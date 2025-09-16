@@ -1,0 +1,2769 @@
+/* Accessibility Widget Styles - New Color Scheme */
+
+/* Text Alignment Controls */
+.alignment-controls {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.alignment-controls h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.alignment-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.alignment-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #6366f1;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    color: #6366f1;
+}
+
+.alignment-btn:hover {
+    background: #6366f1;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+}
+
+.alignment-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+}
+
+.alignment-btn span {
+    font-weight: bold;
+}
+
+:root {
+    --primary-color: #6366f1; /* Indigo */
+    --secondary-color: #4f46e5; /* Darker indigo */
+    --accent-color: #8b5cf6; /* Purple */
+    --light-bg: #f8fafc; /* Light gray */
+    --white: #ffffff;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-600: #64748b;
+    --gray-800: #334155;
+    --black: #000000;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* General focus styles for accessibility - High specificity */
+.accessibility-panel *:focus,
+.accessibility-panel input:focus,
+.accessibility-panel button:focus,
+.accessibility-panel select:focus,
+.accessibility-panel label:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Accessibility Icon - Fixed position on left side */
+.accessibility-icon {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 99999 !important;
+    transition: all 0.3s ease;
+}
+
+/* Focus indicators for accessibility icon - High specificity */
+.accessibility-icon:focus,
+#accessibility-icon:focus,
+.accessibility-widget .accessibility-icon:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: var(--shadow-lg), 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+
+.accessibility-icon:hover {
+    transform: scale(1.1);
+    background: var(--secondary-color);
+}
+
+.accessibility-icon i {
+    color: var(--white);
+    font-size: 24px;
+}
+
+/* Accessibility Panel - Fixed position on left side */
+.accessibility-panel {
+    position: fixed !important;
+    top: 20px !important;
+    left: -600px !important;
+    width: 500px !important;
+    height: 700px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    z-index: 100000 !important;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: 'DM Sans', sans-serif !important;
+    border-radius: 8px !important;
+    margin: 0 20px;
+}
+
+
+.accessibility-panel.active {
+    left: 20px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+/* Panel Header - New colors */
+.panel-header {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: transparent !important;
+    color: var(--white) !important;
+    border-radius: 24px !important;
+    border: 4px solid #ffffff !important;
+    border-bottom: none !important;
+    position: relative;
+    z-index: 1002;
+    overflow: hidden;
+    min-height: 210px;
+}
+
+.panel-header::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 0;
+    background: linear-gradient(135deg, #262E84, #2AA2F1);
+    border-radius: 16px 16px 0 0;
+    z-index: -1;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px;
+    transition: transform 0.2s ease;
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    z-index: 1005;
+}
+
+.close-btn:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+.close-btn:hover {
+    transform: scale(1.1);
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1005;
+}
+
+.language-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.language-selector:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Panel Content */
+.accessibility-panel h2 {
+    text-align: center;
+    margin: 0 0 20px 0;
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: -0.03em;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(217, 217, 217, 0.3) !important;
+    border: 2px solid rgba(217, 217, 217, 0.3) !important;
+    color: var(--white) !important;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-size: 12px;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+}
+
+.action-btn:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* White Content Section */
+.white-content-section {
+    padding: 0 20px 20px;
+    background: #ffffff !important;
+    border-radius: 40px 40px 0 0 !important;
+    margin-top: -30px !important;
+    position: relative;
+    z-index: 1003;
+    padding-top: 12px;
+}
+
+.white-content-section h3 {
+    color: var(--gray-800);
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.profile-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 15px;
+    background: transparent;
+    border-radius: 0;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--gray-200);
+    min-height: 60px;
+    gap: 12px;
+}
+
+.profile-item:first-child {
+    border-top: 1px solid var(--gray-200);
+}
+
+.profile-item:hover {
+    background: rgba(99, 102, 241, 0.05);
+    border-top-color: var(--gray-200);
+    border-bottom-color: var(--gray-200);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    order: 2;
+}
+
+.profile-info i {
+    font-size: 20px;
+    color: var(--primary-color);
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.profile-info h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--gray-800);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-info p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: var(--gray-600);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-info small {
+    display: block;
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: var(--primary-color);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-description {
+    margin: 8px 0 0;
+    padding: 8px 0;
+    border-top: 1px solid var(--gray-200);
+}
+
+.profile-description p {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.4;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+}
+
+.profile-description p:last-child {
+    margin-bottom: 0;
+}
+
+.profile-description strong {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+/* Toggle Switch - New colors */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 80px !important;
+    height: 40px !important;
+    flex-shrink: 0;
+    order: 1;
+}
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-switch input:focus {
+                outline: none !important;
+            }
+
+            .toggle-switch input:focus + .slider,
+            .accessibility-panel .toggle-switch input:focus + .slider {
+                outline: 3px solid #4f46e5 !important;
+                outline-offset: 2px !important;
+                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+            }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: 0.3s;
+    border-radius: 20px !important;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 32px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--white);
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .slider {
+    background-color: #e5e7eb;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Toggle Switch Text Labels */
+.slider::after {
+    content: "OFF";
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #374151;
+    pointer-events: none;
+    transition: 0.3s;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 50px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--white);
+    transition: 0.3s;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #374151;
+    font-family: 'DM Sans', sans-serif;
+}
+
+input:checked + .slider::after {
+    content: "ON";
+    color: white;
+    left: auto;
+    right: 12px;
+}
+
+input:checked + .slider:before {
+    background-color: #4F46E5;
+    color: white;
+}
+
+/* Panel Footer - New colors */
+.panel-footer {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(135deg, #262E84, #2AA2F1);
+    color: var(--white);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    border-radius: 0 0 8px 8px;
+    z-index: 1001;
+}
+
+.panel-footer .learn-more {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Accessibility Features */
+/* Seizure Safe - Stop animations but preserve slider functionality */
+.seizure-safe *:not(.slider-track):not(.slide):not(.slider-btn):not(.dot):not(.slider-wrapper):not(.slider-container),
+.seizure-safe *::before,
+.seizure-safe *::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 0 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
+
+/* Allow slider track to maintain its left positioning for navigation */
+.seizure-safe .slider-track {
+    animation: none !important;
+    animation-name: none !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 0 !important;
+    transition: left 0.5s ease-in-out !important;
+    /* left positioning is controlled by JavaScript, don't override it */
+}
+
+/* Ensure slider buttons and dots remain functional */
+.seizure-safe .slider-btn,
+.seizure-safe .dot {
+    transition: all 0.3s ease !important;
+    /* Allow hover effects and clicks to work */
+}
+
+/* Apply muted colors to website in seizure safe mode */
+.seizure-safe {
+    filter: saturate(0.6) brightness(0.9) !important;
+}
+
+/* Apply muted effect to accessibility panel in seizure safe mode */
+.seizure-safe .accessibility-panel,
+.seizure-safe .accessibility-icon,
+.seizure-safe #accessibility-panel,
+.seizure-safe #accessibility-icon {
+    filter: saturate(0.6) brightness(0.9) !important;
+    z-index: 10000 !important;
+}
+
+/* Vision Impaired - Responsive scaling approach */
+.vision-impaired {
+    filter: saturate(1.1) brightness(1.05) !important;
+    /* Use CSS custom properties for responsive scaling */
+    --vision-scale: 1.2;
+    --vision-font-scale: 1.15;
+}
+
+/* Responsive font scaling for text elements */
+.vision-impaired h1 {
+    font-size: calc(2.2em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired h2 {
+    font-size: calc(1.87em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired h3 {
+    font-size: calc(1.54em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired h4 {
+    font-size: calc(1.21em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired h5 {
+    font-size: calc(1.1em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired h6 {
+    font-size: calc(1.1em * var(--vision-font-scale)) !important;
+}
+
+.vision-impaired p, .vision-impaired span, .vision-impaired div, 
+.vision-impaired li, .vision-impaired td, .vision-impaired th, 
+.vision-impaired label, .vision-impaired small, .vision-impaired em, 
+.vision-impaired strong, .vision-impaired i, .vision-impaired b, 
+.vision-impaired a, .vision-impaired button, .vision-impaired input, 
+.vision-impaired textarea, .vision-impaired select {
+    font-size: calc(1em * var(--vision-font-scale)) !important;
+    line-height: calc(1.6 * var(--vision-font-scale)) !important;
+}
+
+/* Prevent vision impaired scaling inside accessibility widget */
+.vision-impaired .accessibility-panel,
+.vision-impaired .accessibility-icon,
+.vision-impaired #accessibility-widget-container {
+    font-size: 1em !important;
+    line-height: 1.6 !important;
+    transform: none !important;
+}
+
+/* ADHD Friendly - Enhanced with increased contrast */
+.adhd-friendly {
+    position: relative;
+    /* Ensure full height for spotlight scrolling */
+    min-height: 100vh !important;
+    /* Ensure spotlight can move freely */
+    overflow: visible !important;
+}
+
+/* Dark overlay is now handled by JavaScript - removed CSS overlay to prevent duplicates */
+
+/* Make content inside spotlight area enhanced with better contrast */
+.adhd-friendly * {
+    position: relative;
+    z-index: 1000;
+    /* Increase contrast for all text - but not too much to avoid white cast */
+    filter: contrast(1.2) brightness(1.05) !important;
+}
+
+/* Enhanced content inside spotlight area with increased contrast */
+.adhd-friendly .adhd-focus {
+    outline: 4px solid var(--primary-color) !important;
+    outline-offset: 3px !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    filter: contrast(1.3) brightness(1.1) !important;
+}
+
+/* Enhanced content inside spotlight area - original styling */
+.adhd-friendly #adhd-spotlight {
+    z-index: 99999 !important;
+    background: transparent !important;
+    backdrop-filter: brightness(2.0) contrast(1.2) !important;
+    box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4) !important;
+    filter: none !important;
+    position: fixed !important;
+    pointer-events: none !important;
+    border-radius: 8px !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Cognitive Disability */
+.cognitive-disability {
+    font-family: 'Arial', sans-serif !important;
+    font-size: 1.05em !important;
+}
+
+.cognitive-disability * {
+    font-family: inherit !important;
+    font-size: 1.05em !important;
+}
+
+.cognitive-disability h1 {
+    font-size: 2.1em !important;
+}
+
+.cognitive-disability h2 {
+    font-size: 1.78em !important;
+}
+
+.cognitive-disability h3 {
+    font-size: 1.47em !important;
+}
+
+.cognitive-disability h4 {
+    font-size: 1.16em !important;
+}
+
+.cognitive-disability h5 {
+    font-size: 1.05em !important;
+}
+
+.cognitive-disability h6 {
+    font-size: 1.05em !important;
+}
+
+/* Prevent cognitive disability scaling inside accessibility panel */
+.accessibility-panel.cognitive-disability,
+.cognitive-disability .accessibility-panel,
+.cognitive-disability .accessibility-icon {
+    font-size: 1em !important;
+}
+
+.cognitive-disability .accessibility-panel *,
+.cognitive-disability .accessibility-icon * {
+    font-size: 1em !important;
+}
+
+.cognitive-disability .accessibility-panel h1 {
+    font-size: 1.5em !important;
+}
+
+.cognitive-disability .accessibility-panel h2 {
+    font-size: 1.3em !important;
+}
+
+.cognitive-disability .accessibility-panel h3 {
+    font-size: 1.2em !important;
+}
+
+.cognitive-disability .accessibility-panel h4 {
+    font-size: 1.1em !important;
+}
+
+/* Prevent cognitive disability boxes inside accessibility panel */
+.cognitive-disability .accessibility-panel h1,
+.cognitive-disability .accessibility-panel h2,
+.cognitive-disability .accessibility-panel h3,
+.cognitive-disability .accessibility-panel h4,
+.cognitive-disability .accessibility-panel h5,
+.cognitive-disability .accessibility-panel h6,
+.cognitive-disability .accessibility-panel button,
+.cognitive-disability .accessibility-panel .btn,
+.cognitive-disability .accessibility-panel input[type="button"],
+.cognitive-disability .accessibility-panel input[type="submit"],
+.cognitive-disability .accessibility-panel a,
+.cognitive-disability .accessibility-panel img,
+.cognitive-disability .accessibility-panel .logo,
+.cognitive-disability .accessibility-panel [class*="logo"] {
+    background: transparent !important;
+    padding: inherit !important;
+    border: none !important;
+    border-radius: inherit !important;
+    margin: inherit !important;
+    box-shadow: none !important;
+}
+
+/* Prevent cognitive disability effects on accessibility icon */
+.cognitive-disability .accessibility-icon,
+.cognitive-disability .accessibility-icon *,
+.cognitive-disability .accessibility-icon *::before,
+.cognitive-disability .accessibility-icon *::after {
+    background: inherit !important;
+    padding: inherit !important;
+    border: inherit !important;
+    border-radius: inherit !important;
+    margin: inherit !important;
+    box-shadow: inherit !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    color: inherit !important;
+    transform: inherit !important;
+    filter: inherit !important;
+}
+
+/* Ensure accessibility panel maintains its design in cognitive disability mode */
+.cognitive-disability .accessibility-panel {
+    all: initial !important;
+    font-size: 1em !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    background: var(--white) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border-radius: 12px !important;
+    position: fixed !important;
+    top: 20px !important;
+    right: -500px !important;
+    width: 500px !important;
+    height: 700px !important;
+    z-index: 100000 !important;
+    transition: right 0.3s ease !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    margin: 0 20px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.cognitive-disability .accessibility-panel.active {
+    left: 20px !important;
+}
+
+/* Completely exclude accessibility panel from cognitive disability effects */
+.cognitive-disability .accessibility-panel,
+.cognitive-disability .accessibility-icon {
+    font-size: 1em !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Preserve accessibility icon styling in cognitive disability mode */
+.cognitive-disability .accessibility-icon {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: var(--primary-color) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 99999 !important;
+    transition: all 0.3s ease !important;
+    font-size: 1em !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.cognitive-disability .accessibility-icon:hover {
+    transform: scale(1.1) !important;
+    background: var(--secondary-color) !important;
+}
+
+.cognitive-disability .accessibility-icon i {
+    color: var(--white) !important;
+    font-size: 24px !important;
+}
+
+/* Preserve original panel styling while removing cognitive disability effects */
+.cognitive-disability .accessibility-panel {
+    /* Keep original panel styles */
+    font-size: 1em !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    background: var(--white) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border-radius: 12px !important;
+    position: fixed !important;
+    top: 20px !important;
+    left: -500px !important;
+    width: 500px !important;
+    height: 700px !important;
+    z-index: 100000 !important;
+    transition: left 0.3s ease !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    margin: 0 20px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Preserve panel header styling */
+.cognitive-disability .accessibility-panel .panel-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px !important;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+    color: var(--white) !important;
+    border-radius: 12px 12px 0 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1001 !important;
+}
+
+/* Preserve panel content styling */
+.cognitive-disability .accessibility-panel h2 {
+    text-align: center !important;
+    margin: 20px 0 !important;
+    color: var(--gray-800) !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+}
+
+.cognitive-disability .accessibility-panel .action-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 0 20px !important;
+    margin-bottom: 20px !important;
+}
+
+.cognitive-disability .accessibility-panel .action-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 16px !important;
+    background: var(--white) !important;
+    border: 2px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    white-space: nowrap !important;
+}
+
+.cognitive-disability .accessibility-panel .profiles-section {
+    padding: 0 20px 20px !important;
+}
+
+.cognitive-disability .accessibility-panel .profiles-section h3 {
+    color: var(--gray-800) !important;
+    margin-bottom: 20px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 15px !important;
+    background: var(--gray-100) !important;
+    border-radius: 8px !important;
+    margin-bottom: 10px !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid var(--gray-200) !important;
+    min-height: 60px !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-info i {
+    font-size: 20px !important;
+    color: var(--primary-color) !important;
+    width: 24px !important;
+    flex-shrink: 0 !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-info h4 {
+    margin: 0 !important;
+    font-size: 16px !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-info p {
+    margin: 5px 0 0 !important;
+    font-size: 14px !important;
+    color: var(--gray-600) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-info small {
+    margin: 3px 0 0 !important;
+    font-size: 12px !important;
+    color: var(--primary-color) !important;
+    font-style: italic !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-description {
+    margin: 8px 0 0 !important;
+    padding: 8px 0 !important;
+    border-top: 1px solid var(--gray-200) !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-description p {
+    margin: 0 0 6px 0 !important;
+    font-size: 13px !important;
+    color: var(--gray-600) !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-description p:last-child {
+    margin-bottom: 0 !important;
+}
+
+.cognitive-disability .accessibility-panel .profile-description strong {
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+}
+
+.cognitive-disability .accessibility-panel .toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 50px !important;
+    height: 24px !important;
+    flex-shrink: 0 !important;
+}
+
+.cognitive-disability .accessibility-panel .slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: var(--gray-300) !important;
+    transition: 0.3s !important;
+    border-radius: 24px !important;
+}
+
+.cognitive-disability .accessibility-panel .slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 18px !important;
+    width: 18px !important;
+    left: 3px !important;
+    bottom: 3px !important;
+    background-color: var(--white) !important;
+    transition: 0.3s !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.cognitive-disability .accessibility-panel input:checked + .slider {
+    background-color: var(--primary-color) !important;
+}
+
+.cognitive-disability .accessibility-panel input:checked + .slider:before {
+    transform: translateX(26px) !important;
+}
+
+.cognitive-disability .accessibility-panel .panel-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+    color: var(--white) !important;
+    padding: 15px 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-size: 14px !important;
+    border-radius: 0 0 12px 12px !important;
+    z-index: 1001 !important;
+}
+
+/* Specific overrides for panel content - removed to preserve original styling */
+
+/* Panel header and footer styling preserved by removing overrides */
+
+/* Add boxes around headings, buttons, links, and logo */
+.cognitive-disability h1,
+.cognitive-disability h2,
+.cognitive-disability h3,
+.cognitive-disability h4,
+.cognitive-disability h5,
+.cognitive-disability h6 {
+    background: transparent !important;
+    padding: 8px 12px !important;
+    border: 2px solid #6366f1 !important;
+    border-radius: 6px !important;
+    margin: 10px 0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Cognitive disability will use JavaScript to add wrapper divs around buttons and links */
+
+/* Remove boxes from images in cognitive disability mode */
+.cognitive-disability img,
+.cognitive-disability .logo,
+.cognitive-disability [class*="logo"] {
+    background: transparent !important;
+    padding: inherit !important;
+    border: none !important;
+    border-radius: inherit !important;
+    box-shadow: none !important;
+}
+
+/* Keyboard Navigation */
+.keyboard-nav *:focus {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+}
+
+/* Keyboard Navigation Highlights */
+.keyboard-highlight {
+    position: absolute !important;
+    border: 3px solid #6366f1 !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    pointer-events: none !important;
+    z-index: 1000000 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.keyboard-highlight-label {
+    position: absolute !important;
+    top: -30px !important;
+    left: 0 !important;
+    background: #6366f1 !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    white-space: nowrap !important;
+    z-index: 1000001 !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Ensure keyboard highlights work in all accessibility modes */
+.cognitive-disability .keyboard-highlight,
+.vision-impaired .keyboard-highlight,
+.seizure-safe .keyboard-highlight,
+.adhd-friendly .keyboard-highlight {
+    border: 3px solid #6366f1 !important;
+    background: transparent !important;
+    z-index: 1000000 !important;
+}
+
+.cognitive-disability .keyboard-highlight-label,
+.vision-impaired .keyboard-highlight-label,
+.seizure-safe .keyboard-highlight-label,
+.adhd-friendly .keyboard-highlight-label {
+    background: #6366f1 !important;
+    color: white !important;
+    z-index: 1000001 !important;
+}
+
+/* Screen Reader */
+.screen-reader .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Content Scaling */
+.content-scaling {
+    font-size: 1.1em !important;
+}
+
+/* Readable Font - Comprehensive text styling */
+.readable-font,
+.readable-font *,
+.readable-font *:before,
+.readable-font *:after {
+    font-family: 'Arial', 'Open Sans', sans-serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Apply readable font to all text elements */
+.readable-font h1,
+.readable-font h2,
+.readable-font h3,
+.readable-font h4,
+.readable-font h5,
+.readable-font h6,
+.readable-font p,
+.readable-font span,
+.readable-font div,
+.readable-font li,
+.readable-font td,
+.readable-font th,
+.readable-font label,
+.readable-font small,
+.readable-font em,
+.readable-font strong,
+.readable-font i,
+.readable-font b,
+.readable-font a,
+.readable-font button,
+.readable-font input,
+.readable-font textarea,
+.readable-font select,
+.readable-font option,
+.readable-font legend,
+.readable-font fieldset,
+.readable-font caption,
+.readable-font cite,
+.readable-font code,
+.readable-font pre,
+.readable-font blockquote,
+.readable-font address,
+.readable-font time,
+.readable-font mark,
+.readable-font ins,
+.readable-font del,
+.readable-font sub,
+.readable-font sup,
+.readable-font abbr,
+.readable-font acronym,
+.readable-font dfn,
+.readable-font kbd,
+.readable-font samp,
+.readable-font var {
+    font-family: 'Arial', 'Open Sans', sans-serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Ensure buttons and inputs have readable text */
+.readable-font button,
+.readable-font input[type="button"],
+.readable-font input[type="submit"],
+.readable-font input[type="reset"],
+.readable-font .btn,
+.readable-font .button {
+    font-family: 'Arial', 'Open Sans', sans-serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Highlight Titles */
+.highlight-titles h1,
+.highlight-titles h2,
+.highlight-titles h3,
+.highlight-titles h4,
+.highlight-titles h5,
+.highlight-titles h6 {
+    background: transparent !important;
+    padding: 8px 12px !important;
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 6px !important;
+    margin: 10px 0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Highlight Links */
+.highlight-links a {
+    background: transparent !important;
+    padding: 4px 8px !important;
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Text Magnifier */
+.text-magnifier {
+    position: relative;
+}
+
+.magnifier {
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    border: 2px solid var(--primary-color);
+    background: var(--white);
+    pointer-events: none;
+    z-index: 10001;
+    display: none;
+    box-shadow: var(--shadow-lg);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+/* Font Sizing */
+.font-sizing {
+    font-size: 1.1em !important;
+}
+
+/* Text Alignment - Apply to body and exclude accessibility panel */
+.align-center {
+    text-align: center !important;
+}
+
+.align-left {
+    text-align: left !important;
+}
+
+.align-right {
+    text-align: right !important;
+}
+
+/* Override alignment for accessibility panel elements - more specific */
+/* Protect accessibility widget from text alignment changes */
+.align-center .accessibility-panel,
+.align-center .accessibility-panel *,
+.align-center #accessibility-panel,
+.align-center #accessibility-panel *,
+.align-center .accessibility-icon,
+.align-center .accessibility-icon *,
+.align-center #accessibility-icon,
+.align-center #accessibility-icon *,
+.align-center #accessibility-widget-container,
+.align-center #accessibility-widget-container * {
+    text-align: left !important;
+}
+
+/* Additional protection for accessibility widget elements */
+#accessibility-widget-container,
+#accessibility-widget-container *,
+.accessibility-panel,
+.accessibility-panel *,
+#accessibility-panel,
+#accessibility-panel *,
+.accessibility-icon,
+.accessibility-icon *,
+#accessibility-icon,
+#accessibility-icon * {
+    text-align: left !important;
+}
+
+.align-left .accessibility-panel,
+.align-left .accessibility-panel *,
+.align-left #accessibility-panel,
+.align-left #accessibility-panel *,
+.align-left .accessibility-icon,
+.align-left .accessibility-icon *,
+.align-left #accessibility-icon,
+.align-left #accessibility-icon * {
+    text-align: left !important;
+}
+
+.align-right .accessibility-panel,
+.align-right .accessibility-panel *,
+.align-right #accessibility-panel,
+.align-right #accessibility-panel *,
+.align-right .accessibility-icon,
+.align-right .accessibility-icon *,
+.align-right #accessibility-icon,
+.align-right #accessibility-icon * {
+    text-align: left !important;
+}
+
+/* Line Height - No automatic styling, only controlled by buttons */
+/* The adjust-line-height class is now only used to show/hide controls */
+
+/* Line Height Classes - Force line height changes to take precedence */
+.line-height-50 { line-height: 0.5 !important; }
+.line-height-60 { line-height: 0.6 !important; }
+.line-height-70 { line-height: 0.7 !important; }
+.line-height-80 { line-height: 0.8 !important; }
+.line-height-90 { line-height: 0.9 !important; }
+.line-height-100 { line-height: 1.0 !important; }
+.line-height-110 { line-height: 1.1 !important; }
+.line-height-120 { line-height: 1.2 !important; }
+.line-height-130 { line-height: 1.3 !important; }
+.line-height-140 { line-height: 1.4 !important; }
+.line-height-150 { line-height: 1.5 !important; }
+.line-height-160 { line-height: 1.6 !important; }
+.line-height-170 { line-height: 1.7 !important; }
+.line-height-180 { line-height: 1.8 !important; }
+.line-height-190 { line-height: 1.9 !important; }
+.line-height-200 { line-height: 2.0 !important; }
+
+/* Apply line height to all elements within the body */
+.line-height-50 *,
+.line-height-60 *,
+.line-height-70 *,
+.line-height-80 *,
+.line-height-90 *,
+.line-height-100 *,
+.line-height-110 *,
+.line-height-120 *,
+.line-height-130 *,
+.line-height-140 *,
+.line-height-150 *,
+.line-height-160 *,
+.line-height-170 *,
+.line-height-180 *,
+.line-height-190 *,
+.line-height-200 * {
+    line-height: inherit !important;
+}
+
+/* Exclude accessibility widget from line height changes */
+.line-height-50 .accessibility-panel,
+.line-height-50 .accessibility-panel *,
+.line-height-50 #accessibility-panel,
+.line-height-50 #accessibility-panel *,
+.line-height-50 .accessibility-icon,
+.line-height-50 .accessibility-icon *,
+.line-height-50 #accessibility-icon,
+.line-height-50 #accessibility-icon *,
+.line-height-60 .accessibility-panel,
+.line-height-60 .accessibility-panel *,
+.line-height-60 #accessibility-panel,
+.line-height-60 #accessibility-panel *,
+.line-height-60 .accessibility-icon,
+.line-height-60 .accessibility-icon *,
+.line-height-60 #accessibility-icon,
+.line-height-60 #accessibility-icon *,
+.line-height-70 .accessibility-panel,
+.line-height-70 .accessibility-panel *,
+.line-height-70 #accessibility-panel,
+.line-height-70 #accessibility-panel *,
+.line-height-70 .accessibility-icon,
+.line-height-70 .accessibility-icon *,
+.line-height-70 #accessibility-icon,
+.line-height-70 #accessibility-icon *,
+.line-height-80 .accessibility-panel,
+.line-height-80 .accessibility-panel *,
+.line-height-80 #accessibility-panel,
+.line-height-80 #accessibility-panel *,
+.line-height-80 .accessibility-icon,
+.line-height-80 .accessibility-icon *,
+.line-height-80 #accessibility-icon,
+.line-height-80 #accessibility-icon *,
+.line-height-90 .accessibility-panel,
+.line-height-90 .accessibility-panel *,
+.line-height-90 #accessibility-panel,
+.line-height-90 #accessibility-panel *,
+.line-height-90 .accessibility-icon,
+.line-height-90 .accessibility-icon *,
+.line-height-90 #accessibility-icon,
+.line-height-90 #accessibility-icon *,
+.line-height-100 .accessibility-panel,
+.line-height-100 .accessibility-panel *,
+.line-height-100 #accessibility-panel,
+.line-height-100 #accessibility-panel *,
+.line-height-100 .accessibility-icon,
+.line-height-100 .accessibility-icon *,
+.line-height-100 #accessibility-icon,
+.line-height-100 #accessibility-icon *,
+.line-height-110 .accessibility-panel,
+.line-height-110 .accessibility-panel *,
+.line-height-110 #accessibility-panel,
+.line-height-110 #accessibility-panel *,
+.line-height-110 .accessibility-icon,
+.line-height-110 .accessibility-icon *,
+.line-height-110 #accessibility-icon,
+.line-height-110 #accessibility-icon *,
+.line-height-120 .accessibility-panel,
+.line-height-120 .accessibility-panel *,
+.line-height-120 #accessibility-panel,
+.line-height-120 #accessibility-panel *,
+.line-height-120 .accessibility-icon,
+.line-height-120 .accessibility-icon *,
+.line-height-120 #accessibility-icon,
+.line-height-120 #accessibility-icon *,
+.line-height-130 .accessibility-panel,
+.line-height-130 .accessibility-panel *,
+.line-height-130 #accessibility-panel,
+.line-height-130 #accessibility-panel *,
+.line-height-130 .accessibility-icon,
+.line-height-130 .accessibility-icon *,
+.line-height-130 #accessibility-icon,
+.line-height-130 #accessibility-icon *,
+.line-height-140 .accessibility-panel,
+.line-height-140 .accessibility-panel *,
+.line-height-140 #accessibility-panel,
+.line-height-140 #accessibility-panel *,
+.line-height-140 .accessibility-icon,
+.line-height-140 .accessibility-icon *,
+.line-height-140 #accessibility-icon,
+.line-height-140 #accessibility-icon *,
+.line-height-150 .accessibility-panel,
+.line-height-150 .accessibility-panel *,
+.line-height-150 #accessibility-panel,
+.line-height-150 #accessibility-panel *,
+.line-height-150 .accessibility-icon,
+.line-height-150 .accessibility-icon *,
+.line-height-150 #accessibility-icon,
+.line-height-150 #accessibility-icon *,
+.line-height-160 .accessibility-panel,
+.line-height-160 .accessibility-panel *,
+.line-height-160 #accessibility-panel,
+.line-height-160 #accessibility-panel *,
+.line-height-160 .accessibility-icon,
+.line-height-160 .accessibility-icon *,
+.line-height-160 #accessibility-icon,
+.line-height-160 #accessibility-icon *,
+.line-height-170 .accessibility-panel,
+.line-height-170 .accessibility-panel *,
+.line-height-170 #accessibility-panel,
+.line-height-170 #accessibility-panel *,
+.line-height-170 .accessibility-icon,
+.line-height-170 .accessibility-icon *,
+.line-height-170 #accessibility-icon,
+.line-height-170 #accessibility-icon *,
+.line-height-180 .accessibility-panel,
+.line-height-180 .accessibility-panel *,
+.line-height-180 #accessibility-panel,
+.line-height-180 #accessibility-panel *,
+.line-height-180 .accessibility-icon,
+.line-height-180 .accessibility-icon *,
+.line-height-180 #accessibility-icon,
+.line-height-180 #accessibility-icon *,
+.line-height-190 .accessibility-panel,
+.line-height-190 .accessibility-panel *,
+.line-height-190 #accessibility-panel,
+.line-height-190 #accessibility-panel *,
+.line-height-190 .accessibility-icon,
+.line-height-190 .accessibility-icon *,
+.line-height-190 #accessibility-icon,
+.line-height-190 #accessibility-icon *,
+.line-height-200 .accessibility-panel,
+.line-height-200 .accessibility-panel *,
+.line-height-200 #accessibility-panel,
+.line-height-200 #accessibility-panel *,
+.line-height-200 .accessibility-icon,
+.line-height-200 .accessibility-icon *,
+.line-height-200 #accessibility-icon,
+.line-height-200 #accessibility-icon * {
+    line-height: 1.0 !important;
+}
+
+/* Letter Spacing */
+.adjust-letter-spacing {
+    letter-spacing: 1px !important;
+}
+
+/* Contrast Modes */
+body.dark-contrast {
+    background: var(--black) !important;
+    color: var(--white) !important;
+}
+
+/* Apply dark contrast to all text elements - text color only, no borders */
+body.dark-contrast p,
+body.dark-contrast h1,
+body.dark-contrast h2,
+body.dark-contrast h3,
+body.dark-contrast h4,
+body.dark-contrast h5,
+body.dark-contrast h6,
+body.dark-contrast span,
+body.dark-contrast div,
+body.dark-contrast li,
+body.dark-contrast td,
+body.dark-contrast th,
+body.dark-contrast label,
+body.dark-contrast small,
+body.dark-contrast em,
+body.dark-contrast strong,
+body.dark-contrast i,
+body.dark-contrast b,
+body.dark-contrast a {
+    color: var(--white) !important;
+}
+
+/* Apply dark background to main content areas only */
+body.dark-contrast main,
+body.dark-contrast section,
+body.dark-contrast article,
+body.dark-contrast .content,
+body.dark-contrast .container,
+body.dark-contrast .wrapper {
+    background: var(--black) !important;
+}
+
+/* Style ONLY actual service cards and specific content boxes in dark contrast */
+body.dark-contrast .service-card,
+body.dark-contrast .color-box,
+body.dark-contrast .test-block {
+    background: var(--black) !important;
+    border: 2px solid var(--white) !important;
+    color: var(--white) !important;
+}
+
+/* Ensure text inside specific cards is white */
+body.dark-contrast .service-card *,
+body.dark-contrast .color-box *,
+body.dark-contrast .test-block * {
+    color: var(--white) !important;
+}
+
+/* Style form elements for dark contrast */
+body.dark-contrast input,
+body.dark-contrast textarea,
+body.dark-contrast select,
+body.dark-contrast button,
+body.dark-contrast .btn,
+body.dark-contrast .button,
+body.dark-contrast .form-control {
+    background: var(--black) !important;
+    color: var(--white) !important;
+    border: 1px solid var(--white) !important;
+}
+
+/* Style form placeholders for dark contrast */
+body.dark-contrast input::placeholder,
+body.dark-contrast textarea::placeholder {
+    color: #cccccc !important;
+}
+
+/* Style form groups and containers for dark contrast */
+body.dark-contrast .form-group,
+body.dark-contrast .contact-form,
+body.dark-contrast .test-form {
+    background: var(--black) !important;
+    color: var(--white) !important;
+}
+
+/* Exclude UI elements from dark contrast text changes */
+body.dark-contrast header,
+body.dark-contrast nav,
+body.dark-contrast .header,
+body.dark-contrast .navbar,
+body.dark-contrast .navigation,
+body.dark-contrast .logo,
+body.dark-contrast .menu,
+body.dark-contrast .nav-menu,
+body.dark-contrast .card,
+body.dark-contrast .modal,
+body.dark-contrast .dropdown,
+body.dark-contrast .tooltip,
+body.dark-contrast .badge,
+body.dark-contrast .alert {
+    color: inherit !important;
+    background: inherit !important;
+}
+
+/* Style accessibility widget for dark contrast */
+.dark-contrast .accessibility-panel,
+.dark-contrast .accessibility-icon,
+.dark-contrast #accessibility-panel,
+.dark-contrast #accessibility-icon {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+}
+
+.dark-contrast .accessibility-panel *,
+.dark-contrast .accessibility-icon *,
+.dark-contrast #accessibility-panel *,
+.dark-contrast #accessibility-icon * {
+    background: inherit !important;
+    color: inherit !important;
+}
+
+/* Override text color for accessibility widget elements */
+.dark-contrast .accessibility-panel p,
+.dark-contrast .accessibility-panel h1,
+.dark-contrast .accessibility-panel h2,
+.dark-contrast .accessibility-panel h3,
+.dark-contrast .accessibility-panel h4,
+.dark-contrast .accessibility-panel h5,
+.dark-contrast .accessibility-panel h6,
+.dark-contrast .accessibility-panel span,
+.dark-contrast .accessibility-panel div,
+.dark-contrast .accessibility-panel li,
+.dark-contrast .accessibility-panel td,
+.dark-contrast .accessibility-panel th,
+.dark-contrast .accessibility-panel label,
+.dark-contrast .accessibility-panel small,
+.dark-contrast .accessibility-panel em,
+.dark-contrast .accessibility-panel strong,
+.dark-contrast .accessibility-panel i,
+.dark-contrast .accessibility-panel b,
+.dark-contrast .accessibility-panel a {
+    color: #ffffff !important;
+}
+
+/* Style accessibility panel header for dark contrast */
+.dark-contrast .accessibility-panel .panel-header {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #ffffff !important;
+}
+
+/* Style accessibility panel buttons for dark contrast */
+.dark-contrast .accessibility-panel .action-btn {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+}
+
+.dark-contrast .accessibility-panel .action-btn:hover {
+    background: #3a3a3a !important;
+    color: #ffffff !important;
+}
+
+/* Style accessibility panel footer for dark contrast */
+.dark-contrast .accessibility-panel .panel-footer {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border-top: 1px solid #ffffff !important;
+}
+
+/* Style toggle switches for dark contrast */
+.dark-contrast .accessibility-panel .toggle-switch {
+    background: #2a2a2a !important;
+    border: 1px solid #ffffff !important;
+}
+
+.dark-contrast .accessibility-panel .toggle-switch .slider {
+    background: #ffffff !important;
+}
+
+.dark-contrast .accessibility-panel .toggle-switch input:checked + .slider {
+    background: #6366f1 !important;
+}
+
+/* Style profile items for dark contrast */
+.dark-contrast .accessibility-panel .profile-item {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+    margin: 5px 0 !important;
+}
+
+.dark-contrast .accessibility-panel .profile-item:hover {
+    background: #3a3a3a !important;
+}
+
+body.light-contrast {
+    background: var(--white) !important;
+    color: var(--black) !important;
+}
+
+/* Apply light contrast to all text elements - text color only, no borders */
+body.light-contrast p,
+body.light-contrast h1,
+body.light-contrast h2,
+body.light-contrast h3,
+body.light-contrast h4,
+body.light-contrast h5,
+body.light-contrast h6,
+body.light-contrast span,
+body.light-contrast div,
+body.light-contrast li,
+body.light-contrast td,
+body.light-contrast th,
+body.light-contrast label,
+body.light-contrast small,
+body.light-contrast em,
+body.light-contrast strong,
+body.light-contrast i,
+body.light-contrast b,
+body.light-contrast a {
+    color: var(--black) !important;
+}
+
+/* Apply light background to main content areas only */
+body.light-contrast main,
+body.light-contrast section,
+body.light-contrast article,
+body.light-contrast .content,
+body.light-contrast .container,
+body.light-contrast .wrapper {
+    background: var(--white) !important;
+}
+
+/* Style ONLY actual service cards and specific content boxes in light contrast */
+body.light-contrast .service-card,
+body.light-contrast .color-box,
+body.light-contrast .test-block {
+    background: var(--white) !important;
+    border: 2px solid var(--black) !important;
+    color: var(--black) !important;
+}
+
+/* Ensure text inside specific cards is black */
+body.light-contrast .service-card *,
+body.light-contrast .color-box *,
+body.light-contrast .test-block * {
+    color: var(--black) !important;
+}
+
+/* Exclude UI elements and accessibility widget from light contrast text changes */
+body.light-contrast header,
+body.light-contrast nav,
+body.light-contrast .header,
+body.light-contrast .navbar,
+body.light-contrast .navigation,
+body.light-contrast .logo,
+body.light-contrast .menu,
+body.light-contrast .nav-menu,
+body.light-contrast button,
+body.light-contrast .button,
+body.light-contrast .btn,
+body.light-contrast input,
+body.light-contrast textarea,
+body.light-contrast select,
+body.light-contrast .form-control,
+body.light-contrast .card,
+body.light-contrast .modal,
+body.light-contrast .dropdown,
+body.light-contrast .tooltip,
+body.light-contrast .badge,
+body.light-contrast .alert,
+body.light-contrast .accessibility-panel,
+body.light-contrast .accessibility-icon,
+body.light-contrast #accessibility-panel,
+body.light-contrast #accessibility-icon,
+body.light-contrast #accessibility-widget-container,
+body.light-contrast .accessibility-widget-container {
+    color: inherit !important;
+    background: inherit !important;
+}
+
+/* Completely exclude accessibility widget from light contrast effects */
+.light-contrast .accessibility-panel,
+.light-contrast .accessibility-icon,
+.light-contrast #accessibility-panel,
+.light-contrast #accessibility-icon,
+.light-contrast .accessibility-panel *,
+.light-contrast .accessibility-icon *,
+.light-contrast #accessibility-panel *,
+.light-contrast #accessibility-icon * {
+    filter: none !important;
+    -webkit-filter: none !important;
+    background: inherit !important;
+    color: inherit !important;
+    border: inherit !important;
+    box-shadow: inherit !important;
+}
+
+/* Apply high contrast to body but completely exclude accessibility widget */
+body.high-contrast {
+    filter: contrast(2) !important;
+}
+
+/* Completely exclude accessibility widget from high contrast filter */
+body.high-contrast .accessibility-widget,
+body.high-contrast #accessibility-widget,
+body.high-contrast .accessibility-widget *,
+body.high-contrast #accessibility-widget *,
+body.high-contrast #accessibility-widget-container,
+body.high-contrast .accessibility-widget-container,
+body.high-contrast #accessibility-widget-container *,
+body.high-contrast .accessibility-widget-container * {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Completely exclude accessibility widget from high contrast effects */
+body.high-contrast .accessibility-panel,
+body.high-contrast #accessibility-panel,
+body.high-contrast .accessibility-widget .accessibility-panel,
+body.high-contrast .accessibility-widget #accessibility-panel,
+body.high-contrast .accessibility-icon,
+body.high-contrast #accessibility-icon,
+body.high-contrast .accessibility-widget .accessibility-icon,
+body.high-contrast .accessibility-widget #accessibility-icon,
+body.high-contrast #accessibility-widget-container,
+body.high-contrast .accessibility-widget-container,
+.high-contrast .accessibility-panel,
+.high-contrast #accessibility-panel,
+.high-contrast .accessibility-widget .accessibility-panel,
+.high-contrast .accessibility-widget #accessibility-panel,
+.high-contrast .accessibility-icon,
+.high-contrast #accessibility-icon,
+.high-contrast .accessibility-widget .accessibility-icon,
+.high-contrast .accessibility-widget #accessibility-icon,
+.high-contrast #accessibility-widget-container,
+.high-contrast .accessibility-widget-container,
+body.high-contrast .accessibility-panel *,
+body.high-contrast #accessibility-panel *,
+body.high-contrast .accessibility-widget .accessibility-panel *,
+body.high-contrast .accessibility-widget #accessibility-panel *,
+body.high-contrast .accessibility-icon *,
+body.high-contrast #accessibility-icon *,
+body.high-contrast .accessibility-widget .accessibility-icon *,
+body.high-contrast .accessibility-widget #accessibility-icon *,
+body.high-contrast #accessibility-widget-container *,
+body.high-contrast .accessibility-widget-container *,
+.high-contrast .accessibility-panel *,
+.high-contrast #accessibility-panel *,
+.high-contrast .accessibility-widget .accessibility-panel *,
+.high-contrast .accessibility-widget #accessibility-panel *,
+.high-contrast .accessibility-icon *,
+.high-contrast #accessibility-icon *,
+.high-contrast .accessibility-widget .accessibility-icon *,
+.high-contrast .accessibility-widget #accessibility-icon *,
+.high-contrast #accessibility-widget-container *,
+.high-contrast .accessibility-widget-container * {
+    filter: none !important;
+    -webkit-filter: none !important;
+    background: inherit !important;
+    color: inherit !important;
+    border: inherit !important;
+    box-shadow: inherit !important;
+}
+
+/* Saturation */
+.high-saturation {
+    filter: saturate(3) !important;
+}
+
+.low-saturation {
+    filter: saturate(0.3) !important;
+}
+
+/* Monochrome - Convert entire website to grey using overlay */
+.monochrome::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(128, 128, 128, 0.3);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: saturation;
+}
+
+/* Apply monochrome effect to accessibility panel as well */
+.monochrome .accessibility-panel,
+.monochrome .accessibility-icon,
+.monochrome #accessibility-panel,
+.monochrome #accessibility-icon {
+    z-index: 10000 !important;
+    filter: grayscale(100%) !important;
+}
+
+.monochrome .accessibility-panel *,
+.monochrome .accessibility-icon *,
+.monochrome #accessibility-panel *,
+.monochrome #accessibility-icon * {
+    filter: grayscale(100%) !important;
+}
+
+/* Custom Colors */
+.custom-text-color {
+    color: var(--custom-text-color) !important;
+}
+
+.custom-title-color {
+    color: var(--custom-title-color) !important;
+}
+
+.custom-bg-color {
+    background: var(--custom-bg-color) !important;
+}
+
+/* Color Picker Inline */
+.color-picker-inline {
+    margin: 8px 0;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.color-picker-content {
+    text-align: center;
+}
+
+.color-picker-content h4 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.color-options {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    border-color: #6366f1;
+}
+
+.color-option.selected {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #6366f1;
+}
+
+.cancel-btn {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background: #4b5563;
+}
+
+/* Sound and Images */
+
+
+.hide-images img {
+    display: none !important;
+}
+
+.hide-images img::after {
+    content: "[Image: " attr(alt) "]";
+    display: block;
+    padding: 10px;
+    background: var(--gray-200);
+    border: 1px solid var(--gray-300);
+    margin: 10px 0;
+}
+
+/* Read Mode - CSS removed to prevent conflicts with JavaScript overlay approach */
+
+/* Reading Guide */
+.reading-guide {
+    position: relative;
+}
+
+/* Animation Control - Stop animations but preserve slider functionality */
+.stop-animation *:not(.slider-track):not(.slide):not(.slider-btn):not(.dot):not(.slider-wrapper):not(.slider-container),
+.stop-animation *::before,
+.stop-animation *::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 0 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
+
+/* Allow slider track to maintain its left positioning for navigation */
+.stop-animation .slider-track {
+    animation: none !important;
+    animation-name: none !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 0 !important;
+    transition: left 0.5s ease-in-out !important;
+    /* left positioning is controlled by JavaScript, don't override it */
+}
+
+/* Ensure slider buttons and dots remain functional */
+.stop-animation .slider-btn,
+.stop-animation .dot {
+    transition: all 0.3s ease !important;
+    /* Allow hover effects and clicks to work */
+}
+
+
+/* Hover and Focus Highlights */
+.highlight-hover h1:hover,
+.highlight-hover h2:hover,
+.highlight-hover h3:hover,
+.highlight-hover h4:hover,
+.highlight-hover h5:hover,
+.highlight-hover h6:hover,
+.highlight-hover p:hover,
+.highlight-hover a:hover,
+.highlight-hover button:hover,
+.highlight-hover img:hover,
+.highlight-hover input:hover,
+.highlight-hover textarea:hover,
+.highlight-hover select:hover,
+.highlight-hover label:hover,
+.highlight-hover li:hover,
+.highlight-hover td:hover,
+.highlight-hover th:hover,
+.highlight-hover [role="button"]:hover,
+.highlight-hover [role="link"]:hover,
+.highlight-hover [role="menuitem"]:hover,
+.highlight-hover .btn:hover,
+.highlight-hover .nav-item:hover,
+.highlight-hover .menu-item:hover {
+    outline: 2px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+    transition: outline 0.2s ease !important;
+}
+
+
+/* Cursor Styles */
+.big-black-cursor,
+.big-black-cursor *,
+.big-black-cursor *:hover,
+.big-black-cursor *:focus,
+.big-black-cursor *:active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="black" stroke="white" stroke-width="1"/></svg>') 0 0, auto !important;
+}
+
+.big-white-cursor,
+.big-white-cursor *,
+.big-white-cursor *:hover,
+.big-white-cursor *:focus,
+.big-white-cursor *:active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="white" stroke="black" stroke-width="1"/></svg>') 0 0, auto !important;
+}
+
+/* Ensure accessibility widget has normal cursors when big white cursor is disabled */
+body:not(.big-white-cursor) .accessibility-widget,
+body:not(.big-white-cursor) .accessibility-widget *,
+body:not(.big-white-cursor) .accessibility-panel,
+body:not(.big-white-cursor) .accessibility-panel *,
+body:not(.big-white-cursor) #accessibility-widget,
+body:not(.big-white-cursor) #accessibility-widget * {
+    cursor: auto !important;
+}
+
+
+/* Font Size Controls */
+#font-size-controls {
+    display: flex;
+    gap: 5px;
+}
+
+#font-size-controls button {
+    padding: 5px 10px;
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#font-size-controls button:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+/* Scaling Controls */
+.scaling-controls {
+    margin-top: 10px;
+}
+
+.scaling-btn {
+    background: var(--primary-color) !important;
+    color: var(--white) !important;
+    border: none !important;
+    padding: 5px 10px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-size: 12px !important;
+}
+
+.scaling-btn:hover {
+    background: var(--secondary-color) !important;
+    transform: translateY(-1px) !important;
+}
+
+.scaling-btn:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+.scaling-btn i {
+    margin-right: 4px !important;
+}
+
+/* Responsive Design - Completely Fixed */
+@media (max-width: 768px) {
+    .accessibility-panel {
+        width: 500px !important;
+        left: -500px !important;
+        margin: 0 20px;
+        top: 10px !important;
+        height: 700px;
+    }
+    
+    .accessibility-panel.active {
+        left: 20px !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px;
+        height: 50px;
+        bottom: 15px !important;
+        left: 15px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px;
+    }
+
+    .profile-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        min-height: 50px;
+    }
+
+    .profile-info h4 {
+        font-size: 14px;
+    }
+
+    .profile-info p {
+        font-size: 12px;
+    }
+
+    .action-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    .accessibility-panel h2 {
+        font-size: 20px;
+        margin: 15px 0;
+    }
+
+    .profiles-section h3 {
+        font-size: 16px;
+    }
+
+    .panel-header {
+        padding: 15px;
+    }
+
+    .profiles-section {
+        padding: 0 15px 15px;
+    }
+
+    .action-buttons {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 500px !important;
+        margin: 0 10px;
+        left: -500px !important;
+        top: 5px !important;
+        height: 700px;
+    }
+    
+    .accessibility-panel.active {
+        left: 10px !important;
+    }
+
+    .accessibility-icon {
+        width: 45px;
+        height: 45px;
+        bottom: 10px !important;
+        left: 10px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px;
+    }
+
+    .panel-header {
+        padding: 12px;
+    }
+
+    .profiles-section {
+        padding: 0 12px 12px;
+    }
+
+    .action-buttons {
+        padding: 0 12px;
+    }
+
+    .profile-item {
+        padding: 10px;
+        min-height: 45px;
+    }
+
+    .profile-info h4 {
+        font-size: 13px;
+    }
+
+    .profile-info p {
+        font-size: 11px;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .accessibility-panel h2 {
+        font-size: 18px;
+        margin: 12px 0;
+    }
+
+    .profiles-section h3 {
+        font-size: 15px;
+    }
+}
+
+/* Ensure panel is visible when active */
+.accessibility-panel.active {
+    left: 20px !important;
+}
+
+@media (max-width: 768px) {
+    .accessibility-panel.active {
+        left: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .accessibility-panel.active {
+        left: 10px !important;
+    }
+}
+
+/* Useful Links Dropdown - appears inside profile-item below profile-info */
+.useful-links-dropdown {
+    margin: 10px 0;
+    padding: 0;
+    width: 100%;
+    display: block;
+    flex-basis: 100%;
+    order: 1;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.useful-links-dropdown:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.12);
+}
+
+/* Remove flex layout completely for useful links with dropdown - Maximum specificity */
+.accessibility-panel .profile-item.has-dropdown,
+.accessibility-widget .profile-item.has-dropdown,
+#accessibility-panel .profile-item.has-dropdown {
+    display: block !important;
+    flex-direction: unset !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+    flex-wrap: unset !important;
+    flex-flow: unset !important;
+    flex: unset !important;
+    flex-grow: unset !important;
+    flex-shrink: unset !important;
+    flex-basis: unset !important;
+    position: relative !important;
+}
+
+/* Make profile-info and toggle stay on same line */
+.profile-item.has-dropdown .profile-info {
+    display: block !important;
+    padding-left: 100px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Ensure toggle switch stays in position when dropdown is present */
+.profile-item.has-dropdown .toggle-switch {
+    position: absolute !important;
+    left: 20px !important;
+    top: 20px !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+.useful-links-content {
+    padding: 10px;
+}
+
+.useful-links-content select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #6366f1;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 14px;
+    padding-right: 35px;
+}
+
+.useful-links-content select:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.useful-links-content select:hover {
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.useful-links-content select option {
+    padding: 12px 16px;
+    background: white;
+    color: #374151;
+    font-weight: 500;
+    border: none;
+}
+
+.useful-links-content select option:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.useful-links-content select option:selected {
+    background: #6366f1;
+    color: white;
+}
+
+/* Reading Mask Styles */
+.reading-mask {
+    position: relative;
+    /* Ensure full height for spotlight scrolling */
+    min-height: 100vh !important;
+    /* Ensure spotlight can move freely */
+    overflow: visible !important;
+}
+
+/* Reading mask overlay - now handled by JavaScript for better control */
+
+/* Ensure accessibility widget stays above ADHD spotlight */
+.adhd-friendly .accessibility-widget,
+.adhd-friendly #accessibility-widget {
+    z-index: 1000000 !important;
+}
+
+#reading-mask-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    pointer-events: none !important;
+    z-index: 9998 !important;
+    display: block !important;
+}
+
+.reading-mask-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    pointer-events: none !important;
+    z-index: 9998 !important;
+    display: block !important;
+}
+
+/* Reading mask spotlight with enhanced brightness for clear reading */
+.reading-mask #reading-mask-spotlight {
+    z-index: 99998 !important;
+    background: transparent !important;
+    backdrop-filter: brightness(2.2) contrast(1.2) !important;
+    box-shadow: 
+        inset 0 0 50px rgba(255, 255, 255, 0.2),
+        0 0 20px rgba(255, 255, 255, 0.1) !important;
+    /* Remove filter to prevent white cast */
+    filter: none !important;
+    /* Ensure proper positioning and scrolling */
+    position: fixed !important;
+    pointer-events: none !important;
+    border-radius: 8px !important;
+    transition: all 0.1s ease !important;
+    /* Add subtle glow effect without white cast */
+    border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Exclude accessibility panel from reading mask filters */
+.reading-mask .accessibility-panel,
+.reading-mask .accessibility-panel *,
+.reading-mask #accessibility-icon,
+.reading-mask #accessibility-icon * {
+    filter: none !important;
+    position: fixed !important;
+    z-index: 100002 !important;
+}
+
+/* Fix toggle switch positioning in reading mask mode */
+.reading-mask .accessibility-panel .profile-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    position: relative !important;
+}
+
+.reading-mask .accessibility-panel .profile-info {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.reading-mask .accessibility-panel .toggle-switch {
+    position: relative !important;
+    right: 0 !important;
+    top: auto !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    margin-left: 10px !important;
+}
+
+.reading-mask .accessibility-panel .slider {
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+.reading-mask #accessibility-icon * {
+    filter: none !important;
+    position: fixed !important;
+    z-index: 100002 !important;
+    /* Override the universal reading mask filter rule */
+    filter: none !important;
+    /* Override position relative from universal rule */
+    position: fixed !important;
+}
+
+/* Ensure panel maintains its original positioning and appearance */
+.reading-mask .accessibility-panel {
+    top: 50% !important;
+    left: 20px !important;
+    transform: translateY(-50%) !important;
+    /* Override any reading mask effects */
+    filter: none !important;
+    background: var(--white) !important;
+    color: var(--gray-900) !important;
+    border: 1px solid var(--gray-300) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.reading-mask #accessibility-icon {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    z-index: 100002 !important;
+    /* Override any reading mask effects */
+    filter: none !important;
+    background: var(--primary-color) !important;
+    color: var(--white) !important;
+}
+
+/* Override the universal reading mask filter for panel elements specifically */
+.reading-mask .accessibility-panel *,
+.reading-mask #accessibility-icon * {
+    filter: none !important;
+    position: static !important;
+    z-index: auto !important;
+}
+
+
+/* Ensure reading mask effects are completely removed when class is removed */
+body:not(.reading-mask) {
+    position: static !important;
+    min-height: auto !important;
+    overflow: auto !important;
+}
+
+body:not(.reading-mask)::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+/* Additional rules to force removal of reading mask pseudo-element */
+html:not(.reading-mask) body::before,
+html:not(.reading-mask)::before,
+body:not(.reading-mask)::before {
+    display: none !important;
+    content: none !important;
+    background: transparent !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+body:not(.reading-mask) #reading-mask-spotlight {
+    display: none !important;
+}
+
+body:not(.reading-mask) #reading-mask-spotlight-container {
+    display: none !important;
+}
+
+body:not(.reading-mask) #reading-mask-overlay {
+    display: none !important;
+}
+
+body:not(.reading-mask) .reading-mask-overlay {
+    display: none !important;
+}
+
+/* Force remove reading mask pseudo-element with temporary class */
+.force-remove-reading-mask::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+/* Additional aggressive removal rules */
+.force-remove-reading-mask::before,
+body.force-remove-reading-mask::before,
+html.force-remove-reading-mask::before {
+    display: none !important;
+    content: none !important;
+    background: transparent !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+}
+
+/* CRITICAL: Focus indicators for keyboard navigation - Maximum specificity */
+.accessibility-panel input[type="checkbox"]:focus + .slider,
+.accessibility-panel .toggle-switch input:focus + .slider,
+.accessibility-panel button:focus,
+.accessibility-panel .action-btn:focus,
+.accessibility-panel .scaling-btn:focus,
+.accessibility-panel .close-btn:focus,
+.accessibility-panel .language-selector:focus,
+.accessibility-panel select:focus,
+#accessibility-icon:focus,
+.accessibility-icon:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Additional focus styles for better visibility */
+.accessibility-panel input:focus,
+.accessibility-panel button:focus,
+.accessibility-panel select:focus,
+.accessibility-panel label:focus {
+    outline: 3px solid #ff0000 !important;
+    outline-offset: 2px !important;
+    background-color: rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Text Alignment Styles */
+.align-left * {
+    text-align: left !important;
+}
+
+.align-center * {
+    text-align: center !important;
+}
+
+.align-right * {
+    text-align: right !important;
+}
+
+/* FORCE OVERRIDE - Ensure new design is applied */
+.accessibility-panel {
+    width: 500px !important;
+    height: 700px !important;
+    border-radius: 8px !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+.panel-header {
+    background: linear-gradient(135deg, #262E84, #2AA2F1) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.action-btn {
+    background: rgba(217, 217, 217, 0.3) !important;
+    border: 2px solid rgba(217, 217, 217, 0.3) !important;
+    color: white !important;
+}
+
+.toggle-switch {
+    width: 58px !important;
+    height: 17px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
