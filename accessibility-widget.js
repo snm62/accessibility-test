@@ -17,7 +17,7 @@ class AccessibilityWidget {
         this.init();
     }
 
-    init() {
+    async init() {
         this.addFontAwesome();
         this.addCSS(); // Load CSS from hosted URL
         this.createWidget();
