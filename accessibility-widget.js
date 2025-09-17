@@ -9485,6 +9485,8 @@ class AccessibilityWidget {
             if (response.ok) {
                 const data = await response.json();
                 this.customization = data.customization || {};
+                this.accessibilityProfiles = data.accessibilityProfiles || {};
+                this.applyCustomizations();
                 console.log('Accessibility Widget: Customization data loaded:', this.customization);
             } else {
                 console.log('Accessibility Widget: Failed to fetch customization data, using defaults');
@@ -9561,30 +9563,171 @@ class AccessibilityWidget {
             siteId = window.location.hostname;
         }
         
+        // 7. Hardcoded fallback for testing (your actual site ID)
+        if (!siteId || siteId === window.location.hostname) {
+            siteId = "68ca5524c2c2778b87c16230";
+        }
+        
         console.log('Accessibility Widget: Site ID found:', siteId);
         return siteId;
     }
 
-    // Customization Application Methods
     applyCustomizations() {
-        if (!this.customization || Object.keys(this.customization).length === 0) {
-            console.log('Accessibility Widget: No customizations to apply');
-            return;
-        }
+        if (!this.customization) return;
         
         console.log('Accessibility Widget: Applying customizations:', this.customization);
         
-        // Apply widget positioning
-        this.applyWidgetPositioning();
+        // Apply trigger button color
+        if (this.customization.triggerButtonColor) {
+            this.applyTriggerButtonColor(this.customization.triggerButtonColor);
+        }
         
-        // Apply widget styling
-        this.applyWidgetStyling();
+        // Apply trigger position
+        if (this.customization.triggerHorizontalPosition) {
+            this.applyTriggerPosition(this.customization.triggerHorizontalPosition, this.customization.triggerVerticalPosition);
+        }
+        
+        // Apply trigger size and shape
+        if (this.customization.triggerButtonSize) {
+            this.applyTriggerSize(this.customization.triggerButtonSize);
+        }
+        
+        if (this.customization.triggerButtonShape) {
+            this.applyTriggerShape(this.customization.triggerButtonShape);
+        }
+        
+        // Apply hide trigger setting
+        if (this.customization.hideTriggerButton === 'Yes') {
+            this.hideTriggerButton();
+        }
         
         // Apply mobile customizations
         this.applyMobileCustomizations();
         
-        // Apply hide/show settings
+        // Apply visibility settings
         this.applyVisibilitySettings();
+    }
+
+    applyTriggerButtonColor(color) {
+        if (this.shadowRoot) {
+            const icon = this.shadowRoot.getElementById('accessibility-icon');
+            if (icon) {
+                icon.style.backgroundColor = color;
+                console.log('Accessibility Widget: Trigger button color applied:', color);
+            }
+        }
+    }
+
+    applyTriggerPosition(horizontal, vertical) {
+        if (this.shadowRoot && this.shadowRoot.host) {
+            const widget = this.shadowRoot.host;
+            
+            // Apply horizontal position
+            if (horizontal === 'Left') {
+                widget.style.right = 'auto';
+                widget.style.left = '20px';
+            } else if (horizontal === 'Right') {
+                widget.style.left = 'auto';
+                widget.style.right = '20px';
+            }
+            
+            // Apply vertical position
+            if (vertical === 'Top') {
+                widget.style.bottom = 'auto';
+                widget.style.top = '20px';
+            } else if (vertical === 'Middle') {
+                widget.style.top = '50%';
+                widget.style.bottom = 'auto';
+                widget.style.transform = 'translateY(-50%)';
+            } else if (vertical === 'Bottom') {
+                widget.style.top = 'auto';
+                widget.style.bottom = '20px';
+            }
+            
+            // Apply offsets if they exist
+            if (this.customization.triggerHorizontalOffset) {
+                const offset = parseInt(this.customization.triggerHorizontalOffset.replace('px', ''));
+                if (horizontal === 'Left') {
+                    widget.style.left = `${20 + offset}px`;
+                } else if (horizontal === 'Right') {
+                    widget.style.right = `${20 + offset}px`;
+                }
+            }
+            
+            if (this.customization.triggerVerticalOffset) {
+                const offset = parseInt(this.customization.triggerVerticalOffset.replace('px', ''));
+                if (vertical === 'Top') {
+                    widget.style.top = `${20 + offset}px`;
+                } else if (vertical === 'Bottom') {
+                    widget.style.bottom = `${20 + offset}px`;
+                } else if (vertical === 'Middle') {
+                    widget.style.top = `calc(50% + ${offset}px)`;
+                }
+            }
+            
+            console.log('Accessibility Widget: Trigger position applied:', horizontal, vertical);
+        }
+    }
+
+    applyTriggerSize(size) {
+        if (this.shadowRoot) {
+            const icon = this.shadowRoot.getElementById('accessibility-icon');
+            if (icon) {
+                let sizeValue;
+                switch(size) {
+                    case 'Small':
+                        sizeValue = 40;
+                        break;
+                    case 'Medium':
+                        sizeValue = 50;
+                        break;
+                    case 'Large':
+                        sizeValue = 60;
+                        break;
+                    default:
+                        sizeValue = 50;
+                }
+                
+                icon.style.width = `${sizeValue}px`;
+                icon.style.height = `${sizeValue}px`;
+                icon.style.fontSize = `${sizeValue * 0.4}px`;
+                
+                console.log('Accessibility Widget: Trigger size applied:', size, sizeValue);
+            }
+        }
+    }
+
+    applyTriggerShape(shape) {
+        if (this.shadowRoot) {
+            const icon = this.shadowRoot.getElementById('accessibility-icon');
+            if (icon) {
+                switch(shape) {
+                    case 'Round':
+                        icon.style.borderRadius = '50%';
+                        break;
+                    case 'Square':
+                        icon.style.borderRadius = '0';
+                        break;
+                    case 'Rounded':
+                        icon.style.borderRadius = '8px';
+                        break;
+                    default:
+                        icon.style.borderRadius = '8px';
+                }
+                
+                console.log('Accessibility Widget: Trigger shape applied:', shape);
+            }
+        }
+    }
+
+    hideTriggerButton() {
+        if (this.shadowRoot) {
+            const icon = this.shadowRoot.getElementById('accessibility-icon');
+            if (icon) {
+                icon.style.display = 'none';
+                console.log('Accessibility Widget: Trigger button hidden');
+            }
+        }
     }
 
     applyWidgetPositioning() {
