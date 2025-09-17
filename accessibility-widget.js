@@ -1,6 +1,5 @@
 class AccessibilityWidget {
-
-    constructor() {
+constructor() {
 
         this.settings = {};
 
@@ -18983,31 +18982,31 @@ class AccessibilityWidget {
         console.log('[CK] getSiteId() - KV API URL:', this.kvApiUrl);
         console.log('[CK] getSiteId() - this context:', this);
     
-    // Method 1: Check if siteId was embedded by the script injection
+    // Method 1: Check sessionStorage first (set during authorization)
+    let siteId = sessionStorage.getItem('accessibility_site_id');
+    if (siteId) {
+        console.log('[CK] getSiteId() resolved:', siteId, 'from sessionStorage (authorization)');
+        return siteId;
+    }
+    
+    // Method 2: Check if siteId was embedded by the script injection
     if (window.ACCESSIBILITY_SITE_ID) {
         console.log('[CK] getSiteId() - Found embedded siteId:', window.ACCESSIBILITY_SITE_ID);
         return window.ACCESSIBILITY_SITE_ID;
     }
     
-    // Method 2: Check if siteId is in the URL
+    // Method 3: Check if siteId is in the URL
     const urlParams = new URLSearchParams(window.location.search);
-    let siteId = urlParams.get('siteId');
+    siteId = urlParams.get('siteId');
     if (siteId) {
         console.log('[CK] getSiteId() resolved:', siteId, 'from URL');
         return siteId;
     }
     
-    // Method 3: Check localStorage
+    // Method 4: Check localStorage
     siteId = localStorage.getItem('accessibility_site_id');
     if (siteId) {
         console.log('[CK] getSiteId() resolved:', siteId, 'from localStorage');
-        return siteId;
-    }
-    
-    // Method 4: Check sessionStorage
-    siteId = sessionStorage.getItem('accessibility_site_id');
-    if (siteId) {
-        console.log('[CK] getSiteId() resolved:', siteId, 'from sessionStorage');
         return siteId;
     }
     
