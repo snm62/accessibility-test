@@ -28,6 +28,7 @@ class AccessibilityWidget {
 
         // Set the KV API URL for your worker
         this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
+        console.log('Accessibility Widget: kvApiUrl set to:', this.kvApiUrl);
 
         console.log('Accessibility Widget: Initializing...');
 
@@ -18927,6 +18928,7 @@ class AccessibilityWidget {
     // Fetch customization data from the API
     async fetchCustomizationData() {
         console.log('[CK] fetchCustomizationData() - Starting...');
+        console.log('[CK] fetchCustomizationData() - this.kvApiUrl:', this.kvApiUrl);
         
         try {
             // Get siteId first
@@ -18935,6 +18937,11 @@ class AccessibilityWidget {
             
             if (!this.siteId) {
                 console.error('[CK] fetchCustomizationData() - No siteId available, cannot fetch customization data');
+                return null;
+            }
+            
+            if (!this.kvApiUrl) {
+                console.error('[CK] fetchCustomizationData() - kvApiUrl is not set!');
                 return null;
             }
             
@@ -18968,12 +18975,13 @@ class AccessibilityWidget {
         }
     }
 
-// Get site ID for API calls
-async getSiteId() {
-    console.log('[CK] getSiteId() - Starting siteId detection...');
-    console.log('[CK] getSiteId() - Current hostname:', window.location.hostname);
-    console.log('[CK] getSiteId() - Current URL:', window.location.href);
-    console.log('[CK] getSiteId() - KV API URL:', this.kvApiUrl);
+    // Get site ID for API calls
+    async getSiteId() {
+        console.log('[CK] getSiteId() - Starting siteId detection...');
+        console.log('[CK] getSiteId() - Current hostname:', window.location.hostname);
+        console.log('[CK] getSiteId() - Current URL:', window.location.href);
+        console.log('[CK] getSiteId() - KV API URL:', this.kvApiUrl);
+        console.log('[CK] getSiteId() - this context:', this);
     
     // Method 1: Check if siteId was embedded by the script injection
     if (window.ACCESSIBILITY_SITE_ID) {
@@ -19033,13 +19041,19 @@ async getSiteId() {
         return siteId;
     }
     
-    // Method 7: Domain-based lookup (NEW - This is the key!)
-    const hostname = window.location.hostname;
-    console.log('[CK] getSiteId() - Attempting domain lookup for:', hostname);
-    console.log('[CK] getSiteId() - Making request to:', `${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${hostname}`);
-    
-    try {
-        const response = await fetch(`${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${hostname}`);
+        // Method 7: Domain-based lookup (NEW - This is the key!)
+        const hostname = window.location.hostname;
+        console.log('[CK] getSiteId() - Attempting domain lookup for:', hostname);
+        
+        if (!this.kvApiUrl) {
+            console.error('[CK] getSiteId() - kvApiUrl is not set for domain lookup!');
+            return null;
+        }
+        
+        console.log('[CK] getSiteId() - Making request to:', `${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${hostname}`);
+        
+        try {
+            const response = await fetch(`${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${hostname}`);
         console.log('[CK] getSiteId() - Domain lookup response status:', response.status);
         console.log('[CK] getSiteId() - Domain lookup response ok:', response.ok);
         
@@ -19060,6 +19074,12 @@ async getSiteId() {
     if (hostname.startsWith('www.')) {
         const domainWithoutWww = hostname.substring(4);
         console.log('[CK] getSiteId() - Trying domain without www:', domainWithoutWww);
+        
+        if (!this.kvApiUrl) {
+            console.error('[CK] getSiteId() - kvApiUrl is not set for domain lookup (no www)!');
+            return null;
+        }
+        
         console.log('[CK] getSiteId() - Making request to (no www):', `${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${domainWithoutWww}`);
         
         try {
