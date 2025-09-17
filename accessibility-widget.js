@@ -9484,9 +9484,24 @@ class AccessibilityWidget {
             
             if (response.ok) {
                 const data = await response.json();
+                console.log('[CK] /config status:', response.status);
+                console.log('[CK] /config payload:', data);
+                console.log('[CK] customization keys:', data && data.customization ? Object.keys(data.customization) : '(none)');
+                
                 this.customization = data.customization || {};
                 this.accessibilityProfiles = data.accessibilityProfiles || {};
-                this.applyCustomizations();
+                
+                if (this.shadowRoot) {
+                    console.log('[CK] shadowRoot ready, applying customizations');
+                    this.applyCustomizations();
+                } else {
+                    console.warn('[CK] shadowRoot not ready, retrying apply in 100ms');
+                    setTimeout(() => {
+                        console.log('[CK] retry apply, shadowRoot:', !!this.shadowRoot);
+                        this.applyCustomizations();
+                    }, 100);
+                }
+                
                 console.log('Accessibility Widget: Customization data loaded:', this.customization);
             } else {
                 console.log('Accessibility Widget: Failed to fetch customization data, using defaults');
@@ -9568,13 +9583,21 @@ class AccessibilityWidget {
             siteId = "68ca5524c2c2778b87c16230";
         }
         
-        console.log('Accessibility Widget: Site ID found:', siteId);
+        console.log('[CK] getSiteId() resolved:', siteId, 'from URL/local/session/meta/body/hostname');
         return siteId;
     }
 
     applyCustomizations() {
         if (!this.customization) return;
         
+        console.log('[CK] applyCustomizations entered. shadowRoot:', !!this.shadowRoot);
+        console.log('[CK] apply data sample:', {
+            triggerButtonColor: this.customization?.triggerButtonColor,
+            triggerButtonSize: this.customization?.triggerButtonSize,
+            triggerButtonShape: this.customization?.triggerButtonShape,
+            triggerHorizontalPosition: this.customization?.triggerHorizontalPosition,
+            triggerVerticalPosition: this.customization?.triggerVerticalPosition
+        });
         console.log('Accessibility Widget: Applying customizations:', this.customization);
         
         // Apply trigger button color
@@ -9611,8 +9634,10 @@ class AccessibilityWidget {
     applyTriggerButtonColor(color) {
         if (this.shadowRoot) {
             const icon = this.shadowRoot.getElementById('accessibility-icon');
+            console.log('[CK] applyTriggerButtonColor: icon found?', !!icon, 'color:', color);
             if (icon) {
                 icon.style.backgroundColor = color;
+                console.log('[CK] icon style.backgroundColor now:', icon.style.backgroundColor);
                 console.log('Accessibility Widget: Trigger button color applied:', color);
             }
         }
@@ -9621,6 +9646,7 @@ class AccessibilityWidget {
     applyTriggerPosition(horizontal, vertical) {
         if (this.shadowRoot && this.shadowRoot.host) {
             const widget = this.shadowRoot.host;
+            console.log('[CK] applyTriggerPosition: widget host?', !!widget, horizontal, vertical);
             
             // Apply horizontal position
             if (horizontal === 'Left') {
@@ -9665,6 +9691,13 @@ class AccessibilityWidget {
                 }
             }
             
+            console.log('[CK] widget style pos:', {
+                left: widget?.style.left,
+                right: widget?.style.right,
+                top: widget?.style.top,
+                bottom: widget?.style.bottom,
+                transform: widget?.style.transform
+            });
             console.log('Accessibility Widget: Trigger position applied:', horizontal, vertical);
         }
     }
@@ -9672,6 +9705,7 @@ class AccessibilityWidget {
     applyTriggerSize(size) {
         if (this.shadowRoot) {
             const icon = this.shadowRoot.getElementById('accessibility-icon');
+            console.log('[CK] applyTriggerSize: icon found?', !!icon, 'size:', size);
             if (icon) {
                 let sizeValue;
                 switch(size) {
@@ -9692,6 +9726,7 @@ class AccessibilityWidget {
                 icon.style.height = `${sizeValue}px`;
                 icon.style.fontSize = `${sizeValue * 0.4}px`;
                 
+                console.log('[CK] icon size styles:', { w: icon?.style.width, h: icon?.style.height, fs: icon?.style.fontSize });
                 console.log('Accessibility Widget: Trigger size applied:', size, sizeValue);
             }
         }
@@ -9700,6 +9735,7 @@ class AccessibilityWidget {
     applyTriggerShape(shape) {
         if (this.shadowRoot) {
             const icon = this.shadowRoot.getElementById('accessibility-icon');
+            console.log('[CK] applyTriggerShape: icon found?', !!icon, 'shape:', shape);
             if (icon) {
                 switch(shape) {
                     case 'Round':
@@ -9715,6 +9751,7 @@ class AccessibilityWidget {
                         icon.style.borderRadius = '8px';
                 }
                 
+                console.log('[CK] icon borderRadius:', icon?.style.borderRadius);
                 console.log('Accessibility Widget: Trigger shape applied:', shape);
             }
         }
@@ -9723,8 +9760,10 @@ class AccessibilityWidget {
     hideTriggerButton() {
         if (this.shadowRoot) {
             const icon = this.shadowRoot.getElementById('accessibility-icon');
+            console.log('[CK] hideTriggerButton: icon found?', !!icon);
             if (icon) {
                 icon.style.display = 'none';
+                console.log('[CK] icon display:', icon?.style.display);
                 console.log('Accessibility Widget: Trigger button hidden');
             }
         }
