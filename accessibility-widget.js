@@ -19155,7 +19155,15 @@ constructor() {
             
             if (customizationData.interfacePosition) {
                 console.log('[CK] applyCustomizations() - Setting interface position:', customizationData.interfacePosition);
-                this.updateInterfacePosition(customizationData.interfacePosition);
+                
+                // Get the icon's current position and pass it to panel
+                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                if (icon) {
+                    const iconRect = icon.getBoundingClientRect();
+                    const isIconOnLeft = iconRect.left < (window.innerWidth / 2);
+                    const iconPosition = isIconOnLeft ? 'Left' : 'Right';
+                    this.updateInterfacePosition(iconPosition);
+                }
             }
             
             if (customizationData.interfaceFooterContent) {
@@ -19348,15 +19356,25 @@ constructor() {
     updateInterfacePosition(position) {
         console.log('[CK] updateInterfacePosition() - Position:', position);
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        if (panel) {
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        
+        if (panel && icon) {
+            // Get icon's current position
+            const iconRect = icon.getBoundingClientRect();
+            const iconLeft = iconRect.left;
+            const iconRight = window.innerWidth - iconRect.right;
+            const iconTop = iconRect.top;
+            const iconBottom = window.innerHeight - iconRect.bottom;
+            
             // Reset any existing positioning
             panel.style.left = 'auto';
             panel.style.right = 'auto';
             panel.style.top = 'auto';
             panel.style.bottom = 'auto';
             panel.style.transform = 'none';
-            
+    
             if (position === 'Left') {
+                // Panel slides from LEFT side (where icon is)
                 panel.style.left = '0';
                 panel.style.top = '0';
                 panel.style.height = '100vh';
@@ -19364,6 +19382,7 @@ constructor() {
                 panel.style.transform = 'translateX(-100%)';
                 panel.style.transition = 'transform 0.3s ease';
             } else if (position === 'Right') {
+                // Panel slides from RIGHT side (where icon is)
                 panel.style.right = '0';
                 panel.style.top = '0';
                 panel.style.height = '100vh';
@@ -19373,7 +19392,6 @@ constructor() {
             }
         }
     }
-    
     updateInterfaceFooter(content) {
         console.log('[CK] updateInterfaceFooter() - Content:', content);
         let footer = this.shadowRoot?.getElementById('accessibility-footer');
