@@ -19357,10 +19357,7 @@ constructor() {
         if (panel && icon) {
             // Get icon's current position
             const iconRect = icon.getBoundingClientRect();
-            const iconLeft = iconRect.left;
-            const iconRight = window.innerWidth - iconRect.right;
-            const iconTop = iconRect.top;
-            const iconBottom = window.innerHeight - iconRect.bottom;
+            const isIconOnLeft = iconRect.left < (window.innerWidth / 2);
             
             // Reset any existing positioning
             panel.style.left = 'auto';
@@ -19369,7 +19366,7 @@ constructor() {
             panel.style.bottom = 'auto';
             panel.style.transform = 'none';
     
-            if (position === 'Left') {
+            if (isIconOnLeft) {
                 // Panel slides from LEFT side (where icon is)
                 panel.style.left = '0';
                 panel.style.top = '0';
@@ -19377,7 +19374,7 @@ constructor() {
                 panel.style.width = '300px';
                 panel.style.transform = 'translateX(-100%)';
                 panel.style.transition = 'transform 0.3s ease';
-            } else if (position === 'Right') {
+            } else {
                 // Panel slides from RIGHT side (where icon is)
                 panel.style.right = '0';
                 panel.style.top = '0';
@@ -19388,6 +19385,7 @@ constructor() {
             }
         }
     }
+
     updateInterfaceFooter(content) {
         console.log('[CK] updateInterfaceFooter() - Content:', content);
         let footer = this.shadowRoot?.getElementById('accessibility-footer');
@@ -19550,7 +19548,7 @@ constructor() {
                 } else if (shape === 'Square') {
                     icon.style.borderRadius = '6px';
                 } else if (shape === 'Round') {
-                    icon.style.borderRadius = '25px';
+                    icon.style.setProperty('border-radius', '25px', 'important');
                 }
             }
         }
