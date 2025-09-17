@@ -19230,90 +19230,311 @@ constructor() {
         }
     }
     
-    // Helper methods for applying customizations (placeholder implementations)
+    // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
-        // Implementation for updating trigger button color
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            icon.style.backgroundColor = color;
+            icon.style.borderColor = color;
+        }
     }
     
     updateTriggerButtonShape(shape) {
-        // Implementation for updating trigger button shape
         console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            if (shape === 'Circle') {
+                icon.style.borderRadius = '50%';
+            } else if (shape === 'Square') {
+                icon.style.borderRadius = '8px';
+            } else if (shape === 'Round') {
+                icon.style.borderRadius = '20px';
+            }
+        }
     }
     
     updateTriggerButtonSize(size) {
-        // Implementation for updating trigger button size
         console.log('[CK] updateTriggerButtonSize() - Size:', size);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            if (size === 'Small') {
+                icon.style.width = '40px';
+                icon.style.height = '40px';
+                icon.style.fontSize = '16px';
+            } else if (size === 'Medium') {
+                icon.style.width = '50px';
+                icon.style.height = '50px';
+                icon.style.fontSize = '20px';
+            } else if (size === 'Large') {
+                icon.style.width = '60px';
+                icon.style.height = '60px';
+                icon.style.fontSize = '24px';
+            }
+        }
     }
     
     updateTriggerPosition(direction, position) {
-        // Implementation for updating trigger position
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            if (direction === 'horizontal') {
+                if (position === 'Left') {
+                    icon.style.left = '20px';
+                    icon.style.right = 'auto';
+                } else if (position === 'Right') {
+                    icon.style.right = '20px';
+                    icon.style.left = 'auto';
+                }
+            } else if (direction === 'vertical') {
+                if (position === 'Top') {
+                    icon.style.top = '20px';
+                    icon.style.bottom = 'auto';
+                } else if (position === 'Middle') {
+                    icon.style.top = '50%';
+                    icon.style.bottom = 'auto';
+                    icon.style.transform = 'translateY(-50%)';
+                } else if (position === 'Bottom') {
+                    icon.style.bottom = '20px';
+                    icon.style.top = 'auto';
+                    icon.style.transform = 'none';
+                }
+            }
+        }
     }
     
     updateTriggerOffset(direction, offset) {
-        // Implementation for updating trigger offset
         console.log('[CK] updateTriggerOffset() - Direction:', direction, 'Offset:', offset);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            if (direction === 'horizontal') {
+                if (icon.style.left !== 'auto') {
+                    icon.style.left = `calc(20px + ${offset})`;
+                } else if (icon.style.right !== 'auto') {
+                    icon.style.right = `calc(20px + ${offset})`;
+                }
+            } else if (direction === 'vertical') {
+                if (icon.style.top !== 'auto') {
+                    icon.style.top = `calc(20px + ${offset})`;
+                } else if (icon.style.bottom !== 'auto') {
+                    icon.style.bottom = `calc(20px + ${offset})`;
+                }
+            }
+        }
     }
     
     updateTriggerVisibility(hidden) {
-        // Implementation for updating trigger visibility
         console.log('[CK] updateTriggerVisibility() - Hidden:', hidden);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            icon.style.display = hidden ? 'none' : 'block';
+        }
     }
     
     updateInterfaceColor(color) {
-        // Implementation for updating interface color
         console.log('[CK] updateInterfaceColor() - Color:', color);
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        if (panel) {
+            panel.style.backgroundColor = color;
+        }
     }
     
     updateInterfacePosition(position) {
-        // Implementation for updating interface position
         console.log('[CK] updateInterfacePosition() - Position:', position);
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        if (panel) {
+            if (position === 'Left') {
+                panel.style.left = '0';
+                panel.style.right = 'auto';
+                panel.style.transform = 'translateX(-100%)';
+            } else if (position === 'Right') {
+                panel.style.right = '0';
+                panel.style.left = 'auto';
+                panel.style.transform = 'translateX(100%)';
+            }
+        }
     }
     
     updateInterfaceFooter(content) {
-        // Implementation for updating interface footer
         console.log('[CK] updateInterfaceFooter() - Content:', content);
+        let footer = this.shadowRoot?.getElementById('accessibility-footer');
+        if (!footer) {
+            // Create footer if it doesn't exist
+            footer = document.createElement('div');
+            footer.id = 'accessibility-footer';
+            footer.style.padding = '10px';
+            footer.style.borderTop = '1px solid #eee';
+            footer.style.fontSize = '12px';
+            footer.style.color = '#666';
+            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            if (panel) {
+                panel.appendChild(footer);
+            }
+        }
+        if (footer) {
+            footer.textContent = content;
+        }
     }
     
     updateAccessibilityStatementLink(link) {
-        // Implementation for updating accessibility statement link
         console.log('[CK] updateAccessibilityStatementLink() - Link:', link);
+        let statementLink = this.shadowRoot?.getElementById('accessibility-statement-link');
+        if (!statementLink) {
+            // Create link if it doesn't exist
+            statementLink = document.createElement('a');
+            statementLink.id = 'accessibility-statement-link';
+            statementLink.style.display = 'block';
+            statementLink.style.padding = '10px';
+            statementLink.style.textAlign = 'center';
+            statementLink.style.color = '#007bff';
+            statementLink.style.textDecoration = 'none';
+            statementLink.style.fontSize = '12px';
+            statementLink.target = '_blank';
+            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            if (panel) {
+                panel.appendChild(statementLink);
+            }
+        }
+        if (statementLink) {
+            statementLink.href = link;
+            statementLink.textContent = 'Accessibility Statement';
+        }
     }
     
     updateSelectedIcon(icon) {
-        // Implementation for updating selected icon
         console.log('[CK] updateSelectedIcon() - Icon:', icon);
+        const iconElement = this.shadowRoot?.getElementById('accessibility-icon');
+        if (iconElement) {
+            // Map icon names to FontAwesome classes
+            const iconMap = {
+                'accessibility': 'fas fa-universal-access',
+                'wheelchair': 'fas fa-wheelchair',
+                'eye': 'fas fa-eye',
+                'ear': 'fas fa-deaf',
+                'brain': 'fas fa-brain',
+                'hand': 'fas fa-hand-paper',
+                'heart': 'fas fa-heart',
+                'star': 'fas fa-star',
+                'gear': 'fas fa-cog',
+                'settings': 'fas fa-sliders-h'
+            };
+            
+            const iconClass = iconMap[icon] || 'fas fa-universal-access';
+            iconElement.className = `accessibility-icon ${iconClass}`;
+        }
     }
     
     updateSelectedIconName(name) {
-        // Implementation for updating selected icon name
         console.log('[CK] updateSelectedIconName() - Name:', name);
+        // This is mainly for reference, the icon name is used in updateSelectedIcon
+        // You could add a title attribute or aria-label here if needed
+        const iconElement = this.shadowRoot?.getElementById('accessibility-icon');
+        if (iconElement) {
+            iconElement.setAttribute('aria-label', name);
+            iconElement.setAttribute('title', name);
+        }
     }
     
     updateMobileVisibility(visible) {
-        // Implementation for updating mobile visibility
         console.log('[CK] updateMobileVisibility() - Visible:', visible);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            // Check if device is mobile
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                icon.style.display = visible ? 'block' : 'none';
+            }
+        }
     }
     
     updateMobileTriggerPosition(direction, position) {
-        // Implementation for updating mobile trigger position
         console.log('[CK] updateMobileTriggerPosition() - Direction:', direction, 'Position:', position);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                if (direction === 'horizontal') {
+                    if (position === 'Left') {
+                        icon.style.left = '10px';
+                        icon.style.right = 'auto';
+                    } else if (position === 'Right') {
+                        icon.style.right = '10px';
+                        icon.style.left = 'auto';
+                    }
+                } else if (direction === 'vertical') {
+                    if (position === 'Top') {
+                        icon.style.top = '10px';
+                        icon.style.bottom = 'auto';
+                    } else if (position === 'Bottom') {
+                        icon.style.bottom = '10px';
+                        icon.style.top = 'auto';
+                    }
+                }
+            }
+        }
     }
     
     updateMobileTriggerSize(size) {
-        // Implementation for updating mobile trigger size
         console.log('[CK] updateMobileTriggerSize() - Size:', size);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                if (size === 'Small') {
+                    icon.style.width = '35px';
+                    icon.style.height = '35px';
+                    icon.style.fontSize = '14px';
+                } else if (size === 'Medium') {
+                    icon.style.width = '45px';
+                    icon.style.height = '45px';
+                    icon.style.fontSize = '18px';
+                } else if (size === 'Large') {
+                    icon.style.width = '55px';
+                    icon.style.height = '55px';
+                    icon.style.fontSize = '22px';
+                }
+            }
+        }
     }
     
     updateMobileTriggerShape(shape) {
-        // Implementation for updating mobile trigger shape
         console.log('[CK] updateMobileTriggerShape() - Shape:', shape);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                if (shape === 'Circle') {
+                    icon.style.borderRadius = '50%';
+                } else if (shape === 'Square') {
+                    icon.style.borderRadius = '6px';
+                } else if (shape === 'Round') {
+                    icon.style.borderRadius = '15px';
+                }
+            }
+        }
     }
     
     updateMobileTriggerOffset(direction, offset) {
-        // Implementation for updating mobile trigger offset
         console.log('[CK] updateMobileTriggerOffset() - Direction:', direction, 'Offset:', offset);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                if (direction === 'horizontal') {
+                    if (icon.style.left !== 'auto') {
+                        icon.style.left = `calc(10px + ${offset}px)`;
+                    } else if (icon.style.right !== 'auto') {
+                        icon.style.right = `calc(10px + ${offset}px)`;
+                    }
+                } else if (direction === 'vertical') {
+                    if (icon.style.top !== 'auto') {
+                        icon.style.top = `calc(10px + ${offset}px)`;
+                    } else if (icon.style.bottom !== 'auto') {
+                        icon.style.bottom = `calc(10px + ${offset}px)`;
+                    }
+                }
+            }
+        }
     }
 
 }
