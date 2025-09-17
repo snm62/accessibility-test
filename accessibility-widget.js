@@ -1614,8 +1614,6 @@ constructor() {
 
                 position: fixed !important;
 
-                left: -600px !important;
-
                 width: 500px !important;
 
                 height: 700px !important;
