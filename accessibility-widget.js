@@ -26,6 +26,9 @@ class AccessibilityWidget {
 
         this.isOpeningDropdown = false; // Flag to prevent immediate close
 
+        // Set the KV API URL for your worker
+        this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
+
         console.log('Accessibility Widget: Initializing...');
 
         this.init();
@@ -18998,6 +19001,20 @@ async getSiteId() {
     if (siteId) {
         console.log('[CK] getSiteId() resolved:', siteId, 'from sessionStorage');
         return siteId;
+    }
+    
+    // Method 4.5: Check sessionStorage for Apps & Integrations flow
+    const sessionData = sessionStorage.getItem('wf_hybrid_user');
+    if (sessionData) {
+        try {
+            const parsed = JSON.parse(sessionData);
+            if (parsed.siteInfo && parsed.siteInfo.siteId) {
+                console.log('[CK] getSiteId() - Found siteId from Apps & Integrations sessionStorage:', parsed.siteInfo.siteId);
+                return parsed.siteInfo.siteId;
+            }
+        } catch (error) {
+            console.error('[CK] getSiteId() - Error parsing Apps & Integrations sessionStorage:', error);
+        }
     }
     
     // Method 5: Check meta tags
