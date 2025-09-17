@@ -121,8 +121,6 @@
 /* Accessibility Panel - Fixed position on left side */
 .accessibility-panel {
     position: fixed !important;
-    top: 20px !important;
-    left: -600px !important;
     width: 500px !important;
     height: 700px !important;
     background: #ffffff !important;
@@ -138,7 +136,6 @@
 
 
 .accessibility-panel.active {
-    left: 20px !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
