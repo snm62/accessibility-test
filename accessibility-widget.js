@@ -19237,6 +19237,10 @@ constructor() {
         if (icon) {
             icon.style.backgroundColor = color;
             icon.style.borderColor = color;
+            // Ensure icon content is centered
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
         }
     }
     
@@ -19278,6 +19282,11 @@ constructor() {
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            // Always center the icon content
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
+            
             if (direction === 'horizontal') {
                 if (position === 'Left') {
                     icon.style.left = '20px';
@@ -19290,6 +19299,7 @@ constructor() {
                 if (position === 'Top') {
                     icon.style.top = '20px';
                     icon.style.bottom = 'auto';
+                    icon.style.transform = 'none';
                 } else if (position === 'Middle') {
                     icon.style.top = '50%';
                     icon.style.bottom = 'auto';
@@ -19343,14 +19353,27 @@ constructor() {
         console.log('[CK] updateInterfacePosition() - Position:', position);
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         if (panel) {
+            // Reset any existing positioning
+            panel.style.left = 'auto';
+            panel.style.right = 'auto';
+            panel.style.top = 'auto';
+            panel.style.bottom = 'auto';
+            panel.style.transform = 'none';
+            
             if (position === 'Left') {
                 panel.style.left = '0';
-                panel.style.right = 'auto';
+                panel.style.top = '0';
+                panel.style.height = '100vh';
+                panel.style.width = '300px';
                 panel.style.transform = 'translateX(-100%)';
+                panel.style.transition = 'transform 0.3s ease';
             } else if (position === 'Right') {
                 panel.style.right = '0';
-                panel.style.left = 'auto';
+                panel.style.top = '0';
+                panel.style.height = '100vh';
+                panel.style.width = '300px';
                 panel.style.transform = 'translateX(100%)';
+                panel.style.transition = 'transform 0.3s ease';
             }
         }
     }
@@ -19420,7 +19443,16 @@ constructor() {
             };
             
             const iconClass = iconMap[icon] || 'fas fa-universal-access';
-            iconElement.className = `accessibility-icon ${iconClass}`;
+            
+            // Clear existing content and add the new icon
+            iconElement.innerHTML = `<i class="${iconClass}"></i>`;
+            
+            // Ensure proper styling
+            iconElement.style.display = 'flex';
+            iconElement.style.alignItems = 'center';
+            iconElement.style.justifyContent = 'center';
+            iconElement.style.color = '#ffffff';
+            iconElement.style.fontSize = 'inherit';
         }
     }
     
@@ -19532,6 +19564,33 @@ constructor() {
                     } else if (icon.style.bottom !== 'auto') {
                         icon.style.bottom = `calc(10px + ${offset}px)`;
                     }
+                }
+            }
+        }
+    }
+    
+    // Helper function to update panel visibility based on position
+    updatePanelVisibility(isOpen) {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        if (panel) {
+            const currentTransform = panel.style.transform;
+            if (isOpen) {
+                // Show panel
+                if (currentTransform.includes('translateX(-100%)')) {
+                    panel.style.transform = 'translateX(0)';
+                } else if (currentTransform.includes('translateX(100%)')) {
+                    panel.style.transform = 'translateX(0)';
+                } else {
+                    panel.style.transform = 'translateX(0)';
+                }
+            } else {
+                // Hide panel
+                if (currentTransform.includes('translateX(-100%)') || panel.style.left === '0px') {
+                    panel.style.transform = 'translateX(-100%)';
+                } else if (currentTransform.includes('translateX(100%)') || panel.style.right === '0px') {
+                    panel.style.transform = 'translateX(100%)';
+                } else {
+                    panel.style.transform = 'translateX(-100%)';
                 }
             }
         }
