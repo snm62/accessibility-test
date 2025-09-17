@@ -1400,10 +1400,6 @@ constructor() {
 
                 position: fixed !important;
 
-                bottom: 20px !important;
-
-                left: 20px !important;
-
                 top: auto !important;
 
                 right: auto !important;
@@ -2727,10 +2723,6 @@ constructor() {
             :host(.seizure-safe) .accessibility-icon {
 
                 position: fixed !important;
-
-                bottom: 20px !important;
-
-                left: 20px !important;
 
                 z-index: 99999 !important;
 
@@ -19282,10 +19274,10 @@ constructor() {
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
-
-            icon.style.position = 'fixed';
-            icon.style.zIndex = '9999';
-
+            // Set position to fixed with !important to override CSS
+            icon.style.setProperty('position', 'fixed', 'important');
+            icon.style.setProperty('z-index', '9999', 'important');
+            
             // Always center the icon content
             icon.style.display = 'flex';
             icon.style.alignItems = 'center';
@@ -19293,25 +19285,25 @@ constructor() {
             
             if (direction === 'horizontal') {
                 if (position === 'Left') {
-                    icon.style.left = '20px';
-                    icon.style.right = 'auto';
+                    icon.style.setProperty('left', '20px', 'important');
+                    icon.style.setProperty('right', 'auto', 'important');
                 } else if (position === 'Right') {
-                    icon.style.right = '20px';
-                    icon.style.left = 'auto';
+                    icon.style.setProperty('right', '20px', 'important');
+                    icon.style.setProperty('left', 'auto', 'important');
                 }
             } else if (direction === 'vertical') {
                 if (position === 'Top') {
-                    icon.style.top = '20px';
-                    icon.style.bottom = 'auto';
-                    icon.style.transform = 'none';
+                    icon.style.setProperty('top', '20px', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'none', 'important');
                 } else if (position === 'Middle') {
-                    icon.style.top = '50%';
-                    icon.style.bottom = 'auto';
-                    icon.style.transform = 'translateY(-50%)';
+                    icon.style.setProperty('top', '50%', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                 } else if (position === 'Bottom') {
-                    icon.style.bottom = '20px';
-                    icon.style.top = 'auto';
-                    icon.style.transform = 'none';
+                    icon.style.setProperty('bottom', '20px', 'important');
+                    icon.style.setProperty('top', 'auto', 'important');
+                    icon.style.setProperty('transform', 'none', 'important');
                 }
             }
         }
@@ -19323,15 +19315,15 @@ constructor() {
         if (icon) {
             if (direction === 'horizontal') {
                 if (icon.style.left !== 'auto') {
-                    icon.style.left = `calc(20px + ${offset})`;
+                    icon.style.setProperty('left', `calc(20px + ${offset})`, 'important');
                 } else if (icon.style.right !== 'auto') {
-                    icon.style.right = `calc(20px + ${offset})`;
+                    icon.style.setProperty('right', `calc(20px + ${offset})`, 'important');
                 }
             } else if (direction === 'vertical') {
                 if (icon.style.top !== 'auto') {
-                    icon.style.top = `calc(20px + ${offset})`;
+                    icon.style.setProperty('top', `calc(20px + ${offset})`, 'important');
                 } else if (icon.style.bottom !== 'auto') {
-                    icon.style.bottom = `calc(20px + ${offset})`;
+                    icon.style.setProperty('bottom', `calc(20px + ${offset})`, 'important');
                 }
             }
         }
