@@ -1614,8 +1614,6 @@ constructor() {
 
                 position: fixed !important;
 
-                top: 20px !important;
-
                 left: -600px !important;
 
                 width: 500px !important;
@@ -1647,8 +1645,6 @@ constructor() {
 
 
             .accessibility-panel.active {
-
-                left: 20px !important;
 
                 display: block !important;
 
@@ -19253,7 +19249,7 @@ constructor() {
             } else if (shape === 'Square') {
                 icon.style.borderRadius = '8px';
             } else if (shape === 'Round') {
-                icon.style.borderRadius = '14px';
+                icon.style.borderRadius = '25px';
             }
         }
     }
@@ -19554,7 +19550,7 @@ constructor() {
                 } else if (shape === 'Square') {
                     icon.style.borderRadius = '6px';
                 } else if (shape === 'Round') {
-                    icon.style.borderRadius = '15px';
+                    icon.style.borderRadius = '25px';
                 }
             }
         }
