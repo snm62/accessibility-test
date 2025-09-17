@@ -552,7 +552,7 @@ class AccessibilityWidget {
         if (!document.querySelector('link[href*="accessibility-widget.css"]')) {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/snm-accessibility-widget@a91462d/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@f6fed4a/accessibility-widget.css';
             link.onload = () => {
                 console.log('Accessibility Widget: CSS loaded successfully');
             };
