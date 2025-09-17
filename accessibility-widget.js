@@ -19253,7 +19253,7 @@ constructor() {
             } else if (shape === 'Square') {
                 icon.style.borderRadius = '8px';
             } else if (shape === 'Round') {
-                icon.style.borderRadius = '20px';
+                icon.style.borderRadius = '14px';
             }
         }
     }
@@ -19282,6 +19282,10 @@ constructor() {
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+
+            icon.style.position = 'fixed';
+            icon.style.zIndex = '9999';
+
             // Always center the icon content
             icon.style.display = 'flex';
             icon.style.alignItems = 'center';
