@@ -1111,9 +1111,9 @@ constructor() {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@f6fed4a/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@6dccd39/accessibility-widget.css';
             link.onload = () => {
-
+                
                 console.log('Accessibility Widget: CSS loaded successfully');
 
             };
@@ -1367,7 +1367,12 @@ constructor() {
     getWidgetCSS() {
 
         return `
-
+             .accessibility-panel {
+                 left: auto !important;
+                 right: auto !important;
+                 top: auto !important;
+                 bottom: auto !important;
+}
             /* Accessibility Widget Styles - Shadow DOM */
 
             :host {
@@ -19223,7 +19228,48 @@ constructor() {
             console.error('[CK] applyCustomizations() - Error applying customization data:', error);
         }
     }
-    
+    languageContent = {
+        German: {
+          title: "Barrierefreiheit",
+          close: "Schließen",
+          accessibility: "Barrierefreiheit",
+          vision: "Sehbehinderung",
+          motor: "Motorische Behinderung",
+          cognitive: "Kognitive Behinderung",
+          seizure: "Anfallsicher",
+          adhd: "ADHS-freundlich",
+        },
+        English: {
+          title: "Accessibility",
+          close: "Close",
+          accessibility: "Accessibility",
+          vision: "Vision Impaired",
+          motor: "Motor Disability",
+          cognitive: "Cognitive Disability",
+          seizure: "Seizure Safe",
+          adhd: "ADHD Friendly",
+        },
+        Spanish: {
+          title: "Accesibilidad",
+          close: "Cerrar",
+          accessibility: "Accesibilidad",
+          vision: "Discapacidad Visual",
+    motor: "Discapacidad Motora",
+    cognitive: "Discapacidad Cognitiva",
+    seizure: "Seguro para Convulsiones",
+    adhd: "Amigable para TDAH",
+  },
+  French: {
+    title: "Accessibilité",
+    close: "Fermer",
+    accessibility: "Accessibilité",
+    vision: "Déficience Visuelle",
+    motor: "Handicap Moteur",
+    cognitive: "Handicap Cognitif",
+    seizure: "Sûr pour les Crises",
+    adhd: "Convivial pour TDAH",
+  }
+};
     // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
