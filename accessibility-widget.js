@@ -19104,7 +19104,217 @@ constructor() {
     return null;
 }
 
-
+    // Apply customization data to the widget
+    applyCustomizations(customizationData) {
+        console.log('[CK] applyCustomizations() - Starting to apply customization data:', customizationData);
+        
+        if (!customizationData) {
+            console.log('[CK] applyCustomizations() - No customization data provided');
+            return;
+        }
+        
+        try {
+            // Apply trigger button customizations
+            if (customizationData.triggerButtonColor) {
+                console.log('[CK] applyCustomizations() - Setting trigger button color:', customizationData.triggerButtonColor);
+                this.updateTriggerButtonColor(customizationData.triggerButtonColor);
+            }
+            
+            if (customizationData.triggerButtonShape) {
+                console.log('[CK] applyCustomizations() - Setting trigger button shape:', customizationData.triggerButtonShape);
+                this.updateTriggerButtonShape(customizationData.triggerButtonShape);
+            }
+            
+            if (customizationData.triggerButtonSize) {
+                console.log('[CK] applyCustomizations() - Setting trigger button size:', customizationData.triggerButtonSize);
+                this.updateTriggerButtonSize(customizationData.triggerButtonSize);
+            }
+            
+            if (customizationData.triggerHorizontalPosition) {
+                console.log('[CK] applyCustomizations() - Setting trigger horizontal position:', customizationData.triggerHorizontalPosition);
+                this.updateTriggerPosition('horizontal', customizationData.triggerHorizontalPosition);
+            }
+            
+            if (customizationData.triggerVerticalPosition) {
+                console.log('[CK] applyCustomizations() - Setting trigger vertical position:', customizationData.triggerVerticalPosition);
+                this.updateTriggerPosition('vertical', customizationData.triggerVerticalPosition);
+            }
+            
+            if (customizationData.triggerHorizontalOffset) {
+                console.log('[CK] applyCustomizations() - Setting trigger horizontal offset:', customizationData.triggerHorizontalOffset);
+                this.updateTriggerOffset('horizontal', customizationData.triggerHorizontalOffset);
+            }
+            
+            if (customizationData.triggerVerticalOffset) {
+                console.log('[CK] applyCustomizations() - Setting trigger vertical offset:', customizationData.triggerVerticalOffset);
+                this.updateTriggerOffset('vertical', customizationData.triggerVerticalOffset);
+            }
+            
+            if (customizationData.hideTriggerButton) {
+                console.log('[CK] applyCustomizations() - Setting trigger button visibility:', customizationData.hideTriggerButton);
+                this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
+            }
+            
+            // Apply interface customizations
+            if (customizationData.interfaceLeadColor) {
+                console.log('[CK] applyCustomizations() - Setting interface lead color:', customizationData.interfaceLeadColor);
+                this.updateInterfaceColor(customizationData.interfaceLeadColor);
+            }
+            
+            if (customizationData.interfacePosition) {
+                console.log('[CK] applyCustomizations() - Setting interface position:', customizationData.interfacePosition);
+                this.updateInterfacePosition(customizationData.interfacePosition);
+            }
+            
+            if (customizationData.interfaceFooterContent) {
+                console.log('[CK] applyCustomizations() - Setting interface footer content:', customizationData.interfaceFooterContent);
+                this.updateInterfaceFooter(customizationData.interfaceFooterContent);
+            }
+            
+            if (customizationData.accessibilityStatementLink) {
+                console.log('[CK] applyCustomizations() - Setting accessibility statement link:', customizationData.accessibilityStatementLink);
+                this.updateAccessibilityStatementLink(customizationData.accessibilityStatementLink);
+            }
+            
+            // Apply icon customizations
+            if (customizationData.selectedIcon) {
+                console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
+                this.updateSelectedIcon(customizationData.selectedIcon);
+            }
+            
+            if (customizationData.selectedIconName) {
+                console.log('[CK] applyCustomizations() - Setting selected icon name:', customizationData.selectedIconName);
+                this.updateSelectedIconName(customizationData.selectedIconName);
+            }
+            
+            // Apply mobile customizations
+            if (customizationData.showOnMobile) {
+                console.log('[CK] applyCustomizations() - Setting mobile visibility:', customizationData.showOnMobile);
+                this.updateMobileVisibility(customizationData.showOnMobile === 'Show');
+            }
+            
+            if (customizationData.mobileTriggerHorizontalPosition) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
+                this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
+            }
+            
+            if (customizationData.mobileTriggerVerticalPosition) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
+                this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
+            }
+            
+            if (customizationData.mobileTriggerSize) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger size:', customizationData.mobileTriggerSize);
+                this.updateMobileTriggerSize(customizationData.mobileTriggerSize);
+            }
+            
+            if (customizationData.mobileTriggerShape) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
+                this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
+            }
+            
+            if (customizationData.mobileTriggerHorizontalOffset) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
+                this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
+            }
+            
+            if (customizationData.mobileTriggerVerticalOffset) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
+                this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
+            }
+            
+            console.log('[CK] applyCustomizations() - Successfully applied all customization data');
+            
+        } catch (error) {
+            console.error('[CK] applyCustomizations() - Error applying customization data:', error);
+        }
+    }
+    
+    // Helper methods for applying customizations (placeholder implementations)
+    updateTriggerButtonColor(color) {
+        // Implementation for updating trigger button color
+        console.log('[CK] updateTriggerButtonColor() - Color:', color);
+    }
+    
+    updateTriggerButtonShape(shape) {
+        // Implementation for updating trigger button shape
+        console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
+    }
+    
+    updateTriggerButtonSize(size) {
+        // Implementation for updating trigger button size
+        console.log('[CK] updateTriggerButtonSize() - Size:', size);
+    }
+    
+    updateTriggerPosition(direction, position) {
+        // Implementation for updating trigger position
+        console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
+    }
+    
+    updateTriggerOffset(direction, offset) {
+        // Implementation for updating trigger offset
+        console.log('[CK] updateTriggerOffset() - Direction:', direction, 'Offset:', offset);
+    }
+    
+    updateTriggerVisibility(hidden) {
+        // Implementation for updating trigger visibility
+        console.log('[CK] updateTriggerVisibility() - Hidden:', hidden);
+    }
+    
+    updateInterfaceColor(color) {
+        // Implementation for updating interface color
+        console.log('[CK] updateInterfaceColor() - Color:', color);
+    }
+    
+    updateInterfacePosition(position) {
+        // Implementation for updating interface position
+        console.log('[CK] updateInterfacePosition() - Position:', position);
+    }
+    
+    updateInterfaceFooter(content) {
+        // Implementation for updating interface footer
+        console.log('[CK] updateInterfaceFooter() - Content:', content);
+    }
+    
+    updateAccessibilityStatementLink(link) {
+        // Implementation for updating accessibility statement link
+        console.log('[CK] updateAccessibilityStatementLink() - Link:', link);
+    }
+    
+    updateSelectedIcon(icon) {
+        // Implementation for updating selected icon
+        console.log('[CK] updateSelectedIcon() - Icon:', icon);
+    }
+    
+    updateSelectedIconName(name) {
+        // Implementation for updating selected icon name
+        console.log('[CK] updateSelectedIconName() - Name:', name);
+    }
+    
+    updateMobileVisibility(visible) {
+        // Implementation for updating mobile visibility
+        console.log('[CK] updateMobileVisibility() - Visible:', visible);
+    }
+    
+    updateMobileTriggerPosition(direction, position) {
+        // Implementation for updating mobile trigger position
+        console.log('[CK] updateMobileTriggerPosition() - Direction:', direction, 'Position:', position);
+    }
+    
+    updateMobileTriggerSize(size) {
+        // Implementation for updating mobile trigger size
+        console.log('[CK] updateMobileTriggerSize() - Size:', size);
+    }
+    
+    updateMobileTriggerShape(shape) {
+        // Implementation for updating mobile trigger shape
+        console.log('[CK] updateMobileTriggerShape() - Shape:', shape);
+    }
+    
+    updateMobileTriggerOffset(direction, offset) {
+        // Implementation for updating mobile trigger offset
+        console.log('[CK] updateMobileTriggerOffset() - Direction:', direction, 'Offset:', offset);
+    }
 
 }
 
