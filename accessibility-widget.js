@@ -9487,6 +9487,7 @@ class AccessibilityWidget {
                 console.log('[CK] /config status:', response.status);
                 console.log('[CK] /config payload:', data);
                 console.log('[CK] customization keys:', data && data.customization ? Object.keys(data.customization) : '(none)');
+                console.log('[CK] full data structure:', JSON.stringify(data, null, 2));
                 
                 this.customization = data.customization || {};
                 this.accessibilityProfiles = data.accessibilityProfiles || {};
