@@ -48,11 +48,31 @@ class AccessibilityWidget {
 
         // Delay binding events to ensure elements are created
 
-        setTimeout(() => {
+        setTimeout(async () => {
 
             this.bindEvents();
 
             this.applySettings();
+
+            
+
+            // Fetch customization data from API
+
+            console.log('Accessibility Widget: Fetching customization data...');
+
+            const customizationData = await this.fetchCustomizationData();
+
+            if (customizationData && customizationData.customization) {
+
+                console.log('Accessibility Widget: Applying customization data:', customizationData.customization);
+
+                this.applyCustomizations(customizationData.customization);
+
+            } else {
+
+                console.log('Accessibility Widget: No customization data found, using defaults');
+
+            }
 
             
 
@@ -18899,6 +18919,50 @@ class AccessibilityWidget {
 
         }
 
+    }
+
+    // Fetch customization data from the API
+    async fetchCustomizationData() {
+        console.log('[CK] fetchCustomizationData() - Starting...');
+        
+        try {
+            // Get siteId first
+            this.siteId = await this.getSiteId();
+            console.log('[CK] fetchCustomizationData() - Got siteId:', this.siteId);
+            
+            if (!this.siteId) {
+                console.error('[CK] fetchCustomizationData() - No siteId available, cannot fetch customization data');
+                return null;
+            }
+            
+            console.log('[CK] fetchCustomizationData() - Making API request to:', `${this.kvApiUrl}/api/accessibility/config?siteId=${this.siteId}`);
+            
+            const response = await fetch(`${this.kvApiUrl}/api/accessibility/config?siteId=${this.siteId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            console.log('[CK] fetchCustomizationData() - Response status:', response.status);
+            console.log('[CK] fetchCustomizationData() - Response ok:', response.ok);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[CK] fetchCustomizationData() - API request failed:', response.status, errorText);
+                return null;
+            }
+            
+            const data = await response.json();
+            console.log('[CK] fetchCustomizationData() - Full API response:', data);
+            console.log('[CK] fetchCustomizationData() - Customization data:', data.customization);
+            
+            return data;
+            
+        } catch (error) {
+            console.error('[CK] fetchCustomizationData() - Error:', error);
+            return null;
+        }
     }
 
 // Get site ID for API calls
