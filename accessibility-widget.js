@@ -1870,8 +1870,6 @@ document.head.appendChild(overrideStyle);
             .accessibility-icon {
                 width: 45px !important;
                 height: 45px !important;
-                bottom: 10px !important;
-                left: 10px !important;
             }
             
             .accessibility-icon i {
@@ -2215,18 +2213,31 @@ document.head.appendChild(overrideStyle);
 
                 
 
-                .accessibility-panel {
-
-                    width: 500px !important;
-
-                    left: -500px !important;
-
-                    margin: 0 20px !important;
-
-                    height: 700px !important;
-
-                }
-
+    @media (max-width: 768px) {
+      .accessibility-panel {
+          width: 90vw !important;
+          max-width: 400px !important;
+          left: 5vw !important;
+          right: auto !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          /* ADD these for better mobile responsiveness: */
+          font-size: 14px !important;
+          padding: 15px !important;
+    }
+}
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 95vw !important;
+        max-width: 350px !important;
+        left: 2.5vw !important;
+        /* ADD these for better mobile responsiveness: */
+        font-size: 12px !important;
+        padding: 10px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
+}
                 
 
                 .accessibility-panel.active {
@@ -20111,8 +20122,8 @@ applyCustomizations(customizationData) {
                         icon.style.left = '10px';
                         icon.style.right = 'auto';
                     } else if (position === 'Right') {
-                        icon.style.right = '10px';
-                        icon.style.left = 'auto';
+                        icon.style.setProperty('right', '10px', 'important');
+                        icon.style.setProperty('left', 'auto', 'important');
                     }
                 } else if (direction === 'vertical') {
                     if (position === 'Top') {
@@ -20123,9 +20134,10 @@ applyCustomizations(customizationData) {
                         icon.style.top = 'auto';
                     }
                   else if (position === 'Middle') {  // ADD THIS
-                    icon.style.top = '50%';
-                    icon.style.bottom = 'auto';
-                    icon.style.transform = 'translateY(-50%)';
+                    icon.style.setProperty('top', '50%', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+
                 }
                 }
             }
