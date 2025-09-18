@@ -415,7 +415,7 @@ constructor() {
 
 
 
-    init() {
+    async init() {
 
         this.addFontAwesome();
 
@@ -424,7 +424,7 @@ constructor() {
         this.createWidget();
 
         this.loadSettings();
-
+        await this.fetchCustomizationData();
         
 
         // Delay binding events to ensure elements are created
@@ -20078,13 +20078,11 @@ applyCustomizations(customizationData) {
                     } else if (position === 'Bottom') {
                         icon.style.bottom = '10px';
                         icon.style.top = 'auto';
+                    } else if (position === 'Middle') {
+                        icon.style.setProperty('top', '50%', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                     }
-                  else if (position === 'Middle') {  // ADD THIS
-                    icon.style.setProperty('top', '50%', 'important');
-                    icon.style.setProperty('bottom', 'auto', 'important');
-                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-
-                }
                 }
             }
         }
