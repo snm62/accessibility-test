@@ -4148,8 +4148,7 @@ document.head.appendChild(overrideStyle);
 
                 <div class="close-btn" id="close-panel">
 
-                    <i class="fas fa-times"></i>
-
+                    ×
                 </div>
 
                 <div class="header-content">
@@ -6010,183 +6009,130 @@ document.head.appendChild(overrideStyle);
 
             },
 
-            fr: {
-
-                title: "Ajustements d'Accessibilité",
-
-                profilesTitle: "Choisissez le bon profil d'accessibilité pour vous",
-
-                seizureSafe: "Profil Sécurisé pour Crises",
-
-                seizureSafeDesc: "Supprime les flashs et réduit les couleurs",
-
-                visionImpaired: "Profil pour Malvoyants",
-
-                visionImpairedDesc: "Améliore les éléments visuels du site",
-
-                adhdFriendly: "Profil Adapté au TDAH",
-
-                adhdFriendlyDesc: "Plus de concentration et moins de distractions",
-
-                cognitiveDisability: "Profil de Handicap Cognitif",
-
-                cognitiveDisabilityDesc: "Aide à la lecture et à la concentration",
-
-                keyboardNav: "Navigation Clavier (Moteur)",
-
-                keyboardNavDesc: "Utiliser le site web avec le clavier",
-
-                screenReader: "Utilisateurs Aveugles (Lecteur d'Écran)",
-
-                screenReaderDesc: "Optimiser le site web pour les lecteurs d'écran",
-
-                contentScaling: "Mise à l'Échelle du Contenu",
-
-                contentScalingDesc: "Mettre à l'échelle le contenu avec les contrôles fléchés",
-
-                readableFont: "Police Lisible",
-
-                readableFontDesc: "Polices à haute lisibilité",
-
-                highlightTitles: "Surligner les Titres",
-
-                highlightTitlesDesc: "Ajouter des boîtes autour des en-têtes",
-
-                highlightLinks: "Surligner les Liens",
-
-                highlightLinksDesc: "Ajouter des boîtes autour des liens",
-
-                textMagnifier: "Loupe de Texte",
-
-                textMagnifierDesc: "Outil de loupe flottant",
-
-                fontSizing: "Ajuster la Taille de Police",
-
-                fontSizingDesc: "Taille de police avec contrôles fléchés",
-
-                alignCenter: "Aligner au Centre",
-
-                alignCenterDesc: "Centre tout le contenu textuel",
-
-                adjustLineHeight: "Ajuster la Hauteur de Ligne",
-
-                adjustLineHeightDesc: "Hauteur de ligne avec contrôles fléchés",
-
-                adjustLetterSpacing: "Ajuster l'Espacement des Lettres",
-
-                adjustLetterSpacingDesc: "Espacement des lettres avec contrôles fléchés",
-
-                alignLeft: "Aligner à Gauche",
-
-                alignLeftDesc: "Aligne le contenu textuel à gauche",
-
-                alignRight: "Aligner à Droite",
-
-                alignRightDesc: "Aligne le contenu textuel à droite",
-
-                darkContrast: "Contraste Sombre",
-
-                darkContrastDesc: "Arrière-plan sombre avec texte clair",
-
-                lightContrast: "Contraste Clair",
-
-                lightContrastDesc: "Arrière-plan clair avec texte sombre",
-
-                highContrast: "Haut Contraste",
-
-                highContrastDesc: "Implémentation de contraste maximum",
-
-                highSaturation: "Haute Saturation",
-
-                highSaturationDesc: "Augmente l'intensité des couleurs",
-
-                adjustTextColors: "Ajuster les Couleurs de Texte",
-
-                adjustTextColorsDesc: "Fonctionnalité de sélecteur de couleur",
-
-                monochrome: "Monochrome",
-
-                monochromeDesc: "Supprime toutes les couleurs sauf noir, blanc, gris",
-
-                adjustTitleColors: "Ajuster les Couleurs des Titres",
-
-                adjustTitleColorsDesc: "Personnalisation des couleurs pour les en-têtes",
-
-                lowSaturation: "Faible Saturation",
-
-                lowSaturationDesc: "Réduit l'intensité des couleurs",
-
-                adjustBgColors: "Ajuster les Couleurs d'Arrière-plan",
-
-                adjustBgColorsDesc: "Personnalisation des couleurs d'arrière-plan",
-
-                muteSound: "Couper le Son",
-
-                muteSoundDesc: "Désactive tout le contenu audio",
-
-                hideImages: "Masquer les Images",
-
-                hideImagesDesc: "Basculer pour masquer toutes les images",
-
-                readMode: "Mode Lecture",
-
-                readModeDesc: "Supprime les éléments de navigation",
-
-                readingGuide: "Guide de Lecture",
-
-                readingGuideDesc: "Barre de surlignage mobile",
-
-                usefulLinks: "Liens Utiles",
-
-                usefulLinksDesc: "Ressources et liens d'accessibilité",
-
-                stopAnimation: "Arrêter l'Animation",
-
-                stopAnimationDesc: "Met en pause toutes les animations CSS",
-
-                readingMask: "Masque de Lecture",
-
-                readingMaskDesc: "Superposition semi-transparente",
-
-                highlightHover: "Surligner le Survol",
-
-                highlightHoverDesc: "Retour visuel au survol",
-
-                highlightFocus: "Surligner le Focus",
-
-                highlightFocusDesc: "Indicateurs de focus proéminents",
-
-                bigBlackCursor: "Gros Curseur Noir",
-
-                bigBlackCursorDesc: "Augmente la taille du curseur",
-
-                bigWhiteCursor: "Gros Curseur Blanc",
-
-                bigWhiteCursorDesc: "Augmente la taille du curseur",
-
-                resetSettings: "Réinitialiser les Paramètres",
-
-                statement: "Déclaration",
-
-                hideInterface: "Masquer l'Interface",
-
-                accessibilityFeatures: "Fonctionnalités d'Accessibilité",
-
-                // Additional detailed descriptions
-
-                keyboardNavDetailed: "Ce profil permet aux personnes ayant des troubles moteurs d'utiliser le site web avec les touches du clavier (Tab, Shift+Tab, Entrée) et les raccourcis (ex. \"M\" pour les menus, \"H\" pour les titres, \"F\" pour les formulaires, \"B\" pour les boutons, \"G\" pour les graphiques).",
-
-                keyboardNavNote: "Note: Ce profil s'active automatiquement pour les utilisateurs de clavier.",
-
-                screenReaderDetailed: "Ce profil ajuste le site web pour être compatible avec les lecteurs d'écran comme JAWS, NVDA, VoiceOver et TalkBack. Le logiciel lecteur d'écran est installé sur l'ordinateur et le smartphone de l'utilisateur aveugle, et les sites web doivent assurer la compatibilité.",
-
-                screenReaderNote: "Note: Ce profil s'active automatiquement pour les lecteurs d'écran.",
-
-                activatesWithScreenReader: "S'active avec Lecteur d'Écran",
-
-                activatesWithKeyboardNav: "S'active avec Navigation Clavier"
-
-            },
+           French: {
+    // Panel header
+    title: "Accessibilité",
+    //close: "Fermer",
+    "Accessibility Adjustments": "Ajustements d'Accessibilité",
+    "Reset Settings": "Réinitialiser les Paramètres",
+    "Statement": "Déclaration",
+    "Hide Interface": "Masquer l'Interface",
+    
+    // Section title
+    "Choose the right accessibility profile for you": "Choisissez le bon profil d'accessibilité pour vous",
+    
+    // Profile items in exact order from HTML:
+    "Seizure Safe Profile": "Profil Sécurisé pour Crises",
+    "Clear flashes & reduces color": "Supprime les flashs et réduit les couleurs",
+    
+    "Vision Impaired Profile": "Profil pour Malvoyants",
+    "Enhances website's visuals": "Améliore les éléments visuels du site",
+    
+    "ADHD Friendly Profile": "Profil Adapté au TDAH",
+    "More focus & fewer distractions": "Plus de concentration et moins de distractions",
+    
+    "Cognitive Disability Profile": "Profil de Handicap Cognitif",
+    "Assists with reading & focusing": "Aide à la lecture et à la concentration",
+    
+    "Keyboard Navigation (Motor)": "Navigation Clavier (Moteur)",
+    "Use website with the keyboard": "Utiliser le site web avec le clavier",
+    
+    "Blind Users (Screen Reader)": "Utilisateurs Aveugles (Lecteur d'Écran)",
+    "Optimize website for screen-readers": "Optimiser le site web pour les lecteurs d'écran",
+    
+    "Content Scaling": "Mise à l'Échelle du Contenu",
+    "Scale content with arrow controls": "Mettre à l'échelle le contenu avec les contrôles fléchés",
+    
+    "Readable Font": "Police Lisible",
+    "High-legibility fonts": "Polices à haute lisibilité",
+    
+    "Highlight Titles": "Surligner les Titres",
+    "Add boxes around headings": "Ajouter des boîtes autour des titres",
+    
+    "Highlight Links": "Surligner les Liens",
+    "Add boxes around links": "Ajouter des boîtes autour des liens",
+    
+    "Text Magnifier": "Loupe de Texte",
+    "Floating magnifying glass tool": "Outil de loupe flottant",
+    
+    "Adjust Font Sizing": "Ajuster la Taille de Police",
+    "Font size with arrow controls": "Taille de police avec contrôles fléchés",
+    
+    "Adjust Line Height": "Ajuster la Hauteur de Ligne",
+    "Line height with arrow controls": "Hauteur de ligne avec contrôles fléchés",
+    
+    "Adjust Letter Spacing": "Ajuster l'Espacement des Lettres",
+    "Letter spacing with arrow controls": "Espacement des lettres avec contrôles fléchés",
+    
+    "Align Left": "Aligner à Gauche",
+    "Left-aligns text content": "Aligne le contenu du texte à gauche",
+    
+    "Align Right": "Aligner à Droite",
+    "Right-aligns text content": "Aligne le contenu du texte à droite",
+    
+    "Align Center": "Aligner au Centre",
+    "Center-aligns all text content": "Aligne tout le contenu du texte au centre",
+    
+    "Dark Contrast": "Contraste Sombre",
+    "Dark background with light text": "Arrière-plan sombre avec texte clair",
+    
+    "Light Contrast": "Contraste Clair",
+    "Light background with dark text": "Arrière-plan clair avec texte sombre",
+    
+    "High Contrast": "Contraste Élevé",
+    "Maximum contrast implementation": "Implémentation de contraste maximum",
+    
+    "High Saturation": "Saturation Élevée",
+    "Increases color intensity": "Augmente l'intensité des couleurs",
+    
+    "Adjust Text Colors": "Ajuster les Couleurs du Texte",
+    "Color picker functionality": "Fonctionnalité de sélecteur de couleurs",
+    
+    "Monochrome": "Monochrome",
+    "Removes all colors except black, white, grays": "Supprime toutes les couleurs sauf noir, blanc, gris",
+    
+    "Adjust Title Colors": "Ajuster les Couleurs des Titres",
+    "Color customization for headings": "Personnalisation des couleurs pour les titres",
+    
+    "Low Saturation": "Saturation Faible",
+    "Reduces color intensity": "Réduit l'intensité des couleurs",
+    
+    "Adjust Background Colors": "Ajuster les Couleurs d'Arrière-plan",
+    "Background color customization": "Personnalisation de la couleur d'arrière-plan",
+    
+    "Mute Sound": "Couper le Son",
+    "Disables all audio content": "Désactive tout le contenu audio",
+    
+    "Hide Images": "Masquer les Images",
+    "Toggle to hide all images": "Basculer pour masquer toutes les images",
+    
+    "Read Mode": "Mode Lecture",
+    "Removes navigation elements": "Supprime les éléments de navigation",
+    
+    "Reading Guide": "Guide de Lecture",
+    "Movable highlight bar": "Barre de surlignage mobile",
+    
+    "Useful Links": "Liens Utiles",
+    "Accessibility resources and links": "Ressources et liens d'accessibilité",
+    
+    "Stop Animation": "Arrêter l'Animation",
+    "Pauses all CSS animations": "Met en pause toutes les animations CSS",
+    
+    "Reading Mask": "Masque de Lecture",
+    "Semi-transparent overlay": "Superposition semi-transparente",
+    
+    "Highlight Hover": "Surligner au Survol",
+    "Visual feedback on hover": "Retour visuel au survol",
+    
+    "Highlight Focus": "Surligner le Focus",
+    "Prominent focus indicators": "Indicateurs de focus proéminents",
+    
+    "Big Black Cursor": "Gros Curseur Noir",
+    "Increases cursor size": "Augmente la taille du curseur",
+    
+    "Big White Cursor": "Gros Curseur Blanc",
+    "Increases cursor size": "Augmente la taille du curseur"
+},
 
             // Add more languages with basic translations (using English as fallback for now)
 
