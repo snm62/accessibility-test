@@ -1507,6 +1507,12 @@ constructor() {
             document.head.appendChild(link);
 
             // Add this after your existing CSS
+
+
+// Inject the override CSS
+const style = document.createElement('style');
+style.textContent = overrideCSS;
+document.head.appendChild(style);
 const overrideCSS = `
 .accessibility-panel {
   left: auto !important;
@@ -1515,13 +1521,33 @@ const overrideCSS = `
   bottom: auto !important;
   transform: none !important;
 }
+
+accessibility-icon {
+    border-radius: 50% !important;
+}
+
+.accessibility-icon[data-shape="rounded"] {
+    border-radius: 25px !important;
+}
+
+.accessibility-icon[data-shape="square"] {
+    border-radius: 0px !important;
+}
+
+.accessibility-panel {
+    display: none !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+}
+
+.accessibility-panel.show {
+    display: block !important;
+    visibility: visible !important;
+}
 `;
-
-// Inject the override CSS
-const style = document.createElement('style');
-style.textContent = overrideCSS;
-document.head.appendChild(style);
-
+const overrideStyle = document.createElement('style');
+overrideStyle.textContent = overrideCSS;
+document.head.appendChild(overrideStyle);
             console.log('Accessibility Widget: Loading CSS from:', link.href);
 
         }
@@ -1533,7 +1559,7 @@ document.head.appendChild(style);
     createWidget() {
 
         // Create widget container that will host the Shadow DOM
-
+        
         const widgetContainer = document.createElement('div');
 
         widgetContainer.id = 'accessibility-widget-container';
@@ -1635,7 +1661,11 @@ document.head.appendChild(style);
         console.log('Accessibility Widget: Panel created in Shadow DOM with ID:', panel.id);
 
         
-
+        // In your createWidget function, after creating the panel:
+        panel.style.pointerEvents = 'auto';
+        panel.style.display = 'none'; // Hide panel by default
+        panel.style.visibility = 'hidden'; // Also hide with visibility
+        shadowRoot.appendChild(panel);
         // Initialize current language display
 
         this.initializeLanguageDisplay();
@@ -1767,7 +1797,7 @@ document.head.appendChild(style);
         .accessibility-icon {
             position: fixed !important;
             z-index: 99999 !important;
-            border-radius: 50% !important; /* Default round */
+        
         }
         
         /* Override any external CSS that might interfere */
@@ -1847,8 +1877,6 @@ document.head.appendChild(style);
                 height: 60px;
 
                 background: #6366f1;
-
-                border-radius: 50%;
 
                 display: flex;
 
@@ -2066,7 +2094,28 @@ document.head.appendChild(style);
 
             }
 
-
+            /* Add this after the .accessibility-panel rule */
+.accessibility-panel {
+    position: fixed !important;
+    width: 500px !important;
+    height: 700px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    z-index: 100000 !important;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: 'DM Sans', sans-serif !important;
+    border-radius: 8px !important;
+    margin: 0 20px;
+    pointer-events: auto;
+    /* ADD THESE LINES: */
+    display: none !important; /* Hidden by default */
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+}
 
             .accessibility-panel.active {
 
@@ -19273,9 +19322,22 @@ document.head.appendChild(style);
             
 
             if (panel && icon) {
-
+                const isVisible = panel.style.display !== 'none';
                 const isCurrentlyOpen = panel.classList.contains('active');
-
+                if (isVisible) {
+                    // Hide panel
+                    panel.style.display = 'none';
+                    panel.style.visibility = 'hidden';
+                    icon.setAttribute('aria-expanded', 'false');
+                    console.log('Accessibility Widget: Panel hidden');
+                } else {
+                    // Show panel
+                    this.updateInterfacePosition(); // Position panel next to icon
+                    panel.style.display = 'block';
+                    panel.style.visibility = 'visible';
+                    icon.setAttribute('aria-expanded', 'true');
+                    console.log('Accessibility Widget: Panel shown');
+                }
                 
 
                 if (isCurrentlyOpen) {
@@ -19606,37 +19668,49 @@ if (customizationData.interfaceLanguage) {
                 console.log('[CK] applyCustomizations() - Setting mobile visibility:', customizationData.showOnMobile);
                 this.updateMobileVisibility(customizationData.showOnMobile === 'Show');
             }
-            
-            if (customizationData.mobileTriggerHorizontalPosition) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
-                this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
-            }
-            
-            if (customizationData.mobileTriggerVerticalPosition) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
-                this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
-            }
-            
-            if (customizationData.mobileTriggerSize) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger size:', customizationData.mobileTriggerSize);
-                this.updateMobileTriggerSize(customizationData.mobileTriggerSize);
-            }
-            
-            if (customizationData.mobileTriggerShape) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
-                this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
-            }
-            
-            if (customizationData.mobileTriggerHorizontalOffset) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
-                this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
-            }
-            
-            if (customizationData.mobileTriggerVerticalOffset) {
-                console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
-                this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
-            }
-            
+                    
+            // Add this after your existing mobile settings in applyCustomizations
+// Mobile trigger button color
+if (customizationData.mobileTriggerButtonColor) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger button color:', customizationData.mobileTriggerButtonColor);
+    this.updateTriggerButtonColor(customizationData.mobileTriggerButtonColor);
+}
+
+// Mobile trigger button shape
+if (customizationData.mobileTriggerShape) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
+    this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
+}
+
+// Mobile trigger button size
+if (customizationData.mobileTriggerSize) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger size:', customizationData.mobileTriggerSize);
+    this.updateMobileTriggerSize(customizationData.mobileTriggerSize);
+}
+
+// Mobile trigger horizontal position
+if (customizationData.mobileTriggerHorizontalPosition) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
+    this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
+}
+
+// Mobile trigger vertical position
+if (customizationData.mobileTriggerVerticalPosition) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
+    this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
+}
+
+// Mobile trigger horizontal offset
+if (customizationData.mobileTriggerHorizontalOffset) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
+    this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
+}
+
+// Mobile trigger vertical offset
+if (customizationData.mobileTriggerVerticalOffset) {
+    console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
+    this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
+}
             console.log('[CK] applyCustomizations() - Successfully applied all customization data');
             
         } catch (error) {
@@ -19771,6 +19845,8 @@ if (customizationData.interfaceLanguage) {
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            icon.setAttribute('data-shape', shape.toLowerCase());
+        
             // Remove any existing border-radius completely
             icon.style.removeProperty('border-radius');
             icon.style.borderRadius = '';
@@ -19861,49 +19937,7 @@ if (customizationData.interfaceLanguage) {
         }
     }
     
-    
-    
-    updateTriggerOffset(direction, offset) {
-        console.log('[CK] updateTriggerOffset() - Direction:', direction, 'Offset:', offset);
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        if (icon) {
-            if (direction === 'vertical') {
-                let topValue = '50%';
-                let transformValue = 'translateY(-50%)';
-                
-                if (position === 'Top') {
-                    topValue = '20px';
-                    transformValue = 'none';
-                } else if (position === 'Bottom') {
-                    topValue = 'auto';
-                    transformValue = 'none';
-                    icon.style.setProperty('bottom', '20px', 'important');
-                }
-                
-                // Set CSS variables and apply styles
-                icon.style.setProperty('--icon-top', topValue);
-                icon.style.setProperty('--icon-transform', transformValue);
-                icon.style.setProperty('top', topValue, 'important');
-                icon.style.setProperty('transform', transformValue, 'important');
-                
-                console.log('[CK] Applied vertical position:', position, 'top:', topValue, 'transform:', transformValue);
-            }
-            if (direction === 'horizontal') {
-                if (icon.style.left !== 'auto') {
-                    icon.style.setProperty('left', `calc(20px + ${offset})`, 'important');
-                } else if (icon.style.right !== 'auto') {
-                    icon.style.setProperty('right', `calc(20px + ${offset})`, 'important');
-                }
-            } else if (direction === 'vertical') {
-                if (icon.style.top !== 'auto') {
-                    icon.style.setProperty('top', `calc(20px + ${offset})`, 'important');
-                } else if (icon.style.bottom !== 'auto') {
-                    icon.style.setProperty('bottom', `calc(20px + ${offset})`, 'important');
-                }
-            }
-        }
-    }
-    
+   
     updateTriggerVisibility(hidden) {
         console.log('[CK] updateTriggerVisibility() - Hidden:', hidden);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
