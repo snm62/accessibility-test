@@ -1818,6 +1818,10 @@ document.head.appendChild(overrideStyle);
         }
         
         /* Override external CSS */
+        .accessibility-icon[data-shape="circle"] {
+            border-radius: 50% !important;
+        }
+        
         .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
         }
@@ -3058,9 +3062,9 @@ document.head.appendChild(overrideStyle);
 
                 position: absolute !important;
 
-                top: 60px !important;
+                top: 0 !important;
 
-                left: 50px !important;
+                left: 0 !important;
 
                 background: #ffffff !important;
 
@@ -5360,7 +5364,7 @@ document.head.appendChild(overrideStyle);
 
             <div class="language-dropdown-content">
 
-                <!-- First screenshot languages -->
+                <!-- Available languages -->
 
                 <button class="language-option" data-lang="en" data-flag="🇺🇸">
 
@@ -5410,22 +5414,6 @@ document.head.appendChild(overrideStyle);
 
                 </button>
 
-                <button class="language-option" data-lang="zh-cn" data-flag="🇨🇳">
-
-                    <span class="flag">🇨🇳</span>
-
-                    <span class="language-name">简体中文</span>
-
-                </button>
-
-                <button class="language-option" data-lang="pl" data-flag="🇵🇱">
-
-                    <span class="flag">🇵🇱</span>
-
-                    <span class="language-name">Polski</span>
-
-                </button>
-
                 <button class="language-option" data-lang="es" data-flag="🇪🇸">
 
                     <span class="flag">🇪🇸</span>
@@ -5455,178 +5443,6 @@ document.head.appendChild(overrideStyle);
                     <span class="flag">🇹🇼</span>
 
                     <span class="language-name">繁體中文</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ps" data-flag="🇵🇸">
-
-                    <span class="flag">🇵🇸</span>
-
-                    <span class="language-name">العربية</span>
-
-                </button>
-
-                <button class="language-option" data-lang="nl" data-flag="🇳🇱">
-
-                    <span class="flag">🇳🇱</span>
-
-                    <span class="language-name">Nederlands</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ja" data-flag="🇯🇵">
-
-                    <span class="flag">🇯🇵</span>
-
-                    <span class="language-name">日本語</span>
-
-                </button>
-
-                <button class="language-option" data-lang="tr" data-flag="🇹🇷">
-
-                    <span class="flag">🇹🇷</span>
-
-                    <span class="language-name">Türkçe</span>
-
-                </button>
-
-                
-
-                <!-- Second screenshot languages -->
-
-                <button class="language-option" data-lang="cz" data-flag="🇨🇿">
-
-                    <span class="flag">🇨🇿</span>
-
-                    <span class="language-name">Čeština</span>
-
-                </button>
-
-                <button class="language-option" data-lang="si" data-flag="🇸🇮">
-
-                    <span class="flag">🇸🇮</span>
-
-                    <span class="language-name">Slovenščina</span>
-
-                </button>
-
-                <button class="language-option" data-lang="no" data-flag="🇳🇴">
-
-                    <span class="flag">🇳🇴</span>
-
-                    <span class="language-name">Norsk Bokmål</span>
-
-                </button>
-
-                <button class="language-option" data-lang="fi" data-flag="🇫🇮">
-
-                    <span class="flag">🇫🇮</span>
-
-                    <span class="language-name">Suomi</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ro" data-flag="🇷🇴">
-
-                    <span class="flag">🇷🇴</span>
-
-                    <span class="language-name">română</span>
-
-                </button>
-
-                <button class="language-option" data-lang="gr" data-flag="🇬🇷">
-
-                    <span class="flag">🇬🇷</span>
-
-                    <span class="language-name">Ελληνικά</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ba" data-flag="🇧🇦">
-
-                    <span class="flag">🇧🇦</span>
-
-                    <span class="language-name">Bosanski</span>
-
-                </button>
-
-                <button class="language-option" data-lang="lu" data-flag="🇱🇺">
-
-                    <span class="flag">🇱🇺</span>
-
-                    <span class="language-name">Lëtzebuergesch</span>
-
-                </button>
-
-                <button class="language-option" data-lang="dk" data-flag="🇩🇰">
-
-                    <span class="flag">🇩🇰</span>
-
-                    <span class="language-name">Dansk</span>
-
-                </button>
-
-                <button class="language-option" data-lang="hu" data-flag="🇭🇺">
-
-                    <span class="flag">🇭🇺</span>
-
-                    <span class="language-name">Magyar</span>
-
-                </button>
-
-                <button class="language-option" data-lang="sk" data-flag="🇸🇰">
-
-                    <span class="flag">🇸🇰</span>
-
-                    <span class="language-name">Slovenčina</span>
-
-                </button>
-
-                <button class="language-option" data-lang="se" data-flag="🇸🇪">
-
-                    <span class="flag">🇸🇪</span>
-
-                    <span class="language-name">Svenska</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ua" data-flag="🇺🇦">
-
-                    <span class="flag">🇺🇦</span>
-
-                    <span class="language-name">Українська</span>
-
-                </button>
-
-                <button class="language-option" data-lang="ie" data-flag="🇮🇪">
-
-                    <span class="flag">🇮🇪</span>
-
-                    <span class="language-name">Gaeilge</span>
-
-                </button>
-
-                <button class="language-option" data-lang="rs" data-flag="🇷🇸">
-
-                    <span class="flag">🇷🇸</span>
-
-                    <span class="language-name">Srpski</span>
-
-                </button>
-
-                <button class="language-option" data-lang="hr" data-flag="🇭🇷">
-
-                    <span class="flag">🇭🇷</span>
-
-                    <span class="language-name">Hrvatski</span>
-
-                </button>
-
-                <button class="language-option" data-lang="al" data-flag="🇦🇱">
-
-                    <span class="flag">🇦🇱</span>
-
-                    <span class="language-name">Shqip</span>
 
                 </button>
 
@@ -13437,9 +13253,14 @@ document.head.appendChild(overrideStyle);
 
 
     showStatement() {
-
-        alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
-
+        // Check if we have a custom accessibility statement link
+        if (this.customizationData && this.customizationData.accessibilityStatementLink) {
+            console.log('Accessibility Widget: Opening custom statement link:', this.customizationData.accessibilityStatementLink);
+            window.open(this.customizationData.accessibilityStatementLink, '_blank');
+        } else {
+            // Default statement
+            alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
+        }
     }
 
 
@@ -19676,6 +19497,10 @@ applyCustomizations(customizationData) {
         return;
     }
     
+    // Store customization data for later use (e.g., statement link)
+    this.customizationData = customizationData;
+    console.log('[CK] applyCustomizations() - Stored customization data for widget use');
+    
     try {
         // Apply trigger button customizations
         if (customizationData.triggerButtonColor) {
@@ -19952,15 +19777,15 @@ applyCustomizations(customizationData) {
             
             let borderRadius = '50%'; // Default round
             
-            if (shape === 'Round') {
+            if (shape === 'Circle') {
                 borderRadius = '50%';
-                console.log('[CK] Setting Round shape (circle)');
+                console.log('[CK] Setting Circle shape (perfect circle)');
             } else if (shape === 'Rounded') {
                 borderRadius = '25px';
-                console.log('[CK] Setting Rounded shape (rounded square)');
+                console.log('[CK] Setting Rounded shape (square with rounded corners)');
             } else if (shape === 'Square') {
                 borderRadius = '0px';
-                console.log('[CK] Setting Square shape');
+                console.log('[CK] Setting Square shape (sharp square)');
             }
             
             // Apply with maximum force - multiple methods
@@ -20309,7 +20134,7 @@ applyCustomizations(customizationData) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
                 icon.setAttribute('data-shape', shape.toLowerCase());
-                if (shape === 'Round') {
+                if (shape === 'Circle') {
                     icon.style.setProperty('border-radius', '50%', 'important');
                 } else if (shape === 'Rounded') {
                     icon.style.setProperty('border-radius', '25px', 'important');
@@ -20370,6 +20195,150 @@ applyCustomizations(customizationData) {
                 }
             }
         }
+    }
+
+    // Language Dropdown Functions
+    setupLanguageDropdownListeners() {
+        console.log('Accessibility Widget: Setting up language dropdown listeners...');
+        
+        const dropdown = this.shadowRoot?.getElementById('language-dropdown');
+        if (!dropdown) {
+            console.error('Accessibility Widget: Language dropdown not found!');
+            return;
+        }
+
+        // Get all language options
+        const languageOptions = dropdown.querySelectorAll('.language-option');
+        console.log('Accessibility Widget: Found language options:', languageOptions.length);
+
+        languageOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const langCode = option.getAttribute('data-lang');
+                const langName = option.querySelector('.language-name')?.textContent;
+                
+                console.log('Accessibility Widget: Language selected:', langCode, langName);
+                
+                // Update the header to show selected language
+                const currentLanguageHeader = this.shadowRoot?.getElementById('current-language-header');
+                if (currentLanguageHeader && langName) {
+                    currentLanguageHeader.textContent = langName.toUpperCase();
+                }
+                
+                // Apply the language
+                if (langCode) {
+                    this.applyLanguage(this.getLanguageNameFromCode(langCode));
+                }
+                
+                // Hide dropdown
+                this.toggleLanguageDropdown();
+            });
+        });
+
+        console.log('Accessibility Widget: Language dropdown listeners set up successfully');
+    }
+
+    getLanguageNameFromCode(code) {
+        const languageMap = {
+            'en': 'English',
+            'de': 'German', 
+            'fr': 'French',
+            'he': 'Hebrew',
+            'ru': 'Russian',
+            'ar': 'Arabic',
+            'es': 'Spanish',
+            'pt': 'Portuguese',
+            'it': 'Italian',
+            'tw': 'Chinese'
+        };
+        return languageMap[code] || 'English';
+    }
+
+    toggleLanguageDropdown() {
+        console.log('Accessibility Widget: Toggling language dropdown...');
+        
+        const dropdown = this.shadowRoot?.getElementById('language-dropdown');
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        
+        if (!dropdown || !panel) {
+            console.error('Accessibility Widget: Dropdown or panel not found!');
+            return;
+        }
+
+        const isVisible = dropdown.style.display !== 'none';
+        
+        if (isVisible) {
+            // Hide dropdown
+            dropdown.style.display = 'none';
+            console.log('Accessibility Widget: Language dropdown hidden');
+        } else {
+            // Position dropdown relative to panel
+            this.positionLanguageDropdown();
+            
+            // Show dropdown
+            dropdown.style.display = 'block';
+            console.log('Accessibility Widget: Language dropdown shown');
+        }
+    }
+
+    positionLanguageDropdown() {
+        const dropdown = this.shadowRoot?.getElementById('language-dropdown');
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        
+        if (!dropdown || !panel) {
+            console.error('Accessibility Widget: Cannot position dropdown - elements not found');
+            return;
+        }
+
+        // Get panel position and dimensions
+        const panelRect = panel.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        console.log('Accessibility Widget: Panel position:', {
+            left: panelRect.left,
+            top: panelRect.top,
+            right: panelRect.right,
+            bottom: panelRect.bottom,
+            width: panelRect.width,
+            height: panelRect.height
+        });
+
+        // Calculate dropdown position
+        let dropdownLeft = 0;
+        let dropdownTop = 0;
+
+        // Position dropdown to the right of the panel if there's space
+        if (panelRect.right + 420 <= viewportWidth) {
+            // Right side of panel
+            dropdownLeft = panelRect.width + 10;
+            dropdownTop = 0;
+        } else if (panelRect.left - 420 >= 0) {
+            // Left side of panel
+            dropdownLeft = -420;
+            dropdownTop = 0;
+        } else {
+            // Above or below panel
+            dropdownLeft = 0;
+            if (panelRect.top - 420 >= 0) {
+                // Above panel
+                dropdownTop = -420;
+            } else {
+                // Below panel
+                dropdownTop = panelRect.height + 10;
+            }
+        }
+
+        // Apply positioning
+        dropdown.style.left = `${dropdownLeft}px`;
+        dropdown.style.top = `${dropdownTop}px`;
+        
+        console.log('Accessibility Widget: Dropdown positioned at:', {
+            left: dropdownLeft,
+            top: dropdownTop
+        });
     }
 
 }
