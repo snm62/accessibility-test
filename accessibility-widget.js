@@ -1539,7 +1539,9 @@ const overrideCSS = `
   transform: none !important;
 }
 
-accessibility-icon {
+/* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
+
+.accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
 }
 
@@ -1847,8 +1849,7 @@ document.head.appendChild(overrideStyle);
             .accessibility-icon {
                 width: 50px !important;
                 height: 50px !important;
-                bottom: 15px !important;
-                left: 15px !important;
+               
             }
             
             .accessibility-icon i {
@@ -3095,6 +3096,12 @@ document.head.appendChild(overrideStyle);
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 
                 pointer-events: auto !important;
+
+                /* Ensure dropdown is positioned relative to panel */
+
+                margin: 0 !important;
+
+                padding: 0 !important;
 
             }
 
@@ -13253,11 +13260,15 @@ document.head.appendChild(overrideStyle);
 
 
     showStatement() {
+        console.log('Accessibility Widget: Statement button clicked');
+        console.log('Accessibility Widget: Customization data:', this.customizationData);
+        
         // Check if we have a custom accessibility statement link
         if (this.customizationData && this.customizationData.accessibilityStatementLink) {
             console.log('Accessibility Widget: Opening custom statement link:', this.customizationData.accessibilityStatementLink);
             window.open(this.customizationData.accessibilityStatementLink, '_blank');
         } else {
+            console.log('Accessibility Widget: No custom statement link found, showing default alert');
             // Default statement
             alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
         }
@@ -19764,6 +19775,7 @@ applyCustomizations(customizationData) {
     
     updateTriggerButtonShape(shape) {
         console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
+        console.log('[CK] updateTriggerButtonShape() - Current window width:', window.innerWidth);
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
@@ -19805,10 +19817,12 @@ applyCustomizations(customizationData) {
             console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
             console.log('[CK] Icon inline style:', icon.getAttribute('style'));
             console.log('[CK] Icon computed border-radius:', computedStyle);
+            console.log('[CK] Icon data-shape attribute:', icon.getAttribute('data-shape'));
             
             // If computed style is still not what we want, try more aggressive approach
             if (computedStyle !== borderRadius) {
                 console.log('[CK] Computed style mismatch! Trying aggressive override...');
+                console.log('[CK] Expected:', borderRadius, 'Got:', computedStyle);
                 
                 // Add CSS rule to shadow DOM
                 const style = document.createElement('style');
@@ -19821,7 +19835,16 @@ applyCustomizations(customizationData) {
                 
                 // Force reflow again
                 icon.offsetHeight;
-                console.log('[CK] After aggressive override, computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
+                console.log('[CK] After aggressive override, computed border-radius:', finalComputedStyle);
+                
+                if (finalComputedStyle !== borderRadius) {
+                    console.error('[CK] SHAPE OVERRIDE FAILED! Expected:', borderRadius, 'Final result:', finalComputedStyle);
+                } else {
+                    console.log('[CK] Shape override successful!');
+                }
+            } else {
+                console.log('[CK] Shape applied successfully on first try!');
             }
         }
     }
@@ -20099,6 +20122,11 @@ applyCustomizations(customizationData) {
                         icon.style.bottom = '10px';
                         icon.style.top = 'auto';
                     }
+                  else if (position === 'Middle') {  // ADD THIS
+                    icon.style.top = '50%';
+                    icon.style.bottom = 'auto';
+                    icon.style.transform = 'translateY(-50%)';
+                }
                 }
             }
         }
@@ -20129,20 +20157,42 @@ applyCustomizations(customizationData) {
     
     updateMobileTriggerShape(shape) {
         console.log('[CK] updateMobileTriggerShape() - Shape:', shape);
+        console.log('[CK] updateMobileTriggerShape() - Window width:', window.innerWidth);
+        console.log('[CK] updateMobileTriggerShape() - Is mobile:', window.innerWidth <= 768);
+        
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
+                console.log('[CK] Applying mobile shape:', shape);
                 icon.setAttribute('data-shape', shape.toLowerCase());
+                
+                let borderRadius = '50%';
                 if (shape === 'Circle') {
-                    icon.style.setProperty('border-radius', '50%', 'important');
+                    borderRadius = '50%';
                 } else if (shape === 'Rounded') {
-                    icon.style.setProperty('border-radius', '25px', 'important');
+                    borderRadius = '25px';
                 } else if (shape === 'Square') {
-                    icon.style.setProperty('border-radius', '0px', 'important');
+                    borderRadius = '0px';
                 }
                 
-                console.log('[CK] Mobile shape applied:', shape);
+                // Apply with maximum force
+                icon.style.setProperty('border-radius', borderRadius, 'important');
+                icon.style.setProperty('display', 'flex', 'important');
+                icon.style.setProperty('align-items', 'center', 'important');
+                icon.style.setProperty('justify-content', 'center', 'important');
+                // Check computed style
+                const computedStyle = window.getComputedStyle(icon).borderRadius;
+                console.log('[CK] Mobile shape applied:', shape, 'border-radius:', borderRadius);
+                console.log('[CK] Mobile computed border-radius:', computedStyle);
+                
+                if (computedStyle !== borderRadius) {
+                    console.error('[CK] MOBILE SHAPE FAILED! Expected:', borderRadius, 'Got:', computedStyle);
+                } else {
+                    console.log('[CK] Mobile shape applied successfully!');
+                }
+            } else {
+                console.log('[CK] Not mobile, skipping mobile shape application');
             }
         }
     }
@@ -20280,6 +20330,17 @@ applyCustomizations(customizationData) {
             // Show dropdown
             dropdown.style.display = 'block';
             console.log('Accessibility Widget: Language dropdown shown');
+            
+            // Add click outside handler to close dropdown
+            setTimeout(() => {
+                const handleClickOutside = (e) => {
+                    if (!dropdown.contains(e.target) && !panel.querySelector('.language-selector-header').contains(e.target)) {
+                        dropdown.style.display = 'none';
+                        document.removeEventListener('click', handleClickOutside);
+                    }
+                };
+                document.addEventListener('click', handleClickOutside);
+            }, 100);
         }
     }
 
@@ -20306,36 +20367,21 @@ applyCustomizations(customizationData) {
             height: panelRect.height
         });
 
-        // Calculate dropdown position
+        // Position dropdown OVER the panel (centered)
         let dropdownLeft = 0;
         let dropdownTop = 0;
 
-        // Position dropdown to the right of the panel if there's space
-        if (panelRect.right + 420 <= viewportWidth) {
-            // Right side of panel
-            dropdownLeft = panelRect.width + 10;
-            dropdownTop = 0;
-        } else if (panelRect.left - 420 >= 0) {
-            // Left side of panel
-            dropdownLeft = -420;
-            dropdownTop = 0;
-        } else {
-            // Above or below panel
-            dropdownLeft = 0;
-            if (panelRect.top - 420 >= 0) {
-                // Above panel
-                dropdownTop = -420;
-            } else {
-                // Below panel
-                dropdownTop = panelRect.height + 10;
-            }
-        }
+        // Center the dropdown over the panel
+        dropdownLeft = (panelRect.width - 400) / 2; // Center horizontally (dropdown width is 400px)
+        dropdownTop = 10; // Small offset from top of panel
 
-        // Apply positioning
-        dropdown.style.left = `${dropdownLeft}px`;
-        dropdown.style.top = `${dropdownTop}px`;
+        // Apply positioning with !important to override any conflicting CSS
+        dropdown.style.setProperty('left', `${dropdownLeft}px`, 'important');
+        dropdown.style.setProperty('top', `${dropdownTop}px`, 'important');
+        dropdown.style.setProperty('position', 'absolute', 'important');
+        dropdown.style.setProperty('z-index', '100002', 'important'); // Higher than panel
         
-        console.log('Accessibility Widget: Dropdown positioned at:', {
+        console.log('Accessibility Widget: Dropdown positioned OVER panel at:', {
             left: dropdownLeft,
             top: dropdownTop
         });
