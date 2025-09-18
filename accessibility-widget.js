@@ -19163,25 +19163,7 @@ document.head.appendChild(style);
                 console.log('[CK] applyCustomizations() - Setting trigger button visibility:', customizationData.hideTriggerButton);
                 this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
             }
-            
-            // Apply interface customizations
-            if (customizationData.interfaceLeadColor) {
-                console.log('[CK] applyCustomizations() - Setting interface lead color:', customizationData.interfaceLeadColor);
-                this.updateInterfaceColor(customizationData.interfaceLeadColor);
-            }
-            
-            if (customizationData.interfacePosition) {
-                console.log('[CK] applyCustomizations() - Setting interface position:', customizationData.interfacePosition);
-                
-                // Get the icon's current position and pass it to panel
-                const icon = this.shadowRoot?.getElementById('accessibility-icon');
-                if (icon) {
-                    const iconRect = icon.getBoundingClientRect();
-                    const isIconOnLeft = iconRect.left < (window.innerWidth / 2);
-                    const iconPosition = isIconOnLeft ? 'Left' : 'Right';
-                    this.updateInterfacePosition(iconPosition);
-                }
-            }
+        
             
             if (customizationData.interfaceFooterContent) {
                 console.log('[CK] applyCustomizations() - Setting interface footer content:', customizationData.interfaceFooterContent);
@@ -19197,8 +19179,9 @@ document.head.appendChild(style);
 if (customizationData.interfaceLanguage) {
     console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
     this.applyLanguage(customizationData.interfaceLanguage);
+    this.updateInterfacePosition();
   }
-  
+
             // Apply icon customizations
             if (customizationData.selectedIcon) {
                 console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
@@ -19345,7 +19328,7 @@ applyLanguage(language) {
             } else if (shape === 'Square') {
                 icon.style.borderRadius = '8px';
             } else if (shape === 'Round') {
-                icon.style.borderRadius = '25px';
+                icon.style.borderRadius = '10px';
             }
         }
     }
@@ -19372,30 +19355,13 @@ applyLanguage(language) {
     
     updateTriggerPosition(direction, position) {
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
+        
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
-            // Set position to fixed with !important to override CSS
-            icon.style.setProperty('position', 'fixed', 'important');
-            icon.style.setProperty('z-index', '9999', 'important');
-            
-            // Always center the icon content
-            icon.style.display = 'flex';
-            icon.style.alignItems = 'center';
-            icon.style.justifyContent = 'center';
-            
-            if (direction === 'horizontal') {
-                if (position === 'Left') {
-                    icon.style.setProperty('left', '20px', 'important');
-                    icon.style.setProperty('right', 'auto', 'important');
-                } else if (position === 'Right') {
-                    icon.style.setProperty('right', '20px', 'important');
-                    icon.style.setProperty('left', 'auto', 'important');
-                }
-            } else if (direction === 'vertical') {
+            if (direction === 'vertical') {
                 if (position === 'Top') {
                     icon.style.setProperty('top', '20px', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
-                    icon.style.setProperty('transform', 'none', 'important');
                 } else if (position === 'Middle') {
                     icon.style.setProperty('top', '50%', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
@@ -19403,7 +19369,6 @@ applyLanguage(language) {
                 } else if (position === 'Bottom') {
                     icon.style.setProperty('bottom', '20px', 'important');
                     icon.style.setProperty('top', 'auto', 'important');
-                    icon.style.setProperty('transform', 'none', 'important');
                 }
             }
         }
@@ -19445,45 +19410,52 @@ applyLanguage(language) {
         }
     }
     
-    updateInterfacePosition(position) {
-        console.log('[CK] updateInterfacePosition() - Position:', position);
+    updateInterfacePosition() {
+        console.log('[CK] updateInterfacePosition() - Positioning panel next to icon');
         
-        // Get the icon's current position
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         
         if (icon && panel) {
             const iconRect = icon.getBoundingClientRect();
-            console.log('[CK] Icon position:', {
-                left: iconRect.left,
-                right: window.innerWidth - iconRect.right,
-                top: iconRect.top,
-                bottom: window.innerHeight - iconRect.bottom
-            });
+            const panelWidth = 500; // Approximate panel width
+            const panelHeight = 300; // Approximate panel height
             
-            // Force remove all positioning
+            // Force remove all positioning first
             panel.style.removeProperty('left');
             panel.style.removeProperty('right');
             panel.style.removeProperty('top');
             panel.style.removeProperty('bottom');
             panel.style.removeProperty('transform');
             
-            // Apply new positioning based on icon location
-            if (iconRect.left < window.innerWidth / 2) {
-                // Icon is on LEFT side - panel opens from LEFT
-                panel.style.setProperty('left', '20px', 'important');
+            // Determine if icon is on left or right side
+            const isIconOnLeft = iconRect.left < window.innerWidth / 2;
+            
+            if (isIconOnLeft) {
+                // Icon is on LEFT - panel opens to the RIGHT of icon
+                const leftPosition = iconRect.right + 10;
+                panel.style.setProperty('left', `${leftPosition}px`, 'important');
                 panel.style.setProperty('right', 'auto', 'important');
-                console.log('[CK] Panel positioned on LEFT side');
+                console.log('[CK] Panel opening to the RIGHT of icon');
             } else {
-                // Icon is on RIGHT side - panel opens from RIGHT
-                panel.style.setProperty('right', '20px', 'important');
+                // Icon is on RIGHT - panel opens to the LEFT of icon
+                const rightPosition = window.innerWidth - iconRect.left + 10;
+                panel.style.setProperty('right', `${rightPosition}px`, 'important');
                 panel.style.setProperty('left', 'auto', 'important');
-                console.log('[CK] Panel positioned on RIGHT side');
+                console.log('[CK] Panel opening to the LEFT of icon');
             }
             
-            // Always center vertically
-            panel.style.setProperty('top', '50%', 'important');
-            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
+            // Center panel vertically with icon
+            const topPosition = iconRect.top + (iconRect.height / 2) - (panelHeight / 2);
+            panel.style.setProperty('top', `${Math.max(20, topPosition)}px`, 'important');
+            panel.style.setProperty('transform', 'none', 'important');
+            panel.style.setProperty('z-index', '9999', 'important');
+            
+            console.log('[CK] Panel positioned at:', {
+                left: panel.style.left,
+                right: panel.style.right,
+                top: panel.style.top
+            });
         }
     }
 
