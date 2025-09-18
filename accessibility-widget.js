@@ -26,36 +26,371 @@ constructor() {
         this.isOpeningDropdown = false; // Flag to prevent immediate close
 
         this.languageContent = {
-            German: {
-              title: "Barrierefreiheit",
-              close: "Schließen",
-              accessibility: "Barrierefreiheit",
-              vision: "Sehbehinderung",
-              motor: "Motorische Behinderung",
-              cognitive: "Kognitive Behinderung",
-              seizure: "Anfallsicher",
-              adhd: "ADHS-freundlich",
-            },
-            English: {
-              title: "Accessibility",
-              close: "Close",
-              accessibility: "Accessibility",
-              vision: "Vision Impaired",
-              motor: "Motor Disability",
-              cognitive: "Cognitive Disability",
-              seizure: "Seizure Safe",
-              adhd: "ADHD Friendly",
-            },
-            Spanish: {
-              title: "Accesibilidad",
-              close: "Cerrar",
-              accessibility: "Accesibilidad",
-              vision: "Discapacidad Visual",
-        motor: "Discapacidad Motora",
-        cognitive: "Discapacidad Cognitiva",
-        seizure: "Seguro para Convulsiones",
-        adhd: "Amigable para TDAH",
-      },
+                German: {
+                    // Panel header
+                    title: "Barrierefreiheit",
+                    close: "Schließen",
+                    "Accessibility Adjustments": "Barrierefreiheit Anpassungen",
+                    "Reset Settings": "Einstellungen zurücksetzen",
+                    "Statement": "Erklärung",
+                    "Hide Interface": "Interface ausblenden",
+                    
+                    // Section title
+                    "Choose the right accessibility profile for you": "Wählen Sie das richtige Barrierefreiheitsprofil für Sie",
+                    
+                    // Profile items in exact order from HTML:
+                    "Seizure Safe Profile": "Anfallssicheres Profil",
+                    "Clear flashes & reduces color": "Klare Blitze & reduziert Farben",
+                    
+                    "Vision Impaired Profile": "Sehbehindertenprofil", 
+                    "Enhances website's visuals": "Verbessert die Website-Visuals",
+                    
+                    "ADHD Friendly Profile": "ADHS-freundliches Profil",
+                    "More focus & fewer distractions": "Mehr Fokus & weniger Ablenkungen",
+                    
+                    "Cognitive Disability Profile": "Kognitives Behinderungsprofil",
+                    "Assists with reading & focusing": "Unterstützt beim Lesen & Fokussieren",
+                    
+                    "Keyboard Navigation (Motor)": "Tastaturnavigation (Motor)",
+                    "Use website with the keyboard": "Website mit der Tastatur verwenden",
+        
+        "Blind Users (Screen Reader)": "Blinde Benutzer (Bildschirmleser)",
+        "Optimize website for screen-readers": "Website für Bildschirmleser optimieren",
+        
+        "Content Scaling": "Inhaltsskalierung",
+        "Scale content with arrow controls": "Inhalt mit Pfeiltasten skalieren",
+        
+        "Readable Font": "Lesbare Schrift",
+        "High-legibility fonts": "Hochlesbare Schriftarten",
+        
+        "Highlight Titles": "Titel hervorheben",
+        "Add boxes around headings": "Rahmen um Überschriften hinzufügen",
+        
+        "Highlight Links": "Links hervorheben", 
+        "Add boxes around links": "Rahmen um Links hinzufügen",
+        
+        "Text Magnifier": "Textlupe",
+        "Floating magnifying glass tool": "Schwebendes Lupenwerkzeug",
+        
+        "Adjust Font Sizing": "Schriftgröße anpassen",
+        "Font size with arrow controls": "Schriftgröße mit Pfeiltasten",
+        
+        "Align Center": "Zentriert ausrichten",
+        "Center-aligns all text content": "Zentriert alle Textinhalte",
+        
+        "Adjust Line Height": "Zeilenhöhe anpassen",
+        "Line height with arrow controls": "Zeilenhöhe mit Pfeiltasten",
+        
+        "Adjust Letter Spacing": "Buchstabenabstand anpassen",
+        "Letter spacing with arrow controls": "Buchstabenabstand mit Pfeiltasten",
+        
+        "Align Left": "Links ausrichten",
+        "Left-aligns text content": "Textinhalte links ausrichten",
+        
+        "Align Right": "Rechts ausrichten",
+        "Right-aligns text content": "Textinhalte rechts ausrichten",
+        
+        "Dark Contrast": "Dunkler Kontrast",
+        "Dark background with light text": "Dunkler Hintergrund mit hellem Text",
+        
+        "Light Contrast": "Heller Kontrast",
+        "Light background with dark text": "Heller Hintergrund mit dunklem Text",
+        "High Contrast": "Hoher Kontrast",
+        "Maximum contrast implementation": "Maximale Kontrastimplementierung",
+        
+        "High Saturation": "Hohe Sättigung",
+        "Increases color intensity": "Erhöht die Farbintensität",
+        
+        "Adjust Text Colors": "Textfarben anpassen",
+        "Color picker functionality": "Farbauswahl-Funktionalität",
+        
+        "Monochrome": "Monochrom",
+        "Removes all colors except black, white, grays": "Entfernt alle Farben außer Schwarz, Weiß, Grau",
+        
+        "Adjust Title Colors": "Titelfarben anpassen",
+        "Color customization for headings": "Farbanpassung für Überschriften",
+        
+        "Low Saturation": "Niedrige Sättigung",
+        "Reduces color intensity": "Reduziert die Farbintensität",
+        
+        "Adjust Background Colors": "Hintergrundfarben anpassen",
+        "Background color customization": "Hintergrundfarbanpassung",
+        
+        "Mute Sound": "Ton stummschalten",
+        "Disables all audio content": "Deaktiviert alle Audioinhalte",
+        
+        "Hide Images": "Bilder ausblenden",
+        "Toggle to hide all images": "Umschalten zum Ausblenden aller Bilder",
+
+        "Read Mode": "Lesemodus",
+        "Removes navigation elements": "Entfernt Navigationselemente",
+        
+        "Reading Guide": "Lesehilfe",
+        "Movable highlight bar": "Bewegbare Hervorhebungsleiste",
+        
+        "Useful Links": "Nützliche Links",
+        "Accessibility resources and links": "Barrierefreiheitsressourcen und Links",
+        
+        "Stop Animation": "Animation stoppen",
+        "Pauses all CSS animations": "Pausiert alle CSS-Animationen",
+        
+        "Reading Mask": "Lesemaske",
+        "Semi-transparent overlay": "Halbtransparente Überlagerung",
+        
+        "Highlight Hover": "Hover hervorheben",
+        "Visual feedback on hover": "Visuelles Feedback beim Hover",
+        
+        "Highlight Focus": "Fokus hervorheben",
+        "Prominent focus indicators": "Prominente Fokusindikatoren",
+        
+        "Big Black Cursor": "Großer schwarzer Cursor",
+        "Increases cursor size": "Erhöht die Cursorgröße",
+        
+        "Big White Cursor": "Großer weißer Cursor"
+    },
+    English: {
+        // Panel header
+        title: "Accessibility",
+        close: "Close",
+        "Accessibility Adjustments": "Accessibility Adjustments",
+        "Reset Settings": "Reset Settings",
+        "Statement": "Statement",
+        "Hide Interface": "Hide Interface",
+        
+        // Section title
+        "Choose the right accessibility profile for you": "Choose the right accessibility profile for you",
+        
+        // Profile items in exact order from HTML:
+        "Seizure Safe Profile": "Seizure Safe Profile",
+        "Clear flashes & reduces color": "Clear flashes & reduces color",
+        
+        "Vision Impaired Profile": "Vision Impaired Profile", 
+        "Enhances website's visuals": "Enhances website's visuals",
+        
+        "ADHD Friendly Profile": "ADHD Friendly Profile",
+        "More focus & fewer distractions": "More focus & fewer distractions",
+        
+        "Cognitive Disability Profile": "Cognitive Disability Profile",
+        "Assists with reading & focusing": "Assists with reading & focusing",
+        
+        "Keyboard Navigation (Motor)": "Keyboard Navigation (Motor)",
+        "Use website with the keyboard": "Use website with the keyboard",
+        
+        "Blind Users (Screen Reader)": "Blind Users (Screen Reader)",
+        "Optimize website for screen-readers": "Optimize website for screen-readers",
+        
+        "Content Scaling": "Content Scaling",
+        "Scale content with arrow controls": "Scale content with arrow controls",
+        
+        "Readable Font": "Readable Font",
+        "High-legibility fonts": "High-legibility fonts",
+        
+        "Highlight Titles": "Highlight Titles",
+        "Add boxes around headings": "Add boxes around headings",
+        
+        "Highlight Links": "Highlight Links", 
+        "Add boxes around links": "Add boxes around links",
+        
+        "Text Magnifier": "Text Magnifier",
+        "Floating magnifying glass tool": "Floating magnifying glass tool",
+        
+        "Adjust Font Sizing": "Adjust Font Sizing",
+        "Font size with arrow controls": "Font size with arrow controls",
+        
+        "Align Center": "Align Center",
+        "Center-aligns all text content": "Center-aligns all text content",
+        
+        "Adjust Line Height": "Adjust Line Height",
+        "Line height with arrow controls": "Line height with arrow controls",
+        
+        "Adjust Letter Spacing": "Adjust Letter Spacing",
+        "Letter spacing with arrow controls": "Letter spacing with arrow controls",
+        
+        "Align Left": "Align Left",
+        "Left-aligns text content": "Left-aligns text content",
+        "Align Right": "Align Right",
+        "Right-aligns text content": "Right-aligns text content",
+        
+        "Dark Contrast": "Dark Contrast",
+        "Dark background with light text": "Dark background with light text",
+        
+        "Light Contrast": "Light Contrast",
+        "Light background with dark text": "Light background with dark text",
+        
+        "High Contrast": "High Contrast",
+        "Maximum contrast implementation": "Maximum contrast implementation",
+        
+        "High Saturation": "High Saturation",
+        "Increases color intensity": "Increases color intensity",
+        
+        "Adjust Text Colors": "Adjust Text Colors",
+        "Color picker functionality": "Color picker functionality",
+        
+        "Monochrome": "Monochrome",
+        "Removes all colors except black, white, grays": "Removes all colors except black, white, grays",
+        
+        "Adjust Title Colors": "Adjust Title Colors",
+        "Color customization for headings": "Color customization for headings",
+        
+        "Low Saturation": "Low Saturation",
+        "Reduces color intensity": "Reduces color intensity",
+        "Adjust Background Colors": "Adjust Background Colors",
+        "Background color customization": "Background color customization",
+        
+        "Mute Sound": "Mute Sound",
+        "Disables all audio content": "Disables all audio content",
+        
+        "Hide Images": "Hide Images",
+        "Toggle to hide all images": "Toggle to hide all images",
+        
+        "Read Mode": "Read Mode",
+        "Removes navigation elements": "Removes navigation elements",
+        
+        "Reading Guide": "Reading Guide",
+        "Movable highlight bar": "Movable highlight bar",
+        
+        "Useful Links": "Useful Links",
+        "Accessibility resources and links": "Accessibility resources and links",
+        
+        "Stop Animation": "Stop Animation",
+        "Pauses all CSS animations": "Pauses all CSS animations",
+        
+        "Reading Mask": "Reading Mask",
+        "Semi-transparent overlay": "Semi-transparent overlay",
+        
+        "Highlight Hover": "Highlight Hover",
+        "Visual feedback on hover": "Visual feedback on hover",
+        
+        "Highlight Focus": "Highlight Focus",
+        "Prominent focus indicators": "Prominent focus indicators",
+        "Big Black Cursor": "Big Black Cursor",
+        "Increases cursor size": "Increases cursor size",
+        
+        "Big White Cursor": "Big White Cursor"
+    },
+    
+    Spanish: {
+        // Panel header
+        title: "Accesibilidad",
+        close: "Cerrar",
+        "Accessibility Adjustments": "Ajustes de Accesibilidad",
+        "Reset Settings": "Restablecer Configuración",
+        "Statement": "Declaración",
+        "Hide Interface": "Ocultar Interfaz",
+        
+        // Section title
+        "Choose the right accessibility profile for you": "Elige el perfil de accesibilidad adecuado para ti",
+        
+        // Profile items in exact order from HTML:
+        "Seizure Safe Profile": "Perfil Seguro para Convulsiones",
+        "Clear flashes & reduces color": "Elimina destellos y reduce colores",
+        
+        "Vision Impaired Profile": "Perfil de Discapacidad Visual", 
+        "Enhances website's visuals": "Mejora los elementos visuales del sitio web",
+        
+        "ADHD Friendly Profile": "Perfil Amigable para TDAH",
+        "More focus & fewer distractions": "Más enfoque y menos distracciones",
+        
+        "Cognitive Disability Profile": "Perfil de Discapacidad Cognitiva",
+        "Assists with reading & focusing": "Ayuda con la lectura y el enfoque",
+        
+        "Keyboard Navigation (Motor)": "Navegación por Teclado (Motor)",
+        "Use website with the keyboard": "Usar el sitio web con el teclado",
+        "Blind Users (Screen Reader)": "Usuarios Ciegos (Lector de Pantalla)",
+        "Optimize website for screen-readers": "Optimizar sitio web para lectores de pantalla",
+        
+        "Content Scaling": "Escalado de Contenido",
+        "Scale content with arrow controls": "Escalar contenido con controles de flecha",
+        
+        "Readable Font": "Fuente Legible",
+        "High-legibility fonts": "Fuentes de alta legibilidad",
+        
+        "Highlight Titles": "Resaltar Títulos",
+        "Add boxes around headings": "Agregar cajas alrededor de los encabezados",
+        
+        "Highlight Links": "Resaltar Enlaces", 
+        "Add boxes around links": "Agregar cajas alrededor de los enlaces",
+        
+        "Text Magnifier": "Lupa de Texto",
+        "Floating magnifying glass tool": "Herramienta de lupa flotante",
+        
+        "Adjust Font Sizing": "Ajustar Tamaño de Fuente",
+        "Font size with arrow controls": "Tamaño de fuente con controles de flecha",
+        
+        "Align Center": "Alinear Centro",
+        "Center-aligns all text content": "Alinea al centro todo el contenido de texto",
+        "Adjust Line Height": "Ajustar Altura de Línea",
+        "Line height with arrow controls": "Altura de línea con controles de flecha",
+        
+        "Adjust Letter Spacing": "Ajustar Espaciado de Letras",
+        "Letter spacing with arrow controls": "Espaciado de letras con controles de flecha",
+        
+        "Align Left": "Alinear Izquierda",
+        "Left-aligns text content": "Alinea a la izquierda el contenido de texto",
+        
+        "Align Right": "Alinear Derecha",
+        "Right-aligns text content": "Alinea a la derecha el contenido de texto",
+        
+        "Dark Contrast": "Contraste Oscuro",
+        "Dark background with light text": "Fondo oscuro con texto claro",
+        
+        "Light Contrast": "Contraste Claro",
+        "Light background with dark text": "Fondo claro con texto oscuro",
+        
+        "High Contrast": "Alto Contraste",
+        "Maximum contrast implementation": "Implementación de contraste máximo",
+        
+        "High Saturation": "Alta Saturación",
+        "Increases color intensity": "Aumenta la intensidad del color",
+        
+        "Adjust Text Colors": "Ajustar Colores de Texto",
+        "Color picker functionality": "Funcionalidad de selector de color", 
+        
+        "Monochrome": "Monocromo",
+        "Removes all colors except black, white, grays": "Elimina todos los colores excepto negro, blanco, grises",
+        
+        "Adjust Title Colors": "Ajustar Colores de Títulos",
+        "Color customization for headings": "Personalización de color para encabezados",
+        
+        "Low Saturation": "Baja Saturación",
+        "Reduces color intensity": "Reduce la intensidad del color",
+        
+        "Adjust Background Colors": "Ajustar Colores de Fondo",
+        "Background color customization": "Personalización de color de fondo",
+        
+        "Mute Sound": "Silenciar Sonido",
+        "Disables all audio content": "Desactiva todo el contenido de audio",
+        
+        "Hide Images": "Ocultar Imágenes",
+        "Toggle to hide all images": "Alternar para ocultar todas las imágenes",
+        
+        "Read Mode": "Modo de Lectura",
+        "Removes navigation elements": "Elimina elementos de navegación",
+        
+        "Reading Guide": "Guía de Lectura",
+        "Movable highlight bar": "Barra de resaltado móvil",
+        
+        "Useful Links": "Enlaces Útiles",
+        "Accessibility resources and links": "Recursos de accesibilidad y enlaces",
+
+        "Stop Animation": "Detener Animación",
+        "Pauses all CSS animations": "Pausa todas las animaciones CSS",
+        
+        "Reading Mask": "Máscara de Lectura",
+        "Semi-transparent overlay": "Superposición semi-transparente",
+        
+        "Highlight Hover": "Resaltar Hover",
+        "Visual feedback on hover": "Retroalimentación visual al pasar el mouse",
+        
+        "Highlight Focus": "Resaltar Enfoque",
+        "Prominent focus indicators": "Indicadores de enfoque prominentes",
+        
+        "Big Black Cursor": "Cursor Negro Grande",
+        "Increases cursor size": "Aumenta el tamaño del cursor",
+        
+        "Big White Cursor": "Cursor Blanco Grande"
+    },
+    
       French: {
         title: "Accessibilité",
         close: "Fermer",
@@ -67,7 +402,7 @@ constructor() {
         adhd: "Convivial pour TDAH",
       }
     };
-
+   
         // Set the KV API URL for your worker
         this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
         console.log('Accessibility Widget: kvApiUrl set to:', this.kvApiUrl);
@@ -95,6 +430,8 @@ constructor() {
         // Delay binding events to ensure elements are created
 
         setTimeout(async () => {
+
+            
 
             this.bindEvents();
 
@@ -1426,6 +1763,25 @@ document.head.appendChild(style);
     getWidgetCSS() {
 
         return `
+        /* Force icon positioning and shape overrides */
+        .accessibility-icon {
+            position: fixed !important;
+            z-index: 99999 !important;
+        }
+        
+        /* Override any external CSS that might interfere */
+        .accessibility-icon[style*="border-radius"] {
+            border-radius: var(--icon-border-radius, 50%) !important;
+        }
+        
+        .accessibility-icon[style*="top"] {
+            top: var(--icon-top, 50%) !important;
+        }
+        
+        .accessibility-icon[style*="transform"] {
+            transform: var(--icon-transform, translateY(-50%)) !important;
+        }
+        
              .accessibility-panel {
                  left: auto !important;
                  right: auto !important;
@@ -19222,7 +19578,16 @@ if (customizationData.interfaceLanguage) {
     this.applyLanguage(customizationData.interfaceLanguage);
     this.updateInterfacePosition();
   }
-
+            // In your applyCustomizations function, add this at the end:
+// Apply interface language (this should be the default language from the app)
+if (customizationData.interfaceLanguage) {
+    console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
+    this.applyLanguage(customizationData.interfaceLanguage);
+} else {
+    // Default to English if no language is specified
+    console.log('[CK] applyCustomizations() - No interface language specified, defaulting to English');
+    this.applyLanguage('English');
+}
             // Apply icon customizations
             if (customizationData.selectedIcon) {
                 console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
@@ -19284,26 +19649,61 @@ if (customizationData.interfaceLanguage) {
         // Update panel title
         const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
         if (titleElement) {
-          titleElement.textContent = content.title;
+            titleElement.textContent = content["Accessibility Adjustments"] || content.title;
         }
         
         // Update close button
         const closeButton = this.shadowRoot?.querySelector('.close-btn');
         if (closeButton) {
-          closeButton.textContent = content.close;
+            closeButton.textContent = content.close;
         }
         
-        // Update all accessibility feature names
-        const featureElements = this.shadowRoot?.querySelectorAll('.profile-info h4');
-        if (featureElements) {
-          featureElements.forEach((element, index) => {
-            const featureKeys = ['accessibility', 'vision', 'motor', 'cognitive', 'seizure', 'adhd'];
-            if (featureKeys[index]) {
-              element.textContent = content[featureKeys[index]];
-            }
-          });
+        // Update action buttons
+        const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
+        if (resetBtn) {
+            resetBtn.textContent = content["Reset Settings"];
         }
-      } 
+        
+        const statementBtn = this.shadowRoot?.querySelector('#statement');
+        if (statementBtn) {
+            statementBtn.textContent = content["Statement"];
+        }
+        
+        const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
+        if (hideBtn) {
+            hideBtn.textContent = content["Hide Interface"];
+        }
+        
+        // Update section title
+        const sectionTitle = this.shadowRoot?.querySelector('.white-content-section h3');
+        if (sectionTitle) {
+            sectionTitle.textContent = content["Choose the right accessibility profile for you"];
+        }
+        
+        // Update all profile items by iterating through them in order
+        const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
+        if (profileItems) {
+            profileItems.forEach((item) => {
+                const h4 = item.querySelector('h4');
+                const p = item.querySelector('p');
+                
+                if (h4 && p) {
+                    const originalTitle = h4.textContent.trim();
+                    const originalDesc = p.textContent.trim();
+                    
+                    // Update with exact matches
+                    if (content[originalTitle]) {
+                        h4.textContent = content[originalTitle];
+                    }
+                    if (content[originalDesc]) {
+                        p.textContent = content[originalDesc];
+                    }
+                }
+            });
+        }
+        
+        console.log('[CK] applyLanguage() - Language applied successfully');
+    }
     // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
@@ -19320,17 +19720,27 @@ if (customizationData.interfaceLanguage) {
     
     updateTriggerButtonShape(shape) {
         console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
+        
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            let borderRadius = '50%'; // Default round
+            
             if (shape === 'Circle') {
-                icon.style.borderRadius = '50%';
+                borderRadius = '50%';
+            } else if (shape === 'Rounded') {
+                borderRadius = '25px';
             } else if (shape === 'Square') {
-                icon.style.borderRadius = '8px';
-            } else if (shape === 'Round') {
-                icon.style.borderRadius = '10px';
+                borderRadius = '0px';
             }
+            
+            // Set CSS variable and apply style
+            icon.style.setProperty('--icon-border-radius', borderRadius);
+            icon.style.setProperty('border-radius', borderRadius, 'important');
+            
+            console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
         }
     }
+    
     
     updateTriggerButtonSize(size) {
         console.log('[CK] updateTriggerButtonSize() - Size:', size);
@@ -19352,31 +19762,33 @@ if (customizationData.interfaceLanguage) {
         }
     }
     
-    updateTriggerPosition(direction, position) {
-        console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
-        
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        if (icon) {
-            if (direction === 'vertical') {
-                if (position === 'Top') {
-                    icon.style.setProperty('top', '20px', 'important');
-                    icon.style.setProperty('bottom', 'auto', 'important');
-                } else if (position === 'Middle') {
-                    icon.style.setProperty('top', '50%', 'important');
-                    icon.style.setProperty('bottom', 'auto', 'important');
-                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                } else if (position === 'Bottom') {
-                    icon.style.setProperty('bottom', '20px', 'important');
-                    icon.style.setProperty('top', 'auto', 'important');
-                }
-            }
-        }
-    }
+    
     
     updateTriggerOffset(direction, offset) {
         console.log('[CK] updateTriggerOffset() - Direction:', direction, 'Offset:', offset);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            if (direction === 'vertical') {
+                let topValue = '50%';
+                let transformValue = 'translateY(-50%)';
+                
+                if (position === 'Top') {
+                    topValue = '20px';
+                    transformValue = 'none';
+                } else if (position === 'Bottom') {
+                    topValue = 'auto';
+                    transformValue = 'none';
+                    icon.style.setProperty('bottom', '20px', 'important');
+                }
+                
+                // Set CSS variables and apply styles
+                icon.style.setProperty('--icon-top', topValue);
+                icon.style.setProperty('--icon-transform', transformValue);
+                icon.style.setProperty('top', topValue, 'important');
+                icon.style.setProperty('transform', transformValue, 'important');
+                
+                console.log('[CK] Applied vertical position:', position, 'top:', topValue, 'transform:', transformValue);
+            }
             if (direction === 'horizontal') {
                 if (icon.style.left !== 'auto') {
                     icon.style.setProperty('left', `calc(20px + ${offset})`, 'important');
