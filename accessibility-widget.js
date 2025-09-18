@@ -1525,12 +1525,8 @@ window.addEventListener('resize', () => {
 
             // Add this after your existing CSS
 
-
-// Inject the override CSS
-const style = document.createElement('style');
-style.textContent = overrideCSS;
-document.head.appendChild(style);
-const overrideCSS = `
+            // Define overrideCSS first
+            const overrideCSS = `
 .accessibility-panel {
   left: auto !important;
   right: auto !important;
@@ -1564,9 +1560,15 @@ const overrideCSS = `
     visibility: visible !important;
 }
 `;
-const overrideStyle = document.createElement('style');
-overrideStyle.textContent = overrideCSS;
-document.head.appendChild(overrideStyle);
+
+            // Inject the override CSS
+            const style = document.createElement('style');
+            style.textContent = overrideCSS;
+            document.head.appendChild(style);
+            
+            const overrideStyle = document.createElement('style');
+            overrideStyle.textContent = overrideCSS;
+            document.head.appendChild(overrideStyle);
             console.log('Accessibility Widget: Loading CSS from:', link.href);
 
         }
