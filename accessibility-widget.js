@@ -25,6 +25,8 @@ constructor() {
 
         this.isOpeningDropdown = false; // Flag to prevent immediate close
 
+        this.languageContent = languageContent;
+
         // Set the KV API URL for your worker
         this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
         console.log('Accessibility Widget: kvApiUrl set to:', this.kvApiUrl);
@@ -1125,6 +1127,22 @@ constructor() {
             };
 
             document.head.appendChild(link);
+
+            // Add this after your existing CSS
+const overrideCSS = `
+.accessibility-panel {
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+`;
+
+// Inject the override CSS
+const style = document.createElement('style');
+style.textContent = overrideCSS;
+document.head.appendChild(style);
 
             console.log('Accessibility Widget: Loading CSS from:', link.href);
 
@@ -19175,6 +19193,12 @@ constructor() {
                 this.updateAccessibilityStatementLink(customizationData.accessibilityStatementLink);
             }
             
+            // Add language application
+if (customizationData.interfaceLanguage) {
+    console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
+    this.applyLanguage(customizationData.interfaceLanguage);
+  }
+  
             // Apply icon customizations
             if (customizationData.selectedIcon) {
                 console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
@@ -19270,6 +19294,34 @@ constructor() {
     adhd: "Convivial pour TDAH",
   }
 };
+// Add this function
+applyLanguage(language) {
+    console.log('[CK] applyLanguage() - Language:', language);
+    const content = this.languageContent[language] || this.languageContent.English;
+    
+    // Update panel title
+    const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
+    if (titleElement) {
+      titleElement.textContent = content.title;
+    }
+    
+    // Update close button
+    const closeButton = this.shadowRoot?.querySelector('.close-btn');
+    if (closeButton) {
+      closeButton.textContent = content.close;
+    }
+    
+    // Update all accessibility feature names
+    const featureElements = this.shadowRoot?.querySelectorAll('.profile-info h4');
+    if (featureElements) {
+      featureElements.forEach((element, index) => {
+        const featureKeys = ['accessibility', 'vision', 'motor', 'cognitive', 'seizure', 'adhd'];
+        if (featureKeys[index]) {
+          element.textContent = content[featureKeys[index]];
+        }
+    });
+}
+} 
     // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
@@ -19395,38 +19447,43 @@ constructor() {
     
     updateInterfacePosition(position) {
         console.log('[CK] updateInterfacePosition() - Position:', position);
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
-        if (panel && icon) {
-            // Get icon's current position
+        // Get the icon's current position
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        
+        if (icon && panel) {
             const iconRect = icon.getBoundingClientRect();
-            const isIconOnLeft = iconRect.left < (window.innerWidth / 2);
+            console.log('[CK] Icon position:', {
+                left: iconRect.left,
+                right: window.innerWidth - iconRect.right,
+                top: iconRect.top,
+                bottom: window.innerHeight - iconRect.bottom
+            });
             
-            // Reset any existing positioning
-            panel.style.left = 'auto';
-            panel.style.right = 'auto';
-            panel.style.top = 'auto';
-            panel.style.bottom = 'auto';
-            panel.style.transform = 'none';
-    
-            if (isIconOnLeft) {
-                // Panel slides from LEFT side (where icon is)
-                panel.style.left = '0';
-                panel.style.top = '0';
-                panel.style.height = '100vh';
-                panel.style.width = '300px';
-                panel.style.transform = 'translateX(-100%)';
-                panel.style.transition = 'transform 0.3s ease';
+            // Force remove all positioning
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('bottom');
+            panel.style.removeProperty('transform');
+            
+            // Apply new positioning based on icon location
+            if (iconRect.left < window.innerWidth / 2) {
+                // Icon is on LEFT side - panel opens from LEFT
+                panel.style.setProperty('left', '20px', 'important');
+                panel.style.setProperty('right', 'auto', 'important');
+                console.log('[CK] Panel positioned on LEFT side');
             } else {
-                // Panel slides from RIGHT side (where icon is)
-                panel.style.right = '0';
-                panel.style.top = '0';
-                panel.style.height = '100vh';
-                panel.style.width = '300px';
-                panel.style.transform = 'translateX(100%)';
-                panel.style.transition = 'transform 0.3s ease';
+                // Icon is on RIGHT side - panel opens from RIGHT
+                panel.style.setProperty('right', '20px', 'important');
+                panel.style.setProperty('left', 'auto', 'important');
+                console.log('[CK] Panel positioned on RIGHT side');
             }
+            
+            // Always center vertically
+            panel.style.setProperty('top', '50%', 'important');
+            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
         }
     }
 
