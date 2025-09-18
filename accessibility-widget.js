@@ -1767,6 +1767,7 @@ document.head.appendChild(style);
         .accessibility-icon {
             position: fixed !important;
             z-index: 99999 !important;
+            border-radius: 50% !important; /* Default round */
         }
         
         /* Override any external CSS that might interfere */
@@ -1777,7 +1778,12 @@ document.head.appendChild(style);
         .accessibility-icon[style*="top"] {
             top: var(--icon-top, 50%) !important;
         }
-        
+        .accessibility-icon[data-shape="rounded"] {
+            border-radius: 25px !important;
+        }
+        .accessibility-icon[data-shape="square"] {
+            border-radius: 0px !important;
+        }
         .accessibility-icon[style*="transform"] {
             transform: var(--icon-transform, translateY(-50%)) !important;
         }
@@ -19704,6 +19710,52 @@ if (customizationData.interfaceLanguage) {
         
         console.log('[CK] applyLanguage() - Language applied successfully');
     }
+
+    updateTriggerPosition(direction, position) {
+        console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
+        
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            if (direction === 'vertical') {
+                // Force remove any existing positioning
+                icon.style.removeProperty('top');
+                icon.style.removeProperty('bottom');
+                icon.style.removeProperty('transform');
+                
+                if (position === 'Top') {
+                    icon.style.setProperty('top', '20px', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    console.log('[CK] Positioned icon at TOP');
+                } else if (position === 'Middle') {
+                    icon.style.setProperty('top', '50%', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    console.log('[CK] Positioned icon at MIDDLE with transform');
+                } else if (position === 'Bottom') {
+                    icon.style.setProperty('bottom', '20px', 'important');
+                    icon.style.setProperty('top', 'auto', 'important');
+                    console.log('[CK] Positioned icon at BOTTOM');
+                }
+            } else if (direction === 'horizontal') {
+                // Force remove any existing positioning
+                icon.style.removeProperty('left');
+                icon.style.removeProperty('right');
+                
+                if (position === 'Left') {
+                    icon.style.setProperty('left', '20px', 'important');
+                    icon.style.setProperty('right', 'auto', 'important');
+                    console.log('[CK] Positioned icon at LEFT');
+                } else if (position === 'Right') {
+                    icon.style.setProperty('right', '20px', 'important');
+                    icon.style.setProperty('left', 'auto', 'important');
+                    console.log('[CK] Positioned icon at RIGHT');
+                }
+            }
+            
+            // Force the style to take effect
+            icon.offsetHeight; // Trigger reflow
+        }
+    }
     // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
@@ -19723,6 +19775,10 @@ if (customizationData.interfaceLanguage) {
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            icon.setAttribute('data-shape', shape.toLowerCase());
+        
+        // Force remove any existing border-radius
+        icon.style.removeProperty('border-radius');
             let borderRadius = '50%'; // Default round
             
             if (shape === 'Circle') {
@@ -19733,10 +19789,11 @@ if (customizationData.interfaceLanguage) {
                 borderRadius = '0px';
             }
             
-            // Set CSS variable and apply style
-            icon.style.setProperty('--icon-border-radius', borderRadius);
             icon.style.setProperty('border-radius', borderRadius, 'important');
-            
+            icon.setAttribute('style', icon.getAttribute('style') + `; border-radius: ${borderRadius} !important;`);// Set CSS variable and apply style
+            icon.offsetHeight;
+            console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
+        console.log('[CK] Icon computed border-radius:', window.getComputedStyle(icon).borderRadius);
             console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
         }
     }
