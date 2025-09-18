@@ -540,7 +540,24 @@ constructor() {
                 }
 
             });
-
+            // Add this in your init function after the existing code
+// Add window resize listener for mobile responsiveness
+window.addEventListener('resize', () => {
+    const isMobile = window.innerWidth <= 768;
+    const icon = this.shadowRoot?.getElementById('accessibility-icon');
+    
+    if (icon) {
+        if (isMobile) {
+            // Apply mobile settings
+            console.log('[CK] Window resized to mobile');
+            // Reapply mobile customizations if needed
+        } else {
+            // Apply desktop settings
+            console.log('[CK] Window resized to desktop');
+            // Reapply desktop customizations if needed
+        }
+    }
+});
             
 
             // Keyboard event for icon
@@ -1793,37 +1810,72 @@ document.head.appendChild(overrideStyle);
     getWidgetCSS() {
 
         return `
-        /* Force icon positioning and shape overrides */
+        /* Force icon shape overrides - must come first */
         .accessibility-icon {
-            position: fixed !important;
-            z-index: 99999 !important;
-        
         }
         
-        /* Override any external CSS that might interfere */
-        .accessibility-icon[style*="border-radius"] {
-            border-radius: var(--icon-border-radius, 50%) !important;
-        }
-        
-        .accessibility-icon[style*="top"] {
-            top: var(--icon-top, 50%) !important;
-        }
+        /* Override external CSS */
         .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
         }
+        
         .accessibility-icon[data-shape="square"] {
             border-radius: 0px !important;
         }
-        .accessibility-icon[style*="transform"] {
-            transform: var(--icon-transform, translateY(-50%)) !important;
+        
+        /* Force panel positioning */
+        .accessibility-panel {
+            position: fixed !important;
+            z-index: 9999 !important;
+            display: none !important; /* Hidden by default */
         }
         
-             .accessibility-panel {
-                 left: auto !important;
-                 right: auto !important;
-                 top: auto !important;
-                 bottom: auto !important;
-}
+        .accessibility-panel.show {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .accessibility-icon {
+                width: 50px !important;
+                height: 50px !important;
+                bottom: 15px !important;
+                left: 15px !important;
+            }
+            
+            .accessibility-icon i {
+                font-size: 20px !important;
+            }
+            
+            .accessibility-panel {
+                width: 90vw !important;
+                max-width: 400px !important;
+                left: 5vw !important;
+                right: auto !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .accessibility-icon {
+                width: 45px !important;
+                height: 45px !important;
+                bottom: 10px !important;
+                left: 10px !important;
+            }
+            
+            .accessibility-icon i {
+                font-size: 18px !important;
+            }
+            
+            .accessibility-panel {
+                width: 95vw !important;
+                max-width: 350px !important;
+                left: 2.5vw !important;
+            }
+        }
             /* Accessibility Widget Styles - Shadow DOM */
 
             :host {
@@ -19578,188 +19630,188 @@ document.head.appendChild(overrideStyle);
     return null;
 }
 
-    // Apply customization data to the widget
-    applyCustomizations(customizationData) {
-        console.log('[CK] applyCustomizations() - Starting to apply customization data:', customizationData);
-        
-        if (!customizationData) {
-            console.log('[CK] applyCustomizations() - No customization data provided');
-            return;
-        }
-        
-        try {
-            // Apply trigger button customizations
-            if (customizationData.triggerButtonColor) {
-                console.log('[CK] applyCustomizations() - Setting trigger button color:', customizationData.triggerButtonColor);
-                this.updateTriggerButtonColor(customizationData.triggerButtonColor);
-            }
-            
-            if (customizationData.triggerButtonShape) {
-                console.log('[CK] applyCustomizations() - Setting trigger button shape:', customizationData.triggerButtonShape);
-                this.updateTriggerButtonShape(customizationData.triggerButtonShape);
-            }
-            
-            if (customizationData.triggerButtonSize) {
-                console.log('[CK] applyCustomizations() - Setting trigger button size:', customizationData.triggerButtonSize);
-                this.updateTriggerButtonSize(customizationData.triggerButtonSize);
-            }
-            
-            if (customizationData.triggerHorizontalPosition) {
-                console.log('[CK] applyCustomizations() - Setting trigger horizontal position:', customizationData.triggerHorizontalPosition);
-                this.updateTriggerPosition('horizontal', customizationData.triggerHorizontalPosition);
-            }
-            
-            if (customizationData.triggerVerticalPosition) {
-                console.log('[CK] applyCustomizations() - Setting trigger vertical position:', customizationData.triggerVerticalPosition);
-                this.updateTriggerPosition('vertical', customizationData.triggerVerticalPosition);
-            }
-            
-            if (customizationData.triggerHorizontalOffset) {
-                console.log('[CK] applyCustomizations() - Setting trigger horizontal offset:', customizationData.triggerHorizontalOffset);
-                this.updateTriggerOffset('horizontal', customizationData.triggerHorizontalOffset);
-            }
-            
-            if (customizationData.triggerVerticalOffset) {
-                console.log('[CK] applyCustomizations() - Setting trigger vertical offset:', customizationData.triggerVerticalOffset);
-                this.updateTriggerOffset('vertical', customizationData.triggerVerticalOffset);
-            }
-            
-            if (customizationData.hideTriggerButton) {
-                console.log('[CK] applyCustomizations() - Setting trigger button visibility:', customizationData.hideTriggerButton);
-                this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
-            }
-        
-            
-            if (customizationData.interfaceFooterContent) {
-                console.log('[CK] applyCustomizations() - Setting interface footer content:', customizationData.interfaceFooterContent);
-                this.updateInterfaceFooter(customizationData.interfaceFooterContent);
-            }
-            
-            if (customizationData.accessibilityStatementLink) {
-                console.log('[CK] applyCustomizations() - Setting accessibility statement link:', customizationData.accessibilityStatementLink);
-                this.updateAccessibilityStatementLink(customizationData.accessibilityStatementLink);
-            }
-            // In your applyCustomizations function, add this at the end:
-// Apply interface language (this should be the default language from the app)
-// Apply interface language (this should be the default language from the app)
-if (customizationData.interfaceLanguage) {
-    console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
-    this.applyLanguage(customizationData.interfaceLanguage);
-    this.updateInterfacePosition();
-} else {
-    // Default to English if no language is specified
-    console.log('[CK] applyCustomizations() - No interface language specified, defaulting to English');
-    this.applyLanguage('English');
-    this.updateInterfacePosition();
-}
-            // Apply icon customizations
-            if (customizationData.selectedIcon) {
-                console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
-                this.updateSelectedIcon(customizationData.selectedIcon);
-            }
-            
-            if (customizationData.selectedIconName) {
-                console.log('[CK] applyCustomizations() - Setting selected icon name:', customizationData.selectedIconName);
-                this.updateSelectedIconName(customizationData.selectedIconName);
-            }
-            
-            // Apply mobile customizations
-            if (customizationData.showOnMobile) {
-                console.log('[CK] applyCustomizations() - Setting mobile visibility:', customizationData.showOnMobile);
-                this.updateMobileVisibility(customizationData.showOnMobile === 'Show');
-            }
-                    
-            // Add this after your existing mobile settings in applyCustomizations
-// Mobile trigger button color
-if (customizationData.mobileTriggerButtonColor) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger button color:', customizationData.mobileTriggerButtonColor);
-    this.updateTriggerButtonColor(customizationData.mobileTriggerButtonColor);
-}
-
-// Mobile trigger button shape
-if (customizationData.mobileTriggerShape) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
-    this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
-}
-
-// Mobile trigger button size
-if (customizationData.mobileTriggerSize) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger size:', customizationData.mobileTriggerSize);
-    this.updateMobileTriggerSize(customizationData.mobileTriggerSize);
-}
-
-// Mobile trigger horizontal position
-if (customizationData.mobileTriggerHorizontalPosition) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
-    this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
-}
-
-// Mobile trigger vertical position
-if (customizationData.mobileTriggerVerticalPosition) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
-    this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
-}
-
-// Mobile trigger horizontal offset
-if (customizationData.mobileTriggerHorizontalOffset) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
-    this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
-}
-
-// Mobile trigger vertical offset
-if (customizationData.mobileTriggerVerticalOffset) {
-    console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
-    this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
-}
-            console.log('[CK] applyCustomizations() - Successfully applied all customization data');
-            
-        } catch (error) {
-            console.error('[CK] applyCustomizations() - Error applying customization data:', error);
-        }
+applyCustomizations(customizationData) {
+    console.log('[CK] applyCustomizations() - Starting to apply customization data:', customizationData);
+    
+    if (!customizationData) {
+        console.log('[CK] applyCustomizations() - No customization data provided');
+        return;
     }
+    
+    try {
+        // Apply trigger button customizations
+        if (customizationData.triggerButtonColor) {
+            console.log('[CK] applyCustomizations() - Setting trigger button color:', customizationData.triggerButtonColor);
+            this.updateTriggerButtonColor(customizationData.triggerButtonColor);
+        }
+        
+        if (customizationData.triggerButtonShape) {
+            console.log('[CK] applyCustomizations() - Setting trigger button shape:', customizationData.triggerButtonShape);
+            this.updateTriggerButtonShape(customizationData.triggerButtonShape);
+        }
+        
+        if (customizationData.triggerButtonSize) {
+            console.log('[CK] applyCustomizations() - Setting trigger button size:', customizationData.triggerButtonSize);
+            this.updateTriggerButtonSize(customizationData.triggerButtonSize);
+        }
+        
+        if (customizationData.triggerHorizontalPosition) {
+            console.log('[CK] applyCustomizations() - Setting trigger horizontal position:', customizationData.triggerHorizontalPosition);
+            this.updateTriggerPosition('horizontal', customizationData.triggerHorizontalPosition);
+        }
+        
+        if (customizationData.triggerVerticalPosition) {
+            console.log('[CK] applyCustomizations() - Setting trigger vertical position:', customizationData.triggerVerticalPosition);
+            this.updateTriggerPosition('vertical', customizationData.triggerVerticalPosition);
+        }
+        
+        if (customizationData.triggerHorizontalOffset) {
+            console.log('[CK] applyCustomizations() - Setting trigger horizontal offset:', customizationData.triggerHorizontalOffset);
+            this.updateTriggerOffset('horizontal', customizationData.triggerHorizontalOffset);
+        }
+        
+        if (customizationData.triggerVerticalOffset) {
+            console.log('[CK] applyCustomizations() - Setting trigger vertical offset:', customizationData.triggerVerticalOffset);
+            this.updateTriggerOffset('vertical', customizationData.triggerVerticalOffset);
+        }
+        
+        if (customizationData.hideTriggerButton) {
+            console.log('[CK] applyCustomizations() - Setting trigger button visibility:', customizationData.hideTriggerButton);
+            this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
+        }
+        
+        // Apply language
+        if (customizationData.interfaceLanguage) {
+            console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
+            this.applyLanguage(customizationData.interfaceLanguage);
+            this.updateInterfacePosition();
+        } else {
+            console.log('[CK] applyCustomizations() - No interface language specified, defaulting to English');
+            this.applyLanguage('English');
+            this.updateInterfacePosition();
+        }
+        
+        // Apply icon customizations
+        if (customizationData.selectedIcon) {
+            console.log('[CK] applyCustomizations() - Setting selected icon:', customizationData.selectedIcon);
+            this.updateSelectedIcon(customizationData.selectedIcon);
+        }
+        
+        if (customizationData.selectedIconName) {
+            console.log('[CK] applyCustomizations() - Setting selected icon name:', customizationData.selectedIconName);
+            this.updateSelectedIconName(customizationData.selectedIconName);
+        }
+        
+        // Apply mobile customizations
+        if (customizationData.showOnMobile) {
+            console.log('[CK] applyCustomizations() - Setting mobile visibility:', customizationData.showOnMobile);
+            this.updateMobileVisibility(customizationData.showOnMobile === 'Show');
+        }
+        
+        if (customizationData.mobileTriggerHorizontalPosition) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
+            this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
+        }
+        
+        if (customizationData.mobileTriggerVerticalPosition) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
+            this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
+        }
+        
+        if (customizationData.mobileTriggerSize) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger size:', customizationData.mobileTriggerSize);
+            this.updateMobileTriggerSize(customizationData.mobileTriggerSize);
+        }
+        
+        if (customizationData.mobileTriggerShape) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
+            this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
+        }
+        
+        if (customizationData.mobileTriggerHorizontalOffset) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
+            this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
+        }
+        
+        if (customizationData.mobileTriggerVerticalOffset) {
+            console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
+            this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
+        }
+        
+        console.log('[CK] applyCustomizations() - Successfully applied all customization data');
+        
+    } catch (error) {
+        console.error('[CK] applyCustomizations() - Error applying customization data:', error);
+    }
+}
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
+        console.log('[CK] applyLanguage() - Available languages:', Object.keys(this.languageContent));
+        
         const content = this.languageContent[language] || this.languageContent.English;
+        console.log('[CK] applyLanguage() - Using content for language:', language);
+        console.log('[CK] applyLanguage() - Content keys:', Object.keys(content));
         
         // Update panel title
         const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
         if (titleElement) {
-            titleElement.textContent = content["Accessibility Adjustments"] || content.title;
+            const newTitle = content["Accessibility Adjustments"] || content.title;
+            titleElement.textContent = newTitle;
+            console.log('[CK] Updated panel title to:', newTitle);
+        } else {
+            console.log('[CK] Panel title element not found');
         }
         
         // Update close button
         const closeButton = this.shadowRoot?.querySelector('.close-btn');
         if (closeButton) {
             closeButton.textContent = content.close;
+            console.log('[CK] Updated close button to:', content.close);
+        } else {
+            console.log('[CK] Close button element not found');
         }
         
         // Update action buttons
         const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
         if (resetBtn) {
             resetBtn.textContent = content["Reset Settings"];
+            console.log('[CK] Updated reset button to:', content["Reset Settings"]);
+        } else {
+            console.log('[CK] Reset button element not found');
         }
         
         const statementBtn = this.shadowRoot?.querySelector('#statement');
         if (statementBtn) {
             statementBtn.textContent = content["Statement"];
+            console.log('[CK] Updated statement button to:', content["Statement"]);
+        } else {
+            console.log('[CK] Statement button element not found');
         }
         
         const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
         if (hideBtn) {
             hideBtn.textContent = content["Hide Interface"];
+            console.log('[CK] Updated hide button to:', content["Hide Interface"]);
+        } else {
+            console.log('[CK] Hide button element not found');
         }
         
         // Update section title
         const sectionTitle = this.shadowRoot?.querySelector('.white-content-section h3');
         if (sectionTitle) {
             sectionTitle.textContent = content["Choose the right accessibility profile for you"];
+            console.log('[CK] Updated section title to:', content["Choose the right accessibility profile for you"]);
+        } else {
+            console.log('[CK] Section title element not found');
         }
         
         // Update all profile items by iterating through them in order
         const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
+        console.log('[CK] Found profile items:', profileItems.length);
+        
         if (profileItems) {
-            profileItems.forEach((item) => {
+            profileItems.forEach((item, index) => {
                 const h4 = item.querySelector('h4');
                 const p = item.querySelector('p');
                 
@@ -19767,12 +19819,19 @@ if (customizationData.mobileTriggerVerticalOffset) {
                     const originalTitle = h4.textContent.trim();
                     const originalDesc = p.textContent.trim();
                     
+                    console.log(`[CK] Profile item ${index}:`, {
+                        originalTitle: originalTitle,
+                        originalDesc: originalDesc
+                    });
+                    
                     // Update with exact matches
                     if (content[originalTitle]) {
                         h4.textContent = content[originalTitle];
+                        console.log(`[CK] Updated title to:`, content[originalTitle]);
                     }
                     if (content[originalDesc]) {
                         p.textContent = content[originalDesc];
+                        console.log(`[CK] Updated description to:`, content[originalDesc]);
                     }
                 }
             });
@@ -19845,7 +19904,9 @@ if (customizationData.mobileTriggerVerticalOffset) {
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
+            // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
+            console.log('[CK] Set data-shape attribute to:', shape.toLowerCase());
         
             // Remove any existing border-radius completely
             icon.style.removeProperty('border-radius');
@@ -19855,17 +19916,20 @@ if (customizationData.mobileTriggerVerticalOffset) {
             
             if (shape === 'Round') {
                 borderRadius = '50%';
+                console.log('[CK] Setting Round shape (circle)');
             } else if (shape === 'Rounded') {
                 borderRadius = '25px';
+                console.log('[CK] Setting Rounded shape (rounded square)');
             } else if (shape === 'Square') {
                 borderRadius = '0px';
+                console.log('[CK] Setting Square shape');
             }
             
-            // Apply with maximum force
+            // Apply with maximum force - multiple methods
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.borderRadius = borderRadius + ' !important';
             
-            // Also set as inline style attribute
+            // Also set as inline style attribute to override external CSS
             const currentStyle = icon.getAttribute('style') || '';
             const newStyle = currentStyle.replace(/border-radius[^;]*;?/g, '') + `border-radius: ${borderRadius} !important;`;
             icon.setAttribute('style', newStyle);
@@ -19873,9 +19937,29 @@ if (customizationData.mobileTriggerVerticalOffset) {
             // Force reflow
             icon.offsetHeight;
             
+            // Check computed style
+            const computedStyle = window.getComputedStyle(icon).borderRadius;
             console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
             console.log('[CK] Icon inline style:', icon.getAttribute('style'));
-            console.log('[CK] Icon computed border-radius:', window.getComputedStyle(icon).borderRadius);
+            console.log('[CK] Icon computed border-radius:', computedStyle);
+            
+            // If computed style is still not what we want, try more aggressive approach
+            if (computedStyle !== borderRadius) {
+                console.log('[CK] Computed style mismatch! Trying aggressive override...');
+                
+                // Add CSS rule to shadow DOM
+                const style = document.createElement('style');
+                style.textContent = `
+                    .accessibility-icon[data-shape="${shape.toLowerCase()}"] {
+                        border-radius: ${borderRadius} !important;
+                    }
+                `;
+                this.shadowRoot.appendChild(style);
+                
+                // Force reflow again
+                icon.offsetHeight;
+                console.log('[CK] After aggressive override, computed border-radius:', window.getComputedStyle(icon).borderRadius);
+            }
         }
     }
     
@@ -19937,12 +20021,19 @@ if (customizationData.mobileTriggerVerticalOffset) {
         }
     }
     
-   
     updateTriggerVisibility(hidden) {
         console.log('[CK] updateTriggerVisibility() - Hidden:', hidden);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
-            icon.style.display = hidden ? 'none' : 'block';
+            if (hidden === 'Yes' || hidden === true) {
+                icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                console.log('[CK] Trigger button hidden');
+            } else {
+                icon.style.display = 'flex';
+                icon.style.visibility = 'visible';
+                console.log('[CK] Trigger button shown');
+            }
         }
     }
     
@@ -19962,8 +20053,17 @@ if (customizationData.mobileTriggerVerticalOffset) {
         
         if (icon && panel) {
             const iconRect = icon.getBoundingClientRect();
-            const panelWidth = 500; // Approximate panel width
-            const panelHeight = 300; // Approximate panel height
+            const panelWidth = 500;
+            const panelHeight = 700;
+            
+            console.log('[CK] Icon position:', {
+                left: iconRect.left,
+                right: iconRect.right,
+                top: iconRect.top,
+                bottom: iconRect.bottom,
+                width: iconRect.width,
+                height: iconRect.height
+            });
             
             // Force remove all positioning first
             panel.style.removeProperty('left');
@@ -19971,34 +20071,44 @@ if (customizationData.mobileTriggerVerticalOffset) {
             panel.style.removeProperty('top');
             panel.style.removeProperty('bottom');
             panel.style.removeProperty('transform');
-            
+
             // Determine if icon is on left or right side
             const isIconOnLeft = iconRect.left < window.innerWidth / 2;
+            console.log('[CK] Icon is on left side:', isIconOnLeft);
             
             if (isIconOnLeft) {
                 // Icon is on LEFT - panel opens to the RIGHT of icon
                 const leftPosition = iconRect.right + 10;
                 panel.style.setProperty('left', `${leftPosition}px`, 'important');
                 panel.style.setProperty('right', 'auto', 'important');
-                console.log('[CK] Panel opening to the RIGHT of icon');
+                console.log('[CK] Panel opening to the RIGHT of icon at:', leftPosition + 'px');
             } else {
                 // Icon is on RIGHT - panel opens to the LEFT of icon
                 const rightPosition = window.innerWidth - iconRect.left + 10;
                 panel.style.setProperty('right', `${rightPosition}px`, 'important');
                 panel.style.setProperty('left', 'auto', 'important');
-                console.log('[CK] Panel opening to the LEFT of icon');
+                console.log('[CK] Panel opening to the LEFT of icon at:', rightPosition + 'px');
             }
             
-            // Center panel vertically with icon
-            const topPosition = iconRect.top + (iconRect.height / 2) - (panelHeight / 2);
-            panel.style.setProperty('top', `${Math.max(20, topPosition)}px`, 'important');
+            // Position panel vertically centered with icon
+            const iconCenterY = iconRect.top + (iconRect.height / 2);
+            const panelCenterY = iconCenterY;
+            const topPosition = panelCenterY - (panelHeight / 2);
+            
+            // Ensure panel doesn't go above or below viewport
+            const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
+            
+            panel.style.setProperty('top', `${finalTop}px`, 'important');
             panel.style.setProperty('transform', 'none', 'important');
             panel.style.setProperty('z-index', '9999', 'important');
             
             console.log('[CK] Panel positioned at:', {
                 left: panel.style.left,
                 right: panel.style.right,
-                top: panel.style.top
+                top: panel.style.top,
+                iconCenterY: iconCenterY,
+                panelCenterY: panelCenterY,
+                finalTop: finalTop
             });
         }
     }
@@ -20160,13 +20270,16 @@ if (customizationData.mobileTriggerVerticalOffset) {
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                if (shape === 'Circle') {
-                    icon.style.borderRadius = '50%';
-                } else if (shape === 'Square') {
-                    icon.style.borderRadius = '6px';
-                } else if (shape === 'Round') {
+                icon.setAttribute('data-shape', shape.toLowerCase());
+                if (shape === 'Round') {
+                    icon.style.setProperty('border-radius', '50%', 'important');
+                } else if (shape === 'Rounded') {
                     icon.style.setProperty('border-radius', '25px', 'important');
+                } else if (shape === 'Square') {
+                    icon.style.setProperty('border-radius', '0px', 'important');
                 }
+                
+                console.log('[CK] Mobile shape applied:', shape);
             }
         }
     }
