@@ -25,7 +25,48 @@ constructor() {
 
         this.isOpeningDropdown = false; // Flag to prevent immediate close
 
-        this.languageContent = languageContent;
+        this.languageContent = {
+            German: {
+              title: "Barrierefreiheit",
+              close: "Schließen",
+              accessibility: "Barrierefreiheit",
+              vision: "Sehbehinderung",
+              motor: "Motorische Behinderung",
+              cognitive: "Kognitive Behinderung",
+              seizure: "Anfallsicher",
+              adhd: "ADHS-freundlich",
+            },
+            English: {
+              title: "Accessibility",
+              close: "Close",
+              accessibility: "Accessibility",
+              vision: "Vision Impaired",
+              motor: "Motor Disability",
+              cognitive: "Cognitive Disability",
+              seizure: "Seizure Safe",
+              adhd: "ADHD Friendly",
+            },
+            Spanish: {
+              title: "Accesibilidad",
+              close: "Cerrar",
+              accessibility: "Accesibilidad",
+              vision: "Discapacidad Visual",
+        motor: "Discapacidad Motora",
+        cognitive: "Discapacidad Cognitiva",
+        seizure: "Seguro para Convulsiones",
+        adhd: "Amigable para TDAH",
+      },
+      French: {
+        title: "Accessibilité",
+        close: "Fermer",
+        accessibility: "Accessibilité",
+        vision: "Déficience Visuelle",
+        motor: "Handicap Moteur",
+        cognitive: "Handicap Cognitif",
+        seizure: "Sûr pour les Crises",
+        adhd: "Convivial pour TDAH",
+      }
+    };
 
         // Set the KV API URL for your worker
         this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
@@ -19235,76 +19276,34 @@ if (customizationData.interfaceLanguage) {
             console.error('[CK] applyCustomizations() - Error applying customization data:', error);
         }
     }
-    languageContent = {
-        German: {
-          title: "Barrierefreiheit",
-          close: "Schließen",
-          accessibility: "Barrierefreiheit",
-          vision: "Sehbehinderung",
-          motor: "Motorische Behinderung",
-          cognitive: "Kognitive Behinderung",
-          seizure: "Anfallsicher",
-          adhd: "ADHS-freundlich",
-        },
-        English: {
-          title: "Accessibility",
-          close: "Close",
-          accessibility: "Accessibility",
-          vision: "Vision Impaired",
-          motor: "Motor Disability",
-          cognitive: "Cognitive Disability",
-          seizure: "Seizure Safe",
-          adhd: "ADHD Friendly",
-        },
-        Spanish: {
-          title: "Accesibilidad",
-          close: "Cerrar",
-          accessibility: "Accesibilidad",
-          vision: "Discapacidad Visual",
-    motor: "Discapacidad Motora",
-    cognitive: "Discapacidad Cognitiva",
-    seizure: "Seguro para Convulsiones",
-    adhd: "Amigable para TDAH",
-  },
-  French: {
-    title: "Accessibilité",
-    close: "Fermer",
-    accessibility: "Accessibilité",
-    vision: "Déficience Visuelle",
-    motor: "Handicap Moteur",
-    cognitive: "Handicap Cognitif",
-    seizure: "Sûr pour les Crises",
-    adhd: "Convivial pour TDAH",
-  }
-};
-// Add this function
-applyLanguage(language) {
-    console.log('[CK] applyLanguage() - Language:', language);
-    const content = this.languageContent[language] || this.languageContent.English;
-    
-    // Update panel title
-    const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
-    if (titleElement) {
-      titleElement.textContent = content.title;
-    }
-    
-    // Update close button
-    const closeButton = this.shadowRoot?.querySelector('.close-btn');
-    if (closeButton) {
-      closeButton.textContent = content.close;
-    }
-    
-    // Update all accessibility feature names
-    const featureElements = this.shadowRoot?.querySelectorAll('.profile-info h4');
-    if (featureElements) {
-      featureElements.forEach((element, index) => {
-        const featureKeys = ['accessibility', 'vision', 'motor', 'cognitive', 'seizure', 'adhd'];
-        if (featureKeys[index]) {
-          element.textContent = content[featureKeys[index]];
+
+    applyLanguage(language) {
+        console.log('[CK] applyLanguage() - Language:', language);
+        const content = this.languageContent[language] || this.languageContent.English;
+        
+        // Update panel title
+        const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
+        if (titleElement) {
+          titleElement.textContent = content.title;
         }
-    });
-}
-} 
+        
+        // Update close button
+        const closeButton = this.shadowRoot?.querySelector('.close-btn');
+        if (closeButton) {
+          closeButton.textContent = content.close;
+        }
+        
+        // Update all accessibility feature names
+        const featureElements = this.shadowRoot?.querySelectorAll('.profile-info h4');
+        if (featureElements) {
+          featureElements.forEach((element, index) => {
+            const featureKeys = ['accessibility', 'vision', 'motor', 'cognitive', 'seizure', 'adhd'];
+            if (featureKeys[index]) {
+              element.textContent = content[featureKeys[index]];
+            }
+          });
+        }
+      } 
     // Helper methods for applying customizations with actual DOM manipulation
     updateTriggerButtonColor(color) {
         console.log('[CK] updateTriggerButtonColor() - Color:', color);
