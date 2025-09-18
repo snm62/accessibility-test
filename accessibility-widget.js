@@ -1810,6 +1810,9 @@ document.head.appendChild(overrideStyle);
     getWidgetCSS() {
 
         return `
+        /* Import FontAwesome for icons */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+        
         /* Force icon shape overrides - must come first */
         .accessibility-icon {
         }
@@ -13696,6 +13699,41 @@ document.head.appendChild(overrideStyle);
         // Update widget appearance after reset
 
         this.updateWidgetAppearance();
+        
+        // Ensure widget remains visible after reset - ADD THIS PROTECTION
+        setTimeout(() => {
+            console.log('Accessibility Widget: Ensuring widget visibility after reset...');
+            const widgetContainer = document.getElementById('accessibility-widget-container');
+            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            
+            if (!widgetContainer) {
+                console.error('Accessibility Widget: Widget container missing after reset! Recreating...');
+                this.createWidget();
+                return;
+            }
+            
+            if (!icon) {
+                console.error('Accessibility Widget: Icon missing after reset!');
+            } else {
+                // Force icon to be visible
+                icon.style.setProperty('display', 'flex', 'important');
+                icon.style.setProperty('visibility', 'visible', 'important');
+                icon.style.setProperty('opacity', '1', 'important');
+                console.log('Accessibility Widget: Icon visibility ensured');
+            }
+            
+            if (!panel) {
+                console.error('Accessibility Widget: Panel missing after reset!');
+            } else {
+                // Ensure panel is properly hidden but not removed
+                panel.style.setProperty('display', 'none', 'important');
+                panel.style.setProperty('visibility', 'hidden', 'important');
+                console.log('Accessibility Widget: Panel visibility ensured (hidden)');
+            }
+            
+            console.log('Accessibility Widget: Reset completed, widget protected');
+        }, 100);
 
     }
 
