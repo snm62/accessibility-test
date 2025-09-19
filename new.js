@@ -1136,7 +1136,7 @@ window.addEventListener('resize', () => {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@6dccd39/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@3101746/accessibility-widget.css';
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
