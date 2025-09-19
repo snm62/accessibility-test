@@ -1733,9 +1733,10 @@ window.addEventListener('resize', () => {
 
         languageDropdown.innerHTML = this.getLanguageDropdownContent();
 
-        this.shadowRoot.appendChild(languageDropdown);
+        // Append dropdown INSIDE the panel, not to shadowRoot
+        panel.appendChild(languageDropdown);
 
-        console.log('Accessibility Widget: Language dropdown appended to shadowRoot');
+        console.log('Accessibility Widget: Language dropdown appended to panel');
 
         console.log('Accessibility Widget: Dropdown innerHTML length:', languageDropdown.innerHTML.length);
 
@@ -3076,9 +3077,9 @@ window.addEventListener('resize', () => {
 
                 position: absolute !important;
 
-                top: 0 !important;
-
-                left: 0 !important;
+                /* Remove fixed top and left - let JavaScript position it */
+                /* top: 0 !important; */
+                /* left: 0 !important; */
 
                 background: #ffffff !important;
 
@@ -20348,6 +20349,9 @@ applyCustomizations(customizationData) {
         dropdown.style.setProperty('top', `${dropdownTop}px`, 'important');
         dropdown.style.setProperty('position', 'absolute', 'important');
         dropdown.style.setProperty('z-index', '100002', 'important'); // Higher than panel
+        
+        // Ensure dropdown is positioned relative to panel, not viewport
+        dropdown.style.setProperty('transform', 'none', 'important');
         
         console.log('Accessibility Widget: Dropdown positioned INSIDE panel at:', {
             left: dropdownLeft,
