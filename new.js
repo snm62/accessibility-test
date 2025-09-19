@@ -7857,58 +7857,8 @@ window.addEventListener('resize', () => {
 
         
 
-        // Show a small "Show Accessibility" button
-
-        const showBtn = document.createElement('button');
-
-        showBtn.id = 'show-accessibility';
-
-        showBtn.innerHTML = 'Show Accessibility';
-
-        showBtn.style.cssText = `
-
-            position: fixed;
-
-            bottom: 20px;
-
-            left: 20px;
-
-            background: #6366f1;
-
-            color: white;
-
-            border: none;
-
-            padding: 8px 12px;
-
-            border-radius: 4px;
-
-            cursor: pointer;
-
-            z-index: 99999;
-
-            font-size: 12px;
-
-        `;
-
         
-
-        showBtn.addEventListener('click', () => {
-
-            if (icon) icon.style.display = 'flex';
-
-            if (panel) panel.style.display = 'block';
-
-            showBtn.remove();
-
-        });
-
-        
-
-        document.body.appendChild(showBtn);
-
     }
-
 
 
     handleToggle(feature, enabled) {
@@ -19464,18 +19414,38 @@ applyCustomizations(customizationData) {
     }
     
     acceptHideInterface() {
+        console.log('[CK] acceptHideInterface() called');
+        
         // Set flag in localStorage to hide interface permanently
         localStorage.setItem('accessibility-widget-hidden', 'true');
+        console.log('[CK] Set localStorage flag to hide interface');
         
-        // Hide the panel and icon
+        // Hide the panel and icon completely
         const panel = this.shadowRoot?.querySelector('#accessibility-panel');
         const icon = this.shadowRoot?.querySelector('#accessibility-icon');
         
+        console.log('[CK] Found panel:', !!panel);
+        console.log('[CK] Found icon:', !!icon);
+        
         if (panel) {
             panel.style.display = 'none';
+            panel.style.visibility = 'hidden';
+            panel.style.opacity = '0';
+            console.log('[CK] Hidden panel');
         }
         if (icon) {
             icon.style.display = 'none';
+            icon.style.visibility = 'hidden';
+            icon.style.opacity = '0';
+            console.log('[CK] Hidden icon');
+        }
+        
+        // Also hide the entire shadow root container
+        const widgetContainer = this.shadowRoot?.host;
+        if (widgetContainer) {
+            widgetContainer.style.display = 'none';
+            widgetContainer.style.visibility = 'hidden';
+            console.log('[CK] Hidden widget container');
         }
         
         // Close the modal
