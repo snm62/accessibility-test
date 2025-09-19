@@ -19361,12 +19361,23 @@ applyCustomizations(customizationData) {
         const modalCancel = this.shadowRoot?.querySelector('#hide-modal-cancel');
         const modalAccept = this.shadowRoot?.querySelector('#hide-modal-accept');
         
+        console.log('[CK] Setting up hide interface modal:');
+        console.log('[CK] Hide button found:', !!hideBtn);
+        console.log('[CK] Modal found:', !!modal);
+        console.log('[CK] Modal close found:', !!modalClose);
+        console.log('[CK] Modal cancel found:', !!modalCancel);
+        console.log('[CK] Modal accept found:', !!modalAccept);
+        
         if (hideBtn && modal) {
+            console.log('[CK] Adding click listener to hide button');
             hideBtn.addEventListener('click', (e) => {
+                console.log('[CK] Hide button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
                 this.showHideInterfaceModal();
             });
+        } else {
+            console.log('[CK] Cannot setup hide button - missing elements');
         }
         
         if (modalClose) {
@@ -19398,10 +19409,14 @@ applyCustomizations(customizationData) {
     }
     
     showHideInterfaceModal() {
+        console.log('[CK] showHideInterfaceModal() called');
         const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
+        console.log('[CK] Modal element found:', !!modal);
         if (modal) {
             modal.style.display = 'flex';
             console.log('[CK] Hide interface modal shown');
+        } else {
+            console.log('[CK] Modal not found!');
         }
     }
     
