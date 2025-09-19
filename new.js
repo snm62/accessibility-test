@@ -43,6 +43,12 @@ constructor() {
 
         this.addCSS(); // Load CSS from hosted URL
 
+        // Check if interface should be hidden
+        if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
+            console.log('[CK] Accessibility interface is hidden, not creating widget');
+            return;
+        }
+
         this.createWidget();
 
         this.loadSettings();
@@ -3757,7 +3763,109 @@ window.addEventListener('resize', () => {
 
             }
 
+            /* Hide Interface Modal Styles */
+            .hide-interface-modal {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            }
 
+            .hide-interface-modal .modal-content {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+                max-height: 80%;
+                overflow: hidden;
+            }
+
+            .hide-interface-modal .modal-header {
+                padding: 20px 20px 10px 20px;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .hide-interface-modal .modal-header h3 {
+                margin: 0;
+                color: #1f2937;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .hide-interface-modal .modal-close {
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: #6b7280;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .hide-interface-modal .modal-close:hover {
+                color: #374151;
+            }
+
+            .hide-interface-modal .modal-body {
+                padding: 20px;
+            }
+
+            .hide-interface-modal .modal-body p {
+                margin: 0;
+                color: #374151;
+                line-height: 1.5;
+                font-size: 14px;
+            }
+
+            .hide-interface-modal .modal-footer {
+                padding: 10px 20px 20px 20px;
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+            }
+
+            .hide-interface-modal .modal-btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .hide-interface-modal .accept-btn {
+                background: #3b82f6;
+                color: white;
+            }
+
+            .hide-interface-modal .accept-btn:hover {
+                background: #2563eb;
+            }
+
+            .hide-interface-modal .cancel-btn {
+                background: white;
+                color: #374151;
+                border: 1px solid #d1d5db;
+            }
+
+            .hide-interface-modal .cancel-btn:hover {
+                background: #f9fafb;
+            }
 
         `;
 
@@ -4988,10 +5096,27 @@ window.addEventListener('resize', () => {
 
                     <i class="fas fa-check"></i>
 
-                    Accessibility Features
+                    
 
                 </div>
 
+            </div>
+
+            <!-- Hide Interface Confirmation Modal -->
+            <div id="hide-interface-modal" class="hide-interface-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="hide-modal-title">Hide Accessibility Interface?</h3>
+                        <button class="modal-close" id="hide-modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="hide-modal-text">Please note: If you choose to hide the accessibility interface, you won't be able to see it anymore, unless you clear your browsing history and data. Are you sure that you wish to hide the interface?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="hide-modal-accept" class="modal-btn accept-btn">Accept</button>
+                        <button id="hide-modal-cancel" class="modal-btn cancel-btn">Cancel</button>
+                    </div>
+                </div>
             </div>
 
         `;
@@ -5274,7 +5399,13 @@ window.addEventListener('resize', () => {
 
                 activatesWithScreenReader: "Activates with Screen Reader",
 
-                activatesWithKeyboardNav: "Activates with Keyboard Navigation"
+                activatesWithKeyboardNav: "Activates with Keyboard Navigation",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "Hide Accessibility Interface?",
+                hideInterfaceModalText: "Please note: If you choose to hide the accessibility interface, you won't be able to see it anymore, unless you clear your browsing history and data. Are you sure that you wish to hide the interface?",
+                hideInterfaceModalAccept: "Accept",
+                hideInterfaceModalCancel: "Cancel"
 
             },
 
@@ -5635,7 +5766,13 @@ window.addEventListener('resize', () => {
     screenReaderDetailed: "Ce profil ajuste le site web pour être compatible avec les lecteurs d'écran comme JAWS, NVDA, VoiceOver et TalkBack. Le logiciel de lecteur d'écran est installé sur l'ordinateur et le smartphone de l'utilisateur aveugle, et les sites web doivent assurer la compatibilité.",
     screenReaderNote: "Note: Ce profil se déclenche automatiquement avec les lecteurs d'écran.",
     activatesWithScreenReader: "S'active avec le Lecteur d'écran",
-    activatesWithKeyboardNav: "S'active avec la Navigation Clavier"
+    activatesWithKeyboardNav: "S'active avec la Navigation Clavier",
+    
+    // Hide Interface Modal
+    hideInterfaceModalTitle: "Masquer l'Interface d'Accessibilité?",
+    hideInterfaceModalText: "Veuillez noter: Si vous choisissez de masquer l'interface d'accessibilité, vous ne pourrez plus la voir, sauf si vous effacez votre historique de navigation et vos données. Êtes-vous sûr de vouloir masquer l'interface?",
+    hideInterfaceModalAccept: "Accepter",
+    hideInterfaceModalCancel: "Annuler"
 },
 
             pt: {
@@ -19135,6 +19272,12 @@ applyCustomizations(customizationData) {
             console.log('[CK] Hide button element not found');
         }
         
+        // Update hide interface modal content if it exists
+        this.updateHideInterfaceModal(content);
+        
+        // Setup hide interface modal event listeners
+        this.setupHideInterfaceModal();
+        
         // Update profile items using specific selectors
         this.updateProfileItem('seizure-safe', content.seizureSafe, content.seizureSafeDesc);
         this.updateProfileItem('vision-impaired', content.visionImpaired, content.visionImpairedDesc);
@@ -19174,6 +19317,9 @@ applyCustomizations(customizationData) {
         this.updateProfileItem('big-black-cursor', content.bigBlackCursor, content.bigBlackCursorDesc);
         this.updateProfileItem('big-white-cursor', content.bigWhiteCursor, content.bigWhiteCursorDesc);
         
+        // Update detailed descriptions and notes
+        this.updateDetailedDescriptions(content);
+        
         console.log('[CK] applyLanguage() - Language applied successfully');
     }
     
@@ -19192,6 +19338,150 @@ applyCustomizations(customizationData) {
                 console.log(`[CK] Updated ${profileId} description to:`, description);
             }
         }
+    }
+    
+    updateDetailedDescriptions(content) {
+        // Update keyboard navigation detailed description
+        const keyboardNavDescription = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('.profile-description p');
+        if (keyboardNavDescription && content.keyboardNavDetailed) {
+            keyboardNavDescription.textContent = content.keyboardNavDetailed;
+            console.log('[CK] Updated keyboard nav detailed description');
+        }
+        
+        // Update keyboard navigation note
+        const keyboardNavNote = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
+        if (keyboardNavNote && content.keyboardNavNote) {
+            keyboardNavNote.innerHTML = `<strong>Note:</strong> ${content.keyboardNavNote.replace('Note: ', '')}`;
+            console.log('[CK] Updated keyboard nav note');
+        }
+        
+        // Update screen reader detailed description
+        const screenReaderDescription = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p');
+        if (screenReaderDescription && content.screenReaderDetailed) {
+            screenReaderDescription.textContent = content.screenReaderDetailed;
+            console.log('[CK] Updated screen reader detailed description');
+        }
+        
+        // Update screen reader note
+        const screenReaderNote = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
+        if (screenReaderNote && content.screenReaderNote) {
+            screenReaderNote.innerHTML = `<strong>Note:</strong> ${content.screenReaderNote.replace('Note: ', '')}`;
+            console.log('[CK] Updated screen reader note');
+        }
+        
+        // Update "Activates with" text for keyboard navigation
+        const keyboardNavActivates = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('small');
+        if (keyboardNavActivates && content.activatesWithScreenReader) {
+            keyboardNavActivates.textContent = content.activatesWithScreenReader;
+            console.log('[CK] Updated keyboard nav activates text');
+        }
+        
+        // Update "Activates with" text for screen reader
+        const screenReaderActivates = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('small');
+        if (screenReaderActivates && content.activatesWithKeyboardNav) {
+            screenReaderActivates.textContent = content.activatesWithKeyboardNav;
+            console.log('[CK] Updated screen reader activates text');
+        }
+    }
+    
+    updateHideInterfaceModal(content) {
+        const modalTitle = this.shadowRoot?.querySelector('#hide-modal-title');
+        const modalText = this.shadowRoot?.querySelector('#hide-modal-text');
+        const modalAccept = this.shadowRoot?.querySelector('#hide-modal-accept');
+        const modalCancel = this.shadowRoot?.querySelector('#hide-modal-cancel');
+        
+        if (modalTitle && content.hideInterfaceModalTitle) {
+            modalTitle.textContent = content.hideInterfaceModalTitle;
+        }
+        if (modalText && content.hideInterfaceModalText) {
+            modalText.textContent = content.hideInterfaceModalText;
+        }
+        if (modalAccept && content.hideInterfaceModalAccept) {
+            modalAccept.textContent = content.hideInterfaceModalAccept;
+        }
+        if (modalCancel && content.hideInterfaceModalCancel) {
+            modalCancel.textContent = content.hideInterfaceModalCancel;
+        }
+    }
+    
+    setupHideInterfaceModal() {
+        const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
+        const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
+        const modalClose = this.shadowRoot?.querySelector('#hide-modal-close');
+        const modalCancel = this.shadowRoot?.querySelector('#hide-modal-cancel');
+        const modalAccept = this.shadowRoot?.querySelector('#hide-modal-accept');
+        
+        if (hideBtn && modal) {
+            hideBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showHideInterfaceModal();
+            });
+        }
+        
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                this.hideHideInterfaceModal();
+            });
+        }
+        
+        if (modalCancel) {
+            modalCancel.addEventListener('click', () => {
+                this.hideHideInterfaceModal();
+            });
+        }
+        
+        if (modalAccept) {
+            modalAccept.addEventListener('click', () => {
+                this.acceptHideInterface();
+            });
+        }
+        
+        // Close modal when clicking outside
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.hideHideInterfaceModal();
+                }
+            });
+        }
+    }
+    
+    showHideInterfaceModal() {
+        const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            console.log('[CK] Hide interface modal shown');
+        }
+    }
+    
+    hideHideInterfaceModal() {
+        const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            console.log('[CK] Hide interface modal hidden');
+        }
+    }
+    
+    acceptHideInterface() {
+        // Set flag in localStorage to hide interface permanently
+        localStorage.setItem('accessibility-widget-hidden', 'true');
+        
+        // Hide the panel and icon
+        const panel = this.shadowRoot?.querySelector('#accessibility-panel');
+        const icon = this.shadowRoot?.querySelector('#accessibility-icon');
+        
+        if (panel) {
+            panel.style.display = 'none';
+        }
+        if (icon) {
+            icon.style.display = 'none';
+        }
+        
+        // Close the modal
+        this.hideHideInterfaceModal();
+        
+        console.log('[CK] Accessibility interface hidden permanently');
     }
 
     updateTriggerPosition(direction, position) {
