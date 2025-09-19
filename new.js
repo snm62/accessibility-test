@@ -17331,13 +17331,7 @@ body.big-white-cursor * {
 
             
 
-            /* Reset cursor when seizure-safe mode is disabled */
-
-            body:not(.seizure-safe) * {
-
-                cursor: auto !important;
-
-            }
+            /
 
             
 
