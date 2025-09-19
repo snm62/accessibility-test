@@ -1435,6 +1435,11 @@ window.addEventListener('resize', () => {
             }
 
         }, 100);
+        
+        // Setup hide interface modal after a short delay to ensure elements are ready
+        setTimeout(() => {
+            this.setupHideInterfaceModal();
+        }, 200);
 
     }
 
