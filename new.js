@@ -19095,88 +19095,103 @@ applyCustomizations(customizationData) {
         // Update panel title
         const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
         if (titleElement) {
-            const newTitle = content["Accessibility Adjustments"] || content.title;
-            titleElement.textContent = newTitle;
-            console.log('[CK] Updated panel title to:', newTitle);
+            titleElement.textContent = content.title;
+            console.log('[CK] Updated panel title to:', content.title);
         } else {
             console.log('[CK] Panel title element not found');
         }
         
-        // Update close button
-        const closeButton = this.shadowRoot?.querySelector('.close-btn');
-        if (closeButton) {
-            closeButton.textContent = content.close;
-            console.log('[CK] Updated close button to:', content.close);
+        // Update section title
+        const sectionTitle = this.shadowRoot?.querySelector('.white-content-section h3');
+        if (sectionTitle) {
+            sectionTitle.textContent = content.profilesTitle;
+            console.log('[CK] Updated section title to:', content.profilesTitle);
         } else {
-            console.log('[CK] Close button element not found');
+            console.log('[CK] Section title element not found');
         }
         
         // Update action buttons
         const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
         if (resetBtn) {
-            resetBtn.textContent = content["Reset Settings"];
-            console.log('[CK] Updated reset button to:', content["Reset Settings"]);
+            resetBtn.innerHTML = `<i class="fas fa-redo"></i> ${content.resetSettings}`;
+            console.log('[CK] Updated reset button to:', content.resetSettings);
         } else {
             console.log('[CK] Reset button element not found');
         }
         
         const statementBtn = this.shadowRoot?.querySelector('#statement');
         if (statementBtn) {
-            statementBtn.textContent = content["Statement"];
-            console.log('[CK] Updated statement button to:', content["Statement"]);
+            statementBtn.innerHTML = `<i class="fas fa-file-alt"></i> ${content.statement}`;
+            console.log('[CK] Updated statement button to:', content.statement);
         } else {
             console.log('[CK] Statement button element not found');
         }
         
         const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
         if (hideBtn) {
-            hideBtn.textContent = content["Hide Interface"];
-            console.log('[CK] Updated hide button to:', content["Hide Interface"]);
+            hideBtn.innerHTML = `<i class="fas fa-eye-slash"></i> ${content.hideInterface}`;
+            console.log('[CK] Updated hide button to:', content.hideInterface);
         } else {
             console.log('[CK] Hide button element not found');
         }
         
-        // Update section title
-        const sectionTitle = this.shadowRoot?.querySelector('.white-content-section h3');
-        if (sectionTitle) {
-            sectionTitle.textContent = content["Choose the right accessibility profile for you"];
-            console.log('[CK] Updated section title to:', content["Choose the right accessibility profile for you"]);
-        } else {
-            console.log('[CK] Section title element not found');
-        }
-        
-        // Update all profile items by iterating through them in order
-        const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
-        console.log('[CK] Found profile items:', profileItems.length);
-        
-        if (profileItems) {
-            profileItems.forEach((item, index) => {
-                const h4 = item.querySelector('h4');
-                const p = item.querySelector('p');
-                
-                if (h4 && p) {
-                    const originalTitle = h4.textContent.trim();
-                    const originalDesc = p.textContent.trim();
-                    
-                    console.log(`[CK] Profile item ${index}:`, {
-                        originalTitle: originalTitle,
-                        originalDesc: originalDesc
-                    });
-                    
-                    // Update with exact matches
-                    if (content[originalTitle]) {
-                        h4.textContent = content[originalTitle];
-                        console.log(`[CK] Updated title to:`, content[originalTitle]);
-                    }
-                    if (content[originalDesc]) {
-                        p.textContent = content[originalDesc];
-                        console.log(`[CK] Updated description to:`, content[originalDesc]);
-                    }
-                }
-            });
-        }
+        // Update profile items using specific selectors
+        this.updateProfileItem('seizure-safe', content.seizureSafe, content.seizureSafeDesc);
+        this.updateProfileItem('vision-impaired', content.visionImpaired, content.visionImpairedDesc);
+        this.updateProfileItem('adhd-friendly', content.adhdFriendly, content.adhdFriendlyDesc);
+        this.updateProfileItem('cognitive-disability', content.cognitiveDisability, content.cognitiveDisabilityDesc);
+        this.updateProfileItem('keyboard-nav', content.keyboardNav, content.keyboardNavDesc);
+        this.updateProfileItem('screen-reader', content.screenReader, content.screenReaderDesc);
+        this.updateProfileItem('content-scaling', content.contentScaling, content.contentScalingDesc);
+        this.updateProfileItem('readable-font', content.readableFont, content.readableFontDesc);
+        this.updateProfileItem('highlight-titles', content.highlightTitles, content.highlightTitlesDesc);
+        this.updateProfileItem('highlight-links', content.highlightLinks, content.highlightLinksDesc);
+        this.updateProfileItem('text-magnifier', content.textMagnifier, content.textMagnifierDesc);
+        this.updateProfileItem('font-sizing', content.fontSizing, content.fontSizingDesc);
+        this.updateProfileItem('align-center', content.alignCenter, content.alignCenterDesc);
+        this.updateProfileItem('adjust-line-height', content.adjustLineHeight, content.adjustLineHeightDesc);
+        this.updateProfileItem('adjust-letter-spacing', content.adjustLetterSpacing, content.adjustLetterSpacingDesc);
+        this.updateProfileItem('align-left', content.alignLeft, content.alignLeftDesc);
+        this.updateProfileItem('align-right', content.alignRight, content.alignRightDesc);
+        this.updateProfileItem('dark-contrast', content.darkContrast, content.darkContrastDesc);
+        this.updateProfileItem('light-contrast', content.lightContrast, content.lightContrastDesc);
+        this.updateProfileItem('high-contrast', content.highContrast, content.highContrastDesc);
+        this.updateProfileItem('high-saturation', content.highSaturation, content.highSaturationDesc);
+        this.updateProfileItem('adjust-text-colors', content.adjustTextColors, content.adjustTextColorsDesc);
+        this.updateProfileItem('monochrome', content.monochrome, content.monochromeDesc);
+        this.updateProfileItem('adjust-title-colors', content.adjustTitleColors, content.adjustTitleColorsDesc);
+        this.updateProfileItem('low-saturation', content.lowSaturation, content.lowSaturationDesc);
+        this.updateProfileItem('adjust-bg-colors', content.adjustBgColors, content.adjustBgColorsDesc);
+        this.updateProfileItem('mute-sound', content.muteSound, content.muteSoundDesc);
+        this.updateProfileItem('hide-images', content.hideImages, content.hideImagesDesc);
+        this.updateProfileItem('read-mode', content.readMode, content.readModeDesc);
+        this.updateProfileItem('reading-guide', content.readingGuide, content.readingGuideDesc);
+        this.updateProfileItem('useful-links', content.usefulLinks, content.usefulLinksDesc);
+        this.updateProfileItem('stop-animation', content.stopAnimation, content.stopAnimationDesc);
+        this.updateProfileItem('reading-mask', content.readingMask, content.readingMaskDesc);
+        this.updateProfileItem('highlight-hover', content.highlightHover, content.highlightHoverDesc);
+        this.updateProfileItem('highlight-focus', content.highlightFocus, content.highlightFocusDesc);
+        this.updateProfileItem('big-black-cursor', content.bigBlackCursor, content.bigBlackCursorDesc);
+        this.updateProfileItem('big-white-cursor', content.bigWhiteCursor, content.bigWhiteCursorDesc);
         
         console.log('[CK] applyLanguage() - Language applied successfully');
+    }
+    
+    updateProfileItem(profileId, title, description) {
+        const profileItem = this.shadowRoot?.querySelector(`#${profileId}`)?.closest('.profile-item');
+        if (profileItem) {
+            const h4 = profileItem.querySelector('h4');
+            const p = profileItem.querySelector('p');
+            
+            if (h4 && title) {
+                h4.textContent = title;
+                console.log(`[CK] Updated ${profileId} title to:`, title);
+            }
+            if (p && description) {
+                p.textContent = description;
+                console.log(`[CK] Updated ${profileId} description to:`, description);
+            }
+        }
     }
 
     updateTriggerPosition(direction, position) {
