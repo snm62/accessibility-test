@@ -1136,7 +1136,7 @@ window.addEventListener('resize', () => {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@3101746/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@6dccd39/accessibility-widget.css';
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
@@ -1480,13 +1480,186 @@ window.addEventListener('resize', () => {
             visibility: visible !important;
         }
         
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .accessibility-icon {
-                width: 50px !important;
-                height: 50px !important;
-               
-            }
+        /* Responsive Design - Mobile First Approach */
+@media (max-width: 768px) {
+    .accessibility-panel {
+        width: 90vw !important;
+        max-width: 400px !important;
+        height: 80vh !important;
+        max-height: 600px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        font-size: 14px !important;
+        overflow-y: auto !important;
+        border-radius: 12px !important;
+    }
+    
+    .accessibility-panel.active {
+        left: 5vw !important;
+        transform: translateY(-50%) !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+        bottom: 15px !important;
+        left: 15px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+    
+    .panel-header {
+        padding: 15px !important;
+        min-height: 180px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 20px !important;
+        margin: 15px 0 !important;
+    }
+    
+    .action-buttons {
+        gap: 8px !important;
+        padding: 0 15px !important;
+    }
+    
+    .action-btn {
+        padding: 10px 14px !important;
+        font-size: 12px !important;
+    }
+    
+    .profiles-section {
+        padding: 0 15px 15px !important;
+    }
+    
+    .profile-item {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+        min-height: 50px !important;
+    }
+    
+    .profile-info h4 {
+        font-size: 14px !important;
+    }
+    
+    .profile-info p {
+        font-size: 12px !important;
+    }
+    
+    .toggle-switch {
+        width: 50px !important;
+        height: 24px !important;
+    }
+    
+    .slider:before {
+        height: 18px !important;
+        width: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 95vw !important;
+        max-width: 350px !important;
+        height: 85vh !important;
+        max-height: 500px !important;
+        left: 2.5vw !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+    }
+    
+    .accessibility-panel.active {
+        left: 2.5vw !important;
+    }
+    
+    .accessibility-icon {
+        width: 45px !important;
+        height: 45px !important;
+        bottom: 10px !important;
+        left: 10px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px !important;
+    }
+    
+    .panel-header {
+        padding: 12px !important;
+        min-height: 160px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 18px !important;
+        margin: 12px 0 !important;
+    }
+    
+    .action-buttons {
+        gap: 6px !important;
+        padding: 0 12px !important;
+    }
+    
+    .action-btn {
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+    }
+    
+    .profiles-section {
+        padding: 0 12px 12px !important;
+    }
+    
+    .profile-item {
+        padding: 10px !important;
+        margin-bottom: 6px !important;
+        min-height: 45px !important;
+    }
+    
+    .profile-info h4 {
+        font-size: 13px !important;
+    }
+    
+    .profile-info p {
+        font-size: 11px !important;
+    }
+    
+    .toggle-switch {
+        width: 45px !important;
+        height: 22px !important;
+    }
+    
+    .slider:before {
+        height: 16px !important;
+        width: 16px !important;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .accessibility-panel {
+        width: 98vw !important;
+        left: 1vw !important;
+        font-size: 11px !important;
+    }
+    
+    .accessibility-panel.active {
+        left: 1vw !important;
+    }
+    
+    .accessibility-icon {
+        width: 40px !important;
+        height: 40px !important;
+        bottom: 8px !important;
+        left: 8px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 16px !important;
+    }
+}
             
             .accessibility-icon i {
                 font-size: 20px !important;
@@ -1502,11 +1675,7 @@ window.addEventListener('resize', () => {
             }
         }
         
-        @media (max-width: 480px) {
-            .accessibility-icon {
-                width: 45px !important;
-                height: 45px !important;
-            }
+       
             
             .accessibility-icon i {
                 font-size: 18px !important;
