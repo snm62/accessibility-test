@@ -29,7 +29,7 @@ constructor() {
                 German: {
                     // Panel header
                     title: "Barrierefreiheit",
-                    close: "Schließen",
+                    
                     "Accessibility Adjustments": "Barrierefreiheit Anpassungen",
                     "Reset Settings": "Einstellungen zurücksetzen",
                     "Statement": "Erklärung",
@@ -151,7 +151,6 @@ constructor() {
     English: {
         // Panel header
         title: "Accessibility",
-        close: "Close",
         "Accessibility Adjustments": "Accessibility Adjustments",
         "Reset Settings": "Reset Settings",
         "Statement": "Statement",
@@ -272,7 +271,6 @@ constructor() {
     Spanish: {
         // Panel header
         title: "Accesibilidad",
-        close: "Cerrar",
         "Accessibility Adjustments": "Ajustes de Accesibilidad",
         "Reset Settings": "Restablecer Configuración",
         "Statement": "Declaración",
@@ -393,7 +391,6 @@ constructor() {
     
       French: {
         title: "Accessibilité",
-        close: "Fermer",
         accessibility: "Accessibilité",
         vision: "Déficience Visuelle",
         motor: "Handicap Moteur",
@@ -5657,182 +5654,95 @@ window.addEventListener('resize', () => {
             },
 
             es: {
-
-                title: "Ajustes de Accesibilidad",
-
-                profilesTitle: "Elige el perfil de accesibilidad adecuado para ti",
-
-                seizureSafe: "Perfil Seguro para Convulsiones",
-
-                seizureSafeDesc: "Elimina destellos y reduce colores",
-
-                visionImpaired: "Perfil para Discapacidad Visual",
-
-                visionImpairedDesc: "Mejora los elementos visuales del sitio",
-
-                adhdFriendly: "Perfil Amigable para TDAH",
-
-                adhdFriendlyDesc: "Más enfoque y menos distracciones",
-
-                cognitiveDisability: "Perfil de Discapacidad Cognitiva",
-
-                cognitiveDisabilityDesc: "Ayuda con la lectura y el enfoque",
-
-                keyboardNav: "Navegación por Teclado (Motor)",
-
-                keyboardNavDesc: "Usar el sitio web con el teclado",
-
-                screenReader: "Usuarios Ciegos (Lector de Pantalla)",
-
-                screenReaderDesc: "Optimizar el sitio web para lectores de pantalla",
-
-                contentScaling: "Escalado de Contenido",
-
-                contentScalingDesc: "Escalar contenido con controles de flecha",
-
-                readableFont: "Fuente Legible",
-
-                readableFontDesc: "Fuentes de alta legibilidad",
-
-                highlightTitles: "Resaltar Títulos",
-
-                highlightTitlesDesc: "Agregar cajas alrededor de los encabezados",
-
-                highlightLinks: "Resaltar Enlaces",
-
-                highlightLinksDesc: "Agregar cajas alrededor de los enlaces",
-
-                textMagnifier: "Lupa de Texto",
-
-                textMagnifierDesc: "Herramienta de lupa flotante",
-
-                fontSizing: "Ajustar Tamaño de Fuente",
-
-                fontSizingDesc: "Tamaño de fuente con controles de flecha",
-
-                alignCenter: "Alinear Centro",
-
-                alignCenterDesc: "Alinea todo el contenido de texto al centro",
-
-                adjustLineHeight: "Ajustar Altura de Línea",
-
-                adjustLineHeightDesc: "Altura de línea con controles de flecha",
-
-                adjustLetterSpacing: "Ajustar Espaciado de Letras",
-
-                adjustLetterSpacingDesc: "Espaciado de letras con controles de flecha",
-
-                alignLeft: "Alinear Izquierda",
-
-                alignLeftDesc: "Alinea el contenido de texto a la izquierda",
-
-                alignRight: "Alinear Derecha",
-
-                alignRightDesc: "Alinea el contenido de texto a la derecha",
-
-                darkContrast: "Contraste Oscuro",
-
-                darkContrastDesc: "Fondo oscuro con texto claro",
-
-                lightContrast: "Contraste Claro",
-
-                lightContrastDesc: "Fondo claro con texto oscuro",
-
-                highContrast: "Alto Contraste",
-
-                highContrastDesc: "Implementación de contraste máximo",
-
-                highSaturation: "Alta Saturación",
-
-                highSaturationDesc: "Aumenta la intensidad del color",
-
-                adjustTextColors: "Ajustar Colores de Texto",
-
-                adjustTextColorsDesc: "Funcionalidad de selector de color",
-
-                monochrome: "Monocromo",
-
-                monochromeDesc: "Elimina todos los colores excepto negro, blanco, grises",
-
-                adjustTitleColors: "Ajustar Colores de Títulos",
-
-                adjustTitleColorsDesc: "Personalización de color para encabezados",
-
-                lowSaturation: "Baja Saturación",
-
-                lowSaturationDesc: "Reduce la intensidad del color",
-
-                adjustBgColors: "Ajustar Colores de Fondo",
-
-                adjustBgColorsDesc: "Personalización de color de fondo",
-
-                muteSound: "Silenciar Sonido",
-
-                muteSoundDesc: "Desactiva todo el contenido de audio",
-
-                hideImages: "Ocultar Imágenes",
-
-                hideImagesDesc: "Alternar para ocultar todas las imágenes",
-
-                readMode: "Modo de Lectura",
-
-                readModeDesc: "Elimina elementos de navegación",
-
-                readingGuide: "Guía de Lectura",
-
-                readingGuideDesc: "Barra de resaltado móvil",
-
-                usefulLinks: "Enlaces Útiles",
-
-                usefulLinksDesc: "Recursos y enlaces de accesibilidad",
-
-                stopAnimation: "Detener Animación",
-
-                stopAnimationDesc: "Pausa todas las animaciones CSS",
-
-                readingMask: "Máscara de Lectura",
-
-                readingMaskDesc: "Superposición semi-transparente",
-
-                highlightHover: "Resaltar Hover",
-
-                highlightHoverDesc: "Retroalimentación visual al pasar el mouse",
-
-                highlightFocus: "Resaltar Enfoque",
-
-                highlightFocusDesc: "Indicadores de enfoque prominentes",
-
-                bigBlackCursor: "Cursor Negro Grande",
-
-                bigBlackCursorDesc: "Aumenta el tamaño del cursor",
-
-                bigWhiteCursor: "Cursor Blanco Grande",
-
-                bigWhiteCursorDesc: "Aumenta el tamaño del cursor",
-
-                resetSettings: "Restablecer Configuración",
-
-                statement: "Declaración",
-
-                hideInterface: "Ocultar Interfaz",
-
-                accessibilityFeatures: "Características de Accesibilidad",
-
-                // Additional detailed descriptions
-
-                keyboardNavDetailed: "Este perfil permite a las personas con discapacidad motora operar el sitio web usando teclas del teclado (Tab, Shift+Tab, Enter) y atajos (ej., \"M\" para menús, \"H\" para encabezados, \"F\" para formularios, \"B\" para botones, \"G\" para gráficos).",
-
-                keyboardNavNote: "Nota: Este perfil se activa automáticamente para usuarios de teclado.",
-
-                screenReaderDetailed: "Este perfil ajusta el sitio web para ser compatible con lectores de pantalla como JAWS, NVDA, VoiceOver y TalkBack. El software lector de pantalla está instalado en la computadora y smartphone del usuario ciego, y los sitios web deben asegurar compatibilidad.",
-
-                screenReaderNote: "Nota: Este perfil se activa automáticamente para lectores de pantalla.",
-
-                activatesWithScreenReader: "Se activa con Lector de Pantalla",
-
-                activatesWithKeyboardNav: "Se activa con Navegación por Teclado"
-
-            },
+    title: "Ajustes de Accesibilidad",
+    profilesTitle: "Elige el perfil de accesibilidad adecuado para ti",
+    seizureSafe: "Perfil Anti-Convulsiones",
+    seizureSafeDesc: "Elimina destellos y reduce colores",
+    visionImpaired: "Perfil de Deficiencia Visual",
+    visionImpairedDesc: "Mejora los elementos visuales del sitio web",
+    adhdFriendly: "Perfil Amigable para TDAH",
+    adhdFriendlyDesc: "Más enfoque y menos distracciones",
+    cognitiveDisability: "Perfil de Discapacidad Cognitiva",
+    cognitiveDisabilityDesc: "Ayuda con la lectura y concentración",
+    keyboardNav: "Navegación por Teclado (Motora)",
+    keyboardNavDesc: "Usar el sitio web con el teclado",
+    screenReader: "Usuarios Ciegos (Lector de Pantalla)",
+    screenReaderDesc: "Optimizar el sitio web para lectores de pantalla",
+    contentScaling: "Escalado de Contenido",
+    contentScalingDesc: "Escalar contenido con controles de flechas",
+    readableFont: "Fuente Legible",
+    readableFontDesc: "Fuentes de alta legibilidad",
+    highlightTitles: "Resaltar Títulos",
+    highlightTitlesDesc: "Agregar marcos alrededor de los títulos",
+    highlightLinks: "Resaltar Enlaces",
+    highlightLinksDesc: "Agregar marcos alrededor de los enlaces",
+    textMagnifier: "Lupa de Texto",
+    textMagnifierDesc: "Herramienta de lupa flotante",
+    fontSizing: "Ajustar Tamaño de Fuente",
+    fontSizingDesc: "Tamaño de fuente con controles de flechas",
+    alignCenter: "Alinear al Centro",
+    alignCenterDesc: "Centra todo el contenido de texto",
+    adjustLineHeight: "Ajustar Altura de Línea",
+    adjustLineHeightDesc: "Altura de línea con controles de flechas",
+    adjustLetterSpacing: "Ajustar Espaciado de Letras",
+    adjustLetterSpacingDesc: "Espaciado de letras con controles de flechas",
+    alignLeft: "Alinear a la Izquierda",
+    alignLeftDesc: "Alinea el contenido de texto a la izquierda",
+    alignRight: "Alinear a la Derecha",
+    alignRightDesc: "Alinea el contenido de texto a la derecha",
+    darkContrast: "Contraste Oscuro",
+    darkContrastDesc: "Fondo oscuro con texto claro",
+    lightContrast: "Contraste Claro",
+    lightContrastDesc: "Fondo claro con texto oscuro",
+    highContrast: "Alto Contraste",
+    highContrastDesc: "Implementación de contraste máximo",
+    highSaturation: "Alta Saturación",
+    highSaturationDesc: "Aumenta la intensidad de colores",
+    adjustTextColors: "Ajustar Colores de Texto",
+    adjustTextColorsDesc: "Funcionalidad de selector de color",
+    monochrome: "Monocromo",
+    monochromeDesc: "Elimina todos los colores excepto negro, blanco, gris",
+    adjustTitleColors: "Ajustar Colores de Títulos",
+    adjustTitleColorsDesc: "Personalización de colores para títulos",
+    lowSaturation: "Baja Saturación",
+    lowSaturationDesc: "Reduce la intensidad de colores",
+    adjustBgColors: "Ajustar Colores de Fondo",
+    adjustBgColorsDesc: "Personalización de colores de fondo",
+    muteSound: "Silenciar Sonido",
+    muteSoundDesc: "Desactiva todo el contenido de audio",
+    hideImages: "Ocultar Imágenes",
+    hideImagesDesc: "Alternar para ocultar todas las imágenes",
+    readMode: "Modo de Lectura",
+    readModeDesc: "Elimina elementos de navegación",
+    readingGuide: "Guía de Lectura",
+    readingGuideDesc: "Barra de resaltado móvil",
+    usefulLinks: "Enlaces Útiles",
+    usefulLinksDesc: "Recursos y enlaces de accesibilidad",
+    stopAnimation: "Detener Animación",
+    stopAnimationDesc: "Pausa todas las animaciones CSS",
+    readingMask: "Máscara de Lectura",
+    readingMaskDesc: "Superposición semi-transparente",
+    highlightHover: "Resaltar al Pasar",
+    highlightHoverDesc: "Retroalimentación visual al pasar el mouse",
+    highlightFocus: "Resaltar Enfoque",
+    highlightFocusDesc: "Indicadores de enfoque prominentes",
+    bigBlackCursor: "Cursor Negro Grande",
+    bigBlackCursorDesc: "Aumenta el tamaño del cursor",
+    bigWhiteCursor: "Cursor Blanco Grande",
+    bigWhiteCursorDesc: "Aumenta el tamaño del cursor",
+    resetSettings: "Restablecer Configuración",
+    statement: "Declaración",
+    hideInterface: "Ocultar Interfaz",
+    accessibilityFeatures: "Características de Accesibilidad",
+    
+    // Descripciones detalladas adicionales
+    keyboardNavDetailed: "Este perfil permite a las personas con discapacidades motoras operar el sitio web usando teclas del teclado (Tab, Shift+Tab, Enter) y atajos (ej: \"M\" para menús, \"H\" para títulos, \"F\" para formularios, \"B\" para botones, \"G\" para gráficos).",
+    keyboardNavNote: "Nota: Este perfil se activa automáticamente para usuarios de teclado.",
+    screenReaderDetailed: "Este perfil ajusta el sitio web para ser compatible con lectores de pantalla como JAWS, NVDA, VoiceOver y TalkBack. El software lector de pantalla está instalado en la computadora y smartphone del usuario ciego, y los sitios web deben asegurar compatibilidad.",
+    screenReaderNote: "Nota: Este perfil se activa automáticamente con lectores de pantalla.",
+    activatesWithScreenReader: "Se activa con Lector de Pantalla",
+    activatesWithKeyboardNav: "Se activa con Navegación por Teclado"
+},
 
             de: {
 
@@ -6012,488 +5922,369 @@ window.addEventListener('resize', () => {
 
             },
 
-           French: {
-    // Panel header
-    title: "Accessibilité",
-    //close: "Fermer",
-    "Accessibility Adjustments": "Ajustements d'Accessibilité",
-    "Reset Settings": "Réinitialiser les Paramètres",
-    "Statement": "Déclaration",
-    "Hide Interface": "Masquer l'Interface",
+            fr: {
+    title: "Ajustements d'accessibilité",
+    profilesTitle: "Choisissez le bon profil d'accessibilité pour vous",
+    seizureSafe: "Profil Anti-Épilepsie",
+    seizureSafeDesc: "Élimine les flashs et réduit les couleurs",
+    visionImpaired: "Profil Déficience Visuelle",
+    visionImpairedDesc: "Améliore les visuels du site web",
+    adhdFriendly: "Profil TDAH",
+    adhdFriendlyDesc: "Plus de concentration et moins de distractions",
+    cognitiveDisability: "Profil Déficience Cognitive",
+    cognitiveDisabilityDesc: "Aide à la lecture et à la concentration",
+    keyboardNav: "Navigation Clavier (Moteur)",
+    keyboardNavDesc: "Utiliser le site web avec le clavier",
+    screenReader: "Utilisateurs Aveugles (Lecteur d'écran)",
+    screenReaderDesc: "Optimiser le site web pour les lecteurs d'écran",
+    contentScaling: "Mise à l'échelle du contenu",
+    contentScalingDesc: "Mettre à l'échelle le contenu avec les contrôles fléchés",
+    readableFont: "Police Lisible",
+    readableFontDesc: "Polices à haute lisibilité",
+    highlightTitles: "Surligner les Titres",
+    highlightTitlesDesc: "Ajouter des encadrés autour des titres",
+    highlightLinks: "Surligner les Liens",
+    highlightLinksDesc: "Ajouter des encadrés autour des liens",
+    textMagnifier: "Loupe de Texte",
+    textMagnifierDesc: "Outil de loupe flottant",
+    fontSizing: "Ajuster la Taille de Police",
+    fontSizingDesc: "Taille de police avec les contrôles fléchés",
+    alignCenter: "Centrer",
+    alignCenterDesc: "Centre tout le contenu texte",
+    adjustLineHeight: "Ajuster l'Interlignage",
+    adjustLineHeightDesc: "Interlignage avec les contrôles fléchés",
+    adjustLetterSpacing: "Ajuster l'Espacement des Lettres",
+    adjustLetterSpacingDesc: "Espacement des lettres avec les contrôles fléchés",
+    alignLeft: "Aligner à Gauche",
+    alignLeftDesc: "Aligne le contenu texte à gauche",
+    alignRight: "Aligner à Droite",
+    alignRightDesc: "Aligne le contenu texte à droite",
+    darkContrast: "Contraste Sombre",
+    darkContrastDesc: "Arrière-plan sombre avec texte clair",
+    lightContrast: "Contraste Clair",
+    lightContrastDesc: "Arrière-plan clair avec texte sombre",
+    highContrast: "Contraste Élevé",
+    highContrastDesc: "Implémentation de contraste maximum",
+    highSaturation: "Saturation Élevée",
+    highSaturationDesc: "Augmente l'intensité des couleurs",
+    adjustTextColors: "Ajuster les Couleurs du Texte",
+    adjustTextColorsDesc: "Fonctionnalité de sélecteur de couleur",
+    monochrome: "Monochrome",
+    monochromeDesc: "Supprime toutes les couleurs sauf noir, blanc, gris",
+    adjustTitleColors: "Ajuster les Couleurs des Titres",
+    adjustTitleColorsDesc: "Personnalisation des couleurs pour les titres",
+    lowSaturation: "Saturation Faible",
+    lowSaturationDesc: "Réduit l'intensité des couleurs",
+    adjustBgColors: "Ajuster les Couleurs d'Arrière-plan",
+    adjustBgColorsDesc: "Personnalisation des couleurs d'arrière-plan",
+    muteSound: "Couper le Son",
+    muteSoundDesc: "Désactive tout le contenu audio",
+    hideImages: "Masquer les Images",
+    hideImagesDesc: "Basculer pour masquer toutes les images",
+    readMode: "Mode Lecture",
+    readModeDesc: "Supprime les éléments de navigation",
+    readingGuide: "Guide de Lecture",
+    readingGuideDesc: "Barre de surlignage mobile",
+    usefulLinks: "Liens Utiles",
+    usefulLinksDesc: "Ressources et liens d'accessibilité",
+    stopAnimation: "Arrêter l'Animation",
+    stopAnimationDesc: "Met en pause toutes les animations CSS",
+    readingMask: "Masque de Lecture",
+    readingMaskDesc: "Superposition semi-transparente",
+    highlightHover: "Surligner au Survol",
+    highlightHoverDesc: "Retour visuel au survol",
+    highlightFocus: "Surligner le Focus",
+    highlightFocusDesc: "Indicateurs de focus proéminents",
+    bigBlackCursor: "Gros Curseur Noir",
+    bigBlackCursorDesc: "Augmente la taille du curseur",
+    bigWhiteCursor: "Gros Curseur Blanc",
+    bigWhiteCursorDesc: "Augmente la taille du curseur",
+    resetSettings: "Réinitialiser les Paramètres",
+    statement: "Déclaration",
+    hideInterface: "Masquer l'Interface",
+    accessibilityFeatures: "Fonctionnalités d'Accessibilité",
     
-    // Section title
-    "Choose the right accessibility profile for you": "Choisissez le bon profil d'accessibilité pour vous",
-    
-    // Profile items in exact order from HTML:
-    "Seizure Safe Profile": "Profil Sécurisé pour Crises",
-    "Clear flashes & reduces color": "Supprime les flashs et réduit les couleurs",
-    
-    "Vision Impaired Profile": "Profil pour Malvoyants",
-    "Enhances website's visuals": "Améliore les éléments visuels du site",
-    
-    "ADHD Friendly Profile": "Profil Adapté au TDAH",
-    "More focus & fewer distractions": "Plus de concentration et moins de distractions",
-    
-    "Cognitive Disability Profile": "Profil de Handicap Cognitif",
-    "Assists with reading & focusing": "Aide à la lecture et à la concentration",
-    
-    "Keyboard Navigation (Motor)": "Navigation Clavier (Moteur)",
-    "Use website with the keyboard": "Utiliser le site web avec le clavier",
-    
-    "Blind Users (Screen Reader)": "Utilisateurs Aveugles (Lecteur d'Écran)",
-    "Optimize website for screen-readers": "Optimiser le site web pour les lecteurs d'écran",
-    
-    "Content Scaling": "Mise à l'Échelle du Contenu",
-    "Scale content with arrow controls": "Mettre à l'échelle le contenu avec les contrôles fléchés",
-    
-    "Readable Font": "Police Lisible",
-    "High-legibility fonts": "Polices à haute lisibilité",
-    
-    "Highlight Titles": "Surligner les Titres",
-    "Add boxes around headings": "Ajouter des boîtes autour des titres",
-    
-    "Highlight Links": "Surligner les Liens",
-    "Add boxes around links": "Ajouter des boîtes autour des liens",
-    
-    "Text Magnifier": "Loupe de Texte",
-    "Floating magnifying glass tool": "Outil de loupe flottant",
-    
-    "Adjust Font Sizing": "Ajuster la Taille de Police",
-    "Font size with arrow controls": "Taille de police avec contrôles fléchés",
-    
-    "Adjust Line Height": "Ajuster la Hauteur de Ligne",
-    "Line height with arrow controls": "Hauteur de ligne avec contrôles fléchés",
-    
-    "Adjust Letter Spacing": "Ajuster l'Espacement des Lettres",
-    "Letter spacing with arrow controls": "Espacement des lettres avec contrôles fléchés",
-    
-    "Align Left": "Aligner à Gauche",
-    "Left-aligns text content": "Aligne le contenu du texte à gauche",
-    
-    "Align Right": "Aligner à Droite",
-    "Right-aligns text content": "Aligne le contenu du texte à droite",
-    
-    "Align Center": "Aligner au Centre",
-    "Center-aligns all text content": "Aligne tout le contenu du texte au centre",
-    
-    "Dark Contrast": "Contraste Sombre",
-    "Dark background with light text": "Arrière-plan sombre avec texte clair",
-    
-    "Light Contrast": "Contraste Clair",
-    "Light background with dark text": "Arrière-plan clair avec texte sombre",
-    
-    "High Contrast": "Contraste Élevé",
-    "Maximum contrast implementation": "Implémentation de contraste maximum",
-    
-    "High Saturation": "Saturation Élevée",
-    "Increases color intensity": "Augmente l'intensité des couleurs",
-    
-    "Adjust Text Colors": "Ajuster les Couleurs du Texte",
-    "Color picker functionality": "Fonctionnalité de sélecteur de couleurs",
-    
-    "Monochrome": "Monochrome",
-    "Removes all colors except black, white, grays": "Supprime toutes les couleurs sauf noir, blanc, gris",
-    
-    "Adjust Title Colors": "Ajuster les Couleurs des Titres",
-    "Color customization for headings": "Personnalisation des couleurs pour les titres",
-    
-    "Low Saturation": "Saturation Faible",
-    "Reduces color intensity": "Réduit l'intensité des couleurs",
-    
-    "Adjust Background Colors": "Ajuster les Couleurs d'Arrière-plan",
-    "Background color customization": "Personnalisation de la couleur d'arrière-plan",
-    
-    "Mute Sound": "Couper le Son",
-    "Disables all audio content": "Désactive tout le contenu audio",
-    
-    "Hide Images": "Masquer les Images",
-    "Toggle to hide all images": "Basculer pour masquer toutes les images",
-    
-    "Read Mode": "Mode Lecture",
-    "Removes navigation elements": "Supprime les éléments de navigation",
-    
-    "Reading Guide": "Guide de Lecture",
-    "Movable highlight bar": "Barre de surlignage mobile",
-    
-    "Useful Links": "Liens Utiles",
-    "Accessibility resources and links": "Ressources et liens d'accessibilité",
-    
-    "Stop Animation": "Arrêter l'Animation",
-    "Pauses all CSS animations": "Met en pause toutes les animations CSS",
-    
-    "Reading Mask": "Masque de Lecture",
-    "Semi-transparent overlay": "Superposition semi-transparente",
-    
-    "Highlight Hover": "Surligner au Survol",
-    "Visual feedback on hover": "Retour visuel au survol",
-    
-    "Highlight Focus": "Surligner le Focus",
-    "Prominent focus indicators": "Indicateurs de focus proéminents",
-    
-    "Big Black Cursor": "Gros Curseur Noir",
-    "Increases cursor size": "Augmente la taille du curseur",
-    
-    "Big White Cursor": "Gros Curseur Blanc",
-    "Increases cursor size": "Augmente la taille du curseur"
+    // Descriptions détaillées supplémentaires
+    keyboardNavDetailed: "Ce profil permet aux personnes ayant des déficiences motrices d'utiliser le site web avec les touches du clavier (Tab, Shift+Tab, Entrée) et les raccourcis (ex: \"M\" pour les menus, \"H\" pour les titres, \"F\" pour les formulaires, \"B\" pour les boutons, \"G\" pour les graphiques).",
+    keyboardNavNote: "Note: Ce profil se déclenche automatiquement pour les utilisateurs de clavier.",
+    screenReaderDetailed: "Ce profil ajuste le site web pour être compatible avec les lecteurs d'écran comme JAWS, NVDA, VoiceOver et TalkBack. Le logiciel de lecteur d'écran est installé sur l'ordinateur et le smartphone de l'utilisateur aveugle, et les sites web doivent assurer la compatibilité.",
+    screenReaderNote: "Note: Ce profil se déclenche automatiquement avec les lecteurs d'écran.",
+    activatesWithScreenReader: "S'active avec le Lecteur d'écran",
+    activatesWithKeyboardNav: "S'active avec la Navigation Clavier"
 },
 
-            // Add more languages with basic translations (using English as fallback for now)
-
             pt: {
-
-                title: "Ajustes de Acessibilidade",
-
-                profilesTitle: "Escolha o perfil de acessibilidade adequado para você",
-
-                seizureSafe: "Perfil Seguro para Convulsões",
-
-                seizureSafeDesc: "Remove flashes e reduz cores",
-
-                visionImpaired: "Perfil para Deficientes Visuais",
-
-                visionImpairedDesc: "Melhora os elementos visuais do site",
-
-                adhdFriendly: "Perfil Amigável para TDAH",
-
-                adhdFriendlyDesc: "Reduz distrações e ajuda a focar",
-
-                cognitiveDisability: "Perfil de Deficiência Cognitiva",
-
-                cognitiveDisabilityDesc: "Ajuda com leitura e foco",
-
-                keyboardNav: "Navegação por Teclado (Motor)",
-
-                keyboardNavDesc: "Usar o site com o teclado",
-
-                screenReader: "Usuários Cegos (Leitor de Tela)",
-
-                screenReaderDesc: "Otimizar o site para leitores de tela",
-
-                contentScaling: "Escala de Conteúdo",
-
-                contentScalingDesc: "Aumentar ou diminuir o tamanho do conteúdo",
-
-                readableFont: "Fonte Legível",
-
-                readableFontDesc: "Fontes de alta legibilidade",
-
-                highlightTitles: "Destacar Títulos",
-
-                highlightTitlesDesc: "Adicionar caixas ao redor dos cabeçalhos",
-
-                highlightLinks: "Destacar Links",
-
-                highlightLinksDesc: "Adicionar caixas ao redor dos links",
-
-                textMagnifier: "Lupa de Texto",
-
-                textMagnifierDesc: "Ferramenta de lupa flutuante",
-
-                fontSizing: "Tamanho da Fonte",
-
-                fontSizingDesc: "Aumentar ou diminuir o tamanho da fonte",
-
-                alignCenter: "Alinhar Centro",
-
-                alignCenterDesc: "Centraliza todo o conteúdo de texto",
-
-                adjustLineHeight: "Ajustar Altura da Linha",
-
-                adjustLineHeightDesc: "Aumentar ou diminuir a altura da linha",
-
-                adjustLetterSpacing: "Ajustar Espaçamento das Letras",
-
-                adjustLetterSpacingDesc: "Aumentar ou diminuir o espaçamento das letras",
-
-                alignLeft: "Alinhar Esquerda",
-
-                alignLeftDesc: "Alinha o conteúdo de texto à esquerda",
-
-                alignRight: "Alinhar Direita",
-
-                alignRightDesc: "Alinha o conteúdo de texto à direita",
-
-                darkContrast: "Contraste Escuro",
-
-                darkContrastDesc: "Fundo escuro com texto claro",
-
-                lightContrast: "Contraste Claro",
-
-                lightContrastDesc: "Fundo claro com texto escuro",
-
-                highContrast: "Alto Contraste",
-
-                highContrastDesc: "Implementação de contraste máximo",
-
-                highSaturation: "Alta Saturação",
-
-                highSaturationDesc: "Aumenta a intensidade da cor",
-
-                adjustTextColors: "Ajustar Cores do Texto",
-
-                adjustTextColorsDesc: "Funcionalidade de seletor de cor",
-
-                monochrome: "Monocromático",
-
-                monochromeDesc: "Remove todas as cores exceto preto, branco, cinzas",
-
-                adjustTitleColors: "Ajustar Cores dos Títulos",
-
-                adjustTitleColorsDesc: "Personalização de cor para cabeçalhos",
-
-                lowSaturation: "Baixa Saturação",
-
-                lowSaturationDesc: "Reduz a intensidade da cor",
-
-                adjustBgColors: "Ajustar Cores de Fundo",
-
-                adjustBgColorsDesc: "Personalização de cor de fundo",
-
-                muteSound: "Silenciar Som",
-
-                muteSoundDesc: "Desativa todo o conteúdo de áudio",
-
-                hideImages: "Ocultar Imagens",
-
-                hideImagesDesc: "Alternar para ocultar todas as imagens",
-
-                readMode: "Modo de Leitura",
-
-                readModeDesc: "Remove elementos de navegação",
-
-                readingGuide: "Guia de Leitura",
-
-                readingGuideDesc: "Barra de destaque móvel",
-
-                usefulLinks: "Links Úteis",
-
-                usefulLinksDesc: "Recursos e links de acessibilidade",
-
-                stopAnimation: "Parar Animação",
-
-                stopAnimationDesc: "Pausa todas as animações CSS",
-
-                readingMask: "Máscara de Leitura",
-
-                readingMaskDesc: "Sobreposição semi-transparente",
-
-                highlightHover: "Destacar Hover",
-
-                highlightHoverDesc: "Feedback visual ao passar o mouse",
-
-                highlightFocus: "Destacar Foco",
-
-                highlightFocusDesc: "Indicadores de foco proeminentes",
-
-                bigBlackCursor: "Cursor Preto Grande",
-
-                bigBlackCursorDesc: "Aumenta o tamanho do cursor",
-
-                bigWhiteCursor: "Cursor Branco Grande",
-
-                bigWhiteCursorDesc: "Aumenta o tamanho do cursor",
-
-                resetSettings: "Redefinir Configurações",
-
-                statement: "Declaração",
-
-                hideInterface: "Ocultar Interface",
-
-                accessibilityFeatures: "Recursos de Acessibilidade",
-
-                // Additional detailed descriptions
-
-                keyboardNavDetailed: "Este perfil permite que pessoas com deficiência motora operem o site usando teclas do teclado (Tab, Shift+Tab, Enter) e atalhos (ex. \"M\" para menus, \"H\" para cabeçalhos, \"F\" para formulários, \"B\" para botões, \"G\" para gráficos).",
-
-                keyboardNavNote: "Nota: Este perfil é ativado automaticamente para usuários de teclado.",
-
-                screenReaderDetailed: "Este perfil ajusta o site para ser compatível com leitores de tela como JAWS, NVDA, VoiceOver e TalkBack. O software leitor de tela está instalado no computador e smartphone do usuário cego, e os sites devem garantir compatibilidade.",
-
-                screenReaderNote: "Nota: Este perfil é ativado automaticamente para leitores de tela.",
-
-                activatesWithScreenReader: "Ativa com Leitor de Tela",
-
-                activatesWithKeyboardNav: "Ativa com Navegação por Teclado"
-
-            },
-
-            it: {
-
-                title: "Regolazioni di Accessibilità",
-
-                profilesTitle: "Scegli il profilo di accessibilità giusto per te",
-
-                seizureSafe: "Profilo Sicuro per Convulsioni",
-
-                seizureSafeDesc: "Rimuove i flash e riduce i colori",
-
-                visionImpaired: "Profilo per Ipovedenti",
-
-                visionImpairedDesc: "Migliora gli elementi visivi del sito",
-
-                adhdFriendly: "Profilo Amichevole per ADHD",
-
-                adhdFriendlyDesc: "Riduce le distrazioni e aiuta a concentrarsi",
-
-                cognitiveDisability: "Profilo di Disabilità Cognitiva",
-
-                cognitiveDisabilityDesc: "Aiuta con la lettura e la concentrazione",
-
-                keyboardNav: "Navigazione da Tastiera (Motore)",
-
-                keyboardNavDesc: "Usare il sito web con la tastiera",
-
-                screenReader: "Utenti Ciechi (Lettore di Schermo)",
-
-                screenReaderDesc: "Ottimizzare il sito web per i lettori di schermo",
-
-                contentScaling: "Ridimensionamento del Contenuto",
-
-                contentScalingDesc: "Aumentare o diminuire la dimensione del contenuto",
-
-                readableFont: "Carattere Leggibile",
-
-                readableFontDesc: "Caratteri ad alta leggibilità",
-
-                highlightTitles: "Evidenzia Titoli",
-
-                highlightTitlesDesc: "Aggiungere scatole attorno alle intestazioni",
-
-                highlightLinks: "Evidenzia Link",
-
-                highlightLinksDesc: "Aggiungere scatole attorno ai link",
-
-                textMagnifier: "Lente di Ingrandimento Testo",
-
-                textMagnifierDesc: "Strumento lente di ingrandimento flottante",
-
-                fontSizing: "Dimensione del Carattere",
-
-                fontSizingDesc: "Aumentare o diminuire la dimensione del carattere",
-
-                alignCenter: "Allinea Centro",
-
-                alignCenterDesc: "Centra tutto il contenuto di testo",
-
-                adjustLineHeight: "Regolare Altezza della Riga",
-
-                adjustLineHeightDesc: "Aumentare o diminuire l'altezza della riga",
-
-                adjustLetterSpacing: "Regolare Spaziatura delle Lettere",
-
-                adjustLetterSpacingDesc: "Aumentare o diminuire la spaziatura delle lettere",
-
-                alignLeft: "Allinea Sinistra",
-
-                alignLeftDesc: "Allinea il contenuto di testo a sinistra",
-
-                alignRight: "Allinea Destra",
-
-                alignRightDesc: "Allinea il contenuto di testo a destra",
-
-                darkContrast: "Contrasto Scuro",
-
-                darkContrastDesc: "Sfondo scuro con testo chiaro",
-
-                lightContrast: "Contrasto Chiaro",
-
-                lightContrastDesc: "Sfondo chiaro con testo scuro",
-
-                highContrast: "Alto Contrasto",
-
-                highContrastDesc: "Implementazione di contrasto massimo",
-
-                highSaturation: "Alta Saturazione",
-
-                highSaturationDesc: "Aumenta l'intensità del colore",
-
-                adjustTextColors: "Regolare Colori del Testo",
-
-                adjustTextColorsDesc: "Funzionalità selettore colore",
-
-                monochrome: "Monocromatico",
-
-                monochromeDesc: "Rimuove tutti i colori eccetto nero, bianco, grigi",
-
-                adjustTitleColors: "Regolare Colori dei Titoli",
-
-                adjustTitleColorsDesc: "Personalizzazione colore per intestazioni",
-
-                lowSaturation: "Bassa Saturazione",
-
-                lowSaturationDesc: "Riduce l'intensità del colore",
-
-                adjustBgColors: "Regolare Colori di Sfondo",
-
-                adjustBgColorsDesc: "Personalizzazione colore di sfondo",
-
-                muteSound: "Disattiva Suono",
-
-                muteSoundDesc: "Disabilita tutto il contenuto audio",
-
-                hideImages: "Nascondi Immagini",
-
-                hideImagesDesc: "Attiva/disattiva per nascondere tutte le immagini",
-
-                readMode: "Modalità Lettura",
-
-                readModeDesc: "Rimuove elementi di navigazione",
-
-                readingGuide: "Guida alla Lettura",
-
-                readingGuideDesc: "Barra di evidenziazione mobile",
-
-                usefulLinks: "Link Utili",
-
-                usefulLinksDesc: "Risorse e link di accessibilità",
-
-                stopAnimation: "Ferma Animazione",
-
-                stopAnimationDesc: "Mette in pausa tutte le animazioni CSS",
-
-                readingMask: "Maschera di Lettura",
-
-                readingMaskDesc: "Sovrapposizione semi-trasparente",
-
-                highlightHover: "Evidenzia Hover",
-
-                highlightHoverDesc: "Feedback visivo al passaggio del mouse",
-
-                highlightFocus: "Evidenzia Focus",
-
-                highlightFocusDesc: "Indicatori di focus prominenti",
-
-                bigBlackCursor: "Cursore Nero Grande",
-
-                bigBlackCursorDesc: "Aumenta la dimensione del cursore",
-
-                bigWhiteCursor: "Cursore Bianco Grande",
-
-                bigWhiteCursorDesc: "Aumenta la dimensione del cursore",
-
-                resetSettings: "Ripristina Impostazioni",
-
-                statement: "Dichiarazione",
-
-                hideInterface: "Nascondi Interfaccia",
-
-                accessibilityFeatures: "Funzionalità di Accessibilità",
-
-                // Additional detailed descriptions
-
-                keyboardNavDetailed: "Questo profilo consente alle persone con disabilità motorie di utilizzare il sito web usando i tasti della tastiera (Tab, Shift+Tab, Invio) e le scorciatoie (es. \"M\" per i menu, \"H\" per le intestazioni, \"F\" per i moduli, \"B\" per i pulsanti, \"G\" per i grafici).",
-
-                keyboardNavNote: "Nota: Questo profilo si attiva automaticamente per gli utenti della tastiera.",
-
-                screenReaderDetailed: "Questo profilo regola il sito web per essere compatibile con i lettori di schermo come JAWS, NVDA, VoiceOver e TalkBack. Il software lettore di schermo è installato sul computer e smartphone dell'utente cieco, e i siti web devono garantire la compatibilità.",
-
-                screenReaderNote: "Nota: Questo profilo si attiva automaticamente per i lettori di schermo.",
-
-                activatesWithScreenReader: "Si attiva con Lettore di Schermo",
-
-                activatesWithKeyboardNav: "Si attiva con Navigazione da Tastiera"
-
-            },
+    title: "Ajustes de Acessibilidade",
+    profilesTitle: "Escolha o perfil de acessibilidade certo para você",
+    seizureSafe: "Perfil Anti-Convulsões",
+    seizureSafeDesc: "Elimina flashes e reduz cores",
+    visionImpaired: "Perfil de Deficiência Visual",
+    visionImpairedDesc: "Melhora os elementos visuais do site",
+    adhdFriendly: "Perfil Amigável para TDAH",
+    adhdFriendlyDesc: "Mais foco e menos distrações",
+    cognitiveDisability: "Perfil de Deficiência Cognitiva",
+    cognitiveDisabilityDesc: "Ajuda com leitura e concentração",
+    keyboardNav: "Navegação por Teclado (Motora)",
+    keyboardNavDesc: "Usar o site com o teclado",
+    screenReader: "Usuários Cegos (Leitor de Tela)",
+    screenReaderDesc: "Otimizar o site para leitores de tela",
+    contentScaling: "Escala de Conteúdo",
+    contentScalingDesc: "Escalar conteúdo com controles de setas",
+    readableFont: "Fonte Legível",
+    readableFontDesc: "Fontes de alta legibilidade",
+    highlightTitles: "Destacar Títulos",
+    highlightTitlesDesc: "Adicionar molduras ao redor dos títulos",
+    highlightLinks: "Destacar Links",
+    highlightLinksDesc: "Adicionar molduras ao redor dos links",
+    textMagnifier: "Lupa de Texto",
+    textMagnifierDesc: "Ferramenta de lupa flutuante",
+    fontSizing: "Ajustar Tamanho da Fonte",
+    fontSizingDesc: "Tamanho da fonte com controles de setas",
+    alignCenter: "Alinhar ao Centro",
+    alignCenterDesc: "Centraliza todo o conteúdo de texto",
+    adjustLineHeight: "Ajustar Altura da Linha",
+    adjustLineHeightDesc: "Altura da linha com controles de setas",
+    adjustLetterSpacing: "Ajustar Espaçamento das Letras",
+    adjustLetterSpacingDesc: "Espaçamento das letras com controles de setas",
+    alignLeft: "Alinhar à Esquerda",
+    alignLeftDesc: "Alinha o conteúdo de texto à esquerda",
+    alignRight: "Alinhar à Direita",
+    alignRightDesc: "Alinha o conteúdo de texto à direita",
+    darkContrast: "Contraste Escuro",
+    darkContrastDesc: "Fundo escuro com texto claro",
+    lightContrast: "Contraste Claro",
+    lightContrastDesc: "Fundo claro com texto escuro",
+    highContrast: "Alto Contraste",
+    highContrastDesc: "Implementação de contraste máximo",
+    highSaturation: "Alta Saturação",
+    highSaturationDesc: "Aumenta a intensidade das cores",
+    adjustTextColors: "Ajustar Cores do Texto",
+    adjustTextColorsDesc: "Funcionalidade de seletor de cor",
+    monochrome: "Monocromático",
+    monochromeDesc: "Remove todas as cores exceto preto, branco, cinza",
+    adjustTitleColors: "Ajustar Cores dos Títulos",
+    adjustTitleColorsDesc: "Personalização de cores para títulos",
+    lowSaturation: "Baixa Saturação",
+    lowSaturationDesc: "Reduz a intensidade das cores",
+    adjustBgColors: "Ajustar Cores de Fundo",
+    adjustBgColorsDesc: "Personalização de cores de fundo",
+    muteSound: "Silenciar Som",
+    muteSoundDesc: "Desativa todo o conteúdo de áudio",
+    hideImages: "Ocultar Imagens",
+    hideImagesDesc: "Alternar para ocultar todas as imagens",
+    readMode: "Modo de Leitura",
+    readModeDesc: "Remove elementos de navegação",
+    readingGuide: "Guia de Leitura",
+    readingGuideDesc: "Barra de destaque móvel",
+    usefulLinks: "Links Úteis",
+    usefulLinksDesc: "Recursos e links de acessibilidade",
+    stopAnimation: "Parar Animação",
+    stopAnimationDesc: "Pausa todas as animações CSS",
+    readingMask: "Máscara de Leitura",
+    readingMaskDesc: "Sobreposição semi-transparente",
+    highlightHover: "Destacar ao Passar",
+    highlightHoverDesc: "Feedback visual ao passar o mouse",
+    highlightFocus: "Destacar Foco",
+    highlightFocusDesc: "Indicadores de foco proeminentes",
+    bigBlackCursor: "Cursor Preto Grande",
+    bigBlackCursorDesc: "Aumenta o tamanho do cursor",
+    bigWhiteCursor: "Cursor Branco Grande",
+    bigWhiteCursorDesc: "Aumenta o tamanho do cursor",
+    resetSettings: "Redefinir Configurações",
+    statement: "Declaração",
+    hideInterface: "Ocultar Interface",
+    accessibilityFeatures: "Recursos de Acessibilidade",
+    
+    // Descrições detalhadas adicionais
+    keyboardNavDetailed: "Este perfil permite que pessoas com deficiências motoras operem o site usando teclas do teclado (Tab, Shift+Tab, Enter) e atalhos (ex: \"M\" para menus, \"H\" para títulos, \"F\" para formulários, \"B\" para botões, \"G\" para gráficos).",
+    keyboardNavNote: "Nota: Este perfil é ativado automaticamente para usuários de teclado.",
+    screenReaderDetailed: "Este perfil ajusta o site para ser compatível com leitores de tela como JAWS, NVDA, VoiceOver e TalkBack. O software leitor de tela está instalado no computador e smartphone do usuário cego, e os sites devem garantir compatibilidade.",
+    screenReaderNote: "Nota: Este perfil é ativado automaticamente com leitores de tela.",
+    activatesWithScreenReader: "Ativa com Leitor de Tela",
+    activatesWithKeyboardNav: "Ativa com Navegação por Teclado"
+},
+
+           it: {
+    title: "Impostazioni di Accessibilità",
+    profilesTitle: "Scegli il profilo di accessibilità giusto per te",
+    seizureSafe: "Profilo Anti-Epilettico",
+    seizureSafeDesc: "Elimina i flash e riduce i colori",
+    visionImpaired: "Profilo per Ipovedenti",
+    visionImpairedDesc: "Migliora gli elementi visivi del sito web",
+    adhdFriendly: "Profilo Amichevole per ADHD",
+    adhdFriendlyDesc: "Più concentrazione e meno distrazioni",
+    cognitiveDisability: "Profilo per Disabilità Cognitive",
+    cognitiveDisabilityDesc: "Aiuta con la lettura e la concentrazione",
+    keyboardNav: "Navigazione da Tastiera (Motoria)",
+    keyboardNavDesc: "Usare il sito web con la tastiera",
+    screenReader: "Utenti Ciechi (Lettore di Schermo)",
+    screenReaderDesc: "Ottimizzare il sito web per i lettori di schermo",
+    contentScaling: "Ridimensionamento Contenuto",
+    contentScalingDesc: "Ridimensionare il contenuto con controlli frecce",
+    readableFont: "Font Leggibile",
+    readableFontDesc: "Font ad alta leggibilità",
+    highlightTitles: "Evidenziare Titoli",
+    highlightTitlesDesc: "Aggiungere cornici attorno ai titoli",
+    highlightLinks: "Evidenziare Link",
+    highlightLinksDesc: "Aggiungere cornici attorno ai link",
+    textMagnifier: "Lente di Ingrandimento Testo",
+    textMagnifierDesc: "Strumento lente di ingrandimento flottante",
+    fontSizing: "Regolare Dimensione Font",
+    fontSizingDesc: "Dimensione font con controlli frecce",
+    alignCenter: "Allineare al Centro",
+    alignCenterDesc: "Centra tutto il contenuto di testo",
+    adjustLineHeight: "Regolare Altezza Riga",
+    adjustLineHeightDesc: "Altezza riga con controlli frecce",
+    adjustLetterSpacing: "Regolare Spaziatura Lettere",
+    adjustLetterSpacingDesc: "Spaziatura lettere con controlli frecce",
+    alignLeft: "Allineare a Sinistra",
+    alignLeftDesc: "Allinea il contenuto di testo a sinistra",
+    alignRight: "Allineare a Destra",
+    alignRightDesc: "Allinea il contenuto di testo a destra",
+    darkContrast: "Contrasto Scuro",
+    darkContrastDesc: "Sfondo scuro con testo chiaro",
+    lightContrast: "Contrasto Chiaro",
+    lightContrastDesc: "Sfondo chiaro con testo scuro",
+    highContrast: "Alto Contrasto",
+    highContrastDesc: "Implementazione di contrasto massimo",
+    highSaturation: "Alta Saturazione",
+    highSaturationDesc: "Aumenta l'intensità dei colori",
+    adjustTextColors: "Regolare Colori Testo",
+    adjustTextColorsDesc: "Funzionalità selettore colori",
+    monochrome: "Monocromatico",
+    monochromeDesc: "Rimuove tutti i colori eccetto nero, bianco, grigio",
+    adjustTitleColors: "Regolare Colori Titoli",
+    adjustTitleColorsDesc: "Personalizzazione colori per i titoli",
+    lowSaturation: "Bassa Saturazione",
+    lowSaturationDesc: "Riduce l'intensità dei colori",
+    adjustBgColors: "Regolare Colori Sfondo",
+    adjustBgColorsDesc: "Personalizzazione colori di sfondo",
+    muteSound: "Disattiva Suono",
+    muteSoundDesc: "Disabilita tutto il contenuto audio",
+    hideImages: "Nascondere Immagini",
+    hideImagesDesc: "Attiva/disattiva per nascondere tutte le immagini",
+    readMode: "Modalità Lettura",
+    readModeDesc: "Rimuove elementi di navigazione",
+    readingGuide: "Guida alla Lettura",
+    readingGuideDesc: "Barra di evidenziazione mobile",
+    usefulLinks: "Link Utili",
+    usefulLinksDesc: "Risorse e link di accessibilità",
+    stopAnimation: "Fermare Animazione",
+    stopAnimationDesc: "Mette in pausa tutte le animazioni CSS",
+    readingMask: "Maschera di Lettura",
+    readingMaskDesc: "Sovrapposizione semi-trasparente",
+    highlightHover: "Evidenziare al Passaggio",
+    highlightHoverDesc: "Feedback visivo al passaggio del mouse",
+    highlightFocus: "Evidenziare Focus",
+    highlightFocusDesc: "Indicatori di focus prominenti",
+    bigBlackCursor: "Cursore Nero Grande",
+    bigBlackCursorDesc: "Aumenta la dimensione del cursore",
+    bigWhiteCursor: "Cursore Bianco Grande",
+    bigWhiteCursorDesc: "Aumenta la dimensione del cursore",
+    resetSettings: "Ripristina Impostazioni",
+    statement: "Dichiarazione",
+    hideInterface: "Nascondere Interfaccia",
+    accessibilityFeatures: "Funzionalità di Accessibilità",
+    
+    // Descrizioni dettagliate aggiuntive
+    keyboardNavDetailed: "Questo profilo consente alle persone con disabilità motorie di operare il sito web usando i tasti della tastiera (Tab, Shift+Tab, Enter) e scorciatoie (es: \"M\" per i menu, \"H\" per i titoli, \"F\" per i moduli, \"B\" per i pulsanti, \"G\" per i grafici).",
+    keyboardNavNote: "Nota: Questo profilo si attiva automaticamente per gli utenti della tastiera.",
+    screenReaderDetailed: "Questo profilo regola il sito web per essere compatibile con i lettori di schermo come JAWS, NVDA, VoiceOver e TalkBack. Il software lettore di schermo è installato sul computer e smartphone dell'utente cieco, e i siti web devono garantire la compatibilità.",
+    screenReaderNote: "Nota: Questo profilo si attiva automaticamente con i lettori di schermo.",
+    activatesWithScreenReader: "Si attiva con Lettore di Schermo",
+    activatesWithKeyboardNav: "Si attiva con Navigazione da Tastiera"
+},
+
+            il: {
+    title: "התאמות נגישות",
+    profilesTitle: "בחרו את פרופיל הנגישות הנכון עבורכם",
+    seizureSafe: "פרופיל בטוח מפני התקפים",
+    seizureSafeDesc: "מבטל הבזקים ומפחית צבעים",
+    visionImpaired: "פרופיל לקויי ראייה",
+    visionImpairedDesc: "משפר את המראה החזותי של האתר",
+    adhdFriendly: "פרופיל ידידותי ל-ADHD",
+    adhdFriendlyDesc: "יותר ריכוז ופחות הסחות דעת",
+    cognitiveDisability: "פרופיל לקות קוגניטיבית",
+    cognitiveDisabilityDesc: "עוזר בקריאה ובהתמקדות",
+    keyboardNav: "ניווט במקלדת (מוטורי)",
+    keyboardNavDesc: "שימוש באתר עם המקלדת",
+    screenReader: "משתמשים עיוורים (קורא מסך)",
+    screenReaderDesc: "אופטימיזציה של האתר לקוראי מסך",
+    contentScaling: "הגדלת תוכן",
+    contentScalingDesc: "הגדלת תוכן עם בקרות חצים",
+    readableFont: "גופן קריא",
+    readableFontDesc: "גופנים בעלי קריאות גבוהה",
+    highlightTitles: "הדגשת כותרות",
+    highlightTitlesDesc: "הוספת מסגרות סביב כותרות",
+    highlightLinks: "הדגשת קישורים",
+    highlightLinksDesc: "הוספת מסגרות סביב קישורים",
+    textMagnifier: "זכוכית מגדלת לטקסט",
+    textMagnifierDesc: "כלי זכוכית מגדלת צף",
+    fontSizing: "התאמת גודל גופן",
+    fontSizingDesc: "גודל גופן עם בקרות חצים",
+    alignCenter: "יישור למרכז",
+    alignCenterDesc: "מרכז את כל תוכן הטקסט",
+    adjustLineHeight: "התאמת גובה שורה",
+    adjustLineHeightDesc: "גובה שורה עם בקרות חצים",
+    adjustLetterSpacing: "התאמת רווח בין אותיות",
+    adjustLetterSpacingDesc: "רווח בין אותיות עם בקרות חצים",
+    alignLeft: "יישור לשמאל",
+    alignLeftDesc: "מיישר תוכן טקסט לשמאל",
+    alignRight: "יישור לימין",
+    alignRightDesc: "מיישר תוכן טקסט לימין",
+    darkContrast: "ניגודיות כהה",
+    darkContrastDesc: "רקע כהה עם טקסט בהיר",
+    lightContrast: "ניגודיות בהירה",
+    lightContrastDesc: "רקע בהיר עם טקסט כהה",
+    highContrast: "ניגודיות גבוהה",
+    highContrastDesc: "יישום ניגודיות מקסימלית",
+    highSaturation: "רוויה גבוהה",
+    highSaturationDesc: "מגביר עוצמת צבעים",
+    adjustTextColors: "התאמת צבעי טקסט",
+    adjustTextColorsDesc: "פונקציונליות בוחר צבעים",
+    monochrome: "מונוכרום",
+    monochromeDesc: "מסיר את כל הצבעים מלבד שחור, לבן, אפור",
+    adjustTitleColors: "התאמת צבעי כותרות",
+    adjustTitleColorsDesc: "התאמה אישית של צבעים לכותרות",
+    lowSaturation: "רוויה נמוכה",
+    lowSaturationDesc: "מפחית עוצמת צבעים",
+    adjustBgColors: "התאמת צבעי רקע",
+    adjustBgColorsDesc: "התאמה אישית של צבעי רקע",
+    muteSound: "השתקת קול",
+    muteSoundDesc: "מבטל את כל התוכן האודיו",
+    hideImages: "הסתרת תמונות",
+    hideImagesDesc: "מעבר להסתרת כל התמונות",
+    readMode: "מצב קריאה",
+    readModeDesc: "מסיר אלמנטי ניווט",
+    readingGuide: "מדריך קריאה",
+    readingGuideDesc: "סרגל הדגשה נייד",
+    usefulLinks: "קישורים שימושיים",
+    usefulLinksDesc: "משאבים וקישורי נגישות",
+    stopAnimation: "עצירת אנימציה",
+    stopAnimationDesc: "משה את כל אנימציות ה-CSS",
+    readingMask: "מסכת קריאה",
+    readingMaskDesc: "שכבת כיסוי שקופה למחצה",
+    highlightHover: "הדגשת מעבר עכבר",
+    highlightHoverDesc: "משוב חזותי במעבר עכבר",
+    highlightFocus: "הדגשת פוקוס",
+    highlightFocusDesc: "אינדיקטורי פוקוס בולטים",
+    bigBlackCursor: "סמן שחור גדול",
+    bigBlackCursorDesc: "מגדיל את גודל הסמן",
+    bigWhiteCursor: "סמן לבן גדול",
+    bigWhiteCursorDesc: "מגדיל את גודל הסמן",
+    resetSettings: "איפוס הגדרות",
+    statement: "הצהרה",
+    hideInterface: "הסתרת ממשק",
+    accessibilityFeatures: "תכונות נגישות",
+    
+    // תיאורים מפורטים נוספים
+    keyboardNavDetailed: "פרופיל זה מאפשר לאנשים עם לקויות מוטוריות להפעיל את האתר באמצעות מקשי המקלדת (Tab, Shift+Tab, Enter) וקיצורי דרך (למשל \"M\" לתפריטים, \"H\" לכותרות, \"F\" לטופסים, \"B\" לכפתורים, \"G\" לגרפיקה).",
+    keyboardNavNote: "הערה: פרופיל זה מופעל אוטומטית למשתמשי מקלדת.",
+    screenReaderDetailed: "פרופיל זה מתאים את האתר להיות תואם לקוראי מסך כמו JAWS, NVDA, VoiceOver ו-TalkBack. תוכנת קורא מסך מותקנת במחשב ובסמארטפון של המשתמש העיוור, ואתרים צריכים להבטיח תאימות.",
+    screenReaderNote: "הערה: פרופיל זה מופעל אוטומטית עם קוראי מסך.",
+    activatesWithScreenReader: "מופעל עם קורא מסך",
+    activatesWithKeyboardNav: "מופעל עם ניווט במקלדת"
+},
 
             he: {
 
@@ -6674,183 +6465,185 @@ window.addEventListener('resize', () => {
             },
 
             ru: {
-
-                title: "Настройки доступности",
-
-                profilesTitle: "Выберите подходящий профиль доступности для вас",
-
-                seizureSafe: "Профиль безопасности от приступов",
-
-                seizureSafeDesc: "Убирает вспышки и уменьшает цвета",
-
-                visionImpaired: "Профиль для слабовидящих",
-
-                visionImpairedDesc: "Улучшает визуальные элементы сайта",
-
-                adhdFriendly: "Профиль для СДВГ",
-
-                adhdFriendlyDesc: "Уменьшает отвлекающие факторы и помогает сосредоточиться",
-
-                cognitiveDisability: "Профиль когнитивных нарушений",
-
-                cognitiveDisabilityDesc: "Помогает с чтением и концентрацией",
-
-                keyboardNav: "Навигация с клавиатуры (Моторная)",
-
-                keyboardNavDesc: "Использовать сайт с клавиатурой",
-
-                screenReader: "Слепые пользователи (Экранный диктор)",
-
-                screenReaderDesc: "Оптимизировать сайт для экранных дикторов",
-
-                contentScaling: "Масштабирование контента",
-
-                contentScalingDesc: "Увеличить или уменьшить размер контента",
-
-                readableFont: "Читаемый шрифт",
-
-                readableFontDesc: "Шрифты с высокой читаемостью",
-
-                highlightTitles: "Выделить заголовки",
-
-                highlightTitlesDesc: "Добавить рамки вокруг заголовков",
-
-                highlightLinks: "Выделить ссылки",
-
-                highlightLinksDesc: "Добавить рамки вокруг ссылок",
-
-                textMagnifier: "Увеличительное стекло для текста",
-
-                textMagnifierDesc: "Плавающий инструмент увеличения",
-
-                fontSizing: "Размер шрифта",
-
-                fontSizingDesc: "Увеличить или уменьшить размер шрифта",
-
-                alignCenter: "Выровнять по центру",
-
-                alignCenterDesc: "Центрирует весь текстовый контент",
-
-                adjustLineHeight: "Настроить высоту строки",
-
-                adjustLineHeightDesc: "Увеличить или уменьшить высоту строки",
-
-                adjustLetterSpacing: "Настроить межбуквенный интервал",
-
-                adjustLetterSpacingDesc: "Увеличить или уменьшить межбуквенный интервал",
-
-                alignLeft: "Выровнять по левому краю",
-
-                alignLeftDesc: "Выравнивает текстовый контент по левому краю",
-
-                alignRight: "Выровнять по правому краю",
-
-                alignRightDesc: "Выравнивает текстовый контент по правому краю",
-
-                darkContrast: "Темный контраст",
-
-                darkContrastDesc: "Темный фон со светлым текстом",
-
-                lightContrast: "Светлый контраст",
-
-                lightContrastDesc: "Светлый фон с темным текстом",
-
-                highContrast: "Высокий контраст",
-
-                highContrastDesc: "Максимальная реализация контраста",
-
-                highSaturation: "Высокая насыщенность",
-
-                highSaturationDesc: "Увеличивает интенсивность цвета",
-
-                adjustTextColors: "Настроить цвета текста",
-
-                adjustTextColorsDesc: "Функциональность выбора цвета",
-
-                monochrome: "Монохромный",
-
-                monochromeDesc: "Удаляет все цвета кроме черного, белого, серого",
-
-                adjustTitleColors: "Настроить цвета заголовков",
-
-                adjustTitleColorsDesc: "Настройка цвета для заголовков",
-
-                lowSaturation: "Низкая насыщенность",
-
-                lowSaturationDesc: "Уменьшает интенсивность цвета",
-
-                adjustBgColors: "Настроить цвета фона",
-
-                adjustBgColorsDesc: "Настройка цвета фона",
-
-                muteSound: "Отключить звук",
-
-                muteSoundDesc: "Отключает весь аудио контент",
-
-                hideImages: "Скрыть изображения",
-
-                hideImagesDesc: "Переключить для скрытия всех изображений",
-
-                readMode: "Режим чтения",
-
-                readModeDesc: "Удаляет элементы навигации",
-
-                readingGuide: "Руководство по чтению",
-
-                readingGuideDesc: "Подвижная полоса выделения",
-
-                usefulLinks: "Полезные ссылки",
-
-                usefulLinksDesc: "Ресурсы и ссылки доступности",
-
-                stopAnimation: "Остановить анимацию",
-
-                stopAnimationDesc: "Приостанавливает все CSS анимации",
-
-                readingMask: "Маска для чтения",
-
-                readingMaskDesc: "Полупрозрачное наложение",
-
-                highlightHover: "Выделить при наведении",
-
-                highlightHoverDesc: "Визуальная обратная связь при наведении",
-
-                highlightFocus: "Выделить фокус",
-
-                highlightFocusDesc: "Выдающиеся индикаторы фокуса",
-
-                bigBlackCursor: "Большой черный курсор",
-
-                bigBlackCursorDesc: "Увеличивает размер курсора",
-
-                bigWhiteCursor: "Большой белый курсор",
-
-                bigWhiteCursorDesc: "Увеличивает размер курсора",
-
-                resetSettings: "Сбросить настройки",
-
-                statement: "Заявление",
-
-                hideInterface: "Скрыть интерфейс",
-
-                accessibilityFeatures: "Функции доступности",
-
-                // Additional detailed descriptions
-
-                keyboardNavDetailed: "Этот профиль позволяет людям с двигательными нарушениями управлять сайтом с помощью клавиш клавиатуры (Tab, Shift+Tab, Enter) и горячих клавиш (например, \"M\" для меню, \"H\" для заголовков, \"F\" для форм, \"B\" для кнопок, \"G\" для графики).",
-
-                keyboardNavNote: "Примечание: Этот профиль автоматически активируется для пользователей клавиатуры.",
-
-                screenReaderDetailed: "Этот профиль настраивает сайт для совместимости с экранными дикторами, такими как JAWS, NVDA, VoiceOver и TalkBack. Программное обеспечение экранного диктора установлено на компьютере и смартфоне слепого пользователя, и веб-сайты должны обеспечивать совместимость.",
-
-                screenReaderNote: "Примечание: Этот профиль автоматически активируется для экранных дикторов.",
-
-                activatesWithScreenReader: "Активируется с экранным диктором",
-
-                activatesWithKeyboardNav: "Активируется с навигацией клавиатуры"
-
-            },
-
+    title: "Настройки доступности",
+    profilesTitle: "Выберите подходящий профиль доступности",
+    seizureSafe: "Профиль против эпилепсии",
+    seizureSafeDesc: "Устраняет вспышки и снижает цвета",
+    visionImpaired: "Профиль для слабовидящих",
+    visionImpairedDesc: "Улучшает визуальные элементы сайта",
+    adhdFriendly: "Профиль для СДВГ",
+    adhdFriendlyDesc: "Больше концентрации и меньше отвлекающих факторов",
+    cognitiveDisability: "Профиль когнитивных нарушений",
+    cognitiveDisabilityDesc: "Помогает с чтением и концентрацией",
+    keyboardNav: "Навигация с клавиатуры (моторная)",
+    keyboardNavDesc: "Использование сайта с клавиатуры",
+    screenReader: "Слепые пользователи (скрин-ридер)",
+    screenReaderDesc: "Оптимизация сайта для скрин-ридеров",
+    contentScaling: "Масштабирование контента",
+    contentScalingDesc: "Масштабирование контента с помощью стрелок",
+    readableFont: "Читаемый шрифт",
+    readableFontDesc: "Шрифты с высокой читаемостью",
+    highlightTitles: "Выделение заголовков",
+    highlightTitlesDesc: "Добавление рамок вокруг заголовков",
+    highlightLinks: "Выделение ссылок",
+    highlightLinksDesc: "Добавление рамок вокруг ссылок",
+    textMagnifier: "Увеличительное стекло для текста",
+    textMagnifierDesc: "Плавающий инструмент увеличения",
+    fontSizing: "Настройка размера шрифта",
+    fontSizingDesc: "Размер шрифта с помощью стрелок",
+    alignCenter: "Выравнивание по центру",
+    alignCenterDesc: "Центрирует весь текстовый контент",
+    adjustLineHeight: "Настройка межстрочного интервала",
+    adjustLineHeightDesc: "Межстрочный интервал с помощью стрелок",
+    adjustLetterSpacing: "Настройка межбуквенного интервала",
+    adjustLetterSpacingDesc: "Межбуквенный интервал с помощью стрелок",
+    alignLeft: "Выравнивание по левому краю",
+    alignLeftDesc: "Выравнивает текстовый контент по левому краю",
+    alignRight: "Выравнивание по правому краю",
+    alignRightDesc: "Выравнивает текстовый контент по правому краю",
+    darkContrast: "Темный контраст",
+    darkContrastDesc: "Темный фон со светлым текстом",
+    lightContrast: "Светлый контраст",
+    lightContrastDesc: "Светлый фон с темным текстом",
+    highContrast: "Высокий контраст",
+    highContrastDesc: "Максимальная реализация контраста",
+    highSaturation: "Высокая насыщенность",
+    highSaturationDesc: "Увеличивает интенсивность цветов",
+    adjustTextColors: "Настройка цветов текста",
+    adjustTextColorsDesc: "Функциональность выбора цвета",
+    monochrome: "Монохром",
+    monochromeDesc: "Удаляет все цвета кроме черного, белого, серого",
+    adjustTitleColors: "Настройка цветов заголовков",
+    adjustTitleColorsDesc: "Настройка цветов для заголовков",
+    lowSaturation: "Низкая насыщенность",
+    lowSaturationDesc: "Снижает интенсивность цветов",
+    adjustBgColors: "Настройка цветов фона",
+    adjustBgColorsDesc: "Настройка цветов фона",
+    muteSound: "Отключить звук",
+    muteSoundDesc: "Отключает весь аудио контент",
+    hideImages: "Скрыть изображения",
+    hideImagesDesc: "Переключение для скрытия всех изображений",
+    readMode: "Режим чтения",
+    readModeDesc: "Удаляет элементы навигации",
+    readingGuide: "Руководство по чтению",
+    readingGuideDesc: "Подвижная полоса выделения",
+    usefulLinks: "Полезные ссылки",
+    usefulLinksDesc: "Ресурсы и ссылки доступности",
+    stopAnimation: "Остановить анимацию",
+    stopAnimationDesc: "Приостанавливает все CSS анимации",
+    readingMask: "Маска для чтения",
+    readingMaskDesc: "Полупрозрачное наложение",
+    highlightHover: "Выделение при наведении",
+    highlightHoverDesc: "Визуальная обратная связь при наведении",
+    highlightFocus: "Выделение фокуса",
+    highlightFocusDesc: "Выделенные индикаторы фокуса",
+    bigBlackCursor: "Большой черный курсор",
+    bigBlackCursorDesc: "Увеличивает размер курсора",
+    bigWhiteCursor: "Большой белый курсор",
+    bigWhiteCursorDesc: "Увеличивает размер курсора",
+    resetSettings: "Сбросить настройки",
+    statement: "Заявление",
+    hideInterface: "Скрыть интерфейс",
+    accessibilityFeatures: "Функции доступности",
+    
+    // Дополнительные подробные описания
+    keyboardNavDetailed: "Этот профиль позволяет людям с моторными нарушениями управлять сайтом с помощью клавиш клавиатуры (Tab, Shift+Tab, Enter) и горячих клавиш (например, \"M\" для меню, \"H\" для заголовков, \"F\" для форм, \"B\" для кнопок, \"G\" для графики).",
+    keyboardNavNote: "Примечание: Этот профиль автоматически активируется для пользователей клавиатуры.",
+    screenReaderDetailed: "Этот профиль настраивает сайт для совместимости со скрин-ридерами, такими как JAWS, NVDA, VoiceOver и TalkBack. Программное обеспечение скрин-ридера установлено на компьютере и смартфоне слепого пользователя, и веб-сайты должны обеспечивать совместимость.",
+    screenReaderNote: "Примечание: Этот профиль автоматически активируется со скрин-ридерами.",
+    activatesWithScreenReader: "Активируется со скрин-ридером",
+    activatesWithKeyboardNav: "Активируется с навигацией по клавиатуре"
+},
+            tw: {
+    title: "無障礙調整",
+    profilesTitle: "為您選擇合適的無障礙設定檔",
+    seizureSafe: "防癲癇設定檔",
+    seizureSafeDesc: "消除閃爍並減少顏色",
+    visionImpaired: "視力受損設定檔",
+    visionImpairedDesc: "增強網站的視覺效果",
+    adhdFriendly: "ADHD友善設定檔",
+    adhdFriendlyDesc: "更多專注，更少分心",
+    cognitiveDisability: "認知障礙設定檔",
+    cognitiveDisabilityDesc: "協助閱讀和專注",
+    keyboardNav: "鍵盤導航（運動功能）",
+    keyboardNavDesc: "使用鍵盤操作網站",
+    screenReader: "盲人用戶（螢幕閱讀器）",
+    screenReaderDesc: "為螢幕閱讀器優化網站",
+    contentScaling: "內容縮放",
+    contentScalingDesc: "使用箭頭控制縮放內容",
+    readableFont: "易讀字體",
+    readableFontDesc: "高可讀性字體",
+    highlightTitles: "突出標題",
+    highlightTitlesDesc: "在標題周圍添加框線",
+    highlightLinks: "突出連結",
+    highlightLinksDesc: "在連結周圍添加框線",
+    textMagnifier: "文字放大鏡",
+    textMagnifierDesc: "浮動放大工具",
+    fontSizing: "調整字體大小",
+    fontSizingDesc: "使用箭頭控制字體大小",
+    alignCenter: "置中對齊",
+    alignCenterDesc: "將所有文字內容置中",
+    adjustLineHeight: "調整行高",
+    adjustLineHeightDesc: "使用箭頭控制行高",
+    adjustLetterSpacing: "調整字母間距",
+    adjustLetterSpacingDesc: "使用箭頭控制字母間距",
+    alignLeft: "左對齊",
+    alignLeftDesc: "將文字內容左對齊",
+    alignRight: "右對齊",
+    alignRightDesc: "將文字內容右對齊",
+    darkContrast: "深色對比",
+    darkContrastDesc: "深色背景配淺色文字",
+    lightContrast: "淺色對比",
+    lightContrastDesc: "淺色背景配深色文字",
+    highContrast: "高對比",
+    highContrastDesc: "最大對比度實施",
+    highSaturation: "高飽和度",
+    highSaturationDesc: "增加顏色強度",
+    adjustTextColors: "調整文字顏色",
+    adjustTextColorsDesc: "顏色選擇器功能",
+    monochrome: "單色",
+    monochromeDesc: "移除除黑、白、灰以外的所有顏色",
+    adjustTitleColors: "調整標題顏色",
+    adjustTitleColorsDesc: "標題顏色自訂",
+    lowSaturation: "低飽和度",
+    lowSaturationDesc: "降低顏色強度",
+    adjustBgColors: "調整背景顏色",
+    adjustBgColorsDesc: "背景顏色自訂",
+    muteSound: "靜音",
+    muteSoundDesc: "停用所有音訊內容",
+    hideImages: "隱藏圖片",
+    hideImagesDesc: "切換隱藏所有圖片",
+    readMode: "閱讀模式",
+    readModeDesc: "移除導航元素",
+    readingGuide: "閱讀指南",
+    readingGuideDesc: "可移動的突出顯示條",
+    usefulLinks: "有用連結",
+    usefulLinksDesc: "無障礙資源和連結",
+    stopAnimation: "停止動畫",
+    stopAnimationDesc: "暫停所有CSS動畫",
+    readingMask: "閱讀遮罩",
+    readingMaskDesc: "半透明覆蓋層",
+    highlightHover: "懸停突出",
+    highlightHoverDesc: "懸停時的視覺回饋",
+    highlightFocus: "焦點突出",
+    highlightFocusDesc: "突出的焦點指示器",
+    bigBlackCursor: "大黑色游標",
+    bigBlackCursorDesc: "增加游標大小",
+    bigWhiteCursor: "大白色游標",
+    bigWhiteCursorDesc: "增加游標大小",
+    resetSettings: "重設設定",
+    statement: "聲明",
+    hideInterface: "隱藏介面",
+    accessibilityFeatures: "無障礙功能",
+    
+    // 額外的詳細描述
+    keyboardNavDetailed: "此設定檔讓運動功能受損的人士能夠使用鍵盤按鍵（Tab、Shift+Tab、Enter）和快捷鍵（例如「M」代表選單、「H」代表標題、「F」代表表單、「B」代表按鈕、「G」代表圖形）操作網站。",
+    keyboardNavNote: "注意：此設定檔會自動為鍵盤用戶啟用。",
+    screenReaderDetailed: "此設定檔調整網站以與JAWS、NVDA、VoiceOver和TalkBack等螢幕閱讀器相容。螢幕閱讀器軟體安裝在盲人用戶的電腦和智慧型手機上，網站應確保相容性。",
+    screenReaderNote: "注意：此設定檔會自動與螢幕閱讀器一起啟用。",
+    activatesWithScreenReader: "與螢幕閱讀器一起啟用",
+    activatesWithKeyboardNav: "與鍵盤導航一起啟用"
+},
             ar: {
 
                 title: "إعدادات إمكانية الوصول",
@@ -7028,7 +6821,96 @@ window.addEventListener('resize', () => {
                 activatesWithKeyboardNav: "يتفعل مع التنقل بلوحة المفاتيح"
 
             },
-
+            ae: {
+    title: "تعديلات إمكانية الوصول",
+    profilesTitle: "اختر ملف إمكانية الوصول المناسب لك",
+    seizureSafe: "ملف آمن من النوبات",
+    seizureSafeDesc: "يزيل الومضات ويقلل الألوان",
+    visionImpaired: "ملف ضعاف البصر",
+    visionImpairedDesc: "يحسن العناصر البصرية للموقع",
+    adhdFriendly: "ملف صديق لاضطراب فرط الحركة",
+    adhdFriendlyDesc: "مزيد من التركيز وأقل تشتيت",
+    cognitiveDisability: "ملف الإعاقة المعرفية",
+    cognitiveDisabilityDesc: "يساعد في القراءة والتركيز",
+    keyboardNav: "التنقل بلوحة المفاتيح (حركي)",
+    keyboardNavDesc: "استخدام الموقع بلوحة المفاتيح",
+    screenReader: "المستخدمون المكفوفون (قارئ الشاشة)",
+    screenReaderDesc: "تحسين الموقع لقارئات الشاشة",
+    contentScaling: "تحجيم المحتوى",
+    contentScalingDesc: "تحجيم المحتوى بأزرار الأسهم",
+    readableFont: "خط مقروء",
+    readableFontDesc: "خطوط عالية الوضوح",
+    highlightTitles: "تمييز العناوين",
+    highlightTitlesDesc: "إضافة إطارات حول العناوين",
+    highlightLinks: "تمييز الروابط",
+    highlightLinksDesc: "إضافة إطارات حول الروابط",
+    textMagnifier: "مكبر النص",
+    textMagnifierDesc: "أداة تكبير عائمة",
+    fontSizing: "ضبط حجم الخط",
+    fontSizingDesc: "حجم الخط بأزرار الأسهم",
+    alignCenter: "محاذاة للوسط",
+    alignCenterDesc: "يوسط كل محتوى النص",
+    adjustLineHeight: "ضبط ارتفاع السطر",
+    adjustLineHeightDesc: "ارتفاع السطر بأزرار الأسهم",
+    adjustLetterSpacing: "ضبط المسافة بين الحروف",
+    adjustLetterSpacingDesc: "المسافة بين الحروف بأزرار الأسهم",
+    alignLeft: "محاذاة لليسار",
+    alignLeftDesc: "يحاذي محتوى النص لليسار",
+    alignRight: "محاذاة لليمين",
+    alignRightDesc: "يحاذي محتوى النص لليمين",
+    darkContrast: "تباين داكن",
+    darkContrastDesc: "خلفية داكنة مع نص فاتح",
+    lightContrast: "تباين فاتح",
+    lightContrastDesc: "خلفية فاتحة مع نص داكن",
+    highContrast: "تباين عالي",
+    highContrastDesc: "تطبيق أقصى تباين",
+    highSaturation: "تشبع عالي",
+    highSaturationDesc: "يزيد من كثافة الألوان",
+    adjustTextColors: "ضبط ألوان النص",
+    adjustTextColorsDesc: "وظيفة منتقي الألوان",
+    monochrome: "أحادي اللون",
+    monochromeDesc: "يزيل كل الألوان عدا الأسود والأبيض والرمادي",
+    adjustTitleColors: "ضبط ألوان العناوين",
+    adjustTitleColorsDesc: "تخصيص الألوان للعناوين",
+    lowSaturation: "تشبع منخفض",
+    lowSaturationDesc: "يقلل من كثافة الألوان",
+    adjustBgColors: "ضبط ألوان الخلفية",
+    adjustBgColorsDesc: "تخصيص ألوان الخلفية",
+    muteSound: "كتم الصوت",
+    muteSoundDesc: "يعطل كل المحتوى الصوتي",
+    hideImages: "إخفاء الصور",
+    hideImagesDesc: "تبديل لإخفاء كل الصور",
+    readMode: "وضع القراءة",
+    readModeDesc: "يزيل عناصر التنقل",
+    readingGuide: "دليل القراءة",
+    readingGuideDesc: "شريط تمييز متحرك",
+    usefulLinks: "روابط مفيدة",
+    usefulLinksDesc: "مصادر وروابط إمكانية الوصول",
+    stopAnimation: "إيقاف الرسوم المتحركة",
+    stopAnimationDesc: "يوقف كل رسوم CSS المتحركة",
+    readingMask: "قناع القراءة",
+    readingMaskDesc: "طبقة شفافة جزئياً",
+    highlightHover: "تمييز عند التمرير",
+    highlightHoverDesc: "ردود فعل بصرية عند التمرير",
+    highlightFocus: "تمييز التركيز",
+    highlightFocusDesc: "مؤشرات تركيز بارزة",
+    bigBlackCursor: "مؤشر أسود كبير",
+    bigBlackCursorDesc: "يزيد من حجم المؤشر",
+    bigWhiteCursor: "مؤشر أبيض كبير",
+    bigWhiteCursorDesc: "يزيد من حجم المؤشر",
+    resetSettings: "إعادة تعيين الإعدادات",
+    statement: "بيان",
+    hideInterface: "إخفاء الواجهة",
+    accessibilityFeatures: "ميزات إمكانية الوصول",
+    
+    // أوصاف مفصلة إضافية
+    keyboardNavDetailed: "هذا الملف يتيح للأشخاص ذوي الإعاقات الحركية تشغيل الموقع باستخدام مفاتيح لوحة المفاتيح (Tab، Shift+Tab، Enter) والاختصارات (مثل \"M\" للقوائم، \"H\" للعناوين، \"F\" للنماذج، \"B\" للأزرار، \"G\" للرسوم).",
+    keyboardNavNote: "ملاحظة: هذا الملف يُفعل تلقائياً لمستخدمي لوحة المفاتيح.",
+    screenReaderDetailed: "هذا الملف يعدل الموقع ليكون متوافقاً مع قارئات الشاشة مثل JAWS وNVDA وVoiceOver وTalkBack. برنامج قارئ الشاشة مثبت على حاسوب وهاتف المستخدم المكفوف، والمواقع يجب أن تضمن التوافق.",
+    screenReaderNote: "ملاحظة: هذا الملف يُفعل تلقائياً مع قارئات الشاشة.",
+    activatesWithScreenReader: "يُفعل مع قارئ الشاشة",
+    activatesWithKeyboardNav: "يُفعل مع التنقل بلوحة المفاتيح"
+},
             zh: { title: "无障碍调整", seizureSafe: "癫痫安全配置文件", seizureSafeDesc: "清除闪烁并减少颜色", visionImpaired: "视力障碍配置文件", visionImpairedDesc: "增强网站的视觉效果", adhdFriendly: "多动症友好配置文件", adhdFriendlyDesc: "减少干扰并帮助集中注意力", fontSizing: "字体大小", fontSizingDesc: "增加或减少字体大小", adjustLineHeight: "调整行高", adjustLineHeightDesc: "增加或减少行高", adjustLetterSpacing: "调整字母间距", adjustLetterSpacingDesc: "增加或减少字母间距", contentScaling: "内容缩放", contentScalingDesc: "增加或减少内容大小", resetSettings: "重置设置", statement: "声明", hideInterface: "隐藏界面", accessibilityFeatures: "无障碍功能" },
 
             ja: { title: "アクセシビリティ調整", seizureSafe: "発作安全プロファイル", seizureSafeDesc: "フラッシュを除去し、色を減らします", visionImpaired: "視覚障害者プロファイル", visionImpairedDesc: "ウェブサイトの視覚要素を向上させます", adhdFriendly: "ADHDフレンドリープロファイル", adhdFriendlyDesc: "注意散漫を減らし、集中力を高めます", fontSizing: "フォントサイズ", fontSizingDesc: "フォントサイズを増減します", adjustLineHeight: "行の高さを調整", adjustLineHeightDesc: "行の高さを増減します", adjustLetterSpacing: "文字間隔を調整", adjustLetterSpacingDesc: "文字間隔を増減します", contentScaling: "コンテンツスケーリング", contentScalingDesc: "コンテンツサイズを増減します", resetSettings: "設定をリセット", statement: "ステートメント", hideInterface: "インターフェースを非表示", accessibilityFeatures: "アクセシビリティ機能" },
@@ -7038,8 +6920,6 @@ window.addEventListener('resize', () => {
             tr: { title: "Erişilebilirlik Ayarları", seizureSafe: "Nöbet Güvenli Profil", seizureSafeDesc: "Flaşları temizler ve renkleri azaltır", visionImpaired: "Görme Engelli Profil", visionImpairedDesc: "Web sitesinin görsel öğelerini geliştirir", adhdFriendly: "DEHB Dostu Profil", adhdFriendlyDesc: "Dikkat dağınıklığını azaltır ve odaklanmaya yardımcı olur", fontSizing: "Yazı Tipi Boyutu", fontSizingDesc: "Yazı tipi boyutunu artır veya azalt", adjustLineHeight: "Satır Yüksekliğini Ayarla", adjustLineHeightDesc: "Satır yüksekliğini artır veya azalt", adjustLetterSpacing: "Harf Aralığını Ayarla", adjustLetterSpacingDesc: "Harf aralığını artır veya azalt", contentScaling: "İçerik Ölçeklendirme", contentScalingDesc: "İçerik boyutunu artır veya azalt", resetSettings: "Ayarları Sıfırla", statement: "Beyan", hideInterface: "Arayüzü Gizle", accessibilityFeatures: "Erişilebilirlik Özellikleri" },
 
             // Add new language codes from screenshots
-
-            tw: { title: "無障礙調整", profilesTitle: "為您選擇合適的無障礙配置文件", seizureSafe: "癲癇安全配置文件", seizureSafeDesc: "清除閃爍並減少顏色", visionImpaired: "視力障礙配置文件", visionImpairedDesc: "增強網站的視覺效果", adhdFriendly: "多動症友好配置文件", adhdFriendlyDesc: "減少干擾並幫助集中注意力", fontSizing: "字體大小", fontSizingDesc: "增加或減少字體大小", adjustLineHeight: "調整行高", adjustLineHeightDesc: "增加或減少行高", adjustLetterSpacing: "調整字母間距", adjustLetterSpacingDesc: "增加或減少字母間距", contentScaling: "內容縮放", contentScalingDesc: "增加或減少內容大小", resetSettings: "重置設置", statement: "聲明", hideInterface: "隱藏界面", accessibilityFeatures: "無障礙功能" },
 
             ps: { title: "إعدادات إمكانية الوصول", profilesTitle: "اختر ملف إمكانية الوصول المناسب لك", seizureSafe: "ملف آمن للنوبات", seizureSafeDesc: "يزيل الومضات ويقلل الألوان", visionImpaired: "ملف للمعاقين بصرياً", visionImpairedDesc: "يحسن العناصر البصرية للموقع", adhdFriendly: "ملف صديق لاضطراب فرط الحركة", adhdFriendlyDesc: "يقلل المشتتات ويساعد على التركيز", fontSizing: "حجم الخط", fontSizingDesc: "زيادة أو تقليل حجم الخط", adjustLineHeight: "ضبط ارتفاع السطر", adjustLineHeightDesc: "زيادة أو تقليل ارتفاع السطر", adjustLetterSpacing: "ضبط المسافة بين الحروف", adjustLetterSpacingDesc: "زيادة أو تقليل المسافة بين الحروف", contentScaling: "تحجيم المحتوى", contentScalingDesc: "زيادة أو تقليل حجم المحتوى", resetSettings: "إعادة تعيين الإعدادات", statement: "بيان", hideInterface: "إخفاء الواجهة", accessibilityFeatures: "ميزات إمكانية الوصول" },
 
@@ -7385,7 +7265,7 @@ window.addEventListener('resize', () => {
 
                 'it': 'ITALIANO', 'he': 'עברית', 'tw': '繁體中文', 'ru': 'РУССКИЙ', 'ar': 'العربية',
 
-                'ar-ae': 'العربية', 'nl': 'NEDERLANDS', 'zh-cn': '简体中文', 'ja': '日本語', 'pl': 'POLSKI', 'tr': 'TÜRKÇE',
+                'ae': 'العربية', 'nl': 'NEDERLANDS', 'zh-cn': '简体中文', 'ja': '日本語', 'pl': 'POLSKI', 'tr': 'TÜRKÇE',
 
                 'cz': 'ČEŠTINA', 'si': 'SLOVENŠČINA', 'no': 'NORSK BOKMÅL', 'fi': 'SUOMI', 'ro': 'ROMÂNĂ',
 
