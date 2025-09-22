@@ -19665,14 +19665,19 @@ applyCustomizations(customizationData) {
             this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
         }
         
-        // Apply language
-        if (customizationData.interfaceLanguage) {
+        // Apply language - only if it's different from saved language
+        const savedLanguage = localStorage.getItem('accessibility-widget-language');
+        if (customizationData.interfaceLanguage && customizationData.interfaceLanguage !== savedLanguage) {
             console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
             this.applyLanguage(customizationData.interfaceLanguage);
             this.updateInterfacePosition();
-        } else {
+        } else if (!customizationData.interfaceLanguage && !savedLanguage) {
             console.log('[CK] applyCustomizations() - No interface language specified, defaulting to English');
             this.applyLanguage('English');
+            this.updateInterfacePosition();
+        } else {
+            console.log('[CK] applyCustomizations() - Keeping saved language:', savedLanguage);
+            // Keep the current language, just update interface position
             this.updateInterfacePosition();
         }
         
