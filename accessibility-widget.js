@@ -1673,7 +1673,7 @@ if (window.innerWidth <= 768) {
 
             pointer-events: none;
 
-            z-index: 99999;
+            z-index: 99998;
 
         `;
 
@@ -1966,7 +1966,7 @@ if (window.innerWidth <= 768) {
 
                 pointer-events: none;
 
-                z-index: 99999;
+                z-index: 99998;
 
                 isolation: isolate;
 
@@ -1988,7 +1988,7 @@ if (window.innerWidth <= 768) {
 
                 transform: none !important;
 
-                z-index: 99999 !important;
+                z-index: 99998 !important;
 
             }
 
@@ -2017,6 +2017,8 @@ if (window.innerWidth <= 768) {
                 transition: all 0.3s ease;
 
                 pointer-events: auto;
+
+                z-index: 99998;
 
             }
 
@@ -2359,6 +2361,11 @@ if (window.innerWidth <= 768) {
 
                 text-align: center;
 
+                /* Ensure X symbol is perfectly centered */
+                font-weight: bold;
+
+                font-family: Arial, sans-serif;
+
             }
 
 
@@ -2380,6 +2387,8 @@ if (window.innerWidth <= 768) {
                     min-height: 48px !important;
                     line-height: 1 !important;
                     text-align: center !important;
+                    font-weight: bold !important;
+                    font-family: Arial, sans-serif !important;
                 }
             }
 
@@ -3273,7 +3282,7 @@ if (window.innerWidth <= 768) {
 
                 position: fixed !important;
 
-                z-index: 99999 !important;
+                z-index: 99998 !important;
 
             }
 
@@ -4152,7 +4161,7 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: absolute;
+                position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -4161,11 +4170,10 @@ html body.big-white-cursor * {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                z-index: 10000;
-                border-radius: 12px;
-                /* Ensure it covers the entire panel including scrolled content */
-                min-height: 100%;
-                width: 100%;
+                z-index: 100001;
+                /* Ensure it covers the entire viewport including scrolled content */
+                width: 100vw;
+                height: 100vh;
             }
 
             .hide-interface-modal .modal-content {
@@ -14203,7 +14211,7 @@ html body.big-white-cursor * {
 
             body.monochrome #accessibility-widget {
 
-                z-index: 99999 !important;
+                z-index: 99998 !important;
 
             }
 
@@ -17738,7 +17746,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe #accessibility-widget {
 
-                z-index: 99999 !important;
+                z-index: 99998 !important;
 
             }
 
@@ -17752,7 +17760,7 @@ html body.big-white-cursor * {
 
             .adhd-friendly #adhd-spotlight {
 
-                z-index: 99999 !important;
+                z-index: 99998 !important;
 
                 background: rgba(255, 255, 255, 0.1) !important;
 
@@ -17956,7 +17964,7 @@ html body.big-white-cursor * {
 
             transition: all 0.1s ease;
 
-            z-index: 99999;
+            z-index: 99998;
 
             top: 50vh;
 
@@ -20293,7 +20301,7 @@ applyCustomizations(customizationData) {
     }
     
     updateInterfacePosition() {
-        console.log('[CK] updateInterfacePosition() - Positioning panel next to icon');
+        console.log('[CK] updateInterfacePosition() - Positioning panel on top of icon');
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
@@ -20319,23 +20327,15 @@ applyCustomizations(customizationData) {
             panel.style.removeProperty('bottom');
             panel.style.removeProperty('transform');
 
-            // Determine if icon is on left or right side
-            const isIconOnLeft = iconRect.left < window.innerWidth / 2;
-            console.log('[CK] Icon is on left side:', isIconOnLeft);
+            // Position panel on top of the icon (centered horizontally)
+            const iconCenterX = iconRect.left + (iconRect.width / 2);
+            const panelLeft = iconCenterX - (panelWidth / 2);
             
-            if (isIconOnLeft) {
-                // Icon is on LEFT - panel opens to the RIGHT of icon
-                const leftPosition = iconRect.right + 10;
-                panel.style.setProperty('left', `${leftPosition}px`, 'important');
-                panel.style.setProperty('right', 'auto', 'important');
-                console.log('[CK] Panel opening to the RIGHT of icon at:', leftPosition + 'px');
-            } else {
-                // Icon is on RIGHT - panel opens to the LEFT of icon
-                const rightPosition = window.innerWidth - iconRect.left + 10;
-                panel.style.setProperty('right', `${rightPosition}px`, 'important');
-                panel.style.setProperty('left', 'auto', 'important');
-                console.log('[CK] Panel opening to the LEFT of icon at:', rightPosition + 'px');
-            }
+            // Ensure panel doesn't go outside viewport horizontally
+            const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
+            
+            panel.style.setProperty('left', `${finalLeft}px`, 'important');
+            panel.style.setProperty('right', 'auto', 'important');
             
             // Position panel vertically centered with icon
             const iconCenterY = iconRect.top + (iconRect.height / 2);
@@ -20347,15 +20347,15 @@ applyCustomizations(customizationData) {
             
             panel.style.setProperty('top', `${finalTop}px`, 'important');
             panel.style.setProperty('transform', 'none', 'important');
-            panel.style.setProperty('z-index', '9999', 'important');
+            panel.style.setProperty('z-index', '100001', 'important'); // Higher than icon
             
-            console.log('[CK] Panel positioned at:', {
-                left: panel.style.left,
-                right: panel.style.right,
-                top: panel.style.top,
+            console.log('[CK] Panel positioned on top of icon at:', {
+                left: finalLeft + 'px',
+                top: finalTop + 'px',
+                iconCenterX: iconCenterX,
                 iconCenterY: iconCenterY,
-                panelCenterY: panelCenterY,
-                finalTop: finalTop
+                panelWidth: panelWidth,
+                panelHeight: panelHeight
             });
         }
     }
