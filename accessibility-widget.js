@@ -1331,7 +1331,7 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Mobile Landscape - Wider panel */
+/* Mobile Landscape - Wider panel with MUCH smaller text and toggles */
 @media (max-width: 768px) and (min-width: 481px) {
     .accessibility-panel {
         width: 80vw !important;
@@ -1340,8 +1340,8 @@ if (window.innerWidth <= 768) {
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
-        font-size: 14px !important;
-        padding: 14px !important;
+        font-size: 10px !important;
+        padding: 10px !important;
         max-height: 75vh !important;
         overflow-y: auto !important;
         position: fixed !important;
@@ -1423,14 +1423,14 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Mobile Portrait - Wider but still compact */
+/* Mobile Portrait - EXTREMELY small text and toggles */
 @media (max-width: 480px) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
         left: 12.5vw !important;
-        font-size: 13px !important;
-        padding: 12px !important;
+        font-size: 8px !important;
+        padding: 8px !important;
         max-height: 70vh !important;
     }
     
@@ -1443,69 +1443,69 @@ if (window.innerWidth <= 768) {
         font-size: 16px !important;
     }
     
-    /* Very small text and toggles for mobile portrait */
+    /* EXTREMELY small text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        font-size: 11px !important;
-        margin-bottom: 6px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 10px !important;
+        font-size: 9px !important;
         margin-bottom: 4px !important;
     }
     
-    .profile-item {
-        padding: 4px !important;
+    .accessibility-panel h3 {
+        font-size: 8px !important;
         margin-bottom: 3px !important;
     }
     
+    .profile-item {
+        padding: 2px !important;
+        margin-bottom: 2px !important;
+    }
+    
     .profile-item h4 {
-        font-size: 9px !important;
+        font-size: 7px !important;
     }
     
     .profile-item p {
-        font-size: 7px !important;
+        font-size: 5px !important;
     }
     
     .action-btn {
-        padding: 3px 5px !important;
-        font-size: 7px !important;
+        padding: 2px 3px !important;
+        font-size: 5px !important;
     }
     
-    /* Very small action buttons for mobile portrait */
+    /* EXTREMELY small action buttons for mobile portrait */
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 2px 4px !important;
-        font-size: 6px !important;
-        min-height: 16px !important;
+        padding: 1px 2px !important;
+        font-size: 4px !important;
+        min-height: 12px !important;
     }
     
     .action-btn i {
-        font-size: 7px !important;
-        margin-right: 2px !important;
+        font-size: 5px !important;
+        margin-right: 1px !important;
     }
     
-    /* Extremely small toggles for mobile portrait */
+    /* TINY toggles for mobile portrait */
     .toggle-switch {
-        width: 16px !important;
-        height: 10px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider {
-        width: 16px !important;
-        height: 10px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 6px !important;
-        width: 6px !important;
+        height: 4px !important;
+        width: 4px !important;
         left: 2px !important;
         bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(6px) !important;
+        transform: translateX(4px) !important;
     }
 }
 
@@ -1563,6 +1563,63 @@ if (window.innerWidth <= 768) {
         border-radius: 0px !important;
         -webkit-border-radius: 0px !important;
         -moz-border-radius: 0px !important;
+    }
+}
+
+/* ===== FORCE MOBILE STYLES - MAXIMUM AGGRESSIVE ===== */
+
+/* Force mobile styles with absolute maximum specificity */
+@media (max-width: 768px) {
+    .accessibility-panel {
+        font-size: 8px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 9px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 8px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 7px !important;
+    }
+    
+    .profile-item p {
+        font-size: 5px !important;
+    }
+    
+    .action-btn {
+        font-size: 5px !important;
+        padding: 2px 3px !important;
+    }
+    
+    .action-btn.reset-btn,
+    .action-btn.statement-btn,
+    .action-btn.hide-btn {
+        font-size: 4px !important;
+        padding: 1px 2px !important;
+        min-height: 12px !important;
+    }
+    
+    .toggle-switch {
+        width: 12px !important;
+        height: 8px !important;
+    }
+    
+    .toggle-switch .slider {
+        width: 12px !important;
+        height: 8px !important;
+    }
+    
+    .toggle-switch .slider:before {
+        width: 4px !important;
+        height: 4px !important;
+    }
+    
+    .toggle-switch input:checked + .slider:before {
+        transform: translateX(4px) !important;
     }
 }
 
@@ -1842,6 +1899,7 @@ if (window.innerWidth <= 768) {
         
         /* Force icon shape overrides - must come first */
         .accessibility-icon {
+            /* REMOVED empty rule that was potentially conflicting */
         }
         
         /* Override external CSS */
@@ -2764,7 +2822,7 @@ if (window.innerWidth <= 768) {
 
                 transition: 0.3s;
 
-                border-radius: 50%;
+                /* border-radius: 50%; REMOVED - conflicts with shape settings */
 
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
@@ -3798,7 +3856,7 @@ if (window.innerWidth <= 768) {
 
                 height: 28px;
 
-                border-radius: 50%;
+                /* border-radius: 50%; REMOVED - conflicts with shape settings */
 
                 cursor: pointer;
 
