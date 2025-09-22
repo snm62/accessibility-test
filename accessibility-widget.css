@@ -88,7 +88,6 @@
     width: 60px;
     height: 60px;
     background: var(--primary-color);
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2129,18 +2128,9 @@ body.high-contrast .accessibility-widget-container *,
     margin-right: 4px !important;
 }
 
-/* Responsive Design - Completely Fixed */
-@media (max-width: 768px) {
-    .accessibility-panel {
-        width: 500px !important;
-        left: -500px !important;
-        margin: 0 20px;
-        top: 10px !important;
-        height: 700px;
-    }
-    
+
     .accessibility-panel.active {
-        left: 20px !important;
+    
     }
     
     .accessibility-icon {
@@ -2195,15 +2185,6 @@ body.high-contrast .accessibility-widget-container *,
     }
 }
 
-@media (max-width: 480px) {
-    .accessibility-panel {
-        width: 500px !important;
-        margin: 0 10px;
-        left: -500px !important;
-        top: 5px !important;
-        height: 700px;
-    }
-    
     .accessibility-panel.active {
         left: 10px !important;
     }
@@ -2264,17 +2245,7 @@ body.high-contrast .accessibility-widget-container *,
     left: 20px !important;
 }
 
-@media (max-width: 768px) {
-    .accessibility-panel.active {
-        left: 20px !important;
-    }
-}
 
-@media (max-width: 480px) {
-    .accessibility-panel.active {
-        left: 10px !important;
-    }
-}
 
 /* Useful Links Dropdown - appears inside profile-item below profile-info */
 .useful-links-dropdown {
