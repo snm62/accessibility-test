@@ -1158,7 +1158,7 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@8ddc80e/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
@@ -1241,6 +1241,51 @@ if (window.innerWidth <= 768) {
     border-top-right-radius: 25px !important;
     border-bottom-left-radius: 25px !important;
     border-bottom-right-radius: 25px !important;
+}
+
+/* OVERRIDE EXTERNAL CSS CONFLICTS - Maximum specificity */
+.accessibility-icon {
+    /* Override external CSS that forces border-radius: 50% */
+    border-radius: inherit !important;
+}
+
+/* Override external mobile text size conflicts */
+@media (max-width: 768px) {
+    .accessibility-panel {
+        font-size: 12px !important; /* Override external 8px */
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 14px !important; /* Override external 9px */
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 12px !important; /* Override external 8px */
+    }
+}
+
+@media (max-width: 480px) {
+    .accessibility-panel {
+        font-size: 11px !important; /* Override external 8px */
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 13px !important; /* Override external 9px */
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 11px !important; /* Override external 8px */
+    }
+}
+
+/* Override external panel positioning conflicts */
+.accessibility-panel {
+    /* Let JavaScript control positioning, not external CSS */
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
 }
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
