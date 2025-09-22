@@ -1357,69 +1357,69 @@ if (window.innerWidth <= 768) {
         font-size: 18px !important;
     }
     
-    /* Better content spacing with larger text */
+    /* Much smaller text and toggles for mobile landscape */
     .accessibility-panel h2 {
-        font-size: 15px !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 15px !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .profile-item {
-        padding: 10px !important;
+        font-size: 12px !important;
         margin-bottom: 8px !important;
     }
     
+    .accessibility-panel h3 {
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .profile-item {
+        padding: 6px !important;
+        margin-bottom: 4px !important;
+    }
+    
     .profile-item h4 {
-        font-size: 14px !important;
+        font-size: 10px !important;
     }
     
     .profile-item p {
-        font-size: 12px !important;
+        font-size: 8px !important;
     }
     
     .action-btn {
-        padding: 6px 10px !important;
-        font-size: 10px !important;
+        padding: 4px 6px !important;
+        font-size: 8px !important;
     }
     
-    /* Smaller action buttons for mobile landscape */
+    /* Much smaller action buttons for mobile landscape */
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 5px 8px !important;
-        font-size: 9px !important;
-        min-height: 28px !important;
+        padding: 3px 5px !important;
+        font-size: 7px !important;
+        min-height: 20px !important;
     }
     
     .action-btn i {
-        font-size: 10px !important;
-        margin-right: 4px !important;
+        font-size: 8px !important;
+        margin-right: 2px !important;
     }
     
-    /* Much smaller toggles for mobile landscape */
+    /* Very small toggles for mobile landscape */
     .toggle-switch {
-        width: 28px !important;
-        height: 16px !important;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider {
-        width: 28px !important;
-        height: 16px !important;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 12px !important;
-        width: 12px !important;
+        height: 8px !important;
+        width: 8px !important;
         left: 2px !important;
         bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(12px) !important;
+        transform: translateX(8px) !important;
     }
 }
 
@@ -1443,116 +1443,110 @@ if (window.innerWidth <= 768) {
         font-size: 16px !important;
     }
     
-    /* Compact but readable content with larger text */
+    /* Very small text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        font-size: 14px !important;
-        margin-bottom: 8px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 14px !important;
-        margin-bottom: 8px !important;
-    }
-    
-    .profile-item {
-        padding: 8px !important;
+        font-size: 11px !important;
         margin-bottom: 6px !important;
     }
     
+    .accessibility-panel h3 {
+        font-size: 10px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .profile-item {
+        padding: 4px !important;
+        margin-bottom: 3px !important;
+    }
+    
     .profile-item h4 {
-        font-size: 13px !important;
+        font-size: 9px !important;
     }
     
     .profile-item p {
-        font-size: 11px !important;
+        font-size: 7px !important;
     }
     
     .action-btn {
-        padding: 6px 10px !important;
-        font-size: 11px !important;
+        padding: 3px 5px !important;
+        font-size: 7px !important;
     }
     
-    /* Smaller action buttons for mobile portrait */
+    /* Very small action buttons for mobile portrait */
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 4px 6px !important;
-        font-size: 8px !important;
-        min-height: 24px !important;
+        padding: 2px 4px !important;
+        font-size: 6px !important;
+        min-height: 16px !important;
     }
     
     .action-btn i {
-        font-size: 9px !important;
-        margin-right: 3px !important;
+        font-size: 7px !important;
+        margin-right: 2px !important;
     }
     
-    /* Much smaller toggles for mobile portrait */
+    /* Extremely small toggles for mobile portrait */
     .toggle-switch {
-        width: 24px !important;
-        height: 14px !important;
+        width: 16px !important;
+        height: 10px !important;
     }
     
     .toggle-switch .slider {
-        width: 24px !important;
-        height: 14px !important;
+        width: 16px !important;
+        height: 10px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 10px !important;
-        width: 10px !important;
+        height: 6px !important;
+        width: 6px !important;
         left: 2px !important;
         bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(10px) !important;
+        transform: translateX(6px) !important;
     }
 }
 
-/* ===== FIX ROUNDED SHAPES - FORCE SHAPE STYLES ===== */
+/* ===== FORCE ROUNDED SHAPES - MAXIMUM AGGRESSIVE ===== */
 
-/* Force shape styles with maximum specificity */
-.accessibility-icon[data-shape="circle"] {
+/* Force shape styles with absolute maximum specificity */
+.accessibility-icon[data-shape="circle"],
+.accessibility-icon.circle {
     border-radius: 50% !important;
     -webkit-border-radius: 50% !important;
     -moz-border-radius: 50% !important;
+    border-top-left-radius: 50% !important;
+    border-top-right-radius: 50% !important;
+    border-bottom-left-radius: 50% !important;
+    border-bottom-right-radius: 50% !important;
 }
 
-.accessibility-icon[data-shape="rounded"] {
+.accessibility-icon[data-shape="rounded"],
+.accessibility-icon.rounded {
     border-radius: 25px !important;
     -webkit-border-radius: 25px !important;
     -moz-border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
 }
 
-.accessibility-icon[data-shape="square"] {
+.accessibility-icon[data-shape="square"],
+.accessibility-icon.square {
     border-radius: 0px !important;
     -webkit-border-radius: 0px !important;
     -moz-border-radius: 0px !important;
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
 }
 
-/* Force shape styles on all screen sizes */
-@media (max-width: 1366px) {
-    .accessibility-icon[data-shape="circle"] {
-        border-radius: 50% !important;
-        -webkit-border-radius: 50% !important;
-        -moz-border-radius: 50% !important;
-    }
-    
-    .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
-    }
-    
-    .accessibility-icon[data-shape="square"] {
-        border-radius: 0px !important;
-        -webkit-border-radius: 0px !important;
-        -moz-border-radius: 0px !important;
-    }
-}
-
-/* Force shape styles on mobile */
-@media (max-width: 768px) {
+/* Force on ALL screen sizes */
+@media screen {
     .accessibility-icon[data-shape="circle"] {
         border-radius: 50% !important;
         -webkit-border-radius: 50% !important;
