@@ -1192,6 +1192,62 @@ if (window.innerWidth <= 768) {
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
+/* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon */
+@media (max-width: 1366px) and (min-width: 1025px) {
+    .accessibility-panel {
+        width: 70vw !important;
+        max-width: 500px !important;
+        left: 2vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 15px !important;
+        padding: 18px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
+    
+    .accessibility-icon {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 22px !important;
+    }
+    
+    /* Better content spacing for large tablets */
+    .accessibility-panel h2 {
+        font-size: 18px !important;
+        margin-bottom: 14px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .profile-item {
+        padding: 12px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 15px !important;
+    }
+    
+    .profile-item p {
+        font-size: 13px !important;
+    }
+    
+    .action-btn {
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+    }
+}
+
 /* Tablet/iPad starting from 820px - Position panel close to icon */
 @media (max-width: 1024px) and (min-width: 820px) {
     .accessibility-panel {
@@ -1284,7 +1340,7 @@ if (window.innerWidth <= 768) {
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
         padding: 14px !important;
         max-height: 75vh !important;
         overflow-y: auto !important;
@@ -1301,33 +1357,69 @@ if (window.innerWidth <= 768) {
         font-size: 18px !important;
     }
     
-    /* Better content spacing */
+    /* Better content spacing with larger text */
     .accessibility-panel h2 {
+        font-size: 17px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .accessibility-panel h3 {
         font-size: 15px !important;
         margin-bottom: 10px !important;
     }
     
-    .accessibility-panel h3 {
-        font-size: 13px !important;
+    .profile-item {
+        padding: 10px !important;
         margin-bottom: 8px !important;
     }
     
-    .profile-item {
-        padding: 8px !important;
-        margin-bottom: 6px !important;
-    }
-    
     .profile-item h4 {
-        font-size: 12px !important;
+        font-size: 14px !important;
     }
     
     .profile-item p {
-        font-size: 10px !important;
+        font-size: 12px !important;
     }
     
     .action-btn {
         padding: 6px 10px !important;
         font-size: 10px !important;
+    }
+    
+    /* Smaller action buttons for mobile landscape */
+    .action-btn.reset-btn,
+    .action-btn.statement-btn,
+    .action-btn.hide-btn {
+        padding: 5px 8px !important;
+        font-size: 9px !important;
+        min-height: 28px !important;
+    }
+    
+    .action-btn i {
+        font-size: 10px !important;
+        margin-right: 4px !important;
+    }
+    
+    /* Smaller toggles for mobile landscape */
+    .toggle-switch {
+        width: 35px !important;
+        height: 20px !important;
+    }
+    
+    .toggle-switch .slider {
+        width: 35px !important;
+        height: 20px !important;
+    }
+    
+    .toggle-switch .slider:before {
+        height: 16px !important;
+        width: 16px !important;
+        left: 2px !important;
+        bottom: 2px !important;
+    }
+    
+    .toggle-switch input:checked + .slider:before {
+        transform: translateX(15px) !important;
     }
 }
 
@@ -1337,7 +1429,7 @@ if (window.innerWidth <= 768) {
         width: 75vw !important;
         max-width: 320px !important;
         left: 12.5vw !important;
-        font-size: 12px !important;
+        font-size: 13px !important;
         padding: 12px !important;
         max-height: 70vh !important;
     }
@@ -1351,33 +1443,69 @@ if (window.innerWidth <= 768) {
         font-size: 16px !important;
     }
     
-    /* Compact but readable content */
+    /* Compact but readable content with larger text */
     .accessibility-panel h2 {
+        font-size: 16px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .accessibility-panel h3 {
         font-size: 14px !important;
         margin-bottom: 8px !important;
     }
     
-    .accessibility-panel h3 {
-        font-size: 12px !important;
+    .profile-item {
+        padding: 8px !important;
         margin-bottom: 6px !important;
     }
     
-    .profile-item {
-        padding: 6px !important;
-        margin-bottom: 5px !important;
-    }
-    
     .profile-item h4 {
-        font-size: 11px !important;
+        font-size: 13px !important;
     }
     
     .profile-item p {
-        font-size: 9px !important;
+        font-size: 11px !important;
     }
     
     .action-btn {
-        padding: 5px 8px !important;
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+    }
+    
+    /* Smaller action buttons for mobile portrait */
+    .action-btn.reset-btn,
+    .action-btn.statement-btn,
+    .action-btn.hide-btn {
+        padding: 4px 6px !important;
+        font-size: 8px !important;
+        min-height: 24px !important;
+    }
+    
+    .action-btn i {
         font-size: 9px !important;
+        margin-right: 3px !important;
+    }
+    
+    /* Smaller toggles for mobile portrait */
+    .toggle-switch {
+        width: 30px !important;
+        height: 18px !important;
+    }
+    
+    .toggle-switch .slider {
+        width: 30px !important;
+        height: 18px !important;
+    }
+    
+    .toggle-switch .slider:before {
+        height: 14px !important;
+        width: 14px !important;
+        left: 2px !important;
+        bottom: 2px !important;
+    }
+    
+    .toggle-switch input:checked + .slider:before {
+        transform: translateX(12px) !important;
     }
 }
 
@@ -19837,6 +19965,23 @@ applyCustomizations(customizationData) {
                 const iconI = icon.querySelector('i');
                 if (iconI) {
                     iconI.style.setProperty('font-size', '18px', 'important');
+                }
+            } else if (screenWidth >= 1025 && screenWidth <= 1366) {
+                // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
+                console.log('[CK] Applying large tablet styles - positioning very close to icon');
+                panel.style.setProperty('width', '70vw', 'important');
+                panel.style.setProperty('max-width', '500px', 'important');
+                panel.style.setProperty('left', '2vw', 'important');
+                panel.style.setProperty('font-size', '15px', 'important');
+                panel.style.setProperty('padding', '18px', 'important');
+                panel.style.setProperty('max-height', '85vh', 'important');
+                
+                icon.style.setProperty('width', '55px', 'important');
+                icon.style.setProperty('height', '55px', 'important');
+                
+                const iconI = icon.querySelector('i');
+                if (iconI) {
+                    iconI.style.setProperty('font-size', '22px', 'important');
                 }
             } else if (screenWidth >= 820 && screenWidth <= 1024) {
                 // Tablet/iPad 820px+ - Position panel very close to icon
