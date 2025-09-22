@@ -173,19 +173,23 @@ constructor() {
 window.addEventListener('resize', () => {
     const isMobile = window.innerWidth <= 768;
     const icon = this.shadowRoot?.getElementById('accessibility-icon');
+    const panel = this.shadowRoot?.getElementById('accessibility-panel');
     
-    if (icon) {
+    if (icon && panel) {
         if (isMobile) {
             // Apply mobile settings
-            console.log('[CK] Window resized to mobile');
-            // Reapply mobile customizations if needed
+            console.log('[CK] Window resized to mobile - applying mobile styles');
+            this.applyMobileStyles();
         } else {
             // Apply desktop settings
-            console.log('[CK] Window resized to desktop');
-            // Reapply desktop customizations if needed
+            console.log('[CK] Window resized to desktop - applying desktop styles');
+            this.applyDesktopStyles();
         }
     }
 });
+
+// Force apply mobile styles
+this.applyMobileStyles();
             
 
             // Keyboard event for icon
@@ -1423,6 +1427,8 @@ window.addEventListener('resize', () => {
         max-height: 80vh !important;
         overflow-y: auto !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
     }
     
     .accessibility-icon {
@@ -1445,6 +1451,40 @@ window.addEventListener('resize', () => {
     .accessibility-panel[data-position="right"] {
         right: 5vw !important;
         left: auto !important;
+    }
+}
+
+/* ULTRA AGGRESSIVE MOBILE OVERRIDE - Force responsive behavior */
+@media screen and (max-width: 768px) {
+    .accessibility-panel {
+        position: fixed !important;
+        z-index: 9999 !important;
+        width: 90vw !important;
+        max-width: 400px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+        padding: 16px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+        position: fixed !important;
+        z-index: 10000 !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
     }
 }
 
@@ -19832,6 +19872,74 @@ applyCustomizations(customizationData) {
                 // Check again
                 const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Final computed border-radius:', finalComputedStyle);
+            }
+        }
+    }
+    
+    // Force apply mobile styles
+    applyMobileStyles() {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        
+        if (panel && icon) {
+            console.log('[CK] Applying mobile styles');
+            
+            // Force mobile panel styles
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '9999', 'important');
+            panel.style.setProperty('width', '90vw', 'important');
+            panel.style.setProperty('max-width', '400px', 'important');
+            panel.style.setProperty('left', '5vw', 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('top', '50%', 'important');
+            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
+            panel.style.setProperty('font-size', '14px', 'important');
+            panel.style.setProperty('padding', '16px', 'important');
+            panel.style.setProperty('max-height', '80vh', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('margin', '0', 'important');
+            panel.style.setProperty('border-radius', '8px', 'important');
+            
+            // Force mobile icon styles
+            icon.style.setProperty('width', '50px', 'important');
+            icon.style.setProperty('height', '50px', 'important');
+            icon.style.setProperty('position', 'fixed', 'important');
+            icon.style.setProperty('z-index', '10000', 'important');
+            
+            const iconI = icon.querySelector('i');
+            if (iconI) {
+                iconI.style.setProperty('font-size', '20px', 'important');
+            }
+        }
+    }
+    
+    // Force apply desktop styles
+    applyDesktopStyles() {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        
+        if (panel && icon) {
+            console.log('[CK] Applying desktop styles');
+            
+            // Remove mobile-specific styles to allow desktop CSS to take over
+            panel.style.removeProperty('width');
+            panel.style.removeProperty('max-width');
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('transform');
+            panel.style.removeProperty('max-height');
+            panel.style.removeProperty('overflow-y');
+            panel.style.removeProperty('margin');
+            panel.style.removeProperty('border-radius');
+            
+            // Remove mobile icon styles
+            icon.style.removeProperty('width');
+            icon.style.removeProperty('height');
+            
+            const iconI = icon.querySelector('i');
+            if (iconI) {
+                iconI.style.removeProperty('font-size');
             }
         }
     }
