@@ -4118,10 +4118,12 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Cover only the panel viewport, not the whole website */
+                /* Cover the entire panel including all scrollable content */
                 width: 100%;
                 height: 100%;
-                /* Keep modal within panel viewport */
+                min-height: 100%;
+                /* Ensure overlay covers full scrollable area */
+                max-height: none;
                 overflow: hidden;
             }
 
@@ -4129,6 +4131,12 @@ html body.big-white-cursor * {
                 background: white;
                 border-radius: 12px;
                 box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                /* Position the modal dialog in the center of viewable area */
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                /* Ensure it stays within the panel bounds */
                 max-width: 400px;
                 width: 90%;
                 max-height: 80%;
@@ -13810,11 +13818,46 @@ html body.big-white-cursor * {
 
             if (enabled) {
 
-                this.applyFeature(feature, true);
+                // Check usage tracking for special features before applying
+                let shouldApply = true;
+                
+                if (feature === 'content-scaling') {
+                    const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
+                    if (!wasContentScalingUsed && this.contentScale === 100) {
+                        console.log('[CK] Content scaling was saved but never used, not applying');
+                        shouldApply = false;
+                    }
+                } else if (feature === 'font-sizing') {
+                    const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
+                    if (!wasFontSizingUsed && this.fontSize === 100) {
+                        console.log('[CK] Font sizing was saved but never used, not applying');
+                        shouldApply = false;
+                    }
+                } else if (feature === 'adjust-line-height') {
+                    const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
+                    if (!wasLineHeightUsed && this.lineHeight === 100) {
+                        console.log('[CK] Line height was saved but never used, not applying');
+                        shouldApply = false;
+                    }
+                } else if (feature === 'adjust-letter-spacing') {
+                    const wasLetterSpacingUsed = localStorage.getItem('letter-spacing-used') === 'true';
+                    if (!wasLetterSpacingUsed && this.letterSpacing === 100) {
+                        console.log('[CK] Letter spacing was saved but never used, not applying');
+                        shouldApply = false;
+                    }
+                }
 
-                const toggle = this.shadowRoot.getElementById(feature);
+                if (shouldApply) {
+                    this.applyFeature(feature, true);
 
-                if (toggle) toggle.checked = true;
+                    const toggle = this.shadowRoot.getElementById(feature);
+
+                    if (toggle) toggle.checked = true;
+                } else {
+                    // Remove the setting from localStorage since it wasn't actually used
+                    delete this.settings[feature];
+                    this.saveSettings();
+                }
 
             }
 
@@ -13822,76 +13865,94 @@ html body.big-white-cursor * {
 
         
 
-        // Apply content scale if it's not 100%
+        // Apply content scale if it's not 100% AND was actually used
 
         if (this.contentScale !== 100) {
 
-            console.log('Accessibility Widget: Applying saved content scale:', this.contentScale + '%');
-
-            this.updateContentScale();
-
-            this.updateContentScaleDisplay(); // Update the display value
-
+            const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
             
+            if (wasContentScalingUsed) {
+                console.log('Accessibility Widget: Applying saved content scale:', this.contentScale + '%');
 
-            // Show content scaling controls if content scale is not 100%
+                this.updateContentScale();
 
-            const controls = this.shadowRoot.getElementById('content-scaling-controls');
+                this.updateContentScaleDisplay(); // Update the display value
 
-            if (controls) {
+                
 
-                controls.style.display = 'block';
+                // Show content scaling controls if content scale is not 100%
 
-            }
+                const controls = this.shadowRoot.getElementById('content-scaling-controls');
 
-            
+                if (controls) {
 
-            // Update the toggle switch to show it's enabled
+                    controls.style.display = 'block';
 
-            const toggle = this.shadowRoot.getElementById('content-scaling');
+                }
 
-            if (toggle) {
+                
 
-                toggle.checked = true;
+                // Update the toggle switch to show it's enabled
 
+                const toggle = this.shadowRoot.getElementById('content-scaling');
+
+                if (toggle) {
+
+                    toggle.checked = true;
+
+                }
+            } else {
+                console.log('[CK] Content scaling was saved but never used, resetting to 100%');
+                this.contentScale = 100;
+                this.settings['content-scale'] = 100;
+                this.saveSettings();
             }
 
         }
 
         
 
-        // Apply font size if it's not 100%
+        // Apply font size if it's not 100% AND was actually used
 
         if (this.fontSize !== 100) {
 
-            console.log('Accessibility Widget: Applying saved font size:', this.fontSize + '%');
-
-            this.updateFontSizeEnhanced();
-
-            this.updateFontSizeDisplay(); // Update the display value immediately
-
+            const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
             
+            if (wasFontSizingUsed) {
+                console.log('Accessibility Widget: Applying saved font size:', this.fontSize + '%');
 
-            // Show font sizing controls if font size is not 100%
+                this.updateFontSizeEnhanced();
 
-            const fontControls = this.shadowRoot.getElementById('font-sizing-controls');
+                this.updateFontSizeDisplay(); // Update the display value immediately
 
-            if (fontControls) {
+                
 
-                fontControls.style.display = 'block';
+                // Show font sizing controls if font size is not 100%
 
-            }
+                const fontControls = this.shadowRoot.getElementById('font-sizing-controls');
 
-            
+                if (fontControls) {
 
-            // Update the toggle switch to show it's enabled
+                    fontControls.style.display = 'block';
 
-            const fontToggle = this.shadowRoot.getElementById('font-sizing');
+                }
 
-            if (fontToggle) {
+                
 
-                fontToggle.checked = true;
+                // Update the toggle switch to show it's enabled
 
+                const fontToggle = this.shadowRoot.getElementById('font-sizing');
+
+                if (fontToggle) {
+
+                    fontToggle.checked = true;
+
+                }
+            } else {
+                console.log('[CK] Font sizing was saved but never used, resetting to 100%');
+                this.fontSize = 100;
+                this.settings['font-size'] = 100;
+                this.saveSettings();
             }
 
             
@@ -13908,36 +13969,45 @@ html body.big-white-cursor * {
 
         
 
-        // Apply line height if it's not 100%
+        // Apply line height if it's not 100% AND was actually used
 
         if (this.lineHeight !== 100) {
 
-            console.log('Accessibility Widget: Applying saved line height:', this.lineHeight + '%');
-
-            this.updateLineHeight();
-
+            const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
             
+            if (wasLineHeightUsed) {
+                console.log('Accessibility Widget: Applying saved line height:', this.lineHeight + '%');
 
-            // Show line height controls if line height is not 100%
+                this.updateLineHeight();
 
-            const lineHeightControls = this.shadowRoot.getElementById('line-height-controls');
+                
 
-            if (lineHeightControls) {
+                // Show line height controls if line height is not 100%
 
-                lineHeightControls.style.display = 'block';
+                const lineHeightControls = this.shadowRoot.getElementById('line-height-controls');
 
-            }
+                if (lineHeightControls) {
 
-            
+                    lineHeightControls.style.display = 'block';
 
-            // Update the toggle switch to show it's enabled
+                }
 
-            const lineHeightToggle = this.shadowRoot.getElementById('adjust-line-height');
+                
 
-            if (lineHeightToggle) {
+                // Update the toggle switch to show it's enabled
 
-                lineHeightToggle.checked = true;
+                const lineHeightToggle = this.shadowRoot.getElementById('adjust-line-height');
 
+                if (lineHeightToggle) {
+
+                    lineHeightToggle.checked = true;
+
+                }
+            } else {
+                console.log('[CK] Line height was saved but never used, resetting to 100%');
+                this.lineHeight = 100;
+                this.settings['line-height'] = 100;
+                this.saveSettings();
             }
 
             
@@ -13962,36 +14032,45 @@ html body.big-white-cursor * {
 
         
 
-        // Apply letter spacing if it's not 100%
+        // Apply letter spacing if it's not 100% AND was actually used
 
         if (this.letterSpacing !== 100) {
 
-            console.log('Accessibility Widget: Applying saved letter spacing:', this.letterSpacing + '%');
-
-            this.updateLetterSpacing();
-
+            const wasLetterSpacingUsed = localStorage.getItem('letter-spacing-used') === 'true';
             
+            if (wasLetterSpacingUsed) {
+                console.log('Accessibility Widget: Applying saved letter spacing:', this.letterSpacing + '%');
 
-            // Show letter spacing controls if letter spacing is not 100%
+                this.updateLetterSpacing();
 
-            const letterSpacingControls = this.shadowRoot.getElementById('letter-spacing-controls');
+                
 
-            if (letterSpacingControls) {
+                // Show letter spacing controls if letter spacing is not 100%
 
-                letterSpacingControls.style.display = 'block';
+                const letterSpacingControls = this.shadowRoot.getElementById('letter-spacing-controls');
 
-            }
+                if (letterSpacingControls) {
 
-            
+                    letterSpacingControls.style.display = 'block';
 
-            // Update the toggle switch to show it's enabled
+                }
 
-            const letterSpacingToggle = this.shadowRoot.getElementById('adjust-letter-spacing');
+                
 
-            if (letterSpacingToggle) {
+                // Update the toggle switch to show it's enabled
 
-                letterSpacingToggle.checked = true;
+                const letterSpacingToggle = this.shadowRoot.getElementById('adjust-letter-spacing');
 
+                if (letterSpacingToggle) {
+
+                    letterSpacingToggle.checked = true;
+
+                }
+            } else {
+                console.log('[CK] Letter spacing was saved but never used, resetting to 100%');
+                this.letterSpacing = 100;
+                this.settings['letter-spacing'] = 100;
+                this.saveSettings();
             }
 
             
@@ -19973,15 +20052,29 @@ applyCustomizations(customizationData) {
         console.log('[CK] Panel element found:', !!panel);
         
         if (modal && panel) {
-            // Set modal to cover only the panel viewport, not the entire scrollable content
+            // Set modal to cover the entire panel content including scrollable areas
+            const panelScrollHeight = panel.scrollHeight;
             const panelClientHeight = panel.clientHeight;
-            console.log('[CK] Panel clientHeight:', panelClientHeight);
+            console.log('[CK] Panel scrollHeight:', panelScrollHeight, 'clientHeight:', panelClientHeight);
             
-            // Set the modal height to cover only the visible panel area
-            modal.style.height = `${panelClientHeight}px`;
-            modal.style.minHeight = `${panelClientHeight}px`;
+            // Set the modal height to cover the full scrollable content
+            modal.style.height = `${panelScrollHeight}px`;
+            modal.style.minHeight = `${panelScrollHeight}px`;
             modal.style.display = 'flex';
-            console.log('[CK] Hide interface modal shown with height:', panelClientHeight + 'px');
+            
+            // Position the modal dialog in the center of the viewable area
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                // Calculate the center position of the viewable area
+                const centerTop = (panelClientHeight / 2) - (modalContent.offsetHeight / 2);
+                modalContent.style.position = 'absolute';
+                modalContent.style.top = `${Math.max(0, centerTop)}px`;
+                modalContent.style.left = '50%';
+                modalContent.style.transform = 'translateX(-50%)';
+                modalContent.style.margin = '0';
+            }
+            
+            console.log('[CK] Hide interface modal shown with height:', panelScrollHeight + 'px');
         } else {
             console.log('[CK] Modal or panel not found!');
         }
