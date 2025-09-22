@@ -173,19 +173,25 @@ constructor() {
 window.addEventListener('resize', () => {
     const isMobile = window.innerWidth <= 768;
     const icon = this.shadowRoot?.getElementById('accessibility-icon');
+    const panel = this.shadowRoot?.getElementById('accessibility-panel');
     
-    if (icon) {
+    if (icon && panel) {
         if (isMobile) {
-            // Apply mobile settings
-            console.log('[CK] Window resized to mobile');
-            // Reapply mobile customizations if needed
+            // Apply mobile settings - force small panel near icon
+            console.log('[CK] Window resized to mobile - applying mobile styles');
+            this.applyMobileResponsiveStyles();
         } else {
             // Apply desktop settings
-            console.log('[CK] Window resized to desktop');
-            // Reapply desktop customizations if needed
+            console.log('[CK] Window resized to desktop - removing mobile styles');
+            this.removeMobileResponsiveStyles();
         }
     }
 });
+
+// Apply mobile responsive styles on load if mobile
+if (window.innerWidth <= 768) {
+    this.applyMobileResponsiveStyles();
+}
             
 
             // Keyboard event for icon
@@ -1184,40 +1190,23 @@ window.addEventListener('resize', () => {
     -moz-border-radius: 0px !important;
 }
 
-/* ===== RESPONSIVE DESIGN FOR MOBILE AND TABLET ===== */
+/* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
-/* Tablet Styles (769px - 1024px) - Much smaller and more inside */
-@media (max-width: 1024px) and (min-width: 769px) {
+/* Mobile and Tablet - Make panel small and position near icon */
+@media (max-width: 768px) {
     .accessibility-panel {
-        width: 75vw !important;
-        max-width: 380px !important;
-        font-size: 13px !important;
-        padding: 14px !important;
-    }
-    
-    .accessibility-icon {
-        width: 45px !important;
-        height: 45px !important;
-    }
-    
-    .accessibility-icon i {
-        font-size: 18px !important;
-    }
-}
-
-/* Mobile Landscape (481px - 768px) - Much more compact and inside */
-@media (max-width: 768px) and (min-width: 481px) {
-    .accessibility-panel {
-        width: 80vw !important;
-        max-width: 320px !important;
-        left: 10vw !important;
+        width: 70vw !important;
+        max-width: 300px !important;
+        left: 15vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
         font-size: 12px !important;
         padding: 12px !important;
-        max-height: 75vh !important;
+        max-height: 70vh !important;
         overflow-y: auto !important;
+        position: fixed !important;
+        z-index: 9999 !important;
     }
     
     .accessibility-icon {
@@ -1229,69 +1218,14 @@ window.addEventListener('resize', () => {
         font-size: 16px !important;
     }
     
-    /* Much more compact content adjustments */
+    /* Compact content */
     .accessibility-panel h2 {
         font-size: 14px !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
         font-size: 12px !important;
-        margin-bottom: 8px !important;
-    }
-    
-    .profile-item {
-        padding: 8px !important;
-        margin-bottom: 5px !important;
-    }
-    
-    .profile-item h4 {
-        font-size: 11px !important;
-    }
-    
-    .profile-item p {
-        font-size: 9px !important;
-    }
-    
-    /* Compact action buttons */
-    .action-btn {
-        padding: 6px 10px !important;
-        font-size: 10px !important;
-    }
-}
-
-/* Mobile Portrait (320px - 480px) - Very small and inside */
-@media (max-width: 480px) {
-    .accessibility-panel {
-        width: 85vw !important;
-        max-width: 280px !important;
-        left: 7.5vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        font-size: 11px !important;
-        padding: 10px !important;
-        max-height: 70vh !important;
-        overflow-y: auto !important;
-    }
-    
-    .accessibility-icon {
-        width: 35px !important;
-        height: 35px !important;
-    }
-    
-    .accessibility-icon i {
-        font-size: 14px !important;
-    }
-    
-    /* Very small content adjustments */
-    .accessibility-panel h2 {
-        font-size: 13px !important;
-        margin-bottom: 8px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 11px !important;
         margin-bottom: 6px !important;
     }
     
@@ -1308,10 +1242,59 @@ window.addEventListener('resize', () => {
         font-size: 8px !important;
     }
     
-    /* Very compact buttons */
     .action-btn {
-        padding: 5px 8px !important;
+        padding: 4px 8px !important;
         font-size: 9px !important;
+    }
+}
+
+/* Small Mobile - Even smaller and closer to icon */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 65vw !important;
+        max-width: 250px !important;
+        left: 17.5vw !important;
+        font-size: 11px !important;
+        padding: 10px !important;
+        max-height: 65vh !important;
+    }
+    
+    .accessibility-icon {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 14px !important;
+    }
+    
+    /* Very compact content */
+    .accessibility-panel h2 {
+        font-size: 12px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 10px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .profile-item {
+        padding: 4px !important;
+        margin-bottom: 3px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 9px !important;
+    }
+    
+    .profile-item p {
+        font-size: 7px !important;
+    }
+    
+    .action-btn {
+        padding: 3px 6px !important;
+        font-size: 8px !important;
     }
 }
 
@@ -19725,6 +19708,70 @@ applyCustomizations(customizationData) {
                 // Check again
                 const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Final computed border-radius:', finalComputedStyle);
+            }
+        }
+    }
+    
+    // Force apply mobile responsive styles
+    applyMobileResponsiveStyles() {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        
+        if (panel && icon) {
+            console.log('[CK] Applying mobile responsive styles - making panel small and close to icon');
+            
+            // Force mobile panel styles
+            panel.style.setProperty('width', '70vw', 'important');
+            panel.style.setProperty('max-width', '300px', 'important');
+            panel.style.setProperty('left', '15vw', 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('top', '50%', 'important');
+            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
+            panel.style.setProperty('font-size', '12px', 'important');
+            panel.style.setProperty('padding', '12px', 'important');
+            panel.style.setProperty('max-height', '70vh', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '9999', 'important');
+            
+            // Force mobile icon styles
+            icon.style.setProperty('width', '40px', 'important');
+            icon.style.setProperty('height', '40px', 'important');
+            
+            const iconI = icon.querySelector('i');
+            if (iconI) {
+                iconI.style.setProperty('font-size', '16px', 'important');
+            }
+        }
+    }
+    
+    // Remove mobile responsive styles for desktop
+    removeMobileResponsiveStyles() {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        
+        if (panel && icon) {
+            console.log('[CK] Removing mobile responsive styles - restoring desktop styles');
+            
+            // Remove mobile-specific styles to allow desktop CSS to take over
+            panel.style.removeProperty('width');
+            panel.style.removeProperty('max-width');
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('transform');
+            panel.style.removeProperty('max-height');
+            panel.style.removeProperty('overflow-y');
+            panel.style.removeProperty('font-size');
+            panel.style.removeProperty('padding');
+            
+            // Remove mobile icon styles
+            icon.style.removeProperty('width');
+            icon.style.removeProperty('height');
+            
+            const iconI = icon.querySelector('i');
+            if (iconI) {
+                iconI.style.removeProperty('font-size');
             }
         }
     }
