@@ -1158,7 +1158,8 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
+            // link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
+            // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
@@ -1187,35 +1188,19 @@ if (window.innerWidth <= 768) {
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
-/* Clean icon shape overrides - no conflicts */
+/* Icon Shape Rules - Consolidated */
 .accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="rounded"] {
     border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
     border-radius: 0px !important;
-}
-
-/* Maximum specificity for rounded shape - override any conflicts */
-.accessibility-icon.rounded[data-shape="rounded"] {
-    border-radius: 25px !important;
-}
-
-.accessibility-icon[data-shape="rounded"].rounded {
-    border-radius: 25px !important;
-}
-
-/* Force rounded shape with maximum specificity */
-.accessibility-icon[data-shape="rounded"],
-.accessibility-icon.rounded,
-.accessibility-icon[data-shape="rounded"].rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
 }
 
 /* Ensure panel always appears on top of icon */
@@ -1228,12 +1213,10 @@ if (window.innerWidth <= 768) {
     z-index: 99998 !important;
 }
 
-/* ULTIMATE ROUNDED SHAPE OVERRIDE - Maximum specificity */
+/* Maximum Specificity Overrides for External CSS Conflicts */
 .accessibility-icon[data-shape="rounded"],
 .accessibility-icon.rounded,
-.accessibility-icon[data-shape="rounded"].rounded,
-:host .accessibility-icon[data-shape="rounded"],
-:host .accessibility-icon.rounded {
+.accessibility-icon[data-shape="rounded"].rounded {
     border-radius: 25px !important;
     -webkit-border-radius: 25px !important;
     -moz-border-radius: 25px !important;
@@ -1243,24 +1226,49 @@ if (window.innerWidth <= 768) {
     border-bottom-right-radius: 25px !important;
 }
 
-/* OVERRIDE EXTERNAL CSS CONFLICTS - Maximum specificity */
-.accessibility-icon {
-    /* Override external CSS that forces border-radius: 50% */
-    border-radius: inherit !important;
+.accessibility-icon[data-shape="circle"],
+.accessibility-icon.circle {
+    border-radius: 50% !important;
 }
 
-/* Override external mobile text size conflicts */
+.accessibility-icon[data-shape="square"],
+.accessibility-icon.square {
+    border-radius: 0px !important;
+}
+
+/* Mobile Responsive Styles - Consolidated */
 @media (max-width: 768px) {
     .accessibility-panel {
-        font-size: 12px !important; /* Override external 8px */
+        font-size: 12px !important;
+        width: 80vw !important;
+        max-width: 380px !important;
+        padding: 14px !important;
     }
     
     .accessibility-panel h2 {
-        font-size: 14px !important; /* Override external 9px */
+        font-size: 14px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 12px !important; /* Override external 8px */
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 14px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 12px !important;
     }
 }
 
@@ -1275,6 +1283,25 @@ if (window.innerWidth <= 768) {
     
     .accessibility-panel h3 {
         font-size: 11px !important; /* Override external 8px */
+    }
+    
+    /* Override external button size conflicts */
+    .accessibility-panel .action-btn {
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 10px !important;
+        padding: 3px 6px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 11px !important;
     }
 }
 
@@ -20379,6 +20406,21 @@ applyCustomizations(customizationData) {
                 const finalBorderRadius = finalComputedStyle.borderRadius;
                 console.log('[CK] Final computed border-radius after timeout:', finalBorderRadius);
             }, 100);
+            
+            // Additional force application after external CSS loads
+            setTimeout(() => {
+                console.log('[CK] === EXTERNAL CSS OVERRIDE FORCE ===');
+                if (shape === 'Rounded') {
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    console.log('[CK] External CSS override applied');
+                }
+                
+                const finalComputedStyle2 = window.getComputedStyle(icon);
+                const finalBorderRadius2 = finalComputedStyle2.borderRadius;
+                console.log('[CK] Final computed border-radius after external CSS override:', finalBorderRadius2);
+            }, 500);
         } else {
             console.error('[CK] Icon not found!');
         }
