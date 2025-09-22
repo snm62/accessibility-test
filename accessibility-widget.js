@@ -1165,16 +1165,176 @@ window.addEventListener('resize', () => {
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
+/* Force icon shape overrides - must come first and be very specific */
 .accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="rounded"] {
     border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
     border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
+}
+
+/* ===== RESPONSIVE DESIGN - SEPARATE FOR EACH SCREEN SIZE ===== */
+
+/* Tablet Styles (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .accessibility-panel {
+        width: 85vw !important;
+        max-width: 500px !important;
+        font-size: 15px !important;
+        padding: 20px !important;
+    }
+    
+    .accessibility-icon {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 22px !important;
+    }
+}
+
+/* Mobile Landscape (481px - 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
+    .accessibility-panel {
+        width: 90vw !important;
+        max-width: 450px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+        padding: 18px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+    
+    /* Mobile shape overrides */
+    .accessibility-icon[data-shape="circle"] {
+        border-radius: 50% !important;
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+    }
+    
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
+    
+    .accessibility-icon[data-shape="square"] {
+        border-radius: 0px !important;
+        -webkit-border-radius: 0px !important;
+        -moz-border-radius: 0px !important;
+    }
+}
+
+/* Mobile Portrait (320px - 480px) */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 95vw !important;
+        max-width: 350px !important;
+        left: 2.5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 13px !important;
+        padding: 15px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px !important;
+    }
+    
+    /* Mobile shape overrides */
+    .accessibility-icon[data-shape="circle"] {
+        border-radius: 50% !important;
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+    }
+    
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 20px !important;
+        -webkit-border-radius: 20px !important;
+        -moz-border-radius: 20px !important;
+    }
+    
+    .accessibility-icon[data-shape="square"] {
+        border-radius: 0px !important;
+        -webkit-border-radius: 0px !important;
+        -moz-border-radius: 0px !important;
+    }
+    
+    /* Mobile-specific panel content adjustments */
+    .accessibility-panel h2 {
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .profile-item {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 14px !important;
+    }
+    
+    .profile-item p {
+        font-size: 12px !important;
+    }
+}
+
+/* Small Mobile (320px and below) */
+@media (max-width: 320px) {
+    .accessibility-panel {
+        width: 98vw !important;
+        max-width: 300px !important;
+        left: 1vw !important;
+        font-size: 12px !important;
+        padding: 12px !important;
+    }
+    
+    .accessibility-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 16px !important;
+    }
 }
 
 .accessibility-panel {
@@ -1480,27 +1640,7 @@ window.addEventListener('resize', () => {
             visibility: visible !important;
         }
         
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .accessibility-icon {
-                width: 50px !important;
-                height: 50px !important;
-               
-            }
-            
-            .accessibility-icon i {
-                font-size: 20px !important;
-            }
-            
-            .accessibility-panel {
-                width: 90vw !important;
-                max-width: 400px !important;
-                left: 5vw !important;
-                right: auto !important;
-                top: 50% !important;
-                transform: translateY(-50%) !important;
-            }
-        }
+        /* Mobile responsiveness - handled by main responsive CSS above */
         
         @media (max-width: 480px) {
             .accessibility-icon {
@@ -1796,57 +1936,7 @@ window.addEventListener('resize', () => {
 
             
 
-            /* Responsive Design */
-
-            @media (max-width: 768px) {
-
-                .accessibility-icon {
-
-                    width: 50px !important;
-
-                    height: 50px !important;
-
-                    bottom: 15px !important;
-
-                    left: 15px !important;
-
-                }
-
-                
-
-                .accessibility-icon i {
-
-                    font-size: 20px !important;
-
-                }
-
-                
-
-    @media (max-width: 768px) {
-      .accessibility-panel {
-          width: 90vw !important;
-          max-width: 400px !important;
-          left: 5vw !important;
-          right: auto !important;
-          top: 50% !important;
-          transform: translateY(-50%) !important;
-          /* ADD these for better mobile responsiveness: */
-          font-size: 14px !important;
-          padding: 15px !important;
-    }
-}
-@media (max-width: 480px) {
-    .accessibility-panel {
-        width: 95vw !important;
-        max-width: 350px !important;
-        left: 2.5vw !important;
-        /* ADD these for better mobile responsiveness: */
-        font-size: 12px !important;
-        padding: 10px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
-    }
-}
+            /* Responsive Design - handled by main responsive CSS above */
                 
 
                 .accessibility-panel.active {
@@ -19574,6 +19664,10 @@ applyCustomizations(customizationData) {
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.borderRadius = borderRadius + ' !important';
             
+            // Force the CSS class to take effect
+            icon.classList.remove('circle', 'rounded', 'square');
+            icon.classList.add(shape.toLowerCase());
+            
             // Also set as inline style attribute to override external CSS
             const currentStyle = icon.getAttribute('style') || '';
             const newStyle = currentStyle.replace(/border-radius[^;]*;?/g, '') + `border-radius: ${borderRadius} !important;`;
@@ -19590,31 +19684,22 @@ applyCustomizations(customizationData) {
             console.log('[CK] Icon data-shape attribute:', icon.getAttribute('data-shape'));
             
             // If computed style is still not what we want, try more aggressive approach
-            if (computedStyle !== borderRadius) {
+            if (computedStyle !== borderRadius && computedStyle !== borderRadius.replace('px', 'px')) {
                 console.log('[CK] Computed style mismatch! Trying aggressive override...');
                 console.log('[CK] Expected:', borderRadius, 'Got:', computedStyle);
                 
-                // Add CSS rule to shadow DOM
-                const style = document.createElement('style');
-                style.textContent = `
-                    .accessibility-icon[data-shape="${shape.toLowerCase()}"] {
-                        border-radius: ${borderRadius} !important;
-                    }
-                `;
-                this.shadowRoot.appendChild(style);
+                // Try setting it multiple times with different methods
+                icon.style.borderRadius = borderRadius;
+                icon.style.setProperty('border-radius', borderRadius, 'important');
                 
-                // Force reflow again
+                // Force a style recalculation
+                icon.style.display = 'none';
                 icon.offsetHeight;
-                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
-                console.log('[CK] After aggressive override, computed border-radius:', finalComputedStyle);
+                icon.style.display = '';
                 
-                if (finalComputedStyle !== borderRadius) {
-                    console.error('[CK] SHAPE OVERRIDE FAILED! Expected:', borderRadius, 'Final result:', finalComputedStyle);
-                } else {
-                    console.log('[CK] Shape override successful!');
-                }
-            } else {
-                console.log('[CK] Shape applied successfully on first try!');
+                // Check again
+                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
+                console.log('[CK] Final computed border-radius:', finalComputedStyle);
             }
         }
     }
