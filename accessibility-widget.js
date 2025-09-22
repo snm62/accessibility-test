@@ -4118,11 +4118,10 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Cover the entire panel content including scrolled areas */
+                /* Cover only the panel viewport, not the whole website */
                 width: 100%;
                 height: 100%;
-                min-height: 100%;
-                /* Ensure it covers all scrollable content */
+                /* Keep modal within panel viewport */
                 overflow: hidden;
             }
 
@@ -19974,16 +19973,15 @@ applyCustomizations(customizationData) {
         console.log('[CK] Panel element found:', !!panel);
         
         if (modal && panel) {
-            // Set modal height to cover entire panel content including scrolled areas
-            const panelScrollHeight = panel.scrollHeight;
+            // Set modal to cover only the panel viewport, not the entire scrollable content
             const panelClientHeight = panel.clientHeight;
-            console.log('[CK] Panel scrollHeight:', panelScrollHeight, 'clientHeight:', panelClientHeight);
+            console.log('[CK] Panel clientHeight:', panelClientHeight);
             
-            // Set the modal height to cover the full scrollable content
-            modal.style.height = `${panelScrollHeight}px`;
-            modal.style.minHeight = `${panelScrollHeight}px`;
+            // Set the modal height to cover only the visible panel area
+            modal.style.height = `${panelClientHeight}px`;
+            modal.style.minHeight = `${panelClientHeight}px`;
             modal.style.display = 'flex';
-            console.log('[CK] Hide interface modal shown with height:', panelScrollHeight + 'px');
+            console.log('[CK] Hide interface modal shown with height:', panelClientHeight + 'px');
         } else {
             console.log('[CK] Modal or panel not found!');
         }
