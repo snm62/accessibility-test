@@ -95,6 +95,9 @@ constructor() {
             } else {
 
                 console.log('Accessibility Widget: No customization data found, using defaults');
+                
+                // Show the icon with default styling
+                this.showIcon();
 
             }
 
@@ -1836,6 +1839,11 @@ if (window.innerWidth <= 768) {
         icon.innerHTML = '<i class="fas fa-universal-access" aria-hidden="true"></i><span id="accessibility-icon-description" class="sr-only">Click to open accessibility settings panel</span>';
 
         icon.style.pointerEvents = 'auto';
+        
+        // Initially hide the icon until customization data is loaded
+        icon.style.display = 'none';
+        icon.style.visibility = 'hidden';
+        icon.style.opacity = '0';
 
         shadowRoot.appendChild(icon);
 
@@ -2458,7 +2466,7 @@ if (window.innerWidth <= 768) {
 
                 font-size: 20px;
 
-                padding: 5px;
+                padding: 12px;
 
                 transition: transform 0.2s ease;
 
@@ -2470,6 +2478,20 @@ if (window.innerWidth <= 768) {
 
                 z-index: 1005;
 
+                min-width: 40px;
+
+                min-height: 40px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                border-radius: 50%;
+
+                background: rgba(255, 255, 255, 0.1);
+
             }
 
 
@@ -2478,13 +2500,17 @@ if (window.innerWidth <= 768) {
 
                 transform: scale(1.1);
 
+                background: rgba(255, 255, 255, 0.2);
+
             }
 
             /* Desktop only - Make close button bigger */
             @media (min-width: 769px) {
                 .close-btn {
                     font-size: 24px !important;
-                    padding: 8px !important;
+                    padding: 16px !important;
+                    min-width: 48px !important;
+                    min-height: 48px !important;
                 }
             }
 
@@ -4240,21 +4266,19 @@ if (window.innerWidth <= 768) {
 
             }
 
-            /* Big Black Cursor - Proper Arrow Headed */
-body.big-black-cursor {
+            /* Big Black Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
+body.big-black-cursor,
+html body.big-black-cursor,
+body.big-black-cursor *,
+html body.big-black-cursor * {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto !important;
 }
 
-body.big-black-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto !important;
-}
-
-/* Big White Cursor - Proper Arrow Headed */
-body.big-white-cursor {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
-}
-
-body.big-white-cursor * {
+/* Big White Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
+body.big-white-cursor,
+html body.big-white-cursor,
+body.big-white-cursor *,
+html body.big-white-cursor * {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
 }
             /* Hide Interface Modal Styles */
@@ -16318,9 +16342,19 @@ body.big-white-cursor * {
 
     applyBigBlackCursor() {
 
-        // CSS handles the cursor styling for the entire body
+        // Force apply cursor style with JavaScript to override any conflicts
+        const cursorUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>';
+        
+        // Apply to body
+        document.body.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+        
+        // Apply to all elements
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+            el.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+        });
 
-        console.log('Accessibility Widget: Big black cursor applied via CSS');
+        console.log('Accessibility Widget: Big black cursor applied via JavaScript');
 
     }
 
@@ -16456,9 +16490,19 @@ body.big-white-cursor * {
 
     applyBigWhiteCursor() {
 
-        // CSS handles the cursor styling for the entire body
+        // Force apply cursor style with JavaScript to override any conflicts
+        const cursorUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>';
+        
+        // Apply to body
+        document.body.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+        
+        // Apply to all elements
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+            el.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+        });
 
-        console.log('Accessibility Widget: Big white cursor applied via CSS');
+        console.log('Accessibility Widget: Big white cursor applied via JavaScript');
 
     }
 
@@ -16564,15 +16608,10 @@ body.big-white-cursor * {
 
         style.textContent = `
 
-            body:not(.big-white-cursor):not(.big-black-cursor) *,
-
-            body:not(.big-white-cursor):not(.big-black-cursor),
-
-            .accessibility-panel *,
-
-            .accessibility-widget *,
-
-            #accessibility-widget * {
+            /* Only apply auto cursor when big cursors are NOT active */
+            body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-panel *,
+            body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget *,
+            body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget * {
 
                 cursor: auto !important;
 
@@ -19740,10 +19779,30 @@ applyCustomizations(customizationData) {
         
         console.log('[CK] applyCustomizations() - Successfully applied all customization data');
         
+        // Show the icon now that customizations have been applied
+        this.showIcon();
+        
     } catch (error) {
         console.error('[CK] applyCustomizations() - Error applying customization data:', error);
+        
+        // Show the icon even if there was an error, but with default styling
+        this.showIcon();
     }
 }
+
+    // Show the icon after customizations are loaded
+    showIcon() {
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            console.log('[CK] showIcon() - Showing icon with customizations applied');
+            icon.style.display = 'flex';
+            icon.style.visibility = 'visible';
+            icon.style.opacity = '1';
+            icon.style.transition = 'opacity 0.3s ease';
+        } else {
+            console.warn('[CK] showIcon() - Icon not found in shadow DOM');
+        }
+    }
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
