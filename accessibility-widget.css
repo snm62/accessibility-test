@@ -2077,30 +2077,29 @@ body.high-contrast .accessibility-widget-container *,
 }
 
 
-/* Cursor Styles */
+/* Cursor Styles - Big Arrow Headed Cursors */
 body.big-black-cursor {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="black" stroke="white" stroke-width="1"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2 2 L2 28 L8 22 L12 26 L14 24 L10 20 L28 20" fill="black" stroke="white" stroke-width="1"/></svg>') 0 0, auto !important;
 }
 
 body.big-black-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="black" stroke="white" stroke-width="1"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2 2 L2 28 L8 22 L12 26 L14 24 L10 20 L28 20" fill="black" stroke="white" stroke-width="1"/></svg>') 0 0, auto !important;
 }
 
 body.big-white-cursor {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="white" stroke="black" stroke-width="1"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2 2 L2 28 L8 22 L12 26 L14 24 L10 20 L28 20" fill="white" stroke="black" stroke-width="1"/></svg>') 0 0, auto !important;
 }
 
 body.big-white-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="0,0 0,24 6,20 8,26 10,24 8,16 24,16" fill="white" stroke="black" stroke-width="1"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2 2 L2 28 L8 22 L12 26 L14 24 L10 20 L28 20" fill="white" stroke="black" stroke-width="1"/></svg>') 0 0, auto !important;
 }
 
-/* Ensure accessibility widget has normal cursors when big white cursor is disabled */
-body:not(.big-white-cursor) .accessibility-widget,
-body:not(.big-white-cursor) .accessibility-widget *,
-body:not(.big-white-cursor) .accessibility-panel,
-body:not(.big-white-cursor) .accessibility-panel *,
-body:not(.big-white-cursor) #accessibility-widget,
-body:not(.big-white-cursor) #accessibility-widget * {
+body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget,
+body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget *,
+body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-panel,
+body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-panel *,
+body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget,
+body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget * {
     cursor: auto !important;
 }
 
