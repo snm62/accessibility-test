@@ -1184,7 +1184,128 @@ window.addEventListener('resize', () => {
     -moz-border-radius: 0px !important;
 }
 
-/* Mobile-specific overrides */
+/* ===== RESPONSIVE DESIGN FOR MOBILE AND TABLET ===== */
+
+/* Tablet Styles (769px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .accessibility-panel {
+        width: 85vw !important;
+        max-width: 500px !important;
+        font-size: 15px !important;
+        padding: 20px !important;
+    }
+    
+    .accessibility-icon {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 22px !important;
+    }
+}
+
+/* Mobile Landscape (481px - 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
+    .accessibility-panel {
+        width: 90vw !important;
+        max-width: 450px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+        padding: 18px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+}
+
+/* Mobile Portrait (320px - 480px) */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 95vw !important;
+        max-width: 350px !important;
+        left: 2.5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 13px !important;
+        padding: 15px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px !important;
+    }
+    
+    /* Mobile content adjustments */
+    .accessibility-panel h2 {
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .profile-item {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 14px !important;
+    }
+    
+    .profile-item p {
+        font-size: 12px !important;
+    }
+}
+
+/* ===== FIX ROUNDED SHAPES - REMOVE CONFLICTS ===== */
+
+/* Remove any conflicting border-radius rules */
+.accessibility-icon {
+    border-radius: unset !important;
+}
+
+/* Apply shape styles with higher specificity */
+.accessibility-icon[data-shape="circle"] {
+    border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
+}
+
+.accessibility-icon[data-shape="rounded"] {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+}
+
+.accessibility-icon[data-shape="square"] {
+    border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
+}
+
+/* Mobile shape overrides */
 @media (max-width: 768px) {
     .accessibility-icon[data-shape="circle"] {
         border-radius: 50% !important;
