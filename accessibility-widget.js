@@ -1192,21 +1192,154 @@ if (window.innerWidth <= 768) {
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
-/* Mobile and Tablet - Make panel small and position near icon */
-@media (max-width: 768px) {
+/* Tablet/iPad starting from 820px - Position panel close to icon */
+@media (max-width: 1024px) and (min-width: 820px) {
     .accessibility-panel {
-        width: 70vw !important;
-        max-width: 300px !important;
-        left: 15vw !important;
+        width: 80vw !important;
+        max-width: 400px !important;
+        left: 3vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
-        font-size: 12px !important;
-        padding: 12px !important;
-        max-height: 70vh !important;
+        font-size: 14px !important;
+        padding: 16px !important;
+        max-height: 80vh !important;
         overflow-y: auto !important;
         position: fixed !important;
         z-index: 9999 !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+}
+
+/* iPad Mini and Tablet - Wider panel positioned close to icon */
+@media (max-width: 819px) and (min-width: 769px) {
+    .accessibility-panel {
+        width: 85vw !important;
+        max-width: 450px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+        padding: 16px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+    
+    /* Better content spacing for tablet */
+    .accessibility-panel h2 {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 14px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .profile-item {
+        padding: 10px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 13px !important;
+    }
+    
+    .profile-item p {
+        font-size: 11px !important;
+    }
+    
+    .action-btn {
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+    }
+}
+
+/* Mobile Landscape - Wider panel */
+@media (max-width: 768px) and (min-width: 481px) {
+    .accessibility-panel {
+        width: 80vw !important;
+        max-width: 380px !important;
+        left: 10vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 13px !important;
+        padding: 14px !important;
+        max-height: 75vh !important;
+        overflow-y: auto !important;
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
+    
+    .accessibility-icon {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px !important;
+    }
+    
+    /* Better content spacing */
+    .accessibility-panel h2 {
+        font-size: 15px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-item {
+        padding: 8px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 12px !important;
+    }
+    
+    .profile-item p {
+        font-size: 10px !important;
+    }
+    
+    .action-btn {
+        padding: 6px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* Mobile Portrait - Wider but still compact */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 75vw !important;
+        max-width: 320px !important;
+        left: 12.5vw !important;
+        font-size: 12px !important;
+        padding: 12px !important;
+        max-height: 70vh !important;
     }
     
     .accessibility-icon {
@@ -1218,7 +1351,7 @@ if (window.innerWidth <= 768) {
         font-size: 16px !important;
     }
     
-    /* Compact content */
+    /* Compact but readable content */
     .accessibility-panel h2 {
         font-size: 14px !important;
         margin-bottom: 8px !important;
@@ -1231,70 +1364,20 @@ if (window.innerWidth <= 768) {
     
     .profile-item {
         padding: 6px !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 5px !important;
     }
     
     .profile-item h4 {
-        font-size: 10px !important;
-    }
-    
-    .profile-item p {
-        font-size: 8px !important;
-    }
-    
-    .action-btn {
-        padding: 4px 8px !important;
-        font-size: 9px !important;
-    }
-}
-
-/* Small Mobile - Even smaller and closer to icon */
-@media (max-width: 480px) {
-    .accessibility-panel {
-        width: 65vw !important;
-        max-width: 250px !important;
-        left: 17.5vw !important;
         font-size: 11px !important;
-        padding: 10px !important;
-        max-height: 65vh !important;
-    }
-    
-    .accessibility-icon {
-        width: 35px !important;
-        height: 35px !important;
-    }
-    
-    .accessibility-icon i {
-        font-size: 14px !important;
-    }
-    
-    /* Very compact content */
-    .accessibility-panel h2 {
-        font-size: 12px !important;
-        margin-bottom: 6px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 10px !important;
-        margin-bottom: 4px !important;
-    }
-    
-    .profile-item {
-        padding: 4px !important;
-        margin-bottom: 3px !important;
-    }
-    
-    .profile-item h4 {
-        font-size: 9px !important;
     }
     
     .profile-item p {
-        font-size: 7px !important;
+        font-size: 9px !important;
     }
     
     .action-btn {
-        padding: 3px 6px !important;
-        font-size: 8px !important;
+        padding: 5px 8px !important;
+        font-size: 9px !important;
     }
 }
 
@@ -19718,30 +19801,86 @@ applyCustomizations(customizationData) {
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
         if (panel && icon) {
-            console.log('[CK] Applying mobile responsive styles - making panel small and close to icon');
+            const screenWidth = window.innerWidth;
+            console.log('[CK] Applying mobile responsive styles - screen width:', screenWidth);
             
-            // Force mobile panel styles
-            panel.style.setProperty('width', '70vw', 'important');
-            panel.style.setProperty('max-width', '300px', 'important');
-            panel.style.setProperty('left', '15vw', 'important');
+            if (screenWidth <= 480) {
+                // Mobile Portrait - Wider but compact
+                console.log('[CK] Applying mobile portrait styles');
+                panel.style.setProperty('width', '75vw', 'important');
+                panel.style.setProperty('max-width', '320px', 'important');
+                panel.style.setProperty('left', '12.5vw', 'important');
+                panel.style.setProperty('font-size', '12px', 'important');
+                panel.style.setProperty('padding', '12px', 'important');
+                panel.style.setProperty('max-height', '70vh', 'important');
+                
+                icon.style.setProperty('width', '40px', 'important');
+                icon.style.setProperty('height', '40px', 'important');
+                
+                const iconI = icon.querySelector('i');
+                if (iconI) {
+                    iconI.style.setProperty('font-size', '16px', 'important');
+                }
+            } else if (screenWidth <= 768) {
+                // Mobile Landscape - Wider panel
+                console.log('[CK] Applying mobile landscape styles');
+                panel.style.setProperty('width', '80vw', 'important');
+                panel.style.setProperty('max-width', '380px', 'important');
+                panel.style.setProperty('left', '10vw', 'important');
+                panel.style.setProperty('font-size', '13px', 'important');
+                panel.style.setProperty('padding', '14px', 'important');
+                panel.style.setProperty('max-height', '75vh', 'important');
+                
+                icon.style.setProperty('width', '45px', 'important');
+                icon.style.setProperty('height', '45px', 'important');
+                
+                const iconI = icon.querySelector('i');
+                if (iconI) {
+                    iconI.style.setProperty('font-size', '18px', 'important');
+                }
+            } else if (screenWidth >= 820 && screenWidth <= 1024) {
+                // Tablet/iPad 820px+ - Position panel very close to icon
+                console.log('[CK] Applying tablet 820px+ styles - positioning very close to icon');
+                panel.style.setProperty('width', '80vw', 'important');
+                panel.style.setProperty('max-width', '400px', 'important');
+                panel.style.setProperty('left', '3vw', 'important');
+                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('padding', '16px', 'important');
+                panel.style.setProperty('max-height', '80vh', 'important');
+                
+                icon.style.setProperty('width', '50px', 'important');
+                icon.style.setProperty('height', '50px', 'important');
+                
+                const iconI = icon.querySelector('i');
+                if (iconI) {
+                    iconI.style.setProperty('font-size', '20px', 'important');
+                }
+            } else if (screenWidth <= 1024) {
+                // iPad Mini - Much wider panel positioned close to icon
+                console.log('[CK] Applying iPad mini styles - positioning close to icon');
+                panel.style.setProperty('width', '85vw', 'important');
+                panel.style.setProperty('max-width', '450px', 'important');
+                panel.style.setProperty('left', '5vw', 'important');
+                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('padding', '16px', 'important');
+                panel.style.setProperty('max-height', '80vh', 'important');
+                
+                icon.style.setProperty('width', '50px', 'important');
+                icon.style.setProperty('height', '50px', 'important');
+                
+                const iconI = icon.querySelector('i');
+                if (iconI) {
+                    iconI.style.setProperty('font-size', '20px', 'important');
+                }
+            }
+            
+            // Common mobile styles
             panel.style.setProperty('right', 'auto', 'important');
             panel.style.setProperty('top', '50%', 'important');
             panel.style.setProperty('transform', 'translateY(-50%)', 'important');
-            panel.style.setProperty('font-size', '12px', 'important');
-            panel.style.setProperty('padding', '12px', 'important');
-            panel.style.setProperty('max-height', '70vh', 'important');
             panel.style.setProperty('overflow-y', 'auto', 'important');
             panel.style.setProperty('position', 'fixed', 'important');
             panel.style.setProperty('z-index', '9999', 'important');
-            
-            // Force mobile icon styles
-            icon.style.setProperty('width', '40px', 'important');
-            icon.style.setProperty('height', '40px', 'important');
-            
-            const iconI = icon.querySelector('i');
-            if (iconI) {
-                iconI.style.setProperty('font-size', '16px', 'important');
-            }
         }
     }
     
