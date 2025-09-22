@@ -1186,38 +1186,13 @@ window.addEventListener('resize', () => {
 
 /* ===== RESPONSIVE DESIGN FOR MOBILE AND TABLET ===== */
 
-/* Tablet Styles (769px - 1024px) */
+/* Tablet Styles (769px - 1024px) - Smaller and more compact */
 @media (max-width: 1024px) and (min-width: 769px) {
     .accessibility-panel {
-        width: 85vw !important;
-        max-width: 500px !important;
-        font-size: 15px !important;
-        padding: 20px !important;
-    }
-    
-    .accessibility-icon {
-        width: 55px !important;
-        height: 55px !important;
-    }
-    
-    .accessibility-icon i {
-        font-size: 22px !important;
-    }
-}
-
-/* Mobile Landscape (481px - 768px) */
-@media (max-width: 768px) and (min-width: 481px) {
-    .accessibility-panel {
-        width: 90vw !important;
-        max-width: 450px !important;
-        left: 5vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
+        width: 80vw !important;
+        max-width: 420px !important;
         font-size: 14px !important;
-        padding: 18px !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
+        padding: 16px !important;
     }
     
     .accessibility-icon {
@@ -1230,17 +1205,17 @@ window.addEventListener('resize', () => {
     }
 }
 
-/* Mobile Portrait (320px - 480px) */
-@media (max-width: 480px) {
+/* Mobile Landscape (481px - 768px) - More compact */
+@media (max-width: 768px) and (min-width: 481px) {
     .accessibility-panel {
-        width: 95vw !important;
-        max-width: 350px !important;
-        left: 2.5vw !important;
+        width: 85vw !important;
+        max-width: 380px !important;
+        left: 7.5vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
         font-size: 13px !important;
-        padding: 15px !important;
+        padding: 14px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
     }
@@ -1254,28 +1229,83 @@ window.addEventListener('resize', () => {
         font-size: 18px !important;
     }
     
-    /* Mobile content adjustments */
+    /* Compact content adjustments */
     .accessibility-panel h2 {
-        font-size: 18px !important;
-        margin-bottom: 15px !important;
-    }
-    
-    .accessibility-panel h3 {
         font-size: 16px !important;
         margin-bottom: 12px !important;
     }
     
+    .accessibility-panel h3 {
+        font-size: 14px !important;
+        margin-bottom: 10px !important;
+    }
+    
     .profile-item {
-        padding: 12px !important;
-        margin-bottom: 8px !important;
+        padding: 10px !important;
+        margin-bottom: 6px !important;
     }
     
     .profile-item h4 {
-        font-size: 14px !important;
+        font-size: 13px !important;
     }
     
     .profile-item p {
+        font-size: 11px !important;
+    }
+}
+
+/* Mobile Portrait (320px - 480px) - Very compact */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 90vw !important;
+        max-width: 320px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
         font-size: 12px !important;
+        padding: 12px !important;
+        max-height: 75vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 16px !important;
+    }
+    
+    /* Very compact content adjustments */
+    .accessibility-panel h2 {
+        font-size: 15px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-item {
+        padding: 8px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 12px !important;
+    }
+    
+    .profile-item p {
+        font-size: 10px !important;
+    }
+    
+    /* Compact buttons */
+    .action-btn {
+        padding: 8px 12px !important;
+        font-size: 11px !important;
     }
 }
 
