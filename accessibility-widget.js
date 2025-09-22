@@ -54,6 +54,9 @@ constructor() {
         this.loadSettings();
         await this.fetchCustomizationData();
         
+        // Set up periodic refresh to check for customization updates
+        this.setupCustomizationRefresh();
+        
 
         // Delay binding events to ensure elements are created
 
@@ -19282,12 +19285,18 @@ body.big-white-cursor * {
                 return null;
             }
             
-            console.log('[CK] fetchCustomizationData() - Making API request to:', `${this.kvApiUrl}/api/accessibility/config?siteId=${this.siteId}`);
+            // Add cache busting to ensure fresh data
+            const cacheBuster = `_t=${Date.now()}`;
+            const apiUrl = `${this.kvApiUrl}/api/accessibility/config?siteId=${this.siteId}&${cacheBuster}`;
+            console.log('[CK] fetchCustomizationData() - Making API request to:', apiUrl);
             
-            const response = await fetch(`${this.kvApiUrl}/api/accessibility/config?siteId=${this.siteId}`, {
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
             });
             
@@ -19310,6 +19319,41 @@ body.big-white-cursor * {
             console.error('[CK] fetchCustomizationData() - Error:', error);
             return null;
         }
+    }
+
+    // Set up periodic refresh to check for customization updates
+    setupCustomizationRefresh() {
+        console.log('[CK] setupCustomizationRefresh() - Setting up periodic refresh...');
+        
+        // Check for updates every 30 seconds
+        setInterval(async () => {
+            console.log('[CK] setupCustomizationRefresh() - Checking for customization updates...');
+            try {
+                const customizationData = await this.fetchCustomizationData();
+                if (customizationData && customizationData.customization) {
+                    console.log('[CK] setupCustomizationRefresh() - Found updated customization data:', customizationData.customization);
+                    this.applyCustomizations(customizationData.customization);
+                }
+            } catch (error) {
+                console.error('[CK] setupCustomizationRefresh() - Error checking for updates:', error);
+            }
+        }, 30000); // Check every 30 seconds
+        
+        // Also check when the page becomes visible (user switches back to tab)
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden) {
+                console.log('[CK] setupCustomizationRefresh() - Page became visible, checking for updates...');
+                try {
+                    const customizationData = await this.fetchCustomizationData();
+                    if (customizationData && customizationData.customization) {
+                        console.log('[CK] setupCustomizationRefresh() - Found updated customization data on visibility change:', customizationData.customization);
+                        this.applyCustomizations(customizationData.customization);
+                    }
+                } catch (error) {
+                    console.error('[CK] setupCustomizationRefresh() - Error checking for updates on visibility change:', error);
+                }
+            }
+        });
     }
 
     // Get site ID for API calls
