@@ -1195,9 +1195,9 @@ if (window.innerWidth <= 768) {
 /* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon */
 @media (max-width: 1366px) and (min-width: 1025px) {
     .accessibility-panel {
-        width: 70vw !important;
-        max-width: 500px !important;
-        left: 2vw !important;
+        width: 65vw !important;
+        max-width: 450px !important;
+        left: 0.5vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
@@ -1248,12 +1248,12 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Tablet/iPad starting from 820px - Position panel close to icon */
+/* Tablet/iPad starting from 820px - Position panel very close to icon */
 @media (max-width: 1024px) and (min-width: 820px) {
     .accessibility-panel {
-        width: 80vw !important;
-        max-width: 400px !important;
-        left: 3vw !important;
+        width: 75vw !important;
+        max-width: 380px !important;
+        left: 1vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
@@ -1359,8 +1359,8 @@ if (window.innerWidth <= 768) {
     
     /* Better content spacing with larger text */
     .accessibility-panel h2 {
-        font-size: 17px !important;
-        margin-bottom: 12px !important;
+        font-size: 15px !important;
+        margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
@@ -1400,26 +1400,26 @@ if (window.innerWidth <= 768) {
         margin-right: 4px !important;
     }
     
-    /* Smaller toggles for mobile landscape */
+    /* Much smaller toggles for mobile landscape */
     .toggle-switch {
-        width: 35px !important;
-        height: 20px !important;
+        width: 28px !important;
+        height: 16px !important;
     }
     
     .toggle-switch .slider {
-        width: 35px !important;
-        height: 20px !important;
+        width: 28px !important;
+        height: 16px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 16px !important;
-        width: 16px !important;
+        height: 12px !important;
+        width: 12px !important;
         left: 2px !important;
         bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(15px) !important;
+        transform: translateX(12px) !important;
     }
 }
 
@@ -1445,8 +1445,8 @@ if (window.innerWidth <= 768) {
     
     /* Compact but readable content with larger text */
     .accessibility-panel h2 {
-        font-size: 16px !important;
-        margin-bottom: 10px !important;
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
@@ -1486,37 +1486,32 @@ if (window.innerWidth <= 768) {
         margin-right: 3px !important;
     }
     
-    /* Smaller toggles for mobile portrait */
+    /* Much smaller toggles for mobile portrait */
     .toggle-switch {
-        width: 30px !important;
-        height: 18px !important;
+        width: 24px !important;
+        height: 14px !important;
     }
     
     .toggle-switch .slider {
-        width: 30px !important;
-        height: 18px !important;
+        width: 24px !important;
+        height: 14px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 14px !important;
-        width: 14px !important;
+        height: 10px !important;
+        width: 10px !important;
         left: 2px !important;
         bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(12px) !important;
+        transform: translateX(10px) !important;
     }
 }
 
-/* ===== FIX ROUNDED SHAPES - REMOVE CONFLICTS ===== */
+/* ===== FIX ROUNDED SHAPES - FORCE SHAPE STYLES ===== */
 
-/* Remove any conflicting border-radius rules */
-.accessibility-icon {
-    border-radius: unset !important;
-}
-
-/* Apply shape styles with higher specificity */
+/* Force shape styles with maximum specificity */
 .accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
     -webkit-border-radius: 50% !important;
@@ -1535,7 +1530,28 @@ if (window.innerWidth <= 768) {
     -moz-border-radius: 0px !important;
 }
 
-/* Mobile shape overrides */
+/* Force shape styles on all screen sizes */
+@media (max-width: 1366px) {
+    .accessibility-icon[data-shape="circle"] {
+        border-radius: 50% !important;
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+    }
+    
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
+    
+    .accessibility-icon[data-shape="square"] {
+        border-radius: 0px !important;
+        -webkit-border-radius: 0px !important;
+        -moz-border-radius: 0px !important;
+    }
+}
+
+/* Force shape styles on mobile */
 @media (max-width: 768px) {
     .accessibility-icon[data-shape="circle"] {
         border-radius: 50% !important;
@@ -19920,6 +19936,19 @@ applyCustomizations(customizationData) {
                 const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Final computed border-radius:', finalComputedStyle);
             }
+            
+            // Force apply shape styles with maximum specificity
+            setTimeout(() => {
+                console.log('[CK] Force applying shape styles after timeout');
+                icon.style.setProperty('border-radius', borderRadius, 'important');
+                icon.style.borderRadius = borderRadius + ' !important';
+                
+                // Force reflow again
+                icon.offsetHeight;
+                
+                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
+                console.log('[CK] Final force applied border-radius:', finalComputedStyle);
+            }, 100);
         }
     }
     
@@ -19969,9 +19998,9 @@ applyCustomizations(customizationData) {
             } else if (screenWidth >= 1025 && screenWidth <= 1366) {
                 // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
                 console.log('[CK] Applying large tablet styles - positioning very close to icon');
-                panel.style.setProperty('width', '70vw', 'important');
-                panel.style.setProperty('max-width', '500px', 'important');
-                panel.style.setProperty('left', '2vw', 'important');
+                panel.style.setProperty('width', '65vw', 'important');
+                panel.style.setProperty('max-width', '450px', 'important');
+                panel.style.setProperty('left', '0.5vw', 'important');
                 panel.style.setProperty('font-size', '15px', 'important');
                 panel.style.setProperty('padding', '18px', 'important');
                 panel.style.setProperty('max-height', '85vh', 'important');
@@ -19986,9 +20015,9 @@ applyCustomizations(customizationData) {
             } else if (screenWidth >= 820 && screenWidth <= 1024) {
                 // Tablet/iPad 820px+ - Position panel very close to icon
                 console.log('[CK] Applying tablet 820px+ styles - positioning very close to icon');
-                panel.style.setProperty('width', '80vw', 'important');
-                panel.style.setProperty('max-width', '400px', 'important');
-                panel.style.setProperty('left', '3vw', 'important');
+                panel.style.setProperty('width', '75vw', 'important');
+                panel.style.setProperty('max-width', '380px', 'important');
+                panel.style.setProperty('left', '1vw', 'important');
                 panel.style.setProperty('font-size', '14px', 'important');
                 panel.style.setProperty('padding', '16px', 'important');
                 panel.style.setProperty('max-height', '80vh', 'important');
