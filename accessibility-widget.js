@@ -1249,6 +1249,74 @@ window.addEventListener('resize', () => {
     }
 }
 
+/* Mobile Portrait (375px - 480px) - Specific fix for your range */
+@media (max-width: 480px) and (min-width: 375px) {
+    .accessibility-panel {
+        width: 92vw !important;
+        max-width: 380px !important;
+        left: 4vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 13px !important;
+        padding: 16px !important;
+        max-height: 82vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 19px !important;
+    }
+    
+    /* Mobile shape overrides */
+    .accessibility-icon[data-shape="circle"] {
+        border-radius: 50% !important;
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+    }
+    
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 22px !important;
+        -webkit-border-radius: 22px !important;
+        -moz-border-radius: 22px !important;
+    }
+    
+    .accessibility-icon[data-shape="square"] {
+        border-radius: 0px !important;
+        -webkit-border-radius: 0px !important;
+        -moz-border-radius: 0px !important;
+    }
+    
+    /* Panel content adjustments for this range */
+    .accessibility-panel h2 {
+        font-size: 17px !important;
+        margin-bottom: 14px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 15px !important;
+        margin-bottom: 11px !important;
+    }
+    
+    .profile-item {
+        padding: 11px !important;
+        margin-bottom: 7px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 13px !important;
+    }
+    
+    .profile-item p {
+        font-size: 11px !important;
+    }
+}
+
 /* Mobile Portrait (320px - 480px) */
 @media (max-width: 480px) {
     .accessibility-panel {
@@ -1334,6 +1402,70 @@ window.addEventListener('resize', () => {
     
     .accessibility-icon i {
         font-size: 16px !important;
+    }
+}
+
+/* ===== FORCE RESPONSIVE STYLES WITH HIGHER SPECIFICITY ===== */
+
+/* Force mobile styles for screens 375px to 768px */
+@media screen and (max-width: 768px) and (min-width: 375px) {
+    .accessibility-panel {
+        position: fixed !important;
+        z-index: 9999 !important;
+        width: 90vw !important;
+        max-width: 400px !important;
+        left: 5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+        padding: 16px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+        position: fixed !important;
+        z-index: 10000 !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
+    }
+    
+    /* Force mobile positioning */
+    .accessibility-panel[data-position="left"] {
+        left: 5vw !important;
+        right: auto !important;
+    }
+    
+    .accessibility-panel[data-position="right"] {
+        right: 5vw !important;
+        left: auto !important;
+    }
+}
+
+/* Additional force for 375px to 480px range */
+@media screen and (max-width: 480px) and (min-width: 375px) {
+    .accessibility-panel {
+        width: 92vw !important;
+        max-width: 380px !important;
+        left: 4vw !important;
+        right: auto !important;
+        font-size: 13px !important;
+        padding: 15px !important;
+    }
+    
+    .accessibility-icon {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 19px !important;
     }
 }
 
