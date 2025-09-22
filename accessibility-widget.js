@@ -1202,21 +1202,17 @@ if (window.innerWidth <= 768) {
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
-/* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon */
+/* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Responsive sizing */
 @media (max-width: 1366px) and (min-width: 1025px) {
     .accessibility-panel {
         width: 65vw !important;
         max-width: 450px !important;
-        left: 0.5vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
         font-size: 15px !important;
         padding: 18px !important;
         max-height: 85vh !important;
         overflow-y: auto !important;
         position: fixed !important;
-        z-index: 9999 !important;
+        z-index: 100001 !important;
     }
     
     .accessibility-icon {
@@ -1258,21 +1254,17 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Tablet/iPad starting from 820px - Position panel very close to icon */
+/* Tablet/iPad starting from 820px - Responsive sizing */
 @media (max-width: 1024px) and (min-width: 820px) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 380px !important;
-        left: 1vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
         font-size: 14px !important;
         padding: 16px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
         position: fixed !important;
-        z-index: 9999 !important;
+        z-index: 100001 !important;
     }
     
     .accessibility-icon {
@@ -1285,21 +1277,17 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* iPad Mini and Tablet - Wider panel positioned close to icon */
+/* iPad Mini and Tablet - Responsive sizing */
 @media (max-width: 819px) and (min-width: 769px) {
     .accessibility-panel {
         width: 85vw !important;
         max-width: 450px !important;
-        left: 5vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
         font-size: 14px !important;
         padding: 16px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
         position: fixed !important;
-        z-index: 9999 !important;
+        z-index: 100001 !important;
     }
     
     .accessibility-icon {
@@ -1346,16 +1334,12 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 80vw !important;
         max-width: 380px !important;
-        left: 10vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
         font-size: 10px !important;
         padding: 10px !important;
         max-height: 75vh !important;
         overflow-y: auto !important;
         position: fixed !important;
-        z-index: 9999 !important;
+        z-index: 100001 !important;
     }
     
     .accessibility-icon {
@@ -1438,7 +1422,6 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
-        left: 12.5vw !important;
         font-size: 8px !important;
         padding: 8px !important;
         max-height: 70vh !important;
@@ -1947,7 +1930,6 @@ if (window.innerWidth <= 768) {
             .accessibility-panel {
                 width: 95vw !important;
                 max-width: 350px !important;
-                left: 2.5vw !important;
             }
         }
             /* Accessibility Widget Styles - Shadow DOM */
@@ -2167,7 +2149,7 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel {
 
-                position: fixed !important;
+                position: fixed;
 
                 width: 500px !important;
 
@@ -2193,7 +2175,7 @@ if (window.innerWidth <= 768) {
 
                 pointer-events: auto;
 
-                /* Ensure modal is positioned relative to panel */
+                /* Make panel a containing block for modal */
                 position: relative;
 
             }
@@ -2331,9 +2313,7 @@ if (window.innerWidth <= 768) {
 
                 font-size: 20px;
 
-                padding: 12px;
-
-                transition: transform 0.2s ease;
+                padding: 8px;
 
                 position: absolute;
 
@@ -2343,28 +2323,11 @@ if (window.innerWidth <= 768) {
 
                 z-index: 1005;
 
-                min-width: 40px;
-
-                min-height: 40px;
-
-                display: flex;
-
-                align-items: center;
-
-                justify-content: center;
-
-                border-radius: 50%;
-
                 background: transparent;
 
-                line-height: 1;
+                border: none;
 
-                text-align: center;
-
-                /* Ensure X symbol is perfectly centered */
-                font-weight: bold;
-
-                font-family: Arial, sans-serif;
+                color: #666;
 
             }
 
@@ -2372,24 +2335,8 @@ if (window.innerWidth <= 768) {
 
             .close-btn:hover {
 
-                transform: scale(1.1);
+                color: #333;
 
-                background: transparent;
-
-            }
-
-            /* Desktop only - Make close button bigger */
-            @media (min-width: 769px) {
-                .close-btn {
-                    font-size: 24px !important;
-                    padding: 16px !important;
-                    min-width: 48px !important;
-                    min-height: 48px !important;
-                    line-height: 1 !important;
-                    text-align: center !important;
-                    font-weight: bold !important;
-                    font-family: Arial, sans-serif !important;
-                }
             }
 
 
@@ -4161,7 +4108,7 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -4171,9 +4118,11 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Ensure it covers the entire viewport including scrolled content */
-                width: 100vw;
-                height: 100vh;
+                /* Ensure it covers the entire panel including scrolled content */
+                width: 100%;
+                height: 100%;
+                /* Cover the full panel height including scrolled content */
+                min-height: 100%;
             }
 
             .hide-interface-modal .modal-content {
@@ -10474,6 +10423,9 @@ html body.big-white-cursor * {
 
         this.settings['content-scale'] = this.contentScale; // Save to settings
 
+        // Mark that content scaling was actually used
+        localStorage.setItem('content-scaling-used', 'true');
+
         this.updateContentScale();
 
         this.updateContentScaleDisplay();
@@ -10489,6 +10441,9 @@ html body.big-white-cursor * {
         this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
 
         this.settings['content-scale'] = this.contentScale; // Save to settings
+
+        // Mark that content scaling was actually used
+        localStorage.setItem('content-scaling-used', 'true');
 
         this.updateContentScale();
 
@@ -10665,6 +10620,16 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
+            // Check if content scaling was actually used (not just toggled on)
+            const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
+            
+            if (!wasContentScalingUsed && this.contentScale === 100) {
+                // If toggled on but never used, turn it back off
+                console.log('[CK] Content scaling toggled on but never used, turning off');
+                this.toggleFeature('content-scaling', false);
+                return;
+            }
+            
             // Always show the current percentage, even if it's 100%
             this.updateContentScaleDisplay();
 
@@ -10725,6 +10690,16 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
+            // Check if font sizing was actually used (not just toggled on)
+            const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
+            
+            if (!wasFontSizingUsed && this.fontSize === 100) {
+                // If toggled on but never used, turn it back off
+                console.log('[CK] Font sizing toggled on but never used, turning off');
+                this.toggleFeature('font-sizing', false);
+                return;
+            }
+            
             console.log('Accessibility Widget: Font sizing enabled, current fontSize:', this.fontSize);
 
             // Always update display to show current percentage
@@ -11334,6 +11309,9 @@ html body.big-white-cursor * {
 
         this.settings['font-size'] = this.fontSize; // Save to settings
 
+        // Mark that font sizing was actually used
+        localStorage.setItem('font-sizing-used', 'true');
+
         this.updateFontSizeEnhanced();
 
         this.updateFontSizeDisplay();
@@ -11353,6 +11331,9 @@ html body.big-white-cursor * {
         this.fontSize = Math.max(this.fontSize - 10, 50);
 
         this.settings['font-size'] = this.fontSize; // Save to settings
+
+        // Mark that font sizing was actually used
+        localStorage.setItem('font-sizing-used', 'true');
 
         this.updateFontSizeEnhanced();
 
