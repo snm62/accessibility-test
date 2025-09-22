@@ -1614,11 +1614,7 @@ window.addEventListener('resize', () => {
 
             .accessibility-icon:focus {
 
-                outline: 3px solid #4f46e5 !important;
-
-                outline-offset: 2px !important;
-
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+                outline: none !important;
 
             }
 
@@ -1654,12 +1650,7 @@ window.addEventListener('resize', () => {
 
             .toggle-switch input:focus + .slider {
 
-                outline: 3px solid #4f46e5 !important;
-
-                outline-offset: 2px !important;
-
-                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
-
+                 outline: none !important;
             }
 
 
@@ -1670,26 +1661,14 @@ window.addEventListener('resize', () => {
 
             .profile-item:focus-within {
 
-                outline: 2px solid #4f46e5 !important;
-
-                outline-offset: 2px !important;
-
-                border-radius: 8px !important;
-
-                background-color: rgba(79, 70, 229, 0.05) !important;
-
+                outline: none !important;
             }
 
 
 
             .profile-item:focus {
 
-                outline: 3px solid #4f46e5 !important;
-
-                outline-offset: 2px !important;
-
-                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
-
+               outline: none !important;
             }
 
 
@@ -1748,9 +1727,7 @@ window.addEventListener('resize', () => {
 
             .accessibility-panel input:focus-visible {
 
-                outline: 3px solid #000000 !important;
-
-                outline-offset: 2px !important;
+                outline: none !important;
 
             }
 
@@ -12681,9 +12658,9 @@ body.big-white-cursor * {
 
                 console.log('Accessibility Widget: Interactive element focused, applying styles:', focusedElement);
 
-                focusedElement.style.outline = '3px solid #6366f1';
+                focusedElement.style.outline = 'none';
 
-                focusedElement.style.outlineOffset = '2px';
+                focusedElement.style.outlineOffset = '0px';
 
                 focusedElement.style.background = 'rgba(99, 102, 241, 0.1)';
 
