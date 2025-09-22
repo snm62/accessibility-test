@@ -15588,12 +15588,36 @@ body.big-white-cursor * {
 
 
     showStatement() {
+        console.log('Accessibility Widget: Statement button clicked');
+        console.log('Accessibility Widget: Customization data:', this.customizationData);
+        console.log('Accessibility Widget: Full customization data keys:', this.customizationData ? Object.keys(this.customizationData) : 'No customization data');
+        
+        // Check if we have a custom accessibility statement link
+        if (this.customizationData && this.customizationData.accessibilityStatementLink) {
+            console.log('Accessibility Widget: Opening custom statement link:', this.customizationData.accessibilityStatementLink);
+            console.log('Accessibility Widget: Link validation:', {
+                hasLink: !!this.customizationData.accessibilityStatementLink,
+                linkLength: this.customizationData.accessibilityStatementLink.length,
+                linkValue: this.customizationData.accessibilityStatementLink
+            });
+            
+            // Validate the link before opening
+            if (this.customizationData.accessibilityStatementLink.trim() !== '') {
+                window.open(this.customizationData.accessibilityStatementLink, '_blank');
+            } else {
+                console.log('Accessibility Widget: Statement link is empty, showing default alert');
+                alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
+            }
+        } else {
+            console.log('Accessibility Widget: No custom statement link found, showing default alert');
+            console.log('Accessibility Widget: Debug info:', {
+                hasCustomizationData: !!this.customizationData,
+                hasStatementLink: !!(this.customizationData && this.customizationData.accessibilityStatementLink),
+                statementLinkValue: this.customizationData ? this.customizationData.accessibilityStatementLink : 'No customization data'
+            });
 
-        alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
-
+        }
     }
-
-
 
 
 
@@ -19070,7 +19094,8 @@ body.big-white-cursor * {
 
 applyCustomizations(customizationData) {
     console.log('[CK] applyCustomizations() - Starting to apply customization data:', customizationData);
-    
+     console.log('[CK] applyCustomizations() - Customization data keys:', customizationData ? Object.keys(customizationData) : 'No customization data');
+    console.log('[CK] applyCustomizations() - Statement link value:', customizationData ? customizationData.accessibilityStatementLink : 'No customization data');
     if (!customizationData) {
         console.log('[CK] applyCustomizations() - No customization data provided');
         return;
@@ -19079,6 +19104,7 @@ applyCustomizations(customizationData) {
     // Store customization data for later use (e.g., statement link)
     this.customizationData = customizationData;
     console.log('[CK] applyCustomizations() - Stored customization data for widget use');
+    console.log('[CK] applyCustomizations() - Stored statement link:', this.customizationData.accessibilityStatementLink);
     
     try {
         // Apply trigger button customizations
