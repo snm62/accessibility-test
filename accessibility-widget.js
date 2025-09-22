@@ -1228,6 +1228,21 @@ if (window.innerWidth <= 768) {
     z-index: 99998 !important;
 }
 
+/* ULTIMATE ROUNDED SHAPE OVERRIDE - Maximum specificity */
+.accessibility-icon[data-shape="rounded"],
+.accessibility-icon.rounded,
+.accessibility-icon[data-shape="rounded"].rounded,
+:host .accessibility-icon[data-shape="rounded"],
+:host .accessibility-icon.rounded {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
+}
+
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
 /* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Responsive sizing */
@@ -20253,13 +20268,19 @@ applyCustomizations(customizationData) {
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
         if (icon) {
+            console.log('[CK] Icon found:', !!icon);
+            console.log('[CK] Current icon classes:', icon.className);
+            console.log('[CK] Current icon data-shape:', icon.getAttribute('data-shape'));
+            
             // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
+            console.log('[CK] Set data-shape to:', shape.toLowerCase());
         
             // Remove any existing border-radius properties
             icon.style.removeProperty('border-radius');
             icon.style.removeProperty('-webkit-border-radius');
             icon.style.removeProperty('-moz-border-radius');
+            console.log('[CK] Removed existing border-radius properties');
             
             // Set the appropriate border-radius
             let borderRadius = '50%'; // Default circle
@@ -20272,14 +20293,18 @@ applyCustomizations(customizationData) {
                 borderRadius = '0px';
             }
             
+            console.log('[CK] Target border-radius:', borderRadius);
+            
             // Apply the border-radius with maximum specificity
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
             icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
+            console.log('[CK] Applied border-radius with !important');
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
             icon.classList.add(shape.toLowerCase());
+            console.log('[CK] Updated classes to:', icon.className);
             
             // Force a reflow to ensure styles are applied
             icon.offsetHeight;
@@ -20290,6 +20315,27 @@ applyCustomizations(customizationData) {
             const computedStyle = window.getComputedStyle(icon);
             const appliedBorderRadius = computedStyle.borderRadius;
             console.log('[CK] Computed border-radius after application:', appliedBorderRadius);
+            
+            // Additional debugging
+            console.log('[CK] Icon inline style border-radius:', icon.style.borderRadius);
+            console.log('[CK] Icon final HTML:', icon.outerHTML);
+            
+            // Force apply after a short delay to override any conflicting styles
+            setTimeout(() => {
+                console.log('[CK] === TIMEOUT FORCE APPLICATION ===');
+                if (shape === 'Rounded') {
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    console.log('[CK] Force applied rounded shape after timeout');
+                }
+                
+                const finalComputedStyle = window.getComputedStyle(icon);
+                const finalBorderRadius = finalComputedStyle.borderRadius;
+                console.log('[CK] Final computed border-radius after timeout:', finalBorderRadius);
+            }, 100);
+        } else {
+            console.error('[CK] Icon not found!');
         }
     }
     
@@ -20547,11 +20593,6 @@ applyCustomizations(customizationData) {
             // Ensure panel doesn't go outside viewport horizontally
             const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
             
-            panel.style.setProperty('left', `${finalLeft}px`, 'important');
-            panel.style.setProperty('right', 'auto', 'important');
-            panel.style.setProperty('bottom', 'auto', 'important');
-            panel.style.setProperty('top', `${finalTop}px`, 'important');
-            
             // Position panel vertically centered with icon
             const iconCenterY = iconRect.top + (iconRect.height / 2);
             const panelCenterY = iconCenterY;
@@ -20560,6 +20601,9 @@ applyCustomizations(customizationData) {
             // Ensure panel doesn't go above or below viewport
             const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
             
+            panel.style.setProperty('left', `${finalLeft}px`, 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('bottom', 'auto', 'important');
             panel.style.setProperty('top', `${finalTop}px`, 'important');
             panel.style.setProperty('transform', 'none', 'important');
             panel.style.setProperty('z-index', '100001', 'important'); // Higher than icon
