@@ -1638,11 +1638,9 @@ window.addEventListener('resize', () => {
 
             .language-selector:focus {
 
-                outline: 3px solid #4f46e5 !important;
-
-                outline-offset: 2px !important;
-
-                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+             outline: none !important;
+             outline-offset: 0px !important;
+             box-shadow: none !important;   
 
             }
 
@@ -1709,11 +1707,9 @@ window.addEventListener('resize', () => {
 
             .accessibility-panel label:focus {
 
-                outline: 3px solid #6366f1 !important;
-
-                outline-offset: 2px !important;
-
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                outline: none !important;
+                outline-offset: 0px !important;
+                box-shadow: none !important;
 
             }
 
