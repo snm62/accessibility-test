@@ -2191,30 +2191,10 @@ if (window.innerWidth <= 768) {
 
                 pointer-events: auto;
 
-            }
+                /* Ensure modal is positioned relative to panel */
+                position: relative;
 
-            /* Add this after the .accessibility-panel rule */
-.accessibility-panel {
-    position: fixed !important;
-    width: 500px !important;
-    height: 700px !important;
-    background: #ffffff !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-    z-index: 100000 !important;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-    overflow-x: hidden;
-    font-family: 'DM Sans', sans-serif !important;
-    border-radius: 8px !important;
-    margin: 0 20px;
-    pointer-events: auto;
-    /* ADD THESE LINES: */
-    display: none !important; /* Hidden by default */
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-}
+            }
 
             .accessibility-panel.active {
 
@@ -2375,6 +2355,10 @@ if (window.innerWidth <= 768) {
 
                 background: transparent;
 
+                line-height: 1;
+
+                text-align: center;
+
             }
 
 
@@ -2394,6 +2378,8 @@ if (window.innerWidth <= 768) {
                     padding: 16px !important;
                     min-width: 48px !important;
                     min-height: 48px !important;
+                    line-height: 1 !important;
+                    text-align: center !important;
                 }
             }
 
@@ -4166,7 +4152,7 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -4176,6 +4162,10 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 10000;
+                border-radius: 12px;
+                /* Ensure it covers the entire panel including scrolled content */
+                min-height: 100%;
+                width: 100%;
             }
 
             .hide-interface-modal .modal-content {
