@@ -1218,6 +1218,16 @@ if (window.innerWidth <= 768) {
     -moz-border-radius: 25px !important;
 }
 
+/* Ensure panel always appears on top of icon */
+.accessibility-panel {
+    z-index: 100001 !important;
+    position: fixed !important;
+}
+
+.accessibility-icon {
+    z-index: 99998 !important;
+}
+
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
 /* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Responsive sizing */
@@ -1368,13 +1378,13 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Mobile Landscape - Wider panel with MUCH smaller text and toggles */
+/* Mobile Landscape - Wider panel with reasonable text and toggles */
 @media (max-width: 768px) and (min-width: 481px) {
     .accessibility-panel {
         width: 80vw !important;
         max-width: 380px !important;
-        font-size: 10px !important;
-        padding: 10px !important;
+        font-size: 13px !important;
+        padding: 14px !important;
         max-height: 75vh !important;
         overflow-y: auto !important;
         position: fixed !important;
@@ -1390,15 +1400,15 @@ if (window.innerWidth <= 768) {
         font-size: 18px !important;
     }
     
-    /* Much smaller text and toggles for mobile landscape */
+    /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
-        font-size: 12px !important;
-        margin-bottom: 8px !important;
+        font-size: 15px !important;
+        margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 11px !important;
-        margin-bottom: 6px !important;
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
     }
     
     .profile-item {
@@ -1456,13 +1466,13 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Mobile Portrait - EXTREMELY small text and toggles */
+/* Mobile Portrait - Reasonable text and toggles */
 @media (max-width: 480px) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
-        font-size: 8px !important;
-        padding: 8px !important;
+        font-size: 11px !important;
+        padding: 12px !important;
         max-height: 70vh !important;
     }
     
@@ -1475,15 +1485,15 @@ if (window.innerWidth <= 768) {
         font-size: 16px !important;
     }
     
-    /* EXTREMELY small text and toggles for mobile portrait */
+    /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        font-size: 9px !important;
-        margin-bottom: 4px !important;
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 8px !important;
-        margin-bottom: 3px !important;
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
     }
     
     .profile-item {
@@ -1593,15 +1603,15 @@ if (window.innerWidth <= 768) {
 /* Force mobile styles with absolute maximum specificity */
 @media (max-width: 768px) {
     .accessibility-panel {
-        font-size: 8px !important;
+        font-size: 12px !important;
     }
     
     .accessibility-panel h2 {
-        font-size: 9px !important;
+        font-size: 14px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 8px !important;
+        font-size: 12px !important;
     }
     
     /* Ensure rounded shape works on mobile */
@@ -1655,7 +1665,7 @@ if (window.innerWidth <= 768) {
 .accessibility-panel {
     display: none !important;
     position: fixed !important;
-    z-index: 9999 !important;
+    z-index: 100001 !important;
 }
 
 .accessibility-panel.show {
@@ -1952,7 +1962,7 @@ if (window.innerWidth <= 768) {
         /* Force panel positioning */
         .accessibility-panel {
             position: fixed !important;
-            z-index: 9999 !important;
+            z-index: 100001 !important;
             display: none !important; /* Hidden by default */
         }
         
@@ -2224,7 +2234,7 @@ if (window.innerWidth <= 768) {
                 /* Make panel a containing block for modal */
                 position: relative;
 
-            }
+}
 
             .accessibility-panel.active {
 
@@ -2359,17 +2369,7 @@ if (window.innerWidth <= 768) {
 
                 font-size: 20px;
 
-                padding: 12px;
-
-                width: 40px;
-
-                height: 40px;
-
-                display: flex;
-
-                align-items: center;
-
-                justify-content: center;
+                padding: 8px;
 
                 position: absolute;
 
@@ -10719,7 +10719,7 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
-            
+
             // Always show the current percentage, even if it's 100%
             this.updateContentScaleDisplay();
 
@@ -10791,12 +10791,12 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
-            
+
             console.log('Accessibility Widget: Font sizing enabled, current fontSize:', this.fontSize);
 
             // Always update display to show current percentage
             this.updateFontSizeDisplay();
-            
+
             // Show the current percentage in the display
             const fontSizeDisplay = this.shadowRoot.getElementById('font-size-display');
             if (fontSizeDisplay) {
@@ -10881,7 +10881,7 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
-            
+
             // Show controls and restore current line height value
             this.updateLineHeightDisplay();
             
@@ -13334,7 +13334,7 @@ html body.big-white-cursor * {
         this.saveSettings();
 
         this.applySettings();
-        
+
         // Clear usage tracking flags for toggleable features
         localStorage.removeItem('content-scaling-used');
         localStorage.removeItem('font-sizing-used');
@@ -13907,11 +13907,11 @@ html body.big-white-cursor * {
                 }
 
                 if (shouldApply) {
-                    this.applyFeature(feature, true);
+                this.applyFeature(feature, true);
 
-                    const toggle = this.shadowRoot.getElementById(feature);
+                const toggle = this.shadowRoot.getElementById(feature);
 
-                    if (toggle) toggle.checked = true;
+                if (toggle) toggle.checked = true;
                 } else {
                     // Remove the setting from localStorage since it wasn't actually used
                     delete this.settings[feature];
@@ -13931,33 +13931,33 @@ html body.big-white-cursor * {
             const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
             
             if (wasContentScalingUsed) {
-                console.log('Accessibility Widget: Applying saved content scale:', this.contentScale + '%');
+            console.log('Accessibility Widget: Applying saved content scale:', this.contentScale + '%');
 
-                this.updateContentScale();
+            this.updateContentScale();
 
-                this.updateContentScaleDisplay(); // Update the display value
+            this.updateContentScaleDisplay(); // Update the display value
 
-                
+            
 
-                // Show content scaling controls if content scale is not 100%
+            // Show content scaling controls if content scale is not 100%
 
-                const controls = this.shadowRoot.getElementById('content-scaling-controls');
+            const controls = this.shadowRoot.getElementById('content-scaling-controls');
 
-                if (controls) {
+            if (controls) {
 
-                    controls.style.display = 'block';
+                controls.style.display = 'block';
 
-                }
+            }
 
-                
+            
 
-                // Update the toggle switch to show it's enabled
+            // Update the toggle switch to show it's enabled
 
-                const toggle = this.shadowRoot.getElementById('content-scaling');
+            const toggle = this.shadowRoot.getElementById('content-scaling');
 
-                if (toggle) {
+            if (toggle) {
 
-                    toggle.checked = true;
+                toggle.checked = true;
 
                 }
             } else {
@@ -13978,33 +13978,33 @@ html body.big-white-cursor * {
             const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
             
             if (wasFontSizingUsed) {
-                console.log('Accessibility Widget: Applying saved font size:', this.fontSize + '%');
+            console.log('Accessibility Widget: Applying saved font size:', this.fontSize + '%');
 
-                this.updateFontSizeEnhanced();
+            this.updateFontSizeEnhanced();
 
-                this.updateFontSizeDisplay(); // Update the display value immediately
+            this.updateFontSizeDisplay(); // Update the display value immediately
 
-                
+            
 
-                // Show font sizing controls if font size is not 100%
+            // Show font sizing controls if font size is not 100%
 
-                const fontControls = this.shadowRoot.getElementById('font-sizing-controls');
+            const fontControls = this.shadowRoot.getElementById('font-sizing-controls');
 
-                if (fontControls) {
+            if (fontControls) {
 
-                    fontControls.style.display = 'block';
+                fontControls.style.display = 'block';
 
-                }
+            }
 
-                
+            
 
-                // Update the toggle switch to show it's enabled
+            // Update the toggle switch to show it's enabled
 
-                const fontToggle = this.shadowRoot.getElementById('font-sizing');
+            const fontToggle = this.shadowRoot.getElementById('font-sizing');
 
-                if (fontToggle) {
+            if (fontToggle) {
 
-                    fontToggle.checked = true;
+                fontToggle.checked = true;
 
                 }
             } else {
@@ -14035,31 +14035,31 @@ html body.big-white-cursor * {
             const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
             
             if (wasLineHeightUsed) {
-                console.log('Accessibility Widget: Applying saved line height:', this.lineHeight + '%');
+            console.log('Accessibility Widget: Applying saved line height:', this.lineHeight + '%');
 
-                this.updateLineHeight();
+            this.updateLineHeight();
 
-                
+            
 
-                // Show line height controls if line height is not 100%
+            // Show line height controls if line height is not 100%
 
-                const lineHeightControls = this.shadowRoot.getElementById('line-height-controls');
+            const lineHeightControls = this.shadowRoot.getElementById('line-height-controls');
 
-                if (lineHeightControls) {
+            if (lineHeightControls) {
 
-                    lineHeightControls.style.display = 'block';
+                lineHeightControls.style.display = 'block';
 
-                }
+            }
 
-                
+            
 
-                // Update the toggle switch to show it's enabled
+            // Update the toggle switch to show it's enabled
 
-                const lineHeightToggle = this.shadowRoot.getElementById('adjust-line-height');
+            const lineHeightToggle = this.shadowRoot.getElementById('adjust-line-height');
 
-                if (lineHeightToggle) {
+            if (lineHeightToggle) {
 
-                    lineHeightToggle.checked = true;
+                lineHeightToggle.checked = true;
 
                 }
             } else {
@@ -14098,31 +14098,31 @@ html body.big-white-cursor * {
             const wasLetterSpacingUsed = localStorage.getItem('letter-spacing-used') === 'true';
             
             if (wasLetterSpacingUsed) {
-                console.log('Accessibility Widget: Applying saved letter spacing:', this.letterSpacing + '%');
+            console.log('Accessibility Widget: Applying saved letter spacing:', this.letterSpacing + '%');
 
-                this.updateLetterSpacing();
+            this.updateLetterSpacing();
 
-                
+            
 
-                // Show letter spacing controls if letter spacing is not 100%
+            // Show letter spacing controls if letter spacing is not 100%
 
-                const letterSpacingControls = this.shadowRoot.getElementById('letter-spacing-controls');
+            const letterSpacingControls = this.shadowRoot.getElementById('letter-spacing-controls');
 
-                if (letterSpacingControls) {
+            if (letterSpacingControls) {
 
-                    letterSpacingControls.style.display = 'block';
+                letterSpacingControls.style.display = 'block';
 
-                }
+            }
 
-                
+            
 
-                // Update the toggle switch to show it's enabled
+            // Update the toggle switch to show it's enabled
 
-                const letterSpacingToggle = this.shadowRoot.getElementById('adjust-letter-spacing');
+            const letterSpacingToggle = this.shadowRoot.getElementById('adjust-letter-spacing');
 
-                if (letterSpacingToggle) {
+            if (letterSpacingToggle) {
 
-                    letterSpacingToggle.checked = true;
+                letterSpacingToggle.checked = true;
 
                 }
             } else {
@@ -19859,8 +19859,8 @@ applyCustomizations(customizationData) {
             icon.style.transition = 'opacity 0.3s ease';
         } else {
             console.warn('[CK] showIcon() - Icon not found in shadow DOM');
-        }
     }
+}
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
@@ -20255,7 +20255,7 @@ applyCustomizations(customizationData) {
         if (icon) {
             // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
-            
+        
             // Remove any existing border-radius properties
             icon.style.removeProperty('border-radius');
             icon.style.removeProperty('-webkit-border-radius');
@@ -20549,6 +20549,8 @@ applyCustomizations(customizationData) {
             
             panel.style.setProperty('left', `${finalLeft}px`, 'important');
             panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('bottom', 'auto', 'important');
+            panel.style.setProperty('top', `${finalTop}px`, 'important');
             
             // Position panel vertically centered with icon
             const iconCenterY = iconRect.top + (iconRect.height / 2);
@@ -20561,6 +20563,7 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('top', `${finalTop}px`, 'important');
             panel.style.setProperty('transform', 'none', 'important');
             panel.style.setProperty('z-index', '100001', 'important'); // Higher than icon
+            panel.style.setProperty('position', 'fixed', 'important');
             
             console.log('[CK] Panel positioned on top of icon at:', {
                 left: finalLeft + 'px',
