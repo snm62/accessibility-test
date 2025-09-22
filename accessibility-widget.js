@@ -82,7 +82,7 @@ constructor() {
 
             // Fetch customization data from API
 
-            console.log('Accessibility Widget: Fetching customization data...');
+            //console.log('Accessibility Widget: Fetching customization data...');
 
             const customizationData = await this.fetchCustomizationData();
 
@@ -1200,6 +1200,24 @@ if (window.innerWidth <= 768) {
     border-radius: 0px !important;
 }
 
+/* Maximum specificity for rounded shape - override any conflicts */
+.accessibility-icon.rounded[data-shape="rounded"] {
+    border-radius: 25px !important;
+}
+
+.accessibility-icon[data-shape="rounded"].rounded {
+    border-radius: 25px !important;
+}
+
+/* Force rounded shape with maximum specificity */
+.accessibility-icon[data-shape="rounded"],
+.accessibility-icon.rounded,
+.accessibility-icon[data-shape="rounded"].rounded {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+}
+
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
 /* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Responsive sizing */
@@ -1213,6 +1231,13 @@ if (window.innerWidth <= 768) {
         overflow-y: auto !important;
         position: fixed !important;
         z-index: 100001 !important;
+    }
+    
+    /* Ensure rounded shape works on large tablets */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .accessibility-icon {
@@ -1267,6 +1292,13 @@ if (window.innerWidth <= 768) {
         z-index: 100001 !important;
     }
     
+    /* Ensure rounded shape works on tablets */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
+    
     .accessibility-icon {
         width: 50px !important;
         height: 50px !important;
@@ -1288,6 +1320,13 @@ if (window.innerWidth <= 768) {
         overflow-y: auto !important;
         position: fixed !important;
         z-index: 100001 !important;
+    }
+    
+    /* Ensure rounded shape works on iPad Mini */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .accessibility-icon {
@@ -1563,6 +1602,13 @@ if (window.innerWidth <= 768) {
     
     .accessibility-panel h3 {
         font-size: 8px !important;
+    }
+    
+    /* Ensure rounded shape works on mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .profile-item h4 {
@@ -2313,7 +2359,17 @@ if (window.innerWidth <= 768) {
 
                 font-size: 20px;
 
-                padding: 8px;
+                padding: 12px;
+
+                width: 40px;
+
+                height: 40px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
 
                 position: absolute;
 
@@ -11146,6 +11202,9 @@ html body.big-white-cursor * {
         this.lineHeight = Math.min(this.lineHeight + 10, 200); // Expanded range to 200%
 
         this.settings['line-height'] = this.lineHeight; // Save to settings
+
+        // Mark line height feature as used
+        localStorage.setItem('line-height-used', 'true');
 
         console.log('Accessibility Widget: Line height changed from', oldLineHeight + '% to', this.lineHeight + '%');
 
@@ -20197,8 +20256,10 @@ applyCustomizations(customizationData) {
             // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
             
-            // Remove any existing border-radius
+            // Remove any existing border-radius properties
             icon.style.removeProperty('border-radius');
+            icon.style.removeProperty('-webkit-border-radius');
+            icon.style.removeProperty('-moz-border-radius');
             
             // Set the appropriate border-radius
             let borderRadius = '50%'; // Default circle
@@ -20211,14 +20272,24 @@ applyCustomizations(customizationData) {
                 borderRadius = '0px';
             }
             
-            // Apply the border-radius
+            // Apply the border-radius with maximum specificity
             icon.style.setProperty('border-radius', borderRadius, 'important');
+            icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
+            icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
             icon.classList.add(shape.toLowerCase());
             
+            // Force a reflow to ensure styles are applied
+            icon.offsetHeight;
+            
             console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
+            
+            // Double-check the applied style
+            const computedStyle = window.getComputedStyle(icon);
+            const appliedBorderRadius = computedStyle.borderRadius;
+            console.log('[CK] Computed border-radius after application:', appliedBorderRadius);
         }
     }
     
