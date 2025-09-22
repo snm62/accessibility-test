@@ -1187,23 +1187,17 @@ if (window.innerWidth <= 768) {
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
-/* Force icon shape overrides - must come first and be very specific */
+/* Clean icon shape overrides - no conflicts */
 .accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="rounded"] {
     border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
     border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
 }
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
@@ -1527,39 +1521,7 @@ if (window.innerWidth <= 768) {
 
 /* ===== FORCE ROUNDED SHAPES - MAXIMUM AGGRESSIVE ===== */
 
-/* Force shape styles with absolute maximum specificity */
-.accessibility-icon[data-shape="circle"],
-.accessibility-icon.circle {
-    border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
-    border-top-left-radius: 50% !important;
-    border-top-right-radius: 50% !important;
-    border-bottom-left-radius: 50% !important;
-    border-bottom-right-radius: 50% !important;
-}
-
-.accessibility-icon[data-shape="rounded"],
-.accessibility-icon.rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
-}
-
-.accessibility-icon[data-shape="square"],
-.accessibility-icon.square {
-    border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-}
+/* Removed conflicting shape styles */
 
 /* DEBUG: Add visual indicators for shape testing */
 .accessibility-icon[data-shape="circle"]::after {
@@ -1595,93 +1557,14 @@ if (window.innerWidth <= 768) {
     z-index: 9999 !important;
 }
 
-/* Force on ALL screen sizes */
-@media screen {
-    .accessibility-icon[data-shape="circle"] {
-        border-radius: 50% !important;
-        -webkit-border-radius: 50% !important;
-        -moz-border-radius: 50% !important;
-    }
-    
-    .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
-    }
-    
-    .accessibility-icon[data-shape="square"] {
-        border-radius: 0px !important;
-        -webkit-border-radius: 0px !important;
-        -moz-border-radius: 0px !important;
-    }
+/* Removed conflicting media query rules */
+
+/* Removed ultimate override rules */
+
+/* Removed simple clean override rules */
 }
 
-/* ULTIMATE OVERRIDE - Override any calc() or CSS variable conflicts */
-.accessibility-icon[data-shape="circle"] {
-    border-radius: 50% !important;
-    border-top-left-radius: 50% !important;
-    border-top-right-radius: 50% !important;
-    border-bottom-left-radius: 50% !important;
-    border-bottom-right-radius: 50% !important;
-}
-
-.accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
-}
-
-.accessibility-icon[data-shape="square"] {
-    border-radius: 0px !important;
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-}
-
-/* SIMPLE CLEAN OVERRIDE - Remove all calc() conflicts */
-.accessibility-icon[data-shape="circle"] {
-    border-radius: 50% !important;
-}
-
-.accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
-}
-
-.accessibility-icon[data-shape="square"] {
-    border-radius: 0px !important;
-}
-
-/* FORCE OVERRIDE - Override any percentage-based rules */
-.accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-}
-
-/* NUCLEAR OPTION - Override ALL possible conflicting rules */
-.accessibility-icon[data-shape="rounded"],
-.accessibility-icon[data-shape="rounded"]:host,
-:host(.vision-impaired) .accessibility-icon[data-shape="rounded"],
-:host(.vision-impaired) .accessibility-icon[data-shape="rounded"] *,
-.accessibility-icon.rounded,
-.accessibility-icon.rounded:host,
-:host(.vision-impaired) .accessibility-icon.rounded,
-:host(.vision-impaired) .accessibility-icon.rounded * {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
-}
+/* Removed all conflicting shape override rules */
 
 /* ===== FORCE MOBILE STYLES - MAXIMUM AGGRESSIVE ===== */
 
@@ -2490,7 +2373,7 @@ if (window.innerWidth <= 768) {
 
                 border-radius: 50%;
 
-                background: rgba(255, 255, 255, 0.1);
+                background: transparent;
 
             }
 
@@ -2500,7 +2383,7 @@ if (window.innerWidth <= 768) {
 
                 transform: scale(1.1);
 
-                background: rgba(255, 255, 255, 0.2);
+                background: transparent;
 
             }
 
@@ -4283,7 +4166,7 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: absolute;
+                position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -20166,175 +20049,36 @@ applyCustomizations(customizationData) {
     }
     
     updateTriggerButtonShape(shape) {
-        console.log('=== SHAPE DEBUG START ===');
         console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
-        console.log('[CK] updateTriggerButtonShape() - Current window width:', window.innerWidth);
-        console.log('[CK] updateTriggerButtonShape() - Is mobile:', window.innerWidth <= 768);
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        console.log('[CK] updateTriggerButtonShape() - Icon found:', !!icon);
         
         if (icon) {
-            console.log('[CK] updateTriggerButtonShape() - Icon element:', icon);
-            console.log('[CK] updateTriggerButtonShape() - Icon current styles:', {
-                borderRadius: icon.style.borderRadius,
-                display: icon.style.display,
-                width: icon.style.width,
-                height: icon.style.height
-            });
-            
             // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
-            console.log('[CK] Set data-shape attribute to:', shape.toLowerCase());
-            console.log('[CK] Icon data-shape attribute after setting:', icon.getAttribute('data-shape'));
-        
-            // Remove any existing border-radius completely
-            console.log('[CK] Removing existing border-radius...');
-            icon.style.removeProperty('border-radius');
-            icon.style.borderRadius = '';
-            console.log('[CK] Border-radius after removal:', icon.style.borderRadius);
             
-            let borderRadius = '50%'; // Default round
+            // Remove any existing border-radius
+            icon.style.removeProperty('border-radius');
+            
+            // Set the appropriate border-radius
+            let borderRadius = '50%'; // Default circle
             
             if (shape === 'Circle') {
                 borderRadius = '50%';
-                console.log('[CK] Setting Circle shape (perfect circle)');
             } else if (shape === 'Rounded') {
                 borderRadius = '25px';
-                console.log('[CK] Setting Rounded shape (square with rounded corners)');
             } else if (shape === 'Square') {
                 borderRadius = '0px';
-                console.log('[CK] Setting Square shape (sharp square)');
             }
             
-            console.log('[CK] Target border-radius:', borderRadius);
-            
-            // Apply with maximum force - multiple methods
-            console.log('[CK] Applying border-radius with setProperty...');
+            // Apply the border-radius
             icon.style.setProperty('border-radius', borderRadius, 'important');
-            console.log('[CK] Border-radius after setProperty:', icon.style.borderRadius);
             
-            console.log('[CK] Applying border-radius with direct assignment...');
-            icon.style.borderRadius = borderRadius + ' !important';
-            console.log('[CK] Border-radius after direct assignment:', icon.style.borderRadius);
-            
-            // Force the CSS class to take effect
-            console.log('[CK] Managing CSS classes...');
-            console.log('[CK] Current classes before:', icon.className);
+            // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
             icon.classList.add(shape.toLowerCase());
-            console.log('[CK] Current classes after:', icon.className);
             
-            // Also set as inline style attribute to override external CSS
-            console.log('[CK] Setting inline style attribute...');
-            const currentStyle = icon.getAttribute('style') || '';
-            console.log('[CK] Current style attribute:', currentStyle);
-            const newStyle = currentStyle.replace(/border-radius[^;]*;?/g, '') + `border-radius: ${borderRadius} !important;`;
-            console.log('[CK] New style attribute:', newStyle);
-            icon.setAttribute('style', newStyle);
-            console.log('[CK] Final style attribute:', icon.getAttribute('style'));
-            
-            // Force reflow
-            console.log('[CK] Forcing reflow...');
-            icon.offsetHeight;
-            
-            // Check computed style
-            const computedStyle = window.getComputedStyle(icon).borderRadius;
-            console.log('[CK] === SHAPE APPLICATION RESULTS ===');
             console.log('[CK] Applied shape:', shape, 'with border-radius:', borderRadius);
-            console.log('[CK] Icon inline style:', icon.getAttribute('style'));
-            console.log('[CK] Icon computed border-radius:', computedStyle);
-            console.log('[CK] Icon data-shape attribute:', icon.getAttribute('data-shape'));
-            console.log('[CK] Icon classes:', icon.className);
-            console.log('[CK] Icon element HTML:', icon.outerHTML);
-            
-            // If computed style is still not what we want, try more aggressive approach
-            if (computedStyle !== borderRadius && computedStyle !== borderRadius.replace('px', 'px')) {
-                console.log('[CK] === COMPUTED STYLE MISMATCH DETECTED ===');
-                console.log('[CK] Expected:', borderRadius, 'Got:', computedStyle);
-                console.log('[CK] Trying aggressive override...');
-                
-                // Try setting it multiple times with different methods
-                console.log('[CK] Method 1: Direct assignment');
-                icon.style.borderRadius = borderRadius;
-                console.log('[CK] Border-radius after method 1:', icon.style.borderRadius);
-                
-                console.log('[CK] Method 2: setProperty with important');
-                icon.style.setProperty('border-radius', borderRadius, 'important');
-                console.log('[CK] Border-radius after method 2:', icon.style.borderRadius);
-                
-                // Force a style recalculation
-                console.log('[CK] Method 3: Force style recalculation');
-                icon.style.display = 'none';
-                icon.offsetHeight;
-                icon.style.display = '';
-                console.log('[CK] Border-radius after method 3:', icon.style.borderRadius);
-                
-                // Check again
-                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
-                console.log('[CK] Final computed border-radius after aggressive override:', finalComputedStyle);
-                } else {
-                console.log('[CK] === SHAPE SUCCESSFULLY APPLIED ===');
-                console.log('[CK] Computed style matches expected:', computedStyle);
-            }
-            
-            // Simple timeout to ensure CSS is applied
-            setTimeout(() => {
-                console.log('[CK] === SIMPLE TIMEOUT CHECK ===');
-                const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
-                console.log('[CK] Final computed border-radius after timeout:', finalComputedStyle);
-                
-                // If still showing percentage, force override
-                if (finalComputedStyle.includes('%') || finalComputedStyle !== borderRadius) {
-                    console.log('[CK] === FORCING PIXEL OVERRIDE ===');
-                    console.log('[CK] Computed style has percentage or mismatch:', finalComputedStyle);
-                    
-                    // Force set as fixed pixel value
-                    icon.style.setProperty('border-radius', borderRadius, 'important');
-                    icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
-                    icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
-                    icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
-                    icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
-                    
-                    // Force reflow
-                    icon.offsetHeight;
-                    
-                    const forcedComputedStyle = window.getComputedStyle(icon).borderRadius;
-                    console.log('[CK] Forced computed border-radius:', forcedComputedStyle);
-                }
-                
-                // ALWAYS force override regardless of computed style
-                console.log('[CK] === ALWAYS FORCE OVERRIDE ===');
-                console.log('[CK] Forcing border-radius override regardless of computed style...');
-                
-                // Remove any existing border-radius
-                icon.style.removeProperty('border-radius');
-                icon.style.removeProperty('border-top-left-radius');
-                icon.style.removeProperty('border-top-right-radius');
-                icon.style.removeProperty('border-bottom-left-radius');
-                icon.style.removeProperty('border-bottom-right-radius');
-                
-                // Force set as fixed pixel value
-                icon.style.setProperty('border-radius', borderRadius, 'important');
-                icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
-                icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
-                icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
-                icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
-                
-                // Force reflow
-                icon.offsetHeight;
-                
-                const alwaysForcedComputedStyle = window.getComputedStyle(icon).borderRadius;
-                console.log('[CK] Always forced computed border-radius:', alwaysForcedComputedStyle);
-                
-                console.log('=== SHAPE DEBUG END ===');
-            }, 100);
-            } else {
-            console.log('[CK] === SHAPE DEBUG ERROR ===');
-            console.log('[CK] Icon element not found!');
-            console.log('[CK] ShadowRoot:', this.shadowRoot);
-            console.log('[CK] Available elements in shadowRoot:', this.shadowRoot?.querySelectorAll('*'));
-            console.log('=== SHAPE DEBUG END ===');
         }
     }
     
