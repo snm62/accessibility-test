@@ -2327,7 +2327,7 @@ if (window.innerWidth <= 768) {
 
                 border: none;
 
-                color: #666;
+                color: white;
 
             }
 
@@ -4118,11 +4118,13 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Ensure it covers the entire panel including scrolled content */
+                /* Dark overlay covers the entire panel including scrolled content */
                 width: 100%;
                 height: 100%;
-                /* Cover the full panel height including scrolled content */
                 min-height: 100%;
+                /* Ensure overlay covers full scrollable area */
+                max-height: none;
+                overflow: hidden;
             }
 
             .hide-interface-modal .modal-content {
@@ -10611,6 +10613,17 @@ html body.big-white-cursor * {
 
         
 
+        if (enabled) {
+            // Check if content scaling was actually used (not just toggled on)
+            const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
+            
+            if (!wasContentScalingUsed && this.contentScale === 100) {
+                // If toggled on but never used, don't save the state and return
+                console.log('[CK] Content scaling toggled on but never used, not saving state');
+                return;
+            }
+        }
+
         // Save the toggle state
 
         this.settings['content-scaling'] = enabled;
@@ -10620,15 +10633,6 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
-            // Check if content scaling was actually used (not just toggled on)
-            const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
-            
-            if (!wasContentScalingUsed && this.contentScale === 100) {
-                // If toggled on but never used, turn it back off
-                console.log('[CK] Content scaling toggled on but never used, turning off');
-                this.toggleFeature('content-scaling', false);
-                return;
-            }
             
             // Always show the current percentage, even if it's 100%
             this.updateContentScaleDisplay();
@@ -10681,6 +10685,17 @@ html body.big-white-cursor * {
 
         
 
+        if (enabled) {
+            // Check if font sizing was actually used (not just toggled on)
+            const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
+            
+            if (!wasFontSizingUsed && this.fontSize === 100) {
+                // If toggled on but never used, don't save the state and return
+                console.log('[CK] Font sizing toggled on but never used, not saving state');
+                return;
+            }
+        }
+
         // Save the toggle state
 
         this.settings['font-sizing'] = enabled;
@@ -10690,15 +10705,6 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
-            // Check if font sizing was actually used (not just toggled on)
-            const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
-            
-            if (!wasFontSizingUsed && this.fontSize === 100) {
-                // If toggled on but never used, turn it back off
-                console.log('[CK] Font sizing toggled on but never used, turning off');
-                this.toggleFeature('font-sizing', false);
-                return;
-            }
             
             console.log('Accessibility Widget: Font sizing enabled, current fontSize:', this.fontSize);
 
@@ -10769,6 +10775,17 @@ html body.big-white-cursor * {
 
         
 
+        if (enabled) {
+            // Check if line height was actually used (not just toggled on)
+            const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
+            
+            if (!wasLineHeightUsed && this.lineHeight === 100) {
+                // If toggled on but never used, don't save the state and return
+                console.log('[CK] Line height toggled on but never used, not saving state');
+                return;
+            }
+        }
+
         // Save the toggle state
 
         this.settings['adjust-line-height'] = enabled;
@@ -10778,6 +10795,7 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
+            
             // Show controls and restore current line height value
             this.updateLineHeightDisplay();
             
@@ -11256,6 +11274,17 @@ html body.big-white-cursor * {
         }
 
         
+
+        if (enabled) {
+            // Check if letter spacing was actually used (not just toggled on)
+            const wasLetterSpacingUsed = localStorage.getItem('letter-spacing-used') === 'true';
+            
+            if (!wasLetterSpacingUsed && this.letterSpacing === 100) {
+                // If toggled on but never used, don't save the state and return
+                console.log('[CK] Letter spacing toggled on but never used, not saving state');
+                return;
+            }
+        }
 
         // Save the toggle state
 
@@ -13216,6 +13245,13 @@ html body.big-white-cursor * {
         this.saveSettings();
 
         this.applySettings();
+        
+        // Clear usage tracking flags for toggleable features
+        localStorage.removeItem('content-scaling-used');
+        localStorage.removeItem('font-sizing-used');
+        localStorage.removeItem('line-height-used');
+        localStorage.removeItem('letter-spacing-used');
+        console.log('[CK] resetSettings() - Cleared usage tracking flags');
         
         // Restore the language after reset
         this.applyLanguage(currentLanguage);
