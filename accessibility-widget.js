@@ -1603,6 +1603,31 @@ if (window.innerWidth <= 768) {
     }
 }
 
+/* ULTIMATE OVERRIDE - Override any calc() or CSS variable conflicts */
+.accessibility-icon[data-shape="circle"] {
+    border-radius: 50% !important;
+    border-top-left-radius: 50% !important;
+    border-top-right-radius: 50% !important;
+    border-bottom-left-radius: 50% !important;
+    border-bottom-right-radius: 50% !important;
+}
+
+.accessibility-icon[data-shape="rounded"] {
+    border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
+}
+
+.accessibility-icon[data-shape="square"] {
+    border-radius: 0px !important;
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+
 /* ===== FORCE MOBILE STYLES - MAXIMUM AGGRESSIVE ===== */
 
 /* Force mobile styles with absolute maximum specificity */
@@ -20114,7 +20139,22 @@ applyCustomizations(customizationData) {
             setTimeout(() => {
                 console.log('[CK] === TIMEOUT FORCE APPLICATION ===');
                 console.log('[CK] Force applying shape styles after timeout');
+                
+                // AGGRESSIVE OVERRIDE - Remove ALL conflicting styles
+                icon.style.removeProperty('border-radius');
+                icon.style.removeProperty('border-top-left-radius');
+                icon.style.removeProperty('border-top-right-radius');
+                icon.style.removeProperty('border-bottom-left-radius');
+                icon.style.removeProperty('border-bottom-right-radius');
+                
+                // Apply with maximum force
                 icon.style.setProperty('border-radius', borderRadius, 'important');
+                icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
+                icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
+                icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
+                icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
+                
+                // Also set as direct style
                 icon.style.borderRadius = borderRadius + ' !important';
                 
                 // Force reflow again
@@ -20123,6 +20163,23 @@ applyCustomizations(customizationData) {
                 const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Final force applied border-radius after timeout:', finalComputedStyle);
                 console.log('[CK] Final icon style attribute after timeout:', icon.getAttribute('style'));
+                
+                // If still not working, try DOM manipulation
+                if (finalComputedStyle !== borderRadius && finalComputedStyle !== borderRadius.replace('px', 'px')) {
+                    console.log('[CK] === FINAL AGGRESSIVE OVERRIDE ===');
+                    console.log('[CK] Computed style still wrong:', finalComputedStyle);
+                    console.log('[CK] Trying DOM attribute override...');
+                    
+                    // Set as HTML attribute to override everything
+                    icon.setAttribute('style', icon.getAttribute('style') + `; border-radius: ${borderRadius} !important; border-top-left-radius: ${borderRadius} !important; border-top-right-radius: ${borderRadius} !important; border-bottom-left-radius: ${borderRadius} !important; border-bottom-right-radius: ${borderRadius} !important;`);
+                    
+                    // Force another reflow
+                    icon.offsetHeight;
+                    
+                    const ultimateComputedStyle = window.getComputedStyle(icon).borderRadius;
+                    console.log('[CK] Ultimate computed border-radius:', ultimateComputedStyle);
+                }
+                
                 console.log('=== SHAPE DEBUG END ===');
             }, 100);
         } else {
