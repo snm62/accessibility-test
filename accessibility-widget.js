@@ -1635,10 +1635,21 @@ if (window.innerWidth <= 768) {
 
 .accessibility-icon[data-shape="rounded"] {
     border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
     border-radius: 0px !important;
+}
+
+/* FORCE OVERRIDE - Override any percentage-based rules */
+.accessibility-icon[data-shape="rounded"] {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 /* ===== FORCE MOBILE STYLES - MAXIMUM AGGRESSIVE ===== */
@@ -20153,6 +20164,26 @@ applyCustomizations(customizationData) {
                 console.log('[CK] === SIMPLE TIMEOUT CHECK ===');
                 const finalComputedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Final computed border-radius after timeout:', finalComputedStyle);
+                
+                // If still showing percentage, force override
+                if (finalComputedStyle.includes('%') || finalComputedStyle !== borderRadius) {
+                    console.log('[CK] === FORCING PIXEL OVERRIDE ===');
+                    console.log('[CK] Computed style has percentage or mismatch:', finalComputedStyle);
+                    
+                    // Force set as fixed pixel value
+                    icon.style.setProperty('border-radius', borderRadius, 'important');
+                    icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
+                    icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
+                    icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
+                    icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
+                    
+                    // Force reflow
+                    icon.offsetHeight;
+                    
+                    const forcedComputedStyle = window.getComputedStyle(icon).borderRadius;
+                    console.log('[CK] Forced computed border-radius:', forcedComputedStyle);
+                }
+                
                 console.log('=== SHAPE DEBUG END ===');
             }, 100);
         } else {
