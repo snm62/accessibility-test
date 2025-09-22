@@ -2335,7 +2335,7 @@ if (window.innerWidth <= 768) {
 
             .close-btn:hover {
 
-                color: #333;
+                color: white;
 
             }
 
@@ -4118,12 +4118,11 @@ html body.big-white-cursor * {
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Dark overlay covers the entire panel including scrolled content */
+                /* Cover the entire panel content including scrolled areas */
                 width: 100%;
                 height: 100%;
                 min-height: 100%;
-                /* Ensure overlay covers full scrollable area */
-                max-height: none;
+                /* Ensure it covers all scrollable content */
                 overflow: hidden;
             }
 
@@ -8835,26 +8834,50 @@ html body.big-white-cursor * {
 
                 case 'font-sizing':
 
-                    // Font sizing is handled by toggleFontSizingControls() method
-
+                    // Check if font sizing was actually used before applying
+                    const wasFontSizingUsed = localStorage.getItem('font-sizing-used') === 'true';
+                    if (!wasFontSizingUsed && this.fontSize === 100) {
+                        console.log('[CK] Font sizing was saved but never used, not applying');
+                        // Don't apply the feature, just return
+                        return;
+                    }
+                    this.toggleFontSizingControls(true);
                     break;
 
                 case 'content-scaling':
 
-                    // Content scaling is handled by toggleContentScalingControls() method
-
+                    // Check if content scaling was actually used before applying
+                    const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
+                    if (!wasContentScalingUsed && this.contentScale === 100) {
+                        console.log('[CK] Content scaling was saved but never used, not applying');
+                        // Don't apply the feature, just return
+                        return;
+                    }
+                    this.toggleContentScalingControls(true);
                     break;
 
                 case 'adjust-line-height':
 
-                    // Line height is handled by toggleLineHeightControls() method
-
+                    // Check if line height was actually used before applying
+                    const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
+                    if (!wasLineHeightUsed && this.lineHeight === 100) {
+                        console.log('[CK] Line height was saved but never used, not applying');
+                        // Don't apply the feature, just return
+                        return;
+                    }
+                    this.toggleLineHeightControls(true);
                     break;
 
                 case 'adjust-letter-spacing':
 
-                    // Letter spacing is handled by toggleLetterSpacingControls() method
-
+                    // Check if letter spacing was actually used before applying
+                    const wasLetterSpacingUsed = localStorage.getItem('letter-spacing-used') === 'true';
+                    if (!wasLetterSpacingUsed && this.letterSpacing === 100) {
+                        console.log('[CK] Letter spacing was saved but never used, not applying');
+                        // Don't apply the feature, just return
+                        return;
+                    }
+                    this.toggleLetterSpacingControls(true);
                     break;
 
                 case 'highlight-titles':
@@ -19946,12 +19969,23 @@ applyCustomizations(customizationData) {
     showHideInterfaceModal() {
         console.log('[CK] showHideInterfaceModal() called');
         const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
+        const panel = this.shadowRoot?.querySelector('#accessibility-panel');
         console.log('[CK] Modal element found:', !!modal);
-        if (modal) {
+        console.log('[CK] Panel element found:', !!panel);
+        
+        if (modal && panel) {
+            // Set modal height to cover entire panel content including scrolled areas
+            const panelScrollHeight = panel.scrollHeight;
+            const panelClientHeight = panel.clientHeight;
+            console.log('[CK] Panel scrollHeight:', panelScrollHeight, 'clientHeight:', panelClientHeight);
+            
+            // Set the modal height to cover the full scrollable content
+            modal.style.height = `${panelScrollHeight}px`;
+            modal.style.minHeight = `${panelScrollHeight}px`;
             modal.style.display = 'flex';
-            console.log('[CK] Hide interface modal shown');
+            console.log('[CK] Hide interface modal shown with height:', panelScrollHeight + 'px');
         } else {
-            console.log('[CK] Modal not found!');
+            console.log('[CK] Modal or panel not found!');
         }
     }
     
