@@ -1186,38 +1186,13 @@ window.addEventListener('resize', () => {
 
 /* ===== RESPONSIVE DESIGN FOR MOBILE AND TABLET ===== */
 
-/* Tablet Styles (769px - 1024px) - Smaller and more compact */
+/* Tablet Styles (769px - 1024px) - Much smaller and more inside */
 @media (max-width: 1024px) and (min-width: 769px) {
     .accessibility-panel {
-        width: 80vw !important;
-        max-width: 420px !important;
-        font-size: 14px !important;
-        padding: 16px !important;
-    }
-    
-    .accessibility-icon {
-        width: 50px !important;
-        height: 50px !important;
-    }
-    
-    .accessibility-icon i {
-        font-size: 20px !important;
-    }
-}
-
-/* Mobile Landscape (481px - 768px) - More compact */
-@media (max-width: 768px) and (min-width: 481px) {
-    .accessibility-panel {
-        width: 85vw !important;
+        width: 75vw !important;
         max-width: 380px !important;
-        left: 7.5vw !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
         font-size: 13px !important;
         padding: 14px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
     }
     
     .accessibility-icon {
@@ -1228,38 +1203,14 @@ window.addEventListener('resize', () => {
     .accessibility-icon i {
         font-size: 18px !important;
     }
-    
-    /* Compact content adjustments */
-    .accessibility-panel h2 {
-        font-size: 16px !important;
-        margin-bottom: 12px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 14px !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .profile-item {
-        padding: 10px !important;
-        margin-bottom: 6px !important;
-    }
-    
-    .profile-item h4 {
-        font-size: 13px !important;
-    }
-    
-    .profile-item p {
-        font-size: 11px !important;
-    }
 }
 
-/* Mobile Portrait (320px - 480px) - Very compact */
-@media (max-width: 480px) {
+/* Mobile Landscape (481px - 768px) - Much more compact and inside */
+@media (max-width: 768px) and (min-width: 481px) {
     .accessibility-panel {
-        width: 90vw !important;
+        width: 80vw !important;
         max-width: 320px !important;
-        left: 5vw !important;
+        left: 10vw !important;
         right: auto !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
@@ -1278,14 +1229,14 @@ window.addEventListener('resize', () => {
         font-size: 16px !important;
     }
     
-    /* Very compact content adjustments */
+    /* Much more compact content adjustments */
     .accessibility-panel h2 {
-        font-size: 15px !important;
+        font-size: 14px !important;
         margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 13px !important;
+        font-size: 12px !important;
         margin-bottom: 8px !important;
     }
     
@@ -1295,17 +1246,72 @@ window.addEventListener('resize', () => {
     }
     
     .profile-item h4 {
-        font-size: 12px !important;
+        font-size: 11px !important;
     }
     
     .profile-item p {
+        font-size: 9px !important;
+    }
+    
+    /* Compact action buttons */
+    .action-btn {
+        padding: 6px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* Mobile Portrait (320px - 480px) - Very small and inside */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 85vw !important;
+        max-width: 280px !important;
+        left: 7.5vw !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 11px !important;
+        padding: 10px !important;
+        max-height: 70vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-icon {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .accessibility-icon i {
+        font-size: 14px !important;
+    }
+    
+    /* Very small content adjustments */
+    .accessibility-panel h2 {
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .profile-item {
+        padding: 6px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .profile-item h4 {
         font-size: 10px !important;
     }
     
-    /* Compact buttons */
+    .profile-item p {
+        font-size: 8px !important;
+    }
+    
+    /* Very compact buttons */
     .action-btn {
-        padding: 8px 12px !important;
-        font-size: 11px !important;
+        padding: 5px 8px !important;
+        font-size: 9px !important;
     }
 }
 
