@@ -1155,7 +1155,7 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@3101746/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@ae8390d/accessibility-widget.css';
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
@@ -19665,14 +19665,24 @@ applyCustomizations(customizationData) {
             this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
         }
         
-        // Apply language - only if it's different from saved language
+        // Apply language - preserve user's language choice
         const savedLanguage = localStorage.getItem('accessibility-widget-language');
-        if (customizationData.interfaceLanguage && customizationData.interfaceLanguage !== savedLanguage) {
+        
+        // Only apply language from customization if:
+        // 1. There's a saved language AND it's different from customization (user changed it in app)
+        // 2. OR there's no saved language AND customization has a non-default language
+        if (customizationData.interfaceLanguage && 
+            customizationData.interfaceLanguage !== 'English' && 
+            customizationData.interfaceLanguage !== savedLanguage) {
             console.log('[CK] applyCustomizations() - Setting interface language:', customizationData.interfaceLanguage);
             this.applyLanguage(customizationData.interfaceLanguage);
             this.updateInterfacePosition();
-        } else if (!customizationData.interfaceLanguage && !savedLanguage) {
-            console.log('[CK] applyCustomizations() - No interface language specified, defaulting to English');
+        } else if (!savedLanguage && customizationData.interfaceLanguage && customizationData.interfaceLanguage !== 'English') {
+            console.log('[CK] applyCustomizations() - No saved language, using customization language:', customizationData.interfaceLanguage);
+            this.applyLanguage(customizationData.interfaceLanguage);
+            this.updateInterfacePosition();
+        } else if (!savedLanguage && (!customizationData.interfaceLanguage || customizationData.interfaceLanguage === 'English')) {
+            console.log('[CK] applyCustomizations() - No saved language, defaulting to English');
             this.applyLanguage('English');
             this.updateInterfacePosition();
         } else {
