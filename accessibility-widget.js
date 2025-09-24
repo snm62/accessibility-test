@@ -1040,7 +1040,7 @@ if (window.innerWidth <= 768) {
 
             border-radius: 4px;
 
-            /* Font size controlled by JavaScript */
+            font-size: 12px;
 
             font-weight: bold;
 
@@ -1179,87 +1179,87 @@ if (window.innerWidth <= 768) {
             // Define overrideCSS first
             const overrideCSS = `
 .accessibility-panel {
-  left: auto;
-  right: auto;
-  top: auto;
-  bottom: auto;
-  transform: none;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
 }
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
 /* Icon Shape Rules - Consolidated with Maximum Specificity */
 .accessibility-icon[data-shape="circle"] {
-    border-radius: 50%;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
+    border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    border-bottom-left-radius: 25px;
-    border-bottom-right-radius: 25px;
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
+    border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
 }
 
 /* Ensure panel always appears on top of icon */
 .accessibility-panel {
-    z-index: 100001;
-    position: fixed;
+    z-index: 100001 !important;
+    position: fixed !important;
 }
 
 .accessibility-icon {
-    z-index: 99998;
+    z-index: 99998 !important;
 }
 
 /* Maximum Specificity Overrides - Force Shape Application */
 .accessibility-icon[data-shape="rounded"],
 .accessibility-icon.rounded,
 .accessibility-icon[data-shape="rounded"].rounded {
-    border-radius: 25px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    border-bottom-left-radius: 25px;
-    border-bottom-right-radius: 25px;
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="circle"],
 .accessibility-icon.circle {
-    border-radius: 50%;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
+    border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="square"],
 .accessibility-icon.square {
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
+    border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
 }
 
 /* Force rounded shape with absolute maximum specificity */
 .accessibility-icon.rounded {
-    border-radius: 25px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 /* Additional force for rounded shape */
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 /* Mobile-First Responsive Design */
@@ -1274,13 +1274,13 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 6px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
@@ -1288,20 +1288,20 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel p {
-        /* Font size controlled by JavaScript */
         line-height: 1.3;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
         padding: 4px 6px;
         min-height: 24px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1345,13 +1345,13 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
@@ -1359,20 +1359,20 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel p {
-        /* Font size controlled by JavaScript */
         line-height: 1.4;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
         padding: 8px 12px;
         min-height: 32px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
         padding: 5px 8px;
         min-height: 26px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1416,13 +1416,13 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
@@ -1430,20 +1430,20 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel p {
-        /* Font size controlled by JavaScript */
         line-height: 1.5;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
         padding: 10px 14px;
         min-height: 36px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1487,13 +1487,13 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
@@ -1501,20 +1501,20 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel p {
-        /* Font size controlled by JavaScript */
         line-height: 1.6;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
         padding: 12px 16px;
         min-height: 40px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
         padding: 8px 12px;
         min-height: 32px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1559,13 +1559,13 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
         margin-bottom: 6px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
@@ -1573,20 +1573,20 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel p {
-        /* Font size controlled by JavaScript */
         line-height: 1.3;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
         padding: 4px 6px;
         min-height: 24px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1629,12 +1629,12 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel .action-btn {
-        padding: 8px 12px;
+        padding: 8px 12px !important;
         /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        padding: 4px 8px;
+        padding: 4px 8px !important;
         /* Font size controlled by JavaScript */
     }
     
@@ -1648,9 +1648,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
 }
 
@@ -1658,53 +1658,53 @@ if (window.innerWidth <= 768) {
     
     /* Medium toggles for medium mobile screens */
     .toggle-switch {
-        width: 18px;
-        height: 11px;
+        width: 18px !important;
+        height: 11px !important;
     }
     
     .toggle-switch .slider {
-        width: 18px;
-        height: 11px;
+        width: 18px !important;
+        height: 11px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 7px;
-        height: 7px;
-        left: 2px;
-        bottom: 2px;
+        width: 7px !important;
+        height: 7px !important;
+        left: 2px !important;
+        bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(7px);
+        transform: translateX(7px) !important;
     }
     
     /* Medium profile items for medium mobile screens */
     .profile-item {
-        padding: 3px;
-        margin-bottom: 3px;
+        padding: 3px !important;
+        margin-bottom: 3px !important;
     }
     
     .profile-item h4 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 2px;
+        margin-bottom: 2px !important;
     }
     
     .profile-item p {
         /* Font size controlled by JavaScript */
-        margin-bottom: 2px;
+        margin-bottom: 2px !important;
     }
     
     /* Medium close button for medium mobile screens */
     .close-btn {
         /* Font size controlled by JavaScript */
-        padding: 6px;
+        padding: 6px !important;
     }
     
     /* Ensure rounded shape works on medium mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
 }
 
@@ -1801,16 +1801,54 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Removed - consolidated with main mobile media query above */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        /* Font size controlled by JavaScript */ /* Override external 8px */
+    }
+    
+    .accessibility-panel h2 {
+        /* Font size controlled by JavaScript */ /* Override external 9px */
+    }
+    
+    .accessibility-panel h3 {
+        /* Font size controlled by JavaScript */ /* Override external 8px */
+    }
+    
+    /* Override external button size conflicts */
+    .accessibility-panel .action-btn {
+        /* Font size controlled by JavaScript */
+        padding: 6px 10px;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        /* Font size controlled by JavaScript */
+        padding: 3px 6px;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        /* Font size controlled by JavaScript */
+    }
+    
+    .accessibility-panel .profile-info p {
+        /* Font size controlled by JavaScript */
+    }
+    
+    /* Ensure rounded shape works on small mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
+    }
+}
 
 /* Override external panel positioning conflicts */
 .accessibility-panel {
     /* Let JavaScript control positioning, not external CSS */
-    left: auto;
-    right: auto;
-    top: auto;
-    bottom: auto;
-    transform: none;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
 }
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
@@ -1819,14 +1857,14 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on large tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .accessibility-icon {
-        width: 55px;
-        height: 55px;
+        width: 55px !important;
+        height: 55px !important;
     }
     
     .accessibility-icon i {
@@ -1836,17 +1874,17 @@ if (window.innerWidth <= 768) {
     /* Better content spacing for large tablets */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 14px;
+        margin-bottom: 14px !important;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 12px;
+        margin-bottom: 12px !important;
     }
     
     .profile-item {
-        padding: 12px;
-        margin-bottom: 10px;
+        padding: 12px !important;
+        margin-bottom: 10px !important;
     }
     
     .profile-item h4 {
@@ -1858,7 +1896,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 10px 14px;
+        padding: 10px 14px !important;
         /* Font size controlled by JavaScript */
     }
 }
@@ -1867,14 +1905,14 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .accessibility-icon {
-        width: 50px;
-        height: 50px;
+        width: 50px !important;
+        height: 50px !important;
     }
     
     .accessibility-icon i {
@@ -1885,26 +1923,26 @@ if (window.innerWidth <= 768) {
 /* iPad Mini and Tablet - Responsive sizing */
 @media (max-width: 819px) and (min-width: 769px) {
     .accessibility-panel {
-        width: 85vw;
-        max-width: 450px;
+        width: 85vw !important;
+        max-width: 450px !important;
         /* Font size controlled by JavaScript */
-        padding: 16px;
-        max-height: 80vh;
-        overflow-y: auto;
-        position: fixed;
-        z-index: 100001;
+        padding: 16px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        position: fixed !important;
+        z-index: 100001 !important;
     }
     
     /* Ensure rounded shape works on iPad Mini */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .accessibility-icon {
-        width: 50px;
-        height: 50px;
+        width: 50px !important;
+        height: 50px !important;
     }
     
     .accessibility-icon i {
@@ -1914,17 +1952,17 @@ if (window.innerWidth <= 768) {
     /* Better content spacing for tablet */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 12px;
+        margin-bottom: 12px !important;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 10px;
+        margin-bottom: 10px !important;
     }
     
     .profile-item {
-        padding: 10px;
-        margin-bottom: 8px;
+        padding: 10px !important;
+        margin-bottom: 8px !important;
     }
     
     .profile-item h4 {
@@ -1936,7 +1974,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 8px 12px;
+        padding: 8px 12px !important;
         /* Font size controlled by JavaScript */
     }
 }
@@ -1944,8 +1982,8 @@ if (window.innerWidth <= 768) {
 /* Removed - replaced with mobile-first approach above */
     
     .accessibility-icon {
-        width: 45px;
-        height: 45px;
+        width: 45px !important;
+        height: 45px !important;
     }
     
     .accessibility-icon i {
@@ -1955,17 +1993,17 @@ if (window.innerWidth <= 768) {
     /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 10px;
+        margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 8px;
+        margin-bottom: 8px !important;
     }
     
     .profile-item {
-        padding: 6px;
-        margin-bottom: 4px;
+        padding: 6px !important;
+        margin-bottom: 4px !important;
     }
     
     .profile-item h4 {
@@ -1977,7 +2015,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 4px 6px;
+        padding: 4px 6px !important;
         /* Font size controlled by JavaScript */
     }
     
@@ -1985,55 +2023,72 @@ if (window.innerWidth <= 768) {
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 3px 5px;
+        padding: 3px 5px !important;
         /* Font size controlled by JavaScript */
-        min-height: 20px;
+        min-height: 20px !important;
     }
     
     .action-btn i {
         /* Font size controlled by JavaScript */
-        margin-right: 2px;
+        margin-right: 2px !important;
     }
     
     /* Very small toggles for mobile landscape */
     .toggle-switch {
-        width: 20px;
-        height: 12px;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider {
-        width: 20px;
-        height: 12px;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 8px;
-        width: 8px;
-        left: 2px;
-        bottom: 2px;
+        height: 8px !important;
+        width: 8px !important;
+        left: 2px !important;
+        bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(8px);
+        transform: translateX(8px) !important;
     }
 }
 
-/* Removed - consolidated with main mobile media query above */
+/* Mobile Portrait - Reasonable text and toggles */
+@media (max-width: 480px) {
+    .accessibility-panel {
+        width: 75vw !important;
+        max-width: 320px !important;
+        /* Font size controlled by JavaScript */
+        padding: 12px !important;
+        max-height: 70vh !important;
+    }
+    
+    .accessibility-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .accessibility-icon i {
+        /* Font size controlled by JavaScript */
+    }
     
     /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 8px;
+        margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 6px;
+        margin-bottom: 6px !important;
     }
     
     .profile-item {
-        padding: 2px;
-        margin-bottom: 2px;
+        padding: 2px !important;
+        margin-bottom: 2px !important;
     }
     
     .profile-item h4 {
@@ -2045,7 +2100,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 2px 3px;
+        padding: 2px 3px !important;
         /* Font size controlled by JavaScript */
     }
     
@@ -2053,36 +2108,36 @@ if (window.innerWidth <= 768) {
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 1px 2px;
+        padding: 1px 2px !important;
         /* Font size controlled by JavaScript */
-        min-height: 12px;
+        min-height: 12px !important;
     }
     
     .action-btn i {
         /* Font size controlled by JavaScript */
-        margin-right: 1px;
+        margin-right: 1px !important;
     }
     
     /* TINY toggles for mobile portrait */
     .toggle-switch {
-        width: 12px;
-        height: 8px;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider {
-        width: 12px;
-        height: 8px;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 4px;
-        width: 4px;
-        left: 2px;
-        bottom: 2px;
+        height: 4px !important;
+        width: 4px !important;
+        left: 2px !important;
+        bottom: 2px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px);
+        transform: translateX(4px) !important;
     }
 }
 
@@ -2092,36 +2147,36 @@ if (window.innerWidth <= 768) {
 
 /* DEBUG: Add visual indicators for shape testing */
 .accessibility-icon[data-shape="circle"]::after {
-    content: "CIRCLE";
-    position: absolute;
-    top: -20px;
-    left: 0;
+    content: "CIRCLE" !important;
+    position: absolute !important;
+    top: -20px !important;
+    left: 0 !important;
     /* Font size controlled by JavaScript */
-    color: red;
-    background: yellow;
-    z-index: 9999;
+    color: red !important;
+    background: yellow !important;
+    z-index: 9999 !important;
 }
 
 .accessibility-icon[data-shape="rounded"]::after {
-    content: "ROUNDED";
-    position: absolute;
-    top: -20px;
-    left: 0;
+    content: "ROUNDED" !important;
+    position: absolute !important;
+    top: -20px !important;
+    left: 0 !important;
     /* Font size controlled by JavaScript */
-    color: red;
-    background: yellow;
-    z-index: 9999;
+    color: red !important;
+    background: yellow !important;
+    z-index: 9999 !important;
 }
 
 .accessibility-icon[data-shape="square"]::after {
-    content: "SQUARE";
-    position: absolute;
-    top: -20px;
-    left: 0;
+    content: "SQUARE" !important;
+    position: absolute !important;
+    top: -20px !important;
+    left: 0 !important;
     /* Font size controlled by JavaScript */
-    color: red;
-    background: yellow;
-    z-index: 9999;
+    color: red !important;
+    background: yellow !important;
+    z-index: 9999 !important;
 }
 
 /* Removed conflicting media query rules */
@@ -2147,9 +2202,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
     
     .profile-item h4 {
@@ -2162,46 +2217,46 @@ if (window.innerWidth <= 768) {
     
     .action-btn {
         /* Font size controlled by JavaScript */
-        padding: 2px 3px;
+        padding: 2px 3px !important;
     }
     
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         /* Font size controlled by JavaScript */
-        padding: 1px 2px;
-        min-height: 12px;
+        padding: 1px 2px !important;
+        min-height: 12px !important;
     }
     
     .toggle-switch {
-        width: 12px;
-        height: 8px;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider {
-        width: 12px;
-        height: 8px;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 4px;
-        height: 4px;
+        width: 4px !important;
+        height: 4px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px);
+        transform: translateX(4px) !important;
     }
 }
 
 .accessibility-panel {
-    display: none;
-    position: fixed;
-    z-index: 100001;
+    display: none !important;
+    position: fixed !important;
+    z-index: 100001 !important;
 }
 
 .accessibility-panel.show {
-    display: block;
-    visibility: visible;
+    display: block !important;
+    visibility: visible !important;
 }
 `;
 
@@ -2479,35 +2534,35 @@ if (window.innerWidth <= 768) {
         
         /* Override external CSS */
         .accessibility-icon[data-shape="circle"] {
-            border-radius: 50%;
+            border-radius: 50% !important;
         }
         
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px;
+            border-radius: 25px !important;
         }
         
         .accessibility-icon[data-shape="square"] {
-            border-radius: 0px;
+            border-radius: 0px !important;
         }
         
         /* Force panel positioning */
         .accessibility-panel {
-            position: fixed;
-            z-index: 100001;
-            display: none; /* Hidden by default */
+            position: fixed !important;
+            z-index: 100001 !important;
+            display: none !important; /* Hidden by default */
         }
         
         .accessibility-panel.show {
-            display: block;
-            visibility: visible;
+            display: block !important;
+            visibility: visible !important;
         }
         
         /* Mobile responsiveness - handled by main responsive CSS above */
         
         @media (max-width: 480px) {
             .accessibility-icon {
-                width: 45px;
-                height: 45px;
+                width: 45px !important;
+                height: 45px !important;
             }
             
             .accessibility-icon i {
@@ -2515,8 +2570,8 @@ if (window.innerWidth <= 768) {
             }
             
             .accessibility-panel {
-                width: 95vw;
-                max-width: 350px;
+                width: 95vw !important;
+                max-width: 350px !important;
             }
         }
             /* Accessibility Widget Styles - Shadow DOM */
@@ -2549,16 +2604,16 @@ if (window.innerWidth <= 768) {
 
             .accessibility-icon {
 
-                position: fixed;
+                position: fixed !important;
 
-                z-index: 99998;
+                z-index: 99998 !important;
                 
                 /* Ensure JavaScript positioning takes precedence */
-                top: unset;
-                bottom: unset;
-                left: unset;
-                right: unset;
-                transform: unset;
+                top: unset !important;
+                bottom: unset !important;
+                left: unset !important;
+                right: unset !important;
+                transform: unset !important;
 
             }
 
@@ -2618,7 +2673,7 @@ if (window.innerWidth <= 768) {
 
             .accessibility-icon:focus {
 
-                outline: none;
+                outline: none !important;
 
             }
 
@@ -2642,9 +2697,9 @@ if (window.innerWidth <= 768) {
 
             .language-selector:focus {
 
-             outline: none;
-             outline-offset: 0px;
-             box-shadow: none;   
+             outline: none !important;
+             outline-offset: 0px !important;
+             box-shadow: none !important;   
 
             }
 
@@ -2652,7 +2707,7 @@ if (window.innerWidth <= 768) {
 
             .toggle-switch input:focus + .slider {
 
-                 outline: none;
+                 outline: none !important;
             }
 
 
@@ -2663,14 +2718,14 @@ if (window.innerWidth <= 768) {
 
             .profile-item:focus-within {
 
-                outline: none;
+                outline: none !important;
             }
 
 
 
             .profile-item:focus {
 
-               outline: none;
+               outline: none !important;
             }
 
 
@@ -2679,23 +2734,23 @@ if (window.innerWidth <= 768) {
 
             .sr-only {
 
-                position: absolute;
+                position: absolute !important;
 
-                width: 1px;
+                width: 1px !important;
 
-                height: 1px;
+                height: 1px !important;
 
-                padding: 0;
+                padding: 0 !important;
 
-                margin: -1px;
+                margin: -1px !important;
 
-                overflow: hidden;
+                overflow: hidden !important;
 
-                clip: rect(0, 0, 0, 0);
+                clip: rect(0, 0, 0, 0) !important;
 
-                white-space: nowrap;
+                white-space: nowrap !important;
 
-                border: 0;
+                border: 0 !important;
 
             }
 
@@ -2711,9 +2766,9 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel label:focus {
 
-                outline: none;
-                outline-offset: 0px;
-                box-shadow: none;
+                outline: none !important;
+                outline-offset: 0px !important;
+                box-shadow: none !important;
 
             }
 
@@ -2727,7 +2782,7 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel input:focus-visible {
 
-                outline: none;
+                outline: none !important;
 
             }
 
@@ -2739,15 +2794,15 @@ if (window.innerWidth <= 768) {
 
                 position: fixed;
 
-                width: 500px;
+                width: 500px !important;
 
-                height: 700px;
+                height: 700px !important;
 
-                background: #ffffff;
+                background: #ffffff !important;
 
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
 
-                z-index: 100000;
+                z-index: 100000 !important;
 
                 transition: left 0.3s ease;
 
@@ -2755,9 +2810,9 @@ if (window.innerWidth <= 768) {
 
                 overflow-x: hidden;
 
-                font-family: 'DM Sans', sans-serif;
+                font-family: 'DM Sans', sans-serif !important;
 
-                border-radius: 8px;
+                border-radius: 8px !important;
 
                 margin: 0 20px;
 
@@ -2770,11 +2825,11 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel.active {
 
-                display: block;
+                display: block !important;
 
-                visibility: visible;
+                visibility: visible !important;
 
-                opacity: 1;
+                opacity: 1 !important;
 
             }
 
@@ -2785,7 +2840,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel.active {
 
-                    left: 20px;
+                    left: 20px !important;
 
                 }
 
@@ -2797,9 +2852,9 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-icon {
 
-                    width: 45px;
+                    width: 45px !important;
 
-                    height: 45px;
+                    height: 45px !important;
 
                     /* Position controlled by JS; do not force a corner here */
 
@@ -2817,11 +2872,11 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel {
 
-                    width: 500px;
+                    width: 500px !important;
 
-                    margin: 0 10px;
+                    margin: 0 10px !important;
 
-                    height: 700px;
+                    height: 700px !important;
 
                 }
 
@@ -2829,7 +2884,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel.active {
 
-                    left: 10px;
+                    left: 10px !important;
 
                 }
 
@@ -2847,15 +2902,15 @@ if (window.innerWidth <= 768) {
 
                 padding: 20px;
 
-                background: transparent;
+                background: transparent !important;
 
-                color: #ffffff;
+                color: #ffffff !important;
 
-                border-radius: 24px;
+                border-radius: 24px !important;
 
-                border: 4px solid #ffffff;
+                border: 4px solid #ffffff !important;
 
-                border-bottom: none;
+                border-bottom: none !important;
 
                 position: relative;
 
@@ -2897,7 +2952,7 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                /* Font size controlled by JavaScript */
+                font-size: 20px;
 
                 padding: 8px;
 
@@ -3003,7 +3058,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 4px 0;
 
-                /* Font size controlled by JavaScript */
+                font-size: 13px;
 
                 color: #64748b;
 
@@ -3083,11 +3138,11 @@ if (window.innerWidth <= 768) {
 
                 padding: 8px 16px;
 
-                background: rgba(217, 217, 217, 0.3);
+                background: rgba(217, 217, 217, 0.3) !important;
 
-                border: 2px solid rgba(217, 217, 217, 0.3);
+                border: 2px solid rgba(217, 217, 217, 0.3) !important;
 
-                color: #ffffff;
+                color: #ffffff !important;
 
                 border-radius: 30px;
 
@@ -3099,7 +3154,7 @@ if (window.innerWidth <= 768) {
 
                 white-space: nowrap;
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 justify-content: center;
 
@@ -3127,11 +3182,11 @@ if (window.innerWidth <= 768) {
 
                 padding: 0 20px 20px;
 
-                background: #ffffff;
+                background: #ffffff !important;
 
-                border-radius: 40px 40px 0 0;
+                border-radius: 40px 40px 0 0 !important;
 
-                margin-top: -30px;
+                margin-top: -30px !important;
 
                 position: relative;
 
@@ -3151,7 +3206,7 @@ if (window.innerWidth <= 768) {
 
                 margin-bottom: 12px;
 
-                /* Font size controlled by JavaScript */
+                font-size: 18px;
 
                 font-weight: 600;
 
@@ -3235,7 +3290,7 @@ if (window.innerWidth <= 768) {
 
             .profile-info i {
 
-                /* Font size controlled by JavaScript */
+                font-size: 20px;
 
                 color: #6366f1;
 
@@ -3251,7 +3306,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 0;
 
-                /* Font size controlled by JavaScript */
+                font-size: 16px;
 
                 color: #334155;
 
@@ -3269,9 +3324,9 @@ if (window.innerWidth <= 768) {
 
             .profile-info p {
 
-                margin: 5px 0 0;
+                margin: 5px 0 0 !important;
 
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
 
                 color: #64748b;
 
@@ -3291,7 +3346,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 3px 0 0;
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 color: #6366f1;
 
@@ -3315,9 +3370,9 @@ if (window.innerWidth <= 768) {
 
                 display: inline-block;
 
-                width: 80px;
+                width: 80px !important;
 
-                height: 40px;
+                height: 40px !important;
 
                 flex-shrink: 0;
 
@@ -3357,7 +3412,7 @@ if (window.innerWidth <= 768) {
 
                 transition: 0.3s;
 
-                border-radius: 20px;
+                border-radius: 20px !important;
 
             }
 
@@ -3391,7 +3446,7 @@ if (window.innerWidth <= 768) {
 
             input:checked + .slider {
 
-                background-color: #e5e7eb;
+                background-color: #e5e7eb !important;
 
             }
 
@@ -3399,7 +3454,7 @@ if (window.innerWidth <= 768) {
 
             input:checked + .slider:before {
 
-                transform: translateX(26px);
+                transform: translateX(26px) !important;
 
             }
 
@@ -3419,7 +3474,7 @@ if (window.innerWidth <= 768) {
 
                 transform: translateY(-50%);
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 font-weight: bold;
 
@@ -3463,7 +3518,7 @@ if (window.innerWidth <= 768) {
 
                 justify-content: center;
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 font-weight: bold;
 
@@ -3507,7 +3562,7 @@ if (window.innerWidth <= 768) {
 
                 bottom: 0;
 
-                background: linear-gradient(135deg, #262E84, #2AA2F1);
+                background: linear-gradient(135deg, #262E84, #2AA2F1) !important;
 
                 color: #ffffff;
 
@@ -3519,9 +3574,9 @@ if (window.innerWidth <= 768) {
 
                 align-items: center;
 
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
 
-                border-radius: 0 0 8px 8px;
+                border-radius: 0 0 8px 8px !important;
 
                 z-index: 1001;
 
@@ -3561,7 +3616,7 @@ if (window.innerWidth <= 768) {
 
                 color: #ffffff;
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 font-weight: 500;
 
@@ -3587,7 +3642,7 @@ if (window.innerWidth <= 768) {
 
             .language-selector-header .current-flag {
 
-                /* Font size controlled by JavaScript */
+                font-size: 16px;
 
             }
 
@@ -3595,7 +3650,7 @@ if (window.innerWidth <= 768) {
 
             .language-selector-header i.fa-chevron-down {
 
-                /* Font size controlled by JavaScript */
+                font-size: 10px;
 
                 transition: transform 0.2s ease;
 
@@ -3617,48 +3672,47 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown {
 
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                position: sticky !important;
+                top: 0 !important;
 
                 /* Keep dropdown in panel viewport when scrolling */
-                background: #ffffff;
+                position: fixed !important;
 
-                border-radius: 12px;
+                background: #ffffff !important;
 
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                border-radius: 12px !important;
 
-                border: 1px solid #e5e7eb;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
 
-                z-index: 100001;
+                border: 1px solid #e5e7eb !important;
 
-                width: 400px;
+                z-index: 100001 !important;
 
-                max-height: 400px;
+                width: 400px !important;
 
-                overflow-y: auto;
+                max-height: 400px !important;
 
-                overflow-x: hidden;
+                overflow-y: auto !important;
 
-                animation: dropdownSlideIn 0.2s ease-out;
+                overflow-x: hidden !important;
 
-                transform: none;
+                animation: dropdownSlideIn 0.2s ease-out !important;
 
-                clip: none;
+                transform: none !important;
 
-                display: none;
+                clip: none !important;
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                display: none !important;
 
-                pointer-events: auto;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+
+                pointer-events: auto !important;
 
                 /* Ensure dropdown is positioned relative to panel */
 
-                margin: 0;
+                margin: 0 !important;
 
-                padding: 0;
+                padding: 0 !important;
 
             }
 
@@ -3668,13 +3722,13 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown[style*="display: block"] {
 
-                display: block;
+                display: block !important;
 
-                visibility: visible;
+                visibility: visible !important;
 
-                opacity: 1;
+                opacity: 1 !important;
 
-                pointer-events: auto;
+                pointer-events: auto !important;
 
             }
 
@@ -3704,11 +3758,11 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown-content {
 
-                padding: 20px;
+                padding: 20px !important;
 
-                background: #ffffff;
+                background: #ffffff !important;
 
-                min-height: 100px;
+                min-height: 100px !important;
 
             }
 
@@ -3734,7 +3788,7 @@ if (window.innerWidth <= 768) {
 
                 transition: all 0.2s ease;
 
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
 
                 font-weight: 500;
 
@@ -3750,7 +3804,7 @@ if (window.innerWidth <= 768) {
 
                 outline: none;
 
-                pointer-events: auto;
+                pointer-events: auto !important;
 
                 user-select: none;
 
@@ -3778,7 +3832,7 @@ if (window.innerWidth <= 768) {
 
             .language-option .flag {
 
-                /* Font size controlled by JavaScript */
+                font-size: 16px;
 
                 flex-shrink: 0;
 
@@ -3792,7 +3846,7 @@ if (window.innerWidth <= 768) {
 
                 font-weight: 500;
 
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
 
             }
 
@@ -3804,7 +3858,7 @@ if (window.innerWidth <= 768) {
 
             :host(.seizure-safe) .accessibility-panel {
 
-                filter: grayscale(0.8) contrast(0.9);
+                filter: grayscale(0.8) contrast(0.9) !important;
 
             }
 
@@ -3814,9 +3868,9 @@ if (window.innerWidth <= 768) {
 
             :host(.seizure-safe) .accessibility-icon {
 
-                position: fixed;
+                position: fixed !important;
 
-                z-index: 99998;
+                z-index: 99998 !important;
 
             }
 
@@ -3826,7 +3880,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) {
 
-                filter: saturate(1.1) brightness(1.05);
+                filter: saturate(1.1) brightness(1.05) !important;
 
                 /* Use CSS custom properties for responsive scaling */
 
@@ -3842,11 +3896,11 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-icon {
 
-                width: calc(60px * var(--vision-scale));
+                width: calc(60px * var(--vision-scale)) !important;
 
-                height: calc(60px * var(--vision-scale));
+                height: calc(60px * var(--vision-scale)) !important;
 
-                font-size: calc(24px * var(--vision-font-scale));
+                font-size: calc(24px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3854,9 +3908,9 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel {
 
-                width: calc(400px * var(--vision-scale));
+                width: calc(400px * var(--vision-scale)) !important;
 
-                font-size: calc(1em * var(--vision-font-scale));
+                font-size: calc(1em * var(--vision-font-scale)) !important;
 
             }
 
@@ -3864,7 +3918,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h2 {
 
-                font-size: calc(24px * var(--vision-font-scale));
+                font-size: calc(24px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3872,7 +3926,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h3 {
 
-                font-size: calc(18px * var(--vision-font-scale));
+                font-size: calc(18px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3880,7 +3934,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h4 {
 
-                font-size: calc(16px * var(--vision-font-scale));
+                font-size: calc(16px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3888,7 +3942,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel p {
 
-                font-size: calc(14px * var(--vision-font-scale));
+                font-size: calc(14px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3896,9 +3950,9 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel .action-btn {
 
-                font-size: calc(1em * var(--vision-font-scale));
+                font-size: calc(1em * var(--vision-font-scale)) !important;
 
-                padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale));
+                padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale)) !important;
 
             }
 
@@ -3906,7 +3960,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel * {
 
-                font-size: 1em;
+                font-size: 1em !important;
 
             }
 
@@ -3914,7 +3968,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h1 {
 
-                font-size: 1.5em;
+                font-size: 1.5em !important;
 
             }
 
@@ -3922,7 +3976,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h2 {
 
-                font-size: 1.3em;
+                font-size: 1.3em !important;
 
             }
 
@@ -3930,7 +3984,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h3 {
 
-                font-size: 1.2em;
+                font-size: 1.2em !important;
 
             }
 
@@ -3938,7 +3992,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h4 {
 
-                font-size: 1.1em;
+                font-size: 1.1em !important;
 
             }
 
@@ -3948,7 +4002,7 @@ if (window.innerWidth <= 768) {
 
             :host(.adhd-friendly) .accessibility-panel {
 
-                filter: saturate(0.9) brightness(0.9);
+                filter: saturate(0.9) brightness(0.9) !important;
 
             }
 
@@ -3958,7 +4012,7 @@ if (window.innerWidth <= 768) {
 
             :host(.cognitive-disability) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(1.1);
+                filter: saturate(1.2) brightness(1.1) !important;
 
             }
 
@@ -3972,7 +4026,7 @@ if (window.innerWidth <= 768) {
 
             :host(.monochrome) .accessibility-panel {
 
-                filter: grayscale(1);
+                filter: grayscale(1) !important;
 
             }
 
@@ -3982,7 +4036,7 @@ if (window.innerWidth <= 768) {
 
             :host(.dark-contrast) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(0.8) contrast(1.3);
+                filter: saturate(1.2) brightness(0.8) contrast(1.3) !important;
 
             }
 
@@ -3992,7 +4046,7 @@ if (window.innerWidth <= 768) {
 
             :host(.light-contrast) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(1.2) contrast(0.9);
+                filter: saturate(1.2) brightness(1.2) contrast(0.9) !important;
 
             }
 
@@ -4006,9 +4060,9 @@ if (window.innerWidth <= 768) {
 
             :host(.high-contrast) .accessibility-panel * {
 
-                filter: contrast(0.8);
+                filter: contrast(0.8) !important;
 
-                -webkit-filter: contrast(0.8);
+                -webkit-filter: contrast(0.8) !important;
 
             }
 
@@ -4022,11 +4076,11 @@ if (window.innerWidth <= 768) {
 
             :host(:not(.readable-font)) .accessibility-panel {
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 
-                font-weight: normal;
+                font-weight: normal !important;
 
-                letter-spacing: normal;
+                letter-spacing: normal !important;
 
             }
 
@@ -4048,11 +4102,11 @@ if (window.innerWidth <= 768) {
 
             :host(:not(.readable-font)) .accessibility-panel label {
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 
-                font-weight: normal;
+                font-weight: normal !important;
 
-                letter-spacing: normal;
+                letter-spacing: normal !important;
 
             }
 
@@ -4064,11 +4118,11 @@ if (window.innerWidth <= 768) {
 
             :host(.readable-font) .accessibility-panel {
 
-                font-family: 'Arial', 'Open Sans', sans-serif;
+                font-family: 'Arial', 'Open Sans', sans-serif !important;
 
-                font-weight: 500;
+                font-weight: 500 !important;
 
-                letter-spacing: 0.5px;
+                letter-spacing: 0.5px !important;
 
             }
 
@@ -4090,11 +4144,11 @@ if (window.innerWidth <= 768) {
 
             :host(.readable-font) .accessibility-panel label {
 
-                font-family: 'Arial', 'Open Sans', sans-serif;
+                font-family: 'Arial', 'Open Sans', sans-serif !important;
 
-                font-weight: 500;
+                font-weight: 500 !important;
 
-                letter-spacing: 0.5px;
+                letter-spacing: 0.5px !important;
 
             }
 
@@ -4104,7 +4158,7 @@ if (window.innerWidth <= 768) {
 
             :host(.high-saturation) .accessibility-panel {
 
-                filter: saturate(1.5);
+                filter: saturate(1.5) !important;
 
             }
 
@@ -4386,7 +4440,7 @@ if (window.innerWidth <= 768) {
 
                 color: #333;
 
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
 
                 font-weight: 600;
 
@@ -4466,7 +4520,7 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                /* Font size controlled by JavaScript */
+                font-size: 12px;
 
                 font-weight: 500;
 
@@ -4488,7 +4542,7 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown {
 
-                position: relative;
+                position: relative !important;
 
             }
 
@@ -4498,17 +4552,17 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown .toggle-switch {
 
-                position: absolute;
+                position: absolute !important;
 
-                left: 20px;
+                left: 20px !important;
 
-                top: 20px;
+                top: 20px !important;
 
-                transform: none;
+                transform: none !important;
 
-                flex-shrink: 0;
+                flex-shrink: 0 !important;
 
-                margin: 0;
+                margin: 0 !important;
 
             }
 
@@ -4516,11 +4570,11 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown .profile-info {
 
-                display: block;
+                display: block !important;
 
-                padding-left: 100px;
+                padding-left: 100px !important;
 
-                margin-bottom: 10px;
+                margin-bottom: 10px !important;
 
             }
 
@@ -4588,7 +4642,7 @@ if (window.innerWidth <= 768) {
 
                 color: #374151;
 
-                /* Font size controlled by JavaScript */
+                font-size: 13px;
 
                 font-weight: 500;
 
@@ -4618,9 +4672,9 @@ if (window.innerWidth <= 768) {
 
             .useful-links-content select:focus {
 
-                outline: 3px solid #4f46e5;
+                outline: 3px solid #4f46e5 !important;
 
-                outline-offset: 2px;
+                outline-offset: 2px !important;
 
                 border-color: #4f46e5;
 
@@ -4683,7 +4737,7 @@ body.big-black-cursor,
 html body.big-black-cursor,
 body.big-black-cursor *,
 html body.big-black-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto !important;
 }
 
 /* Big White Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
@@ -4691,24 +4745,24 @@ body.big-white-cursor,
 html body.big-white-cursor,
 body.big-white-cursor *,
 html body.big-white-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                position: sticky !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
                 background: rgba(0, 0, 0, 0.8);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
                 /* Keep modal in panel viewport when scrolling */
-                width: 100%;
-                height: 100%;
-                min-height: 100%;
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 100% !important;
                 /* Ensure overlay covers full scrollable area */
                 max-height: none;
                 overflow: hidden;
@@ -4741,7 +4795,7 @@ html body.big-white-cursor * {
             .hide-interface-modal .modal-header h3 {
                 margin: 0;
                 color: #1f2937;
-                /* Font size controlled by JavaScript */
+                font-size: 18px;
                 font-weight: 600;
             }
 
@@ -4771,7 +4825,7 @@ html body.big-white-cursor * {
                 margin: 0;
                 color: #374151;
                 line-height: 1.5;
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
             }
 
             .hide-interface-modal .modal-footer {
@@ -4785,7 +4839,7 @@ html body.big-white-cursor * {
                 padding: 10px 20px;
                 border: none;
                 border-radius: 6px;
-                /* Font size controlled by JavaScript */
+                font-size: 14px;
                 font-weight: 500;
                 cursor: pointer;
                 transition: all 0.2s ease;
@@ -9158,7 +9212,7 @@ html body.big-white-cursor * {
 
             border-radius: 4px;
 
-            /* Font size controlled by JavaScript */
+            font-size: 12px;
 
             font-weight: bold;
 
@@ -11674,9 +11728,9 @@ html body.big-white-cursor * {
 
         // Apply line-height directly to body and html
 
-        document.body.style.setProperty('line-height', lineHeightValue);
+        document.body.style.setProperty('line-height', lineHeightValue, 'important');
 
-        document.documentElement.style.setProperty('line-height', lineHeightValue);
+        document.documentElement.style.setProperty('line-height', lineHeightValue, 'important');
 
         console.log('Accessibility Widget: Applied lineHeight to body and html:', lineHeightValue + ' (important)');
 
@@ -11704,9 +11758,9 @@ html body.big-white-cursor * {
 
                 // Use multiple approaches to ensure the line height is applied
 
-                element.style.setProperty('line-height', lineHeightValue);
+                element.style.setProperty('line-height', lineHeightValue, 'important');
 
-                element.style.lineHeight = lineHeightValue + '';
+                element.style.lineHeight = lineHeightValue + ' !important';
 
                 updatedCount++;
 
@@ -12280,12 +12334,14 @@ html body.big-white-cursor * {
 
         
 
-        // Apply to body using original size
+        // Apply to body using original size with !important to override CSS
+
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
-        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
+
+        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
         
         // Also apply to html element to ensure it takes precedence
-        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
+        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
 
         
 
@@ -12305,9 +12361,9 @@ html body.big-white-cursor * {
 
                 if (originalSize && !isNaN(originalSize)) {
 
-                    // Apply the scale to the original size with to override CSS
+                    // Apply the scale to the original size with !important to override CSS
 
-                    element.style.setProperty('font-size', `${originalSize * scale}px`);
+                    element.style.setProperty('font-size', `${originalSize * scale}px`, 'important');
 
                 }
 
@@ -14143,9 +14199,9 @@ html body.big-white-cursor * {
                 console.error('Accessibility Widget: Icon missing after reset!');
             } else {
                 // Force icon to be visible
-                icon.style.setProperty('display', 'flex');
-                icon.style.setProperty('visibility', 'visible');
-                icon.style.setProperty('opacity', '1');
+                icon.style.setProperty('display', 'flex', 'important');
+                icon.style.setProperty('visibility', 'visible', 'important');
+                icon.style.setProperty('opacity', '1', 'important');
                 console.log('Accessibility Widget: Icon visibility ensured');
             }
             
@@ -14906,9 +14962,9 @@ html body.big-white-cursor * {
 
             body.monochrome *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
 
-                filter: grayscale(100%);
+                filter: grayscale(100%) !important;
 
-                transition: filter 0.3s ease;
+                transition: filter 0.3s ease !important;
 
             }
 
@@ -14920,7 +14976,7 @@ html body.big-white-cursor * {
 
             body.monochrome #accessibility-widget {
 
-                z-index: 99998;
+                z-index: 99998 !important;
 
             }
 
@@ -15954,27 +16010,27 @@ html body.big-white-cursor * {
 
             <div id="read-mode-overlay" style="
 
-                position: fixed;
+                position: fixed !important;
 
-                top: 0;
+                top: 0 !important;
 
-                left: 0;
+                left: 0 !important;
 
-                width: 100%;
+                width: 100% !important;
 
-                height: 100%;
+                height: 100% !important;
 
-                background: #e8f4f8;
+                background: #e8f4f8 !important;
 
-                z-index: 99997;
+                z-index: 99997 !important;
 
-                overflow-y: auto;
+                overflow-y: auto !important;
 
-                padding: 20px;
+                padding: 20px !important;
 
-                font-family: Arial, sans-serif;
+                font-family: Arial, sans-serif !important;
 
-                display: block;
+                display: block !important;
 
             ">
 
@@ -17203,7 +17259,7 @@ html body.big-white-cursor * {
             body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget *,
             body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget * {
 
-                cursor: auto;
+                cursor: auto !important;
 
             }
 
@@ -17341,7 +17397,7 @@ html body.big-white-cursor * {
 
             font-family: 'DM Sans', sans-serif;
 
-            /* Font size controlled by JavaScript */
+            font-size: 14px;
 
             z-index: 1000000;
 
@@ -18345,21 +18401,21 @@ html body.big-white-cursor * {
 
             body.seizure-safe *::after {
 
-                animation: none;
+                animation: none !important;
 
-                transition: none;
+                transition: none !important;
 
-                transform: none;
+                transform: none !important;
 
-                animation-duration: 0s;
+                animation-duration: 0s !important;
 
-                animation-delay: 0s;
+                animation-delay: 0s !important;
 
-                animation-iteration-count: 0;
+                animation-iteration-count: 0 !important;
 
-                transition-duration: 0s;
+                transition-duration: 0s !important;
 
-                transition-delay: 0s;
+                transition-delay: 0s !important;
 
             }
 
@@ -18369,15 +18425,15 @@ html body.big-white-cursor * {
 
             body.seizure-safe .slider-track {
 
-                animation: none;
+                animation: none !important;
 
-                animation-name: none;
+                animation-name: none !important;
 
-                animation-duration: 0s;
+                animation-duration: 0s !important;
 
-                animation-iteration-count: 0;
+                animation-iteration-count: 0 !important;
 
-                transition: left 0.5s ease-in-out;
+                transition: left 0.5s ease-in-out !important;
 
                 /* left positioning is controlled by JavaScript, don't override it */
 
@@ -18391,15 +18447,15 @@ html body.big-white-cursor * {
 
             body.seizure-safe .slider-track * {
 
-                animation: none;
+                animation: none !important;
 
-                animation-name: none;
+                animation-name: none !important;
 
-                animation-duration: 0s;
+                animation-duration: 0s !important;
 
-                animation-iteration-count: 0;
+                animation-iteration-count: 0 !important;
 
-                animation-delay: 0s;
+                animation-delay: 0s !important;
 
             }
 
@@ -18411,7 +18467,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe .dot {
 
-                transition: all 0.3s ease;
+                transition: all 0.3s ease !important;
 
                 /* Allow hover effects and clicks to work */
 
@@ -18423,9 +18479,9 @@ html body.big-white-cursor * {
 
             body.seizure-safe *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
 
-                filter: saturate(0.4) brightness(0.95);
+                filter: saturate(0.4) brightness(0.95) !important;
 
-                transition: filter 0.3s ease;
+                transition: filter 0.3s ease !important;
 
             }
 
@@ -18435,7 +18491,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe {
 
-                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto;
+                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
 
             }
 
@@ -18443,7 +18499,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe * {
 
-                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto;
+                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
 
             }
 
@@ -18455,7 +18511,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe #accessibility-widget {
 
-                z-index: 99998;
+                z-index: 99998 !important;
 
             }
 
@@ -18469,23 +18525,23 @@ html body.big-white-cursor * {
 
             .adhd-friendly #adhd-spotlight {
 
-                z-index: 99998;
+                z-index: 99998 !important;
 
-                background: rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.1) !important;
 
-                backdrop-filter: brightness(2.0) contrast(1.2);
+                backdrop-filter: brightness(2.0) contrast(1.2) !important;
 
-                box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4);
+                box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4) !important;
 
-                filter: none;
+                filter: none !important;
 
-                position: fixed;
+                position: fixed !important;
 
-                pointer-events: none;
+                pointer-events: none !important;
 
-                border-radius: 8px;
+                border-radius: 8px !important;
 
-                transition: all 0.1s ease;
+                transition: all 0.1s ease !important;
 
             }
 
@@ -18497,7 +18553,7 @@ html body.big-white-cursor * {
 
             .adhd-friendly #accessibility-widget {
 
-                z-index: 1000000;
+                z-index: 1000000 !important;
 
             }
 
@@ -18507,13 +18563,13 @@ html body.big-white-cursor * {
 
             .adhd-friendly .adhd-focus {
 
-                outline: 4px solid var(--primary-color);
+                outline: 4px solid var(--primary-color) !important;
 
-                outline-offset: 3px;
+                outline-offset: 3px !important;
 
-                background: rgba(99, 102, 241, 0.15);
+                background: rgba(99, 102, 241, 0.15) !important;
 
-                filter: contrast(1.3) brightness(1.1);
+                filter: contrast(1.3) brightness(1.1) !important;
 
             }
 
@@ -20818,7 +20874,7 @@ applyCustomizations(customizationData) {
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
             icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
-            console.log('[CK] Applied border-radius with');
+            console.log('[CK] Applied border-radius with !important');
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
@@ -20922,97 +20978,97 @@ applyCustomizations(customizationData) {
             if (screenWidth <= 480) {
                 // Mobile Portrait - Wider but compact
                 console.log('[CK] Applying mobile portrait styles');
-                panel.style.setProperty('width', '75vw');
-                panel.style.setProperty('max-width', '320px');
-                panel.style.setProperty('left', '12.5vw');
-                panel.style.setProperty('font-size', '12px');
-                panel.style.setProperty('padding', '12px');
-                panel.style.setProperty('max-height', '70vh');
+                panel.style.setProperty('width', '75vw', 'important');
+                panel.style.setProperty('max-width', '320px', 'important');
+                panel.style.setProperty('left', '12.5vw', 'important');
+                panel.style.setProperty('font-size', '12px', 'important');
+                panel.style.setProperty('padding', '12px', 'important');
+                panel.style.setProperty('max-height', '70vh', 'important');
                 
-                icon.style.setProperty('width', '40px');
-                icon.style.setProperty('height', '40px');
+                icon.style.setProperty('width', '40px', 'important');
+                icon.style.setProperty('height', '40px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '16px');
+                    iconI.style.setProperty('font-size', '16px', 'important');
                 }
             } else if (screenWidth <= 768) {
                 // Mobile Landscape - Wider panel
                 console.log('[CK] Applying mobile landscape styles');
-                panel.style.setProperty('width', '80vw');
-                panel.style.setProperty('max-width', '380px');
-                panel.style.setProperty('left', '10vw');
-                panel.style.setProperty('font-size', '13px');
-                panel.style.setProperty('padding', '14px');
-                panel.style.setProperty('max-height', '75vh');
+                panel.style.setProperty('width', '80vw', 'important');
+                panel.style.setProperty('max-width', '380px', 'important');
+                panel.style.setProperty('left', '10vw', 'important');
+                panel.style.setProperty('font-size', '13px', 'important');
+                panel.style.setProperty('padding', '14px', 'important');
+                panel.style.setProperty('max-height', '75vh', 'important');
                 
-                icon.style.setProperty('width', '45px');
-                icon.style.setProperty('height', '45px');
+                icon.style.setProperty('width', '45px', 'important');
+                icon.style.setProperty('height', '45px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '18px');
+                    iconI.style.setProperty('font-size', '18px', 'important');
                 }
             } else if (screenWidth >= 1025 && screenWidth <= 1366) {
                 // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
                 console.log('[CK] Applying large tablet styles - positioning very close to icon');
-                panel.style.setProperty('width', '65vw');
-                panel.style.setProperty('max-width', '450px');
-                panel.style.setProperty('left', '0.5vw');
-                panel.style.setProperty('font-size', '15px');
-                panel.style.setProperty('padding', '18px');
-                panel.style.setProperty('max-height', '85vh');
+                panel.style.setProperty('width', '65vw', 'important');
+                panel.style.setProperty('max-width', '450px', 'important');
+                panel.style.setProperty('left', '0.5vw', 'important');
+                panel.style.setProperty('font-size', '15px', 'important');
+                panel.style.setProperty('padding', '18px', 'important');
+                panel.style.setProperty('max-height', '85vh', 'important');
                 
-                icon.style.setProperty('width', '55px');
-                icon.style.setProperty('height', '55px');
+                icon.style.setProperty('width', '55px', 'important');
+                icon.style.setProperty('height', '55px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '22px');
+                    iconI.style.setProperty('font-size', '22px', 'important');
                 }
             } else if (screenWidth >= 820 && screenWidth <= 1024) {
                 // Tablet/iPad 820px+ - Position panel very close to icon
                 console.log('[CK] Applying tablet 820px+ styles - positioning very close to icon');
-                panel.style.setProperty('width', '75vw');
-                panel.style.setProperty('max-width', '380px');
-                panel.style.setProperty('left', '1vw');
-                panel.style.setProperty('font-size', '14px');
-                panel.style.setProperty('padding', '16px');
-                panel.style.setProperty('max-height', '80vh');
+                panel.style.setProperty('width', '75vw', 'important');
+                panel.style.setProperty('max-width', '380px', 'important');
+                panel.style.setProperty('left', '1vw', 'important');
+                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('padding', '16px', 'important');
+                panel.style.setProperty('max-height', '80vh', 'important');
                 
-                icon.style.setProperty('width', '50px');
-                icon.style.setProperty('height', '50px');
+                icon.style.setProperty('width', '50px', 'important');
+                icon.style.setProperty('height', '50px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px');
+                    iconI.style.setProperty('font-size', '20px', 'important');
                 }
             } else if (screenWidth <= 1024) {
                 // iPad Mini - Much wider panel positioned close to icon
                 console.log('[CK] Applying iPad mini styles - positioning close to icon');
-                panel.style.setProperty('width', '85vw');
-                panel.style.setProperty('max-width', '450px');
-                panel.style.setProperty('left', '5vw');
-                panel.style.setProperty('font-size', '14px');
-                panel.style.setProperty('padding', '16px');
-                panel.style.setProperty('max-height', '80vh');
+                panel.style.setProperty('width', '85vw', 'important');
+                panel.style.setProperty('max-width', '450px', 'important');
+                panel.style.setProperty('left', '5vw', 'important');
+                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('padding', '16px', 'important');
+                panel.style.setProperty('max-height', '80vh', 'important');
                 
-                icon.style.setProperty('width', '50px');
-                icon.style.setProperty('height', '50px');
+                icon.style.setProperty('width', '50px', 'important');
+                icon.style.setProperty('height', '50px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px');
+                    iconI.style.setProperty('font-size', '20px', 'important');
                 }
             }
             
             // Common mobile styles
-            panel.style.setProperty('right', 'auto');
-            panel.style.setProperty('top', '50%');
-            panel.style.setProperty('transform', 'translateY(-50%)');
-            panel.style.setProperty('overflow-y', 'auto');
-            panel.style.setProperty('position', 'fixed');
-            panel.style.setProperty('z-index', '9999');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('top', '50%', 'important');
+            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '9999', 'important');
         }
     }
     
@@ -21309,29 +21365,29 @@ applyCustomizations(customizationData) {
                 
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
-                        icon.style.setProperty('left', '10px');
-                        icon.style.setProperty('right', 'auto');
+                        icon.style.setProperty('left', '10px', 'important');
+                        icon.style.setProperty('right', 'auto', 'important');
                         console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
-                        icon.style.setProperty('right', '10px');
-                        icon.style.setProperty('left', 'auto');
+                        icon.style.setProperty('right', '10px', 'important');
+                        icon.style.setProperty('left', 'auto', 'important');
                         console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
-                        icon.style.setProperty('top', '10px');
-                        icon.style.setProperty('bottom', 'auto');
-                        icon.style.setProperty('transform', 'none');
+                        icon.style.setProperty('top', '10px', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px');
-                        icon.style.setProperty('top', 'auto');
-                        icon.style.setProperty('transform', 'none');
+                        icon.style.setProperty('bottom', '10px', 'important');
+                        icon.style.setProperty('top', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%');
-                        icon.style.setProperty('bottom', 'auto');
-                        icon.style.setProperty('transform', 'translateY(-50%)');
+                        icon.style.setProperty('top', '50%', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
                 }
@@ -21348,15 +21404,15 @@ applyCustomizations(customizationData) {
                 if (size === 'Small') {
                     icon.style.setProperty('width', '35px', 'important');
                     icon.style.setProperty('height', '35px', 'important');
-                    icon.style.setProperty('font-size', '14px');
+                    icon.style.setProperty('font-size', '14px', 'important');
                 } else if (size === 'Medium') {
                     icon.style.setProperty('width', '45px', 'important');
                     icon.style.setProperty('height', '45px', 'important');
-                    icon.style.setProperty('font-size', '18px');
+                    icon.style.setProperty('font-size', '18px', 'important');
                 } else if (size === 'Large') {
                     icon.style.setProperty('width', '55px', 'important');
                     icon.style.setProperty('height', '55px', 'important');
-                    icon.style.setProperty('font-size', '22px');
+                    icon.style.setProperty('font-size', '22px', 'important');
                 }
             }
         }
@@ -21592,7 +21648,7 @@ applyCustomizations(customizationData) {
             console.log('Accessibility Widget: Positioning dropdown on RIGHT side of panel');
         }
 
-        // Apply positioning with to override any conflicting CSS
+        // Apply positioning with !important to override any conflicting CSS
         dropdown.style.setProperty('left', `${dropdownLeft}px`, 'important');
         dropdown.style.setProperty('top', `${dropdownTop}px`, 'important');
         dropdown.style.setProperty('position', 'absolute', 'important');
