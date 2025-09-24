@@ -2333,12 +2333,6 @@ if (window.innerWidth <= 768) {
 
                 position: fixed !important;
 
-                top: auto !important;
-
-                right: auto !important;
-
-                transform: none !important;
-
                 z-index: 99998 !important;
 
             }
@@ -12062,11 +12056,11 @@ html body.big-white-cursor * {
 
         
 
-        // Apply to body using original size
+        // Apply to body using original size with !important to override CSS
 
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
 
-        document.body.style.fontSize = `${bodyOriginalSize * scale}px`;
+        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
 
         
 
@@ -12086,9 +12080,9 @@ html body.big-white-cursor * {
 
                 if (originalSize && !isNaN(originalSize)) {
 
-                    // Apply the scale to the original size
+                    // Apply the scale to the original size with !important to override CSS
 
-                    element.style.fontSize = `${originalSize * scale}px`;
+                    element.style.setProperty('font-size', `${originalSize * scale}px`, 'important');
 
                 }
 
