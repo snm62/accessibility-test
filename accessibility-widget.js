@@ -1040,7 +1040,7 @@ if (window.innerWidth <= 768) {
 
             border-radius: 4px;
 
-            font-size: 12px;
+            /* Font size controlled by JavaScript */
 
             font-weight: bold;
 
@@ -1270,58 +1270,58 @@ if (window.innerWidth <= 768) {
         width: 90vw;
         max-width: 350px;
         padding: 12px;
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
     }
     
     .accessibility-panel h3 {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px;
     }
     
     .accessibility-panel h4 {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
         line-height: 1.3;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
         padding: 4px 6px;
         min-height: 24px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1331,7 +1331,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1341,58 +1341,58 @@ if (window.innerWidth <= 768) {
         width: 80vw;
         max-width: 380px;
         padding: 14px;
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
-        font-size: 18px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
     }
     
     .accessibility-panel h4 {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
         line-height: 1.4;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
         padding: 8px 12px;
         min-height: 32px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
         padding: 5px 8px;
         min-height: 26px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1402,7 +1402,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 18px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1412,58 +1412,58 @@ if (window.innerWidth <= 768) {
         width: 70vw;
         max-width: 450px;
         padding: 16px;
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
-        font-size: 20px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px;
     }
     
     .accessibility-panel h3 {
-        font-size: 18px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px;
     }
     
     .accessibility-panel h4 {
-        font-size: 15px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
         line-height: 1.5;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
         padding: 10px 14px;
         min-height: 36px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 18px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1473,7 +1473,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 20px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1483,58 +1483,58 @@ if (window.innerWidth <= 768) {
         width: 500px;
         max-width: 500px;
         padding: 20px;
-        font-size: 15px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
-        font-size: 22px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 14px;
     }
     
     .accessibility-panel h3 {
-        font-size: 20px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px;
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
         line-height: 1.6;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
         padding: 12px 16px;
         min-height: 40px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
         padding: 8px 12px;
         min-height: 32px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 15px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 15px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1544,7 +1544,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 22px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1555,58 +1555,58 @@ if (window.innerWidth <= 768) {
         max-width: 400px;
         max-height: 80vh;
         overflow-y: auto;
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px;
     }
     
     .accessibility-panel h3 {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px;
     }
     
     .accessibility-panel h4 {
-        font-size: 13px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
         line-height: 1.3;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 11px;
+        /* Font size controlled by JavaScript */
         padding: 6px 10px;
         min-height: 28px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
         padding: 4px 6px;
         min-height: 24px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 12px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 10px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 14px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -2897,7 +2897,7 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                font-size: 20px;
+                /* Font size controlled by JavaScript */
 
                 padding: 8px;
 
@@ -3003,7 +3003,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 4px 0;
 
-                font-size: 13px;
+                /* Font size controlled by JavaScript */
 
                 color: #64748b;
 
@@ -3099,7 +3099,7 @@ if (window.innerWidth <= 768) {
 
                 white-space: nowrap;
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 justify-content: center;
 
@@ -3151,7 +3151,7 @@ if (window.innerWidth <= 768) {
 
                 margin-bottom: 12px;
 
-                font-size: 18px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 600;
 
@@ -3235,7 +3235,7 @@ if (window.innerWidth <= 768) {
 
             .profile-info i {
 
-                font-size: 20px;
+                /* Font size controlled by JavaScript */
 
                 color: #6366f1;
 
@@ -3251,7 +3251,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 0;
 
-                font-size: 16px;
+                /* Font size controlled by JavaScript */
 
                 color: #334155;
 
@@ -3271,7 +3271,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 5px 0 0;
 
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
 
                 color: #64748b;
 
@@ -3291,7 +3291,7 @@ if (window.innerWidth <= 768) {
 
                 margin: 3px 0 0;
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 color: #6366f1;
 
@@ -3419,7 +3419,7 @@ if (window.innerWidth <= 768) {
 
                 transform: translateY(-50%);
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: bold;
 
@@ -3463,7 +3463,7 @@ if (window.innerWidth <= 768) {
 
                 justify-content: center;
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: bold;
 
@@ -3519,7 +3519,7 @@ if (window.innerWidth <= 768) {
 
                 align-items: center;
 
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
 
                 border-radius: 0 0 8px 8px;
 
@@ -3561,7 +3561,7 @@ if (window.innerWidth <= 768) {
 
                 color: #ffffff;
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 500;
 
@@ -3587,7 +3587,7 @@ if (window.innerWidth <= 768) {
 
             .language-selector-header .current-flag {
 
-                font-size: 16px;
+                /* Font size controlled by JavaScript */
 
             }
 
@@ -3595,7 +3595,7 @@ if (window.innerWidth <= 768) {
 
             .language-selector-header i.fa-chevron-down {
 
-                font-size: 10px;
+                /* Font size controlled by JavaScript */
 
                 transition: transform 0.2s ease;
 
@@ -3617,12 +3617,13 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown {
 
-                position: sticky;
+                position: fixed;
                 top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
 
                 /* Keep dropdown in panel viewport when scrolling */
-                position: fixed;
-
                 background: #ffffff;
 
                 border-radius: 12px;
@@ -3733,7 +3734,7 @@ if (window.innerWidth <= 768) {
 
                 transition: all 0.2s ease;
 
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 500;
 
@@ -3777,7 +3778,7 @@ if (window.innerWidth <= 768) {
 
             .language-option .flag {
 
-                font-size: 16px;
+                /* Font size controlled by JavaScript */
 
                 flex-shrink: 0;
 
@@ -3791,7 +3792,7 @@ if (window.innerWidth <= 768) {
 
                 font-weight: 500;
 
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
 
             }
 
@@ -4385,7 +4386,7 @@ if (window.innerWidth <= 768) {
 
                 color: #333;
 
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 600;
 
@@ -4465,7 +4466,7 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                font-size: 12px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 500;
 
@@ -4587,7 +4588,7 @@ if (window.innerWidth <= 768) {
 
                 color: #374151;
 
-                font-size: 13px;
+                /* Font size controlled by JavaScript */
 
                 font-weight: 500;
 
@@ -4694,7 +4695,7 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: sticky;
+                position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -4740,7 +4741,7 @@ html body.big-white-cursor * {
             .hide-interface-modal .modal-header h3 {
                 margin: 0;
                 color: #1f2937;
-                font-size: 18px;
+                /* Font size controlled by JavaScript */
                 font-weight: 600;
             }
 
@@ -4770,7 +4771,7 @@ html body.big-white-cursor * {
                 margin: 0;
                 color: #374151;
                 line-height: 1.5;
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
             }
 
             .hide-interface-modal .modal-footer {
@@ -4784,7 +4785,7 @@ html body.big-white-cursor * {
                 padding: 10px 20px;
                 border: none;
                 border-radius: 6px;
-                font-size: 14px;
+                /* Font size controlled by JavaScript */
                 font-weight: 500;
                 cursor: pointer;
                 transition: all 0.2s ease;
@@ -9157,7 +9158,7 @@ html body.big-white-cursor * {
 
             border-radius: 4px;
 
-            font-size: 12px;
+            /* Font size controlled by JavaScript */
 
             font-weight: bold;
 
@@ -11673,9 +11674,9 @@ html body.big-white-cursor * {
 
         // Apply line-height directly to body and html
 
-        document.body.style.setProperty('line-height', lineHeightValue, 'important');
+        document.body.style.setProperty('line-height', lineHeightValue);
 
-        document.documentElement.style.setProperty('line-height', lineHeightValue, 'important');
+        document.documentElement.style.setProperty('line-height', lineHeightValue);
 
         console.log('Accessibility Widget: Applied lineHeight to body and html:', lineHeightValue + ' (important)');
 
@@ -11703,7 +11704,7 @@ html body.big-white-cursor * {
 
                 // Use multiple approaches to ensure the line height is applied
 
-                element.style.setProperty('line-height', lineHeightValue, 'important');
+                element.style.setProperty('line-height', lineHeightValue);
 
                 element.style.lineHeight = lineHeightValue + '';
 
@@ -12279,14 +12280,12 @@ html body.big-white-cursor * {
 
         
 
-        // Apply to body using original size with to override CSS
-
+        // Apply to body using original size
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
-
-        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
+        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
         
         // Also apply to html element to ensure it takes precedence
-        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
+        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
 
         
 
@@ -12308,7 +12307,7 @@ html body.big-white-cursor * {
 
                     // Apply the scale to the original size with to override CSS
 
-                    element.style.setProperty('font-size', `${originalSize * scale}px`, 'important');
+                    element.style.setProperty('font-size', `${originalSize * scale}px`);
 
                 }
 
@@ -14144,9 +14143,9 @@ html body.big-white-cursor * {
                 console.error('Accessibility Widget: Icon missing after reset!');
             } else {
                 // Force icon to be visible
-                icon.style.setProperty('display', 'flex', 'important');
-                icon.style.setProperty('visibility', 'visible', 'important');
-                icon.style.setProperty('opacity', '1', 'important');
+                icon.style.setProperty('display', 'flex');
+                icon.style.setProperty('visibility', 'visible');
+                icon.style.setProperty('opacity', '1');
                 console.log('Accessibility Widget: Icon visibility ensured');
             }
             
@@ -17342,7 +17341,7 @@ html body.big-white-cursor * {
 
             font-family: 'DM Sans', sans-serif;
 
-            font-size: 14px;
+            /* Font size controlled by JavaScript */
 
             z-index: 1000000;
 
@@ -20923,97 +20922,97 @@ applyCustomizations(customizationData) {
             if (screenWidth <= 480) {
                 // Mobile Portrait - Wider but compact
                 console.log('[CK] Applying mobile portrait styles');
-                panel.style.setProperty('width', '75vw', 'important');
-                panel.style.setProperty('max-width', '320px', 'important');
-                panel.style.setProperty('left', '12.5vw', 'important');
-                panel.style.setProperty('font-size', '12px', 'important');
-                panel.style.setProperty('padding', '12px', 'important');
-                panel.style.setProperty('max-height', '70vh', 'important');
+                panel.style.setProperty('width', '75vw');
+                panel.style.setProperty('max-width', '320px');
+                panel.style.setProperty('left', '12.5vw');
+                panel.style.setProperty('font-size', '12px');
+                panel.style.setProperty('padding', '12px');
+                panel.style.setProperty('max-height', '70vh');
                 
-                icon.style.setProperty('width', '40px', 'important');
-                icon.style.setProperty('height', '40px', 'important');
+                icon.style.setProperty('width', '40px');
+                icon.style.setProperty('height', '40px');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '16px', 'important');
+                    iconI.style.setProperty('font-size', '16px');
                 }
             } else if (screenWidth <= 768) {
                 // Mobile Landscape - Wider panel
                 console.log('[CK] Applying mobile landscape styles');
-                panel.style.setProperty('width', '80vw', 'important');
-                panel.style.setProperty('max-width', '380px', 'important');
-                panel.style.setProperty('left', '10vw', 'important');
-                panel.style.setProperty('font-size', '13px', 'important');
-                panel.style.setProperty('padding', '14px', 'important');
-                panel.style.setProperty('max-height', '75vh', 'important');
+                panel.style.setProperty('width', '80vw');
+                panel.style.setProperty('max-width', '380px');
+                panel.style.setProperty('left', '10vw');
+                panel.style.setProperty('font-size', '13px');
+                panel.style.setProperty('padding', '14px');
+                panel.style.setProperty('max-height', '75vh');
                 
-                icon.style.setProperty('width', '45px', 'important');
-                icon.style.setProperty('height', '45px', 'important');
+                icon.style.setProperty('width', '45px');
+                icon.style.setProperty('height', '45px');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '18px', 'important');
+                    iconI.style.setProperty('font-size', '18px');
                 }
             } else if (screenWidth >= 1025 && screenWidth <= 1366) {
                 // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
                 console.log('[CK] Applying large tablet styles - positioning very close to icon');
-                panel.style.setProperty('width', '65vw', 'important');
-                panel.style.setProperty('max-width', '450px', 'important');
-                panel.style.setProperty('left', '0.5vw', 'important');
-                panel.style.setProperty('font-size', '15px', 'important');
-                panel.style.setProperty('padding', '18px', 'important');
-                panel.style.setProperty('max-height', '85vh', 'important');
+                panel.style.setProperty('width', '65vw');
+                panel.style.setProperty('max-width', '450px');
+                panel.style.setProperty('left', '0.5vw');
+                panel.style.setProperty('font-size', '15px');
+                panel.style.setProperty('padding', '18px');
+                panel.style.setProperty('max-height', '85vh');
                 
-                icon.style.setProperty('width', '55px', 'important');
-                icon.style.setProperty('height', '55px', 'important');
+                icon.style.setProperty('width', '55px');
+                icon.style.setProperty('height', '55px');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '22px', 'important');
+                    iconI.style.setProperty('font-size', '22px');
                 }
             } else if (screenWidth >= 820 && screenWidth <= 1024) {
                 // Tablet/iPad 820px+ - Position panel very close to icon
                 console.log('[CK] Applying tablet 820px+ styles - positioning very close to icon');
-                panel.style.setProperty('width', '75vw', 'important');
-                panel.style.setProperty('max-width', '380px', 'important');
-                panel.style.setProperty('left', '1vw', 'important');
-                panel.style.setProperty('font-size', '14px', 'important');
-                panel.style.setProperty('padding', '16px', 'important');
-                panel.style.setProperty('max-height', '80vh', 'important');
+                panel.style.setProperty('width', '75vw');
+                panel.style.setProperty('max-width', '380px');
+                panel.style.setProperty('left', '1vw');
+                panel.style.setProperty('font-size', '14px');
+                panel.style.setProperty('padding', '16px');
+                panel.style.setProperty('max-height', '80vh');
                 
-                icon.style.setProperty('width', '50px', 'important');
-                icon.style.setProperty('height', '50px', 'important');
+                icon.style.setProperty('width', '50px');
+                icon.style.setProperty('height', '50px');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px', 'important');
+                    iconI.style.setProperty('font-size', '20px');
                 }
             } else if (screenWidth <= 1024) {
                 // iPad Mini - Much wider panel positioned close to icon
                 console.log('[CK] Applying iPad mini styles - positioning close to icon');
-                panel.style.setProperty('width', '85vw', 'important');
-                panel.style.setProperty('max-width', '450px', 'important');
-                panel.style.setProperty('left', '5vw', 'important');
-                panel.style.setProperty('font-size', '14px', 'important');
-                panel.style.setProperty('padding', '16px', 'important');
-                panel.style.setProperty('max-height', '80vh', 'important');
+                panel.style.setProperty('width', '85vw');
+                panel.style.setProperty('max-width', '450px');
+                panel.style.setProperty('left', '5vw');
+                panel.style.setProperty('font-size', '14px');
+                panel.style.setProperty('padding', '16px');
+                panel.style.setProperty('max-height', '80vh');
                 
-                icon.style.setProperty('width', '50px', 'important');
-                icon.style.setProperty('height', '50px', 'important');
+                icon.style.setProperty('width', '50px');
+                icon.style.setProperty('height', '50px');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px', 'important');
+                    iconI.style.setProperty('font-size', '20px');
                 }
             }
             
             // Common mobile styles
-            panel.style.setProperty('right', 'auto', 'important');
-            panel.style.setProperty('top', '50%', 'important');
-            panel.style.setProperty('transform', 'translateY(-50%)', 'important');
-            panel.style.setProperty('overflow-y', 'auto', 'important');
-            panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('z-index', '9999', 'important');
+            panel.style.setProperty('right', 'auto');
+            panel.style.setProperty('top', '50%');
+            panel.style.setProperty('transform', 'translateY(-50%)');
+            panel.style.setProperty('overflow-y', 'auto');
+            panel.style.setProperty('position', 'fixed');
+            panel.style.setProperty('z-index', '9999');
         }
     }
     
@@ -21310,29 +21309,29 @@ applyCustomizations(customizationData) {
                 
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
-                        icon.style.setProperty('left', '10px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
+                        icon.style.setProperty('left', '10px');
+                        icon.style.setProperty('right', 'auto');
                         console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
-                        icon.style.setProperty('right', '10px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
+                        icon.style.setProperty('right', '10px');
+                        icon.style.setProperty('left', 'auto');
                         console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
-                        icon.style.setProperty('top', '10px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
+                        icon.style.setProperty('top', '10px');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'none');
                         console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
+                        icon.style.setProperty('bottom', '10px');
+                        icon.style.setProperty('top', 'auto');
+                        icon.style.setProperty('transform', 'none');
                         console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                        icon.style.setProperty('top', '50%');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'translateY(-50%)');
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
                 }
@@ -21349,15 +21348,15 @@ applyCustomizations(customizationData) {
                 if (size === 'Small') {
                     icon.style.setProperty('width', '35px', 'important');
                     icon.style.setProperty('height', '35px', 'important');
-                    icon.style.setProperty('font-size', '14px', 'important');
+                    icon.style.setProperty('font-size', '14px');
                 } else if (size === 'Medium') {
                     icon.style.setProperty('width', '45px', 'important');
                     icon.style.setProperty('height', '45px', 'important');
-                    icon.style.setProperty('font-size', '18px', 'important');
+                    icon.style.setProperty('font-size', '18px');
                 } else if (size === 'Large') {
                     icon.style.setProperty('width', '55px', 'important');
                     icon.style.setProperty('height', '55px', 'important');
-                    icon.style.setProperty('font-size', '22px', 'important');
+                    icon.style.setProperty('font-size', '22px');
                 }
             }
         }
