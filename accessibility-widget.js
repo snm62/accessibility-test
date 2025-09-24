@@ -2607,6 +2607,13 @@ if (window.innerWidth <= 768) {
                 position: fixed !important;
 
                 z-index: 99998 !important;
+                
+                /* Ensure JavaScript positioning takes precedence */
+                top: unset !important;
+                bottom: unset !important;
+                left: unset !important;
+                right: unset !important;
+                transform: unset !important;
 
             }
 
@@ -3665,11 +3672,11 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown {
 
-                position: absolute !important;
+                position: sticky !important;
+                top: 0 !important;
 
-                /* Remove fixed top and left - let JavaScript position it */
-                /* top: 0 !important; */
-                /* left: 0 !important; */
+                /* Keep dropdown in panel viewport when scrolling */
+                position: fixed !important;
 
                 background: #ffffff !important;
 
@@ -4742,20 +4749,20 @@ html body.big-white-cursor * {
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                position: sticky !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
                 background: rgba(0, 0, 0, 0.8);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
-                /* Cover the entire panel including all scrollable content */
-                width: 100%;
-                height: 100%;
-                min-height: 100%;
+                /* Keep modal in panel viewport when scrolling */
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 100% !important;
                 /* Ensure overlay covers full scrollable area */
                 max-height: none;
                 overflow: hidden;
@@ -12332,6 +12339,9 @@ html body.big-white-cursor * {
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
 
         document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
+        
+        // Also apply to html element to ensure it takes precedence
+        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
 
         
 
@@ -21346,25 +21356,39 @@ applyCustomizations(customizationData) {
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
+                // First, clear all existing positioning
+                icon.style.removeProperty('top');
+                icon.style.removeProperty('bottom');
+                icon.style.removeProperty('left');
+                icon.style.removeProperty('right');
+                icon.style.removeProperty('transform');
+                
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
                         icon.style.setProperty('left', '10px', 'important');
                         icon.style.setProperty('right', 'auto', 'important');
+                        console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
                         icon.style.setProperty('right', '10px', 'important');
                         icon.style.setProperty('left', 'auto', 'important');
+                        console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
                         icon.style.setProperty('top', '10px', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
+                        console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
                         icon.style.setProperty('bottom', '10px', 'important');
                         icon.style.setProperty('top', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
+                        console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
                         icon.style.setProperty('top', '50%', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                        console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
                 }
             }
