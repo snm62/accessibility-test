@@ -1270,7 +1270,58 @@ if (window.innerWidth <= 768) {
         width: 90vw !important;
         max-width: 350px !important;
         padding: 12px !important;
-        /* Font sizes controlled by JavaScript - no !important overrides */
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel p {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+        min-height: 28px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+        min-height: 24px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 10px !important;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 10px !important;
+    }
+    
+    .accessibility-panel .close-btn {
+        font-size: 14px !important;
     }
     
     .accessibility-icon {
@@ -1280,7 +1331,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px !important;
     }
 }
 
@@ -1290,13 +1341,68 @@ if (window.innerWidth <= 768) {
         width: 80vw !important;
         max-width: 380px !important;
         padding: 14px !important;
-        /* Font sizes controlled by JavaScript - no !important overrides */
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 18px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 14px !important;
+    }
+    
+    .accessibility-panel p {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        min-height: 32px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 11px !important;
+        padding: 5px 8px !important;
+        min-height: 26px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 11px !important;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 11px !important;
+    }
+    
+    .accessibility-panel .close-btn {
+        font-size: 16px !important;
     }
     
     .accessibility-icon {
         width: 50px !important;
         height: 50px !important;
         /* Position controlled by JS */
+    }
+    
+    .accessibility-icon i {
+        font-size: 18px !important;
     }
 }
 
@@ -1306,13 +1412,68 @@ if (window.innerWidth <= 768) {
         width: 70vw !important;
         max-width: 450px !important;
         padding: 16px !important;
-        /* Font sizes controlled by JavaScript - no !important overrides */
+        font-size: 14px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 20px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 18px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 15px !important;
+    }
+    
+    .accessibility-panel p {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 13px !important;
+        padding: 10px 14px !important;
+        min-height: 36px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+        min-height: 28px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 14px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 14px !important;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .close-btn {
+        font-size: 18px !important;
     }
     
     .accessibility-icon {
         width: 55px !important;
         height: 55px !important;
         /* Position controlled by JS */
+    }
+    
+    .accessibility-icon i {
+        font-size: 20px !important;
     }
 }
 
@@ -1322,13 +1483,68 @@ if (window.innerWidth <= 768) {
         width: 500px !important;
         max-width: 500px !important;
         padding: 20px !important;
-        /* Font sizes controlled by JavaScript - no !important overrides */
+        font-size: 15px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 22px !important;
+        margin-bottom: 14px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 20px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 16px !important;
+    }
+    
+    .accessibility-panel p {
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+        min-height: 40px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+        min-height: 32px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 15px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 15px !important;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel .close-btn {
+        font-size: 20px !important;
     }
     
     .accessibility-icon {
         width: 60px !important;
         height: 60px !important;
         /* Position controlled by JS */
+    }
+    
+    .accessibility-icon i {
+        font-size: 22px !important;
     }
 }
 
@@ -1339,6 +1555,58 @@ if (window.innerWidth <= 768) {
         max-width: 400px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 13px !important;
+    }
+    
+    .accessibility-panel p {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+        min-height: 28px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+        min-height: 24px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 10px !important;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 12px !important;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 10px !important;
+    }
+    
+    .accessibility-panel .close-btn {
+        font-size: 14px !important;
     }
 }
 
