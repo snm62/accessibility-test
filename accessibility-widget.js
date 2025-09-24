@@ -1179,87 +1179,87 @@ if (window.innerWidth <= 768) {
             // Define overrideCSS first
             const overrideCSS = `
 .accessibility-panel {
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;
 }
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
 /* Icon Shape Rules - Consolidated with Maximum Specificity */
 .accessibility-icon[data-shape="circle"] {
-    border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
 }
 
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
+    border-radius: 25px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
 }
 
 .accessibility-icon[data-shape="square"] {
-    border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
 }
 
 /* Ensure panel always appears on top of icon */
 .accessibility-panel {
-    z-index: 100001 !important;
-    position: fixed !important;
+    z-index: 100001;
+    position: fixed;
 }
 
 .accessibility-icon {
-    z-index: 99998 !important;
+    z-index: 99998;
 }
 
 /* Maximum Specificity Overrides - Force Shape Application */
 .accessibility-icon[data-shape="rounded"],
 .accessibility-icon.rounded,
 .accessibility-icon[data-shape="rounded"].rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
+    border-radius: 25px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
 }
 
 .accessibility-icon[data-shape="circle"],
 .accessibility-icon.circle {
-    border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
 }
 
 .accessibility-icon[data-shape="square"],
 .accessibility-icon.square {
-    border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
 }
 
 /* Force rounded shape with absolute maximum specificity */
 .accessibility-icon.rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
+    border-radius: 25px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
 }
 
 /* Additional force for rounded shape */
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
+    border-radius: 25px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
 }
 
 /* Mobile-First Responsive Design */
@@ -1267,346 +1267,346 @@ if (window.innerWidth <= 768) {
 /* Mobile Devices (Small Screens) - Base styles */
 @media (max-width: 480px) {
     .accessibility-panel {
-        width: 90vw !important;
-        max-width: 350px !important;
-        padding: 12px !important;
-        font-size: 12px !important;
+        width: 90vw;
+        max-width: 350px;
+        padding: 12px;
+        font-size: 12px;
     }
     
     .accessibility-panel h2 {
-        font-size: 16px !important;
-        margin-bottom: 8px !important;
+        font-size: 16px;
+        margin-bottom: 8px;
     }
     
     .accessibility-panel h3 {
-        font-size: 14px !important;
-        margin-bottom: 6px !important;
+        font-size: 14px;
+        margin-bottom: 6px;
     }
     
     .accessibility-panel h4 {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel p {
-        font-size: 11px !important;
-        line-height: 1.3 !important;
+        font-size: 11px;
+        line-height: 1.3;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 11px !important;
-        padding: 6px 10px !important;
-        min-height: 28px !important;
+        font-size: 11px;
+        padding: 6px 10px;
+        min-height: 28px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 10px !important;
-        padding: 4px 6px !important;
-        min-height: 24px !important;
+        font-size: 10px;
+        padding: 4px 6px;
+        min-height: 24px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 10px !important;
+        font-size: 10px;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 10px !important;
+        font-size: 10px;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .accessibility-icon {
-        width: 45px !important;
-        height: 45px !important;
+        width: 45px;
+        height: 45px;
         /* Position controlled by JS; do not force a corner here */
     }
     
     .accessibility-icon i {
-        font-size: 16px !important;
+        font-size: 16px;
     }
 }
 
 /* Landscape Phones & Smaller Portrait Tablets */
 @media (min-width: 481px) and (max-width: 768px) {
     .accessibility-panel {
-        width: 80vw !important;
-        max-width: 380px !important;
-        padding: 14px !important;
-        font-size: 13px !important;
+        width: 80vw;
+        max-width: 380px;
+        padding: 14px;
+        font-size: 13px;
     }
     
     .accessibility-panel h2 {
-        font-size: 18px !important;
-        margin-bottom: 10px !important;
+        font-size: 18px;
+        margin-bottom: 10px;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px !important;
-        margin-bottom: 8px !important;
+        font-size: 16px;
+        margin-bottom: 8px;
     }
     
     .accessibility-panel h4 {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .accessibility-panel p {
-        font-size: 12px !important;
-        line-height: 1.4 !important;
+        font-size: 12px;
+        line-height: 1.4;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 12px !important;
-        padding: 8px 12px !important;
-        min-height: 32px !important;
+        font-size: 12px;
+        padding: 8px 12px;
+        min-height: 32px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 11px !important;
-        padding: 5px 8px !important;
-        min-height: 26px !important;
+        font-size: 11px;
+        padding: 5px 8px;
+        min-height: 26px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 11px !important;
+        font-size: 11px;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 11px !important;
+        font-size: 11px;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 16px !important;
+        font-size: 16px;
     }
     
     .accessibility-icon {
-        width: 50px !important;
-        height: 50px !important;
+        width: 50px;
+        height: 50px;
         /* Position controlled by JS */
     }
     
     .accessibility-icon i {
-        font-size: 18px !important;
+        font-size: 18px;
     }
 }
 
 /* Tablets (Portrait & Landscape) & Laptops */
 @media (min-width: 769px) and (max-width: 1024px) {
     .accessibility-panel {
-        width: 70vw !important;
-        max-width: 450px !important;
-        padding: 16px !important;
-        font-size: 14px !important;
+        width: 70vw;
+        max-width: 450px;
+        padding: 16px;
+        font-size: 14px;
     }
     
     .accessibility-panel h2 {
-        font-size: 20px !important;
-        margin-bottom: 12px !important;
+        font-size: 20px;
+        margin-bottom: 12px;
     }
     
     .accessibility-panel h3 {
-        font-size: 18px !important;
-        margin-bottom: 10px !important;
+        font-size: 18px;
+        margin-bottom: 10px;
     }
     
     .accessibility-panel h4 {
-        font-size: 15px !important;
+        font-size: 15px;
     }
     
     .accessibility-panel p {
-        font-size: 13px !important;
-        line-height: 1.5 !important;
+        font-size: 13px;
+        line-height: 1.5;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 13px !important;
-        padding: 10px 14px !important;
-        min-height: 36px !important;
+        font-size: 13px;
+        padding: 10px 14px;
+        min-height: 36px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 12px !important;
-        padding: 6px 10px !important;
-        min-height: 28px !important;
+        font-size: 12px;
+        padding: 6px 10px;
+        min-height: 28px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 18px !important;
+        font-size: 18px;
     }
     
     .accessibility-icon {
-        width: 55px !important;
-        height: 55px !important;
+        width: 55px;
+        height: 55px;
         /* Position controlled by JS */
     }
     
     .accessibility-icon i {
-        font-size: 20px !important;
+        font-size: 20px;
     }
 }
 
 /* Larger Displays (Desktops) */
 @media (min-width: 1025px) {
     .accessibility-panel {
-        width: 500px !important;
-        max-width: 500px !important;
-        padding: 20px !important;
-        font-size: 15px !important;
+        width: 500px;
+        max-width: 500px;
+        padding: 20px;
+        font-size: 15px;
     }
     
     .accessibility-panel h2 {
-        font-size: 22px !important;
-        margin-bottom: 14px !important;
+        font-size: 22px;
+        margin-bottom: 14px;
     }
     
     .accessibility-panel h3 {
-        font-size: 20px !important;
-        margin-bottom: 12px !important;
+        font-size: 20px;
+        margin-bottom: 12px;
     }
     
     .accessibility-panel h4 {
-        font-size: 16px !important;
+        font-size: 16px;
     }
     
     .accessibility-panel p {
-        font-size: 14px !important;
-        line-height: 1.6 !important;
+        font-size: 14px;
+        line-height: 1.6;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 14px !important;
-        padding: 12px 16px !important;
-        min-height: 40px !important;
+        font-size: 14px;
+        padding: 12px 16px;
+        min-height: 40px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 13px !important;
-        padding: 8px 12px !important;
-        min-height: 32px !important;
+        font-size: 13px;
+        padding: 8px 12px;
+        min-height: 32px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 15px !important;
+        font-size: 15px;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 15px !important;
+        font-size: 15px;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px !important;
+        font-size: 20px;
     }
     
     .accessibility-icon {
-        width: 60px !important;
-        height: 60px !important;
+        width: 60px;
+        height: 60px;
         /* Position controlled by JS */
     }
     
     .accessibility-icon i {
-        font-size: 22px !important;
+        font-size: 22px;
     }
 }
 
 /* Orientation-specific styles */
 @media (orientation: landscape) and (max-width: 768px) {
     .accessibility-panel {
-        width: 85vw !important;
-        max-width: 400px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
-        font-size: 12px !important;
+        width: 85vw;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        font-size: 12px;
     }
     
     .accessibility-panel h2 {
-        font-size: 16px !important;
-        margin-bottom: 8px !important;
+        font-size: 16px;
+        margin-bottom: 8px;
     }
     
     .accessibility-panel h3 {
-        font-size: 14px !important;
-        margin-bottom: 6px !important;
+        font-size: 14px;
+        margin-bottom: 6px;
     }
     
     .accessibility-panel h4 {
-        font-size: 13px !important;
+        font-size: 13px;
     }
     
     .accessibility-panel p {
-        font-size: 11px !important;
-        line-height: 1.3 !important;
+        font-size: 11px;
+        line-height: 1.3;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 11px !important;
-        padding: 6px 10px !important;
-        min-height: 28px !important;
+        font-size: 11px;
+        padding: 6px 10px;
+        min-height: 28px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 10px !important;
-        padding: 4px 6px !important;
-        min-height: 24px !important;
+        font-size: 10px;
+        padding: 4px 6px;
+        min-height: 24px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 10px !important;
+        font-size: 10px;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 10px !important;
+        font-size: 10px;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 14px !important;
+        font-size: 14px;
     }
 }
 
@@ -1629,12 +1629,12 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel .action-btn {
-        padding: 8px 12px !important;
+        padding: 8px 12px;
         /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        padding: 4px 8px !important;
+        padding: 4px 8px;
         /* Font size controlled by JavaScript */
     }
     
@@ -1648,9 +1648,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
 }
 
@@ -1658,53 +1658,53 @@ if (window.innerWidth <= 768) {
     
     /* Medium toggles for medium mobile screens */
     .toggle-switch {
-        width: 18px !important;
-        height: 11px !important;
+        width: 18px;
+        height: 11px;
     }
     
     .toggle-switch .slider {
-        width: 18px !important;
-        height: 11px !important;
+        width: 18px;
+        height: 11px;
     }
     
     .toggle-switch .slider:before {
-        width: 7px !important;
-        height: 7px !important;
-        left: 2px !important;
-        bottom: 2px !important;
+        width: 7px;
+        height: 7px;
+        left: 2px;
+        bottom: 2px;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(7px) !important;
+        transform: translateX(7px);
     }
     
     /* Medium profile items for medium mobile screens */
     .profile-item {
-        padding: 3px !important;
-        margin-bottom: 3px !important;
+        padding: 3px;
+        margin-bottom: 3px;
     }
     
     .profile-item h4 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 2px !important;
+        margin-bottom: 2px;
     }
     
     .profile-item p {
         /* Font size controlled by JavaScript */
-        margin-bottom: 2px !important;
+        margin-bottom: 2px;
     }
     
     /* Medium close button for medium mobile screens */
     .close-btn {
         /* Font size controlled by JavaScript */
-        padding: 6px !important;
+        padding: 6px;
     }
     
     /* Ensure rounded shape works on medium mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
 }
 
@@ -1712,33 +1712,33 @@ if (window.innerWidth <= 768) {
 @media (max-width: 400px) {
     .accessibility-panel {
         /* Font size controlled by JavaScript */
-        padding: 8px !important;
-        width: 90vw !important;
-        max-width: 300px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
+        padding: 8px;
+        width: 90vw;
+        max-width: 300px;
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 6px !important;
+        margin-bottom: 6px;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 4px !important;
+        margin-bottom: 4px;
     }
     
     .accessibility-panel .action-btn {
         /* Font size controlled by JavaScript */
-        padding: 4px 6px !important;
-        min-height: 24px !important;
+        padding: 4px 6px;
+        min-height: 24px;
     }
     
     .accessibility-panel .scaling-btn {
         /* Font size controlled by JavaScript */
-        padding: 2px 4px !important;
-        min-height: 20px !important;
+        padding: 2px 4px;
+        min-height: 20px;
     }
     
     .accessibility-panel .profile-info h4 {
@@ -1751,104 +1751,66 @@ if (window.innerWidth <= 768) {
     
     /* Smaller toggles for small screens */
     .toggle-switch {
-        width: 16px !important;
-        height: 10px !important;
+        width: 16px;
+        height: 10px;
     }
     
     .toggle-switch .slider {
-        width: 16px !important;
-        height: 10px !important;
+        width: 16px;
+        height: 10px;
     }
     
     .toggle-switch .slider:before {
-        width: 6px !important;
-        height: 6px !important;
-        left: 2px !important;
-        bottom: 2px !important;
+        width: 6px;
+        height: 6px;
+        left: 2px;
+        bottom: 2px;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(6px) !important;
+        transform: translateX(6px);
     }
     
     /* Smaller profile items for small screens */
     .profile-item {
-        padding: 2px !important;
-        margin-bottom: 2px !important;
+        padding: 2px;
+        margin-bottom: 2px;
     }
     
     .profile-item h4 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 1px !important;
+        margin-bottom: 1px;
     }
     
     .profile-item p {
         /* Font size controlled by JavaScript */
-        margin-bottom: 1px !important;
+        margin-bottom: 1px;
     }
     
     /* Smaller close button for small screens */
     .close-btn {
         /* Font size controlled by JavaScript */
-        padding: 4px !important;
+        padding: 4px;
     }
     
     /* Ensure rounded shape works on small mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
 }
 
-@media (max-width: 480px) {
-    .accessibility-panel {
-        /* Font size controlled by JavaScript */ /* Override external 8px */
-    }
-    
-    .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */ /* Override external 9px */
-    }
-    
-    .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */ /* Override external 8px */
-    }
-    
-    /* Override external button size conflicts */
-    .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
-        padding: 6px 10px !important;
-    }
-    
-    .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
-        padding: 3px 6px !important;
-    }
-    
-    .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
-    }
-    
-    .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
-    }
-    
-    /* Ensure rounded shape works on small mobile */
-    .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
-    }
-}
+/* Removed - consolidated with main mobile media query above */
 
 /* Override external panel positioning conflicts */
 .accessibility-panel {
     /* Let JavaScript control positioning, not external CSS */
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    transform: none;
 }
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
@@ -1857,14 +1819,14 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on large tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
     
     .accessibility-icon {
-        width: 55px !important;
-        height: 55px !important;
+        width: 55px;
+        height: 55px;
     }
     
     .accessibility-icon i {
@@ -1874,17 +1836,17 @@ if (window.innerWidth <= 768) {
     /* Better content spacing for large tablets */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 14px !important;
+        margin-bottom: 14px;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 12px !important;
+        margin-bottom: 12px;
     }
     
     .profile-item {
-        padding: 12px !important;
-        margin-bottom: 10px !important;
+        padding: 12px;
+        margin-bottom: 10px;
     }
     
     .profile-item h4 {
@@ -1896,7 +1858,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 10px 14px !important;
+        padding: 10px 14px;
         /* Font size controlled by JavaScript */
     }
 }
@@ -1905,14 +1867,14 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
     
     .accessibility-icon {
-        width: 50px !important;
-        height: 50px !important;
+        width: 50px;
+        height: 50px;
     }
     
     .accessibility-icon i {
@@ -1923,26 +1885,26 @@ if (window.innerWidth <= 768) {
 /* iPad Mini and Tablet - Responsive sizing */
 @media (max-width: 819px) and (min-width: 769px) {
     .accessibility-panel {
-        width: 85vw !important;
-        max-width: 450px !important;
+        width: 85vw;
+        max-width: 450px;
         /* Font size controlled by JavaScript */
-        padding: 16px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
-        position: fixed !important;
-        z-index: 100001 !important;
+        padding: 16px;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: fixed;
+        z-index: 100001;
     }
     
     /* Ensure rounded shape works on iPad Mini */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
     
     .accessibility-icon {
-        width: 50px !important;
-        height: 50px !important;
+        width: 50px;
+        height: 50px;
     }
     
     .accessibility-icon i {
@@ -1952,17 +1914,17 @@ if (window.innerWidth <= 768) {
     /* Better content spacing for tablet */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 12px !important;
+        margin-bottom: 12px;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 10px !important;
+        margin-bottom: 10px;
     }
     
     .profile-item {
-        padding: 10px !important;
-        margin-bottom: 8px !important;
+        padding: 10px;
+        margin-bottom: 8px;
     }
     
     .profile-item h4 {
@@ -1974,7 +1936,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 8px 12px !important;
+        padding: 8px 12px;
         /* Font size controlled by JavaScript */
     }
 }
@@ -1982,8 +1944,8 @@ if (window.innerWidth <= 768) {
 /* Removed - replaced with mobile-first approach above */
     
     .accessibility-icon {
-        width: 45px !important;
-        height: 45px !important;
+        width: 45px;
+        height: 45px;
     }
     
     .accessibility-icon i {
@@ -1993,17 +1955,17 @@ if (window.innerWidth <= 768) {
     /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 10px !important;
+        margin-bottom: 10px;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 8px !important;
+        margin-bottom: 8px;
     }
     
     .profile-item {
-        padding: 6px !important;
-        margin-bottom: 4px !important;
+        padding: 6px;
+        margin-bottom: 4px;
     }
     
     .profile-item h4 {
@@ -2015,7 +1977,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 4px 6px !important;
+        padding: 4px 6px;
         /* Font size controlled by JavaScript */
     }
     
@@ -2023,72 +1985,55 @@ if (window.innerWidth <= 768) {
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 3px 5px !important;
+        padding: 3px 5px;
         /* Font size controlled by JavaScript */
-        min-height: 20px !important;
+        min-height: 20px;
     }
     
     .action-btn i {
         /* Font size controlled by JavaScript */
-        margin-right: 2px !important;
+        margin-right: 2px;
     }
     
     /* Very small toggles for mobile landscape */
     .toggle-switch {
-        width: 20px !important;
-        height: 12px !important;
+        width: 20px;
+        height: 12px;
     }
     
     .toggle-switch .slider {
-        width: 20px !important;
-        height: 12px !important;
+        width: 20px;
+        height: 12px;
     }
     
     .toggle-switch .slider:before {
-        height: 8px !important;
-        width: 8px !important;
-        left: 2px !important;
-        bottom: 2px !important;
+        height: 8px;
+        width: 8px;
+        left: 2px;
+        bottom: 2px;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(8px) !important;
+        transform: translateX(8px);
     }
 }
 
-/* Mobile Portrait - Reasonable text and toggles */
-@media (max-width: 480px) {
-    .accessibility-panel {
-        width: 75vw !important;
-        max-width: 320px !important;
-        /* Font size controlled by JavaScript */
-        padding: 12px !important;
-        max-height: 70vh !important;
-    }
-    
-    .accessibility-icon {
-        width: 40px !important;
-        height: 40px !important;
-    }
-    
-    .accessibility-icon i {
-        /* Font size controlled by JavaScript */
-    }
+/* Removed - consolidated with main mobile media query above */
     
     /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 8px !important;
+        margin-bottom: 8px;
     }
     
     .accessibility-panel h3 {
         /* Font size controlled by JavaScript */
-        margin-bottom: 6px !important;
+        margin-bottom: 6px;
     }
     
     .profile-item {
-        padding: 2px !important;
-        margin-bottom: 2px !important;
+        padding: 2px;
+        margin-bottom: 2px;
     }
     
     .profile-item h4 {
@@ -2100,7 +2045,7 @@ if (window.innerWidth <= 768) {
     }
     
     .action-btn {
-        padding: 2px 3px !important;
+        padding: 2px 3px;
         /* Font size controlled by JavaScript */
     }
     
@@ -2108,36 +2053,36 @@ if (window.innerWidth <= 768) {
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        padding: 1px 2px !important;
+        padding: 1px 2px;
         /* Font size controlled by JavaScript */
-        min-height: 12px !important;
+        min-height: 12px;
     }
     
     .action-btn i {
         /* Font size controlled by JavaScript */
-        margin-right: 1px !important;
+        margin-right: 1px;
     }
     
     /* TINY toggles for mobile portrait */
     .toggle-switch {
-        width: 12px !important;
-        height: 8px !important;
+        width: 12px;
+        height: 8px;
     }
     
     .toggle-switch .slider {
-        width: 12px !important;
-        height: 8px !important;
+        width: 12px;
+        height: 8px;
     }
     
     .toggle-switch .slider:before {
-        height: 4px !important;
-        width: 4px !important;
-        left: 2px !important;
-        bottom: 2px !important;
+        height: 4px;
+        width: 4px;
+        left: 2px;
+        bottom: 2px;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(4px);
     }
 }
 
@@ -2147,36 +2092,36 @@ if (window.innerWidth <= 768) {
 
 /* DEBUG: Add visual indicators for shape testing */
 .accessibility-icon[data-shape="circle"]::after {
-    content: "CIRCLE" !important;
-    position: absolute !important;
-    top: -20px !important;
-    left: 0 !important;
+    content: "CIRCLE";
+    position: absolute;
+    top: -20px;
+    left: 0;
     /* Font size controlled by JavaScript */
-    color: red !important;
-    background: yellow !important;
-    z-index: 9999 !important;
+    color: red;
+    background: yellow;
+    z-index: 9999;
 }
 
 .accessibility-icon[data-shape="rounded"]::after {
-    content: "ROUNDED" !important;
-    position: absolute !important;
-    top: -20px !important;
-    left: 0 !important;
+    content: "ROUNDED";
+    position: absolute;
+    top: -20px;
+    left: 0;
     /* Font size controlled by JavaScript */
-    color: red !important;
-    background: yellow !important;
-    z-index: 9999 !important;
+    color: red;
+    background: yellow;
+    z-index: 9999;
 }
 
 .accessibility-icon[data-shape="square"]::after {
-    content: "SQUARE" !important;
-    position: absolute !important;
-    top: -20px !important;
-    left: 0 !important;
+    content: "SQUARE";
+    position: absolute;
+    top: -20px;
+    left: 0;
     /* Font size controlled by JavaScript */
-    color: red !important;
-    background: yellow !important;
-    z-index: 9999 !important;
+    color: red;
+    background: yellow;
+    z-index: 9999;
 }
 
 /* Removed conflicting media query rules */
@@ -2202,9 +2147,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
     }
     
     .profile-item h4 {
@@ -2217,46 +2162,46 @@ if (window.innerWidth <= 768) {
     
     .action-btn {
         /* Font size controlled by JavaScript */
-        padding: 2px 3px !important;
+        padding: 2px 3px;
     }
     
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         /* Font size controlled by JavaScript */
-        padding: 1px 2px !important;
-        min-height: 12px !important;
+        padding: 1px 2px;
+        min-height: 12px;
     }
     
     .toggle-switch {
-        width: 12px !important;
-        height: 8px !important;
+        width: 12px;
+        height: 8px;
     }
     
     .toggle-switch .slider {
-        width: 12px !important;
-        height: 8px !important;
+        width: 12px;
+        height: 8px;
     }
     
     .toggle-switch .slider:before {
-        width: 4px !important;
-        height: 4px !important;
+        width: 4px;
+        height: 4px;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(4px);
     }
 }
 
 .accessibility-panel {
-    display: none !important;
-    position: fixed !important;
-    z-index: 100001 !important;
+    display: none;
+    position: fixed;
+    z-index: 100001;
 }
 
 .accessibility-panel.show {
-    display: block !important;
-    visibility: visible !important;
+    display: block;
+    visibility: visible;
 }
 `;
 
@@ -2534,35 +2479,35 @@ if (window.innerWidth <= 768) {
         
         /* Override external CSS */
         .accessibility-icon[data-shape="circle"] {
-            border-radius: 50% !important;
+            border-radius: 50%;
         }
         
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px !important;
+            border-radius: 25px;
         }
         
         .accessibility-icon[data-shape="square"] {
-            border-radius: 0px !important;
+            border-radius: 0px;
         }
         
         /* Force panel positioning */
         .accessibility-panel {
-            position: fixed !important;
-            z-index: 100001 !important;
-            display: none !important; /* Hidden by default */
+            position: fixed;
+            z-index: 100001;
+            display: none; /* Hidden by default */
         }
         
         .accessibility-panel.show {
-            display: block !important;
-            visibility: visible !important;
+            display: block;
+            visibility: visible;
         }
         
         /* Mobile responsiveness - handled by main responsive CSS above */
         
         @media (max-width: 480px) {
             .accessibility-icon {
-                width: 45px !important;
-                height: 45px !important;
+                width: 45px;
+                height: 45px;
             }
             
             .accessibility-icon i {
@@ -2570,8 +2515,8 @@ if (window.innerWidth <= 768) {
             }
             
             .accessibility-panel {
-                width: 95vw !important;
-                max-width: 350px !important;
+                width: 95vw;
+                max-width: 350px;
             }
         }
             /* Accessibility Widget Styles - Shadow DOM */
@@ -2604,16 +2549,16 @@ if (window.innerWidth <= 768) {
 
             .accessibility-icon {
 
-                position: fixed !important;
+                position: fixed;
 
-                z-index: 99998 !important;
+                z-index: 99998;
                 
                 /* Ensure JavaScript positioning takes precedence */
-                top: unset !important;
-                bottom: unset !important;
-                left: unset !important;
-                right: unset !important;
-                transform: unset !important;
+                top: unset;
+                bottom: unset;
+                left: unset;
+                right: unset;
+                transform: unset;
 
             }
 
@@ -2673,7 +2618,7 @@ if (window.innerWidth <= 768) {
 
             .accessibility-icon:focus {
 
-                outline: none !important;
+                outline: none;
 
             }
 
@@ -2697,9 +2642,9 @@ if (window.innerWidth <= 768) {
 
             .language-selector:focus {
 
-             outline: none !important;
-             outline-offset: 0px !important;
-             box-shadow: none !important;   
+             outline: none;
+             outline-offset: 0px;
+             box-shadow: none;   
 
             }
 
@@ -2707,7 +2652,7 @@ if (window.innerWidth <= 768) {
 
             .toggle-switch input:focus + .slider {
 
-                 outline: none !important;
+                 outline: none;
             }
 
 
@@ -2718,14 +2663,14 @@ if (window.innerWidth <= 768) {
 
             .profile-item:focus-within {
 
-                outline: none !important;
+                outline: none;
             }
 
 
 
             .profile-item:focus {
 
-               outline: none !important;
+               outline: none;
             }
 
 
@@ -2734,23 +2679,23 @@ if (window.innerWidth <= 768) {
 
             .sr-only {
 
-                position: absolute !important;
+                position: absolute;
 
-                width: 1px !important;
+                width: 1px;
 
-                height: 1px !important;
+                height: 1px;
 
-                padding: 0 !important;
+                padding: 0;
 
-                margin: -1px !important;
+                margin: -1px;
 
-                overflow: hidden !important;
+                overflow: hidden;
 
-                clip: rect(0, 0, 0, 0) !important;
+                clip: rect(0, 0, 0, 0);
 
-                white-space: nowrap !important;
+                white-space: nowrap;
 
-                border: 0 !important;
+                border: 0;
 
             }
 
@@ -2766,9 +2711,9 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel label:focus {
 
-                outline: none !important;
-                outline-offset: 0px !important;
-                box-shadow: none !important;
+                outline: none;
+                outline-offset: 0px;
+                box-shadow: none;
 
             }
 
@@ -2782,7 +2727,7 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel input:focus-visible {
 
-                outline: none !important;
+                outline: none;
 
             }
 
@@ -2794,15 +2739,15 @@ if (window.innerWidth <= 768) {
 
                 position: fixed;
 
-                width: 500px !important;
+                width: 500px;
 
-                height: 700px !important;
+                height: 700px;
 
-                background: #ffffff !important;
+                background: #ffffff;
 
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-                z-index: 100000 !important;
+                z-index: 100000;
 
                 transition: left 0.3s ease;
 
@@ -2810,9 +2755,9 @@ if (window.innerWidth <= 768) {
 
                 overflow-x: hidden;
 
-                font-family: 'DM Sans', sans-serif !important;
+                font-family: 'DM Sans', sans-serif;
 
-                border-radius: 8px !important;
+                border-radius: 8px;
 
                 margin: 0 20px;
 
@@ -2825,11 +2770,11 @@ if (window.innerWidth <= 768) {
 
             .accessibility-panel.active {
 
-                display: block !important;
+                display: block;
 
-                visibility: visible !important;
+                visibility: visible;
 
-                opacity: 1 !important;
+                opacity: 1;
 
             }
 
@@ -2840,7 +2785,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel.active {
 
-                    left: 20px !important;
+                    left: 20px;
 
                 }
 
@@ -2852,9 +2797,9 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-icon {
 
-                    width: 45px !important;
+                    width: 45px;
 
-                    height: 45px !important;
+                    height: 45px;
 
                     /* Position controlled by JS; do not force a corner here */
 
@@ -2872,11 +2817,11 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel {
 
-                    width: 500px !important;
+                    width: 500px;
 
-                    margin: 0 10px !important;
+                    margin: 0 10px;
 
-                    height: 700px !important;
+                    height: 700px;
 
                 }
 
@@ -2884,7 +2829,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-panel.active {
 
-                    left: 10px !important;
+                    left: 10px;
 
                 }
 
@@ -2902,15 +2847,15 @@ if (window.innerWidth <= 768) {
 
                 padding: 20px;
 
-                background: transparent !important;
+                background: transparent;
 
-                color: #ffffff !important;
+                color: #ffffff;
 
-                border-radius: 24px !important;
+                border-radius: 24px;
 
-                border: 4px solid #ffffff !important;
+                border: 4px solid #ffffff;
 
-                border-bottom: none !important;
+                border-bottom: none;
 
                 position: relative;
 
@@ -3138,11 +3083,11 @@ if (window.innerWidth <= 768) {
 
                 padding: 8px 16px;
 
-                background: rgba(217, 217, 217, 0.3) !important;
+                background: rgba(217, 217, 217, 0.3);
 
-                border: 2px solid rgba(217, 217, 217, 0.3) !important;
+                border: 2px solid rgba(217, 217, 217, 0.3);
 
-                color: #ffffff !important;
+                color: #ffffff;
 
                 border-radius: 30px;
 
@@ -3182,11 +3127,11 @@ if (window.innerWidth <= 768) {
 
                 padding: 0 20px 20px;
 
-                background: #ffffff !important;
+                background: #ffffff;
 
-                border-radius: 40px 40px 0 0 !important;
+                border-radius: 40px 40px 0 0;
 
-                margin-top: -30px !important;
+                margin-top: -30px;
 
                 position: relative;
 
@@ -3324,7 +3269,7 @@ if (window.innerWidth <= 768) {
 
             .profile-info p {
 
-                margin: 5px 0 0 !important;
+                margin: 5px 0 0;
 
                 font-size: 14px;
 
@@ -3370,9 +3315,9 @@ if (window.innerWidth <= 768) {
 
                 display: inline-block;
 
-                width: 80px !important;
+                width: 80px;
 
-                height: 40px !important;
+                height: 40px;
 
                 flex-shrink: 0;
 
@@ -3412,7 +3357,7 @@ if (window.innerWidth <= 768) {
 
                 transition: 0.3s;
 
-                border-radius: 20px !important;
+                border-radius: 20px;
 
             }
 
@@ -3446,7 +3391,7 @@ if (window.innerWidth <= 768) {
 
             input:checked + .slider {
 
-                background-color: #e5e7eb !important;
+                background-color: #e5e7eb;
 
             }
 
@@ -3454,7 +3399,7 @@ if (window.innerWidth <= 768) {
 
             input:checked + .slider:before {
 
-                transform: translateX(26px) !important;
+                transform: translateX(26px);
 
             }
 
@@ -3562,7 +3507,7 @@ if (window.innerWidth <= 768) {
 
                 bottom: 0;
 
-                background: linear-gradient(135deg, #262E84, #2AA2F1) !important;
+                background: linear-gradient(135deg, #262E84, #2AA2F1);
 
                 color: #ffffff;
 
@@ -3576,7 +3521,7 @@ if (window.innerWidth <= 768) {
 
                 font-size: 14px;
 
-                border-radius: 0 0 8px 8px !important;
+                border-radius: 0 0 8px 8px;
 
                 z-index: 1001;
 
@@ -3672,47 +3617,47 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown {
 
-                position: sticky !important;
-                top: 0 !important;
+                position: sticky;
+                top: 0;
 
                 /* Keep dropdown in panel viewport when scrolling */
-                position: fixed !important;
+                position: fixed;
 
-                background: #ffffff !important;
+                background: #ffffff;
 
-                border-radius: 12px !important;
+                border-radius: 12px;
 
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-                border: 1px solid #e5e7eb !important;
+                border: 1px solid #e5e7eb;
 
-                z-index: 100001 !important;
+                z-index: 100001;
 
-                width: 400px !important;
+                width: 400px;
 
-                max-height: 400px !important;
+                max-height: 400px;
 
-                overflow-y: auto !important;
+                overflow-y: auto;
 
-                overflow-x: hidden !important;
+                overflow-x: hidden;
 
-                animation: dropdownSlideIn 0.2s ease-out !important;
+                animation: dropdownSlideIn 0.2s ease-out;
 
-                transform: none !important;
+                transform: none;
 
-                clip: none !important;
+                clip: none;
 
-                display: none !important;
+                display: none;
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-                pointer-events: auto !important;
+                pointer-events: auto;
 
                 /* Ensure dropdown is positioned relative to panel */
 
-                margin: 0 !important;
+                margin: 0;
 
-                padding: 0 !important;
+                padding: 0;
 
             }
 
@@ -3722,13 +3667,13 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown[style*="display: block"] {
 
-                display: block !important;
+                display: block;
 
-                visibility: visible !important;
+                visibility: visible;
 
-                opacity: 1 !important;
+                opacity: 1;
 
-                pointer-events: auto !important;
+                pointer-events: auto;
 
             }
 
@@ -3758,11 +3703,11 @@ if (window.innerWidth <= 768) {
 
             .language-dropdown-content {
 
-                padding: 20px !important;
+                padding: 20px;
 
-                background: #ffffff !important;
+                background: #ffffff;
 
-                min-height: 100px !important;
+                min-height: 100px;
 
             }
 
@@ -3804,7 +3749,7 @@ if (window.innerWidth <= 768) {
 
                 outline: none;
 
-                pointer-events: auto !important;
+                pointer-events: auto;
 
                 user-select: none;
 
@@ -3858,7 +3803,7 @@ if (window.innerWidth <= 768) {
 
             :host(.seizure-safe) .accessibility-panel {
 
-                filter: grayscale(0.8) contrast(0.9) !important;
+                filter: grayscale(0.8) contrast(0.9);
 
             }
 
@@ -3868,9 +3813,9 @@ if (window.innerWidth <= 768) {
 
             :host(.seizure-safe) .accessibility-icon {
 
-                position: fixed !important;
+                position: fixed;
 
-                z-index: 99998 !important;
+                z-index: 99998;
 
             }
 
@@ -3880,7 +3825,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) {
 
-                filter: saturate(1.1) brightness(1.05) !important;
+                filter: saturate(1.1) brightness(1.05);
 
                 /* Use CSS custom properties for responsive scaling */
 
@@ -3896,11 +3841,11 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-icon {
 
-                width: calc(60px * var(--vision-scale)) !important;
+                width: calc(60px * var(--vision-scale));
 
-                height: calc(60px * var(--vision-scale)) !important;
+                height: calc(60px * var(--vision-scale));
 
-                font-size: calc(24px * var(--vision-font-scale)) !important;
+                font-size: calc(24px * var(--vision-font-scale));
 
             }
 
@@ -3908,9 +3853,9 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel {
 
-                width: calc(400px * var(--vision-scale)) !important;
+                width: calc(400px * var(--vision-scale));
 
-                font-size: calc(1em * var(--vision-font-scale)) !important;
+                font-size: calc(1em * var(--vision-font-scale));
 
             }
 
@@ -3918,7 +3863,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h2 {
 
-                font-size: calc(24px * var(--vision-font-scale)) !important;
+                font-size: calc(24px * var(--vision-font-scale));
 
             }
 
@@ -3926,7 +3871,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h3 {
 
-                font-size: calc(18px * var(--vision-font-scale)) !important;
+                font-size: calc(18px * var(--vision-font-scale));
 
             }
 
@@ -3934,7 +3879,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h4 {
 
-                font-size: calc(16px * var(--vision-font-scale)) !important;
+                font-size: calc(16px * var(--vision-font-scale));
 
             }
 
@@ -3942,7 +3887,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel p {
 
-                font-size: calc(14px * var(--vision-font-scale)) !important;
+                font-size: calc(14px * var(--vision-font-scale));
 
             }
 
@@ -3950,9 +3895,9 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel .action-btn {
 
-                font-size: calc(1em * var(--vision-font-scale)) !important;
+                font-size: calc(1em * var(--vision-font-scale));
 
-                padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale)) !important;
+                padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale));
 
             }
 
@@ -3960,7 +3905,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel * {
 
-                font-size: 1em !important;
+                font-size: 1em;
 
             }
 
@@ -3968,7 +3913,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h1 {
 
-                font-size: 1.5em !important;
+                font-size: 1.5em;
 
             }
 
@@ -3976,7 +3921,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h2 {
 
-                font-size: 1.3em !important;
+                font-size: 1.3em;
 
             }
 
@@ -3984,7 +3929,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h3 {
 
-                font-size: 1.2em !important;
+                font-size: 1.2em;
 
             }
 
@@ -3992,7 +3937,7 @@ if (window.innerWidth <= 768) {
 
             :host(.vision-impaired) .accessibility-panel h4 {
 
-                font-size: 1.1em !important;
+                font-size: 1.1em;
 
             }
 
@@ -4002,7 +3947,7 @@ if (window.innerWidth <= 768) {
 
             :host(.adhd-friendly) .accessibility-panel {
 
-                filter: saturate(0.9) brightness(0.9) !important;
+                filter: saturate(0.9) brightness(0.9);
 
             }
 
@@ -4012,7 +3957,7 @@ if (window.innerWidth <= 768) {
 
             :host(.cognitive-disability) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(1.1) !important;
+                filter: saturate(1.2) brightness(1.1);
 
             }
 
@@ -4026,7 +3971,7 @@ if (window.innerWidth <= 768) {
 
             :host(.monochrome) .accessibility-panel {
 
-                filter: grayscale(1) !important;
+                filter: grayscale(1);
 
             }
 
@@ -4036,7 +3981,7 @@ if (window.innerWidth <= 768) {
 
             :host(.dark-contrast) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(0.8) contrast(1.3) !important;
+                filter: saturate(1.2) brightness(0.8) contrast(1.3);
 
             }
 
@@ -4046,7 +3991,7 @@ if (window.innerWidth <= 768) {
 
             :host(.light-contrast) .accessibility-panel {
 
-                filter: saturate(1.2) brightness(1.2) contrast(0.9) !important;
+                filter: saturate(1.2) brightness(1.2) contrast(0.9);
 
             }
 
@@ -4060,9 +4005,9 @@ if (window.innerWidth <= 768) {
 
             :host(.high-contrast) .accessibility-panel * {
 
-                filter: contrast(0.8) !important;
+                filter: contrast(0.8);
 
-                -webkit-filter: contrast(0.8) !important;
+                -webkit-filter: contrast(0.8);
 
             }
 
@@ -4076,11 +4021,11 @@ if (window.innerWidth <= 768) {
 
             :host(:not(.readable-font)) .accessibility-panel {
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-                font-weight: normal !important;
+                font-weight: normal;
 
-                letter-spacing: normal !important;
+                letter-spacing: normal;
 
             }
 
@@ -4102,11 +4047,11 @@ if (window.innerWidth <= 768) {
 
             :host(:not(.readable-font)) .accessibility-panel label {
 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-                font-weight: normal !important;
+                font-weight: normal;
 
-                letter-spacing: normal !important;
+                letter-spacing: normal;
 
             }
 
@@ -4118,11 +4063,11 @@ if (window.innerWidth <= 768) {
 
             :host(.readable-font) .accessibility-panel {
 
-                font-family: 'Arial', 'Open Sans', sans-serif !important;
+                font-family: 'Arial', 'Open Sans', sans-serif;
 
-                font-weight: 500 !important;
+                font-weight: 500;
 
-                letter-spacing: 0.5px !important;
+                letter-spacing: 0.5px;
 
             }
 
@@ -4144,11 +4089,11 @@ if (window.innerWidth <= 768) {
 
             :host(.readable-font) .accessibility-panel label {
 
-                font-family: 'Arial', 'Open Sans', sans-serif !important;
+                font-family: 'Arial', 'Open Sans', sans-serif;
 
-                font-weight: 500 !important;
+                font-weight: 500;
 
-                letter-spacing: 0.5px !important;
+                letter-spacing: 0.5px;
 
             }
 
@@ -4158,7 +4103,7 @@ if (window.innerWidth <= 768) {
 
             :host(.high-saturation) .accessibility-panel {
 
-                filter: saturate(1.5) !important;
+                filter: saturate(1.5);
 
             }
 
@@ -4542,7 +4487,7 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown {
 
-                position: relative !important;
+                position: relative;
 
             }
 
@@ -4552,17 +4497,17 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown .toggle-switch {
 
-                position: absolute !important;
+                position: absolute;
 
-                left: 20px !important;
+                left: 20px;
 
-                top: 20px !important;
+                top: 20px;
 
-                transform: none !important;
+                transform: none;
 
-                flex-shrink: 0 !important;
+                flex-shrink: 0;
 
-                margin: 0 !important;
+                margin: 0;
 
             }
 
@@ -4570,11 +4515,11 @@ if (window.innerWidth <= 768) {
 
             .profile-item.has-dropdown .profile-info {
 
-                display: block !important;
+                display: block;
 
-                padding-left: 100px !important;
+                padding-left: 100px;
 
-                margin-bottom: 10px !important;
+                margin-bottom: 10px;
 
             }
 
@@ -4672,9 +4617,9 @@ if (window.innerWidth <= 768) {
 
             .useful-links-content select:focus {
 
-                outline: 3px solid #4f46e5 !important;
+                outline: 3px solid #4f46e5;
 
-                outline-offset: 2px !important;
+                outline-offset: 2px;
 
                 border-color: #4f46e5;
 
@@ -4737,7 +4682,7 @@ body.big-black-cursor,
 html body.big-black-cursor,
 body.big-black-cursor *,
 html body.big-black-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto;
 }
 
 /* Big White Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
@@ -4745,24 +4690,24 @@ body.big-white-cursor,
 html body.big-white-cursor,
 body.big-white-cursor *,
 html body.big-white-cursor * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto;
 }
             /* Hide Interface Modal Styles */
             .hide-interface-modal {
-                position: sticky !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
+                position: sticky;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
                 background: rgba(0, 0, 0, 0.8);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 100001;
                 /* Keep modal in panel viewport when scrolling */
-                width: 100% !important;
-                height: 100% !important;
-                min-height: 100% !important;
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
                 /* Ensure overlay covers full scrollable area */
                 max-height: none;
                 overflow: hidden;
@@ -11760,7 +11705,7 @@ html body.big-white-cursor * {
 
                 element.style.setProperty('line-height', lineHeightValue, 'important');
 
-                element.style.lineHeight = lineHeightValue + ' !important';
+                element.style.lineHeight = lineHeightValue + '';
 
                 updatedCount++;
 
@@ -12334,7 +12279,7 @@ html body.big-white-cursor * {
 
         
 
-        // Apply to body using original size with !important to override CSS
+        // Apply to body using original size with to override CSS
 
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
 
@@ -12361,7 +12306,7 @@ html body.big-white-cursor * {
 
                 if (originalSize && !isNaN(originalSize)) {
 
-                    // Apply the scale to the original size with !important to override CSS
+                    // Apply the scale to the original size with to override CSS
 
                     element.style.setProperty('font-size', `${originalSize * scale}px`, 'important');
 
@@ -14962,9 +14907,9 @@ html body.big-white-cursor * {
 
             body.monochrome *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
 
-                filter: grayscale(100%) !important;
+                filter: grayscale(100%);
 
-                transition: filter 0.3s ease !important;
+                transition: filter 0.3s ease;
 
             }
 
@@ -14976,7 +14921,7 @@ html body.big-white-cursor * {
 
             body.monochrome #accessibility-widget {
 
-                z-index: 99998 !important;
+                z-index: 99998;
 
             }
 
@@ -16010,27 +15955,27 @@ html body.big-white-cursor * {
 
             <div id="read-mode-overlay" style="
 
-                position: fixed !important;
+                position: fixed;
 
-                top: 0 !important;
+                top: 0;
 
-                left: 0 !important;
+                left: 0;
 
-                width: 100% !important;
+                width: 100%;
 
-                height: 100% !important;
+                height: 100%;
 
-                background: #e8f4f8 !important;
+                background: #e8f4f8;
 
-                z-index: 99997 !important;
+                z-index: 99997;
 
-                overflow-y: auto !important;
+                overflow-y: auto;
 
-                padding: 20px !important;
+                padding: 20px;
 
-                font-family: Arial, sans-serif !important;
+                font-family: Arial, sans-serif;
 
-                display: block !important;
+                display: block;
 
             ">
 
@@ -17259,7 +17204,7 @@ html body.big-white-cursor * {
             body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget *,
             body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget * {
 
-                cursor: auto !important;
+                cursor: auto;
 
             }
 
@@ -18401,21 +18346,21 @@ html body.big-white-cursor * {
 
             body.seizure-safe *::after {
 
-                animation: none !important;
+                animation: none;
 
-                transition: none !important;
+                transition: none;
 
-                transform: none !important;
+                transform: none;
 
-                animation-duration: 0s !important;
+                animation-duration: 0s;
 
-                animation-delay: 0s !important;
+                animation-delay: 0s;
 
-                animation-iteration-count: 0 !important;
+                animation-iteration-count: 0;
 
-                transition-duration: 0s !important;
+                transition-duration: 0s;
 
-                transition-delay: 0s !important;
+                transition-delay: 0s;
 
             }
 
@@ -18425,15 +18370,15 @@ html body.big-white-cursor * {
 
             body.seizure-safe .slider-track {
 
-                animation: none !important;
+                animation: none;
 
-                animation-name: none !important;
+                animation-name: none;
 
-                animation-duration: 0s !important;
+                animation-duration: 0s;
 
-                animation-iteration-count: 0 !important;
+                animation-iteration-count: 0;
 
-                transition: left 0.5s ease-in-out !important;
+                transition: left 0.5s ease-in-out;
 
                 /* left positioning is controlled by JavaScript, don't override it */
 
@@ -18447,15 +18392,15 @@ html body.big-white-cursor * {
 
             body.seizure-safe .slider-track * {
 
-                animation: none !important;
+                animation: none;
 
-                animation-name: none !important;
+                animation-name: none;
 
-                animation-duration: 0s !important;
+                animation-duration: 0s;
 
-                animation-iteration-count: 0 !important;
+                animation-iteration-count: 0;
 
-                animation-delay: 0s !important;
+                animation-delay: 0s;
 
             }
 
@@ -18467,7 +18412,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe .dot {
 
-                transition: all 0.3s ease !important;
+                transition: all 0.3s ease;
 
                 /* Allow hover effects and clicks to work */
 
@@ -18479,9 +18424,9 @@ html body.big-white-cursor * {
 
             body.seizure-safe *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
 
-                filter: saturate(0.4) brightness(0.95) !important;
+                filter: saturate(0.4) brightness(0.95);
 
-                transition: filter 0.3s ease !important;
+                transition: filter 0.3s ease;
 
             }
 
@@ -18491,7 +18436,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe {
 
-                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
+                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto;
 
             }
 
@@ -18499,7 +18444,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe * {
 
-                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
+                cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto;
 
             }
 
@@ -18511,7 +18456,7 @@ html body.big-white-cursor * {
 
             body.seizure-safe #accessibility-widget {
 
-                z-index: 99998 !important;
+                z-index: 99998;
 
             }
 
@@ -18525,23 +18470,23 @@ html body.big-white-cursor * {
 
             .adhd-friendly #adhd-spotlight {
 
-                z-index: 99998 !important;
+                z-index: 99998;
 
-                background: rgba(255, 255, 255, 0.1) !important;
+                background: rgba(255, 255, 255, 0.1);
 
-                backdrop-filter: brightness(2.0) contrast(1.2) !important;
+                backdrop-filter: brightness(2.0) contrast(1.2);
 
-                box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4) !important;
+                box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4);
 
-                filter: none !important;
+                filter: none;
 
-                position: fixed !important;
+                position: fixed;
 
-                pointer-events: none !important;
+                pointer-events: none;
 
-                border-radius: 8px !important;
+                border-radius: 8px;
 
-                transition: all 0.1s ease !important;
+                transition: all 0.1s ease;
 
             }
 
@@ -18553,7 +18498,7 @@ html body.big-white-cursor * {
 
             .adhd-friendly #accessibility-widget {
 
-                z-index: 1000000 !important;
+                z-index: 1000000;
 
             }
 
@@ -18563,13 +18508,13 @@ html body.big-white-cursor * {
 
             .adhd-friendly .adhd-focus {
 
-                outline: 4px solid var(--primary-color) !important;
+                outline: 4px solid var(--primary-color);
 
-                outline-offset: 3px !important;
+                outline-offset: 3px;
 
-                background: rgba(99, 102, 241, 0.15) !important;
+                background: rgba(99, 102, 241, 0.15);
 
-                filter: contrast(1.3) brightness(1.1) !important;
+                filter: contrast(1.3) brightness(1.1);
 
             }
 
@@ -20874,7 +20819,7 @@ applyCustomizations(customizationData) {
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
             icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
-            console.log('[CK] Applied border-radius with !important');
+            console.log('[CK] Applied border-radius with');
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
@@ -21648,7 +21593,7 @@ applyCustomizations(customizationData) {
             console.log('Accessibility Widget: Positioning dropdown on RIGHT side of panel');
         }
 
-        // Apply positioning with !important to override any conflicting CSS
+        // Apply positioning with to override any conflicting CSS
         dropdown.style.setProperty('left', `${dropdownLeft}px`, 'important');
         dropdown.style.setProperty('top', `${dropdownTop}px`, 'important');
         dropdown.style.setProperty('position', 'absolute', 'important');
