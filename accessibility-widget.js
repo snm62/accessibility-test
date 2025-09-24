@@ -1264,64 +1264,101 @@ if (window.innerWidth <= 768) {
 
 /* Mobile-First Responsive Design */
 
+/* Very Small Mobile Screens (430px and below) */
+@media (max-width: 430px) {
+    .accessibility-panel .close-btn {
+        font-size: 16px;
+        padding: 4px;
+        top: 8px;
+        right: 8px;
+    }
+    .accessibility-panel h2 {
+        font-size: 16px;
+    }
+    .accessibility-panel h3 {
+        font-size: 14px;
+    }
+    .accessibility-panel h4 {
+        font-size: 12px;
+    }
+    .accessibility-panel p {
+        font-size: 10px;
+    }
+    .accessibility-panel .action-btn {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+    .accessibility-panel .scaling-btn {
+        font-size: 9px;
+        padding: 3px 5px;
+    }
+}
+
 /* Mobile Devices (Small Screens) - Base styles */
 @media (max-width: 480px) {
+    .accessibility-panel .close-btn {
+        font-size: 18px;
+        padding: 6px;
+        top: 12px;
+        right: 12px;
+    }
     .accessibility-panel {
         width: 90vw;
         max-width: 350px;
         padding: 12px;
-        /* Font size controlled by JavaScript */
+        font-size: 14px;
     }
     
     .accessibility-panel h2 {
         margin-bottom: 8px;
-        /* Font size controlled by JavaScript */
+        font-size: 18px;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 6px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel p {
         line-height: 1.3;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 6px 10px;
         min-height: 28px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 6px;
         min-height: 24px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 20px;
+        padding: 8px;
     }
     
     .accessibility-icon {
@@ -1331,7 +1368,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1341,58 +1378,59 @@ if (window.innerWidth <= 768) {
         width: 80vw;
         max-width: 380px;
         padding: 14px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h2 {
         margin-bottom: 10px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 8px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel p {
         line-height: 1.4;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 8px 12px;
         min-height: 32px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 5px 8px;
         min-height: 26px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 20px;
+        padding: 8px;
     }
     
     .accessibility-icon {
@@ -1402,7 +1440,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1412,58 +1450,59 @@ if (window.innerWidth <= 768) {
         width: 70vw;
         max-width: 450px;
         padding: 16px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h2 {
         margin-bottom: 12px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 10px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel p {
         line-height: 1.5;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 10px 14px;
         min-height: 36px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 6px 10px;
         min-height: 28px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 20px;
+        padding: 8px;
     }
     
     .accessibility-icon {
@@ -1473,7 +1512,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1483,58 +1522,59 @@ if (window.innerWidth <= 768) {
         width: 500px;
         max-width: 500px;
         padding: 20px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h2 {
         margin-bottom: 14px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 12px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel p {
         line-height: 1.6;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 12px 16px;
         min-height: 40px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 8px 12px;
         min-height: 32px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 20px;
+        padding: 8px;
     }
     
     .accessibility-icon {
@@ -1544,7 +1584,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1555,58 +1595,59 @@ if (window.innerWidth <= 768) {
         max-width: 400px;
         max-height: 80vh;
         overflow-y: auto;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h2 {
         margin-bottom: 8px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 6px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel p {
         line-height: 1.3;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 6px 10px;
         min-height: 28px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 6px;
         min-height: 24px;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 20px;
+        padding: 8px;
     }
 }
 
@@ -1621,29 +1662,29 @@ if (window.innerWidth <= 768) {
 }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .action-btn {
         padding: 8px 12px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 8px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Ensure rounded shape works on mobile */
@@ -1685,19 +1726,19 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 2px !important;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 2px !important;
     }
     
     /* Medium close button for medium mobile screens */
     .close-btn {
-        /* Font size controlled by JavaScript */
-        padding: 6px !important;
+        font-size: 18px;
+        padding: 6px;
     }
     
     /* Ensure rounded shape works on medium mobile */
@@ -1711,7 +1752,7 @@ if (window.innerWidth <= 768) {
 /* Small Mobile Screens (375px and below) */
 @media (max-width: 400px) {
     .accessibility-panel {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 8px;
         width: 90vw;
         max-width: 300px;
@@ -1720,33 +1761,33 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 6px;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 4px;
     }
     
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 4px 6px;
         min-height: 24px;
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 2px 4px;
         min-height: 20px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Smaller toggles for small screens */
@@ -1778,18 +1819,18 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 1px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 1px;
     }
     
     /* Smaller close button for small screens */
     .close-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 4px;
     }
     
@@ -1803,34 +1844,34 @@ if (window.innerWidth <= 768) {
 
 @media (max-width: 480px) {
     .accessibility-panel {
-        /* Font size controlled by JavaScript */ /* Override external 8px */
+        font-size: 16px; /* Override external 8px */
     }
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */ /* Override external 9px */
+        font-size: 16px; /* Override external 9px */
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */ /* Override external 8px */
+        font-size: 16px; /* Override external 8px */
     }
     
     /* Override external button size conflicts */
     .accessibility-panel .action-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 6px 10px;
     }
     
     .accessibility-panel .scaling-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 3px 6px;
     }
     
     .accessibility-panel .profile-info h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel .profile-info p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Ensure rounded shape works on small mobile */
@@ -1868,17 +1909,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Better content spacing for large tablets */
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 14px !important;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 12px !important;
     }
     
@@ -1888,16 +1929,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .action-btn {
         padding: 10px 14px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1916,7 +1957,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1925,7 +1966,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 85vw !important;
         max-width: 450px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 16px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
@@ -1946,17 +1987,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Better content spacing for tablet */
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 12px !important;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 10px !important;
     }
     
@@ -1966,16 +2007,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .action-btn {
         padding: 8px 12px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
 }
 
@@ -1987,17 +2028,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 8px !important;
     }
     
@@ -2007,16 +2048,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .action-btn {
         padding: 4px 6px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Much smaller action buttons for mobile landscape */
@@ -2024,12 +2065,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 3px 5px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         min-height: 20px !important;
     }
     
     .action-btn i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-right: 2px !important;
     }
     
@@ -2061,7 +2102,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 12px !important;
         max-height: 70vh !important;
     }
@@ -2072,17 +2113,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-bottom: 6px !important;
     }
     
@@ -2092,16 +2133,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .action-btn {
         padding: 2px 3px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* EXTREMELY small action buttons for mobile portrait */
@@ -2109,12 +2150,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 1px 2px !important;
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         min-height: 12px !important;
     }
     
     .action-btn i {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         margin-right: 1px !important;
     }
     
@@ -2193,11 +2234,11 @@ if (window.innerWidth <= 768) {
 /* Removed - replaced with mobile-first approach above */
     
     .accessibility-panel h2 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .accessibility-panel h3 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     /* Ensure rounded shape works on mobile */
@@ -2208,22 +2249,22 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .profile-item p {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
     }
     
     .action-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 2px 3px !important;
     }
     
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        /* Font size controlled by JavaScript */
+        font-size: 16px;
         padding: 1px 2px !important;
         min-height: 12px !important;
     }
@@ -2566,7 +2607,7 @@ if (window.innerWidth <= 768) {
             }
             
             .accessibility-icon i {
-                /* Font size controlled by JavaScript */
+                font-size: 16px;
             }
             
             .accessibility-panel {
@@ -2864,7 +2905,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-icon i {
 
-                    /* Font size controlled by JavaScript */
+                    font-size: 16px;
 
                 }
 
@@ -2952,15 +2993,15 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                font-size: 20px;
+                font-size: 28px;
 
-                padding: 8px;
+                padding: 12px;
 
                 position: absolute;
 
-                top: 10px;
+                top: 15px;
 
-                left: 15px;
+                right: 15px;
 
                 z-index: 1005;
 
@@ -4802,12 +4843,12 @@ html body.big-white-cursor * {
             .hide-interface-modal .modal-close {
                 background: none;
                 border: none;
-                font-size: 24px;
+                font-size: 32px;
                 color: #6b7280;
                 cursor: pointer;
-                padding: 0;
-                width: 30px;
-                height: 30px;
+                padding: 8px;
+                width: 46px;
+                height: 46px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -20981,7 +21022,7 @@ applyCustomizations(customizationData) {
                 panel.style.setProperty('width', '75vw', 'important');
                 panel.style.setProperty('max-width', '320px', 'important');
                 panel.style.setProperty('left', '12.5vw', 'important');
-                panel.style.setProperty('font-size', '12px', 'important');
+                panel.style.setProperty('font-size', '12px');
                 panel.style.setProperty('padding', '12px', 'important');
                 panel.style.setProperty('max-height', '70vh', 'important');
                 
@@ -20990,7 +21031,7 @@ applyCustomizations(customizationData) {
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '16px', 'important');
+                    iconI.style.setProperty('font-size', '16px');
                 }
             } else if (screenWidth <= 768) {
                 // Mobile Landscape - Wider panel
@@ -20998,7 +21039,7 @@ applyCustomizations(customizationData) {
                 panel.style.setProperty('width', '80vw', 'important');
                 panel.style.setProperty('max-width', '380px', 'important');
                 panel.style.setProperty('left', '10vw', 'important');
-                panel.style.setProperty('font-size', '13px', 'important');
+                panel.style.setProperty('font-size', '13px');
                 panel.style.setProperty('padding', '14px', 'important');
                 panel.style.setProperty('max-height', '75vh', 'important');
                 
@@ -21007,7 +21048,7 @@ applyCustomizations(customizationData) {
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '18px', 'important');
+                    iconI.style.setProperty('font-size', '18px');
                 }
             } else if (screenWidth >= 1025 && screenWidth <= 1366) {
                 // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
@@ -21015,7 +21056,7 @@ applyCustomizations(customizationData) {
                 panel.style.setProperty('width', '65vw', 'important');
                 panel.style.setProperty('max-width', '450px', 'important');
                 panel.style.setProperty('left', '0.5vw', 'important');
-                panel.style.setProperty('font-size', '15px', 'important');
+                panel.style.setProperty('font-size', '15px');
                 panel.style.setProperty('padding', '18px', 'important');
                 panel.style.setProperty('max-height', '85vh', 'important');
                 
@@ -21024,7 +21065,7 @@ applyCustomizations(customizationData) {
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '22px', 'important');
+                    iconI.style.setProperty('font-size', '22px');
                 }
             } else if (screenWidth >= 820 && screenWidth <= 1024) {
                 // Tablet/iPad 820px+ - Position panel very close to icon
@@ -21032,7 +21073,7 @@ applyCustomizations(customizationData) {
                 panel.style.setProperty('width', '75vw', 'important');
                 panel.style.setProperty('max-width', '380px', 'important');
                 panel.style.setProperty('left', '1vw', 'important');
-                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('font-size', '14px');
                 panel.style.setProperty('padding', '16px', 'important');
                 panel.style.setProperty('max-height', '80vh', 'important');
                 
@@ -21041,7 +21082,7 @@ applyCustomizations(customizationData) {
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px', 'important');
+                    iconI.style.setProperty('font-size', '20px');
                 }
             } else if (screenWidth <= 1024) {
                 // iPad Mini - Much wider panel positioned close to icon
@@ -21049,7 +21090,7 @@ applyCustomizations(customizationData) {
                 panel.style.setProperty('width', '85vw', 'important');
                 panel.style.setProperty('max-width', '450px', 'important');
                 panel.style.setProperty('left', '5vw', 'important');
-                panel.style.setProperty('font-size', '14px', 'important');
+                panel.style.setProperty('font-size', '14px');
                 panel.style.setProperty('padding', '16px', 'important');
                 panel.style.setProperty('max-height', '80vh', 'important');
                 
@@ -21058,7 +21099,7 @@ applyCustomizations(customizationData) {
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '20px', 'important');
+                    iconI.style.setProperty('font-size', '20px');
                 }
             }
             
@@ -21365,28 +21406,28 @@ applyCustomizations(customizationData) {
                 
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
-                        icon.style.setProperty('left', '10px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
+                        icon.style.setProperty('left', '10px');
+                        icon.style.setProperty('right', 'auto');
                         console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
-                        icon.style.setProperty('right', '10px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
+                        icon.style.setProperty('right', '10px');
+                        icon.style.setProperty('left', 'auto');
                         console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
-                        icon.style.setProperty('top', '10px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('top', '10px');
+                        icon.style.setProperty('bottom', 'auto');
                         icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
+                        icon.style.setProperty('bottom', '10px');
+                        icon.style.setProperty('top', 'auto');
                         icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('top', '50%');
+                        icon.style.setProperty('bottom', 'auto');
                         icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
@@ -21404,15 +21445,15 @@ applyCustomizations(customizationData) {
                 if (size === 'Small') {
                     icon.style.setProperty('width', '35px', 'important');
                     icon.style.setProperty('height', '35px', 'important');
-                    icon.style.setProperty('font-size', '14px', 'important');
+                    icon.style.setProperty('font-size', '14px');
                 } else if (size === 'Medium') {
                     icon.style.setProperty('width', '45px', 'important');
                     icon.style.setProperty('height', '45px', 'important');
-                    icon.style.setProperty('font-size', '18px', 'important');
+                    icon.style.setProperty('font-size', '18px');
                 } else if (size === 'Large') {
                     icon.style.setProperty('width', '55px', 'important');
                     icon.style.setProperty('height', '55px', 'important');
-                    icon.style.setProperty('font-size', '22px', 'important');
+                    icon.style.setProperty('font-size', '22px');
                 }
             }
         }
