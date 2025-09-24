@@ -1188,19 +1188,27 @@ if (window.innerWidth <= 768) {
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
-/* Icon Shape Rules - Consolidated */
+/* Icon Shape Rules - Consolidated with Maximum Specificity */
 .accessibility-icon[data-shape="circle"] {
     border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="rounded"] {
     border-radius: 25px !important;
     -webkit-border-radius: 25px !important;
     -moz-border-radius: 25px !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
 }
 
 .accessibility-icon[data-shape="square"] {
     border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
 }
 
 /* Ensure panel always appears on top of icon */
@@ -1213,7 +1221,7 @@ if (window.innerWidth <= 768) {
     z-index: 99998 !important;
 }
 
-/* Maximum Specificity Overrides for External CSS Conflicts */
+/* Maximum Specificity Overrides - Force Shape Application */
 .accessibility-icon[data-shape="rounded"],
 .accessibility-icon.rounded,
 .accessibility-icon[data-shape="rounded"].rounded {
@@ -1229,11 +1237,29 @@ if (window.innerWidth <= 768) {
 .accessibility-icon[data-shape="circle"],
 .accessibility-icon.circle {
     border-radius: 50% !important;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
 }
 
 .accessibility-icon[data-shape="square"],
 .accessibility-icon.square {
     border-radius: 0px !important;
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
+}
+
+/* Force rounded shape with absolute maximum specificity */
+.accessibility-icon.rounded {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
+}
+
+/* Additional force for rounded shape */
+.accessibility-icon[data-shape="rounded"] {
+    border-radius: 25px !important;
+    -webkit-border-radius: 25px !important;
+    -moz-border-radius: 25px !important;
 }
 
 /* Mobile Responsive Styles - Consolidated */
@@ -1270,6 +1296,199 @@ if (window.innerWidth <= 768) {
     .accessibility-panel .profile-info p {
         font-size: 12px !important;
     }
+    
+    /* Ensure rounded shape works on mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
+}
+
+/* Medium Mobile Screens (414px and similar) */
+@media (max-width: 450px) and (min-width: 401px) {
+    .accessibility-panel {
+        font-size: 10px !important;
+        padding: 10px !important;
+        width: 85vw !important;
+        max-width: 320px !important;
+        max-height: 75vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 12px !important;
+        margin-bottom: 7px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 10px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 9px !important;
+        padding: 5px 8px !important;
+        min-height: 26px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 8px !important;
+        padding: 3px 5px !important;
+        min-height: 22px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 11px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 9px !important;
+    }
+    
+    /* Medium toggles for medium mobile screens */
+    .toggle-switch {
+        width: 18px !important;
+        height: 11px !important;
+    }
+    
+    .toggle-switch .slider {
+        width: 18px !important;
+        height: 11px !important;
+    }
+    
+    .toggle-switch .slider:before {
+        width: 7px !important;
+        height: 7px !important;
+        left: 2px !important;
+        bottom: 2px !important;
+    }
+    
+    .toggle-switch input:checked + .slider:before {
+        transform: translateX(7px) !important;
+    }
+    
+    /* Medium profile items for medium mobile screens */
+    .profile-item {
+        padding: 3px !important;
+        margin-bottom: 3px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 9px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .profile-item p {
+        font-size: 8px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    /* Medium close button for medium mobile screens */
+    .close-btn {
+        font-size: 16px !important;
+        padding: 6px !important;
+    }
+    
+    /* Ensure rounded shape works on medium mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
+}
+
+/* Small Mobile Screens (375px and below) */
+@media (max-width: 400px) {
+    .accessibility-panel {
+        font-size: 9px !important;
+        padding: 8px !important;
+        width: 90vw !important;
+        max-width: 300px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 9px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 8px !important;
+        padding: 4px 6px !important;
+        min-height: 24px !important;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 7px !important;
+        padding: 2px 4px !important;
+        min-height: 20px !important;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 10px !important;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 8px !important;
+    }
+    
+    /* Smaller toggles for small screens */
+    .toggle-switch {
+        width: 16px !important;
+        height: 10px !important;
+    }
+    
+    .toggle-switch .slider {
+        width: 16px !important;
+        height: 10px !important;
+    }
+    
+    .toggle-switch .slider:before {
+        width: 6px !important;
+        height: 6px !important;
+        left: 2px !important;
+        bottom: 2px !important;
+    }
+    
+    .toggle-switch input:checked + .slider:before {
+        transform: translateX(6px) !important;
+    }
+    
+    /* Smaller profile items for small screens */
+    .profile-item {
+        padding: 2px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .profile-item h4 {
+        font-size: 8px !important;
+        margin-bottom: 1px !important;
+    }
+    
+    .profile-item p {
+        font-size: 7px !important;
+        margin-bottom: 1px !important;
+    }
+    
+    /* Smaller close button for small screens */
+    .close-btn {
+        font-size: 14px !important;
+        padding: 4px !important;
+    }
+    
+    /* Ensure rounded shape works on small mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1302,6 +1521,13 @@ if (window.innerWidth <= 768) {
     
     .accessibility-panel .profile-info p {
         font-size: 11px !important;
+    }
+    
+    /* Ensure rounded shape works on small mobile */
+    .accessibility-icon[data-shape="rounded"] {
+        border-radius: 25px !important;
+        -webkit-border-radius: 25px !important;
+        -moz-border-radius: 25px !important;
     }
 }
 
@@ -20399,6 +20625,10 @@ applyCustomizations(customizationData) {
                     icon.style.setProperty('border-radius', '25px', 'important');
                     icon.style.setProperty('-webkit-border-radius', '25px', 'important');
                     icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
                     console.log('[CK] Force applied rounded shape after timeout');
                 }
                 
@@ -20414,6 +20644,10 @@ applyCustomizations(customizationData) {
                     icon.style.setProperty('border-radius', '25px', 'important');
                     icon.style.setProperty('-webkit-border-radius', '25px', 'important');
                     icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
                     console.log('[CK] External CSS override applied');
                 }
                 
@@ -20421,6 +20655,35 @@ applyCustomizations(customizationData) {
                 const finalBorderRadius2 = finalComputedStyle2.borderRadius;
                 console.log('[CK] Final computed border-radius after external CSS override:', finalBorderRadius2);
             }, 500);
+            
+            // Final aggressive force application
+            setTimeout(() => {
+                console.log('[CK] === FINAL AGGRESSIVE FORCE ===');
+                if (shape === 'Rounded') {
+                    // Remove any conflicting styles first
+                    icon.style.removeProperty('border-radius');
+                    icon.style.removeProperty('-webkit-border-radius');
+                    icon.style.removeProperty('-moz-border-radius');
+                    
+                    // Apply rounded shape with maximum force
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    
+                    // Force reflow
+                    icon.offsetHeight;
+                    
+                    console.log('[CK] Final aggressive force applied');
+                }
+                
+                const finalComputedStyle3 = window.getComputedStyle(icon);
+                const finalBorderRadius3 = finalComputedStyle3.borderRadius;
+                console.log('[CK] Final computed border-radius after aggressive force:', finalBorderRadius3);
+            }, 1000);
         } else {
             console.error('[CK] Icon not found!');
         }
