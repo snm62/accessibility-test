@@ -1262,39 +1262,120 @@ if (window.innerWidth <= 768) {
     -moz-border-radius: 25px !important;
 }
 
-/* Mobile Responsive Styles - Consolidated */
-@media (max-width: 768px) {
+/* Mobile-First Responsive Design */
+
+/* Mobile Devices (Small Screens) - Base styles */
+@media (max-width: 480px) {
     .accessibility-panel {
-        font-size: 12px !important;
+        width: 90vw !important;
+        max-width: 350px !important;
+        padding: 12px !important;
+        /* Font sizes controlled by JavaScript - no !important overrides */
+    }
+    
+    .accessibility-icon {
+        width: 45px !important;
+        height: 45px !important;
+        /* Position controlled by JS; do not force a corner here */
+    }
+    
+    .accessibility-icon i {
+        /* Font size controlled by JavaScript */
+    }
+}
+
+/* Landscape Phones & Smaller Portrait Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+    .accessibility-panel {
         width: 80vw !important;
         max-width: 380px !important;
         padding: 14px !important;
+        /* Font sizes controlled by JavaScript - no !important overrides */
     }
     
+    .accessibility-icon {
+        width: 50px !important;
+        height: 50px !important;
+        /* Position controlled by JS */
+    }
+}
+
+/* Tablets (Portrait & Landscape) & Laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .accessibility-panel {
+        width: 70vw !important;
+        max-width: 450px !important;
+        padding: 16px !important;
+        /* Font sizes controlled by JavaScript - no !important overrides */
+    }
+    
+    .accessibility-icon {
+        width: 55px !important;
+        height: 55px !important;
+        /* Position controlled by JS */
+    }
+}
+
+/* Larger Displays (Desktops) */
+@media (min-width: 1025px) {
+    .accessibility-panel {
+        width: 500px !important;
+        max-width: 500px !important;
+        padding: 20px !important;
+        /* Font sizes controlled by JavaScript - no !important overrides */
+    }
+    
+    .accessibility-icon {
+        width: 60px !important;
+        height: 60px !important;
+        /* Position controlled by JS */
+    }
+}
+
+/* Orientation-specific styles */
+@media (orientation: landscape) and (max-width: 768px) {
+    .accessibility-panel {
+        width: 85vw !important;
+        max-width: 400px !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* High-resolution screens */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+    .accessibility-icon {
+        /* Ensure crisp rendering on high-DPI displays */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+    
     .accessibility-panel h2 {
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        font-size: 12px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
-        font-size: 12px !important;
         padding: 8px 12px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 11px !important;
         padding: 4px 8px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 12px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on mobile */
@@ -1305,46 +1386,7 @@ if (window.innerWidth <= 768) {
     }
 }
 
-/* Medium Mobile Screens (414px and similar) */
-@media (max-width: 450px) and (min-width: 401px) {
-    .accessibility-panel {
-        font-size: 10px !important;
-        padding: 10px !important;
-        width: 85vw !important;
-        max-width: 320px !important;
-        max-height: 75vh !important;
-        overflow-y: auto !important;
-    }
-    
-    .accessibility-panel h2 {
-        font-size: 12px !important;
-        margin-bottom: 7px !important;
-    }
-    
-    .accessibility-panel h3 {
-        font-size: 10px !important;
-        margin-bottom: 5px !important;
-    }
-    
-    .accessibility-panel .action-btn {
-        font-size: 9px !important;
-        padding: 5px 8px !important;
-        min-height: 26px !important;
-    }
-    
-    .accessibility-panel .scaling-btn {
-        font-size: 8px !important;
-        padding: 3px 5px !important;
-        min-height: 22px !important;
-    }
-    
-    .accessibility-panel .profile-info h4 {
-        font-size: 11px !important;
-    }
-    
-    .accessibility-panel .profile-info p {
-        font-size: 9px !important;
-    }
+/* Removed - replaced with mobile-first approach above */
     
     /* Medium toggles for medium mobile screens */
     .toggle-switch {
@@ -1375,18 +1417,18 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 9px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 2px !important;
     }
     
     .profile-item p {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 2px !important;
     }
     
     /* Medium close button for medium mobile screens */
     .close-btn {
-        font-size: 16px !important;
+        /* Font size controlled by JavaScript */
         padding: 6px !important;
     }
     
@@ -1401,7 +1443,7 @@ if (window.innerWidth <= 768) {
 /* Small Mobile Screens (375px and below) */
 @media (max-width: 400px) {
     .accessibility-panel {
-        font-size: 9px !important;
+        /* Font size controlled by JavaScript */
         padding: 8px !important;
         width: 90vw !important;
         max-width: 300px !important;
@@ -1410,33 +1452,33 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 9px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 4px !important;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
         padding: 4px 6px !important;
         min-height: 24px !important;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 7px !important;
+        /* Font size controlled by JavaScript */
         padding: 2px 4px !important;
         min-height: 20px !important;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 10px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Smaller toggles for small screens */
@@ -1468,18 +1510,18 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 1px !important;
     }
     
     .profile-item p {
-        font-size: 7px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 1px !important;
     }
     
     /* Smaller close button for small screens */
     .close-btn {
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
         padding: 4px !important;
     }
     
@@ -1493,34 +1535,34 @@ if (window.innerWidth <= 768) {
 
 @media (max-width: 480px) {
     .accessibility-panel {
-        font-size: 11px !important; /* Override external 8px */
+        /* Font size controlled by JavaScript */ /* Override external 8px */
     }
     
     .accessibility-panel h2 {
-        font-size: 13px !important; /* Override external 9px */
+        /* Font size controlled by JavaScript */ /* Override external 9px */
     }
     
     .accessibility-panel h3 {
-        font-size: 11px !important; /* Override external 8px */
+        /* Font size controlled by JavaScript */ /* Override external 8px */
     }
     
     /* Override external button size conflicts */
     .accessibility-panel .action-btn {
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
         padding: 6px 10px !important;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 10px !important;
+        /* Font size controlled by JavaScript */
         padding: 3px 6px !important;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on small mobile */
@@ -1543,18 +1585,7 @@ if (window.innerWidth <= 768) {
 
 /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
 
-/* Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Responsive sizing */
-@media (max-width: 1366px) and (min-width: 1025px) {
-    .accessibility-panel {
-        width: 65vw !important;
-        max-width: 450px !important;
-        font-size: 15px !important;
-        padding: 18px !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
-        position: fixed !important;
-        z-index: 100001 !important;
-    }
+/* Removed - replaced with mobile-first approach above */
     
     /* Ensure rounded shape works on large tablets */
     .accessibility-icon[data-shape="rounded"] {
@@ -1569,17 +1600,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 22px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Better content spacing for large tablets */
     .accessibility-panel h2 {
-        font-size: 18px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 14px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px !important;
     }
     
@@ -1589,31 +1620,20 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 15px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 10px 14px !important;
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
     }
 }
 
-/* Tablet/iPad starting from 820px - Responsive sizing */
-@media (max-width: 1024px) and (min-width: 820px) {
-    .accessibility-panel {
-        width: 75vw !important;
-        max-width: 380px !important;
-        font-size: 14px !important;
-        padding: 16px !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
-        position: fixed !important;
-        z-index: 100001 !important;
-    }
+/* Removed - replaced with mobile-first approach above */
     
     /* Ensure rounded shape works on tablets */
     .accessibility-icon[data-shape="rounded"] {
@@ -1628,7 +1648,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 20px !important;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1637,7 +1657,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 85vw !important;
         max-width: 450px !important;
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
         padding: 16px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
@@ -1658,17 +1678,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 20px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Better content spacing for tablet */
     .accessibility-panel h2 {
-        font-size: 16px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px !important;
     }
     
@@ -1678,31 +1698,20 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 8px 12px !important;
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
     }
 }
 
-/* Mobile Landscape - Wider panel with reasonable text and toggles */
-@media (max-width: 768px) and (min-width: 481px) {
-    .accessibility-panel {
-        width: 80vw !important;
-        max-width: 380px !important;
-        font-size: 13px !important;
-        padding: 14px !important;
-        max-height: 75vh !important;
-        overflow-y: auto !important;
-        position: fixed !important;
-        z-index: 100001 !important;
-    }
+/* Removed - replaced with mobile-first approach above */
     
     .accessibility-icon {
         width: 45px !important;
@@ -1710,17 +1719,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 18px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
-        font-size: 15px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px !important;
     }
     
@@ -1730,16 +1739,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 10px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 4px 6px !important;
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Much smaller action buttons for mobile landscape */
@@ -1747,12 +1756,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 3px 5px !important;
-        font-size: 7px !important;
+        /* Font size controlled by JavaScript */
         min-height: 20px !important;
     }
     
     .action-btn i {
-        font-size: 8px !important;
+        /* Font size controlled by JavaScript */
         margin-right: 2px !important;
     }
     
@@ -1784,7 +1793,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
         padding: 12px !important;
         max-height: 70vh !important;
     }
@@ -1795,17 +1804,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        font-size: 13px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 11px !important;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px !important;
     }
     
@@ -1815,16 +1824,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 7px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 5px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 2px 3px !important;
-        font-size: 5px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* EXTREMELY small action buttons for mobile portrait */
@@ -1832,12 +1841,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 1px 2px !important;
-        font-size: 4px !important;
+        /* Font size controlled by JavaScript */
         min-height: 12px !important;
     }
     
     .action-btn i {
-        font-size: 5px !important;
+        /* Font size controlled by JavaScript */
         margin-right: 1px !important;
     }
     
@@ -1874,7 +1883,7 @@ if (window.innerWidth <= 768) {
     position: absolute !important;
     top: -20px !important;
     left: 0 !important;
-    font-size: 8px !important;
+    /* Font size controlled by JavaScript */
     color: red !important;
     background: yellow !important;
     z-index: 9999 !important;
@@ -1885,7 +1894,7 @@ if (window.innerWidth <= 768) {
     position: absolute !important;
     top: -20px !important;
     left: 0 !important;
-    font-size: 8px !important;
+    /* Font size controlled by JavaScript */
     color: red !important;
     background: yellow !important;
     z-index: 9999 !important;
@@ -1896,7 +1905,7 @@ if (window.innerWidth <= 768) {
     position: absolute !important;
     top: -20px !important;
     left: 0 !important;
-    font-size: 8px !important;
+    /* Font size controlled by JavaScript */
     color: red !important;
     background: yellow !important;
     z-index: 9999 !important;
@@ -1913,18 +1922,14 @@ if (window.innerWidth <= 768) {
 
 /* ===== FORCE MOBILE STYLES - MAXIMUM AGGRESSIVE ===== */
 
-/* Force mobile styles with absolute maximum specificity */
-@media (max-width: 768px) {
-    .accessibility-panel {
-        font-size: 12px !important;
-    }
+/* Removed - replaced with mobile-first approach above */
     
     .accessibility-panel h2 {
-        font-size: 14px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        font-size: 12px !important;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on mobile */
@@ -1935,22 +1940,22 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 7px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 5px !important;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
-        font-size: 5px !important;
+        /* Font size controlled by JavaScript */
         padding: 2px 3px !important;
     }
     
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        font-size: 4px !important;
+        /* Font size controlled by JavaScript */
         padding: 1px 2px !important;
         min-height: 12px !important;
     }
@@ -2293,7 +2298,7 @@ if (window.innerWidth <= 768) {
             }
             
             .accessibility-icon i {
-                font-size: 18px !important;
+                /* Font size controlled by JavaScript */
             }
             
             .accessibility-panel {
@@ -2576,9 +2581,7 @@ if (window.innerWidth <= 768) {
 
                     height: 45px !important;
 
-                    bottom: 10px !important;
-
-                    left: 10px !important;
+                    /* Position controlled by JS; do not force a corner here */
 
                 }
 
@@ -2586,7 +2589,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-icon i {
 
-                    font-size: 18px !important;
+                    /* Font size controlled by JavaScript */
 
                 }
 
@@ -20497,39 +20500,41 @@ applyCustomizations(customizationData) {
 
     updateTriggerPosition(direction, position) {
         console.log('[CK] updateTriggerPosition() - Direction:', direction, 'Position:', position);
+        const normalizedDirection = (direction || '').toLowerCase();
+        const pos = (position || '').toLowerCase();
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
-            if (direction === 'vertical') {
+            if (normalizedDirection === 'vertical') {
                 // Force remove any existing positioning
                 icon.style.removeProperty('top');
                 icon.style.removeProperty('bottom');
                 icon.style.removeProperty('transform');
                 
-                if (position === 'Top') {
+                if (pos === 'top') {
                     icon.style.setProperty('top', '20px', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     console.log('[CK] Positioned icon at TOP');
-                } else if (position === 'Middle') {
+                } else if (pos === 'middle') {
                     icon.style.setProperty('top', '50%', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                     console.log('[CK] Positioned icon at MIDDLE with transform');
-                } else if (position === 'Bottom') {
+                } else if (pos === 'bottom') {
                     icon.style.setProperty('bottom', '20px', 'important');
                     icon.style.setProperty('top', 'auto', 'important');
                     console.log('[CK] Positioned icon at BOTTOM');
                 }
-            } else if (direction === 'horizontal') {
+            } else if (normalizedDirection === 'horizontal') {
                 // Force remove any existing positioning
                 icon.style.removeProperty('left');
                 icon.style.removeProperty('right');
                 
-                if (position === 'Left') {
+                if (pos === 'left') {
                     icon.style.setProperty('left', '20px', 'important');
                     icon.style.setProperty('right', 'auto', 'important');
                     console.log('[CK] Positioned icon at LEFT');
-                } else if (position === 'Right') {
+                } else if (pos === 'right') {
                     icon.style.setProperty('right', '20px', 'important');
                     icon.style.setProperty('left', 'auto', 'important');
                     console.log('[CK] Positioned icon at RIGHT');
@@ -21067,26 +21072,28 @@ applyCustomizations(customizationData) {
     
     updateMobileTriggerPosition(direction, position) {
         console.log('[CK] updateMobileTriggerPosition() - Direction:', direction, 'Position:', position);
+        const normalizedDirection = (direction || '').toLowerCase();
+        const pos = (position || '').toLowerCase();
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                if (direction === 'horizontal') {
-                    if (position === 'Left') {
+                if (normalizedDirection === 'horizontal') {
+                    if (pos === 'left') {
                         icon.style.setProperty('left', '10px', 'important');
                         icon.style.setProperty('right', 'auto', 'important');
-                    } else if (position === 'Right') {
+                    } else if (pos === 'right') {
                         icon.style.setProperty('right', '10px', 'important');
                         icon.style.setProperty('left', 'auto', 'important');
                     }
-                } else if (direction === 'vertical') {
-                    if (position === 'Top') {
+                } else if (normalizedDirection === 'vertical') {
+                    if (pos === 'top') {
                         icon.style.setProperty('top', '10px', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
-                    } else if (position === 'Bottom') {
+                    } else if (pos === 'bottom') {
                         icon.style.setProperty('bottom', '10px', 'important');
                         icon.style.setProperty('top', 'auto', 'important');
-                    } else if (position === 'Middle') {
+                    } else if (pos === 'middle') {
                         icon.style.setProperty('top', '50%', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'translateY(-50%)', 'important');
