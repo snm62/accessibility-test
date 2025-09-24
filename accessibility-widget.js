@@ -12334,14 +12334,14 @@ html body.big-white-cursor * {
 
         
 
-        // Apply to body using original size with !important to override CSS
+        // Apply to body using original size
 
         const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
 
-        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
+        document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
         
         // Also apply to html element to ensure it takes precedence
-        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`, 'important');
+        document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
 
         
 
@@ -12361,9 +12361,9 @@ html body.big-white-cursor * {
 
                 if (originalSize && !isNaN(originalSize)) {
 
-                    // Apply the scale to the original size with !important to override CSS
+                    // Apply the scale to the original size
 
-                    element.style.setProperty('font-size', `${originalSize * scale}px`, 'important');
+                    element.style.setProperty('font-size', `${originalSize * scale}px`);
 
                 }
 
