@@ -1217,7 +1217,7 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@77b2db8/accessibility-widget.css';
             // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
@@ -12063,23 +12063,17 @@ html body.big-white-cursor * {
 
     updateLineHeightDisplay() {
 
-        console.log('Accessibility Widget: updateLineHeightDisplay called, lineHeight:', this.lineHeight);
-
-        console.log('Accessibility Widget: shadowRoot exists:', !!this.shadowRoot);
-
-        
+        console.log('📏 [UPDATE DISPLAY] updateLineHeightDisplay called, lineHeight:', this.lineHeight);
+        console.log('📏 [UPDATE DISPLAY] shadowRoot exists:', !!this.shadowRoot);
 
         const display = this.shadowRoot.getElementById('line-height-value');
-
-        console.log('Accessibility Widget: line-height-value element found:', !!display);
-
-        
+        console.log('📏 [UPDATE DISPLAY] line-height-value element found:', !!display);
 
         if (display) {
-
+            console.log('📏 [UPDATE DISPLAY] Previous display value:', display.textContent);
             display.textContent = this.lineHeight + '%';
-
-            console.log('Accessibility Widget: Updated line height display to', this.lineHeight + '%');
+            console.log('📏 [UPDATE DISPLAY] Updated line height display to', this.lineHeight + '%');
+            console.log('📏 [UPDATE DISPLAY] Current display value after update:', display.textContent);
 
         } else {
 
@@ -14767,6 +14761,11 @@ html body.big-white-cursor * {
 
                 if (shouldApply) {
                 this.applyFeature(feature, true);
+
+                // Update displays for numeric features
+                if (feature === 'adjust-line-height') {
+                    this.updateLineHeightDisplay();
+                }
 
                 const toggle = this.shadowRoot.getElementById(feature);
 
@@ -20020,7 +20019,7 @@ html body.big-white-cursor * {
 
         // Then apply to specific content elements, excluding accessibility widget
         console.log('🔧 [ALIGN LEFT] Querying content elements...');
-        const contentElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
+        const contentElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span:not([class*="icon"]):not([class*="button"]), div:not([class*="icon"]):not([class*="button"]):not([class*="nav"]):not([class*="menu"]), li, td, th, label, small, em, strong, i, b, a, button, input, textarea, select, article, section, aside, nav, header, footer');
         console.log('🔧 [ALIGN LEFT] Found', contentElements.length, 'content elements');
 
         let processedCount = 0;
@@ -21901,12 +21900,15 @@ applyCustomizations(customizationData) {
             const isMobile = window.innerWidth <= 768;
             console.log('📱 [MOBILE POSITION] Is mobile:', isMobile);
             if (isMobile) {
-                // Clear all existing positioning
-                icon.style.setProperty('top', 'unset');
-                icon.style.setProperty('bottom', 'unset');
-                icon.style.setProperty('left', 'unset');
-                icon.style.setProperty('right', 'unset');
-                icon.style.setProperty('transform', 'unset');
+                // Clear all existing positioning aggressively
+                icon.style.removeProperty('top');
+                icon.style.removeProperty('bottom');
+                icon.style.removeProperty('left');
+                icon.style.removeProperty('right');
+                icon.style.removeProperty('transform');
+                icon.style.removeProperty('inset');
+                icon.style.setProperty('position', 'fixed');
+                icon.style.setProperty('inset', 'unset');
                 
                 // Apply horizontal positioning
                 console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
