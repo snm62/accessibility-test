@@ -435,6 +435,7 @@ if (window.innerWidth <= 768) {
                         toggle.checked = !toggle.checked;
 
                         const feature = toggle.id;
+                        console.log('🎹 [KEYBOARD TOGGLE] Feature toggled via keyboard:', feature, 'enabled:', toggle.checked);
 
                         const enabled = toggle.checked;
 
@@ -2935,6 +2936,16 @@ body.align-right a {
                 border-radius: 4px !important;
                 transition: outline 0.2s ease, background 0.2s ease !important;
             }
+            
+            /* Additional focus styles for accessibility icon when keyboard navigation is active */
+            body.highlight-focus #accessibility-icon:focus {
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+            }
 
 
 
@@ -3239,13 +3250,13 @@ body.align-right a {
 
                 color: white;
 
-                /* Ensure proper clickable area */
-                width: 44px !important;
-                height: 44px !important;
-                min-width: 44px !important;
-                min-height: 44px !important;
-                max-width: 44px !important;
-                max-height: 44px !important;
+                /* Match hide interface modal close button approach */
+                width: 30px !important;
+                height: 30px !important;
+                min-width: 30px !important;
+                min-height: 30px !important;
+                max-width: 30px !important;
+                max-height: 30px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -4115,16 +4126,16 @@ body.align-right a {
             .language-option.selected,
             .language-option[aria-selected="true"] {
 
-                background: #6366f1;
+                background: #6366f1 !important;
 
-                color: #ffffff;
+                color: #ffffff !important;
 
             }
 
             .language-option.selected:hover,
             .language-option[aria-selected="true"]:hover {
 
-                background: #4f46e5;
+                background: #4f46e5 !important;
 
             }
 
@@ -8310,8 +8321,9 @@ html body.big-white-cursor * {
             
 
             // Mark current language as selected
-
-            this.updateSelectedLanguage();
+            setTimeout(() => {
+                this.updateSelectedLanguage();
+            }, 100);
 
             // Announce to screen reader
 
@@ -8346,10 +8358,13 @@ html body.big-white-cursor * {
 
 
     updateSelectedLanguage() {
+        console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() called');
 
         const currentLang = this.getCurrentLanguage();
+        console.log('🎯 [LANGUAGE SELECTION] Current language:', currentLang);
 
         const languageOptions = this.shadowRoot.querySelectorAll('.language-option');
+        console.log('🎯 [LANGUAGE SELECTION] Found language options:', languageOptions.length);
 
         
 
@@ -8372,6 +8387,7 @@ html body.big-white-cursor * {
 
 
     selectLanguage(langCode, flag) {
+        console.log('🎯 [LANGUAGE SELECTION] selectLanguage() called with:', langCode);
 
         // Update current language display in header
 
@@ -8422,8 +8438,9 @@ html body.big-white-cursor * {
 
 
         // Update selected state in dropdown
-
+        console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage()');
         this.updateSelectedLanguage();
+        console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed');
 
 
 
@@ -9148,9 +9165,10 @@ html body.big-white-cursor * {
 
 
     getCurrentLanguage() {
-
-        return this.currentLanguage || localStorage.getItem('accessibility-widget-language') || 'en';
-
+        const stored = localStorage.getItem('accessibility-widget-language');
+        const current = this.currentLanguage || stored || 'en';
+        console.log('🎯 [LANGUAGE SELECTION] getCurrentLanguage() - stored:', stored, 'current:', current);
+        return current;
     }
 
 
@@ -11654,6 +11672,8 @@ html body.big-white-cursor * {
         const controls = this.shadowRoot.getElementById('content-scaling-controls');
 
         console.log('🎛️ [CONTENT SCALING] Controls element found:', !!controls);
+        console.log('🎛️ [CONTENT SCALING] Shadow root exists:', !!this.shadowRoot);
+        console.log('🎛️ [CONTENT SCALING] Controls element:', controls);
 
         if (controls) {
 
@@ -11741,6 +11761,8 @@ html body.big-white-cursor * {
         const controls = this.shadowRoot.getElementById('font-sizing-controls');
 
         console.log('🔤 [FONT SIZING] Controls element found:', !!controls);
+        console.log('🔤 [FONT SIZING] Shadow root exists:', !!this.shadowRoot);
+        console.log('🔤 [FONT SIZING] Controls element:', controls);
 
         if (controls) {
 
@@ -11840,6 +11862,8 @@ html body.big-white-cursor * {
         const controls = this.shadowRoot.getElementById('line-height-controls');
 
         console.log('Accessibility Widget: Line height controls found:', !!controls);
+        console.log('Accessibility Widget: Shadow root exists:', !!this.shadowRoot);
+        console.log('Accessibility Widget: Controls element:', controls);
 
         if (controls) {
 
@@ -12454,6 +12478,9 @@ html body.big-white-cursor * {
         console.log('Accessibility Widget: toggleLetterSpacingControls called with enabled:', enabled);
 
         const controls = this.shadowRoot.getElementById('letter-spacing-controls');
+        console.log('Accessibility Widget: Letter spacing controls found:', !!controls);
+        console.log('Accessibility Widget: Shadow root exists:', !!this.shadowRoot);
+        console.log('Accessibility Widget: Controls element:', controls);
 
         if (controls) {
 
@@ -14238,6 +14265,13 @@ html body.big-white-cursor * {
             console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
             console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
             console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
+            
+            // Special debugging for accessibility icon
+            if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                console.log('🎯 [FOCUS] Accessibility icon focused!');
+                console.log('🎯 [FOCUS] Icon classes:', e.target.className);
+                console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+            }
 
             if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
@@ -14265,15 +14299,13 @@ html body.big-white-cursor * {
 
                 
 
-                // Skip if element is not interactive or is part of accessibility widget
+                // Skip if element is not interactive or is part of accessibility panel (but allow accessibility icon)
 
                 if (focusedElement === document.body || 
 
                     focusedElement === document.documentElement ||
 
                     focusedElement.closest('.accessibility-panel') ||
-
-                    focusedElement.closest('#accessibility-icon') ||
 
                     !isInteractiveElement) {
 
@@ -17144,6 +17176,13 @@ html body.big-white-cursor * {
             console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
             console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
             console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
+            
+            // Special debugging for accessibility icon
+            if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                console.log('🎯 [FOCUS] Accessibility icon focused!');
+                console.log('🎯 [FOCUS] Icon classes:', e.target.className);
+                console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+            }
 
             if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
@@ -17171,15 +17210,13 @@ html body.big-white-cursor * {
 
                 
 
-                // Skip if element is not interactive or is part of accessibility widget
+                // Skip if element is not interactive or is part of accessibility panel (but allow accessibility icon)
 
                 if (focusedElement === document.body || 
 
                     focusedElement === document.documentElement ||
 
                     focusedElement.closest('.accessibility-panel') ||
-
-                    focusedElement.closest('#accessibility-icon') ||
 
                     !isInteractiveElement) {
 
@@ -21748,14 +21785,16 @@ applyCustomizations(customizationData) {
             console.log('📱 [MOBILE SIZES] Reduced language selector size');
         }
         
-        // Reduce close button size and fix position
+        // Reduce close button size and fix position - match hide interface modal approach
         const closeBtn = this.shadowRoot?.querySelector('.close-btn');
         if (closeBtn) {
-            closeBtn.style.setProperty('font-size', '16px', 'important');
-            closeBtn.style.setProperty('width', '32px', 'important');
-            closeBtn.style.setProperty('height', '32px', 'important');
-            closeBtn.style.setProperty('min-width', '32px', 'important');
-            closeBtn.style.setProperty('min-height', '32px', 'important');
+            closeBtn.style.setProperty('font-size', '20px', 'important');
+            closeBtn.style.setProperty('width', '28px', 'important');
+            closeBtn.style.setProperty('height', '28px', 'important');
+            closeBtn.style.setProperty('min-width', '28px', 'important');
+            closeBtn.style.setProperty('min-height', '28px', 'important');
+            closeBtn.style.setProperty('max-width', '28px', 'important');
+            closeBtn.style.setProperty('max-height', '28px', 'important');
             closeBtn.style.setProperty('top', '8px', 'important');
             closeBtn.style.setProperty('left', '12px', 'important');
             closeBtn.style.setProperty('display', 'flex', 'important');
@@ -21955,6 +21994,8 @@ applyCustomizations(customizationData) {
             closeBtn.style.removeProperty('height');
             closeBtn.style.removeProperty('min-width');
             closeBtn.style.removeProperty('min-height');
+            closeBtn.style.removeProperty('max-width');
+            closeBtn.style.removeProperty('max-height');
             closeBtn.style.removeProperty('top');
             closeBtn.style.removeProperty('left');
             closeBtn.style.removeProperty('display');
