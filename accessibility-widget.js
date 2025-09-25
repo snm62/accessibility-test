@@ -11586,6 +11586,9 @@ html body.big-white-cursor * {
         if (controls) {
 
             controls.style.display = 'block';
+            
+            // Bind events when controls are shown
+            this.bindLineHeightEvents();
 
         }
 
@@ -13625,17 +13628,12 @@ html body.big-white-cursor * {
             style.id = 'highlight-hover-css';
             style.textContent = `
                 .highlight-hover *:hover {
-                    background-color: #ffff00 !important;
-                    color: #000000 !important;
-                    outline: 2px solid #ff0000 !important;
+                    outline: 2px solid #0066ff !important;
                     outline-offset: 2px !important;
                 }
                 
                 .highlight-hover a:hover {
-                    background-color: #ffff00 !important;
-                    color: #000000 !important;
-                    text-decoration: underline !important;
-                    outline: 2px solid #ff0000 !important;
+                    outline: 2px solid #0066ff !important;
                     outline-offset: 2px !important;
                 }
                 
@@ -13643,15 +13641,12 @@ html body.big-white-cursor * {
                 .highlight-hover input:hover,
                 .highlight-hover select:hover,
                 .highlight-hover textarea:hover {
-                    background-color: #ffff00 !important;
-                    color: #000000 !important;
-                    border: 2px solid #ff0000 !important;
-                    outline: 2px solid #ff0000 !important;
+                    outline: 2px solid #0066ff !important;
                     outline-offset: 2px !important;
                 }
                 
                 .highlight-hover img:hover {
-                    outline: 3px solid #ff0000 !important;
+                    outline: 3px solid #0066ff !important;
                     outline-offset: 3px !important;
                 }
             `;
@@ -14731,6 +14726,9 @@ html body.big-white-cursor * {
             if (lineHeightControls) {
 
                 lineHeightControls.style.display = 'block';
+                
+                // Bind events when controls are shown
+                this.bindLineHeightEvents();
 
             }
 
