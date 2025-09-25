@@ -1247,27 +1247,17 @@ if (window.innerWidth <= 768) {
 
 /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
 
-/* Icon Shape Rules - Consolidated with Maximum Specificity */
+/* Icon Shape Rules - Simplified */
 .accessibility-icon[data-shape="circle"] {
-    border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
+    border-radius: 50%;
 }
 
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
+    border-radius: 25px;
 }
 
 .accessibility-icon[data-shape="square"] {
-    border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
+    border-radius: 0px;
 }
 
 /* Ensure panel always appears on top of icon */
@@ -1280,45 +1270,17 @@ if (window.innerWidth <= 768) {
     z-index: 99998 !important;
 }
 
-/* Maximum Specificity Overrides - Force Shape Application */
-.accessibility-icon[data-shape="rounded"],
-.accessibility-icon.rounded,
-.accessibility-icon[data-shape="rounded"].rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
-    border-top-left-radius: 25px !important;
-    border-top-right-radius: 25px !important;
-    border-bottom-left-radius: 25px !important;
-    border-bottom-right-radius: 25px !important;
-}
-
-.accessibility-icon[data-shape="circle"],
-.accessibility-icon.circle {
-    border-radius: 50% !important;
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
-}
-
-.accessibility-icon[data-shape="square"],
-.accessibility-icon.square {
-    border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
-}
-
-/* Force rounded shape with absolute maximum specificity */
+/* Additional shape classes for compatibility */
 .accessibility-icon.rounded {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
+    border-radius: 25px;
 }
 
-/* Additional force for rounded shape */
-.accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px !important;
-    -webkit-border-radius: 25px !important;
-    -moz-border-radius: 25px !important;
+.accessibility-icon.circle {
+    border-radius: 50%;
+}
+
+.accessibility-icon.square {
+    border-radius: 0px;
 }
 
 /* Mobile-First Responsive Design */
@@ -1760,11 +1722,9 @@ if (window.innerWidth <= 768) {
         /* Font size controlled by JavaScript */
     }
     
-    /* Ensure rounded shape works on mobile */
+    /* Mobile shape adjustments */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
     }
 }
 
@@ -2314,11 +2274,9 @@ if (window.innerWidth <= 768) {
         /* Font size controlled by JavaScript */
     }
     
-    /* Ensure rounded shape works on mobile */
+    /* Mobile shape adjustments */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 25px;
     }
     
     .profile-item h4 {
@@ -2371,6 +2329,59 @@ if (window.innerWidth <= 768) {
 .accessibility-panel.show {
     display: block !important;
     visibility: visible !important;
+}
+
+/* Text Alignment CSS Rules */
+body.align-left * {
+    text-align: left !important;
+}
+
+body.align-center * {
+    text-align: center !important;
+}
+
+body.align-right * {
+    text-align: right !important;
+}
+
+/* More specific alignment rules for better coverage */
+body.align-left h1,
+body.align-left h2,
+body.align-left h3,
+body.align-left h4,
+body.align-left h5,
+body.align-left h6,
+body.align-left p,
+body.align-left div,
+body.align-left span,
+body.align-left a {
+    text-align: left !important;
+}
+
+body.align-center h1,
+body.align-center h2,
+body.align-center h3,
+body.align-center h4,
+body.align-center h5,
+body.align-center h6,
+body.align-center p,
+body.align-center div,
+body.align-center span,
+body.align-center a {
+    text-align: center !important;
+}
+
+body.align-right h1,
+body.align-right h2,
+body.align-right h3,
+body.align-right h4,
+body.align-right h5,
+body.align-right h6,
+body.align-right p,
+body.align-right div,
+body.align-right span,
+body.align-right a {
+    text-align: right !important;
 }
 `;
 
@@ -21366,10 +21377,10 @@ applyCustomizations(customizationData) {
             console.log('[CK] Target border-radius:', borderRadius);
             
             // Apply the border-radius with maximum specificity
-            icon.style.setProperty('border-radius', borderRadius, 'important');
-            icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
-            icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
-            console.log('[CK] Applied border-radius with !important');
+            icon.style.setProperty('border-radius', borderRadius);
+            icon.style.setProperty('-webkit-border-radius', borderRadius);
+            icon.style.setProperty('-moz-border-radius', borderRadius);
+            console.log('[CK] Applied border-radius');
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
@@ -21900,44 +21911,46 @@ applyCustomizations(customizationData) {
             const isMobile = window.innerWidth <= 768;
             console.log('📱 [MOBILE POSITION] Is mobile:', isMobile);
             if (isMobile) {
-                // Clear all existing positioning aggressively
+                // Clear all existing positioning properties
                 icon.style.removeProperty('top');
                 icon.style.removeProperty('bottom');
                 icon.style.removeProperty('left');
                 icon.style.removeProperty('right');
                 icon.style.removeProperty('transform');
                 icon.style.removeProperty('inset');
-                icon.style.setProperty('position', 'fixed');
-                icon.style.setProperty('inset', 'unset');
+                
+                // Set base positioning
+                icon.style.position = 'fixed';
+                icon.style.zIndex = '9999';
                 
                 // Apply horizontal positioning
                 console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
                 if (horizontalPos === 'left') {
-                    icon.style.setProperty('left', '10px');
-                    icon.style.setProperty('right', 'auto');
-                    console.log('📱 [MOBILE POSITION] Set left: 10px, right: auto');
+                    icon.style.left = '20px';
+                    icon.style.right = 'auto';
+                    console.log('📱 [MOBILE POSITION] Set left: 20px, right: auto');
                 } else if (horizontalPos === 'right') {
-                    icon.style.setProperty('right', '10px');
-                    icon.style.setProperty('left', 'auto');
-                    console.log('📱 [MOBILE POSITION] Set right: 10px, left: auto');
+                    icon.style.right = '20px';
+                    icon.style.left = 'auto';
+                    console.log('📱 [MOBILE POSITION] Set right: 20px, left: auto');
                 }
                 
                 // Apply vertical positioning
                 console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
                 if (verticalPos === 'top') {
-                    icon.style.setProperty('top', '10px');
-                    icon.style.setProperty('bottom', 'auto');
-                    icon.style.setProperty('transform', 'none');
-                    console.log('📱 [MOBILE POSITION] Set top: 10px, bottom: auto, transform: none');
+                    icon.style.top = '20px';
+                    icon.style.bottom = 'auto';
+                    icon.style.transform = 'none';
+                    console.log('📱 [MOBILE POSITION] Set top: 20px, bottom: auto, transform: none');
                 } else if (verticalPos === 'bottom') {
-                    icon.style.setProperty('bottom', '10px');
-                    icon.style.setProperty('top', 'auto');
-                    icon.style.setProperty('transform', 'none');
-                    console.log('📱 [MOBILE POSITION] Set bottom: 10px, top: auto, transform: none');
+                    icon.style.bottom = '20px';
+                    icon.style.top = 'auto';
+                    icon.style.transform = 'none';
+                    console.log('📱 [MOBILE POSITION] Set bottom: 20px, top: auto, transform: none');
                 } else if (verticalPos === 'middle') {
-                    icon.style.setProperty('top', '50%');
-                    icon.style.setProperty('bottom', 'auto');
-                    icon.style.setProperty('transform', 'translateY(-50%)');
+                    icon.style.top = '50%';
+                    icon.style.bottom = 'auto';
+                    icon.style.transform = 'translateY(-50%)';
                     console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%)');
                 }
                 
@@ -21948,40 +21961,7 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
                 
-                // Force reapply styles after a short delay to override any conflicting CSS
-                setTimeout(() => {
-                    console.log('📱 [MOBILE POSITION] Reapplying styles after delay...');
-                    if (horizontalPos === 'right') {
-                        icon.style.setProperty('right', '10px');
-                        icon.style.setProperty('left', 'auto');
-                    } else if (horizontalPos === 'left') {
-                        icon.style.setProperty('left', '10px');
-                        icon.style.setProperty('right', 'auto');
-                    }
-                    
-                    if (verticalPos === 'middle') {
-                        icon.style.setProperty('top', '50%');
-                        icon.style.setProperty('bottom', 'auto');
-                        icon.style.setProperty('transform', 'translateY(-50%)');
-                    } else if (verticalPos === 'top') {
-                        icon.style.setProperty('top', '10px');
-                        icon.style.setProperty('bottom', 'auto');
-                        icon.style.setProperty('transform', 'none');
-                    } else if (verticalPos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px');
-                        icon.style.setProperty('top', 'auto');
-                        icon.style.setProperty('transform', 'none');
-                    }
-                    
-                    console.log('📱 [MOBILE POSITION] Final styles after delay:');
-                    console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
-                    console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
-                    console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
-                    console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
-                    console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
-                }, 100);
-                
-                console.log('📱 [MOBILE POSITION] Mobile icon positioned with !important:', horizontalPos, verticalPos, '- COMPLETED');
+                console.log('📱 [MOBILE POSITION] Mobile icon positioned:', horizontalPos, verticalPos, '- COMPLETED');
             }
         }
     }
