@@ -696,7 +696,7 @@ if (window.innerWidth <= 768) {
         this.keyboardShortcutHandler = (e) => {
 
             console.log('Accessibility Widget: Key pressed:', e.key, 'Alt:', e.altKey, 'Keyboard nav enabled:', this.settings['keyboard-nav']);
-            
+
             // Detect Tab key navigation
             if (e.key === 'Tab') {
                 this.isKeyboardNavigation = true;
@@ -8354,7 +8354,7 @@ html body.big-white-cursor * {
 
             // Mark current language as selected
             setTimeout(() => {
-                this.updateSelectedLanguage();
+            this.updateSelectedLanguage();
             }, 100);
 
             // Announce to screen reader
@@ -8406,9 +8406,14 @@ html body.big-white-cursor * {
 
             // apply selected state
             if (option.dataset.lang === currentLang) {
+                console.log('🎯 [LANGUAGE SELECTION] Setting option as selected:', option.dataset.lang);
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
                 option.setAttribute('data-selected', 'true');
+                console.log('🎯 [LANGUAGE SELECTION] Option classes after setting:', option.className);
+                console.log('🎯 [LANGUAGE SELECTION] Option aria-selected:', option.getAttribute('aria-selected'));
+            } else {
+                console.log('🎯 [LANGUAGE SELECTION] Option not selected:', option.dataset.lang);
             }
         });
 
@@ -14304,6 +14309,15 @@ html body.big-white-cursor * {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+                console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
+                
+                // Apply focus styles directly to the accessibility icon
+                e.target.style.outline = '3px solid #6366f1';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.background = 'rgba(99, 102, 241, 0.1)';
+                e.target.style.borderRadius = '4px';
+                e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                return; // Exit early to prevent other focus handling
             }
 
             if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
@@ -14397,6 +14411,20 @@ html body.big-white-cursor * {
         // Add the focus event listener
 
         document.addEventListener('focusin', this.highlightFocusHandler, true);
+        
+        // Add focusout handler to clean up accessibility icon styles
+        this.highlightFocusOutHandler = (e) => {
+            if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                console.log('🎯 [FOCUS] Accessibility icon lost focus - removing styles');
+                e.target.style.outline = '';
+                e.target.style.outlineOffset = '';
+                e.target.style.background = '';
+                e.target.style.borderRadius = '';
+                e.target.style.transition = '';
+            }
+        };
+        
+        document.addEventListener('focusout', this.highlightFocusOutHandler, true);
 
         console.log('Accessibility Widget: Focus event listener added');
 
@@ -14512,6 +14540,12 @@ html body.big-white-cursor * {
 
             this.highlightFocusHandler = null;
 
+        }
+        
+        // Remove the focusout handler
+        if (this.highlightFocusOutHandler) {
+            document.removeEventListener('focusout', this.highlightFocusOutHandler, true);
+            this.highlightFocusOutHandler = null;
         }
 
         
@@ -17213,6 +17247,15 @@ html body.big-white-cursor * {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+                console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
+                
+                // Apply focus styles directly to the accessibility icon
+                e.target.style.outline = '3px solid #6366f1';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.background = 'rgba(99, 102, 241, 0.1)';
+                e.target.style.borderRadius = '4px';
+                e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                return; // Exit early to prevent other focus handling
             }
 
             if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
@@ -17306,6 +17349,20 @@ html body.big-white-cursor * {
         // Add the focus event listener
 
         document.addEventListener('focusin', this.highlightFocusHandler, true);
+        
+        // Add focusout handler to clean up accessibility icon styles
+        this.highlightFocusOutHandler = (e) => {
+            if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                console.log('🎯 [FOCUS] Accessibility icon lost focus - removing styles');
+                e.target.style.outline = '';
+                e.target.style.outlineOffset = '';
+                e.target.style.background = '';
+                e.target.style.borderRadius = '';
+                e.target.style.transition = '';
+            }
+        };
+        
+        document.addEventListener('focusout', this.highlightFocusOutHandler, true);
 
         console.log('Accessibility Widget: Focus event listener added');
 
@@ -17421,6 +17478,12 @@ html body.big-white-cursor * {
 
             this.highlightFocusHandler = null;
 
+        }
+        
+        // Remove the focusout handler
+        if (this.highlightFocusOutHandler) {
+            document.removeEventListener('focusout', this.highlightFocusOutHandler, true);
+            this.highlightFocusOutHandler = null;
         }
 
         
@@ -21889,9 +21952,15 @@ applyCustomizations(customizationData) {
                 text-overflow: ellipsis !important; 
                 max-width: 100% !important; 
             }
+            /* Make ON text smaller on mobile to fit inside purple toggle area */
+            .toggle-switch > input:checked + .slider::after {
+                font-size: 8px !important;
+                font-weight: 600 !important;
+                line-height: 1 !important;
+            }
         `;
         this.shadowRoot?.appendChild(style);
-        console.log('📱 [MOBILE SIZES] Added toggle width fix for ON state and text sliding fix');
+        console.log('📱 [MOBILE SIZES] Added toggle width fix for ON state, text sliding fix, and smaller ON text');
         
         console.log('📱 [MOBILE SIZES] Mobile size reductions applied successfully');
     }
