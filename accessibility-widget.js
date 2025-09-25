@@ -352,7 +352,7 @@ if (window.innerWidth <= 768) {
 
                 } else if (feature === 'align-center' && enabled) {
                     console.log('🔧 [TOGGLE HANDLER] Enabling align-center, disabling others...');
-                    
+
                     // Clear all alignment classes first
                     this.clearAllAlignmentClasses();
 
@@ -366,7 +366,7 @@ if (window.innerWidth <= 768) {
 
                 } else if (feature === 'align-right' && enabled) {
                     console.log('🔧 [TOGGLE HANDLER] Enabling align-right, disabling others...');
-                    
+
                     // Clear all alignment classes first
                     this.clearAllAlignmentClasses();
 
@@ -5279,7 +5279,7 @@ html body.big-white-cursor * {
 
                                 <p>This profile enables motor-impaired persons to operate the website using keyboard keys (Tab, Shift+Tab, Enter) and shortcuts (e.g., "M" for menus, "H" for headings, "F" for forms, "B" for buttons, "G" for graphics).</p>
 
-                                
+
                             </div>
 
                             <small style="color: #6366f1; font-style: italic;">Activates with Screen Reader</small>
@@ -6872,7 +6872,13 @@ html body.big-white-cursor * {
 
                 activatesWithScreenReader: "Aktiviert sich mit Bildschirmleser",
 
-                activatesWithKeyboardNav: "Aktiviert sich mit Tastaturnavigation"
+                activatesWithKeyboardNav: "Aktiviert sich mit Tastaturnavigation",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "Barrierefreiheits-Interface ausblenden?",
+                hideInterfaceModalText: "Bitte beachten Sie: Wenn Sie sich entscheiden, das Barrierefreiheits-Interface auszublenden, können Sie es nicht mehr sehen, es sei denn, Sie löschen Ihren Browserverlauf und Ihre Daten. Sind Sie sicher, dass Sie das Interface ausblenden möchten?",
+                hideInterfaceModalAccept: "Akzeptieren",
+                hideInterfaceModalCancel: "Abbrechen"
 
             },
 
@@ -7061,7 +7067,13 @@ html body.big-white-cursor * {
                 screenReaderDetailed: "Este perfil ajusta o site para ser compatível com leitores de tela como JAWS, NVDA, VoiceOver e TalkBack. O software leitor de tela está instalado no computador e smartphone do usuário cego, e os sites devem garantir compatibilidade.",
     screenReaderNote: "Nota: Este perfil é ativado automaticamente com leitores de tela.",
                 activatesWithScreenReader: "Ativa com Leitor de Tela",
-                activatesWithKeyboardNav: "Ativa com Navegação por Teclado"
+                activatesWithKeyboardNav: "Ativa com Navegação por Teclado",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "Ocultar Interface de Acessibilidade?",
+                hideInterfaceModalText: "Por favor, note: Se você escolher ocultar a interface de acessibilidade, não conseguirá vê-la novamente, a menos que limpe o histórico de navegação e os dados. Tem certeza de que deseja ocultar a interface?",
+                hideInterfaceModalAccept: "Aceitar",
+                hideInterfaceModalCancel: "Cancelar"
             },
 
             it: {
@@ -7152,7 +7164,13 @@ html body.big-white-cursor * {
                 screenReaderDetailed: "Questo profilo regola il sito web per essere compatibile con i lettori di schermo come JAWS, NVDA, VoiceOver e TalkBack. Il software lettore di schermo è installato sul computer e smartphone dell'utente cieco, e i siti web devono garantire la compatibilità.",
     screenReaderNote: "Nota: Questo profilo si attiva automaticamente con i lettori di schermo.",
                 activatesWithScreenReader: "Si attiva con Lettore di Schermo",
-                activatesWithKeyboardNav: "Si attiva con Navigazione da Tastiera"
+                activatesWithKeyboardNav: "Si attiva con Navigazione da Tastiera",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "Nascondere l'Interfaccia di Accessibilità?",
+                hideInterfaceModalText: "Si prega di notare: Se scegli di nascondere l'interfaccia di accessibilità, non potrai più vederla, a meno che non cancelli la cronologia di navigazione e i dati. Sei sicuro di voler nascondere l'interfaccia?",
+                hideInterfaceModalAccept: "Accetta",
+                hideInterfaceModalCancel: "Annulla"
 },
 
             il: {
@@ -7243,7 +7261,13 @@ html body.big-white-cursor * {
     screenReaderDetailed: "פרופיל זה מתאים את האתר להיות תואם לקוראי מסך כמו JAWS, NVDA, VoiceOver ו-TalkBack. תוכנת קורא מסך מותקנת במחשב ובסמארטפון של המשתמש העיוור, ואתרים צריכים להבטיח תאימות.",
     screenReaderNote: "הערה: פרופיל זה מופעל אוטומטית עם קוראי מסך.",
     activatesWithScreenReader: "מופעל עם קורא מסך",
-    activatesWithKeyboardNav: "מופעל עם ניווט במקלדת"
+    activatesWithKeyboardNav: "מופעל עם ניווט במקלדת",
+    
+    // Hide Interface Modal
+    hideInterfaceModalTitle: "להסתיר את ממשק הנגישות?",
+    hideInterfaceModalText: "שימו לב: אם תבחרו להסתיר את ממשק הנגישות, לא תוכלו לראות אותו יותר, אלא אם תמחקו את היסטוריית הגלישה והנתונים. האם אתם בטוחים שברצונכם להסתיר את הממשק?",
+    hideInterfaceModalAccept: "קבל",
+    hideInterfaceModalCancel: "בטל"
             },
 
             he: {
@@ -7512,7 +7536,13 @@ html body.big-white-cursor * {
     screenReaderDetailed: "Этот профиль настраивает сайт для совместимости со скрин-ридерами, такими как JAWS, NVDA, VoiceOver и TalkBack. Программное обеспечение скрин-ридера установлено на компьютере и смартфоне слепого пользователя, и веб-сайты должны обеспечивать совместимость.",
     screenReaderNote: "Примечание: Этот профиль автоматически активируется со скрин-ридерами.",
     activatesWithScreenReader: "Активируется со скрин-ридером",
-    activatesWithKeyboardNav: "Активируется с навигацией по клавиатуре"
+    activatesWithKeyboardNav: "Активируется с навигацией по клавиатуре",
+    
+    // Hide Interface Modal
+    hideInterfaceModalTitle: "Скрыть интерфейс доступности?",
+    hideInterfaceModalText: "Обратите внимание: Если вы решите скрыть интерфейс доступности, вы больше не сможете его видеть, если только не очистите историю браузера и данные. Вы уверены, что хотите скрыть интерфейс?",
+    hideInterfaceModalAccept: "Принять",
+    hideInterfaceModalCancel: "Отмена"
 },
             tw: {
     title: "無障礙調整",
@@ -7602,7 +7632,13 @@ html body.big-white-cursor * {
     screenReaderDetailed: "此設定檔調整網站以與JAWS、NVDA、VoiceOver和TalkBack等螢幕閱讀器相容。螢幕閱讀器軟體安裝在盲人用戶的電腦和智慧型手機上，網站應確保相容性。",
     screenReaderNote: "注意：此設定檔會自動與螢幕閱讀器一起啟用。",
     activatesWithScreenReader: "與螢幕閱讀器一起啟用",
-    activatesWithKeyboardNav: "與鍵盤導航一起啟用"
+    activatesWithKeyboardNav: "與鍵盤導航一起啟用",
+    
+    // Hide Interface Modal
+    hideInterfaceModalTitle: "隱藏無障礙介面？",
+    hideInterfaceModalText: "請注意：如果您選擇隱藏無障礙介面，除非清除瀏覽歷史記錄和數據，否則將無法再看到它。您確定要隱藏介面嗎？",
+    hideInterfaceModalAccept: "接受",
+    hideInterfaceModalCancel: "取消"
 },
             ar: {
 
@@ -7778,7 +7814,13 @@ html body.big-white-cursor * {
 
                 activatesWithScreenReader: "يتفعل مع قارئ الشاشة",
 
-                activatesWithKeyboardNav: "يتفعل مع التنقل بلوحة المفاتيح"
+                activatesWithKeyboardNav: "يتفعل مع التنقل بلوحة المفاتيح",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "إخفاء واجهة إمكانية الوصول؟",
+                hideInterfaceModalText: "يرجى ملاحظة: إذا اخترت إخفاء واجهة إمكانية الوصول، لن تتمكن من رؤيتها مرة أخرى، إلا إذا قمت بمسح سجل التصفح والبيانات. هل أنت متأكد من أنك تريد إخفاء الواجهة؟",
+                hideInterfaceModalAccept: "قبول",
+                hideInterfaceModalCancel: "إلغاء"
 
             },
             ae: {
@@ -7869,7 +7911,13 @@ html body.big-white-cursor * {
     screenReaderDetailed: "هذا الملف يعدل الموقع ليكون متوافقاً مع قارئات الشاشة مثل JAWS وNVDA وVoiceOver وTalkBack. برنامج قارئ الشاشة مثبت على حاسوب وهاتف المستخدم المكفوف، والمواقع يجب أن تضمن التوافق.",
     screenReaderNote: "ملاحظة: هذا الملف يُفعل تلقائياً مع قارئات الشاشة.",
     activatesWithScreenReader: "يُفعل مع قارئ الشاشة",
-    activatesWithKeyboardNav: "يُفعل مع التنقل بلوحة المفاتيح"
+    activatesWithKeyboardNav: "يُفعل مع التنقل بلوحة المفاتيح",
+    
+    // Hide Interface Modal
+    hideInterfaceModalTitle: "إخفاء واجهة إمكانية الوصول؟",
+    hideInterfaceModalText: "يرجى ملاحظة: إذا اخترت إخفاء واجهة إمكانية الوصول، لن تتمكن من رؤيتها مرة أخرى، إلا إذا قمت بمسح سجل التصفح والبيانات. هل أنت متأكد من أنك تريد إخفاء الواجهة؟",
+    hideInterfaceModalAccept: "قبول",
+    hideInterfaceModalCancel: "إلغاء"
 },
             zh: { title: "无障碍调整", seizureSafe: "癫痫安全配置文件", seizureSafeDesc: "清除闪烁并减少颜色", visionImpaired: "视力障碍配置文件", visionImpairedDesc: "增强网站的视觉效果", adhdFriendly: "多动症友好配置文件", adhdFriendlyDesc: "减少干扰并帮助集中注意力", fontSizing: "字体大小", fontSizingDesc: "增加或减少字体大小", adjustLineHeight: "调整行高", adjustLineHeightDesc: "增加或减少行高", adjustLetterSpacing: "调整字母间距", adjustLetterSpacingDesc: "增加或减少字母间距", contentScaling: "内容缩放", contentScalingDesc: "增加或减少内容大小", resetSettings: "重置设置", statement: "声明", hideInterface: "隐藏界面", accessibilityFeatures: "无障碍功能" },
 
@@ -21466,7 +21514,7 @@ applyCustomizations(customizationData) {
                 const style = document.createElement('style');
                 style.textContent = `
                     .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
-                    .toggle-switch > input:checked + .slider:before { transform: translateX(16px) !important; }
+                    .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
                 `;
                 this.shadowRoot?.appendChild(style);
                 console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
@@ -21527,13 +21575,15 @@ applyCustomizations(customizationData) {
             console.log('📱 [MOBILE SIZES] Reduced language selector size');
         }
         
-        // Reduce close button size
+        // Reduce close button size and fix position
         const closeBtn = this.shadowRoot?.querySelector('.close-btn');
         if (closeBtn) {
             closeBtn.style.setProperty('font-size', '16px', 'important');
             closeBtn.style.setProperty('width', '24px', 'important');
             closeBtn.style.setProperty('height', '24px', 'important');
-            console.log('📱 [MOBILE SIZES] Reduced close button size');
+            closeBtn.style.setProperty('top', '5px', 'important');
+            closeBtn.style.setProperty('left', '10px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced close button size and fixed position');
         }
         
         // Reduce increase/decrease buttons (arrow controls)
@@ -21549,7 +21599,7 @@ applyCustomizations(customizationData) {
         }
         
         // Reduce color picker sizes
-        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button');
+        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button, input[type="color"]');
         if (colorPickers && colorPickers.length > 0) {
             colorPickers.forEach((picker, index) => {
                 picker.style.setProperty('width', '24px', 'important');
@@ -21560,14 +21610,39 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Increase toggle width when ON to fit text properly
+        // Reduce useful links dropdown size
+        const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
+        if (usefulLinksDropdown) {
+            usefulLinksDropdown.style.setProperty('font-size', '11px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '6px 8px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '32px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
+        }
+        
+        // Reduce useful links content select size
+        const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
+        if (usefulLinksSelect) {
+            usefulLinksSelect.style.setProperty('font-size', '11px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '6px 8px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '32px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links select size');
+        }
+        
+        // Increase toggle width when ON to fit text properly and fix text sliding
         const style = document.createElement('style');
         style.textContent = `
             .toggle-switch > input:checked + .slider { width: 100% !important; }
-            .toggle-switch > input:checked + .slider:before { transform: translateX(calc(100% - 20px)) !important; }
+            .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
+            .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
+            .profile-item .profile-info h4, .profile-item .profile-info p { 
+                white-space: nowrap !important; 
+                overflow: hidden !important; 
+                text-overflow: ellipsis !important; 
+                max-width: 100% !important; 
+            }
         `;
         this.shadowRoot?.appendChild(style);
-        console.log('📱 [MOBILE SIZES] Added toggle width fix for ON state');
+        console.log('📱 [MOBILE SIZES] Added toggle width fix for ON state and text sliding fix');
         
         console.log('📱 [MOBILE SIZES] Mobile size reductions applied successfully');
     }
@@ -21693,13 +21768,15 @@ applyCustomizations(customizationData) {
             console.log('📱 [REMOVE MOBILE SIZES] Restored language selector size');
         }
         
-        // Restore close button size
+        // Restore close button size and position
         const closeBtn = this.shadowRoot?.querySelector('.close-btn');
         if (closeBtn) {
             closeBtn.style.removeProperty('font-size');
             closeBtn.style.removeProperty('width');
             closeBtn.style.removeProperty('height');
-            console.log('📱 [REMOVE MOBILE SIZES] Restored close button size');
+            closeBtn.style.removeProperty('top');
+            closeBtn.style.removeProperty('left');
+            console.log('📱 [REMOVE MOBILE SIZES] Restored close button size and position');
         }
         
         // Restore increase/decrease buttons
@@ -21715,7 +21792,7 @@ applyCustomizations(customizationData) {
         }
         
         // Restore color picker sizes
-        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button');
+        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button, input[type="color"]');
         if (colorPickers && colorPickers.length > 0) {
             colorPickers.forEach((picker, index) => {
                 picker.style.removeProperty('width');
@@ -21724,6 +21801,24 @@ applyCustomizations(customizationData) {
                 picker.style.removeProperty('min-height');
                 console.log(`📱 [REMOVE MOBILE SIZES] Restored color picker ${index + 1} size`);
             });
+        }
+        
+        // Restore useful links dropdown size
+        const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
+        if (usefulLinksDropdown) {
+            usefulLinksDropdown.style.removeProperty('font-size');
+            usefulLinksDropdown.style.removeProperty('padding');
+            usefulLinksDropdown.style.removeProperty('min-height');
+            console.log('📱 [REMOVE MOBILE SIZES] Restored useful links dropdown size');
+        }
+        
+        // Restore useful links content select size
+        const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
+        if (usefulLinksSelect) {
+            usefulLinksSelect.style.removeProperty('font-size');
+            usefulLinksSelect.style.removeProperty('padding');
+            usefulLinksSelect.style.removeProperty('min-height');
+            console.log('📱 [REMOVE MOBILE SIZES] Restored useful links select size');
         }
         
         // Remove injected toggle width styles
