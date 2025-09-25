@@ -3154,9 +3154,9 @@ body.align-right a {
 
                 cursor: pointer;
 
-                font-size: 20px;
+                font-size: 24px;
 
-                padding: 8px;
+                padding: 10px;
 
                 position: absolute;
 
@@ -21486,8 +21486,9 @@ applyCustomizations(customizationData) {
         // Reduce headings and profile titles
         const headerH2 = this.shadowRoot?.querySelector('.panel-header h2');
         if (headerH2) {
-            headerH2.style.setProperty('font-size', '18px', 'important');
-            headerH2.style.setProperty('line-height', '22px', 'important');
+            headerH2.style.setProperty('font-size', '16px', 'important');
+            headerH2.style.setProperty('line-height', '20px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced main title size');
         }
         const profileTitles = this.shadowRoot?.querySelectorAll('.profile-item h4');
         if (profileTitles && profileTitles.length > 0) {
@@ -21534,6 +21535,39 @@ applyCustomizations(customizationData) {
             closeBtn.style.setProperty('height', '24px', 'important');
             console.log('📱 [MOBILE SIZES] Reduced close button size');
         }
+        
+        // Reduce increase/decrease buttons (arrow controls)
+        const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn');
+        if (arrowBtns && arrowBtns.length > 0) {
+            arrowBtns.forEach((btn, index) => {
+                btn.style.setProperty('height', '28px', 'important');
+                btn.style.setProperty('min-height', '28px', 'important');
+                btn.style.setProperty('padding', '4px 8px', 'important');
+                btn.style.setProperty('font-size', '10px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced arrow button ${index + 1} size`);
+            });
+        }
+        
+        // Reduce color picker sizes
+        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button');
+        if (colorPickers && colorPickers.length > 0) {
+            colorPickers.forEach((picker, index) => {
+                picker.style.setProperty('width', '24px', 'important');
+                picker.style.setProperty('height', '24px', 'important');
+                picker.style.setProperty('min-width', '24px', 'important');
+                picker.style.setProperty('min-height', '24px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced color picker ${index + 1} size`);
+            });
+        }
+        
+        // Increase toggle width when ON to fit text properly
+        const style = document.createElement('style');
+        style.textContent = `
+            .toggle-switch > input:checked + .slider { width: 100% !important; }
+            .toggle-switch > input:checked + .slider:before { transform: translateX(calc(100% - 20px)) !important; }
+        `;
+        this.shadowRoot?.appendChild(style);
+        console.log('📱 [MOBILE SIZES] Added toggle width fix for ON state');
         
         console.log('📱 [MOBILE SIZES] Mobile size reductions applied successfully');
     }
@@ -21666,6 +21700,41 @@ applyCustomizations(customizationData) {
             closeBtn.style.removeProperty('width');
             closeBtn.style.removeProperty('height');
             console.log('📱 [REMOVE MOBILE SIZES] Restored close button size');
+        }
+        
+        // Restore increase/decrease buttons
+        const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn');
+        if (arrowBtns && arrowBtns.length > 0) {
+            arrowBtns.forEach((btn, index) => {
+                btn.style.removeProperty('height');
+                btn.style.removeProperty('min-height');
+                btn.style.removeProperty('padding');
+                btn.style.removeProperty('font-size');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored arrow button ${index + 1} size`);
+            });
+        }
+        
+        // Restore color picker sizes
+        const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button');
+        if (colorPickers && colorPickers.length > 0) {
+            colorPickers.forEach((picker, index) => {
+                picker.style.removeProperty('width');
+                picker.style.removeProperty('height');
+                picker.style.removeProperty('min-width');
+                picker.style.removeProperty('min-height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored color picker ${index + 1} size`);
+            });
+        }
+        
+        // Remove injected toggle width styles
+        const injectedStyles = this.shadowRoot?.querySelectorAll('style');
+        if (injectedStyles && injectedStyles.length > 0) {
+            injectedStyles.forEach(style => {
+                if (style.textContent.includes('toggle-switch') || style.textContent.includes('slider:before')) {
+                    style.remove();
+                    console.log('📱 [REMOVE MOBILE SIZES] Removed injected toggle styles');
+                }
+            });
         }
         
         console.log('📱 [REMOVE MOBILE SIZES] Mobile size reductions removed successfully');
