@@ -1810,24 +1810,26 @@ if (window.innerWidth <= 768) {
     
     /* Medium toggles for medium mobile screens */
     .toggle-switch {
-        width: 18px !important;
-        height: 11px !important;
+        width: 44px !important;
+        height: 24px !important;
     }
     
     .toggle-switch .slider {
-        width: 18px !important;
-        height: 11px !important;
+        width: 44px !important;
+        height: 24px !important;
+        border-radius: 24px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 7px !important;
-        height: 7px !important;
+        width: 20px !important;
+        height: 20px !important;
         left: 2px !important;
         bottom: 2px !important;
+        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(7px) !important;
+        transform: translateX(20px) !important;
     }
     
     /* Medium profile items for medium mobile screens */
@@ -1903,24 +1905,26 @@ if (window.innerWidth <= 768) {
     
     /* Smaller toggles for small screens */
     .toggle-switch {
-        width: 16px;
-        height: 10px;
+        width: 44px;
+        height: 24px;
     }
     
     .toggle-switch .slider {
-        width: 16px;
-        height: 10px;
+        width: 44px;
+        height: 24px;
+        border-radius: 24px;
     }
     
     .toggle-switch .slider:before {
-        width: 6px;
-        height: 6px;
+        width: 20px;
+        height: 20px;
         left: 2px;
         bottom: 2px;
+        border-radius: 50%;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(6px);
+        transform: translateX(20px);
     }
     
     /* Smaller profile items for small screens */
@@ -2187,24 +2191,26 @@ if (window.innerWidth <= 768) {
     
     /* Very small toggles for mobile landscape */
     .toggle-switch {
-        width: 20px !important;
-        height: 12px !important;
+        width: 44px !important;
+        height: 24px !important;
     }
     
     .toggle-switch .slider {
-        width: 20px !important;
-        height: 12px !important;
+        width: 44px !important;
+        height: 24px !important;
+        border-radius: 24px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 8px !important;
-        width: 8px !important;
+        height: 20px !important;
+        width: 20px !important;
         left: 2px !important;
         bottom: 2px !important;
+        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(8px) !important;
+        transform: translateX(20px) !important;
     }
 }
 
@@ -2273,24 +2279,26 @@ if (window.innerWidth <= 768) {
     
     /* TINY toggles for mobile portrait */
     .toggle-switch {
-        width: 12px !important;
-        height: 8px !important;
+        width: 44px !important;
+        height: 24px !important;
     }
     
     .toggle-switch .slider {
-        width: 12px !important;
-        height: 8px !important;
+        width: 44px !important;
+        height: 24px !important;
+        border-radius: 24px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 4px !important;
-        width: 4px !important;
+        height: 20px !important;
+        width: 20px !important;
         left: 2px !important;
         bottom: 2px !important;
+        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(20px) !important;
     }
 }
 
@@ -2380,22 +2388,24 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch {
-        width: 12px !important;
-        height: 8px !important;
+        width: 44px !important;
+        height: 24px !important;
     }
     
     .toggle-switch .slider {
-        width: 12px !important;
-        height: 8px !important;
+        width: 44px !important;
+        height: 24px !important;
+        border-radius: 24px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 4px !important;
-        height: 4px !important;
+        width: 20px !important;
+        height: 20px !important;
+        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(20px) !important;
     }
 }
 
@@ -22902,33 +22912,33 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Reduce toggle switch sizes (label.toggle-switch contains input + span.slider)
+        // Set proper toggle switch sizes for mobile (label.toggle-switch contains input + span.slider)
         const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
         if (toggles && toggles.length > 0) {
             toggles.forEach((toggle, index) => {
-                toggle.style.setProperty('width', '38px', 'important');
-                toggle.style.setProperty('height', '22px', 'important');
-                console.log(`📱 [MOBILE SIZES] Reduced toggle ${index + 1} size`);
+                toggle.style.setProperty('width', '44px', 'important');
+                toggle.style.setProperty('height', '24px', 'important');
+                console.log(`📱 [MOBILE SIZES] Set proper toggle ${index + 1} size`);
             });
         }
         
-        // Reduce toggle slider knob (.slider and its pseudo knob)
+        // Set proper toggle slider knob size (.slider and its pseudo knob)
         const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
         if (sliders && sliders.length > 0) {
             sliders.forEach((slider, index) => {
                 // Track and bar
-                slider.style.setProperty('height', '22px', 'important');
-                slider.style.setProperty('border-radius', '22px', 'important');
+                slider.style.setProperty('height', '24px', 'important');
+                slider.style.setProperty('border-radius', '24px', 'important');
                 slider.style.setProperty('padding', '0', 'important');
                 slider.style.setProperty('box-sizing', 'border-box', 'important');
-                // Inject a tiny stylesheet to shrink the knob (:before)
+                // Inject proper stylesheet for the knob (:before)
                 const style = document.createElement('style');
                 style.textContent = `
-                    .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
-                    .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
+                    .toggle-switch > input + .slider:before { width: 20px !important; height: 20px !important; top: 2px !important; left: 2px !important; border-radius: 50% !important; }
+                    .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
                 `;
                 this.shadowRoot?.appendChild(style);
-                console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
+                console.log(`📱 [MOBILE SIZES] Set proper toggle slider ${index + 1} size`);
             });
         }
         
@@ -23078,106 +23088,125 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Reduce useful links dropdown size more aggressively
+        // Set useful links dropdown to reasonable mobile size
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '10px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '4px 6px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '28px', 'important');
-            usefulLinksDropdown.style.setProperty('margin', '6px 0', 'important');
-            usefulLinksDropdown.style.setProperty('border-radius', '6px', 'important');
-            console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
+            usefulLinksDropdown.style.setProperty('font-size', '14px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '8px 12px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '40px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '8px 0', 'important');
+            usefulLinksDropdown.style.setProperty('border-radius', '8px', 'important');
+            usefulLinksDropdown.style.setProperty('width', '100%', 'important');
+            usefulLinksDropdown.style.setProperty('display', 'block', 'important');
+            usefulLinksDropdown.style.setProperty('visibility', 'visible', 'important');
+            usefulLinksDropdown.style.setProperty('opacity', '1', 'important');
+            console.log('📱 [MOBILE SIZES] Set useful links dropdown to reasonable size');
         }
         
-        // Reduce useful links content select size more aggressively
+        // Set useful links select to reasonable mobile size
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '10px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '4px 6px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '24px', 'important');
-            usefulLinksSelect.style.setProperty('height', '24px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.1', 'important');
+            usefulLinksSelect.style.setProperty('font-size', '14px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '8px 12px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '36px', 'important');
+            usefulLinksSelect.style.setProperty('height', '36px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
             usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
             usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
-            usefulLinksSelect.style.setProperty('border-radius', '4px', 'important');
-            console.log('📱 [MOBILE SIZES] Reduced useful links select size');
+            usefulLinksSelect.style.setProperty('border-radius', '6px', 'important');
+            usefulLinksSelect.style.setProperty('width', '100%', 'important');
+            usefulLinksSelect.style.setProperty('display', 'block', 'important');
+            usefulLinksSelect.style.setProperty('visibility', 'visible', 'important');
+            usefulLinksSelect.style.setProperty('opacity', '1', 'important');
+            console.log('📱 [MOBILE SIZES] Set useful links select to reasonable size');
         }
         
-        // Add mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL
+        // Add mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE
         const mobileUsefulLinksStyle = document.createElement('style');
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 6px !important;
-                    padding: 1px 2px !important;
-                    min-height: 16px !important;
-                    height: 16px !important;
-                    margin: 2px 0 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 40px !important;
+                    height: auto !important;
+                    margin: 8px 0 !important;
+                    border-radius: 8px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1 !important;
+                    line-height: 1.2 !important;
                     border: 1px solid #ccc !important;
                     max-width: 100% !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content {
-                    padding: 2px !important;
+                    padding: 8px 12px !important;
                     box-sizing: border-box !important;
                     margin: 0 !important;
                     width: 100% !important;
                     max-width: 100% !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 6px !important;
-                    padding: 0px 2px !important;
-                    min-height: 14px !important;
-                    height: 14px !important;
-                    line-height: 1 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 36px !important;
+                    height: 36px !important;
+                    line-height: 1.2 !important;
+                    border-radius: 6px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     border: 1px solid #ccc !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content select option {
-                    font-size: 6px !important;
-                    padding: 1px 2px !important;
-                    line-height: 1 !important;
+                    font-size: 14px !important;
+                    padding: 4px 8px !important;
+                    line-height: 1.2 !important;
                 }
                 /* Override any existing styles with maximum specificity */
                 .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
-                    font-size: 6px !important;
-                    padding: 1px 2px !important;
-                    min-height: 16px !important;
-                    height: 16px !important;
-                    margin: 2px 0 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 40px !important;
+                    height: auto !important;
+                    margin: 8px 0 !important;
+                    border-radius: 8px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1 !important;
+                    line-height: 1.2 !important;
                     border: 1px solid #ccc !important;
                     max-width: 100% !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .accessibility-panel .profile-item.has-dropdown .useful-links-content select {
-                    font-size: 6px !important;
-                    padding: 0px 2px !important;
-                    min-height: 14px !important;
-                    height: 14px !important;
-                    line-height: 1 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 36px !important;
+                    height: 36px !important;
+                    line-height: 1.2 !important;
+                    border-radius: 6px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     border: 1px solid #ccc !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
             }
         `;
         this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
-        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL with maximum specificity');
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE with maximum specificity');
         
         // Add CSS to hide ON/OFF text on mobile screens
         const mobileToggleTextStyle = document.createElement('style');
