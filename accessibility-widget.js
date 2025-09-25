@@ -2942,9 +2942,8 @@ body.align-right a {
             /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
 
             .accessibility-icon:focus {
-
-                outline: none !important;
-
+                
+                
             }
 
             /* Allow focus indicators when highlight-focus is active */
@@ -4137,7 +4136,7 @@ body.align-right a {
 
                 font-family: inherit;
 
-                outline: none;
+            
 
                 pointer-events: auto !important;
 
@@ -8398,18 +8397,46 @@ html body.big-white-cursor * {
         const languageOptions = this.shadowRoot.querySelectorAll('.language-option');
         console.log('🎯 [LANGUAGE SELECTION] Found language options:', languageOptions.length);
 
+        // Normalize language value to a two-letter code used in data-lang
+        const normalizeLang = (lang) => {
+            if (!lang) return 'en';
+            const lower = String(lang).toLowerCase();
+            // Map common name variants to codes
+            const map = {
+                'english': 'en', 'en': 'en',
+                'german': 'de', 'deutsch': 'de', 'de': 'de',
+                'french': 'fr', 'français': 'fr', 'fr': 'fr',
+                'spanish': 'es', 'español': 'es', 'es': 'es',
+                'português': 'pt', 'portuguese': 'pt', 'pt': 'pt',
+                'italian': 'it', 'italiano': 'it', 'it': 'it',
+                'hebrew': 'he', 'il': 'he', 'he': 'he',
+                'russian': 'ru', 'русский': 'ru', 'ru': 'ru',
+                'chinese (traditional)': 'tw', '繁體中文': 'tw', 'tw': 'tw',
+                'arabic': 'ae', 'ar': 'ae', 'ae': 'ae'
+            };
+            return map[lower] || (lower.length === 2 ? lower : 'en');
+        };
+
+        const normalizedCurrent = normalizeLang(currentLang);
+
         languageOptions.forEach(option => {
             // clear previous state
             option.classList.remove('selected');
             option.setAttribute('aria-selected', 'false');
             option.setAttribute('data-selected', 'false');
+            // clear any inline fallback styles
+            option.style.background = '';
+            option.style.color = '';
 
             // apply selected state
-            if (option.dataset.lang === currentLang) {
+            if (normalizeLang(option.dataset.lang) === normalizedCurrent) {
                 console.log('🎯 [LANGUAGE SELECTION] Setting option as selected:', option.dataset.lang);
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
                 option.setAttribute('data-selected', 'true');
+                // Fallback inline styles to guarantee visibility over external CSS
+                option.style.background = '#6366f1';
+                option.style.color = '#ffffff';
                 console.log('🎯 [LANGUAGE SELECTION] Option classes after setting:', option.className);
                 console.log('🎯 [LANGUAGE SELECTION] Option aria-selected:', option.getAttribute('aria-selected'));
             } else {
@@ -8420,7 +8447,7 @@ html body.big-white-cursor * {
         // Also reflect the selected state on the header for consistency
         const header = this.shadowRoot.getElementById('language-selector-header');
         if (header) {
-            header.setAttribute('data-current-lang', currentLang);
+            header.setAttribute('data-current-lang', normalizedCurrent);
         }
     }
 
@@ -21898,15 +21925,17 @@ applyCustomizations(customizationData) {
             console.log('📱 [MOBILE SIZES] Reduced close button size and fixed position');
         }
         
-        // Reduce increase/decrease buttons (arrow controls)
-        const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn');
+        // Reduce increase/decrease buttons (arrow controls) more on mobile
+        const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn, .scaling-btn');
         if (arrowBtns && arrowBtns.length > 0) {
             arrowBtns.forEach((btn, index) => {
-                btn.style.setProperty('height', '28px', 'important');
-                btn.style.setProperty('min-height', '28px', 'important');
-                btn.style.setProperty('padding', '4px 8px', 'important');
+                btn.style.setProperty('height', '24px', 'important');
+                btn.style.setProperty('min-height', '24px', 'important');
+                btn.style.setProperty('padding', '2px 8px', 'important');
                 btn.style.setProperty('font-size', '10px', 'important');
-                console.log(`📱 [MOBILE SIZES] Reduced arrow button ${index + 1} size`);
+                btn.style.setProperty('border-radius', '6px', 'important');
+                btn.style.setProperty('line-height', '1', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced arrow button ${index + 1} size (compact)`);
             });
         }
         
@@ -21936,8 +21965,34 @@ applyCustomizations(customizationData) {
         if (usefulLinksSelect) {
             usefulLinksSelect.style.setProperty('font-size', '11px', 'important');
             usefulLinksSelect.style.setProperty('padding', '6px 8px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '32px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '28px', 'important');
+            usefulLinksSelect.style.setProperty('height', '28px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
+            usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
+            usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
             console.log('📱 [MOBILE SIZES] Reduced useful links select size');
+        }
+
+        // Prevent Useful Links title from shifting when toggle is ON (mobile)
+        const usefulLinksProfile = this.shadowRoot?.querySelector('.profile-item.has-dropdown');
+        if (usefulLinksProfile) {
+            const profileInfo = usefulLinksProfile.querySelector('.profile-info');
+            const toggle = usefulLinksProfile.querySelector('.toggle-switch');
+            if (profileInfo) {
+                // Reduce left padding so text doesn't get pushed too far on mobile
+                profileInfo.style.setProperty('padding-left', '64px', 'important');
+                profileInfo.style.setProperty('min-width', '0', 'important');
+                profileInfo.style.setProperty('flex', '1', 'important');
+            }
+            if (toggle) {
+                // Keep toggle pinned so it doesn't affect text flow
+                toggle.style.setProperty('position', 'absolute', 'important');
+                toggle.style.setProperty('left', '12px', 'important');
+                toggle.style.setProperty('top', '12px', 'important');
+                toggle.style.setProperty('transform', 'none', 'important');
+                toggle.style.setProperty('margin', '0', 'important');
+            }
+            console.log('📱 [MOBILE SIZES] Adjusted Useful Links layout to prevent text shift');
         }
         
         // Increase toggle width when ON to fit text properly and fix text sliding
