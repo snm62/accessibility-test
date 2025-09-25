@@ -2985,7 +2985,7 @@ body.align-right a {
 
             .language-selector:focus {
 
-             outline: none !important;
+        
              outline-offset: 0px !important;
              box-shadow: none !important;   
 
@@ -2996,6 +2996,17 @@ body.align-right a {
             .toggle-switch input:focus + .slider {
 
                  outline: none !important;
+            }
+            
+            /* Override for accessibility icon to show focus when keyboard navigation is active */
+            body.highlight-focus .accessibility-icon:focus,
+            body.highlight-focus #accessibility-icon:focus {
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
             }
 
 
@@ -3046,8 +3057,6 @@ body.align-right a {
 
             /* Focus indicators for keyboard navigation */
 
-            .accessibility-icon:focus,
-
             .accessibility-panel button:focus,
 
             .accessibility-panel input:focus,
@@ -3093,7 +3102,7 @@ body.align-right a {
 
             .accessibility-panel input:focus-visible {
 
-                outline: none !important;
+                
 
             }
 
@@ -4155,7 +4164,8 @@ body.align-right a {
 
 
             .language-option.selected,
-            .language-option[aria-selected="true"] {
+            .language-option[aria-selected="true"],
+            .language-option[data-selected="true"] {
 
                 background: #6366f1 !important;
 
@@ -4164,7 +4174,8 @@ body.align-right a {
             }
 
             .language-option.selected:hover,
-            .language-option[aria-selected="true"]:hover {
+            .language-option[aria-selected="true"]:hover,
+            .language-option[data-selected="true"]:hover {
 
                 background: #4f46e5 !important;
 
@@ -8353,7 +8364,9 @@ html body.big-white-cursor * {
 
             // Mark current language as selected
             setTimeout(() => {
-            this.updateSelectedLanguage();
+                console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage() from showLanguageDropdown');
+                this.updateSelectedLanguage();
+                console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed from showLanguageDropdown');
             }, 100);
 
             // Announce to screen reader
@@ -8434,11 +8447,15 @@ html body.big-white-cursor * {
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
                 option.setAttribute('data-selected', 'true');
-                // Fallback inline styles to guarantee visibility over external CSS
-                option.style.background = '#6366f1';
-                option.style.color = '#ffffff';
+                // Force inline styles to guarantee visibility over external CSS
+                option.style.background = '#6366f1 !important';
+                option.style.color = '#ffffff !important';
+                option.style.setProperty('background', '#6366f1', 'important');
+                option.style.setProperty('color', '#ffffff', 'important');
                 console.log('🎯 [LANGUAGE SELECTION] Option classes after setting:', option.className);
                 console.log('🎯 [LANGUAGE SELECTION] Option aria-selected:', option.getAttribute('aria-selected'));
+                console.log('🎯 [LANGUAGE SELECTION] Option inline background:', option.style.background);
+                console.log('🎯 [LANGUAGE SELECTION] Option inline color:', option.style.color);
             } else {
                 console.log('🎯 [LANGUAGE SELECTION] Option not selected:', option.dataset.lang);
             }
@@ -14325,25 +14342,31 @@ html body.big-white-cursor * {
 
         this.highlightFocusHandler = (e) => {
 
-            console.log('Accessibility Widget: Focus event triggered on:', e.target);
+            console.log('🎯 [FOCUS DEBUG] Focus event triggered on:', e.target);
+            console.log('🎯 [FOCUS DEBUG] Target tag name:', e.target.tagName);
+            console.log('🎯 [FOCUS DEBUG] Target classes:', e.target.className);
+            console.log('🎯 [FOCUS DEBUG] Target ID:', e.target.id);
 
-            console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
-            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
-            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
+            console.log('🎯 [FOCUS DEBUG] Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
             
             // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+                console.log('🎯 [FOCUS] Body has highlight-focus:', document.body.classList.contains('highlight-focus'));
+                console.log('🎯 [FOCUS] Is keyboard navigation:', this.isKeyboardNavigation);
                 console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
                 
-                // Apply focus styles directly to the accessibility icon
+                // Always apply focus styles to accessibility icon when focused
                 e.target.style.outline = '3px solid #6366f1';
                 e.target.style.outlineOffset = '2px';
                 e.target.style.background = 'rgba(99, 102, 241, 0.1)';
                 e.target.style.borderRadius = '4px';
                 e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                 return; // Exit early to prevent other focus handling
             }
 
@@ -17263,25 +17286,31 @@ html body.big-white-cursor * {
 
         this.highlightFocusHandler = (e) => {
 
-            console.log('Accessibility Widget: Focus event triggered on:', e.target);
+            console.log('🎯 [FOCUS DEBUG] Focus event triggered on:', e.target);
+            console.log('🎯 [FOCUS DEBUG] Target tag name:', e.target.tagName);
+            console.log('🎯 [FOCUS DEBUG] Target classes:', e.target.className);
+            console.log('🎯 [FOCUS DEBUG] Target ID:', e.target.id);
 
-            console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
-            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
-            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
+            console.log('🎯 [FOCUS DEBUG] Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
             
             // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
+                console.log('🎯 [FOCUS] Body has highlight-focus:', document.body.classList.contains('highlight-focus'));
+                console.log('🎯 [FOCUS] Is keyboard navigation:', this.isKeyboardNavigation);
                 console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
                 
-                // Apply focus styles directly to the accessibility icon
+                // Always apply focus styles to accessibility icon when focused
                 e.target.style.outline = '3px solid #6366f1';
                 e.target.style.outlineOffset = '2px';
                 e.target.style.background = 'rgba(99, 102, 241, 0.1)';
                 e.target.style.borderRadius = '4px';
                 e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                 return; // Exit early to prevent other focus handling
             }
 
@@ -21929,15 +21958,36 @@ applyCustomizations(customizationData) {
         const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn, .scaling-btn');
         if (arrowBtns && arrowBtns.length > 0) {
             arrowBtns.forEach((btn, index) => {
-                btn.style.setProperty('height', '24px', 'important');
-                btn.style.setProperty('min-height', '24px', 'important');
-                btn.style.setProperty('padding', '2px 8px', 'important');
-                btn.style.setProperty('font-size', '10px', 'important');
-                btn.style.setProperty('border-radius', '6px', 'important');
+                btn.style.setProperty('height', '20px', 'important');
+                btn.style.setProperty('min-height', '20px', 'important');
+                btn.style.setProperty('padding', '1px 6px', 'important');
+                btn.style.setProperty('font-size', '9px', 'important');
+                btn.style.setProperty('border-radius', '4px', 'important');
                 btn.style.setProperty('line-height', '1', 'important');
+                btn.style.setProperty('width', 'auto', 'important');
+                btn.style.setProperty('min-width', '32px', 'important');
                 console.log(`📱 [MOBILE SIZES] Reduced arrow button ${index + 1} size (compact)`);
             });
         }
+        
+        // Add mobile-specific CSS for all control buttons
+        const mobileControlStyle = document.createElement('style');
+        mobileControlStyle.textContent = `
+            @media (max-width: 768px) {
+                .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
+                    height: 20px !important;
+                    min-height: 20px !important;
+                    padding: 1px 6px !important;
+                    font-size: 9px !important;
+                    border-radius: 4px !important;
+                    line-height: 1 !important;
+                    width: auto !important;
+                    min-width: 32px !important;
+                }
+            }
+        `;
+        this.shadowRoot?.appendChild(mobileControlStyle);
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for control buttons');
         
         // Reduce color picker sizes
         const colorPickers = this.shadowRoot?.querySelectorAll('.color-picker, .color-input, .color-preview, .color-picker-button, input[type="color"]');
@@ -21951,27 +22001,62 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Reduce useful links dropdown size
+        // Reduce useful links dropdown size more aggressively
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '11px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '6px 8px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '32px', 'important');
+            usefulLinksDropdown.style.setProperty('font-size', '10px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '28px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '6px 0', 'important');
+            usefulLinksDropdown.style.setProperty('border-radius', '6px', 'important');
             console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
         }
         
-        // Reduce useful links content select size
+        // Reduce useful links content select size more aggressively
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '11px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '6px 8px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '28px', 'important');
-            usefulLinksSelect.style.setProperty('height', '28px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
+            usefulLinksSelect.style.setProperty('font-size', '10px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.1', 'important');
             usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
             usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
+            usefulLinksSelect.style.setProperty('border-radius', '4px', 'important');
             console.log('📱 [MOBILE SIZES] Reduced useful links select size');
         }
+        
+        // Add mobile-specific CSS for Useful Links dropdown
+        const mobileUsefulLinksStyle = document.createElement('style');
+        mobileUsefulLinksStyle.textContent = `
+            @media (max-width: 768px) {
+                .useful-links-dropdown {
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
+                    min-height: 28px !important;
+                    margin: 6px 0 !important;
+                    border-radius: 6px !important;
+                }
+                .useful-links-content {
+                    padding: 6px !important;
+                }
+                .useful-links-content select {
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
+                    min-height: 24px !important;
+                    height: 24px !important;
+                    line-height: 1.1 !important;
+                    border-radius: 4px !important;
+                }
+                .useful-links-content select option {
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
+                    line-height: 1.1 !important;
+                }
+            }
+        `;
+        this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown');
 
         // Prevent Useful Links title from shifting when toggle is ON (mobile)
         const usefulLinksProfile = this.shadowRoot?.querySelector('.profile-item.has-dropdown');
