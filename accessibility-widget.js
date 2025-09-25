@@ -2,6 +2,7 @@ class AccessibilityWidget {
 constructor() {
 
         this.settings = {};
+        
 
         this.contentScale = 100; // Start at 100% (normal size)
 
