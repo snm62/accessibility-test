@@ -13629,6 +13629,56 @@ html body.big-white-cursor * {
 
             
 
+            // Fix layout positioning for mobile
+
+            if (window.innerWidth <= 768) {
+
+                // Ensure profile item has proper spacing for toggle
+
+                usefulLinksModule.style.paddingLeft = '50px';
+
+                usefulLinksModule.style.minHeight = '40px';
+
+                usefulLinksModule.style.position = 'relative';
+
+                
+
+                // Ensure profile info stays in place
+
+                if (profileInfo) {
+
+                    profileInfo.style.position = 'static';
+
+                    profileInfo.style.left = 'auto';
+
+                    profileInfo.style.right = 'auto';
+
+                    profileInfo.style.width = '100%';
+
+                }
+
+                
+
+                // Ensure toggle is positioned correctly
+
+                if (toggleSwitch) {
+
+                    toggleSwitch.style.position = 'absolute';
+
+                    toggleSwitch.style.left = '8px';
+
+                    toggleSwitch.style.top = '8px';
+
+                    toggleSwitch.style.zIndex = '5';
+
+                }
+
+                console.log('Accessibility Widget: Applied mobile layout fixes');
+
+            }
+
+            
+
             // Add class to profile-item to indicate dropdown is present
 
             usefulLinksModule.classList.add('has-dropdown');
@@ -13646,6 +13696,30 @@ html body.big-white-cursor * {
             usefulLinksModule.style.justifyContent = 'unset';
 
             usefulLinksModule.style.flexWrap = 'unset';
+
+            
+
+            // Ensure dropdown content is positioned correctly on mobile
+
+            if (window.innerWidth <= 768) {
+
+                dropdownContainer.style.position = 'static';
+
+                dropdownContainer.style.left = 'auto';
+
+                dropdownContainer.style.right = 'auto';
+
+                dropdownContainer.style.width = '100%';
+
+                dropdownContainer.style.marginTop = '8px';
+
+                dropdownContainer.style.marginLeft = '0';
+
+                dropdownContainer.style.marginRight = '0';
+
+                console.log('Accessibility Widget: Applied mobile positioning to dropdown');
+
+            }
 
             usefulLinksModule.style.flexFlow = 'unset';
 
@@ -16735,11 +16809,39 @@ html body.big-white-cursor * {
 
                 }
 
+                // Force mute even if audio is already playing
+
                 element.volume = 0;
 
-                element.muted = true; // Also set muted attribute for better compatibility
+                element.muted = true;
 
-                console.log(`Accessibility Widget: Muted audio element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
+                
+
+                // If audio is currently playing, pause and restart to apply mute
+
+                if (!element.paused) {
+
+                    console.log(`Accessibility Widget: Audio element ${index} is playing, pausing and restarting to apply mute`);
+
+                    element.pause();
+
+                    // Small delay to ensure pause takes effect
+
+                    setTimeout(() => {
+
+                        element.volume = 0;
+
+                        element.muted = true;
+
+                        // Don't restart - keep it paused but muted
+
+                    }, 50);
+
+                }
+
+                
+
+                console.log(`Accessibility Widget: Muted audio element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
 
             });
 
@@ -16757,11 +16859,39 @@ html body.big-white-cursor * {
 
                 }
 
+                // Force mute even if video is already playing
+
                 element.volume = 0;
 
-                element.muted = true; // Also set muted attribute for better compatibility
+                element.muted = true;
 
-                console.log(`Accessibility Widget: Muted video element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
+                
+
+                // If video is currently playing, pause and restart to apply mute
+
+                if (!element.paused) {
+
+                    console.log(`Accessibility Widget: Video element ${index} is playing, pausing and restarting to apply mute`);
+
+                    element.pause();
+
+                    // Small delay to ensure pause takes effect
+
+                    setTimeout(() => {
+
+                        element.volume = 0;
+
+                        element.muted = true;
+
+                        // Don't restart - keep it paused but muted
+
+                    }, 50);
+
+                }
+
+                
+
+                console.log(`Accessibility Widget: Muted video element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
 
             });
 
@@ -16791,6 +16921,12 @@ html body.big-white-cursor * {
 
                             element.muted = true;
 
+                            if (!element.paused) {
+
+                                element.pause();
+
+                            }
+
                         });
 
                         iframeVideo.forEach((element) => {
@@ -16798,6 +16934,12 @@ html body.big-white-cursor * {
                             element.volume = 0;
 
                             element.muted = true;
+
+                            if (!element.paused) {
+
+                                element.pause();
+
+                            }
 
                         });
 
@@ -16985,6 +17127,18 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
+                        
+
+                        // If it's playing, pause it
+
+                        if (!element.paused) {
+
+                            element.pause();
+
+                        }
+
+                        
+
                         console.log('Accessibility Widget: Re-muted audio element that was unmuted');
 
                     }
@@ -17001,7 +17155,87 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
+                        
+
+                        // If it's playing, pause it
+
+                        if (!element.paused) {
+
+                            element.pause();
+
+                        }
+
+                        
+
                         console.log('Accessibility Widget: Re-muted video element that was unmuted');
+
+                    }
+
+                });
+
+                
+
+                // Also check iframe content
+
+                const iframes = document.querySelectorAll('iframe');
+
+                iframes.forEach((iframe) => {
+
+                    try {
+
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                        if (iframeDoc) {
+
+                            const iframeAudio = iframeDoc.querySelectorAll('audio');
+
+                            const iframeVideo = iframeDoc.querySelectorAll('video');
+
+                            
+
+                            iframeAudio.forEach((element) => {
+
+                                if (element.volume > 0 || !element.muted) {
+
+                                    element.volume = 0;
+
+                                    element.muted = true;
+
+                                    if (!element.paused) {
+
+                                        element.pause();
+
+                                    }
+
+                                }
+
+                            });
+
+                            
+
+                            iframeVideo.forEach((element) => {
+
+                                if (element.volume > 0 || !element.muted) {
+
+                                    element.volume = 0;
+
+                                    element.muted = true;
+
+                                    if (!element.paused) {
+
+                                        element.pause();
+
+                                    }
+
+                                }
+
+                            });
+
+                        }
+
+                    } catch (e) {
+
+                        // Cross-origin iframe, skip
 
                     }
 
@@ -17009,7 +17243,7 @@ html body.big-white-cursor * {
 
             }
 
-        }, 1000); // Check every second
+        }, 500); // Check every 500ms for more aggressive muting
 
     }
 
@@ -17073,21 +17307,83 @@ html body.big-white-cursor * {
 
         
 
-        audioElements.forEach((element) => {
+        console.log(`Accessibility Widget: Restoring volume for ${audioElements.length} audio and ${videoElements.length} video elements`);
 
-            element.volume = 1; // Restore to full volume
+        
 
-            element.muted = false; // Remove muted attribute
+        audioElements.forEach((element, index) => {
+
+            // Restore to full volume
+
+            element.volume = 1;
+
+            element.muted = false;
+
+            
+
+            console.log(`Accessibility Widget: Restored audio element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
 
         });
 
         
 
-        videoElements.forEach((element) => {
+        videoElements.forEach((element, index) => {
 
-            element.volume = 1; // Restore to full volume
+            // Restore to full volume
 
-            element.muted = false; // Remove muted attribute
+            element.volume = 1;
+
+            element.muted = false;
+
+            
+
+            console.log(`Accessibility Widget: Restored video element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
+
+        });
+
+        
+
+        // Also restore iframe content
+
+        const iframes = document.querySelectorAll('iframe');
+
+        iframes.forEach((iframe, index) => {
+
+            try {
+
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                if (iframeDoc) {
+
+                    const iframeAudio = iframeDoc.querySelectorAll('audio');
+
+                    const iframeVideo = iframeDoc.querySelectorAll('video');
+
+                    iframeAudio.forEach((element) => {
+
+                        element.volume = 1;
+
+                        element.muted = false;
+
+                    });
+
+                    iframeVideo.forEach((element) => {
+
+                        element.volume = 1;
+
+                        element.muted = false;
+
+                    });
+
+                    console.log(`Accessibility Widget: Restored ${iframeAudio.length} audio and ${iframeVideo.length} video elements in iframe ${index}`);
+
+                }
+
+            } catch (e) {
+
+                console.log(`Accessibility Widget: Cannot access iframe ${index} content (cross-origin)`);
+
+            }
 
         });
 
@@ -17100,6 +17396,18 @@ html body.big-white-cursor * {
             this.originalVolumeStates.clear();
 
         }
+
+        
+
+        // Force a page refresh to ensure all audio contexts are reset
+
+        console.log('Accessibility Widget: Mute sound disabled - refreshing page to reset audio contexts');
+
+        setTimeout(() => {
+
+            window.location.reload();
+
+        }, 500); // Small delay to ensure all changes are applied
 
         
 
@@ -22512,30 +22820,32 @@ applyCustomizations(customizationData) {
             const profileInfo = usefulLinksProfile.querySelector('.profile-info');
             const toggle = usefulLinksProfile.querySelector('.toggle-switch');
             
-            // Set the profile item to relative positioning
+            // Keep the profile item in normal flow but with proper spacing
             usefulLinksProfile.style.setProperty('position', 'relative', 'important');
-            usefulLinksProfile.style.setProperty('display', 'flex', 'important');
-            usefulLinksProfile.style.setProperty('align-items', 'flex-start', 'important');
+            usefulLinksProfile.style.setProperty('display', 'block', 'important');
+            usefulLinksProfile.style.setProperty('padding-left', '50px', 'important');
+            usefulLinksProfile.style.setProperty('min-height', '40px', 'important');
             
             if (profileInfo) {
-                // Give text container fixed positioning to prevent shifting
-                profileInfo.style.setProperty('position', 'relative', 'important');
-                profileInfo.style.setProperty('left', '50px', 'important');
-                profileInfo.style.setProperty('right', '0', 'important');
-                profileInfo.style.setProperty('flex', '1', 'important');
-                profileInfo.style.setProperty('min-width', '0', 'important');
+                // Keep text in normal flow but with proper positioning
+                profileInfo.style.setProperty('position', 'static', 'important');
+                profileInfo.style.setProperty('left', 'auto', 'important');
+                profileInfo.style.setProperty('right', 'auto', 'important');
+                profileInfo.style.setProperty('flex', 'none', 'important');
+                profileInfo.style.setProperty('min-width', 'auto', 'important');
                 profileInfo.style.setProperty('padding-left', '0', 'important');
                 profileInfo.style.setProperty('margin-left', '0', 'important');
+                profileInfo.style.setProperty('width', '100%', 'important');
             }
             
             if (toggle) {
-                // Pin toggle absolutely to prevent any layout shifts
+                // Pin toggle absolutely but ensure it doesn't interfere with content
                 toggle.style.setProperty('position', 'absolute', 'important');
                 toggle.style.setProperty('left', '8px', 'important');
                 toggle.style.setProperty('top', '8px', 'important');
                 toggle.style.setProperty('transform', 'none', 'important');
                 toggle.style.setProperty('margin', '0', 'important');
-                toggle.style.setProperty('z-index', '10', 'important');
+                toggle.style.setProperty('z-index', '5', 'important');
             }
             console.log('📱 [MOBILE SIZES] Fixed Useful Links layout to prevent text shift');
         }
@@ -22563,23 +22873,32 @@ applyCustomizations(customizationData) {
                     height: 14px !important;
                 }
                 .profile-item .profile-info { 
-                    flex: 1 !important; 
-                    min-width: 0 !important; 
-                    position: relative !important;
-                    left: 50px !important;
-                    right: 0 !important;
+                    position: static !important;
+                    left: auto !important;
+                    right: auto !important;
+                    width: 100% !important;
+                    min-width: auto !important;
                 }
                 /* Prevent any text shifting */
                 .profile-item.has-dropdown {
                     position: relative !important;
-                    display: flex !important;
-                    align-items: flex-start !important;
+                    display: block !important;
+                    padding-left: 50px !important;
+                    min-height: 40px !important;
                 }
                 .profile-item.has-dropdown .toggle-switch {
                     position: absolute !important;
                     left: 8px !important;
                     top: 8px !important;
-                    z-index: 10 !important;
+                    z-index: 5 !important;
+                }
+                /* Ensure dropdown content stays in place */
+                .profile-item.has-dropdown .useful-links-content {
+                    position: static !important;
+                    left: auto !important;
+                    right: auto !important;
+                    width: 100% !important;
+                    margin-top: 8px !important;
                 }
             }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
