@@ -663,6 +663,12 @@ if (window.innerWidth <= 768) {
             this.isKeyboardNavigation = false;
             this.lastInteractionMethod = 'mouse';
             console.log('Accessibility Widget: Mouse interaction detected - disabling keyboard focus indicators');
+            
+            // Disable highlight focus when mouse is used
+            if (document.body.classList.contains('highlight-focus')) {
+                console.log('Accessibility Widget: Auto-disabling highlight focus for mouse interaction');
+                this.disableHighlightFocus();
+            }
         };
 
         // Add keyboard shortcuts for navigation
@@ -676,6 +682,12 @@ if (window.innerWidth <= 768) {
                 this.isKeyboardNavigation = true;
                 this.lastInteractionMethod = 'keyboard';
                 console.log('Accessibility Widget: Tab key detected - keyboard navigation mode active');
+                
+                // Automatically enable highlight focus when Tab is used
+                if (!document.body.classList.contains('highlight-focus')) {
+                    console.log('Accessibility Widget: Auto-enabling highlight focus for keyboard navigation');
+                    this.enableHighlightFocus();
+                }
             }
 
             
@@ -3188,35 +3200,39 @@ body.align-right a {
 
             .close-btn {
 
-                cursor: pointer;
+                cursor: pointer !important;
 
                 font-size: 24px;
 
-                padding: 8px;
+                padding: 0 !important;
 
-                position: absolute;
+                position: absolute !important;
 
-                top: 12px;
+                top: 12px !important;
 
-                left: 18px;
+                left: 18px !important;
 
-                z-index: 1005;
+                z-index: 1005 !important;
 
-                background: transparent;
+                background: transparent !important;
 
-                border: none;
+                border: none !important;
 
                 color: white;
 
                 /* Ensure proper clickable area */
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-sizing: border-box;
+                width: 44px !important;
+                height: 44px !important;
+                min-width: 44px !important;
+                min-height: 44px !important;
+                max-width: 44px !important;
+                max-height: 44px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                outline: none !important;
 
             }
 
@@ -3226,6 +3242,15 @@ body.align-right a {
 
                 color: white;
 
+            }
+
+            /* Force close button clickable area alignment */
+            .close-btn * {
+                pointer-events: none !important;
+            }
+
+            .close-btn {
+                pointer-events: auto !important;
             }
 
 
@@ -11605,11 +11630,26 @@ html body.big-white-cursor * {
 
     toggleContentScalingControls(enabled) {
 
+        console.log('🎛️ [CONTENT SCALING] toggleContentScalingControls called with enabled:', enabled);
+
         const controls = this.shadowRoot.getElementById('content-scaling-controls');
+
+        console.log('🎛️ [CONTENT SCALING] Controls element found:', !!controls);
 
         if (controls) {
 
             controls.style.display = enabled ? 'block' : 'none';
+
+            console.log('🎛️ [CONTENT SCALING] Controls display set to:', enabled ? 'block' : 'none');
+
+            // Force the display with !important
+            if (enabled) {
+                controls.style.setProperty('display', 'block', 'important');
+                console.log('🎛️ [CONTENT SCALING] Forced display: block with !important');
+            } else {
+                controls.style.setProperty('display', 'none', 'important');
+                console.log('🎛️ [CONTENT SCALING] Forced display: none with !important');
+            }
 
         }
 
@@ -11677,11 +11717,26 @@ html body.big-white-cursor * {
 
     toggleFontSizingControls(enabled) {
 
+        console.log('🔤 [FONT SIZING] toggleFontSizingControls called with enabled:', enabled);
+
         const controls = this.shadowRoot.getElementById('font-sizing-controls');
+
+        console.log('🔤 [FONT SIZING] Controls element found:', !!controls);
 
         if (controls) {
 
             controls.style.display = enabled ? 'block' : 'none';
+
+            console.log('🔤 [FONT SIZING] Controls display set to:', enabled ? 'block' : 'none');
+
+            // Force the display with !important
+            if (enabled) {
+                controls.style.setProperty('display', 'block', 'important');
+                console.log('🔤 [FONT SIZING] Forced display: block with !important');
+            } else {
+                controls.style.setProperty('display', 'none', 'important');
+                console.log('🔤 [FONT SIZING] Forced display: none with !important');
+            }
 
         }
 
@@ -11772,6 +11827,15 @@ html body.big-white-cursor * {
             controls.style.display = enabled ? 'block' : 'none';
 
             console.log('Accessibility Widget: Controls display set to:', enabled ? 'block' : 'none');
+
+            // Force the display with !important
+            if (enabled) {
+                controls.style.setProperty('display', 'block', 'important');
+                console.log('📏 [LINE HEIGHT] Forced display: block with !important');
+            } else {
+                controls.style.setProperty('display', 'none', 'important');
+                console.log('📏 [LINE HEIGHT] Forced display: none with !important');
+            }
 
         }
 
@@ -12377,6 +12441,15 @@ html body.big-white-cursor * {
             controls.style.display = enabled ? 'block' : 'none';
 
             console.log('Accessibility Widget: Letter spacing controls display set to:', enabled ? 'block' : 'none');
+
+            // Force the display with !important
+            if (enabled) {
+                controls.style.setProperty('display', 'block', 'important');
+                console.log('📝 [LETTER SPACING] Forced display: block with !important');
+            } else {
+                controls.style.setProperty('display', 'none', 'important');
+                console.log('📝 [LETTER SPACING] Forced display: none with !important');
+            }
 
         }
 
@@ -14215,9 +14288,9 @@ html body.big-white-cursor * {
 
                 console.log('Accessibility Widget: Interactive element focused, applying styles:', focusedElement);
 
-                focusedElement.style.outline = 'none';
+                focusedElement.style.outline = '3px solid #6366f1';
 
-                focusedElement.style.outlineOffset = '0px';
+                focusedElement.style.outlineOffset = '2px';
 
                 focusedElement.style.background = 'rgba(99, 102, 241, 0.1)';
 
