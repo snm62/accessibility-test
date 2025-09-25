@@ -330,8 +330,9 @@ if (window.innerWidth <= 768) {
 
                 if (feature === 'align-left' && enabled) {
                     console.log('🔧 [TOGGLE HANDLER] Enabling align-left, disabling others...');
-                    this.disableAlignCenter();
-                    this.disableAlignRight();
+                    
+                    // Clear all alignment classes first
+                    this.clearAllAlignmentClasses();
 
                     // Uncheck other alignment toggles in UI
                     const centerToggle = this.shadowRoot.getElementById('align-center');
@@ -342,35 +343,25 @@ if (window.innerWidth <= 768) {
                     if (rightToggle) rightToggle.checked = false;
 
                 } else if (feature === 'align-center' && enabled) {
-
-                    this.disableAlignLeft();
-
-                    this.disableAlignRight();
+                    
+                    // Clear all alignment classes first
+                    this.clearAllAlignmentClasses();
 
                     // Uncheck other alignment toggles in UI
-
                     const leftToggle = this.shadowRoot.getElementById('align-left');
-
                     const rightToggle = this.shadowRoot.getElementById('align-right');
-
                     if (leftToggle) leftToggle.checked = false;
-
                     if (rightToggle) rightToggle.checked = false;
 
                 } else if (feature === 'align-right' && enabled) {
-
-                    this.disableAlignLeft();
-
-                    this.disableAlignCenter();
+                    
+                    // Clear all alignment classes first
+                    this.clearAllAlignmentClasses();
 
                     // Uncheck other alignment toggles in UI
-
                     const leftToggle = this.shadowRoot.getElementById('align-left');
-
                     const centerToggle = this.shadowRoot.getElementById('align-center');
-
                     if (leftToggle) leftToggle.checked = false;
-
                     if (centerToggle) centerToggle.checked = false;
 
                 }
@@ -17204,20 +17195,16 @@ html body.big-white-cursor * {
 
     enableAlignLeft() {
 
-        // Disable other alignment options first
-        this.disableAlignCenter();
-        this.disableAlignRight();
+        // First, completely clear all alignment classes
+        this.clearAllAlignmentClasses();
 
         this.settings['align-left'] = true;
 
         document.body.classList.add('align-left');
 
         // Also add to the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.add('align-left');
-
         }
 
         this.saveSettings();
@@ -17252,20 +17239,16 @@ html body.big-white-cursor * {
 
     enableAlignCenter() {
 
-        // Disable other alignment options first
-        this.disableAlignLeft();
-        this.disableAlignRight();
+        // First, completely clear all alignment classes
+        this.clearAllAlignmentClasses();
 
         this.settings['align-center'] = true;
 
         document.body.classList.add('align-center');
 
         // Also add to the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.add('align-center');
-
         }
 
         this.saveSettings();
@@ -17300,20 +17283,16 @@ html body.big-white-cursor * {
 
     enableAlignRight() {
 
-        // Disable other alignment options first
-        this.disableAlignLeft();
-        this.disableAlignCenter();
+        // First, completely clear all alignment classes
+        this.clearAllAlignmentClasses();
 
         this.settings['align-right'] = true;
 
         document.body.classList.add('align-right');
 
         // Also add to the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.add('align-right');
-
         }
 
         this.saveSettings();
@@ -17331,17 +17310,32 @@ html body.big-white-cursor * {
         document.body.classList.remove('align-right');
 
         // Also remove from the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.remove('align-right');
-
         }
 
         this.saveSettings();
 
         console.log('Accessibility Widget: Align right disabled');
 
+    }
+
+    // Helper method to clear all alignment classes
+    clearAllAlignmentClasses() {
+        // Remove all alignment classes from body
+        document.body.classList.remove('align-left', 'align-center', 'align-right');
+        
+        // Remove all alignment classes from widget host
+        if (this.shadowRoot && this.shadowRoot.host) {
+            this.shadowRoot.host.classList.remove('align-left', 'align-center', 'align-right');
+        }
+        
+        // Reset all alignment settings
+        this.settings['align-left'] = false;
+        this.settings['align-center'] = false;
+        this.settings['align-right'] = false;
+        
+        console.log('Accessibility Widget: Cleared all alignment classes');
     }
 
 
@@ -20895,6 +20889,7 @@ applyCustomizations(customizationData) {
         if (customizationData.mobileTriggerHorizontalPosition && customizationData.mobileTriggerVerticalPosition) {
             console.log('📱 [APPLY CUSTOMIZATIONS] Setting combined mobile trigger position:', customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
             console.log('📱 [APPLY CUSTOMIZATIONS] Window width at time of application:', window.innerWidth);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Is mobile at application time:', window.innerWidth <= 768);
             this.updateMobileTriggerCombinedPosition(customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
         } else {
             // Handle individual positioning
@@ -20915,7 +20910,9 @@ applyCustomizations(customizationData) {
         }
         
         if (customizationData.mobileTriggerShape) {
-            console.log('[CK] applyCustomizations() - Setting mobile trigger shape:', customizationData.mobileTriggerShape);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Setting mobile trigger shape:', customizationData.mobileTriggerShape);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Window width at shape application:', window.innerWidth);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Is mobile at shape application:', window.innerWidth <= 768);
             this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
         }
         
@@ -21911,55 +21908,125 @@ applyCustomizations(customizationData) {
             const isMobile = window.innerWidth <= 768;
             console.log('📱 [MOBILE POSITION] Is mobile:', isMobile);
             if (isMobile) {
-                // Clear all existing positioning properties
+                console.log('📱 [MOBILE POSITION] BEFORE CLEARING - Current styles:');
+                console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
+                console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
+                console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
+                console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
+                console.log('📱 [MOBILE POSITION] - inset:', icon.style.inset);
+                
+                // Clear all existing positioning properties more aggressively
                 icon.style.removeProperty('top');
                 icon.style.removeProperty('bottom');
                 icon.style.removeProperty('left');
                 icon.style.removeProperty('right');
                 icon.style.removeProperty('transform');
                 icon.style.removeProperty('inset');
+                icon.style.removeProperty('position');
+                icon.style.removeProperty('z-index');
                 
-                // Set base positioning
-                icon.style.position = 'fixed';
-                icon.style.zIndex = '9999';
-                
-                // Apply horizontal positioning
-                console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
-                if (horizontalPos === 'left') {
-                    icon.style.left = '20px';
-                    icon.style.right = 'auto';
-                    console.log('📱 [MOBILE POSITION] Set left: 20px, right: auto');
-                } else if (horizontalPos === 'right') {
-                    icon.style.right = '20px';
-                    icon.style.left = 'auto';
-                    console.log('📱 [MOBILE POSITION] Set right: 20px, left: auto');
-                }
-                
-                // Apply vertical positioning
-                console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
-                if (verticalPos === 'top') {
-                    icon.style.top = '20px';
-                    icon.style.bottom = 'auto';
-                    icon.style.transform = 'none';
-                    console.log('📱 [MOBILE POSITION] Set top: 20px, bottom: auto, transform: none');
-                } else if (verticalPos === 'bottom') {
-                    icon.style.bottom = '20px';
-                    icon.style.top = 'auto';
-                    icon.style.transform = 'none';
-                    console.log('📱 [MOBILE POSITION] Set bottom: 20px, top: auto, transform: none');
-                } else if (verticalPos === 'middle') {
-                    icon.style.top = '50%';
-                    icon.style.bottom = 'auto';
-                    icon.style.transform = 'translateY(-50%)';
-                    console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%)');
-                }
-                
-                console.log('📱 [MOBILE POSITION] Final computed styles:');
+                console.log('📱 [MOBILE POSITION] AFTER CLEARING - Current styles:');
                 console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
                 console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
                 console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
                 console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                
+                // Set base positioning with higher specificity
+                icon.style.setProperty('position', 'fixed', 'important');
+                icon.style.setProperty('z-index', '9999', 'important');
+                
+                console.log('📱 [MOBILE POSITION] BASE POSITIONING SET:');
+                console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
+                console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
+                
+                // Apply horizontal positioning with !important
+                console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
+                if (horizontalPos === 'left') {
+                    icon.style.setProperty('left', '20px', 'important');
+                    icon.style.setProperty('right', 'auto', 'important');
+                    console.log('📱 [MOBILE POSITION] Set left: 20px, right: auto with !important');
+                } else if (horizontalPos === 'right') {
+                    icon.style.setProperty('right', '20px', 'important');
+                    icon.style.setProperty('left', 'auto', 'important');
+                    console.log('📱 [MOBILE POSITION] Set right: 20px, left: auto with !important');
+                }
+                
+                // Apply vertical positioning with !important
+                console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
+                if (verticalPos === 'top') {
+                    icon.style.setProperty('top', '20px', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'none', 'important');
+                    console.log('📱 [MOBILE POSITION] Set top: 20px, bottom: auto, transform: none with !important');
+                } else if (verticalPos === 'bottom') {
+                    icon.style.setProperty('bottom', '20px', 'important');
+                    icon.style.setProperty('top', 'auto', 'important');
+                    icon.style.setProperty('transform', 'none', 'important');
+                    console.log('📱 [MOBILE POSITION] Set bottom: 20px, top: auto, transform: none with !important');
+                } else if (verticalPos === 'middle') {
+                    icon.style.setProperty('top', '50%', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%) with !important');
+                }
+                
+                console.log('📱 [MOBILE POSITION] IMMEDIATELY AFTER SETTING - Current styles:');
+                console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
+                console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
+                console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
+                console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
+                console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
+                
+                // Force reapply after a short delay to override any conflicting CSS
+                setTimeout(() => {
+                    console.log('📱 [MOBILE POSITION] REAPPLYING AFTER DELAY...');
+                    if (horizontalPos === 'right') {
+                        icon.style.setProperty('right', '20px', 'important');
+                        icon.style.setProperty('left', 'auto', 'important');
+                    } else if (horizontalPos === 'left') {
+                        icon.style.setProperty('left', '20px', 'important');
+                        icon.style.setProperty('right', 'auto', 'important');
+                    }
+                    
+                    if (verticalPos === 'middle') {
+                        icon.style.setProperty('top', '50%', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    } else if (verticalPos === 'top') {
+                        icon.style.setProperty('top', '20px', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
+                    } else if (verticalPos === 'bottom') {
+                        icon.style.setProperty('bottom', '20px', 'important');
+                        icon.style.setProperty('top', 'auto', 'important');
+                        icon.style.setProperty('transform', 'none', 'important');
+                    }
+                    
+                    console.log('📱 [MOBILE POSITION] FINAL STYLES AFTER DELAY:');
+                    console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
+                    console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
+                    console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                    console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
+                    console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                    console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
+                    console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
+                    
+                    // Check computed styles
+                    const computedStyle = window.getComputedStyle(icon);
+                    console.log('📱 [MOBILE POSITION] COMPUTED STYLES:');
+                    console.log('📱 [MOBILE POSITION] - computed left:', computedStyle.left);
+                    console.log('📱 [MOBILE POSITION] - computed right:', computedStyle.right);
+                    console.log('📱 [MOBILE POSITION] - computed top:', computedStyle.top);
+                    console.log('📱 [MOBILE POSITION] - computed bottom:', computedStyle.bottom);
+                    console.log('📱 [MOBILE POSITION] - computed transform:', computedStyle.transform);
+                    console.log('📱 [MOBILE POSITION] - computed position:', computedStyle.position);
+                    console.log('📱 [MOBILE POSITION] - computed z-index:', computedStyle.zIndex);
+                }, 100);
                 
                 console.log('📱 [MOBILE POSITION] Mobile icon positioned:', horizontalPos, verticalPos, '- COMPLETED');
             }
@@ -21990,15 +22057,27 @@ applyCustomizations(customizationData) {
     }
     
     updateMobileTriggerShape(shape) {
-        console.log('[CK] updateMobileTriggerShape() - Shape:', shape);
-        console.log('[CK] updateMobileTriggerShape() - Window width:', window.innerWidth);
-        console.log('[CK] updateMobileTriggerShape() - Is mobile:', window.innerWidth <= 768);
+        console.log('📱 [MOBILE SHAPE] updateMobileTriggerShape() - Shape:', shape);
+        console.log('📱 [MOBILE SHAPE] Window width:', window.innerWidth);
+        console.log('📱 [MOBILE SHAPE] Is mobile:', window.innerWidth <= 768);
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
+                console.log('📱 [MOBILE SHAPE] BEFORE SHAPE CHANGE:');
+                console.log('📱 [MOBILE SHAPE] - Current classes:', icon.className);
+                console.log('📱 [MOBILE SHAPE] - Current data-shape:', icon.getAttribute('data-shape'));
+                console.log('📱 [MOBILE SHAPE] - Current border-radius:', icon.style.borderRadius);
+                console.log('📱 [MOBILE SHAPE] - Computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                
                 console.log('[CK] Applying mobile shape:', shape);
+                
+                // Clear existing shape properties
+                icon.style.removeProperty('border-radius');
+                icon.style.removeProperty('-webkit-border-radius');
+                icon.style.removeProperty('-moz-border-radius');
+                
                 icon.setAttribute('data-shape', shape.toLowerCase());
                 
                 let borderRadius = '50%';
@@ -22010,11 +22089,34 @@ applyCustomizations(customizationData) {
                     borderRadius = '0px';
                 }
                 
+                console.log('📱 [MOBILE SHAPE] AFTER CLEARING:');
+                console.log('📱 [MOBILE SHAPE] - Border-radius after clearing:', icon.style.borderRadius);
+                console.log('📱 [MOBILE SHAPE] - Computed after clearing:', window.getComputedStyle(icon).borderRadius);
+                
                 // Apply with maximum force
                 icon.style.setProperty('border-radius', borderRadius, 'important');
+                icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
+                icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
                 icon.style.setProperty('display', 'flex', 'important');
                 icon.style.setProperty('align-items', 'center', 'important');
                 icon.style.setProperty('justify-content', 'center', 'important');
+                
+                console.log('📱 [MOBILE SHAPE] IMMEDIATELY AFTER SETTING:');
+                console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
+                console.log('📱 [MOBILE SHAPE] - Computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                
+                // Force reapply after delay
+                setTimeout(() => {
+                    console.log('📱 [MOBILE SHAPE] REAPPLYING SHAPE AFTER DELAY...');
+                    icon.style.setProperty('border-radius', borderRadius, 'important');
+                    icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
+                    icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
+                    
+                    console.log('📱 [MOBILE SHAPE] FINAL SHAPE AFTER DELAY:');
+                    console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
+                    console.log('📱 [MOBILE SHAPE] - Computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                }, 100);
+                
                 // Check computed style
                 const computedStyle = window.getComputedStyle(icon).borderRadius;
                 console.log('[CK] Mobile shape applied:', shape, 'border-radius:', borderRadius);
