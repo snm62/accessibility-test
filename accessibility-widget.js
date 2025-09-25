@@ -11641,6 +11641,7 @@ html body.big-white-cursor * {
             
             // Bind events when controls are shown
             this.bindLineHeightEvents();
+            this.bindLineHeightEventsDirect();
 
         }
 
@@ -11687,10 +11688,16 @@ html body.big-white-cursor * {
             console.log('Accessibility Widget: Line height controls element:', controls);
             console.log('Accessibility Widget: Controls display style:', controls ? controls.style.display : 'not found');
             
-            if (!controls || controls.style.display === 'none') {
-                console.log('Accessibility Widget: Controls not visible, retrying in 200ms...');
+            if (!controls) {
+                console.log('Accessibility Widget: Controls not found, retrying in 200ms...');
                 setTimeout(() => this.bindLineHeightEvents(), 200);
                 return;
+            }
+            
+            // Force controls to be visible if they exist
+            if (controls.style.display === 'none') {
+                controls.style.display = 'block';
+                console.log('Accessibility Widget: Forced controls to be visible');
             }
 
             // Line height control buttons - using Shadow DOM
@@ -11801,6 +11808,34 @@ html body.big-white-cursor * {
 
         }, 500); // Increased delay to ensure DOM is ready and controls are visible
 
+    }
+    
+    // Alternative method to bind line height events directly
+    bindLineHeightEventsDirect() {
+        console.log('Accessibility Widget: Binding line height events directly...');
+        
+        const decreaseBtn = this.shadowRoot.getElementById('decrease-line-height-btn');
+        const increaseBtn = this.shadowRoot.getElementById('increase-line-height-btn');
+        
+        if (decreaseBtn) {
+            decreaseBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Accessibility Widget: Decrease button clicked directly');
+                this.decreaseLineHeight();
+            };
+            console.log('Accessibility Widget: Direct decrease button handler attached');
+        }
+        
+        if (increaseBtn) {
+            increaseBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Accessibility Widget: Increase button clicked directly');
+                this.increaseLineHeight();
+            };
+            console.log('Accessibility Widget: Direct increase button handler attached');
+        }
     }
 
 
@@ -14792,6 +14827,7 @@ html body.big-white-cursor * {
                 
                 // Bind events when controls are shown
                 this.bindLineHeightEvents();
+                this.bindLineHeightEventsDirect();
 
             }
 
@@ -19766,7 +19802,9 @@ html body.big-white-cursor * {
 
         console.log('Accessibility Widget: Enabling center alignment');
 
-        
+        // Disable other alignment options first
+        this.disableAlignLeft();
+        this.disableAlignRight();
 
         // Apply center alignment to body first
 
@@ -19886,7 +19924,9 @@ html body.big-white-cursor * {
 
         console.log('Accessibility Widget: Enabling left alignment');
 
-        
+        // Disable other alignment options first
+        this.disableAlignCenter();
+        this.disableAlignRight();
 
         // Apply left alignment to body first
 
@@ -19982,7 +20022,9 @@ html body.big-white-cursor * {
 
         console.log('Accessibility Widget: Enabling right alignment');
 
-        
+        // Disable other alignment options first
+        this.disableAlignLeft();
+        this.disableAlignCenter();
 
         // Apply right alignment to body first, then to specific content elements
 
