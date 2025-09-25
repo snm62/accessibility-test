@@ -11573,6 +11573,10 @@ html body.big-white-cursor * {
         
 
         if (enabled) {
+            console.log('📏 [TOGGLE CONTROLS] Enabling line height controls, binding events...');
+            // Bind the line height events when controls are enabled
+            this.bindLineHeightEvents();
+            
             // Check if line height was actually used (not just toggled on)
             const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
             
@@ -19511,7 +19515,7 @@ html body.big-white-cursor * {
 
         // Apply to document body first
 
-        document.body.style.setProperty('text-align', alignment, 'important');
+        document.body.style.setProperty('text-align', alignment);
 
         
 
@@ -19541,7 +19545,7 @@ html body.big-white-cursor * {
 
             if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span', 'section', 'article', 'main', 'header', 'footer', 'nav', 'li', 'td', 'th', 'blockquote', 'cite', 'address', 'label', 'a'].includes(tagName)) {
 
-                element.style.setProperty('text-align', alignment, 'important');
+                element.style.setProperty('text-align', alignment);
 
                 count++;
 
@@ -19579,7 +19583,7 @@ html body.big-white-cursor * {
 
                 if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
 
-                    element.style.setProperty('text-align', alignment, 'important');
+                    element.style.setProperty('text-align', alignment);
 
                     count++;
 
@@ -20014,13 +20018,13 @@ html body.big-white-cursor * {
         document.body.style.textAlign = 'left';
         console.log('🔧 [ALIGN LEFT] Body textAlign set to:', document.body.style.textAlign);
 
-        
-
         // Then apply to specific content elements, excluding accessibility widget
-
+        console.log('🔧 [ALIGN LEFT] Querying content elements...');
         const contentElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
+        console.log('🔧 [ALIGN LEFT] Found', contentElements.length, 'content elements');
 
-        
+        let processedCount = 0;
+        let skippedCount = 0;
 
         contentElements.forEach(element => {
 
@@ -20052,11 +20056,13 @@ html body.big-white-cursor * {
 
             
 
+            console.log('🔧 [ALIGN LEFT] Setting textAlign to left for element:', element.tagName, element.className);
             element.style.textAlign = 'left';
+            processedCount++;
 
         });
-
         
+        console.log('🔧 [ALIGN LEFT] Processed', processedCount, 'elements, skipped', skippedCount, 'elements');
 
         console.log('🔧 [ALIGN LEFT] Left alignment enabled - COMPLETED');
         console.log('🔧 [ALIGN LEFT] Final body textAlign:', document.body.style.textAlign);
@@ -21855,29 +21861,29 @@ applyCustomizations(customizationData) {
                 
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
-                        icon.style.setProperty('left', '10px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
+                        icon.style.setProperty('left', '10px');
+                        icon.style.setProperty('right', 'auto');
                         console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
-                        icon.style.setProperty('right', '10px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
+                        icon.style.setProperty('right', '10px');
+                        icon.style.setProperty('left', 'auto');
                         console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
-                        icon.style.setProperty('top', '10px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
+                        icon.style.setProperty('top', '10px');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'none');
                         console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
+                        icon.style.setProperty('bottom', '10px');
+                        icon.style.setProperty('top', 'auto');
+                        icon.style.setProperty('transform', 'none');
                         console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                        icon.style.setProperty('top', '50%');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'translateY(-50%)');
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
                 }
@@ -21895,41 +21901,41 @@ applyCustomizations(customizationData) {
             const isMobile = window.innerWidth <= 768;
             console.log('📱 [MOBILE POSITION] Is mobile:', isMobile);
             if (isMobile) {
-                // Clear all existing positioning with higher specificity
-                icon.style.setProperty('top', 'unset', 'important');
-                icon.style.setProperty('bottom', 'unset', 'important');
-                icon.style.setProperty('left', 'unset', 'important');
-                icon.style.setProperty('right', 'unset', 'important');
-                icon.style.setProperty('transform', 'unset', 'important');
+                // Clear all existing positioning
+                icon.style.setProperty('top', 'unset');
+                icon.style.setProperty('bottom', 'unset');
+                icon.style.setProperty('left', 'unset');
+                icon.style.setProperty('right', 'unset');
+                icon.style.setProperty('transform', 'unset');
                 
-                // Apply horizontal positioning with !important
+                // Apply horizontal positioning
                 console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
                 if (horizontalPos === 'left') {
-                    icon.style.setProperty('left', '10px', 'important');
-                    icon.style.setProperty('right', 'auto', 'important');
+                    icon.style.setProperty('left', '10px');
+                    icon.style.setProperty('right', 'auto');
                     console.log('📱 [MOBILE POSITION] Set left: 10px, right: auto');
                 } else if (horizontalPos === 'right') {
-                    icon.style.setProperty('right', '10px', 'important');
-                    icon.style.setProperty('left', 'auto', 'important');
+                    icon.style.setProperty('right', '10px');
+                    icon.style.setProperty('left', 'auto');
                     console.log('📱 [MOBILE POSITION] Set right: 10px, left: auto');
                 }
                 
-                // Apply vertical positioning with !important
+                // Apply vertical positioning
                 console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
                 if (verticalPos === 'top') {
-                    icon.style.setProperty('top', '10px', 'important');
-                    icon.style.setProperty('bottom', 'auto', 'important');
-                    icon.style.setProperty('transform', 'none', 'important');
+                    icon.style.setProperty('top', '10px');
+                    icon.style.setProperty('bottom', 'auto');
+                    icon.style.setProperty('transform', 'none');
                     console.log('📱 [MOBILE POSITION] Set top: 10px, bottom: auto, transform: none');
                 } else if (verticalPos === 'bottom') {
-                    icon.style.setProperty('bottom', '10px', 'important');
-                    icon.style.setProperty('top', 'auto', 'important');
-                    icon.style.setProperty('transform', 'none', 'important');
+                    icon.style.setProperty('bottom', '10px');
+                    icon.style.setProperty('top', 'auto');
+                    icon.style.setProperty('transform', 'none');
                     console.log('📱 [MOBILE POSITION] Set bottom: 10px, top: auto, transform: none');
                 } else if (verticalPos === 'middle') {
-                    icon.style.setProperty('top', '50%', 'important');
-                    icon.style.setProperty('bottom', 'auto', 'important');
-                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    icon.style.setProperty('top', '50%');
+                    icon.style.setProperty('bottom', 'auto');
+                    icon.style.setProperty('transform', 'translateY(-50%)');
                     console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%)');
                 }
                 
@@ -21939,6 +21945,40 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
                 console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                
+                // Force reapply styles after a short delay to override any conflicting CSS
+                setTimeout(() => {
+                    console.log('📱 [MOBILE POSITION] Reapplying styles after delay...');
+                    if (horizontalPos === 'right') {
+                        icon.style.setProperty('right', '10px');
+                        icon.style.setProperty('left', 'auto');
+                    } else if (horizontalPos === 'left') {
+                        icon.style.setProperty('left', '10px');
+                        icon.style.setProperty('right', 'auto');
+                    }
+                    
+                    if (verticalPos === 'middle') {
+                        icon.style.setProperty('top', '50%');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'translateY(-50%)');
+                    } else if (verticalPos === 'top') {
+                        icon.style.setProperty('top', '10px');
+                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('transform', 'none');
+                    } else if (verticalPos === 'bottom') {
+                        icon.style.setProperty('bottom', '10px');
+                        icon.style.setProperty('top', 'auto');
+                        icon.style.setProperty('transform', 'none');
+                    }
+                    
+                    console.log('📱 [MOBILE POSITION] Final styles after delay:');
+                    console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
+                    console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
+                    console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                    console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
+                    console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                }, 100);
+                
                 console.log('📱 [MOBILE POSITION] Mobile icon positioned with !important:', horizontalPos, verticalPos, '- COMPLETED');
             }
         }
