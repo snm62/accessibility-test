@@ -2995,7 +2995,7 @@ body.align-right a {
 
             .toggle-switch input:focus + .slider {
 
-                 outline: none !important;
+                 /* Removed conflicting outline: none */
             }
             
             /* Override for accessibility icon to show focus when keyboard navigation is active */
@@ -3017,7 +3017,7 @@ body.align-right a {
 
             .profile-item:focus-within {
 
-                outline: none !important;
+                /* Removed conflicting outline: none */
             }
 
 
@@ -3063,9 +3063,9 @@ body.align-right a {
 
             .accessibility-panel label:focus {
 
-                outline: none !important;
-                outline-offset: 0px !important;
-                box-shadow: none !important;
+                /* Removed conflicting outline: none */
+                /* Removed conflicting outline-offset */
+                /* Removed conflicting box-shadow: none */
 
             }
 
@@ -3321,7 +3321,7 @@ body.align-right a {
                 justify-content: center !important;
                 box-sizing: border-box !important;
                 margin: 0 !important;
-                outline: none !important;
+                /* Removed conflicting outline: none */
 
             }
 
@@ -14462,7 +14462,6 @@ html body.big-white-cursor * {
 
                     focusedElement === document.documentElement ||
 
-                    focusedElement.closest('.accessibility-panel') ||
 
                     !isInteractiveElement) {
 
@@ -17406,7 +17405,6 @@ html body.big-white-cursor * {
 
                     focusedElement === document.documentElement ||
 
-                    focusedElement.closest('.accessibility-panel') ||
 
                     !isInteractiveElement) {
 
