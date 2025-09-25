@@ -2927,6 +2927,15 @@ body.align-right a {
 
             }
 
+            /* Allow focus indicators when highlight-focus is active */
+            body.highlight-focus .accessibility-icon:focus {
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
+            }
+
 
 
             /* Focus indicators for all interactive elements */
@@ -3022,7 +3031,17 @@ body.align-right a {
 
             }
 
-
+            /* Allow focus indicators when highlight-focus is active */
+            body.highlight-focus .accessibility-icon:focus,
+            body.highlight-focus .accessibility-panel button:focus,
+            body.highlight-focus .accessibility-panel input:focus,
+            body.highlight-focus .accessibility-panel label:focus {
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
+            }
 
             /* High contrast focus for better visibility */
 
@@ -5356,7 +5375,7 @@ html body.big-white-cursor * {
 
                             <div class="profile-description">
 
-                                <p>This profile enables motor-impaired persons to operate the website using keyboard keys (Tab, Shift+Tab, Enter) and shortcuts (e.g., "M" for menus, "H" for headings, "F" for forms, "B" for buttons, "G" for graphics).</p>
+                                <p>This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts</p>
 
 
                             </div>
@@ -21384,7 +21403,7 @@ applyCustomizations(customizationData) {
         // Update keyboard navigation note
         const keyboardNavNote = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
         if (keyboardNavNote && content.keyboardNavNote) {
-            keyboardNavNote.innerHTML = `<strong>Note:</strong> ${content.keyboardNavNote.replace('Note: ', '')}`;
+            keyboardNavNote.innerHTML = `<strong></strong> ${content.keyboardNavNote.replace('Note: ', '')}`;
             console.log('[CK] Updated keyboard nav note');
         }
         
