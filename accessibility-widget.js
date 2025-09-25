@@ -19913,7 +19913,7 @@ html body.big-white-cursor * {
 
             
 
-            element.style.textAlign = 'center';
+            element.style.textAlign = 'left';
 
         });
 
@@ -21836,28 +21836,28 @@ applyCustomizations(customizationData) {
                 
                 if (normalizedDirection === 'horizontal') {
                     if (pos === 'left') {
-                        icon.style.setProperty('left', '10px');
-                        icon.style.setProperty('right', 'auto');
+                        icon.style.setProperty('left', '10px', 'important');
+                        icon.style.setProperty('right', 'auto', 'important');
                         console.log('[CK] Mobile icon positioned LEFT');
                     } else if (pos === 'right') {
-                        icon.style.setProperty('right', '10px');
-                        icon.style.setProperty('left', 'auto');
+                        icon.style.setProperty('right', '10px', 'important');
+                        icon.style.setProperty('left', 'auto', 'important');
                         console.log('[CK] Mobile icon positioned RIGHT');
                     }
                 } else if (normalizedDirection === 'vertical') {
                     if (pos === 'top') {
-                        icon.style.setProperty('top', '10px');
-                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('top', '10px', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned TOP');
                     } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '10px');
-                        icon.style.setProperty('top', 'auto');
+                        icon.style.setProperty('bottom', '10px', 'important');
+                        icon.style.setProperty('top', 'auto', 'important');
                         icon.style.setProperty('transform', 'none', 'important');
                         console.log('[CK] Mobile icon positioned BOTTOM');
                     } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%');
-                        icon.style.setProperty('bottom', 'auto');
+                        icon.style.setProperty('top', '50%', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
@@ -21873,44 +21873,38 @@ applyCustomizations(customizationData) {
         if (icon) {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                // Clear all existing positioning
-                icon.style.removeProperty('top');
-                icon.style.removeProperty('bottom');
-                icon.style.removeProperty('left');
-                icon.style.removeProperty('right');
-                icon.style.removeProperty('transform');
+                // Clear all existing positioning with higher specificity
+                icon.style.setProperty('top', 'unset', 'important');
+                icon.style.setProperty('bottom', 'unset', 'important');
+                icon.style.setProperty('left', 'unset', 'important');
+                icon.style.setProperty('right', 'unset', 'important');
+                icon.style.setProperty('transform', 'unset', 'important');
                 
-                // Apply horizontal positioning
+                // Apply horizontal positioning with !important
                 if (horizontalPos === 'left') {
-                    icon.style.setProperty('left', '10px');
-                    icon.style.setProperty('right', 'auto');
+                    icon.style.setProperty('left', '10px', 'important');
+                    icon.style.setProperty('right', 'auto', 'important');
                 } else if (horizontalPos === 'right') {
-                    icon.style.setProperty('right', '10px');
-                    icon.style.setProperty('left', 'auto');
+                    icon.style.setProperty('right', '10px', 'important');
+                    icon.style.setProperty('left', 'auto', 'important');
                 }
                 
-                // Apply vertical positioning
+                // Apply vertical positioning with !important
                 if (verticalPos === 'top') {
-                    icon.style.setProperty('top', '10px');
-                    icon.style.setProperty('bottom', 'auto');
+                    icon.style.setProperty('top', '10px', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
                 } else if (verticalPos === 'bottom') {
-                    icon.style.setProperty('bottom', '10px');
-                    icon.style.setProperty('top', 'auto');
+                    icon.style.setProperty('bottom', '10px', 'important');
+                    icon.style.setProperty('top', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
                 } else if (verticalPos === 'middle') {
-                    icon.style.setProperty('top', '50%');
-                    icon.style.setProperty('bottom', 'auto');
-                    
-                    // Combine with horizontal transform if needed
-                    if (horizontalPos === 'right') {
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                    } else {
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                    }
+                    icon.style.setProperty('top', '50%', 'important');
+                    icon.style.setProperty('bottom', 'auto', 'important');
+                    icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                 }
                 
-                console.log('[CK] Mobile icon positioned:', horizontalPos, verticalPos);
+                console.log('[CK] Mobile icon positioned with !important:', horizontalPos, verticalPos);
             }
         }
     }
