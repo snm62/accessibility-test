@@ -18,6 +18,8 @@ constructor() {
         this.originalFontSizes = new Map(); // Store original font sizes to prevent compounding
 
         this.currentlyFocusedElement = null; // Track currently focused element for highlight focus
+        this.isKeyboardNavigation = false; // Track if user is using keyboard navigation
+        this.lastInteractionMethod = null; // Track last interaction method (keyboard/mouse)
 
         this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
 
@@ -656,11 +658,25 @@ if (window.innerWidth <= 768) {
 
         
 
+        // Add mouse detection for disabling keyboard focus indicators
+        this.mouseHandler = (e) => {
+            this.isKeyboardNavigation = false;
+            this.lastInteractionMethod = 'mouse';
+            console.log('Accessibility Widget: Mouse interaction detected - disabling keyboard focus indicators');
+        };
+
         // Add keyboard shortcuts for navigation
 
         this.keyboardShortcutHandler = (e) => {
 
             console.log('Accessibility Widget: Key pressed:', e.key, 'Alt:', e.altKey, 'Keyboard nav enabled:', this.settings['keyboard-nav']);
+            
+            // Detect Tab key navigation
+            if (e.key === 'Tab') {
+                this.isKeyboardNavigation = true;
+                this.lastInteractionMethod = 'keyboard';
+                console.log('Accessibility Widget: Tab key detected - keyboard navigation mode active');
+            }
 
             
 
@@ -924,11 +940,13 @@ if (window.innerWidth <= 768) {
 
         
 
-        // Add event listener
+        // Add event listeners
 
         document.addEventListener('keydown', this.keyboardShortcutHandler);
+        document.addEventListener('mousedown', this.mouseHandler);
+        document.addEventListener('click', this.mouseHandler);
 
-        console.log('Accessibility Widget: Keyboard shortcuts initialized successfully');
+        console.log('Accessibility Widget: Keyboard shortcuts and mouse detection initialized successfully');
 
         
 
@@ -959,6 +977,17 @@ if (window.innerWidth <= 768) {
             this.keyboardShortcutHandler = null;
 
             console.log('Accessibility Widget: Keyboard shortcuts removed');
+        }
+
+        if (this.mouseHandler) {
+
+            document.removeEventListener('mousedown', this.mouseHandler);
+
+            document.removeEventListener('click', this.mouseHandler);
+
+            this.mouseHandler = null;
+
+            console.log('Accessibility Widget: Mouse detection removed');
 
         }
 
@@ -1357,6 +1386,8 @@ if (window.innerWidth <= 768) {
         max-width: 350px;
         padding: 12px;
         font-size: 14px;
+        max-height: 90vh !important;
+        overflow-y: auto;
     }
     
     .accessibility-panel h2 {
@@ -1428,6 +1459,8 @@ if (window.innerWidth <= 768) {
         width: 80vw;
         max-width: 380px;
         padding: 14px;
+        max-height: 90vh !important;
+        overflow-y: auto;
         /* Font size controlled by JavaScript */
     }
     
@@ -1499,6 +1532,8 @@ if (window.innerWidth <= 768) {
         width: 70vw;
         max-width: 450px;
         padding: 16px;
+        max-height: 90vh !important;
+        overflow-y: auto;
         /* Font size controlled by JavaScript */
     }
     
@@ -1640,7 +1675,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 85vw;
         max-width: 400px;
-        max-height: 80vh;
+        max-height: 90vh !important;
         overflow-y: auto;
         /* Font size controlled by JavaScript */
     }
@@ -2148,7 +2183,8 @@ if (window.innerWidth <= 768) {
         max-width: 320px !important;
         /* Font size controlled by JavaScript */
         padding: 12px !important;
-        max-height: 70vh !important;
+        max-height: 90vh !important;
+        overflow-y: auto;
     }
     
     .accessibility-icon {
@@ -3156,13 +3192,13 @@ body.align-right a {
 
                 font-size: 24px;
 
-                padding: 10px;
+                padding: 8px;
 
                 position: absolute;
 
-                top: 10px;
+                top: 12px;
 
-                left: 15px;
+                left: 18px;
 
                 z-index: 1005;
 
@@ -3173,6 +3209,8 @@ body.align-right a {
                 color: white;
 
                 /* Ensure proper clickable area */
+                width: 44px;
+                height: 44px;
                 min-width: 44px;
                 min-height: 44px;
                 display: flex;
@@ -9317,6 +9355,17 @@ html body.big-white-cursor * {
             this.keyboardShortcutHandler = null;
 
             console.log('Accessibility Widget: Keyboard shortcuts removed');
+        }
+
+        if (this.mouseHandler) {
+
+            document.removeEventListener('mousedown', this.mouseHandler);
+
+            document.removeEventListener('click', this.mouseHandler);
+
+            this.mouseHandler = null;
+
+            console.log('Accessibility Widget: Mouse detection removed');
 
         }
 
@@ -14095,8 +14144,10 @@ html body.big-white-cursor * {
             console.log('Accessibility Widget: Focus event triggered on:', e.target);
 
             console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
 
-            if (document.body.classList.contains('highlight-focus')) {
+            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
                 const focusedElement = e.target;
 
@@ -16999,8 +17050,10 @@ html body.big-white-cursor * {
             console.log('Accessibility Widget: Focus event triggered on:', e.target);
 
             console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
 
-            if (document.body.classList.contains('highlight-focus')) {
+            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
                 const focusedElement = e.target;
 
@@ -21607,10 +21660,16 @@ applyCustomizations(customizationData) {
         const closeBtn = this.shadowRoot?.querySelector('.close-btn');
         if (closeBtn) {
             closeBtn.style.setProperty('font-size', '16px', 'important');
-            closeBtn.style.setProperty('width', '24px', 'important');
-            closeBtn.style.setProperty('height', '24px', 'important');
-            closeBtn.style.setProperty('top', '5px', 'important');
-            closeBtn.style.setProperty('left', '10px', 'important');
+            closeBtn.style.setProperty('width', '32px', 'important');
+            closeBtn.style.setProperty('height', '32px', 'important');
+            closeBtn.style.setProperty('min-width', '32px', 'important');
+            closeBtn.style.setProperty('min-height', '32px', 'important');
+            closeBtn.style.setProperty('top', '8px', 'important');
+            closeBtn.style.setProperty('left', '12px', 'important');
+            closeBtn.style.setProperty('display', 'flex', 'important');
+            closeBtn.style.setProperty('align-items', 'center', 'important');
+            closeBtn.style.setProperty('justify-content', 'center', 'important');
+            closeBtn.style.setProperty('box-sizing', 'border-box', 'important');
             console.log('📱 [MOBILE SIZES] Reduced close button size and fixed position');
         }
         
@@ -21802,8 +21861,14 @@ applyCustomizations(customizationData) {
             closeBtn.style.removeProperty('font-size');
             closeBtn.style.removeProperty('width');
             closeBtn.style.removeProperty('height');
+            closeBtn.style.removeProperty('min-width');
+            closeBtn.style.removeProperty('min-height');
             closeBtn.style.removeProperty('top');
             closeBtn.style.removeProperty('left');
+            closeBtn.style.removeProperty('display');
+            closeBtn.style.removeProperty('align-items');
+            closeBtn.style.removeProperty('justify-content');
+            closeBtn.style.removeProperty('box-sizing');
             console.log('📱 [REMOVE MOBILE SIZES] Restored close button size and position');
         }
         
