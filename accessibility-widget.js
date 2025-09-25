@@ -187,28 +187,36 @@ constructor() {
             // Add this in your init function after the existing code
 // Add window resize listener for mobile responsiveness
 window.addEventListener('resize', () => {
-    const isMobile = window.innerWidth <= 768;
+    const screenWidth = window.innerWidth;
+    const isMobile = screenWidth <= 768;
     const icon = this.shadowRoot?.getElementById('accessibility-icon');
     const panel = this.shadowRoot?.getElementById('accessibility-panel');
+    
+    console.log('📱 [WINDOW RESIZE] Window resized - screen width:', screenWidth);
+    console.log('📱 [WINDOW RESIZE] Is mobile:', isMobile);
+    console.log('📱 [WINDOW RESIZE] Icon found:', !!icon);
+    console.log('📱 [WINDOW RESIZE] Panel found:', !!panel);
     
     if (icon && panel) {
         if (isMobile) {
             // Apply mobile settings - force small panel near icon
-            console.log('[CK] Window resized to mobile - applying mobile styles');
+            console.log('📱 [WINDOW RESIZE] Window resized to mobile - applying mobile styles');
             this.applyMobileResponsiveStyles();
             
             // Reapply mobile positioning if it was set
             if (this.customizationData) {
                 if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
-                    console.log('[CK] Reapplying combined mobile positioning on resize');
+                    console.log('📱 [WINDOW RESIZE] Reapplying combined mobile positioning on resize');
                     this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
                 }
             }
         } else {
             // Apply desktop settings
-            console.log('[CK] Window resized to desktop - removing mobile styles');
+            console.log('📱 [WINDOW RESIZE] Window resized to desktop - removing mobile styles');
             this.removeMobileResponsiveStyles();
         }
+    } else {
+        console.log('📱 [WINDOW RESIZE] Icon or panel not found - skipping responsive styles');
     }
 });
 
@@ -5271,8 +5279,7 @@ html body.big-white-cursor * {
 
                                 <p>This profile enables motor-impaired persons to operate the website using keyboard keys (Tab, Shift+Tab, Enter) and shortcuts (e.g., "M" for menus, "H" for headings, "F" for forms, "B" for buttons, "G" for graphics).</p>
 
-                                <p><strong>Note:</strong> This profile prompts automatically for keyboard users.</p>
-
+                                
                             </div>
 
                             <small style="color: #6366f1; font-style: italic;">Activates with Screen Reader</small>
@@ -21189,7 +21196,7 @@ applyCustomizations(customizationData) {
         // Update screen reader note
         const screenReaderNote = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
         if (screenReaderNote && content.screenReaderNote) {
-            screenReaderNote.innerHTML = `<strong>Note:</strong> ${content.screenReaderNote.replace('Note: ', '')}`;
+            screenReaderNote.innerHTML = `<strong></strong> ${content.screenReaderNote.replace('Note: ', '')}`;
             console.log('[CK] Updated screen reader note');
         }
         
@@ -21344,6 +21351,120 @@ applyCustomizations(customizationData) {
         if (panel) {
             panel.style.display = 'none'; // Keep panel hidden unless opened
             console.log('[CK] Panel kept hidden (as expected)');
+        }
+    }
+    
+    debugFontSizeConflicts(element) {
+        console.log('🔍 [FONT DEBUG] debugFontSizeConflicts() called');
+        
+        if (!element) {
+            console.log('🔍 [FONT DEBUG] No element provided');
+            return;
+        }
+        
+        // Get computed styles
+        const computedStyle = window.getComputedStyle(element);
+        const fontSize = computedStyle.fontSize;
+        const fontFamily = computedStyle.fontFamily;
+        
+        console.log('🔍 [FONT DEBUG] Element computed font-size:', fontSize);
+        console.log('🔍 [FONT DEBUG] Element computed font-family:', fontFamily);
+        
+        // Check inline styles
+        const inlineFontSize = element.style.fontSize;
+        console.log('🔍 [FONT DEBUG] Element inline font-size:', inlineFontSize || 'none');
+        
+        // Check for any CSS rules that might be affecting font-size
+        const allStyles = document.styleSheets;
+        console.log('🔍 [FONT DEBUG] Total stylesheets found:', allStyles.length);
+        
+        // Check if element has any classes that might affect font-size
+        const classes = element.className;
+        console.log('🔍 [FONT DEBUG] Element classes:', classes);
+        
+        // Check parent element font-size
+        const parent = element.parentElement;
+        if (parent) {
+            const parentFontSize = window.getComputedStyle(parent).fontSize;
+            console.log('🔍 [FONT DEBUG] Parent element font-size:', parentFontSize);
+        }
+    }
+    
+    applyMobileButtonStacking() {
+        console.log('📱 [BUTTON STACKING] applyMobileButtonStacking() called');
+        
+        // Find the action buttons container
+        const actionButtons = this.shadowRoot?.querySelector('.action-buttons');
+        const buttonRows = this.shadowRoot?.querySelectorAll('.button-row');
+        
+        console.log('📱 [BUTTON STACKING] Action buttons found:', !!actionButtons);
+        console.log('📱 [BUTTON STACKING] Button rows found:', buttonRows?.length || 0);
+        
+        if (actionButtons) {
+            // Stack all buttons vertically on mobile
+            actionButtons.style.setProperty('flex-direction', 'column', 'important');
+            actionButtons.style.setProperty('gap', '8px', 'important');
+            actionButtons.style.setProperty('align-items', 'stretch', 'important');
+            console.log('📱 [BUTTON STACKING] Applied vertical stacking to action-buttons');
+        }
+        
+        if (buttonRows && buttonRows.length > 0) {
+            buttonRows.forEach((row, index) => {
+                // Make each button row stack vertically
+                row.style.setProperty('flex-direction', 'column', 'important');
+                row.style.setProperty('gap', '8px', 'important');
+                row.style.setProperty('width', '100%', 'important');
+                console.log(`📱 [BUTTON STACKING] Applied vertical stacking to button-row ${index + 1}`);
+            });
+        }
+        
+        // Also ensure individual buttons take full width
+        const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
+        if (actionBtns && actionBtns.length > 0) {
+            actionBtns.forEach((btn, index) => {
+                btn.style.setProperty('width', '100%', 'important');
+                btn.style.setProperty('justify-content', 'center', 'important');
+                console.log(`📱 [BUTTON STACKING] Applied full width to action-btn ${index + 1}`);
+            });
+        }
+    }
+    
+    removeMobileButtonStacking() {
+        console.log('📱 [REMOVE BUTTON STACKING] removeMobileButtonStacking() called');
+        
+        // Find the action buttons container
+        const actionButtons = this.shadowRoot?.querySelector('.action-buttons');
+        const buttonRows = this.shadowRoot?.querySelectorAll('.button-row');
+        
+        console.log('📱 [REMOVE BUTTON STACKING] Action buttons found:', !!actionButtons);
+        console.log('📱 [REMOVE BUTTON STACKING] Button rows found:', buttonRows?.length || 0);
+        
+        if (actionButtons) {
+            // Restore desktop layout
+            actionButtons.style.removeProperty('flex-direction');
+            actionButtons.style.removeProperty('gap');
+            actionButtons.style.removeProperty('align-items');
+            console.log('📱 [REMOVE BUTTON STACKING] Removed mobile stacking from action-buttons');
+        }
+        
+        if (buttonRows && buttonRows.length > 0) {
+            buttonRows.forEach((row, index) => {
+                // Restore desktop button row layout
+                row.style.removeProperty('flex-direction');
+                row.style.removeProperty('gap');
+                row.style.removeProperty('width');
+                console.log(`📱 [REMOVE BUTTON STACKING] Removed mobile stacking from button-row ${index + 1}`);
+            });
+        }
+        
+        // Restore individual button styles
+        const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
+        if (actionBtns && actionBtns.length > 0) {
+            actionBtns.forEach((btn, index) => {
+                btn.style.removeProperty('width');
+                btn.style.removeProperty('justify-content');
+                console.log(`📱 [REMOVE BUTTON STACKING] Removed mobile styles from action-btn ${index + 1}`);
+            });
         }
     }
     
@@ -21670,43 +21791,83 @@ applyCustomizations(customizationData) {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
+        console.log('📱 [MOBILE RESPONSIVE] applyMobileResponsiveStyles() called');
+        console.log('📱 [MOBILE RESPONSIVE] Panel found:', !!panel);
+        console.log('📱 [MOBILE RESPONSIVE] Icon found:', !!icon);
+        
         if (panel && icon) {
             const screenWidth = window.innerWidth;
-            console.log('[CK] Applying mobile responsive styles - screen width:', screenWidth);
+            console.log('📱 [MOBILE RESPONSIVE] Screen width:', screenWidth);
+            
+            // Log current font sizes before changes
+            const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
+            console.log('📱 [MOBILE RESPONSIVE] Current panel font-size:', currentPanelFontSize);
             
             if (screenWidth <= 480) {
                 // Mobile Portrait - Wider but compact
-                console.log('[CK] Applying mobile portrait styles');
+                console.log('📱 [MOBILE RESPONSIVE] Applying mobile portrait styles (≤480px)');
+                console.log('📱 [MOBILE RESPONSIVE] Setting panel font-size to 12px');
                 panel.style.setProperty('width', '75vw', 'important');
                 panel.style.setProperty('max-width', '320px', 'important');
                 panel.style.setProperty('left', '12.5vw', 'important');
-                panel.style.setProperty('font-size', '12px');
+                panel.style.setProperty('font-size', '12px', 'important');
                 panel.style.setProperty('padding', '12px', 'important');
                 panel.style.setProperty('max-height', '70vh', 'important');
+                
+                // Verify font-size was applied
+                const newPanelFontSize = window.getComputedStyle(panel).fontSize;
+                console.log('📱 [MOBILE RESPONSIVE] New panel font-size after setting:', newPanelFontSize);
+                
+                // Apply mobile button stacking
+                this.applyMobileButtonStacking();
+                
+                // Debug any font-size conflicts
+                this.debugFontSizeConflicts(panel);
                 
                 icon.style.setProperty('width', '40px', 'important');
                 icon.style.setProperty('height', '40px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '16px');
+                    console.log('📱 [MOBILE RESPONSIVE] Setting icon font-size to 16px');
+                    iconI.style.setProperty('font-size', '16px', 'important');
+                    const newIconFontSize = window.getComputedStyle(iconI).fontSize;
+                    console.log('📱 [MOBILE RESPONSIVE] New icon font-size after setting:', newIconFontSize);
+                } else {
+                    console.log('📱 [MOBILE RESPONSIVE] Icon <i> element not found!');
                 }
             } else if (screenWidth <= 768) {
                 // Mobile Landscape - Wider panel
-                console.log('[CK] Applying mobile landscape styles');
+                console.log('📱 [MOBILE RESPONSIVE] Applying mobile landscape styles (≤768px)');
+                console.log('📱 [MOBILE RESPONSIVE] Setting panel font-size to 13px');
                 panel.style.setProperty('width', '80vw', 'important');
                 panel.style.setProperty('max-width', '380px', 'important');
                 panel.style.setProperty('left', '10vw', 'important');
-                panel.style.setProperty('font-size', '13px');
+                panel.style.setProperty('font-size', '13px', 'important');
                 panel.style.setProperty('padding', '14px', 'important');
                 panel.style.setProperty('max-height', '75vh', 'important');
+                
+                // Apply mobile button stacking
+                this.applyMobileButtonStacking();
+                
+                // Verify font-size was applied
+                const newPanelFontSize = window.getComputedStyle(panel).fontSize;
+                console.log('📱 [MOBILE RESPONSIVE] New panel font-size after setting:', newPanelFontSize);
+                
+                // Debug any font-size conflicts
+                this.debugFontSizeConflicts(panel);
                 
                 icon.style.setProperty('width', '45px', 'important');
                 icon.style.setProperty('height', '45px', 'important');
                 
                 const iconI = icon.querySelector('i');
                 if (iconI) {
-                    iconI.style.setProperty('font-size', '18px');
+                    console.log('📱 [MOBILE RESPONSIVE] Setting icon font-size to 18px');
+                    iconI.style.setProperty('font-size', '18px', 'important');
+                    const newIconFontSize = window.getComputedStyle(iconI).fontSize;
+                    console.log('📱 [MOBILE RESPONSIVE] New icon font-size after setting:', newIconFontSize);
+                } else {
+                    console.log('📱 [MOBILE RESPONSIVE] Icon <i> element not found!');
                 }
             } else if (screenWidth >= 1025 && screenWidth <= 1366) {
                 // Large Tablets (iPad Air, iPad Pro, Surface Pro, etc.) - Position panel very close to icon
@@ -21776,10 +21937,19 @@ applyCustomizations(customizationData) {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
+        console.log('📱 [REMOVE MOBILE] removeMobileResponsiveStyles() called');
+        console.log('📱 [REMOVE MOBILE] Panel found:', !!panel);
+        console.log('📱 [REMOVE MOBILE] Icon found:', !!icon);
+        
         if (panel && icon) {
-            console.log('[CK] Removing mobile responsive styles - restoring desktop styles');
+            // Log current font sizes before removing
+            const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
+            console.log('📱 [REMOVE MOBILE] Current panel font-size before removal:', currentPanelFontSize);
+            
+            console.log('📱 [REMOVE MOBILE] Removing mobile responsive styles - restoring desktop styles');
             
             // Remove mobile-specific styles to allow desktop CSS to take over
+            console.log('📱 [REMOVE MOBILE] Removing panel font-size property');
             panel.style.removeProperty('width');
             panel.style.removeProperty('max-width');
             panel.style.removeProperty('left');
@@ -21790,6 +21960,16 @@ applyCustomizations(customizationData) {
             panel.style.removeProperty('overflow-y');
             panel.style.removeProperty('font-size');
             panel.style.removeProperty('padding');
+            
+            // Check font-size after removal
+            const newPanelFontSize = window.getComputedStyle(panel).fontSize;
+            console.log('📱 [REMOVE MOBILE] Panel font-size after removal:', newPanelFontSize);
+            
+            // Check for any CSS rules that might be overriding font-size
+            this.debugFontSizeConflicts(panel);
+            
+            // Remove mobile button stacking
+            this.removeMobileButtonStacking();
             
             // Remove mobile icon styles
             icon.style.removeProperty('width');
