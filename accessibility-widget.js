@@ -3093,6 +3093,25 @@ body.align-right a {
                 border-radius: 4px !important;
                 transition: outline 0.2s ease, background 0.2s ease !important;
             }
+            
+            /* Mobile-specific focus outline rules */
+            @media (max-width: 768px) {
+                .accessibility-panel button:focus,
+                .accessibility-panel input:focus,
+                .accessibility-panel select:focus,
+                .accessibility-panel label:focus,
+                .accessibility-panel .toggle-switch:focus,
+                .accessibility-panel .profile-item:focus,
+                .accessibility-icon:focus,
+                #accessibility-icon:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
+            }
 
             /* High contrast focus for better visibility */
 
@@ -4166,19 +4185,34 @@ body.align-right a {
             .language-option.selected,
             .language-option[aria-selected="true"],
             .language-option[data-selected="true"] {
-
                 background: #6366f1 !important;
-
                 color: #ffffff !important;
-
+                border: 2px solid #4f46e5 !important;
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
             }
 
             .language-option.selected:hover,
             .language-option[aria-selected="true"]:hover,
             .language-option[data-selected="true"]:hover {
-
                 background: #4f46e5 !important;
+                border: 2px solid #3730a3 !important;
+                box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3) !important;
+            }
+            
+            /* Ultra-specific rules to override any external CSS */
+            .accessibility-panel .language-option.selected,
+            .accessibility-panel .language-option[aria-selected="true"],
+            .accessibility-panel .language-option[data-selected="true"] {
+                background: #6366f1 !important;
+                color: #ffffff !important;
+                border: 2px solid #4f46e5 !important;
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+            }
 
+            /* Also support highlighting via span classes (fallback the user asked for) */
+            .language-option .language-name.selected,
+            .language-option .flag.selected {
+                color: #ffffff !important;
             }
 
 
@@ -8362,11 +8396,14 @@ html body.big-white-cursor * {
 
             
 
-            // Mark current language as selected
+            // Mark current language as selected - call immediately and after delay
+            console.log('🎯 [LANGUAGE SELECTION] Calling updateSelectedLanguage() immediately');
+            this.updateSelectedLanguage();
+            
             setTimeout(() => {
-                console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage() from showLanguageDropdown');
+                console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage() from showLanguageDropdown (delayed)');
                 this.updateSelectedLanguage();
-                console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed from showLanguageDropdown');
+                console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed from showLanguageDropdown (delayed)');
             }, 100);
 
             // Announce to screen reader
@@ -8409,6 +8446,10 @@ html body.big-white-cursor * {
 
         const languageOptions = this.shadowRoot.querySelectorAll('.language-option');
         console.log('🎯 [LANGUAGE SELECTION] Found language options:', languageOptions.length);
+        
+        // Debug: Check if dropdown is visible
+        const dropdown = this.shadowRoot.getElementById('language-dropdown');
+        console.log('🎯 [LANGUAGE SELECTION] Dropdown visible:', dropdown ? dropdown.style.display !== 'none' : 'dropdown not found');
 
         // Normalize language value to a two-letter code used in data-lang
         const normalizeLang = (lang) => {
@@ -8440,6 +8481,11 @@ html body.big-white-cursor * {
             // clear any inline fallback styles
             option.style.background = '';
             option.style.color = '';
+            // clear span-level fallback marking
+            const nameEl = option.querySelector('.language-name');
+            const flagEl = option.querySelector('.flag');
+            if (nameEl) nameEl.classList.remove('selected');
+            if (flagEl) flagEl.classList.remove('selected');
 
             // apply selected state
             if (normalizeLang(option.dataset.lang) === normalizedCurrent) {
@@ -8447,15 +8493,29 @@ html body.big-white-cursor * {
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
                 option.setAttribute('data-selected', 'true');
-                // Force inline styles to guarantee visibility over external CSS
-                option.style.background = '#6366f1 !important';
-                option.style.color = '#ffffff !important';
+                
+                // Ultra-aggressive inline styles to guarantee visibility over external CSS
                 option.style.setProperty('background', '#6366f1', 'important');
                 option.style.setProperty('color', '#ffffff', 'important');
+                option.style.setProperty('border', '2px solid #4f46e5', 'important');
+                option.style.setProperty('box-shadow', '0 0 0 2px rgba(99, 102, 241, 0.3)', 'important');
+                
+                // Also set direct style properties as backup
+                option.style.background = '#6366f1';
+                option.style.color = '#ffffff';
+                option.style.border = '2px solid #4f46e5';
+                option.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.3)';
+
+                // Also add span-level class so UI can style via span.selected if needed
+                if (nameEl) nameEl.classList.add('selected');
+                if (flagEl) flagEl.classList.add('selected');
+                
                 console.log('🎯 [LANGUAGE SELECTION] Option classes after setting:', option.className);
                 console.log('🎯 [LANGUAGE SELECTION] Option aria-selected:', option.getAttribute('aria-selected'));
                 console.log('🎯 [LANGUAGE SELECTION] Option inline background:', option.style.background);
                 console.log('🎯 [LANGUAGE SELECTION] Option inline color:', option.style.color);
+                console.log('🎯 [LANGUAGE SELECTION] Option computed background:', window.getComputedStyle(option).background);
+                console.log('🎯 [LANGUAGE SELECTION] Option computed color:', window.getComputedStyle(option).color);
             } else {
                 console.log('🎯 [LANGUAGE SELECTION] Option not selected:', option.dataset.lang);
             }
@@ -14308,13 +14368,12 @@ html body.big-white-cursor * {
 
             
 
-            // Apply to interactive elements not inside the panel (allow the icon itself)
+            // Apply to interactive elements (both inside and outside the panel)
 
-            if (!activeElement.closest('.accessibility-panel') && 
+            if (isInteractiveElement) {
 
-                isInteractiveElement) {
-
-                console.log('Accessibility Widget: Applying focus styles to currently focused element:', activeElement);
+                console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
+                console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
 
                 activeElement.style.outline = '3px solid #6366f1';
 
@@ -14325,6 +14384,7 @@ html body.big-white-cursor * {
                 activeElement.style.borderRadius = '4px';
 
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
                 
 
@@ -17252,13 +17312,12 @@ html body.big-white-cursor * {
 
             
 
-            // Apply to interactive elements not inside the panel (allow the icon itself)
+            // Apply to interactive elements (both inside and outside the panel)
 
-            if (!activeElement.closest('.accessibility-panel') && 
+            if (isInteractiveElement) {
 
-                isInteractiveElement) {
-
-                console.log('Accessibility Widget: Applying focus styles to currently focused element:', activeElement);
+                console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
+                console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
 
                 activeElement.style.outline = '3px solid #6366f1';
 
@@ -17269,6 +17328,7 @@ html body.big-white-cursor * {
                 activeElement.style.borderRadius = '4px';
 
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
                 
 
@@ -21984,6 +22044,32 @@ applyCustomizations(customizationData) {
                     width: auto !important;
                     min-width: 32px !important;
                 }
+                
+                /* Mobile focus outline for all interactive elements */
+                .accessibility-panel button:focus,
+                .accessibility-panel input:focus,
+                .accessibility-panel select:focus,
+                .accessibility-panel label:focus,
+                .accessibility-panel .toggle-switch:focus,
+                .accessibility-panel .profile-item:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
+                
+                /* Ensure accessibility icon focus works on mobile */
+                .accessibility-icon:focus,
+                #accessibility-icon:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
             }
         `;
         this.shadowRoot?.appendChild(mobileControlStyle);
@@ -22036,17 +22122,23 @@ applyCustomizations(customizationData) {
                     min-height: 28px !important;
                     margin: 6px 0 !important;
                     border-radius: 6px !important;
+                    box-sizing: border-box !important;
+                    width: 100% !important;
                 }
                 .useful-links-content {
                     padding: 6px !important;
+                    box-sizing: border-box !important;
                 }
                 .useful-links-content select {
                     font-size: 10px !important;
-                    padding: 4px 6px !important;
-                    min-height: 24px !important;
-                    height: 24px !important;
+                    padding: 2px 6px !important;
+                    min-height: 22px !important;
+                    height: 22px !important;
                     line-height: 1.1 !important;
                     border-radius: 4px !important;
+                    max-width: 100% !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
                 }
                 .useful-links-content select option {
                     font-size: 10px !important;
@@ -22071,6 +22163,7 @@ applyCustomizations(customizationData) {
             }
             if (toggle) {
                 // Keep toggle pinned so it doesn't affect text flow
+                usefulLinksProfile.style.setProperty('position', 'relative', 'important');
                 toggle.style.setProperty('position', 'absolute', 'important');
                 toggle.style.setProperty('left', '12px', 'important');
                 toggle.style.setProperty('top', '12px', 'important');
@@ -22080,12 +22173,16 @@ applyCustomizations(customizationData) {
             console.log('📱 [MOBILE SIZES] Adjusted Useful Links layout to prevent text shift');
         }
         
-        // Increase toggle width when ON to fit text properly and fix text sliding
+        // Fix toggle width and prevent text sliding on mobile
         const style = document.createElement('style');
         style.textContent = `
-            .toggle-switch > input:checked + .slider { width: 100% !important; }
-            .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
-            .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
+            @media (max-width: 768px) {
+                /* Keep slider width fixed so text never shifts */
+                .toggle-switch .slider { width: 36px !important; height: 20px !important; }
+                .toggle-switch > input:checked + .slider { width: 36px !important; }
+                .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
+                .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
+            }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
                 white-space: nowrap !important; 
                 overflow: hidden !important; 
