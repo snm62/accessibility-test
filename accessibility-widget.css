@@ -82,9 +82,7 @@
 
 /* Accessibility Icon - Fixed position on left side */
 .accessibility-icon {
-    position: fixed !important;
-    bottom: 20px !important;
-    left: 20px !important;
+    position: fixed;
     width: 60px;
     height: 60px;
     background: var(--primary-color);
@@ -171,7 +169,6 @@
 
 .close-btn {
     cursor: pointer;
-    font-size: 20px;
     padding: 5px;
     transition: transform 0.2s ease;
     position: absolute;
@@ -394,8 +391,7 @@
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 80px !important;
-    height: 40px !important;
+   
     flex-shrink: 0;
     order: 1;
 }
@@ -412,9 +408,7 @@
 
             .toggle-switch input:focus + .slider,
             .accessibility-panel .toggle-switch input:focus + .slider {
-                outline: 3px solid #4f46e5 !important;
-                outline-offset: 2px !important;
-                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+              
             }
 
 .slider {
@@ -645,7 +639,7 @@ input:checked + .slider:before {
 
 /* Enhanced content inside spotlight area - original styling */
 .adhd-friendly #adhd-spotlight {
-    z-index: 99999 !important;
+   
     background: transparent !important;
     backdrop-filter: brightness(2.0) contrast(1.2) !important;
     box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4) !important;
@@ -2644,6 +2638,6 @@ html.force-remove-reading-mask::before {
 }
 
 .toggle-switch {
-    width: 58px !important;
-    height: 17px !important;
+    width: 58px;
+    height: 17px;
 }
