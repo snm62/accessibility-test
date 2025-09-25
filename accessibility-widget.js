@@ -21437,28 +21437,38 @@ applyCustomizations(customizationData) {
         if (actionBtns && actionBtns.length > 0) {
             actionBtns.forEach((btn, index) => {
                 btn.style.setProperty('font-size', '11px', 'important');
-                btn.style.setProperty('padding', '8px 12px', 'important');
-                btn.style.setProperty('min-height', '32px', 'important');
+                btn.style.setProperty('padding', '6px 10px', 'important');
+                btn.style.setProperty('min-height', '30px', 'important');
                 console.log(`📱 [MOBILE SIZES] Reduced action-btn ${index + 1} size`);
             });
         }
         
-        // Reduce toggle switch sizes
-        const toggles = this.shadowRoot?.querySelectorAll('.toggle-switch');
+        // Reduce toggle switch sizes (label.toggle-switch contains input + span.slider)
+        const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
         if (toggles && toggles.length > 0) {
             toggles.forEach((toggle, index) => {
-                toggle.style.setProperty('width', '36px', 'important');
-                toggle.style.setProperty('height', '20px', 'important');
+                toggle.style.setProperty('width', '38px', 'important');
+                toggle.style.setProperty('height', '22px', 'important');
                 console.log(`📱 [MOBILE SIZES] Reduced toggle ${index + 1} size`);
             });
         }
         
-        // Reduce toggle switch sliders
-        const sliders = this.shadowRoot?.querySelectorAll('.toggle-slider');
+        // Reduce toggle slider knob (.slider and its pseudo knob)
+        const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
         if (sliders && sliders.length > 0) {
             sliders.forEach((slider, index) => {
-                slider.style.setProperty('width', '16px', 'important');
-                slider.style.setProperty('height', '16px', 'important');
+                // Track and bar
+                slider.style.setProperty('height', '22px', 'important');
+                slider.style.setProperty('border-radius', '22px', 'important');
+                slider.style.setProperty('padding', '0', 'important');
+                slider.style.setProperty('box-sizing', 'border-box', 'important');
+                // Inject a tiny stylesheet to shrink the knob (:before)
+                const style = document.createElement('style');
+                style.textContent = `
+                    .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
+                    .toggle-switch > input:checked + .slider:before { transform: translateX(16px) !important; }
+                `;
+                this.shadowRoot?.appendChild(style);
                 console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
             });
         }
@@ -21473,8 +21483,13 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Reduce profile titles
-        const profileTitles = this.shadowRoot?.querySelectorAll('.profile-title');
+        // Reduce headings and profile titles
+        const headerH2 = this.shadowRoot?.querySelector('.panel-header h2');
+        if (headerH2) {
+            headerH2.style.setProperty('font-size', '18px', 'important');
+            headerH2.style.setProperty('line-height', '22px', 'important');
+        }
+        const profileTitles = this.shadowRoot?.querySelectorAll('.profile-item h4');
         if (profileTitles && profileTitles.length > 0) {
             profileTitles.forEach((title, index) => {
                 title.style.setProperty('font-size', '12px', 'important');
@@ -21484,7 +21499,7 @@ applyCustomizations(customizationData) {
         }
         
         // Reduce profile descriptions
-        const profileDescs = this.shadowRoot?.querySelectorAll('.profile-description');
+        const profileDescs = this.shadowRoot?.querySelectorAll('.profile-item p');
         if (profileDescs && profileDescs.length > 0) {
             profileDescs.forEach((desc, index) => {
                 desc.style.setProperty('font-size', '10px', 'important');
