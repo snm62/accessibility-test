@@ -1158,7 +1158,7 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            // link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@0e86d68/accessibility-widget.css';
             // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
@@ -1266,42 +1266,60 @@ if (window.innerWidth <= 768) {
 
 /* Very Small Mobile Screens (430px and below) */
 @media (max-width: 430px) {
+    .accessibility-panel {
+        font-size: 12px;
+    }
+    
+    .accessibility-panel h2 {
+        font-size: 1.3em;
+    }
+    
+    .accessibility-panel h3 {
+        font-size: 1.1em;
+    }
+    
+    .accessibility-panel h4 {
+        font-size: 0.9em;
+    }
+    
+    .accessibility-panel p {
+        font-size: 0.8em;
+    }
+    
+    .accessibility-panel .action-btn {
+        font-size: 0.8em;
+        padding: 4px 8px;
+    }
+    
+    .accessibility-panel .scaling-btn {
+        font-size: 0.7em;
+        padding: 3px 5px;
+    }
+    
+    .accessibility-panel .profile-info h4 {
+        font-size: 0.8em;
+    }
+    
+    .accessibility-panel .profile-info p {
+        font-size: 0.7em;
+    }
+    
+    .accessibility-panel .profile-item h4 {
+        font-size: 0.8em;
+    }
+    
+    .accessibility-panel .profile-item p {
+        font-size: 0.7em;
+    }
+    
     .accessibility-panel .close-btn {
         font-size: 16px;
         padding: 4px;
-        top: 8px;
-        right: 8px;
-    }
-    .accessibility-panel h2 {
-        font-size: 16px;
-    }
-    .accessibility-panel h3 {
-        font-size: 14px;
-    }
-    .accessibility-panel h4 {
-        font-size: 12px;
-    }
-    .accessibility-panel p {
-        font-size: 10px;
-    }
-    .accessibility-panel .action-btn {
-        font-size: 10px;
-        padding: 4px 8px;
-    }
-    .accessibility-panel .scaling-btn {
-        font-size: 9px;
-        padding: 3px 5px;
     }
 }
 
 /* Mobile Devices (Small Screens) - Base styles */
 @media (max-width: 480px) {
-    .accessibility-panel .close-btn {
-        font-size: 18px;
-        padding: 6px;
-        top: 12px;
-        right: 12px;
-    }
     .accessibility-panel {
         width: 90vw;
         max-width: 350px;
@@ -1311,54 +1329,54 @@ if (window.innerWidth <= 768) {
     
     .accessibility-panel h2 {
         margin-bottom: 8px;
-        font-size: 18px;
+        font-size: 1.5em;
     }
     
     .accessibility-panel h3 {
         margin-bottom: 6px;
-        font-size: 16px;
+        font-size: 1.2em;
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        font-size: 1em;
     }
     
     .accessibility-panel p {
         line-height: 1.3;
-        font-size: 16px;
+        font-size: 0.9em;
     }
     
     .accessibility-panel .action-btn {
         padding: 6px 10px;
         min-height: 28px;
-        font-size: 16px;
+        font-size: 0.9em;
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 6px;
         min-height: 24px;
-        font-size: 16px;
+        font-size: 0.8em;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        font-size: 0.9em;
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        font-size: 0.8em;
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 16px;
+        font-size: 0.9em;
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 16px;
+        font-size: 0.8em;
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
-        padding: 8px;
+        font-size: 18px;
+        padding: 6px;
     }
     
     .accessibility-icon {
@@ -1368,7 +1386,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1378,59 +1396,58 @@ if (window.innerWidth <= 768) {
         width: 80vw;
         max-width: 380px;
         padding: 14px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
         margin-bottom: 10px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
         margin-bottom: 8px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
         line-height: 1.4;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
         padding: 8px 12px;
         min-height: 32px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
         padding: 5px 8px;
         min-height: 26px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
-        padding: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1440,7 +1457,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1450,59 +1467,58 @@ if (window.innerWidth <= 768) {
         width: 70vw;
         max-width: 450px;
         padding: 16px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
         margin-bottom: 12px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
         margin-bottom: 10px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
         line-height: 1.5;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
         padding: 10px 14px;
         min-height: 36px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
         padding: 6px 10px;
         min-height: 28px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
-        padding: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1512,7 +1528,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1522,59 +1538,58 @@ if (window.innerWidth <= 768) {
         width: 500px;
         max-width: 500px;
         padding: 20px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
         margin-bottom: 14px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
         margin-bottom: 12px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
         line-height: 1.6;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
         padding: 12px 16px;
         min-height: 40px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
         padding: 8px 12px;
         min-height: 32px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
-        padding: 8px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-icon {
@@ -1584,7 +1599,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1595,59 +1610,58 @@ if (window.innerWidth <= 768) {
         max-width: 400px;
         max-height: 80vh;
         overflow-y: auto;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h2 {
         margin-bottom: 8px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
         margin-bottom: 6px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel p {
         line-height: 1.3;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
         padding: 6px 10px;
         min-height: 28px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 6px;
         min-height: 24px;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .close-btn {
-        font-size: 20px;
-        padding: 8px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1662,29 +1676,29 @@ if (window.innerWidth <= 768) {
 }
     
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .action-btn {
         padding: 8px 12px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .scaling-btn {
         padding: 4px 8px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on mobile */
@@ -1726,19 +1740,19 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 2px !important;
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 2px !important;
     }
     
     /* Medium close button for medium mobile screens */
     .close-btn {
-        font-size: 18px;
-        padding: 6px;
+        /* Font size controlled by JavaScript */
+        padding: 6px !important;
     }
     
     /* Ensure rounded shape works on medium mobile */
@@ -1752,7 +1766,7 @@ if (window.innerWidth <= 768) {
 /* Small Mobile Screens (375px and below) */
 @media (max-width: 400px) {
     .accessibility-panel {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 8px;
         width: 90vw;
         max-width: 300px;
@@ -1761,33 +1775,33 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 4px;
     }
     
     .accessibility-panel .action-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 4px 6px;
         min-height: 24px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 2px 4px;
         min-height: 20px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Smaller toggles for small screens */
@@ -1819,18 +1833,18 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 1px;
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 1px;
     }
     
     /* Smaller close button for small screens */
     .close-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 4px;
     }
     
@@ -1844,34 +1858,34 @@ if (window.innerWidth <= 768) {
 
 @media (max-width: 480px) {
     .accessibility-panel {
-        font-size: 16px; /* Override external 8px */
+        /* Font size controlled by JavaScript */ /* Override external 8px */
     }
     
     .accessibility-panel h2 {
-        font-size: 16px; /* Override external 9px */
+        /* Font size controlled by JavaScript */ /* Override external 9px */
     }
     
     .accessibility-panel h3 {
-        font-size: 16px; /* Override external 8px */
+        /* Font size controlled by JavaScript */ /* Override external 8px */
     }
     
     /* Override external button size conflicts */
     .accessibility-panel .action-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 6px 10px;
     }
     
     .accessibility-panel .scaling-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 3px 6px;
     }
     
     .accessibility-panel .profile-info h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel .profile-info p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on small mobile */
@@ -1909,17 +1923,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Better content spacing for large tablets */
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 14px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px !important;
     }
     
@@ -1929,16 +1943,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 10px 14px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1957,7 +1971,7 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -1966,7 +1980,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 85vw !important;
         max-width: 450px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 16px !important;
         max-height: 80vh !important;
         overflow-y: auto !important;
@@ -1987,17 +2001,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Better content spacing for tablet */
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 12px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px !important;
     }
     
@@ -2007,16 +2021,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 8px 12px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
 }
 
@@ -2028,17 +2042,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Reasonable text and toggles for mobile landscape */
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 10px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px !important;
     }
     
@@ -2048,16 +2062,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 4px 6px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Much smaller action buttons for mobile landscape */
@@ -2065,12 +2079,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 3px 5px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         min-height: 20px !important;
     }
     
     .action-btn i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-right: 2px !important;
     }
     
@@ -2102,7 +2116,7 @@ if (window.innerWidth <= 768) {
     .accessibility-panel {
         width: 75vw !important;
         max-width: 320px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 12px !important;
         max-height: 70vh !important;
     }
@@ -2113,17 +2127,17 @@ if (window.innerWidth <= 768) {
     }
     
     .accessibility-icon i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Reasonable text and toggles for mobile portrait */
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 8px !important;
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-bottom: 6px !important;
     }
     
@@ -2133,16 +2147,16 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
         padding: 2px 3px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* EXTREMELY small action buttons for mobile portrait */
@@ -2150,12 +2164,12 @@ if (window.innerWidth <= 768) {
     .action-btn.statement-btn,
     .action-btn.hide-btn {
         padding: 1px 2px !important;
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         min-height: 12px !important;
     }
     
     .action-btn i {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         margin-right: 1px !important;
     }
     
@@ -2234,11 +2248,11 @@ if (window.innerWidth <= 768) {
 /* Removed - replaced with mobile-first approach above */
     
     .accessibility-panel h2 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .accessibility-panel h3 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     /* Ensure rounded shape works on mobile */
@@ -2249,22 +2263,22 @@ if (window.innerWidth <= 768) {
     }
     
     .profile-item h4 {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .profile-item p {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
     }
     
     .action-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 2px 3px !important;
     }
     
     .action-btn.reset-btn,
     .action-btn.statement-btn,
     .action-btn.hide-btn {
-        font-size: 16px;
+        /* Font size controlled by JavaScript */
         padding: 1px 2px !important;
         min-height: 12px !important;
     }
@@ -2607,7 +2621,7 @@ if (window.innerWidth <= 768) {
             }
             
             .accessibility-icon i {
-                font-size: 16px;
+                /* Font size controlled by JavaScript */
             }
             
             .accessibility-panel {
@@ -2905,7 +2919,7 @@ if (window.innerWidth <= 768) {
 
                 .accessibility-icon i {
 
-                    font-size: 16px;
+                    /* Font size controlled by JavaScript */
 
                 }
 
@@ -2993,15 +3007,15 @@ if (window.innerWidth <= 768) {
 
                 cursor: pointer;
 
-                font-size: 28px;
+                font-size: 20px;
 
-                padding: 12px;
+                padding: 8px;
 
                 position: absolute;
 
-                top: 15px;
+                top: 10px;
 
-                right: 15px;
+                left: 15px;
 
                 z-index: 1005;
 
@@ -4843,12 +4857,12 @@ html body.big-white-cursor * {
             .hide-interface-modal .modal-close {
                 background: none;
                 border: none;
-                font-size: 32px;
+                font-size: 24px;
                 color: #6b7280;
                 cursor: pointer;
-                padding: 8px;
-                width: 46px;
-                height: 46px;
+                padding: 0;
+                width: 30px;
+                height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -9605,6 +9619,12 @@ html body.big-white-cursor * {
 
                     break;
 
+                case 'hide-images':
+
+                    this.enableHideImages();
+
+                    break;
+
                 case 'read-mode':
 
                     this.enableReadMode();
@@ -9942,6 +9962,12 @@ html body.big-white-cursor * {
                 case 'mute-sound':
 
                     this.disableMuteSound();
+
+                    break;
+
+                case 'hide-images':
+
+                    this.disableHideImages();
 
                     break;
 
@@ -11767,51 +11793,32 @@ html body.big-white-cursor * {
 
         
 
-        // Apply line-height directly to body and html
+        // Add CSS rules for line height if not already added
+        if (!document.getElementById('line-height-css')) {
+            const style = document.createElement('style');
+            style.id = 'line-height-css';
+            document.head.appendChild(style);
+        }
 
-        document.body.style.setProperty('line-height', lineHeightValue, 'important');
+        // Update the CSS with the new line height value
+        const existingStyle = document.getElementById('line-height-css');
+        if (existingStyle) {
+            existingStyle.textContent = `
+                body, html {
+                    line-height: ${lineHeightValue} !important;
+                }
+                
+                body *, html * {
+                    line-height: ${lineHeightValue} !important;
+                }
+                
+                p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer, main {
+                    line-height: ${lineHeightValue} !important;
+                }
+            `;
+        }
 
-        document.documentElement.style.setProperty('line-height', lineHeightValue, 'important');
-
-        console.log('Accessibility Widget: Applied lineHeight to body and html:', lineHeightValue + ' (important)');
-
-        console.log('Accessibility Widget: Body computed line-height after application:', window.getComputedStyle(document.body).lineHeight);
-
-        console.log('Accessibility Widget: Body style line-height:', document.body.style.lineHeight);
-
-        
-
-        // Apply to all text elements except accessibility panel with more specific targeting
-
-        const textElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer, main');
-
-        console.log('Accessibility Widget: Found', textElements.length, 'text elements to update');
-
-        
-
-        let updatedCount = 0;
-
-        textElements.forEach(element => {
-
-            // Skip if element is inside accessibility panel
-
-            if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-
-                // Use multiple approaches to ensure the line height is applied
-
-                element.style.setProperty('line-height', lineHeightValue, 'important');
-
-                element.style.lineHeight = lineHeightValue + ' !important';
-
-                updatedCount++;
-
-            }
-
-        });
-
-        
-
-        console.log('Accessibility Widget: Updated', updatedCount, 'elements with lineHeight:', lineHeightValue);
+        console.log('Accessibility Widget: Applied lineHeight via CSS injection:', lineHeightValue);
 
         console.log('Accessibility Widget: Line height updated to', this.lineHeight + '% (value:', lineHeightValue + ')');
 
@@ -11919,13 +11926,15 @@ html body.big-white-cursor * {
     resetLineHeight() {
 
         console.log('Accessibility Widget: Starting line height reset...');
-
         
+        // Remove CSS rules for line height
+        const existingStyle = document.getElementById('line-height-css');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
 
         // Reset line height back to original website styling
-
         document.body.style.removeProperty('line-height');
-
         document.documentElement.style.removeProperty('line-height');
 
         
@@ -13607,21 +13616,66 @@ html body.big-white-cursor * {
     // Highlight Hover Methods
 
     enableHighlightHover() {
-
+        this.settings['highlight-hover'] = true;
         document.body.classList.add('highlight-hover');
-
+        
+        // Add CSS rules for highlight hover if not already added
+        if (!document.getElementById('highlight-hover-css')) {
+            const style = document.createElement('style');
+            style.id = 'highlight-hover-css';
+            style.textContent = `
+                .highlight-hover *:hover {
+                    background-color: #ffff00 !important;
+                    color: #000000 !important;
+                    outline: 2px solid #ff0000 !important;
+                    outline-offset: 2px !important;
+                }
+                
+                .highlight-hover a:hover {
+                    background-color: #ffff00 !important;
+                    color: #000000 !important;
+                    text-decoration: underline !important;
+                    outline: 2px solid #ff0000 !important;
+                    outline-offset: 2px !important;
+                }
+                
+                .highlight-hover button:hover,
+                .highlight-hover input:hover,
+                .highlight-hover select:hover,
+                .highlight-hover textarea:hover {
+                    background-color: #ffff00 !important;
+                    color: #000000 !important;
+                    border: 2px solid #ff0000 !important;
+                    outline: 2px solid #ff0000 !important;
+                    outline-offset: 2px !important;
+                }
+                
+                .highlight-hover img:hover {
+                    outline: 3px solid #ff0000 !important;
+                    outline-offset: 3px !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        this.saveSettings();
         console.log('Accessibility Widget: Highlight hover enabled');
-
     }
 
 
 
     disableHighlightHover() {
-
+        this.settings['highlight-hover'] = false;
         document.body.classList.remove('highlight-hover');
-
+        
+        // Remove CSS rules for highlight hover
+        const existingStyle = document.getElementById('highlight-hover-css');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
+        this.saveSettings();
         console.log('Accessibility Widget: Highlight hover disabled');
-
     }
 
 
@@ -16013,7 +16067,65 @@ html body.big-white-cursor * {
 
     }
 
+    // Hide Images Methods
+    enableHideImages() {
+        this.settings['hide-images'] = true;
+        document.body.classList.add('hide-images');
+        
+        // Add CSS rules for hiding images if not already added
+        if (!document.getElementById('hide-images-css')) {
+            const style = document.createElement('style');
+            style.id = 'hide-images-css';
+            style.textContent = `
+                .hide-images img {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                .hide-images picture {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                .hide-images svg {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                .hide-images video {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                .hide-images canvas {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                .hide-images [style*="background-image"] {
+                    background-image: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        this.saveSettings();
+        console.log('Accessibility Widget: Hide images enabled');
+    }
 
+    disableHideImages() {
+        this.settings['hide-images'] = false;
+        document.body.classList.remove('hide-images');
+        
+        // Remove CSS rules for hiding images
+        const existingStyle = document.getElementById('hide-images-css');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
+        this.saveSettings();
+        console.log('Accessibility Widget: Hide images disabled');
+    }
 
     // Read Mode Methods
 
@@ -16812,45 +16924,88 @@ html body.big-white-cursor * {
 
 
     enableReadableFont() {
-
         this.settings['readable-font'] = true;
-
         document.body.classList.add('readable-font');
-
+        
         // Also add to the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.add('readable-font');
-
         }
-
+        
+        // Add CSS rules for readable font if not already added
+        if (!document.getElementById('readable-font-css')) {
+            const style = document.createElement('style');
+            style.id = 'readable-font-css';
+            style.textContent = `
+                .readable-font {
+                    font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                }
+                
+                .readable-font * {
+                    font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                    font-weight: 500 !important;
+                    letter-spacing: 0.5px !important;
+                }
+                
+                .readable-font h1,
+                .readable-font h2,
+                .readable-font h3,
+                .readable-font h4,
+                .readable-font h5,
+                .readable-font h6 {
+                    font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                    font-weight: 600 !important;
+                    letter-spacing: 0.8px !important;
+                }
+                
+                .readable-font p,
+                .readable-font span,
+                .readable-font div,
+                .readable-font li,
+                .readable-font td,
+                .readable-font th,
+                .readable-font label,
+                .readable-font small,
+                .readable-font em,
+                .readable-font strong,
+                .readable-font i,
+                .readable-font b,
+                .readable-font a,
+                .readable-font button,
+                .readable-font input,
+                .readable-font textarea,
+                .readable-font select {
+                    font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                    font-weight: 500 !important;
+                    letter-spacing: 0.5px !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         this.saveSettings();
-
         console.log('Accessibility Widget: Readable font enabled');
-
     }
 
 
 
     disableReadableFont() {
-
         this.settings['readable-font'] = false;
-
         document.body.classList.remove('readable-font');
-
+        
         // Also remove from the widget host element
-
         if (this.shadowRoot && this.shadowRoot.host) {
-
             this.shadowRoot.host.classList.remove('readable-font');
-
         }
-
+        
+        // Remove CSS rules for readable font
+        const existingStyle = document.getElementById('readable-font-css');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
         this.saveSettings();
-
         console.log('Accessibility Widget: Readable font disabled');
-
     }
 
 
@@ -17482,6 +17637,50 @@ html body.big-white-cursor * {
 
         
 
+        // Add CSS rules for stop animation if not already added
+
+        if (!document.getElementById('stop-animation-css')) {
+
+            const style = document.createElement('style');
+
+            style.id = 'stop-animation-css';
+
+            style.textContent = `
+
+                .stop-animation *,
+
+                .stop-animation *::before,
+
+                .stop-animation *::after {
+
+                    animation-duration: 0.01ms !important;
+
+                    animation-iteration-count: 1 !important;
+
+                    animation-delay: 0s !important;
+
+                    transition-duration: 0.01ms !important;
+
+                    scroll-behavior: auto !important;
+
+                }
+
+                
+
+                .stop-animation * {
+
+                    animation-play-state: paused !important;
+
+                }
+
+            `;
+
+            document.head.appendChild(style);
+
+        }
+
+        
+
         // Stop any JavaScript-based animations (like the slider auto-slide)
 
         if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
@@ -17523,6 +17722,18 @@ html body.big-white-cursor * {
         this.settings['stop-animation'] = false;
 
         this.saveSettings();
+
+        
+
+        // Remove CSS rules for stop animation
+
+        const existingStyle = document.getElementById('stop-animation-css');
+
+        if (existingStyle) {
+
+            existingStyle.remove();
+
+        }
 
         
 
@@ -19409,37 +19620,69 @@ html body.big-white-cursor * {
 
 
     applyVisionImpairedStyles() {
-
-        // Vision impaired styles are now handled by CSS classes
-
-        // The body class 'vision-impaired' will apply all the necessary styles
-
-        console.log('Accessibility Widget: Vision impaired styles applied via CSS classes');
-
+        // Add CSS rules for vision impaired if not already added
+        if (!document.getElementById('vision-impaired-css')) {
+            const style = document.createElement('style');
+            style.id = 'vision-impaired-css';
+            style.textContent = `
+                .vision-impaired {
+                    filter: contrast(1.5) brightness(1.2) !important;
+                }
+                
+                .vision-impaired * {
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+                }
+                
+                .vision-impaired img {
+                    filter: contrast(1.3) brightness(1.1) !important;
+                }
+                
+                .vision-impaired a {
+                    text-decoration: underline !important;
+                    font-weight: bold !important;
+                }
+                
+                .vision-impaired button,
+                .vision-impaired input,
+                .vision-impaired select,
+                .vision-impaired textarea {
+                    border: 2px solid #000 !important;
+                    background: #fff !important;
+                    color: #000 !important;
+                }
+                
+                .vision-impaired h1,
+                .vision-impaired h2,
+                .vision-impaired h3,
+                .vision-impaired h4,
+                .vision-impaired h5,
+                .vision-impaired h6 {
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.9) !important;
+                    font-weight: bold !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
-
+        console.log('Accessibility Widget: Vision impaired styles applied via CSS classes');
+        
         // Ensure the Shadow DOM host gets the vision-impaired class
-
         this.updateWidgetAppearance();
-
     }
 
 
 
     removeVisionImpairedStyles() {
-
-        // Vision impaired styles are now handled by CSS classes
-
-        // Removing the body class 'vision-impaired' will remove all styles
-
-        console.log('Accessibility Widget: Vision impaired styles removed via CSS classes');
-
+        // Remove CSS rules for vision impaired
+        const existingStyle = document.getElementById('vision-impaired-css');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
         
-
+        console.log('Accessibility Widget: Vision impaired styles removed via CSS classes');
+        
         // Ensure the Shadow DOM host gets updated
-
         this.updateWidgetAppearance();
-
     }
 
 
