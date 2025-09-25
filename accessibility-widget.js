@@ -317,29 +317,28 @@ if (window.innerWidth <= 768) {
 
 
                 // Special handling for line height toggle
+                console.log('📏 [TOGGLE HANDLER] Processing line height toggle:', feature, 'enabled:', enabled);
 
                 if (feature === 'adjust-line-height') {
-
+                    console.log('📏 [TOGGLE HANDLER] Calling toggleLineHeightControls with enabled:', enabled);
                     this.toggleLineHeightControls(enabled);
 
                 }
 
                 // Special handling for alignment toggles - ensure mutual exclusion
+                console.log('🔧 [TOGGLE HANDLER] Processing alignment toggle:', feature, 'enabled:', enabled);
 
                 if (feature === 'align-left' && enabled) {
-
+                    console.log('🔧 [TOGGLE HANDLER] Enabling align-left, disabling others...');
                     this.disableAlignCenter();
-
                     this.disableAlignRight();
 
                     // Uncheck other alignment toggles in UI
-
                     const centerToggle = this.shadowRoot.getElementById('align-center');
-
                     const rightToggle = this.shadowRoot.getElementById('align-right');
-
+                    console.log('🔧 [TOGGLE HANDLER] Center toggle found:', !!centerToggle);
+                    console.log('🔧 [TOGGLE HANDLER] Right toggle found:', !!rightToggle);
                     if (centerToggle) centerToggle.checked = false;
-
                     if (rightToggle) rightToggle.checked = false;
 
                 } else if (feature === 'align-center' && enabled) {
@@ -11840,8 +11839,9 @@ html body.big-white-cursor * {
             decreaseBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Accessibility Widget: Decrease button clicked directly');
-                console.log('Accessibility Widget: Current lineHeight before decrease:', this.lineHeight);
+                console.log('📏 [BUTTON CLICK] Decrease button clicked directly');
+                console.log('📏 [BUTTON CLICK] Current lineHeight before decrease:', this.lineHeight);
+                console.log('📏 [BUTTON CLICK] Calling decreaseLineHeight()...');
                 this.decreaseLineHeight();
             };
             console.log('Accessibility Widget: Direct decrease button handler attached');
@@ -11854,8 +11854,9 @@ html body.big-white-cursor * {
             increaseBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Accessibility Widget: Increase button clicked directly');
-                console.log('Accessibility Widget: Current lineHeight before increase:', this.lineHeight);
+                console.log('📏 [BUTTON CLICK] Increase button clicked directly');
+                console.log('📏 [BUTTON CLICK] Current lineHeight before increase:', this.lineHeight);
+                console.log('📏 [BUTTON CLICK] Calling increaseLineHeight()...');
                 this.increaseLineHeight();
             };
             console.log('Accessibility Widget: Direct increase button handler attached');
@@ -11909,6 +11910,9 @@ html body.big-white-cursor * {
 
     updateLineHeight() {
 
+        console.log('📏 [UPDATE LINE HEIGHT] Starting updateLineHeight()');
+        console.log('📏 [UPDATE LINE HEIGHT] Current lineHeight:', this.lineHeight);
+
         // Store original line-height if not already stored
 
         if (this.originalLineHeight === null) {
@@ -11917,7 +11921,7 @@ html body.big-white-cursor * {
 
             this.originalLineHeight = parseFloat(computedStyle.lineHeight);
 
-            console.log('Accessibility Widget: Stored original line-height:', this.originalLineHeight);
+            console.log('📏 [UPDATE LINE HEIGHT] Stored original line-height:', this.originalLineHeight);
 
         }
 
@@ -11984,9 +11988,11 @@ html body.big-white-cursor * {
             `;
         }
 
-        console.log('Accessibility Widget: Applied lineHeight via CSS injection:', lineHeightValue);
+        console.log('📏 [UPDATE LINE HEIGHT] Applied lineHeight via CSS injection:', lineHeightValue);
+        console.log('📏 [UPDATE LINE HEIGHT] CSS element found:', !!existingStyle);
+        console.log('📏 [UPDATE LINE HEIGHT] CSS content length:', existingStyle ? existingStyle.textContent.length : 0);
 
-        console.log('Accessibility Widget: Line height updated to', this.lineHeight + '% (value:', lineHeightValue + ')');
+        console.log('📏 [UPDATE LINE HEIGHT] Line height updated to', this.lineHeight + '% (value:', lineHeightValue + ') - COMPLETED');
 
     }
 
@@ -11994,7 +12000,8 @@ html body.big-white-cursor * {
 
     increaseLineHeight() {
 
-        console.log('Accessibility Widget: increaseLineHeight called - Current lineHeight:', this.lineHeight);
+        console.log('📏 [LINE HEIGHT] increaseLineHeight called - Current lineHeight:', this.lineHeight);
+        console.log('📏 [LINE HEIGHT] Settings before increase:', this.settings);
 
         const oldLineHeight = this.lineHeight;
 
@@ -12005,15 +12012,18 @@ html body.big-white-cursor * {
         // Mark line height feature as used
         localStorage.setItem('line-height-used', 'true');
 
-        console.log('Accessibility Widget: Line height changed from', oldLineHeight + '% to', this.lineHeight + '%');
+        console.log('📏 [LINE HEIGHT] Line height changed from', oldLineHeight + '% to', this.lineHeight + '%');
 
+        console.log('📏 [LINE HEIGHT] Calling updateLineHeight()...');
         this.updateLineHeight();
 
+        console.log('📏 [LINE HEIGHT] Calling updateLineHeightDisplay()...');
         this.updateLineHeightDisplay();
 
+        console.log('📏 [LINE HEIGHT] Saving settings...');
         this.saveSettings(); // Persist to localStorage
 
-        console.log('Accessibility Widget: Line height increased to', this.lineHeight + '%');
+        console.log('📏 [LINE HEIGHT] Line height increased to', this.lineHeight + '% - COMPLETED');
 
     }
 
@@ -12021,7 +12031,8 @@ html body.big-white-cursor * {
 
     decreaseLineHeight() {
 
-        console.log('Accessibility Widget: decreaseLineHeight called - Current lineHeight:', this.lineHeight);
+        console.log('📏 [LINE HEIGHT] decreaseLineHeight called - Current lineHeight:', this.lineHeight);
+        console.log('📏 [LINE HEIGHT] Settings before decrease:', this.settings);
 
         const oldLineHeight = this.lineHeight;
 
@@ -12029,15 +12040,18 @@ html body.big-white-cursor * {
 
         this.settings['line-height'] = this.lineHeight; // Save to settings
 
-        console.log('Accessibility Widget: Line height changed from', oldLineHeight + '% to', this.lineHeight + '%');
+        console.log('📏 [LINE HEIGHT] Line height changed from', oldLineHeight + '% to', this.lineHeight + '%');
 
+        console.log('📏 [LINE HEIGHT] Calling updateLineHeight()...');
         this.updateLineHeight();
 
+        console.log('📏 [LINE HEIGHT] Calling updateLineHeightDisplay()...');
         this.updateLineHeightDisplay();
 
+        console.log('📏 [LINE HEIGHT] Saving settings...');
         this.saveSettings(); // Persist to localStorage
 
-        console.log('Accessibility Widget: Line height decreased to', this.lineHeight + '%');
+        console.log('📏 [LINE HEIGHT] Line height decreased to', this.lineHeight + '% - COMPLETED');
 
     }
 
@@ -19987,15 +20001,18 @@ html body.big-white-cursor * {
 
     enableAlignLeft() {
 
-        console.log('Accessibility Widget: Enabling left alignment');
+        console.log('🔧 [ALIGN LEFT] Starting enableAlignLeft()');
+        console.log('🔧 [ALIGN LEFT] Current settings:', this.settings);
 
         // Disable other alignment options first
+        console.log('🔧 [ALIGN LEFT] Disabling other alignment options...');
         this.disableAlignCenter();
         this.disableAlignRight();
 
         // Apply left alignment to body first
-
+        console.log('🔧 [ALIGN LEFT] Setting body textAlign to left...');
         document.body.style.textAlign = 'left';
+        console.log('🔧 [ALIGN LEFT] Body textAlign set to:', document.body.style.textAlign);
 
         
 
@@ -20041,7 +20058,8 @@ html body.big-white-cursor * {
 
         
 
-        console.log('Accessibility Widget: Left alignment enabled');
+        console.log('🔧 [ALIGN LEFT] Left alignment enabled - COMPLETED');
+        console.log('🔧 [ALIGN LEFT] Final body textAlign:', document.body.style.textAlign);
 
     }
 
@@ -20859,7 +20877,8 @@ applyCustomizations(customizationData) {
         
         // Handle combined positioning for mobile trigger
         if (customizationData.mobileTriggerHorizontalPosition && customizationData.mobileTriggerVerticalPosition) {
-            console.log('[CK] applyCustomizations() - Setting combined mobile trigger position:', customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Setting combined mobile trigger position:', customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
+            console.log('📱 [APPLY CUSTOMIZATIONS] Window width at time of application:', window.innerWidth);
             this.updateMobileTriggerCombinedPosition(customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
         } else {
             // Handle individual positioning
@@ -21868,10 +21887,13 @@ applyCustomizations(customizationData) {
     
     // New method to handle combined positioning (e.g., "right middle")
     updateMobileTriggerCombinedPosition(horizontalPos, verticalPos) {
-        console.log('[CK] updateMobileTriggerCombinedPosition() - Horizontal:', horizontalPos, 'Vertical:', verticalPos);
+        console.log('📱 [MOBILE POSITION] updateMobileTriggerCombinedPosition() - Horizontal:', horizontalPos, 'Vertical:', verticalPos);
+        console.log('📱 [MOBILE POSITION] Window width:', window.innerWidth);
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        console.log('📱 [MOBILE POSITION] Icon element found:', !!icon);
         if (icon) {
             const isMobile = window.innerWidth <= 768;
+            console.log('📱 [MOBILE POSITION] Is mobile:', isMobile);
             if (isMobile) {
                 // Clear all existing positioning with higher specificity
                 icon.style.setProperty('top', 'unset', 'important');
@@ -21881,30 +21903,43 @@ applyCustomizations(customizationData) {
                 icon.style.setProperty('transform', 'unset', 'important');
                 
                 // Apply horizontal positioning with !important
+                console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
                 if (horizontalPos === 'left') {
                     icon.style.setProperty('left', '10px', 'important');
                     icon.style.setProperty('right', 'auto', 'important');
+                    console.log('📱 [MOBILE POSITION] Set left: 10px, right: auto');
                 } else if (horizontalPos === 'right') {
                     icon.style.setProperty('right', '10px', 'important');
                     icon.style.setProperty('left', 'auto', 'important');
+                    console.log('📱 [MOBILE POSITION] Set right: 10px, left: auto');
                 }
                 
                 // Apply vertical positioning with !important
+                console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
                 if (verticalPos === 'top') {
                     icon.style.setProperty('top', '10px', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
+                    console.log('📱 [MOBILE POSITION] Set top: 10px, bottom: auto, transform: none');
                 } else if (verticalPos === 'bottom') {
                     icon.style.setProperty('bottom', '10px', 'important');
                     icon.style.setProperty('top', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
+                    console.log('📱 [MOBILE POSITION] Set bottom: 10px, top: auto, transform: none');
                 } else if (verticalPos === 'middle') {
                     icon.style.setProperty('top', '50%', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%)');
                 }
                 
-                console.log('[CK] Mobile icon positioned with !important:', horizontalPos, verticalPos);
+                console.log('📱 [MOBILE POSITION] Final computed styles:');
+                console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
+                console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
+                console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
+                console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                console.log('📱 [MOBILE POSITION] Mobile icon positioned with !important:', horizontalPos, verticalPos, '- COMPLETED');
             }
         }
     }
