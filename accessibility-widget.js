@@ -196,6 +196,14 @@ window.addEventListener('resize', () => {
             // Apply mobile settings - force small panel near icon
             console.log('[CK] Window resized to mobile - applying mobile styles');
             this.applyMobileResponsiveStyles();
+            
+            // Reapply mobile positioning if it was set
+            if (this.customizationData) {
+                if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
+                    console.log('[CK] Reapplying combined mobile positioning on resize');
+                    this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
+                }
+            }
         } else {
             // Apply desktop settings
             console.log('[CK] Window resized to desktop - removing mobile styles');
@@ -11606,6 +11614,12 @@ html body.big-white-cursor * {
             // Bind events to the line height buttons when they become visible
 
             this.bindLineHeightEvents();
+            this.bindLineHeightEventsDirect();
+            
+            // Test the functionality
+            setTimeout(() => {
+                this.testLineHeight();
+            }, 1000);
 
             
 
@@ -11813,28 +11827,79 @@ html body.big-white-cursor * {
     // Alternative method to bind line height events directly
     bindLineHeightEventsDirect() {
         console.log('Accessibility Widget: Binding line height events directly...');
+        console.log('Accessibility Widget: Shadow root exists:', !!this.shadowRoot);
         
         const decreaseBtn = this.shadowRoot.getElementById('decrease-line-height-btn');
         const increaseBtn = this.shadowRoot.getElementById('increase-line-height-btn');
         
+        console.log('Accessibility Widget: Decrease button found:', !!decreaseBtn);
+        console.log('Accessibility Widget: Increase button found:', !!increaseBtn);
+        
         if (decreaseBtn) {
+            console.log('Accessibility Widget: Decrease button HTML:', decreaseBtn.outerHTML);
             decreaseBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('Accessibility Widget: Decrease button clicked directly');
+                console.log('Accessibility Widget: Current lineHeight before decrease:', this.lineHeight);
                 this.decreaseLineHeight();
             };
             console.log('Accessibility Widget: Direct decrease button handler attached');
+        } else {
+            console.error('Accessibility Widget: Decrease button NOT found in direct binding!');
         }
         
         if (increaseBtn) {
+            console.log('Accessibility Widget: Increase button HTML:', increaseBtn.outerHTML);
             increaseBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('Accessibility Widget: Increase button clicked directly');
+                console.log('Accessibility Widget: Current lineHeight before increase:', this.lineHeight);
                 this.increaseLineHeight();
             };
             console.log('Accessibility Widget: Direct increase button handler attached');
+        } else {
+            console.error('Accessibility Widget: Increase button NOT found in direct binding!');
+        }
+    }
+    
+    // Test method to verify line height functionality
+    testLineHeight() {
+        console.log('Accessibility Widget: Testing line height functionality...');
+        console.log('Accessibility Widget: Current lineHeight:', this.lineHeight);
+        console.log('Accessibility Widget: Shadow root exists:', !!this.shadowRoot);
+        
+        const decreaseBtn = this.shadowRoot.getElementById('decrease-line-height-btn');
+        const increaseBtn = this.shadowRoot.getElementById('increase-line-height-btn');
+        const controls = this.shadowRoot.getElementById('line-height-controls');
+        
+        console.log('Accessibility Widget: Controls found:', !!controls);
+        console.log('Accessibility Widget: Controls display:', controls ? controls.style.display : 'not found');
+        console.log('Accessibility Widget: Decrease button found:', !!decreaseBtn);
+        console.log('Accessibility Widget: Increase button found:', !!increaseBtn);
+        
+        if (controls) {
+            controls.style.display = 'block';
+            console.log('Accessibility Widget: Forced controls to be visible');
+        }
+        
+        // Test the methods directly
+        console.log('Accessibility Widget: Testing increaseLineHeight method...');
+        this.increaseLineHeight();
+        
+        console.log('Accessibility Widget: Testing decreaseLineHeight method...');
+        this.decreaseLineHeight();
+        
+        // Test clicking the buttons programmatically
+        if (increaseBtn) {
+            console.log('Accessibility Widget: Testing programmatic click on increase button...');
+            increaseBtn.click();
+        }
+        
+        if (decreaseBtn) {
+            console.log('Accessibility Widget: Testing programmatic click on decrease button...');
+            decreaseBtn.click();
         }
     }
 
@@ -20792,14 +20857,21 @@ applyCustomizations(customizationData) {
             this.updateMobileVisibility(customizationData.showOnMobile === 'Show');
         }
         
-        if (customizationData.mobileTriggerHorizontalPosition) {
-            console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
-            this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
-        }
-        
-        if (customizationData.mobileTriggerVerticalPosition) {
-            console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
-            this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
+        // Handle combined positioning for mobile trigger
+        if (customizationData.mobileTriggerHorizontalPosition && customizationData.mobileTriggerVerticalPosition) {
+            console.log('[CK] applyCustomizations() - Setting combined mobile trigger position:', customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
+            this.updateMobileTriggerCombinedPosition(customizationData.mobileTriggerHorizontalPosition, customizationData.mobileTriggerVerticalPosition);
+        } else {
+            // Handle individual positioning
+            if (customizationData.mobileTriggerHorizontalPosition) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal position:', customizationData.mobileTriggerHorizontalPosition);
+                this.updateMobileTriggerPosition('horizontal', customizationData.mobileTriggerHorizontalPosition);
+            }
+            
+            if (customizationData.mobileTriggerVerticalPosition) {
+                console.log('[CK] applyCustomizations() - Setting mobile trigger vertical position:', customizationData.mobileTriggerVerticalPosition);
+                this.updateMobileTriggerPosition('vertical', customizationData.mobileTriggerVerticalPosition);
+            }
         }
         
         if (customizationData.mobileTriggerSize) {
@@ -21790,6 +21862,55 @@ applyCustomizations(customizationData) {
                         console.log('[CK] Mobile icon positioned MIDDLE with transform');
                     }
                 }
+            }
+        }
+    }
+    
+    // New method to handle combined positioning (e.g., "right middle")
+    updateMobileTriggerCombinedPosition(horizontalPos, verticalPos) {
+        console.log('[CK] updateMobileTriggerCombinedPosition() - Horizontal:', horizontalPos, 'Vertical:', verticalPos);
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                // Clear all existing positioning
+                icon.style.removeProperty('top');
+                icon.style.removeProperty('bottom');
+                icon.style.removeProperty('left');
+                icon.style.removeProperty('right');
+                icon.style.removeProperty('transform');
+                
+                // Apply horizontal positioning
+                if (horizontalPos === 'left') {
+                    icon.style.setProperty('left', '10px');
+                    icon.style.setProperty('right', 'auto');
+                } else if (horizontalPos === 'right') {
+                    icon.style.setProperty('right', '10px');
+                    icon.style.setProperty('left', 'auto');
+                }
+                
+                // Apply vertical positioning
+                if (verticalPos === 'top') {
+                    icon.style.setProperty('top', '10px');
+                    icon.style.setProperty('bottom', 'auto');
+                    icon.style.setProperty('transform', 'none', 'important');
+                } else if (verticalPos === 'bottom') {
+                    icon.style.setProperty('bottom', '10px');
+                    icon.style.setProperty('top', 'auto');
+                    icon.style.setProperty('transform', 'none', 'important');
+                } else if (verticalPos === 'middle') {
+                    icon.style.setProperty('top', '50%');
+                    icon.style.setProperty('bottom', 'auto');
+                    
+                    // Combine with horizontal transform if needed
+                    if (horizontalPos === 'right') {
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    } else {
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                    }
+                }
+                
+                console.log('[CK] Mobile icon positioned:', horizontalPos, verticalPos);
             }
         }
     }
