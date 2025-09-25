@@ -16657,41 +16657,157 @@ html body.big-white-cursor * {
 
         
 
-        // Find all audio and video elements
-
-        const audioElements = document.querySelectorAll('audio');
-
-        const videoElements = document.querySelectorAll('video');
-
-        
-
-        // Store original volume and set volume to 0 (allows playback but no sound)
+        // Store original volume states
 
         this.originalVolumeStates = new Map();
 
-        
-
-        audioElements.forEach((element, index) => {
-
-            this.originalVolumeStates.set(`audio-${index}`, element.volume);
-
-            element.volume = 0;
-
-        });
+        this.muteSoundEnabled = true;
 
         
 
-        videoElements.forEach((element, index) => {
+        // Function to mute all existing and future audio/video elements
 
-            this.originalVolumeStates.set(`video-${index}`, element.volume);
+        const muteAllMedia = () => {
 
-            element.volume = 0;
+            const audioElements = document.querySelectorAll('audio');
 
-        });
+            const videoElements = document.querySelectorAll('video');
+
+            
+
+            // Handle audio elements
+
+            audioElements.forEach((element, index) => {
+
+                const elementId = `audio-${index}-${Date.now()}`;
+
+                if (!this.originalVolumeStates.has(elementId)) {
+
+                    this.originalVolumeStates.set(elementId, element.volume);
+
+                }
+
+                element.volume = 0;
+
+                element.muted = true; // Also set muted attribute for better compatibility
+
+            });
+
+            
+
+            // Handle video elements
+
+            videoElements.forEach((element, index) => {
+
+                const elementId = `video-${index}-${Date.now()}`;
+
+                if (!this.originalVolumeStates.has(elementId)) {
+
+                    this.originalVolumeStates.set(elementId, element.volume);
+
+                }
+
+                element.volume = 0;
+
+                element.muted = true; // Also set muted attribute for better compatibility
+
+            });
+
+            
+
+            console.log(`Accessibility Widget: Muted ${audioElements.length} audio and ${videoElements.length} video elements`);
+
+        };
 
         
 
-        console.log(`Accessibility Widget: Set volume to 0 for ${audioElements.length} audio and ${videoElements.length} video elements`);
+        // Mute existing elements
+
+        muteAllMedia();
+
+        
+
+        // Set up observer to handle dynamically added elements
+
+        if (!this.muteSoundObserver) {
+
+            this.muteSoundObserver = new MutationObserver((mutations) => {
+
+                if (this.muteSoundEnabled) {
+
+                    let hasNewMedia = false;
+
+                    mutations.forEach((mutation) => {
+
+                        mutation.addedNodes.forEach((node) => {
+
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+
+                                // Check if the added node is audio/video
+
+                                if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
+
+                                    hasNewMedia = true;
+
+                                }
+
+                                // Check for audio/video elements within the added node
+
+                                const mediaElements = node.querySelectorAll ? node.querySelectorAll('audio, video') : [];
+
+                                if (mediaElements.length > 0) {
+
+                                    hasNewMedia = true;
+
+                                }
+
+                            }
+
+                        });
+
+                    });
+
+                    
+
+                    if (hasNewMedia) {
+
+                        console.log('Accessibility Widget: New media elements detected, applying mute');
+
+                        muteAllMedia();
+
+                    }
+
+                }
+
+            });
+
+            
+
+            // Start observing the entire document
+
+            this.muteSoundObserver.observe(document.body, {
+
+                childList: true,
+
+                subtree: true
+
+            });
+
+        }
+
+        
+
+        // Also mute any new elements that might be added
+
+        setTimeout(() => {
+
+            if (this.muteSoundEnabled) {
+
+                muteAllMedia();
+
+            }
+
+        }, 100);
 
     }
 
@@ -16703,43 +16819,53 @@ html body.big-white-cursor * {
 
         
 
-        // Restore original volume states
+        this.muteSoundEnabled = false;
+
+        
+
+        // Stop observing for new elements
+
+        if (this.muteSoundObserver) {
+
+            this.muteSoundObserver.disconnect();
+
+            this.muteSoundObserver = null;
+
+        }
+
+        
+
+        // Restore original volume states for all elements
+
+        const audioElements = document.querySelectorAll('audio');
+
+        const videoElements = document.querySelectorAll('video');
+
+        
+
+        audioElements.forEach((element) => {
+
+            element.volume = 1; // Restore to full volume
+
+            element.muted = false; // Remove muted attribute
+
+        });
+
+        
+
+        videoElements.forEach((element) => {
+
+            element.volume = 1; // Restore to full volume
+
+            element.muted = false; // Remove muted attribute
+
+        });
+
+        
+
+        // Clear stored states
 
         if (this.originalVolumeStates) {
-
-            const audioElements = document.querySelectorAll('audio');
-
-            const videoElements = document.querySelectorAll('video');
-
-            
-
-            audioElements.forEach((element, index) => {
-
-                const originalVolume = this.originalVolumeStates.get(`audio-${index}`);
-
-                if (originalVolume !== undefined) {
-
-                    element.volume = originalVolume;
-
-                }
-
-            });
-
-            
-
-            videoElements.forEach((element, index) => {
-
-                const originalVolume = this.originalVolumeStates.get(`video-${index}`);
-
-                if (originalVolume !== undefined) {
-
-                    element.volume = originalVolume;
-
-                }
-
-            });
-
-            
 
             this.originalVolumeStates.clear();
 
@@ -16747,7 +16873,7 @@ html body.big-white-cursor * {
 
         
 
-        console.log('Accessibility Widget: Restored original audio/video volume states');
+        console.log(`Accessibility Widget: Restored volume for ${audioElements.length} audio and ${videoElements.length} video elements`);
 
     }
 
