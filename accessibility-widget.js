@@ -443,6 +443,25 @@ if (window.innerWidth <= 768) {
 
                         this.handleToggle(feature, enabled);
 
+                        // Ensure control buttons are revealed when toggled via keyboard
+                        try {
+                            if (feature === 'content-scaling') {
+                                console.log('🎛️ [KEYBOARD TOGGLE] Forcing content scaling controls visibility:', enabled);
+                                this.toggleContentScalingControls(enabled);
+                            } else if (feature === 'font-sizing') {
+                                console.log('🔤 [KEYBOARD TOGGLE] Forcing font sizing controls visibility:', enabled);
+                                this.toggleFontSizingControls(enabled);
+                            } else if (feature === 'adjust-line-height') {
+                                console.log('📏 [KEYBOARD TOGGLE] Forcing line height controls visibility:', enabled);
+                                this.toggleLineHeightControls(enabled);
+                            } else if (feature === 'adjust-letter-spacing') {
+                                console.log('📝 [KEYBOARD TOGGLE] Forcing letter spacing controls visibility:', enabled);
+                                this.toggleLetterSpacingControls(enabled);
+                            }
+                        } catch (err) {
+                            console.warn('⚠️ [KEYBOARD TOGGLE] Failed to force control visibility:', err);
+                        }
+
                         
 
                         // Announce to screen reader
@@ -3042,11 +3061,24 @@ body.align-right a {
 
             }
 
-            /* Allow focus indicators when highlight-focus is active */
+            /* Allow focus indicators when highlight-focus is active (document scope) */
             body.highlight-focus .accessibility-icon:focus,
             body.highlight-focus .accessibility-panel button:focus,
             body.highlight-focus .accessibility-panel input:focus,
             body.highlight-focus .accessibility-panel label:focus {
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
+            }
+
+            /* Ensure focus styles work inside Shadow DOM when body has highlight-focus */
+            :host-context(.highlight-focus) #accessibility-icon:focus,
+            :host-context(.highlight-focus) .accessibility-icon:focus,
+            :host-context(.highlight-focus) .accessibility-panel button:focus,
+            :host-context(.highlight-focus) .accessibility-panel input:focus,
+            :host-context(.highlight-focus) .accessibility-panel label:focus {
                 outline: 3px solid #6366f1 !important;
                 outline-offset: 2px !important;
                 background: rgba(99, 102, 241, 0.1) !important;
@@ -8366,22 +8398,25 @@ html body.big-white-cursor * {
         const languageOptions = this.shadowRoot.querySelectorAll('.language-option');
         console.log('🎯 [LANGUAGE SELECTION] Found language options:', languageOptions.length);
 
-        
-
         languageOptions.forEach(option => {
-
+            // clear previous state
             option.classList.remove('selected');
             option.setAttribute('aria-selected', 'false');
+            option.setAttribute('data-selected', 'false');
 
+            // apply selected state
             if (option.dataset.lang === currentLang) {
-
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
-
+                option.setAttribute('data-selected', 'true');
             }
-
         });
 
+        // Also reflect the selected state on the header for consistency
+        const header = this.shadowRoot.getElementById('language-selector-header');
+        if (header) {
+            header.setAttribute('data-current-lang', currentLang);
+        }
     }
 
 
@@ -14224,11 +14259,9 @@ html body.big-white-cursor * {
 
             
 
-            // Skip if element is not interactive or is part of accessibility widget
+            // Apply to interactive elements not inside the panel (allow the icon itself)
 
             if (!activeElement.closest('.accessibility-panel') && 
-
-                !activeElement.closest('#accessibility-icon') && 
 
                 isInteractiveElement) {
 
@@ -17135,11 +17168,9 @@ html body.big-white-cursor * {
 
             
 
-            // Skip if element is not interactive or is part of accessibility widget
+            // Apply to interactive elements not inside the panel (allow the icon itself)
 
             if (!activeElement.closest('.accessibility-panel') && 
-
-                !activeElement.closest('#accessibility-icon') && 
 
                 isInteractiveElement) {
 
