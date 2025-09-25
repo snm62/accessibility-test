@@ -2679,6 +2679,30 @@ body.align-right a {
             -moz-border-radius: 0px !important;
         }
         
+        /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE */
+        .accessibility-icon.rounded,
+        .accessibility-icon[data-shape="rounded"],
+        .accessibility-icon.rounded[data-shape="rounded"],
+        .accessibility-icon[data-shape="rounded"].rounded {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Force rounded shape with absolute maximum specificity */
+        .accessibility-icon.rounded[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Override any external CSS that might be forcing circle shape */
+        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
         /* Force rounded shape with absolute maximum specificity */
         .accessibility-icon.rounded,
         .accessibility-icon[data-shape="rounded"] {
@@ -9012,19 +9036,10 @@ html body.big-white-cursor * {
 
     hideInterface() {
 
-        const icon = this.shadowRoot.getElementById('accessibility-icon');
-
-        const panel = this.shadowRoot.getElementById('accessibility-panel');
-
+        console.log('[CK] hideInterface() called - showing modal instead of hiding immediately');
         
-
-        if (icon) icon.style.display = 'none';
-
-        if (panel) panel.style.display = 'none';
-
-        
-
-        
+        // Show the confirmation modal instead of hiding immediately
+        this.showHideInterfaceModal();
     }
 
 
@@ -19989,7 +20004,7 @@ html body.big-white-cursor * {
 
             
 
-            element.style.textAlign = 'left';
+            element.style.textAlign = 'center';
 
         });
 
@@ -21247,7 +21262,10 @@ applyCustomizations(customizationData) {
         
         if (modalCancel) {
             modalCancel.addEventListener('click', () => {
+                console.log('[CK] Cancel button clicked - ensuring icon is visible');
                 this.hideHideInterfaceModal();
+                // Ensure icon is visible after canceling
+                this.ensureIconVisible();
             });
         }
         
@@ -21308,6 +21326,24 @@ applyCustomizations(customizationData) {
         if (modal) {
             modal.style.display = 'none';
             console.log('[CK] Hide interface modal hidden');
+        }
+    }
+    
+    ensureIconVisible() {
+        console.log('[CK] ensureIconVisible() called');
+        const icon = this.shadowRoot?.querySelector('#accessibility-icon');
+        const panel = this.shadowRoot?.querySelector('#accessibility-panel');
+        
+        if (icon) {
+            icon.style.display = 'flex';
+            icon.style.visibility = 'visible';
+            icon.style.opacity = '1';
+            console.log('[CK] Icon made visible');
+        }
+        
+        if (panel) {
+            panel.style.display = 'none'; // Keep panel hidden unless opened
+            console.log('[CK] Panel kept hidden (as expected)');
         }
     }
     
@@ -21531,6 +21567,26 @@ applyCustomizations(customizationData) {
                     
                     const finalFinalComputed = window.getComputedStyle(icon).borderRadius;
                     console.log('🖥️ [DESKTOP SHAPE] After force fix:', finalFinalComputed);
+                    
+                    // Last resort: Create a new style element with maximum specificity
+                    if (finalFinalComputed !== borderRadius) {
+                        console.log('🖥️ [DESKTOP SHAPE] 🔧 LAST RESORT: Injecting external style element...');
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .accessibility-icon[data-shape="rounded"] {
+                                border-radius: ${borderRadius} !important;
+                                -webkit-border-radius: ${borderRadius} !important;
+                                -moz-border-radius: ${borderRadius} !important;
+                            }
+                            .accessibility-icon.rounded {
+                                border-radius: ${borderRadius} !important;
+                                -webkit-border-radius: ${borderRadius} !important;
+                                -moz-border-radius: ${borderRadius} !important;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        console.log('🖥️ [DESKTOP SHAPE] 🔧 External style element injected');
+                    }
                 }
             }, 100);
             
@@ -22310,6 +22366,11 @@ applyCustomizations(customizationData) {
                         const style = document.createElement('style');
                         style.textContent = `
                             .accessibility-icon[data-shape="rounded"] {
+                                border-radius: ${borderRadius} !important;
+                                -webkit-border-radius: ${borderRadius} !important;
+                                -moz-border-radius: ${borderRadius} !important;
+                            }
+                            .accessibility-icon.rounded {
                                 border-radius: ${borderRadius} !important;
                                 -webkit-border-radius: ${borderRadius} !important;
                                 -moz-border-radius: ${borderRadius} !important;
