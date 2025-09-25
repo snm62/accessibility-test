@@ -343,6 +343,7 @@ if (window.innerWidth <= 768) {
                     if (rightToggle) rightToggle.checked = false;
 
                 } else if (feature === 'align-center' && enabled) {
+                    console.log('🔧 [TOGGLE HANDLER] Enabling align-center, disabling others...');
                     
                     // Clear all alignment classes first
                     this.clearAllAlignmentClasses();
@@ -350,10 +351,13 @@ if (window.innerWidth <= 768) {
                     // Uncheck other alignment toggles in UI
                     const leftToggle = this.shadowRoot.getElementById('align-left');
                     const rightToggle = this.shadowRoot.getElementById('align-right');
+                    console.log('🔧 [TOGGLE HANDLER] Left toggle found:', !!leftToggle);
+                    console.log('🔧 [TOGGLE HANDLER] Right toggle found:', !!rightToggle);
                     if (leftToggle) leftToggle.checked = false;
                     if (rightToggle) rightToggle.checked = false;
 
                 } else if (feature === 'align-right' && enabled) {
+                    console.log('🔧 [TOGGLE HANDLER] Enabling align-right, disabling others...');
                     
                     // Clear all alignment classes first
                     this.clearAllAlignmentClasses();
@@ -361,6 +365,8 @@ if (window.innerWidth <= 768) {
                     // Uncheck other alignment toggles in UI
                     const leftToggle = this.shadowRoot.getElementById('align-left');
                     const centerToggle = this.shadowRoot.getElementById('align-center');
+                    console.log('🔧 [TOGGLE HANDLER] Left toggle found:', !!leftToggle);
+                    console.log('🔧 [TOGGLE HANDLER] Center toggle found:', !!centerToggle);
                     if (leftToggle) leftToggle.checked = false;
                     if (centerToggle) centerToggle.checked = false;
 
@@ -21944,11 +21950,11 @@ applyCustomizations(customizationData) {
                 
                 // Apply horizontal positioning with !important
                 console.log('📱 [MOBILE POSITION] Applying horizontal positioning:', horizontalPos);
-                if (horizontalPos === 'left') {
+                if (horizontalPos === 'Left' || horizontalPos === 'left') {
                     icon.style.setProperty('left', '20px', 'important');
                     icon.style.setProperty('right', 'auto', 'important');
                     console.log('📱 [MOBILE POSITION] Set left: 20px, right: auto with !important');
-                } else if (horizontalPos === 'right') {
+                } else if (horizontalPos === 'Right' || horizontalPos === 'right') {
                     icon.style.setProperty('right', '20px', 'important');
                     icon.style.setProperty('left', 'auto', 'important');
                     console.log('📱 [MOBILE POSITION] Set right: 20px, left: auto with !important');
@@ -21956,17 +21962,17 @@ applyCustomizations(customizationData) {
                 
                 // Apply vertical positioning with !important
                 console.log('📱 [MOBILE POSITION] Applying vertical positioning:', verticalPos);
-                if (verticalPos === 'top') {
+                if (verticalPos === 'Top' || verticalPos === 'top') {
                     icon.style.setProperty('top', '20px', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
                     console.log('📱 [MOBILE POSITION] Set top: 20px, bottom: auto, transform: none with !important');
-                } else if (verticalPos === 'bottom') {
+                } else if (verticalPos === 'Bottom' || verticalPos === 'bottom') {
                     icon.style.setProperty('bottom', '20px', 'important');
                     icon.style.setProperty('top', 'auto', 'important');
                     icon.style.setProperty('transform', 'none', 'important');
                     console.log('📱 [MOBILE POSITION] Set bottom: 20px, top: auto, transform: none with !important');
-                } else if (verticalPos === 'middle') {
+                } else if (verticalPos === 'Middle' || verticalPos === 'middle') {
                     icon.style.setProperty('top', '50%', 'important');
                     icon.style.setProperty('bottom', 'auto', 'important');
                     icon.style.setProperty('transform', 'translateY(-50%)', 'important');
@@ -21985,23 +21991,23 @@ applyCustomizations(customizationData) {
                 // Force reapply after a short delay to override any conflicting CSS
                 setTimeout(() => {
                     console.log('📱 [MOBILE POSITION] REAPPLYING AFTER DELAY...');
-                    if (horizontalPos === 'right') {
+                    if (horizontalPos === 'Right' || horizontalPos === 'right') {
                         icon.style.setProperty('right', '20px', 'important');
                         icon.style.setProperty('left', 'auto', 'important');
-                    } else if (horizontalPos === 'left') {
+                    } else if (horizontalPos === 'Left' || horizontalPos === 'left') {
                         icon.style.setProperty('left', '20px', 'important');
                         icon.style.setProperty('right', 'auto', 'important');
                     }
                     
-                    if (verticalPos === 'middle') {
+                    if (verticalPos === 'Middle' || verticalPos === 'middle') {
                         icon.style.setProperty('top', '50%', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                    } else if (verticalPos === 'top') {
+                    } else if (verticalPos === 'Top' || verticalPos === 'top') {
                         icon.style.setProperty('top', '20px', 'important');
                         icon.style.setProperty('bottom', 'auto', 'important');
                         icon.style.setProperty('transform', 'none', 'important');
-                    } else if (verticalPos === 'bottom') {
+                    } else if (verticalPos === 'Bottom' || verticalPos === 'bottom') {
                         icon.style.setProperty('bottom', '20px', 'important');
                         icon.style.setProperty('top', 'auto', 'important');
                         icon.style.setProperty('transform', 'none', 'important');
