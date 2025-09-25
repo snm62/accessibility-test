@@ -13717,7 +13717,49 @@ html body.big-white-cursor * {
 
                 dropdownContainer.style.marginRight = '0';
 
-                console.log('Accessibility Widget: Applied mobile positioning to dropdown');
+                
+
+                // Force extremely small size with inline styles
+
+                dropdownContainer.style.fontSize = '6px';
+
+                dropdownContainer.style.padding = '1px 2px';
+
+                dropdownContainer.style.minHeight = '16px';
+
+                dropdownContainer.style.height = '16px';
+
+                dropdownContainer.style.lineHeight = '1';
+
+                dropdownContainer.style.borderRadius = '2px';
+
+                
+
+                // Also style the select element inside
+
+                const selectElement = dropdownContainer.querySelector('select');
+
+                if (selectElement) {
+
+                    selectElement.style.fontSize = '6px';
+
+                    selectElement.style.padding = '0px 2px';
+
+                    selectElement.style.minHeight = '14px';
+
+                    selectElement.style.height = '14px';
+
+                    selectElement.style.lineHeight = '1';
+
+                    selectElement.style.borderRadius = '2px';
+
+                    selectElement.style.border = '1px solid #ccc';
+
+                }
+
+                
+
+                console.log('Accessibility Widget: Applied mobile positioning and EXTREMELY SMALL size to dropdown');
 
             }
 
@@ -22774,45 +22816,117 @@ applyCustomizations(customizationData) {
             console.log('📱 [MOBILE SIZES] Reduced useful links select size');
         }
         
-        // Add mobile-specific CSS for Useful Links dropdown - MUCH SMALLER
+        // Add mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL
         const mobileUsefulLinksStyle = document.createElement('style');
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 8px !important;
-                    padding: 2px 4px !important;
-                    min-height: 20px !important;
-                    height: 20px !important;
-                    margin: 4px 0 !important;
-                    border-radius: 4px !important;
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
+                    min-height: 16px !important;
+                    height: 16px !important;
+                    margin: 2px 0 !important;
+                    border-radius: 2px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
                     line-height: 1 !important;
+                    border: 1px solid #ccc !important;
+                    max-width: 100% !important;
+                    overflow: hidden !important;
                 }
                 .useful-links-content {
-                    padding: 4px !important;
+                    padding: 2px !important;
                     box-sizing: border-box !important;
+                    margin: 0 !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
                 }
                 .useful-links-content select {
-                    font-size: 8px !important;
-                    padding: 1px 3px !important;
-                    min-height: 18px !important;
-                    height: 18px !important;
+                    font-size: 6px !important;
+                    padding: 0px 2px !important;
+                    min-height: 14px !important;
+                    height: 14px !important;
                     line-height: 1 !important;
-                    border-radius: 3px !important;
+                    border-radius: 2px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
+                    border: 1px solid #ccc !important;
+                    overflow: hidden !important;
                 }
                 .useful-links-content select option {
-                    font-size: 8px !important;
-                    padding: 2px 3px !important;
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
                     line-height: 1 !important;
+                }
+                /* Override any existing styles with maximum specificity */
+                .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
+                    min-height: 16px !important;
+                    height: 16px !important;
+                    margin: 2px 0 !important;
+                    border-radius: 2px !important;
+                    box-sizing: border-box !important;
+                    width: 100% !important;
+                    line-height: 1 !important;
+                    border: 1px solid #ccc !important;
+                    max-width: 100% !important;
+                    overflow: hidden !important;
+                }
+                .accessibility-panel .profile-item.has-dropdown .useful-links-content select {
+                    font-size: 6px !important;
+                    padding: 0px 2px !important;
+                    min-height: 14px !important;
+                    height: 14px !important;
+                    line-height: 1 !important;
+                    border-radius: 2px !important;
+                    max-width: 100% !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    border: 1px solid #ccc !important;
+                    overflow: hidden !important;
                 }
             }
         `;
         this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
-        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - MUCH SMALLER');
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL with maximum specificity');
+        
+        // Add CSS to hide ON/OFF text on mobile screens
+        const mobileToggleTextStyle = document.createElement('style');
+        mobileToggleTextStyle.textContent = `
+            @media (max-width: 768px) {
+                /* Hide ON/OFF text on mobile screens */
+                .toggle-switch > input + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                .toggle-switch > input:checked + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                /* Hide any text in the slider */
+                .toggle-switch .slider::before {
+                    content: "" !important;
+                }
+                .toggle-switch .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                /* Ensure the slider still shows purple color when ON */
+                .toggle-switch > input:checked + .slider {
+                    background-color: #6366f1 !important;
+                }
+            }
+        `;
+        this.shadowRoot?.appendChild(mobileToggleTextStyle);
+        console.log('📱 [MOBILE SIZES] Added CSS to hide ON/OFF text on mobile screens');
 
         // Prevent Useful Links title from shifting when toggle is ON (mobile)
         const usefulLinksProfile = this.shadowRoot?.querySelector('.profile-item.has-dropdown');
@@ -22907,11 +23021,28 @@ applyCustomizations(customizationData) {
                 text-overflow: ellipsis !important; 
                 max-width: 100% !important; 
             }
-            /* Make ON text smaller on mobile to fit inside purple toggle area */
+            /* Hide ON/OFF text on mobile screens */
+            .toggle-switch > input + .slider::after {
+                content: "" !important;
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
             .toggle-switch > input:checked + .slider::after {
-                font-size: 6px !important;
-                font-weight: 600 !important;
-                line-height: 1 !important;
+                content: "" !important;
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+            /* Also hide any text that might be in the slider itself */
+            .toggle-switch .slider::before {
+                content: "" !important;
+            }
+            .toggle-switch .slider::after {
+                content: "" !important;
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
             }
         `;
         this.shadowRoot?.appendChild(style);
