@@ -3024,7 +3024,7 @@ body.align-right a {
 
             .profile-item:focus {
 
-               outline: none !important;
+               
             }
 
 
