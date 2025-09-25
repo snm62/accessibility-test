@@ -20920,6 +20920,21 @@ applyCustomizations(customizationData) {
             console.log('📱 [APPLY CUSTOMIZATIONS] Window width at shape application:', window.innerWidth);
             console.log('📱 [APPLY CUSTOMIZATIONS] Is mobile at shape application:', window.innerWidth <= 768);
             this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
+            
+            // Final verification for mobile shape
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                    if (icon) {
+                        const computedBorderRadius = window.getComputedStyle(icon).borderRadius;
+                        console.log('📱 [FINAL VERIFICATION] Mobile shape verification:');
+                        console.log('📱 [FINAL VERIFICATION] - Expected shape:', customizationData.mobileTriggerShape);
+                        console.log('📱 [FINAL VERIFICATION] - Computed border-radius:', computedBorderRadius);
+                        console.log('📱 [FINAL VERIFICATION] - Data-shape attribute:', icon.getAttribute('data-shape'));
+                        console.log('📱 [FINAL VERIFICATION] - Icon classes:', icon.className);
+                    }
+                }, 200);
+            }
         }
         
         if (customizationData.mobileTriggerHorizontalOffset) {
@@ -21348,6 +21363,9 @@ applyCustomizations(customizationData) {
     
     updateTriggerButtonShape(shape) {
         console.log('[CK] updateTriggerButtonShape() - Shape:', shape);
+        console.log('[CK] updateTriggerButtonShape() - Window width:', window.innerWidth);
+        console.log('[CK] updateTriggerButtonShape() - Is mobile:', window.innerWidth <= 768);
+        console.log('[CK] updateTriggerButtonShape() - Has mobile shape config:', !!this.customizationData?.mobileTriggerShape);
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         
@@ -21355,6 +21373,16 @@ applyCustomizations(customizationData) {
             console.log('[CK] Icon found:', !!icon);
             console.log('[CK] Current icon classes:', icon.className);
             console.log('[CK] Current icon data-shape:', icon.getAttribute('data-shape'));
+            
+            // Check if we're on mobile and have mobile shape configuration
+            const isMobile = window.innerWidth <= 768;
+            const hasMobileShape = this.customizationData?.mobileTriggerShape;
+            
+            if (isMobile && hasMobileShape) {
+                console.log('[CK] SKIPPING DESKTOP SHAPE - Mobile device with mobile shape config detected');
+                console.log('[CK] Mobile shape will be applied by updateMobileTriggerShape()');
+                return;
+            }
             
             // Set data attribute for CSS targeting
             icon.setAttribute('data-shape', shape.toLowerCase());
@@ -22066,6 +22094,13 @@ applyCustomizations(customizationData) {
         console.log('📱 [MOBILE SHAPE] updateMobileTriggerShape() - Shape:', shape);
         console.log('📱 [MOBILE SHAPE] Window width:', window.innerWidth);
         console.log('📱 [MOBILE SHAPE] Is mobile:', window.innerWidth <= 768);
+        console.log('📱 [MOBILE SHAPE] Shape type check:');
+        console.log('📱 [MOBILE SHAPE] - shape === "Circle":', shape === 'Circle');
+        console.log('📱 [MOBILE SHAPE] - shape === "Rounded":', shape === 'Rounded');
+        console.log('📱 [MOBILE SHAPE] - shape === "Square":', shape === 'Square');
+        console.log('📱 [MOBILE SHAPE] - shape === "circle":', shape === 'circle');
+        console.log('📱 [MOBILE SHAPE] - shape === "rounded":', shape === 'rounded');
+        console.log('📱 [MOBILE SHAPE] - shape === "square":', shape === 'square');
         
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
         if (icon) {
@@ -22087,17 +22122,23 @@ applyCustomizations(customizationData) {
                 icon.setAttribute('data-shape', shape.toLowerCase());
                 
                 let borderRadius = '50%';
-                if (shape === 'Circle') {
+                if (shape === 'Circle' || shape === 'circle') {
                     borderRadius = '50%';
-                } else if (shape === 'Rounded') {
+                    console.log('📱 [MOBILE SHAPE] Detected Circle shape, setting border-radius to 50%');
+                } else if (shape === 'Rounded' || shape === 'rounded') {
                     borderRadius = '25px';
-                } else if (shape === 'Square') {
+                    console.log('📱 [MOBILE SHAPE] Detected Rounded shape, setting border-radius to 25px');
+                } else if (shape === 'Square' || shape === 'square') {
                     borderRadius = '0px';
+                    console.log('📱 [MOBILE SHAPE] Detected Square shape, setting border-radius to 0px');
+                } else {
+                    console.warn('📱 [MOBILE SHAPE] Unknown shape:', shape, 'defaulting to 50%');
                 }
                 
                 console.log('📱 [MOBILE SHAPE] AFTER CLEARING:');
                 console.log('📱 [MOBILE SHAPE] - Border-radius after clearing:', icon.style.borderRadius);
                 console.log('📱 [MOBILE SHAPE] - Computed after clearing:', window.getComputedStyle(icon).borderRadius);
+                console.log('📱 [MOBILE SHAPE] - Target border-radius:', borderRadius);
                 
                 // Apply with maximum force
                 icon.style.setProperty('border-radius', borderRadius, 'important');
@@ -22110,6 +22151,7 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE SHAPE] IMMEDIATELY AFTER SETTING:');
                 console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
                 console.log('📱 [MOBILE SHAPE] - Computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                console.log('📱 [MOBILE SHAPE] - Expected border-radius:', borderRadius);
                 
                 // Force reapply after delay
                 setTimeout(() => {
@@ -22121,6 +22163,15 @@ applyCustomizations(customizationData) {
                     console.log('📱 [MOBILE SHAPE] FINAL SHAPE AFTER DELAY:');
                     console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
                     console.log('📱 [MOBILE SHAPE] - Computed border-radius:', window.getComputedStyle(icon).borderRadius);
+                    console.log('📱 [MOBILE SHAPE] - Expected border-radius:', borderRadius);
+                    
+                    // Final verification
+                    const finalComputed = window.getComputedStyle(icon).borderRadius;
+                    if (finalComputed === borderRadius) {
+                        console.log('📱 [MOBILE SHAPE] ✅ SUCCESS: Shape applied correctly!');
+                    } else {
+                        console.error('📱 [MOBILE SHAPE] ❌ FAILED: Expected', borderRadius, 'but got', finalComputed);
+                    }
                 }, 100);
                 
                 // Check computed style
