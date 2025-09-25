@@ -5316,7 +5316,7 @@ html body.big-white-cursor * {
 
                                 <p>This profile adjusts the website to be compatible with screen-readers such as JAWS, NVDA, VoiceOver, and TalkBack. Screen-reader software is installed on the blind user's computer and smartphone, and websites should ensure compatibility.</p>
 
-                                <p><strong>Note:</strong> This profile prompts automatically to screen-readers.</p>
+                                
 
                             </div>
 
@@ -21429,6 +21429,100 @@ applyCustomizations(customizationData) {
         }
     }
     
+    applyMobileSizeReductions() {
+        console.log('📱 [MOBILE SIZES] applyMobileSizeReductions() called');
+        
+        // Reduce action button sizes
+        const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
+        if (actionBtns && actionBtns.length > 0) {
+            actionBtns.forEach((btn, index) => {
+                btn.style.setProperty('font-size', '11px', 'important');
+                btn.style.setProperty('padding', '8px 12px', 'important');
+                btn.style.setProperty('min-height', '32px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced action-btn ${index + 1} size`);
+            });
+        }
+        
+        // Reduce toggle switch sizes
+        const toggles = this.shadowRoot?.querySelectorAll('.toggle-switch');
+        if (toggles && toggles.length > 0) {
+            toggles.forEach((toggle, index) => {
+                toggle.style.setProperty('width', '36px', 'important');
+                toggle.style.setProperty('height', '20px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced toggle ${index + 1} size`);
+            });
+        }
+        
+        // Reduce toggle switch sliders
+        const sliders = this.shadowRoot?.querySelectorAll('.toggle-slider');
+        if (sliders && sliders.length > 0) {
+            sliders.forEach((slider, index) => {
+                slider.style.setProperty('width', '16px', 'important');
+                slider.style.setProperty('height', '16px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
+            });
+        }
+        
+        // Reduce profile item sizes
+        const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
+        if (profileItems && profileItems.length > 0) {
+            profileItems.forEach((item, index) => {
+                item.style.setProperty('padding', '8px 10px', 'important');
+                item.style.setProperty('margin-bottom', '6px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced profile-item ${index + 1} size`);
+            });
+        }
+        
+        // Reduce profile titles
+        const profileTitles = this.shadowRoot?.querySelectorAll('.profile-title');
+        if (profileTitles && profileTitles.length > 0) {
+            profileTitles.forEach((title, index) => {
+                title.style.setProperty('font-size', '12px', 'important');
+                title.style.setProperty('line-height', '1.3', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced profile-title ${index + 1} size`);
+            });
+        }
+        
+        // Reduce profile descriptions
+        const profileDescs = this.shadowRoot?.querySelectorAll('.profile-description');
+        if (profileDescs && profileDescs.length > 0) {
+            profileDescs.forEach((desc, index) => {
+                desc.style.setProperty('font-size', '10px', 'important');
+                desc.style.setProperty('line-height', '1.2', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced profile-description ${index + 1} size`);
+            });
+        }
+        
+        // Reduce section titles
+        const sectionTitles = this.shadowRoot?.querySelectorAll('h3');
+        if (sectionTitles && sectionTitles.length > 0) {
+            sectionTitles.forEach((title, index) => {
+                title.style.setProperty('font-size', '13px', 'important');
+                title.style.setProperty('margin-bottom', '8px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced section title ${index + 1} size`);
+            });
+        }
+        
+        // Reduce language selector size
+        const languageSelector = this.shadowRoot?.querySelector('.language-selector');
+        if (languageSelector) {
+            languageSelector.style.setProperty('font-size', '11px', 'important');
+            languageSelector.style.setProperty('padding', '6px 8px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced language selector size');
+        }
+        
+        // Reduce close button size
+        const closeBtn = this.shadowRoot?.querySelector('.close-btn');
+        if (closeBtn) {
+            closeBtn.style.setProperty('font-size', '16px', 'important');
+            closeBtn.style.setProperty('width', '24px', 'important');
+            closeBtn.style.setProperty('height', '24px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced close button size');
+        }
+        
+        console.log('📱 [MOBILE SIZES] Mobile size reductions applied successfully');
+    }
+    
     removeMobileButtonStacking() {
         console.log('📱 [REMOVE BUTTON STACKING] removeMobileButtonStacking() called');
         
@@ -21466,6 +21560,100 @@ applyCustomizations(customizationData) {
                 console.log(`📱 [REMOVE BUTTON STACKING] Removed mobile styles from action-btn ${index + 1}`);
             });
         }
+    }
+    
+    removeMobileSizeReductions() {
+        console.log('📱 [REMOVE MOBILE SIZES] removeMobileSizeReductions() called');
+        
+        // Restore action button sizes
+        const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
+        if (actionBtns && actionBtns.length > 0) {
+            actionBtns.forEach((btn, index) => {
+                btn.style.removeProperty('font-size');
+                btn.style.removeProperty('padding');
+                btn.style.removeProperty('min-height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored action-btn ${index + 1} size`);
+            });
+        }
+        
+        // Restore toggle switch sizes
+        const toggles = this.shadowRoot?.querySelectorAll('.toggle-switch');
+        if (toggles && toggles.length > 0) {
+            toggles.forEach((toggle, index) => {
+                toggle.style.removeProperty('width');
+                toggle.style.removeProperty('height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored toggle ${index + 1} size`);
+            });
+        }
+        
+        // Restore toggle switch sliders
+        const sliders = this.shadowRoot?.querySelectorAll('.toggle-slider');
+        if (sliders && sliders.length > 0) {
+            sliders.forEach((slider, index) => {
+                slider.style.removeProperty('width');
+                slider.style.removeProperty('height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored toggle slider ${index + 1} size`);
+            });
+        }
+        
+        // Restore profile item sizes
+        const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
+        if (profileItems && profileItems.length > 0) {
+            profileItems.forEach((item, index) => {
+                item.style.removeProperty('padding');
+                item.style.removeProperty('margin-bottom');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored profile-item ${index + 1} size`);
+            });
+        }
+        
+        // Restore profile titles
+        const profileTitles = this.shadowRoot?.querySelectorAll('.profile-title');
+        if (profileTitles && profileTitles.length > 0) {
+            profileTitles.forEach((title, index) => {
+                title.style.removeProperty('font-size');
+                title.style.removeProperty('line-height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored profile-title ${index + 1} size`);
+            });
+        }
+        
+        // Restore profile descriptions
+        const profileDescs = this.shadowRoot?.querySelectorAll('.profile-description');
+        if (profileDescs && profileDescs.length > 0) {
+            profileDescs.forEach((desc, index) => {
+                desc.style.removeProperty('font-size');
+                desc.style.removeProperty('line-height');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored profile-description ${index + 1} size`);
+            });
+        }
+        
+        // Restore section titles
+        const sectionTitles = this.shadowRoot?.querySelectorAll('h3');
+        if (sectionTitles && sectionTitles.length > 0) {
+            sectionTitles.forEach((title, index) => {
+                title.style.removeProperty('font-size');
+                title.style.removeProperty('margin-bottom');
+                console.log(`📱 [REMOVE MOBILE SIZES] Restored section title ${index + 1} size`);
+            });
+        }
+        
+        // Restore language selector size
+        const languageSelector = this.shadowRoot?.querySelector('.language-selector');
+        if (languageSelector) {
+            languageSelector.style.removeProperty('font-size');
+            languageSelector.style.removeProperty('padding');
+            console.log('📱 [REMOVE MOBILE SIZES] Restored language selector size');
+        }
+        
+        // Restore close button size
+        const closeBtn = this.shadowRoot?.querySelector('.close-btn');
+        if (closeBtn) {
+            closeBtn.style.removeProperty('font-size');
+            closeBtn.style.removeProperty('width');
+            closeBtn.style.removeProperty('height');
+            console.log('📱 [REMOVE MOBILE SIZES] Restored close button size');
+        }
+        
+        console.log('📱 [REMOVE MOBILE SIZES] Mobile size reductions removed successfully');
     }
     
     acceptHideInterface() {
@@ -21821,6 +22009,9 @@ applyCustomizations(customizationData) {
                 // Apply mobile button stacking
                 this.applyMobileButtonStacking();
                 
+                // Apply mobile size reductions
+                this.applyMobileSizeReductions();
+                
                 // Debug any font-size conflicts
                 this.debugFontSizeConflicts(panel);
                 
@@ -21849,6 +22040,9 @@ applyCustomizations(customizationData) {
                 
                 // Apply mobile button stacking
                 this.applyMobileButtonStacking();
+                
+                // Apply mobile size reductions
+                this.applyMobileSizeReductions();
                 
                 // Verify font-size was applied
                 const newPanelFontSize = window.getComputedStyle(panel).fontSize;
@@ -21970,6 +22164,9 @@ applyCustomizations(customizationData) {
             
             // Remove mobile button stacking
             this.removeMobileButtonStacking();
+            
+            // Remove mobile size reductions
+            this.removeMobileSizeReductions();
             
             // Remove mobile icon styles
             icon.style.removeProperty('width');
