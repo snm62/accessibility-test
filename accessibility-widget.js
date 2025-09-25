@@ -2694,6 +2694,27 @@ body.align-right a {
             -moz-border-radius: 25px !important;
         }
         
+        /* Maximum specificity override for rounded shape */
+        .accessibility-icon.rounded[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Force rounded shape with absolute maximum specificity */
+        .accessibility-icon[data-shape="rounded"].rounded {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Override any external CSS with maximum force */
+        .accessibility-icon[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
         /* Force panel positioning */
         .accessibility-panel {
             position: fixed !important;
@@ -21495,6 +21516,21 @@ applyCustomizations(customizationData) {
                     console.log('🖥️ [DESKTOP SHAPE] ✅ FINAL SUCCESS: Desktop shape maintained!');
                 } else {
                     console.error('🖥️ [DESKTOP SHAPE] ❌ FINAL FAILED: Shape changed to', finalComputed);
+                    console.log('🖥️ [DESKTOP SHAPE] 🔧 FORCING SHAPE FIX...');
+                    
+                    // Ultra-aggressive force fix
+                    icon.style.setProperty('border-radius', borderRadius, 'important');
+                    icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
+                    icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
+                    icon.style.borderRadius = borderRadius;
+                    icon.style.webkitBorderRadius = borderRadius;
+                    icon.style.mozBorderRadius = borderRadius;
+                    
+                    // Force reflow
+                    icon.offsetHeight;
+                    
+                    const finalFinalComputed = window.getComputedStyle(icon).borderRadius;
+                    console.log('🖥️ [DESKTOP SHAPE] After force fix:', finalFinalComputed);
                 }
             }, 100);
             
@@ -22269,6 +22305,18 @@ applyCustomizations(customizationData) {
                         console.log('📱 [MOBILE SHAPE] ✅ FIXED: Shape applied after force fix!');
                     } else {
                         console.error('📱 [MOBILE SHAPE] ❌ STILL FAILED: Shape could not be applied');
+                        
+                        // Last resort: Create a new style element with maximum specificity
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .accessibility-icon[data-shape="rounded"] {
+                                border-radius: ${borderRadius} !important;
+                                -webkit-border-radius: ${borderRadius} !important;
+                                -moz-border-radius: ${borderRadius} !important;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        console.log('📱 [MOBILE SHAPE] 🔧 Added external style element as last resort');
                     }
                 }
                 }, 100);
