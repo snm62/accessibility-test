@@ -3172,6 +3172,14 @@ body.align-right a {
 
                 color: white;
 
+                /* Ensure proper clickable area */
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+
             }
 
 
@@ -4022,11 +4030,19 @@ body.align-right a {
 
 
 
-            .language-option.selected {
+            .language-option.selected,
+            .language-option[aria-selected="true"] {
 
                 background: #6366f1;
 
                 color: #ffffff;
+
+            }
+
+            .language-option.selected:hover,
+            .language-option[aria-selected="true"]:hover {
+
+                background: #4f46e5;
 
             }
 
@@ -6695,7 +6711,13 @@ html body.big-white-cursor * {
                 screenReaderDetailed: "Este perfil ajusta el sitio web para ser compatible con lectores de pantalla como JAWS, NVDA, VoiceOver y TalkBack. El software lector de pantalla está instalado en la computadora y smartphone del usuario ciego, y los sitios web deben asegurar compatibilidad.",
     screenReaderNote: "Nota: Este perfil se activa automáticamente con lectores de pantalla.",
                 activatesWithScreenReader: "Se activa con Lector de Pantalla",
-                activatesWithKeyboardNav: "Se activa con Navegación por Teclado"
+                activatesWithKeyboardNav: "Se activa con Navegación por Teclado",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "¿Ocultar Interfaz de Accesibilidad?",
+                hideInterfaceModalText: "Tenga en cuenta: Si elige ocultar la interfaz de accesibilidad, no podrá verla más, a menos que borre el historial de navegación y los datos. ¿Está seguro de que desea ocultar la interfaz?",
+                hideInterfaceModalAccept: "Aceptar",
+                hideInterfaceModalCancel: "Cancelar"
             },
 
             de: {
@@ -7444,7 +7466,13 @@ html body.big-white-cursor * {
 
                 activatesWithScreenReader: "מופעל עם קורא מסך",
 
-                activatesWithKeyboardNav: "מופעל עם ניווט במקלדת"
+                activatesWithKeyboardNav: "מופעל עם ניווט במקלדת",
+                
+                // Hide Interface Modal
+                hideInterfaceModalTitle: "להסתיר את ממשק הנגישות?",
+                hideInterfaceModalText: "שימו לב: אם תבחרו להסתיר את ממשק הנגישות, לא תוכלו לראות אותו יותר, אלא אם תמחקו את היסטוריית הגלישה והנתונים. האם אתם בטוחים שברצונכם להסתיר את הממשק?",
+                hideInterfaceModalAccept: "קבל",
+                hideInterfaceModalCancel: "בטל"
 
             },
 
@@ -8246,10 +8274,12 @@ html body.big-white-cursor * {
         languageOptions.forEach(option => {
 
             option.classList.remove('selected');
+            option.setAttribute('aria-selected', 'false');
 
             if (option.dataset.lang === currentLang) {
 
                 option.classList.add('selected');
+                option.setAttribute('aria-selected', 'true');
 
             }
 
@@ -14304,9 +14334,7 @@ html body.big-white-cursor * {
 
 
     resetSettings() {
-        // Preserve the current language before resetting
-        const currentLanguage = localStorage.getItem('accessibility-widget-language') || 'English';
-        console.log('[CK] resetSettings() - Preserving language:', currentLanguage);
+        console.log('[CK] resetSettings() - Resetting all settings including language to English');
 
         this.settings = {};
 
@@ -14321,9 +14349,9 @@ html body.big-white-cursor * {
         localStorage.removeItem('letter-spacing-used');
         console.log('[CK] resetSettings() - Cleared usage tracking flags');
         
-        // Restore the language after reset
-        this.applyLanguage(currentLanguage);
-        console.log('[CK] resetSettings() - Language restored:', currentLanguage);
+        // Reset language to English
+        this.applyLanguage('en');
+        console.log('[CK] resetSettings() - Language reset to English');
 
         
 
