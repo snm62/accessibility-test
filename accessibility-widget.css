@@ -2246,8 +2246,6 @@ body.high-contrast .accessibility-widget-container *,
     margin: 10px 0;
     padding: 0;
     width: 100%;
-    display: block;
-    flex-basis: 100%;
     order: 1;
     background: #f8fafc;
     border-radius: 8px;
@@ -2265,16 +2263,10 @@ body.high-contrast .accessibility-widget-container *,
 .accessibility-panel .profile-item.has-dropdown,
 .accessibility-widget .profile-item.has-dropdown,
 #accessibility-panel .profile-item.has-dropdown {
-    display: block !important;
-    flex-direction: unset !important;
+    
     align-items: unset !important;
     justify-content: unset !important;
-    flex-wrap: unset !important;
-    flex-flow: unset !important;
-    flex: unset !important;
-    flex-grow: unset !important;
-    flex-shrink: unset !important;
-    flex-basis: unset !important;
+    
     position: relative !important;
 }
 
