@@ -3721,8 +3721,6 @@ body.align-right a {
 
                 flex-shrink: 0;
 
-                order: 1;
-
             }
 
 
@@ -4915,9 +4913,6 @@ body.align-right a {
 
             .profile-item.has-dropdown .profile-info {
 
-                display: flex !important;
-                flex-direction: column !important;
-                flex: 1 !important;
                 padding-left: 0 !important;
                 margin-bottom: 0 !important;
 
@@ -22036,7 +22031,6 @@ applyCustomizations(customizationData) {
                 // Keep text in normal flow - don't add excessive padding
                 profileInfo.style.setProperty('padding-left', '0', 'important');
                 profileInfo.style.setProperty('min-width', '0', 'important');
-                profileInfo.style.setProperty('flex', '1', 'important');
             }
             if (toggle) {
                 // Keep toggle in normal flow - don't use absolute positioning
@@ -22055,7 +22049,7 @@ applyCustomizations(customizationData) {
             @media (max-width: 768px) {
                 .toggle-switch > input:checked + .slider { width: 100% !important; }
             }
-            .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
+            .profile-item .profile-info { min-width: 0 !important; }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
                 white-space: nowrap !important; 
                 overflow: hidden !important; 
