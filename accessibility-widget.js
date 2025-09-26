@@ -13568,9 +13568,8 @@ html body.big-white-cursor * {
 
             
 
-            // Insert dropdown after the toggle switch to keep toggle in position
-            const toggleElement = usefulLinksModule.querySelector('.toggle-switch');
-            toggleElement.parentNode.insertBefore(dropdownContainer, toggleElement.nextSibling);
+            // Insert dropdown at the end of the profile-item to maintain layout
+            usefulLinksModule.appendChild(dropdownContainer);
 
             
 
