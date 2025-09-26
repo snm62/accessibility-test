@@ -2,6 +2,7 @@ class AccessibilityWidget {
 constructor() {
 
         this.settings = {};
+        
 
         this.contentScale = 100; // Start at 100% (normal size)
 
@@ -1810,26 +1811,24 @@ if (window.innerWidth <= 768) {
     
     /* Medium toggles for medium mobile screens */
     .toggle-switch {
-        width: 44px !important;
-        height: 24px !important;
+        width: 18px !important;
+        height: 11px !important;
     }
     
     .toggle-switch .slider {
-        width: 44px !important;
-        height: 24px !important;
-        border-radius: 24px !important;
+        width: 18px !important;
+        height: 11px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 20px !important;
-        height: 20px !important;
+        width: 7px !important;
+        height: 7px !important;
         left: 2px !important;
         bottom: 2px !important;
-        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(20px) !important;
+        transform: translateX(7px) !important;
     }
     
     /* Medium profile items for medium mobile screens */
@@ -1905,26 +1904,24 @@ if (window.innerWidth <= 768) {
     
     /* Smaller toggles for small screens */
     .toggle-switch {
-        width: 44px;
-        height: 24px;
+        width: 16px;
+        height: 10px;
     }
     
     .toggle-switch .slider {
-        width: 44px;
-        height: 24px;
-        border-radius: 24px;
+        width: 16px;
+        height: 10px;
     }
     
     .toggle-switch .slider:before {
-        width: 20px;
-        height: 20px;
+        width: 6px;
+        height: 6px;
         left: 2px;
         bottom: 2px;
-        border-radius: 50%;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(20px);
+        transform: translateX(6px);
     }
     
     /* Smaller profile items for small screens */
@@ -2191,26 +2188,24 @@ if (window.innerWidth <= 768) {
     
     /* Very small toggles for mobile landscape */
     .toggle-switch {
-        width: 44px !important;
-        height: 24px !important;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider {
-        width: 44px !important;
-        height: 24px !important;
-        border-radius: 24px !important;
+        width: 20px !important;
+        height: 12px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 20px !important;
-        width: 20px !important;
+        height: 8px !important;
+        width: 8px !important;
         left: 2px !important;
         bottom: 2px !important;
-        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(20px) !important;
+        transform: translateX(8px) !important;
     }
 }
 
@@ -2279,26 +2274,24 @@ if (window.innerWidth <= 768) {
     
     /* TINY toggles for mobile portrait */
     .toggle-switch {
-        width: 44px !important;
-        height: 24px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider {
-        width: 44px !important;
-        height: 24px !important;
-        border-radius: 24px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider:before {
-        height: 20px !important;
-        width: 20px !important;
+        height: 4px !important;
+        width: 4px !important;
         left: 2px !important;
         bottom: 2px !important;
-        border-radius: 50% !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(20px) !important;
+        transform: translateX(4px) !important;
     }
 }
 
@@ -2388,24 +2381,22 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch {
-        width: 44px !important;
-        height: 24px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider {
-        width: 44px !important;
-        height: 24px !important;
-        border-radius: 24px !important;
+        width: 12px !important;
+        height: 8px !important;
     }
     
     .toggle-switch .slider:before {
-        width: 20px !important;
-        height: 20px !important;
-        border-radius: 50% !important;
+        width: 4px !important;
+        height: 4px !important;
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(20px) !important;
+        transform: translateX(4px) !important;
     }
 }
 
@@ -14468,16 +14459,11 @@ html body.big-white-cursor * {
 
         
 
-        // DON'T apply focus styles to currently focused element when enabling the feature
-        // Only apply focus styles during actual keyboard navigation
-        console.log('🎯 [FOCUS DEBUG] Highlight focus enabled - NOT applying styles to currently focused element');
-        console.log('🎯 [FOCUS DEBUG] Current active element:', document.activeElement);
-        console.log('🎯 [FOCUS DEBUG] Will only apply styles during keyboard navigation (Tab key)');
-        
-        // Skip applying styles to currently focused element
-        const activeElement = null; // Don't apply to current element
-        
-        if (false) { // Never execute this block
+        // Apply focus styles to currently focused element if any
+
+        const activeElement = document.activeElement;
+
+        if (activeElement && activeElement !== document.body && activeElement !== document.documentElement) {
 
             // Only apply to interactive elements
 
@@ -14542,33 +14528,26 @@ html body.big-white-cursor * {
             console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
             console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
             
-            // Special debugging for accessibility icon - ONLY during keyboard navigation
+            // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
                 console.log('🎯 [FOCUS] Body has highlight-focus:', document.body.classList.contains('highlight-focus'));
                 console.log('🎯 [FOCUS] Is keyboard navigation:', this.isKeyboardNavigation);
-                console.log('🎯 [FOCUS] Last interaction method:', this.lastInteractionMethod);
+                console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
                 
-                // Only apply focus styles to accessibility icon during keyboard navigation
-                if (this.isKeyboardNavigation && this.lastInteractionMethod === 'keyboard') {
-                    console.log('🎯 [FOCUS] Applying focus styles to accessibility icon - keyboard navigation confirmed');
-                    e.target.style.outline = '3px solid #6366f1';
-                    e.target.style.outlineOffset = '2px';
-                    e.target.style.background = 'rgba(99, 102, 241, 0.1)';
-                    e.target.style.borderRadius = '4px';
-                    e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
-                } else {
-                    console.log('🎯 [FOCUS] NOT applying focus styles to accessibility icon - not keyboard navigation');
-                }
+                // Always apply focus styles to accessibility icon when focused
+                e.target.style.outline = '3px solid #6366f1';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.background = 'rgba(99, 102, 241, 0.1)';
+                e.target.style.borderRadius = '4px';
+                e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                 return; // Exit early to prevent other focus handling
             }
 
-            // Only apply focus styles during actual keyboard navigation
-            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation && this.lastInteractionMethod === 'keyboard') {
-                console.log('🎯 [FOCUS DEBUG] Applying focus styles - keyboard navigation confirmed');
+            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
                 const focusedElement = e.target;
 
@@ -16791,72 +16770,15 @@ html body.big-white-cursor * {
 
     enableMuteSound() {
 
-        console.log('🔇 [MUTE SOUND] Mute sound enabled - Starting aggressive muting');
+        console.log('Accessibility Widget: Mute sound enabled');
+
+        
 
         // Store original volume states
 
         this.originalVolumeStates = new Map();
 
         this.muteSoundEnabled = true;
-        
-        // IMMEDIATE AGGRESSIVE MUTING - Don't wait for anything
-        console.log('🔇 [MUTE SOUND] IMMEDIATE MUTE: Starting instant muting of all media');
-        
-        // First, immediately mute and pause ALL media elements
-        const immediateMute = () => {
-            const allAudio = document.querySelectorAll('audio');
-            const allVideo = document.querySelectorAll('video');
-            
-            console.log(`🔇 [MUTE SOUND] IMMEDIATE: Found ${allAudio.length} audio and ${allVideo.length} video elements`);
-            
-            // Aggressively mute and pause ALL audio
-            allAudio.forEach((element, index) => {
-                console.log(`🔇 [MUTE SOUND] IMMEDIATE: Muting audio ${index} - was playing: ${!element.paused}, volume: ${element.volume}`);
-                
-                // Force immediate mute and pause
-                element.volume = 0;
-                element.muted = true;
-                element.pause();
-                
-                // Force mute again immediately
-                setTimeout(() => {
-                    element.volume = 0;
-                    element.muted = true;
-                    if (!element.paused) {
-                        element.pause();
-                    }
-                    console.log(`🔇 [MUTE SOUND] IMMEDIATE: Re-muted audio ${index} - now paused: ${element.paused}, volume: ${element.volume}`);
-                }, 1);
-            });
-            
-            // Aggressively mute and pause ALL video
-            allVideo.forEach((element, index) => {
-                console.log(`🔇 [MUTE SOUND] IMMEDIATE: Muting video ${index} - was playing: ${!element.paused}, volume: ${element.volume}`);
-                
-                // Force immediate mute and pause
-                element.volume = 0;
-                element.muted = true;
-                element.pause();
-                
-                // Force mute again immediately
-                setTimeout(() => {
-                    element.volume = 0;
-                    element.muted = true;
-                    if (!element.paused) {
-                        element.pause();
-                    }
-                    console.log(`🔇 [MUTE SOUND] IMMEDIATE: Re-muted video ${index} - now paused: ${element.paused}, volume: ${element.volume}`);
-                }, 1);
-            });
-        };
-        
-        // Execute immediate muting right now
-        immediateMute();
-        
-        // Also execute it again after a tiny delay to catch any that were missed
-        setTimeout(immediateMute, 10);
-        setTimeout(immediateMute, 50);
-        setTimeout(immediateMute, 100);
 
         
 
@@ -16868,63 +16790,17 @@ html body.big-white-cursor * {
 
         
 
-        // Override play method to ensure muted playback - ULTRA AGGRESSIVE
+        // Override play method to ensure muted playback
 
         HTMLMediaElement.prototype.play = function() {
 
             if (window.accessibilityWidget && window.accessibilityWidget.muteSoundEnabled) {
 
-                console.log('🔇 [MUTE SOUND] OVERRIDE: Play method called - immediately muting');
-
                 this.volume = 0;
 
                 this.muted = true;
 
-                // Force pause immediately
-
-                this.pause();
-
-                console.log('🔇 [MUTE SOUND] OVERRIDE: Forced pause and mute');
-
-                // Force mute again after play starts
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('🔇 [MUTE SOUND] OVERRIDE: Re-applied mute and pause after play override');
-
-                }, 1);
-
-                // Even more aggressive - multiple attempts
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('🔇 [MUTE SOUND] OVERRIDE: Second re-application');
-
-                }, 10);
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('🔇 [MUTE SOUND] OVERRIDE: Third re-application');
-
-                }, 50);
+                console.log('Accessibility Widget: Override play - forcing muted playback');
 
             }
 
@@ -16984,23 +16860,15 @@ html body.big-white-cursor * {
 
                 
 
-                // If audio is currently playing, immediately mute and pause
+                // If audio is currently playing, pause and restart to apply mute
 
                 if (!element.paused) {
 
-                    console.log(`Accessibility Widget: Audio element ${index} is playing, immediately muting and pausing`);
-
-                    // Immediately set volume to 0 and muted to true
-
-                    element.volume = 0;
-
-                    element.muted = true;
-
-                    // Pause the audio
+                    console.log(`Accessibility Widget: Audio element ${index} is playing, pausing and restarting to apply mute`);
 
                     element.pause();
 
-                    // Force mute again after a very short delay to ensure it sticks
+                    // Small delay to ensure pause takes effect
 
                     setTimeout(() => {
 
@@ -17008,15 +16876,9 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
-                        if (!element.paused) {
+                        // Don't restart - keep it paused but muted
 
-                            element.pause();
-
-                        }
-
-                        console.log(`Accessibility Widget: Re-applied mute to audio element ${index}`);
-
-                    }, 10);
+                    }, 50);
 
                 }
 
@@ -17048,23 +16910,15 @@ html body.big-white-cursor * {
 
                 
 
-                // If video is currently playing, immediately mute and pause
+                // If video is currently playing, pause and restart to apply mute
 
                 if (!element.paused) {
 
-                    console.log(`Accessibility Widget: Video element ${index} is playing, immediately muting and pausing`);
-
-                    // Immediately set volume to 0 and muted to true
-
-                    element.volume = 0;
-
-                    element.muted = true;
-
-                    // Pause the video
+                    console.log(`Accessibility Widget: Video element ${index} is playing, pausing and restarting to apply mute`);
 
                     element.pause();
 
-                    // Force mute again after a very short delay to ensure it sticks
+                    // Small delay to ensure pause takes effect
 
                     setTimeout(() => {
 
@@ -17072,15 +16926,9 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
-                        if (!element.paused) {
+                        // Don't restart - keep it paused but muted
 
-                            element.pause();
-
-                        }
-
-                        console.log(`Accessibility Widget: Re-applied mute to video element ${index}`);
-
-                    }, 10);
+                    }, 50);
 
                 }
 
@@ -17300,91 +17148,11 @@ html body.big-white-cursor * {
 
         
 
-        // Add event listeners to catch any audio/video that starts playing
-
-        this.audioVideoEventListeners = [];
-
-        const addMuteListeners = () => {
-
-            const audioElements = document.querySelectorAll('audio');
-
-            const videoElements = document.querySelectorAll('video');
-
-            
-
-            [...audioElements, ...videoElements].forEach((element) => {
-
-                const muteHandler = () => {
-
-                    if (this.muteSoundEnabled) {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        console.log('Accessibility Widget: Event listener muted playing media');
-
-                    }
-
-                };
-
-                
-
-                element.addEventListener('play', muteHandler);
-
-                element.addEventListener('playing', muteHandler);
-
-                element.addEventListener('loadstart', muteHandler);
-
-                this.audioVideoEventListeners.push({ element, muteHandler });
-
-            });
-
-        };
-
-        
-
-        // Add listeners to existing elements
-
-        addMuteListeners();
-
-        
-
-        // Also add listeners to new elements via observer
-
-        if (this.muteSoundObserver) {
-
-            const originalCallback = this.muteSoundObserver.callback;
-
-            this.muteSoundObserver.callback = (mutations) => {
-
-                originalCallback(mutations);
-
-                // Add listeners to any new audio/video elements
-
-                setTimeout(() => {
-
-                    if (this.muteSoundEnabled) {
-
-                        addMuteListeners();
-
-                    }
-
-                }, 100);
-
-            };
-
-        }
-
-        
-
-        // Set up a more aggressive muting approach - MUCH MORE FREQUENT
+        // Set up a more aggressive muting approach
 
         this.muteSoundInterval = setInterval(() => {
 
             if (this.muteSoundEnabled) {
-
-                console.log('🔇 [MUTE SOUND] INTERVAL: Re-checking all media elements');
 
                 // Re-mute all audio/video elements periodically
 
@@ -17394,25 +17162,9 @@ html body.big-white-cursor * {
 
                 
 
-                console.log(`🔇 [MUTE SOUND] INTERVAL: Found ${audioElements.length} audio and ${videoElements.length} video elements`);
+                audioElements.forEach((element) => {
 
-                
-
-                audioElements.forEach((element, index) => {
-
-                    const wasPlaying = !element.paused;
-
-                    const hadVolume = element.volume > 0;
-
-                    const wasUnmuted = !element.muted;
-
-                    
-
-                    if (element.volume > 0 || !element.muted || !element.paused) {
-
-                        console.log(`🔇 [MUTE SOUND] INTERVAL: Audio ${index} needs muting - volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
-
-                        
+                    if (element.volume > 0 || !element.muted) {
 
                         element.volume = 0;
 
@@ -17426,13 +17178,11 @@ html body.big-white-cursor * {
 
                             element.pause();
 
-                            console.log(`🔇 [MUTE SOUND] INTERVAL: Paused playing audio ${index}`);
-
                         }
 
                         
 
-                        console.log(`🔇 [MUTE SOUND] INTERVAL: Re-muted audio element ${index} - now volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
+                        console.log('Accessibility Widget: Re-muted audio element that was unmuted');
 
                     }
 
@@ -17440,21 +17190,9 @@ html body.big-white-cursor * {
 
                 
 
-                videoElements.forEach((element, index) => {
+                videoElements.forEach((element) => {
 
-                    const wasPlaying = !element.paused;
-
-                    const hadVolume = element.volume > 0;
-
-                    const wasUnmuted = !element.muted;
-
-                    
-
-                    if (element.volume > 0 || !element.muted || !element.paused) {
-
-                        console.log(`🔇 [MUTE SOUND] INTERVAL: Video ${index} needs muting - volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
-
-                        
+                    if (element.volume > 0 || !element.muted) {
 
                         element.volume = 0;
 
@@ -17468,13 +17206,11 @@ html body.big-white-cursor * {
 
                             element.pause();
 
-                            console.log(`🔇 [MUTE SOUND] INTERVAL: Paused playing video ${index}`);
-
                         }
 
                         
 
-                        console.log(`🔇 [MUTE SOUND] INTERVAL: Re-muted video element ${index} - now volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
+                        console.log('Accessibility Widget: Re-muted video element that was unmuted');
 
                     }
 
@@ -17550,7 +17286,7 @@ html body.big-white-cursor * {
 
             }
 
-        }, 50); // Check every 50ms for ULTRA aggressive muting
+        }, 500); // Check every 500ms for more aggressive muting
 
     }
 
@@ -17601,26 +17337,6 @@ html body.big-white-cursor * {
             clearInterval(this.muteSoundInterval);
 
             this.muteSoundInterval = null;
-
-        }
-
-        
-
-        // Remove event listeners
-
-        if (this.audioVideoEventListeners) {
-
-            this.audioVideoEventListeners.forEach(({ element, muteHandler }) => {
-
-                element.removeEventListener('play', muteHandler);
-
-                element.removeEventListener('playing', muteHandler);
-
-                element.removeEventListener('loadstart', muteHandler);
-
-            });
-
-            this.audioVideoEventListeners = [];
 
         }
 
@@ -18276,16 +17992,11 @@ html body.big-white-cursor * {
 
         
 
-        // DON'T apply focus styles to currently focused element when enabling the feature
-        // Only apply focus styles during actual keyboard navigation
-        console.log('🎯 [FOCUS DEBUG] Highlight focus enabled - NOT applying styles to currently focused element');
-        console.log('🎯 [FOCUS DEBUG] Current active element:', document.activeElement);
-        console.log('🎯 [FOCUS DEBUG] Will only apply styles during keyboard navigation (Tab key)');
-        
-        // Skip applying styles to currently focused element
-        const activeElement = null; // Don't apply to current element
-        
-        if (false) { // Never execute this block
+        // Apply focus styles to currently focused element if any
+
+        const activeElement = document.activeElement;
+
+        if (activeElement && activeElement !== document.body && activeElement !== document.documentElement) {
 
             // Only apply to interactive elements
 
@@ -18350,33 +18061,26 @@ html body.big-white-cursor * {
             console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
             console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
             
-            // Special debugging for accessibility icon - ONLY during keyboard navigation
+            // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
                 console.log('🎯 [FOCUS] Accessibility icon focused!');
                 console.log('🎯 [FOCUS] Icon classes:', e.target.className);
                 console.log('🎯 [FOCUS] Icon ID:', e.target.id);
                 console.log('🎯 [FOCUS] Body has highlight-focus:', document.body.classList.contains('highlight-focus'));
                 console.log('🎯 [FOCUS] Is keyboard navigation:', this.isKeyboardNavigation);
-                console.log('🎯 [FOCUS] Last interaction method:', this.lastInteractionMethod);
+                console.log('🎯 [FOCUS] Applying focus styles to accessibility icon');
                 
-                // Only apply focus styles to accessibility icon during keyboard navigation
-                if (this.isKeyboardNavigation && this.lastInteractionMethod === 'keyboard') {
-                    console.log('🎯 [FOCUS] Applying focus styles to accessibility icon - keyboard navigation confirmed');
-                    e.target.style.outline = '3px solid #6366f1';
-                    e.target.style.outlineOffset = '2px';
-                    e.target.style.background = 'rgba(99, 102, 241, 0.1)';
-                    e.target.style.borderRadius = '4px';
-                    e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
-                } else {
-                    console.log('🎯 [FOCUS] NOT applying focus styles to accessibility icon - not keyboard navigation');
-                }
+                // Always apply focus styles to accessibility icon when focused
+                e.target.style.outline = '3px solid #6366f1';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.background = 'rgba(99, 102, 241, 0.1)';
+                e.target.style.borderRadius = '4px';
+                e.target.style.transition = 'outline 0.2s ease, background 0.2s ease';
+                e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                 return; // Exit early to prevent other focus handling
             }
 
-            // Only apply focus styles during actual keyboard navigation
-            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation && this.lastInteractionMethod === 'keyboard') {
-                console.log('🎯 [FOCUS DEBUG] Applying focus styles - keyboard navigation confirmed');
+            if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
 
                 const focusedElement = e.target;
 
@@ -22912,33 +22616,33 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Set proper toggle switch sizes for mobile (label.toggle-switch contains input + span.slider)
+        // Reduce toggle switch sizes (label.toggle-switch contains input + span.slider)
         const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
         if (toggles && toggles.length > 0) {
             toggles.forEach((toggle, index) => {
-                toggle.style.setProperty('width', '44px', 'important');
-                toggle.style.setProperty('height', '24px', 'important');
-                console.log(`📱 [MOBILE SIZES] Set proper toggle ${index + 1} size`);
+                toggle.style.setProperty('width', '38px', 'important');
+                toggle.style.setProperty('height', '22px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced toggle ${index + 1} size`);
             });
         }
         
-        // Set proper toggle slider knob size (.slider and its pseudo knob)
+        // Reduce toggle slider knob (.slider and its pseudo knob)
         const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
         if (sliders && sliders.length > 0) {
             sliders.forEach((slider, index) => {
                 // Track and bar
-                slider.style.setProperty('height', '24px', 'important');
-                slider.style.setProperty('border-radius', '24px', 'important');
+                slider.style.setProperty('height', '22px', 'important');
+                slider.style.setProperty('border-radius', '22px', 'important');
                 slider.style.setProperty('padding', '0', 'important');
                 slider.style.setProperty('box-sizing', 'border-box', 'important');
-                // Inject proper stylesheet for the knob (:before)
+                // Inject a tiny stylesheet to shrink the knob (:before)
                 const style = document.createElement('style');
                 style.textContent = `
-                    .toggle-switch > input + .slider:before { width: 20px !important; height: 20px !important; top: 2px !important; left: 2px !important; border-radius: 50% !important; }
-                    .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
+                    .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
+                    .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
                 `;
                 this.shadowRoot?.appendChild(style);
-                console.log(`📱 [MOBILE SIZES] Set proper toggle slider ${index + 1} size`);
+                console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
             });
         }
         
@@ -23088,175 +22792,138 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Set useful links dropdown to reasonable mobile size
+        // Reduce useful links dropdown size more aggressively
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '14px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '8px 12px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '40px', 'important');
-            usefulLinksDropdown.style.setProperty('margin', '8px 0', 'important');
-            usefulLinksDropdown.style.setProperty('border-radius', '8px', 'important');
-            usefulLinksDropdown.style.setProperty('width', '100%', 'important');
-            usefulLinksDropdown.style.setProperty('display', 'block', 'important');
-            usefulLinksDropdown.style.setProperty('visibility', 'visible', 'important');
-            usefulLinksDropdown.style.setProperty('opacity', '1', 'important');
-            console.log('📱 [MOBILE SIZES] Set useful links dropdown to reasonable size');
+            usefulLinksDropdown.style.setProperty('font-size', '10px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '28px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '6px 0', 'important');
+            usefulLinksDropdown.style.setProperty('border-radius', '6px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
         }
         
-        // Set useful links select to reasonable mobile size
+        // Reduce useful links content select size more aggressively
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '14px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '8px 12px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '36px', 'important');
-            usefulLinksSelect.style.setProperty('height', '36px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
+            usefulLinksSelect.style.setProperty('font-size', '10px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.1', 'important');
             usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
             usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
-            usefulLinksSelect.style.setProperty('border-radius', '6px', 'important');
-            usefulLinksSelect.style.setProperty('width', '100%', 'important');
-            usefulLinksSelect.style.setProperty('display', 'block', 'important');
-            usefulLinksSelect.style.setProperty('visibility', 'visible', 'important');
-            usefulLinksSelect.style.setProperty('opacity', '1', 'important');
-            console.log('📱 [MOBILE SIZES] Set useful links select to reasonable size');
+            usefulLinksSelect.style.setProperty('border-radius', '4px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links select size');
         }
         
-        // Add mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE
+        // Add mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL
         const mobileUsefulLinksStyle = document.createElement('style');
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 40px !important;
-                    height: auto !important;
-                    margin: 8px 0 !important;
-                    border-radius: 8px !important;
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
+                    min-height: 16px !important;
+                    height: 16px !important;
+                    margin: 2px 0 !important;
+                    border-radius: 2px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.2 !important;
+                    line-height: 1 !important;
                     border: 1px solid #ccc !important;
                     max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    overflow: hidden !important;
                 }
                 .useful-links-content {
-                    padding: 8px 12px !important;
+                    padding: 2px !important;
                     box-sizing: border-box !important;
                     margin: 0 !important;
                     width: 100% !important;
                     max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 36px !important;
-                    height: 36px !important;
-                    line-height: 1.2 !important;
-                    border-radius: 6px !important;
+                    font-size: 6px !important;
+                    padding: 0px 2px !important;
+                    min-height: 14px !important;
+                    height: 14px !important;
+                    line-height: 1 !important;
+                    border-radius: 2px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     border: 1px solid #ccc !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    overflow: hidden !important;
                 }
                 .useful-links-content select option {
-                    font-size: 14px !important;
-                    padding: 4px 8px !important;
-                    line-height: 1.2 !important;
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
+                    line-height: 1 !important;
                 }
                 /* Override any existing styles with maximum specificity */
                 .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 40px !important;
-                    height: auto !important;
-                    margin: 8px 0 !important;
-                    border-radius: 8px !important;
+                    font-size: 6px !important;
+                    padding: 1px 2px !important;
+                    min-height: 16px !important;
+                    height: 16px !important;
+                    margin: 2px 0 !important;
+                    border-radius: 2px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.2 !important;
+                    line-height: 1 !important;
                     border: 1px solid #ccc !important;
                     max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    overflow: hidden !important;
                 }
                 .accessibility-panel .profile-item.has-dropdown .useful-links-content select {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 36px !important;
-                    height: 36px !important;
-                    line-height: 1.2 !important;
-                    border-radius: 6px !important;
+                    font-size: 6px !important;
+                    padding: 0px 2px !important;
+                    min-height: 14px !important;
+                    height: 14px !important;
+                    line-height: 1 !important;
+                    border-radius: 2px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     border: 1px solid #ccc !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    overflow: hidden !important;
                 }
             }
         `;
         this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
-        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE with maximum specificity');
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL with maximum specificity');
         
         // Add CSS to hide ON/OFF text on mobile screens
         const mobileToggleTextStyle = document.createElement('style');
         mobileToggleTextStyle.textContent = `
             @media (max-width: 768px) {
-            /* Hide ON/OFF text on mobile screens */
-            .toggle-switch > input + .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            .toggle-switch > input:checked + .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            /* Hide any text in the slider */
-            .toggle-switch .slider::before {
-                content: "" !important;
-            }
-            .toggle-switch .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            /* Make toggles visible when OFF - add grey background */
-            .toggle-switch .slider {
-                background-color: #e5e7eb !important;
-                border: 1px solid #d1d5db !important;
-            }
-            /* Ensure the slider shows purple color when ON */
-            .toggle-switch > input:checked + .slider {
-                background-color: #6366f1 !important;
-                border: 1px solid #4f46e5 !important;
-            }
-            /* Make the toggle knob visible when OFF */
-            .toggle-switch .slider:before {
-                background-color: #ffffff !important;
-                border: 1px solid #d1d5db !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-            }
-            /* Make the toggle knob visible when ON */
-            .toggle-switch > input:checked + .slider:before {
-                background-color: #ffffff !important;
-                border: 1px solid #4f46e5 !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-            }
+                /* Hide ON/OFF text on mobile screens */
+                .toggle-switch > input + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                .toggle-switch > input:checked + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                /* Hide any text in the slider */
+                .toggle-switch .slider::before {
+                    content: "" !important;
+                }
+                .toggle-switch .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                /* Ensure the slider still shows purple color when ON */
+                .toggle-switch > input:checked + .slider {
+                    background-color: #6366f1 !important;
+                }
             }
         `;
         this.shadowRoot?.appendChild(mobileToggleTextStyle);
@@ -23264,17 +22931,9 @@ applyCustomizations(customizationData) {
 
         // Prevent Useful Links title from shifting when toggle is ON (mobile)
         const usefulLinksProfile = this.shadowRoot?.querySelector('.profile-item.has-dropdown');
-        console.log('📱 [USEFUL LINKS DEBUG] Profile item found:', !!usefulLinksProfile);
-        
         if (usefulLinksProfile) {
             const profileInfo = usefulLinksProfile.querySelector('.profile-info');
             const toggle = usefulLinksProfile.querySelector('.toggle-switch');
-            
-            console.log('📱 [USEFUL LINKS DEBUG] Profile info found:', !!profileInfo);
-            console.log('📱 [USEFUL LINKS DEBUG] Toggle found:', !!toggle);
-            console.log('📱 [USEFUL LINKS DEBUG] Current profile item classes:', usefulLinksProfile.className);
-            console.log('📱 [USEFUL LINKS DEBUG] Current profile item display:', window.getComputedStyle(usefulLinksProfile).display);
-            console.log('📱 [USEFUL LINKS DEBUG] Current profile item position:', window.getComputedStyle(usefulLinksProfile).position);
             
             // Keep the profile item in normal flow but with proper spacing
             usefulLinksProfile.style.setProperty('position', 'relative', 'important');
@@ -23282,15 +22941,7 @@ applyCustomizations(customizationData) {
             usefulLinksProfile.style.setProperty('padding-left', '50px', 'important');
             usefulLinksProfile.style.setProperty('min-height', '40px', 'important');
             
-            console.log('📱 [USEFUL LINKS DEBUG] Applied profile item styles');
-            console.log('📱 [USEFUL LINKS DEBUG] Profile item padding-left:', usefulLinksProfile.style.paddingLeft);
-            console.log('📱 [USEFUL LINKS DEBUG] Profile item min-height:', usefulLinksProfile.style.minHeight);
-            
             if (profileInfo) {
-                console.log('📱 [USEFUL LINKS DEBUG] Profile info current position:', window.getComputedStyle(profileInfo).position);
-                console.log('📱 [USEFUL LINKS DEBUG] Profile info current left:', window.getComputedStyle(profileInfo).left);
-                console.log('📱 [USEFUL LINKS DEBUG] Profile info current width:', window.getComputedStyle(profileInfo).width);
-                
                 // Keep text in normal flow but with proper positioning
                 profileInfo.style.setProperty('position', 'static', 'important');
                 profileInfo.style.setProperty('left', 'auto', 'important');
@@ -23300,17 +22951,9 @@ applyCustomizations(customizationData) {
                 profileInfo.style.setProperty('padding-left', '0', 'important');
                 profileInfo.style.setProperty('margin-left', '0', 'important');
                 profileInfo.style.setProperty('width', '100%', 'important');
-                
-                console.log('📱 [USEFUL LINKS DEBUG] Applied profile info styles');
-                console.log('📱 [USEFUL LINKS DEBUG] Profile info final position:', profileInfo.style.position);
-                console.log('📱 [USEFUL LINKS DEBUG] Profile info final width:', profileInfo.style.width);
             }
             
             if (toggle) {
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle current position:', window.getComputedStyle(toggle).position);
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle current left:', window.getComputedStyle(toggle).left);
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle current top:', window.getComputedStyle(toggle).top);
-                
                 // Pin toggle absolutely but ensure it doesn't interfere with content
                 toggle.style.setProperty('position', 'absolute', 'important');
                 toggle.style.setProperty('left', '8px', 'important');
@@ -23318,13 +22961,8 @@ applyCustomizations(customizationData) {
                 toggle.style.setProperty('transform', 'none', 'important');
                 toggle.style.setProperty('margin', '0', 'important');
                 toggle.style.setProperty('z-index', '5', 'important');
-                
-                console.log('📱 [USEFUL LINKS DEBUG] Applied toggle styles');
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle final position:', toggle.style.position);
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle final left:', toggle.style.left);
-                console.log('📱 [USEFUL LINKS DEBUG] Toggle final top:', toggle.style.top);
             }
-            console.log('📱 [USEFUL LINKS DEBUG] Fixed Useful Links layout to prevent text shift');
+            console.log('📱 [MOBILE SIZES] Fixed Useful Links layout to prevent text shift');
         }
         
         // Fix toggle width and prevent text sliding on mobile
@@ -23376,51 +23014,6 @@ applyCustomizations(customizationData) {
                     right: auto !important;
                     width: 100% !important;
                     margin-top: 8px !important;
-                }
-                /* AGGRESSIVE FIX: Prevent any text shifting in Useful Links */
-                .profile-item.has-dropdown {
-                    position: relative !important;
-                    display: block !important;
-                    padding-left: 50px !important;
-                    min-height: 40px !important;
-                    overflow: visible !important;
-                }
-                .profile-item.has-dropdown .profile-info {
-                    position: static !important;
-                    left: auto !important;
-                    right: auto !important;
-                    width: 100% !important;
-                    min-width: auto !important;
-                    max-width: none !important;
-                    flex: none !important;
-                    padding-left: 0 !important;
-                    margin-left: 0 !important;
-                    transform: none !important;
-                    transition: none !important;
-                }
-                .profile-item.has-dropdown .toggle-switch {
-                    position: absolute !important;
-                    left: 8px !important;
-                    top: 8px !important;
-                    z-index: 5 !important;
-                    transform: none !important;
-                    margin: 0 !important;
-                    width: 32px !important;
-                    height: 18px !important;
-                }
-                .profile-item.has-dropdown .toggle-switch .slider {
-                    width: 32px !important;
-                    height: 18px !important;
-                    position: relative !important;
-                    transform: none !important;
-                }
-                .profile-item.has-dropdown .toggle-switch .slider:before {
-                    width: 14px !important;
-                    height: 14px !important;
-                    transform: none !important;
-                }
-                .profile-item.has-dropdown .toggle-switch > input:checked + .slider:before {
-                    transform: translateX(14px) !important;
                 }
             }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
