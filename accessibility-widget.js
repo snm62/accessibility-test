@@ -4898,9 +4898,6 @@ body.align-right a {
             .profile-item.has-dropdown {
 
                 position: relative !important;
-                display: flex !important;
-                align-items: center !important;
-                gap: 12px !important;
 
             }
 
@@ -4910,17 +4907,7 @@ body.align-right a {
 
             .profile-item.has-dropdown .toggle-switch {
 
-                position: relative !important;
-
-                left: auto !important;
-
-                top: auto !important;
-
-                transform: none !important;
-
                 flex-shrink: 0 !important;
-
-                margin: 0 !important;
 
             }
 
