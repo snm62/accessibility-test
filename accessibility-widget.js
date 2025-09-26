@@ -21858,8 +21858,10 @@ applyCustomizations(customizationData) {
                 // Inject a tiny stylesheet to shrink the knob (:before)
                 const style = document.createElement('style');
                 style.textContent = `
-                    .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
-                    .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
+                    @media (max-width: 768px) {
+                        .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
+                        .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
+                    }
                 `;
                 this.shadowRoot?.appendChild(style);
                 console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
@@ -22068,8 +22070,10 @@ applyCustomizations(customizationData) {
         // Increase toggle width when ON to fit text properly and fix text sliding
         const style = document.createElement('style');
         style.textContent = `
-            .toggle-switch > input:checked + .slider { width: 100% !important; }
-            .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
+            @media (max-width: 768px) {
+                .toggle-switch > input:checked + .slider { width: 100% !important; }
+                .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
+            }
             .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
                 white-space: nowrap !important; 
