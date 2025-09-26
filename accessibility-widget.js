@@ -3425,7 +3425,7 @@ body.align-right a {
 
             .profile-info {
 
-                flex: 0 1 auto; /* Don't grow, can shrink, auto basis */
+                flex: 1;
 
                 min-width: 0; /* Allow flex item to shrink */
 
@@ -13568,8 +13568,8 @@ html body.big-white-cursor * {
 
             
 
-            // Insert dropdown after profile-info but before toggle to keep text visible
-            profileInfo.parentNode.insertBefore(dropdownContainer, profileInfo.nextSibling);
+            // Insert dropdown after the entire profile-item to avoid flex layout issues
+            usefulLinksModule.parentNode.insertBefore(dropdownContainer, usefulLinksModule.nextSibling);
 
             
 
