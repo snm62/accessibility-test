@@ -5036,6 +5036,16 @@ body.align-right a {
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 
                 transition: all 0.3s ease;
+                
+                position: static !important;
+                
+                left: auto !important;
+                
+                right: auto !important;
+                
+                top: auto !important;
+                
+                bottom: auto !important;
 
             }
 
@@ -13823,9 +13833,8 @@ html body.big-white-cursor * {
 
             
 
-            // Insert dropdown after profile-info
-
-            profileInfo.parentNode.insertBefore(dropdownContainer, profileInfo.nextSibling);
+            // Insert dropdown AFTER the profile-item, not inside it
+            usefulLinksModule.parentNode.insertBefore(dropdownContainer, usefulLinksModule.nextSibling);
 
             
 
@@ -23461,7 +23470,7 @@ applyCustomizations(customizationData) {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                         }
                         .toggle-switch > input:checked + .slider:before { 
-                            transform: translateX(20px) translateY(-50%) !important; 
+                            transform: translateX(20px) !important; 
                             background-color: #ffffff !important;
                             border: 1px solid #4f46e5 !important;
                         }
