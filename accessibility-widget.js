@@ -23329,6 +23329,27 @@ applyCustomizations(customizationData) {
                 const style = document.createElement('style');
                 style.textContent = `
                     @media (max-width: 768px) {
+                        /* Ensure the toggle wrapper has proper box and doesn't collapse */
+                        label.toggle-switch {
+                            display: inline-block !important;
+                            position: relative !important;
+                            width: 44px !important;
+                            height: 24px !important;
+                            vertical-align: middle !important;
+                        }
+
+                        /* Root cause fix: make the slider a real rounded track, not inheriting generic .slider styles */
+                        label.toggle-switch > .slider {
+                            display: block !important;
+                            position: relative !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            border-radius: 24px !important;
+                            overflow: hidden !important;
+                            box-sizing: border-box !important;
+                            background-clip: padding-box !important;
+                        }
+
                         .toggle-switch > input + .slider:before { 
                             width: 18px !important; 
                             height: 18px !important; 
@@ -23347,6 +23368,10 @@ applyCustomizations(customizationData) {
                         .toggle-switch .slider {
                             background-color: #e5e7eb !important;
                             border: 1px solid #d1d5db !important;
+                            height: 24px !important;
+                            border-radius: 24px !important;
+                            width: 44px !important;
+                            overflow: hidden !important;
                         }
                         .toggle-switch > input:checked + .slider {
                             background-color: #6366f1 !important;
