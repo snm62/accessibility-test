@@ -23336,6 +23336,14 @@ applyCustomizations(customizationData) {
                             width: 44px !important;
                             height: 24px !important;
                             vertical-align: middle !important;
+                            flex-shrink: 0 !important;
+                        }
+                        
+                        /* Align text and toggle horizontally */
+                        .profile-item {
+                            display: flex !important;
+                            align-items: center !important;
+                            gap: 8px !important;
                         }
 
                         /* Root cause fix: make the slider a real rounded track, not inheriting generic .slider styles */
@@ -23353,15 +23361,16 @@ applyCustomizations(customizationData) {
                         .toggle-switch > input + .slider:before { 
                             width: 18px !important; 
                             height: 18px !important; 
-                            top: 3px !important; 
+                            top: 50% !important; 
                             left: 3px !important; 
+                            transform: translateY(-50%) !important;
                             border-radius: 50% !important; 
                             background-color: #ffffff !important;
                             border: 1px solid #d1d5db !important;
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                         }
                         .toggle-switch > input:checked + .slider:before { 
-                            transform: translateX(20px) !important; 
+                            transform: translateX(20px) translateY(-50%) !important; 
                             background-color: #ffffff !important;
                             border: 1px solid #4f46e5 !important;
                         }
