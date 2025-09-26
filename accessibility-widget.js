@@ -3815,7 +3815,7 @@ body.align-right a {
 
                 top: 50%;
 
-                left: 12px;
+                left: 20px; /* Position relative to knob center */
 
                 transform: translateY(-50%)
 
@@ -3883,7 +3883,7 @@ body.align-right a {
 
                 left: auto;
 
-                right: 12px;
+                right: 20px; /* Position relative to knob center */
 
             }
 
@@ -13572,21 +13572,14 @@ html body.big-white-cursor * {
 
             
 
-            // Force block layout with inline styles to override any CSS
-
-            usefulLinksModule.style.display = 'block';
-
-            usefulLinksModule.style.flexDirection = 'unset';
-
-            usefulLinksModule.style.alignItems = 'unset';
-
-            usefulLinksModule.style.justifyContent = 'unset';
-
-            usefulLinksModule.style.flexWrap = 'unset';
-
-            usefulLinksModule.style.flexFlow = 'unset';
-
-            usefulLinksModule.style.flex = 'unset';
+            // Keep flexbox layout - don't override with block
+            // usefulLinksModule.style.display = 'block'; // REMOVED - this was breaking the layout
+            // usefulLinksModule.style.flexDirection = 'unset'; // REMOVED
+            // usefulLinksModule.style.alignItems = 'unset'; // REMOVED
+            // usefulLinksModule.style.justifyContent = 'unset'; // REMOVED
+            // usefulLinksModule.style.flexWrap = 'unset'; // REMOVED
+            // usefulLinksModule.style.flexFlow = 'unset'; // REMOVED
+            // usefulLinksModule.style.flex = 'unset'; // REMOVED
 
             
 
@@ -22054,16 +22047,16 @@ applyCustomizations(customizationData) {
             const profileInfo = usefulLinksProfile.querySelector('.profile-info');
             const toggle = usefulLinksProfile.querySelector('.toggle-switch');
             if (profileInfo) {
-                // Reduce left padding so text doesn't get pushed too far on mobile
-                profileInfo.style.setProperty('padding-left', '64px', 'important');
+                // Keep text in normal flow - don't add excessive padding
+                profileInfo.style.setProperty('padding-left', '0', 'important');
                 profileInfo.style.setProperty('min-width', '0', 'important');
                 profileInfo.style.setProperty('flex', '1', 'important');
             }
             if (toggle) {
-                // Keep toggle pinned so it doesn't affect text flow
-                toggle.style.setProperty('position', 'absolute', 'important');
-                toggle.style.setProperty('left', '12px', 'important');
-                toggle.style.setProperty('top', '12px', 'important');
+                // Keep toggle in normal flow - don't use absolute positioning
+                toggle.style.setProperty('position', 'relative', 'important');
+                toggle.style.setProperty('left', 'auto', 'important');
+                toggle.style.setProperty('top', 'auto', 'important');
                 toggle.style.setProperty('transform', 'none', 'important');
                 toggle.style.setProperty('margin', '0', 'important');
             }
@@ -22082,11 +22075,20 @@ applyCustomizations(customizationData) {
                 text-overflow: ellipsis !important; 
                 max-width: 100% !important; 
             }
-            /* Make ON text smaller on mobile to fit inside purple toggle area */
-            .toggle-switch > input:checked + .slider::after {
-                font-size: 8px !important;
-                font-weight: 600 !important;
-                line-height: 1 !important;
+            /* Hide ON/OFF text on mobile screens */
+            @media (max-width: 768px) {
+                .toggle-switch > input + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                .toggle-switch > input:checked + .slider::after {
+                    content: "" !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
             }
         `;
         this.shadowRoot?.appendChild(style);
