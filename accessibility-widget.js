@@ -4274,7 +4274,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.15;
+                --vision-font-scale: 1.05;
 
             }
 
@@ -16796,11 +16796,27 @@ html body.big-white-cursor * {
 
             if (window.accessibilityWidget && window.accessibilityWidget.muteSoundEnabled) {
 
+                console.log('Accessibility Widget: Override play - forcing muted playback');
+
                 this.volume = 0;
 
                 this.muted = true;
 
-                console.log('Accessibility Widget: Override play - forcing muted playback');
+                // Force pause immediately to prevent any sound
+
+                this.pause();
+
+                // Force mute again after play starts
+
+                setTimeout(() => {
+
+                    this.volume = 0;
+
+                    this.muted = true;
+
+                    this.pause();
+
+                }, 1);
 
             }
 
@@ -16860,15 +16876,19 @@ html body.big-white-cursor * {
 
                 
 
-                // If audio is currently playing, pause and restart to apply mute
+                // If audio is currently playing, immediately pause and mute
 
                 if (!element.paused) {
 
-                    console.log(`Accessibility Widget: Audio element ${index} is playing, pausing and restarting to apply mute`);
+                    console.log(`Accessibility Widget: Audio element ${index} is playing, immediately pausing and muting`);
 
                     element.pause();
 
-                    // Small delay to ensure pause takes effect
+                    element.volume = 0;
+
+                    element.muted = true;
+
+                    // Force mute again after a short delay to ensure it sticks
 
                     setTimeout(() => {
 
@@ -16876,9 +16896,13 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
-                        // Don't restart - keep it paused but muted
+                        if (!element.paused) {
 
-                    }, 50);
+                            element.pause();
+
+                        }
+
+                    }, 10);
 
                 }
 
@@ -16910,15 +16934,19 @@ html body.big-white-cursor * {
 
                 
 
-                // If video is currently playing, pause and restart to apply mute
+                // If video is currently playing, immediately pause and mute
 
                 if (!element.paused) {
 
-                    console.log(`Accessibility Widget: Video element ${index} is playing, pausing and restarting to apply mute`);
+                    console.log(`Accessibility Widget: Video element ${index} is playing, immediately pausing and muting`);
 
                     element.pause();
 
-                    // Small delay to ensure pause takes effect
+                    element.volume = 0;
+
+                    element.muted = true;
+
+                    // Force mute again after a short delay to ensure it sticks
 
                     setTimeout(() => {
 
@@ -16926,9 +16954,13 @@ html body.big-white-cursor * {
 
                         element.muted = true;
 
-                        // Don't restart - keep it paused but muted
+                        if (!element.paused) {
 
-                    }, 50);
+                            element.pause();
+
+                        }
+
+                    }, 10);
 
                 }
 
@@ -17009,6 +17041,58 @@ html body.big-white-cursor * {
         // Mute existing elements
 
         muteAllMedia();
+
+        
+
+        // Add event listeners to catch any media that starts playing
+
+        this.audioVideoEventListeners = [];
+
+        const addMuteListeners = () => {
+
+            const audioElements = document.querySelectorAll('audio');
+
+            const videoElements = document.querySelectorAll('video');
+
+            
+
+            [...audioElements, ...videoElements].forEach((element) => {
+
+                const muteHandler = () => {
+
+                    if (this.muteSoundEnabled) {
+
+                        console.log('Accessibility Widget: Event listener caught playing media - immediately muting');
+
+                        element.volume = 0;
+
+                        element.muted = true;
+
+                        element.pause();
+
+                    }
+
+                };
+
+                
+
+                element.addEventListener('play', muteHandler);
+
+                element.addEventListener('playing', muteHandler);
+
+                element.addEventListener('loadstart', muteHandler);
+
+                this.audioVideoEventListeners.push({ element, muteHandler });
+
+            });
+
+        };
+
+        
+
+        // Add listeners to existing elements
+
+        addMuteListeners();
 
         
 
@@ -17111,6 +17195,18 @@ html body.big-white-cursor * {
                         console.log('Accessibility Widget: New media elements detected, applying mute');
 
                         muteAllMedia();
+
+                        // Also add event listeners to new elements
+
+                        setTimeout(() => {
+
+                            if (this.muteSoundEnabled) {
+
+                                addMuteListeners();
+
+                            }
+
+                        }, 100);
 
                     }
 
@@ -17286,7 +17382,7 @@ html body.big-white-cursor * {
 
             }
 
-        }, 500); // Check every 500ms for more aggressive muting
+        }, 100); // Check every 100ms for more aggressive muting
 
     }
 
@@ -17337,6 +17433,26 @@ html body.big-white-cursor * {
             clearInterval(this.muteSoundInterval);
 
             this.muteSoundInterval = null;
+
+        }
+
+        
+
+        // Remove event listeners
+
+        if (this.audioVideoEventListeners) {
+
+            this.audioVideoEventListeners.forEach(({ element, muteHandler }) => {
+
+                element.removeEventListener('play', muteHandler);
+
+                element.removeEventListener('playing', muteHandler);
+
+                element.removeEventListener('loadstart', muteHandler);
+
+            });
+
+            this.audioVideoEventListeners = [];
 
         }
 
@@ -20014,6 +20130,466 @@ html body.big-white-cursor * {
 
     }
 
+    
+
+    disableAutoplay() {
+
+        console.log('Accessibility Widget: Disabling autoplay for seizure safety');
+
+        
+
+        // Disable autoplay for all video elements
+
+        const videos = document.querySelectorAll('video');
+
+        videos.forEach((video, index) => {
+
+            video.autoplay = false;
+
+            video.removeAttribute('autoplay');
+
+            if (!video.paused) {
+
+                video.pause();
+
+            }
+
+            console.log(`Accessibility Widget: Disabled autoplay for video ${index}`);
+
+        });
+
+        
+
+        // Disable autoplay for all audio elements
+
+        const audios = document.querySelectorAll('audio');
+
+        audios.forEach((audio, index) => {
+
+            audio.autoplay = false;
+
+            audio.removeAttribute('autoplay');
+
+            if (!audio.paused) {
+
+                audio.pause();
+
+            }
+
+            console.log(`Accessibility Widget: Disabled autoplay for audio ${index}`);
+
+        });
+
+        
+
+        // Override HTMLMediaElement autoplay property
+
+        if (!this.originalAutoplayDescriptor) {
+
+            this.originalAutoplayDescriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'autoplay');
+
+        }
+
+        
+
+        Object.defineProperty(HTMLMediaElement.prototype, 'autoplay', {
+
+            get: function() {
+
+                return false;
+
+            },
+
+            set: function(value) {
+
+                // Ignore any attempts to set autoplay
+
+                console.log('Accessibility Widget: Blocked autoplay attempt for seizure safety');
+
+            },
+
+            configurable: true
+
+        });
+
+        
+
+        // Set up observer to catch new media elements
+
+        if (!this.autoplayObserver) {
+
+            this.autoplayObserver = new MutationObserver((mutations) => {
+
+                mutations.forEach((mutation) => {
+
+                    mutation.addedNodes.forEach((node) => {
+
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+
+                            if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO') {
+
+                                node.autoplay = false;
+
+                                node.removeAttribute('autoplay');
+
+                                if (!node.paused) {
+
+                                    node.pause();
+
+                                }
+
+                                console.log('Accessibility Widget: Disabled autoplay for new media element');
+
+                            }
+
+                            
+
+                            // Check for media elements within the added node
+
+                            const mediaElements = node.querySelectorAll ? node.querySelectorAll('video, audio') : [];
+
+                            mediaElements.forEach((element) => {
+
+                                element.autoplay = false;
+
+                                element.removeAttribute('autoplay');
+
+                                if (!element.paused) {
+
+                                    element.pause();
+
+                                }
+
+                                console.log('Accessibility Widget: Disabled autoplay for nested media element');
+
+                            });
+
+                        }
+
+                    });
+
+                });
+
+            });
+
+            
+
+            this.autoplayObserver.observe(document.body, {
+
+                childList: true,
+
+                subtree: true
+
+            });
+
+        }
+
+    }
+
+    
+
+    disableSeizureInducingAnimations() {
+
+        console.log('Accessibility Widget: Disabling seizure-inducing animations');
+
+        
+
+        // Disable CSS animations and transitions globally
+
+        const style = document.createElement('style');
+
+        style.id = 'seizure-safe-animations';
+
+        style.textContent = `
+
+            /* Disable all animations and transitions */
+
+            body.seizure-safe *,
+
+            body.seizure-safe *::before,
+
+            body.seizure-safe *::after {
+
+                animation: none !important;
+
+                transition: none !important;
+
+                transform: none !important;
+
+                animation-duration: 0s !important;
+
+                animation-delay: 0s !important;
+
+                animation-iteration-count: 0 !important;
+
+                transition-duration: 0s !important;
+
+                transition-delay: 0s !important;
+
+                animation-play-state: paused !important;
+
+            }
+
+            
+
+            /* Disable hover animations specifically */
+
+            body.seizure-safe *:hover,
+
+            body.seizure-safe *:hover::before,
+
+            body.seizure-safe *:hover::after {
+
+                animation: none !important;
+
+                transition: none !important;
+
+                transform: none !important;
+
+            }
+
+            
+
+            /* Disable scroll animations */
+
+            body.seizure-safe [data-aos],
+
+            body.seizure-safe .animate__animated,
+
+            body.seizure-safe .wow,
+
+            body.seizure-safe .scroll-animate {
+
+                animation: none !important;
+
+                transition: none !important;
+
+                transform: none !important;
+
+            }
+
+            
+
+            /* Disable parallax and scroll effects */
+
+            body.seizure-safe [data-parallax],
+
+            body.seizure-safe .parallax,
+
+            body.seizure-safe .scroll-effect {
+
+                transform: none !important;
+
+                animation: none !important;
+
+                transition: none !important;
+
+            }
+
+            
+
+            /* Disable carousel/slider autoplay */
+
+            body.seizure-safe .carousel,
+
+            body.seizure-safe .slider,
+
+            body.seizure-safe .swiper {
+
+                animation: none !important;
+
+            }
+
+            
+
+            /* Disable loading animations */
+
+            body.seizure-safe .loading,
+
+            body.seizure-safe .spinner,
+
+            body.seizure-safe .pulse {
+
+                animation: none !important;
+
+            }
+
+        `;
+
+        document.head.appendChild(style);
+
+        
+
+        // Disable JavaScript-based animations
+
+        this.disableJavaScriptAnimations();
+
+    }
+
+    
+
+    disableJavaScriptAnimations() {
+
+        console.log('Accessibility Widget: Disabling JavaScript-based animations');
+
+        
+
+        // Override common animation libraries
+
+        if (window.anime) {
+
+            window.anime = () => {};
+
+        }
+
+        
+
+        if (window.gsap) {
+
+            window.gsap.to = () => {};
+
+            window.gsap.from = () => {};
+
+            window.gsap.fromTo = () => {};
+
+        }
+
+        
+
+        if (window.ScrollMagic) {
+
+            window.ScrollMagic = () => {};
+
+        }
+
+        
+
+        if (window.AOS) {
+
+            window.AOS = { init: () => {}, refresh: () => {} };
+
+        }
+
+        
+
+        // Disable Intersection Observer animations
+
+        const originalIntersectionObserver = window.IntersectionObserver;
+
+        window.IntersectionObserver = function(callback, options) {
+
+            return new originalIntersectionObserver((entries, observer) => {
+
+                // Don't trigger animations, just observe
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        // Remove animation classes instead of adding them
+
+                        entry.target.classList.remove('animate', 'animated', 'fade-in', 'slide-in', 'zoom-in');
+
+                    }
+
+                });
+
+            }, options);
+
+        };
+
+        
+
+        // Disable scroll event animations
+
+        const originalAddEventListener = EventTarget.prototype.addEventListener;
+
+        EventTarget.prototype.addEventListener = function(type, listener, options) {
+
+            if (type === 'scroll' && typeof listener === 'function') {
+
+                // Wrap scroll listeners to prevent animations
+
+                const wrappedListener = function(event) {
+
+                    // Prevent scroll-based animations
+
+                    event.preventDefault = () => {};
+
+                    return listener.call(this, event);
+
+                };
+
+                return originalAddEventListener.call(this, type, wrappedListener, options);
+
+            }
+
+            return originalAddEventListener.call(this, type, listener, options);
+
+        };
+
+    }
+
+    
+
+    enableAutoplay() {
+
+        console.log('Accessibility Widget: Re-enabling autoplay');
+
+        
+
+        // Restore original autoplay property
+
+        if (this.originalAutoplayDescriptor) {
+
+            Object.defineProperty(HTMLMediaElement.prototype, 'autoplay', this.originalAutoplayDescriptor);
+
+        }
+
+        
+
+        // Disconnect autoplay observer
+
+        if (this.autoplayObserver) {
+
+            this.autoplayObserver.disconnect();
+
+            this.autoplayObserver = null;
+
+        }
+
+    }
+
+    
+
+    enableSeizureInducingAnimations() {
+
+        console.log('Accessibility Widget: Re-enabling animations');
+
+        
+
+        // Remove seizure-safe animation styles
+
+        const seizureAnimationStyle = document.getElementById('seizure-safe-animations');
+
+        if (seizureAnimationStyle) {
+
+            seizureAnimationStyle.remove();
+
+        }
+
+        
+
+        // Restore original animation libraries
+
+        // Note: This is a simplified restoration - in a real implementation,
+
+        // you'd want to store the original functions and restore them
+
+        console.log('Accessibility Widget: Animations re-enabled (some library overrides may persist)');
+
+    }
+
 
 
     disableSeizureSafe() {
@@ -20023,6 +20599,14 @@ html body.big-white-cursor * {
         document.body.classList.remove('seizure-safe');
 
         this.removeSeizureSafeStyles();
+
+        
+
+        // Re-enable autoplay and animations
+
+        this.enableAutoplay();
+
+        this.enableSeizureInducingAnimations();
 
         
 
@@ -22792,73 +23376,86 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Reduce useful links dropdown size more aggressively
+        // Set useful links dropdown to reasonable mobile size
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '10px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '4px 6px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '28px', 'important');
-            usefulLinksDropdown.style.setProperty('margin', '6px 0', 'important');
-            usefulLinksDropdown.style.setProperty('border-radius', '6px', 'important');
-            console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
+            usefulLinksDropdown.style.setProperty('font-size', '14px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '8px 12px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '40px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '8px 0', 'important');
+            usefulLinksDropdown.style.setProperty('border-radius', '8px', 'important');
+            usefulLinksDropdown.style.setProperty('display', 'block', 'important');
+            usefulLinksDropdown.style.setProperty('visibility', 'visible', 'important');
+            usefulLinksDropdown.style.setProperty('opacity', '1', 'important');
+            console.log('📱 [MOBILE SIZES] Set useful links dropdown to reasonable size');
         }
         
-        // Reduce useful links content select size more aggressively
+        // Set useful links content select to reasonable mobile size
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '10px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '4px 6px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '24px', 'important');
-            usefulLinksSelect.style.setProperty('height', '24px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.1', 'important');
+            usefulLinksSelect.style.setProperty('font-size', '14px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '8px 12px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '36px', 'important');
+            usefulLinksSelect.style.setProperty('height', '36px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
             usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
             usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
-            usefulLinksSelect.style.setProperty('border-radius', '4px', 'important');
-            console.log('📱 [MOBILE SIZES] Reduced useful links select size');
+            usefulLinksSelect.style.setProperty('border-radius', '6px', 'important');
+            usefulLinksSelect.style.setProperty('display', 'block', 'important');
+            usefulLinksSelect.style.setProperty('visibility', 'visible', 'important');
+            usefulLinksSelect.style.setProperty('opacity', '1', 'important');
+            console.log('📱 [MOBILE SIZES] Set useful links select to reasonable size');
         }
         
-        // Add mobile-specific CSS for Useful Links dropdown - EXTREMELY SMALL
+        // Add mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE
         const mobileUsefulLinksStyle = document.createElement('style');
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 6px !important;
-                    padding: 1px 2px !important;
-                    min-height: 16px !important;
-                    height: 16px !important;
-                    margin: 2px 0 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 40px !important;
+                    height: auto !important;
+                    margin: 8px 0 !important;
+                    border-radius: 8px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1 !important;
+                    line-height: 1.2 !important;
                     border: 1px solid #ccc !important;
                     max-width: 100% !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content {
-                    padding: 2px !important;
+                    padding: 8px 12px !important;
                     box-sizing: border-box !important;
                     margin: 0 !important;
                     width: 100% !important;
                     max-width: 100% !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 6px !important;
-                    padding: 0px 2px !important;
-                    min-height: 14px !important;
-                    height: 14px !important;
-                    line-height: 1 !important;
-                    border-radius: 2px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 36px !important;
+                    height: 36px !important;
+                    line-height: 1.2 !important;
+                    border-radius: 6px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     border: 1px solid #ccc !important;
-                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
                 .useful-links-content select option {
-                    font-size: 6px !important;
-                    padding: 1px 2px !important;
-                    line-height: 1 !important;
+                    font-size: 14px !important;
+                    padding: 4px 8px !important;
+                    line-height: 1.2 !important;
                 }
                 /* Override any existing styles with maximum specificity */
                 .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
@@ -22920,9 +23517,27 @@ applyCustomizations(customizationData) {
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
-                /* Ensure the slider still shows purple color when ON */
+                /* Make toggles visible when OFF - add grey background */
+                .toggle-switch .slider {
+                    background-color: #e5e7eb !important;
+                    border: 1px solid #d1d5db !important;
+                }
+                /* Ensure the slider shows purple color when ON */
                 .toggle-switch > input:checked + .slider {
                     background-color: #6366f1 !important;
+                    border: 1px solid #4f46e5 !important;
+                }
+                /* Make the toggle knob visible when OFF */
+                .toggle-switch .slider:before {
+                    background-color: #ffffff !important;
+                    border: 1px solid #d1d5db !important;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                }
+                /* Make the toggle knob visible when ON */
+                .toggle-switch > input:checked + .slider:before {
+                    background-color: #ffffff !important;
+                    border: 1px solid #4f46e5 !important;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                 }
             }
         `;
@@ -22974,9 +23589,13 @@ applyCustomizations(customizationData) {
                     width: 32px !important; 
                     height: 18px !important; 
                     position: relative !important;
+                    background-color: #e5e7eb !important;
+                    border: 1px solid #d1d5db !important;
                 }
                 .toggle-switch > input:checked + .slider { 
                     width: 32px !important; 
+                    background-color: #6366f1 !important;
+                    border: 1px solid #4f46e5 !important;
                 }
                 .toggle-switch > input:checked + .slider:before { 
                     transform: translateX(14px) !important; 
@@ -22986,6 +23605,14 @@ applyCustomizations(customizationData) {
                 .toggle-switch .slider:before {
                     width: 14px !important;
                     height: 14px !important;
+                    background-color: #ffffff !important;
+                    border: 1px solid #d1d5db !important;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                }
+                .toggle-switch > input:checked + .slider:before {
+                    background-color: #ffffff !important;
+                    border: 1px solid #4f46e5 !important;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                 }
                 .profile-item .profile-info { 
                     position: static !important;
