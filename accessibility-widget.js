@@ -1290,11 +1290,16 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@77b2db8/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@17fc873/accessibility-widget.css';
             // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
+                
+                // Apply shape fixes after external CSS loads to override any conflicts
+                setTimeout(() => {
+                    this.applyShapeOverrides();
+                }, 100);
 
             };
 
@@ -2479,7 +2484,41 @@ body.align-right a {
 
     }
 
-
+    applyShapeOverrides() {
+        console.log('🔧 [SHAPE OVERRIDES] Applying shape overrides after external CSS load');
+        
+        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+        if (icon && this.customizationData?.triggerButtonShape) {
+            const shape = this.customizationData.triggerButtonShape;
+            console.log('🔧 [SHAPE OVERRIDES] Re-applying shape:', shape);
+            
+            // Re-apply the shape with maximum specificity
+            if (shape === 'Rounded') {
+                icon.style.setProperty('border-radius', '25px', 'important');
+                icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                console.log('🔧 [SHAPE OVERRIDES] Applied Rounded shape overrides');
+            } else if (shape === 'Circle') {
+                icon.style.setProperty('border-radius', '50%', 'important');
+                icon.style.setProperty('-webkit-border-radius', '50%', 'important');
+                icon.style.setProperty('-moz-border-radius', '50%', 'important');
+                console.log('🔧 [SHAPE OVERRIDES] Applied Circle shape overrides');
+            } else if (shape === 'Square') {
+                icon.style.setProperty('border-radius', '0px', 'important');
+                icon.style.setProperty('-webkit-border-radius', '0px', 'important');
+                icon.style.setProperty('-moz-border-radius', '0px', 'important');
+                console.log('🔧 [SHAPE OVERRIDES] Applied Square shape overrides');
+            }
+            
+            // Verify the shape was applied
+            const computedStyle = window.getComputedStyle(icon).borderRadius;
+            console.log('🔧 [SHAPE OVERRIDES] Final computed border-radius:', computedStyle);
+        }
+    }
 
     createWidget() {
 
@@ -2779,6 +2818,26 @@ body.align-right a {
         
         /* Force rounded shape with absolute maximum specificity - target shadow DOM */
         .accessibility-icon.rounded[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* ULTRA-AGGRESSIVE OVERRIDE - Override any external CSS */
+        .accessibility-icon[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+            border-top-left-radius: 25px !important;
+            border-top-right-radius: 25px !important;
+            border-bottom-left-radius: 25px !important;
+            border-bottom-right-radius: 25px !important;
+        }
+        
+        /* Override any universal selectors that might be forcing 50% */
+        * .accessibility-icon[data-shape="rounded"],
+        body .accessibility-icon[data-shape="rounded"],
+        html .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
@@ -23349,9 +23408,19 @@ applyCustomizations(customizationData) {
                         /* Special handling for dropdown items to prevent layout conflicts */
                         .profile-item.has-dropdown {
                             position: relative !important;
-                            display: block !important;
+                            display: flex !important;
+                            align-items: center !important;
                             padding-left: 60px !important;
                             min-height: 50px !important;
+                        }
+                        
+                        /* Override any external CSS that might conflict */
+                        .accessibility-panel .profile-item.has-dropdown,
+                        .accessibility-widget .profile-item.has-dropdown,
+                        #accessibility-panel .profile-item.has-dropdown {
+                            display: flex !important;
+                            align-items: center !important;
+                            position: relative !important;
                         }
                         .profile-item.has-dropdown .profile-info {
                             position: static !important;
@@ -23392,7 +23461,7 @@ applyCustomizations(customizationData) {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                         }
                         .toggle-switch > input:checked + .slider:before { 
-                            transform: translateX(20px) !important; 
+                            transform: translateX(20px) translateY(-50%) !important; 
                             background-color: #ffffff !important;
                             border: 1px solid #4f46e5 !important;
                         }
@@ -23786,7 +23855,8 @@ applyCustomizations(customizationData) {
                 /* Prevent any text shifting */
                 .profile-item.has-dropdown {
                     position: relative !important;
-                    display: block !important;
+                    display: flex !important;
+                    align-items: center !important;
                     padding-left: 50px !important;
                     min-height: 40px !important;
                 }
