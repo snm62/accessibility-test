@@ -3817,7 +3817,7 @@ body.align-right a {
 
                 left: 20px; /* Position relative to knob center */
 
-                transform: translateY(-50%)
+                transform: translateY(-50%) translateX(-50%);
 
                 font-size: 12px;
 
@@ -3884,6 +3884,8 @@ body.align-right a {
                 left: auto;
 
                 right: 20px; /* Position relative to knob center */
+                
+                transform: translateY(-50%) translateX(50%);
 
             }
 
