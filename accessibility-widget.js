@@ -1827,7 +1827,7 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(7px) !important;
+        transform: translateX(26px) !important;
     }
     
     /* Medium profile items for medium mobile screens */
@@ -2204,7 +2204,7 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(8px) !important;
+        transform: translateX(26px) !important;
     }
 }
 
@@ -2290,7 +2290,7 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(26px) !important;
     }
 }
 
@@ -2395,7 +2395,7 @@ if (window.innerWidth <= 768) {
     }
     
     .toggle-switch input:checked + .slider:before {
-        transform: translateX(4px) !important;
+        transform: translateX(26px) !important;
     }
 }
 
@@ -4949,10 +4949,6 @@ body.align-right a {
                 width: 100%;
 
                 display: block;
-
-                flex-basis: 100%;
-
-                order: 1;
 
                 background: #f8fafc;
 
@@ -21860,7 +21856,6 @@ applyCustomizations(customizationData) {
                 style.textContent = `
                     @media (max-width: 768px) {
                         .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
-                        .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
                     }
                 `;
                 this.shadowRoot?.appendChild(style);
@@ -22072,7 +22067,6 @@ applyCustomizations(customizationData) {
         style.textContent = `
             @media (max-width: 768px) {
                 .toggle-switch > input:checked + .slider { width: 100% !important; }
-                .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
             }
             .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
@@ -22081,6 +22075,11 @@ applyCustomizations(customizationData) {
                 text-overflow: ellipsis !important; 
                 max-width: 100% !important; 
             }
+            /* Ensure useful links toggle works correctly */
+            #useful-links:checked + .slider:before {
+                transform: translateX(26px) !important;
+            }
+            
             /* Hide ON/OFF text on mobile screens */
             @media (max-width: 768px) {
                 .toggle-switch > input + .slider::after {
