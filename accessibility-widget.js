@@ -23339,11 +23339,33 @@ applyCustomizations(customizationData) {
                             flex-shrink: 0 !important;
                         }
                         
-                        /* Align text and toggle horizontally - but not for has-dropdown items */
-                        .profile-item:not(.has-dropdown) {
+                        /* Align text and toggle horizontally for all profile items */
+                        .profile-item {
                             display: flex !important;
                             align-items: center !important;
                             gap: 8px !important;
+                        }
+                        
+                        /* Special handling for dropdown items to prevent layout conflicts */
+                        .profile-item.has-dropdown {
+                            position: relative !important;
+                            display: block !important;
+                            padding-left: 60px !important;
+                            min-height: 50px !important;
+                        }
+                        .profile-item.has-dropdown .profile-info {
+                            position: static !important;
+                            width: 100% !important;
+                            padding-left: 0 !important;
+                            margin-left: 0 !important;
+                        }
+                        .profile-item.has-dropdown .toggle-switch {
+                            position: absolute !important;
+                            left: 15px !important;
+                            top: 50% !important;
+                            transform: translateY(-50%) !important;
+                            width: 44px !important;
+                            height: 24px !important;
                         }
 
                         /* Root cause fix: make the slider a real rounded track, not inheriting generic .slider styles */
@@ -23370,7 +23392,7 @@ applyCustomizations(customizationData) {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                         }
                         .toggle-switch > input:checked + .slider:before { 
-                            transform: translateX(20px) translateY(-50%) !important; 
+                            transform: translateX(20px) !important; 
                             background-color: #ffffff !important;
                             border: 1px solid #4f46e5 !important;
                         }
@@ -23539,42 +23561,34 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Set useful links dropdown to reasonable mobile size
+        // Remove conflicting inline styles for useful links dropdown
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '16px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '12px 16px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '50px', 'important');
-            usefulLinksDropdown.style.setProperty('margin', '12px 0', 'important');
-            usefulLinksDropdown.style.setProperty('border-radius', '8px', 'important');
-            usefulLinksDropdown.style.setProperty('border', '2px solid #e2e8f0', 'important');
-            usefulLinksDropdown.style.setProperty('background', '#f8fafc', 'important');
-            usefulLinksDropdown.style.setProperty('box-shadow', '0 2px 6px rgba(0, 0, 0, 0.06)', 'important');
-            usefulLinksDropdown.style.setProperty('display', 'block', 'important');
-            usefulLinksDropdown.style.setProperty('visibility', 'visible', 'important');
-            usefulLinksDropdown.style.setProperty('opacity', '1', 'important');
-            console.log('📱 [MOBILE SIZES] Set useful links dropdown to reasonable size');
+            usefulLinksDropdown.style.removeProperty('font-size');
+            usefulLinksDropdown.style.removeProperty('padding');
+            usefulLinksDropdown.style.removeProperty('min-height');
+            usefulLinksDropdown.style.removeProperty('margin');
+            usefulLinksDropdown.style.removeProperty('border-radius');
+            usefulLinksDropdown.style.removeProperty('border');
+            usefulLinksDropdown.style.removeProperty('background');
+            usefulLinksDropdown.style.removeProperty('box-shadow');
+            console.log('📱 [MOBILE SIZES] Removed conflicting inline styles for useful links dropdown');
         }
         
-        // Set useful links content select to reasonable mobile size
+        // Remove conflicting inline styles for useful links select
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '16px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '10px 14px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '44px', 'important');
-            usefulLinksSelect.style.setProperty('height', '44px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.3', 'important');
-            usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
-            usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
-            usefulLinksSelect.style.setProperty('border-radius', '6px', 'important');
-            usefulLinksSelect.style.setProperty('border', '2px solid #d1d5db', 'important');
-            usefulLinksSelect.style.setProperty('background', 'white', 'important');
-            usefulLinksSelect.style.setProperty('color', '#374151', 'important');
-            usefulLinksSelect.style.setProperty('font-weight', '500', 'important');
-            usefulLinksSelect.style.setProperty('display', 'block', 'important');
-            usefulLinksSelect.style.setProperty('visibility', 'visible', 'important');
-            usefulLinksSelect.style.setProperty('opacity', '1', 'important');
-            console.log('📱 [MOBILE SIZES] Set useful links select to reasonable size');
+            usefulLinksSelect.style.removeProperty('font-size');
+            usefulLinksSelect.style.removeProperty('padding');
+            usefulLinksSelect.style.removeProperty('min-height');
+            usefulLinksSelect.style.removeProperty('height');
+            usefulLinksSelect.style.removeProperty('line-height');
+            usefulLinksSelect.style.removeProperty('border-radius');
+            usefulLinksSelect.style.removeProperty('border');
+            usefulLinksSelect.style.removeProperty('background');
+            usefulLinksSelect.style.removeProperty('color');
+            usefulLinksSelect.style.removeProperty('font-weight');
+            console.log('📱 [MOBILE SIZES] Removed conflicting inline styles for useful links select');
         }
         
         // Add mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE
@@ -23582,15 +23596,15 @@ applyCustomizations(customizationData) {
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 36px !important;
+                    font-size: 12px !important;
+                    padding: 6px 10px !important;
+                    min-height: 28px !important;
                     height: auto !important;
-                    margin: 8px 0 !important;
-                    border-radius: 6px !important;
+                    margin: 6px 0 !important;
+                    border-radius: 4px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.2 !important;
+                    line-height: 1.1 !important;
                     border: 1px solid #d1d5db !important;
                     background: #f9fafb !important;
                     max-width: 100% !important;
@@ -23609,12 +23623,12 @@ applyCustomizations(customizationData) {
                     opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 14px !important;
-                    padding: 6px 10px !important;
-                    min-height: 32px !important;
-                    height: 32px !important;
-                    line-height: 1.2 !important;
-                    border-radius: 4px !important;
+                    font-size: 12px !important;
+                    padding: 4px 8px !important;
+                    min-height: 24px !important;
+                    height: 24px !important;
+                    line-height: 1.1 !important;
+                    border-radius: 3px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
@@ -23627,32 +23641,12 @@ applyCustomizations(customizationData) {
                     font-weight: 400 !important;
                 }
                 .useful-links-content select option {
-                    font-size: 14px !important;
-                    padding: 6px 10px !important;
-                    line-height: 1.2 !important;
+                    font-size: 12px !important;
+                    padding: 4px 8px !important;
+                    line-height: 1.1 !important;
                     font-weight: 400 !important;
                 }
                 
-                /* Clean layout for Useful Links on mobile */
-                .profile-item.has-dropdown {
-                    position: relative !important;
-                    display: block !important;
-                    padding-left: 60px !important;
-                    min-height: 50px !important;
-                }
-                .profile-item.has-dropdown .profile-info {
-                    position: static !important;
-                    width: 100% !important;
-                    padding-left: 0 !important;
-                    margin-left: 0 !important;
-                }
-                .profile-item.has-dropdown .toggle-switch {
-                    position: absolute !important;
-                    left: 10px !important;
-                    top: 10px !important;
-                    width: 44px !important;
-                    height: 24px !important;
-                }
             }
         `;
         this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
