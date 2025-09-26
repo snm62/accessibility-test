@@ -3,7 +3,6 @@ constructor() {
 
         this.settings = {};
 
-
         this.contentScale = 100; // Start at 100% (normal size)
 
         this.fontSize = 100;
@@ -1290,16 +1289,11 @@ if (window.innerWidth <= 768) {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@17fc873/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@77b2db8/accessibility-widget.css';
             // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
                 console.log('Accessibility Widget: CSS loaded successfully');
-                
-                // Apply shape fixes after external CSS loads to override any conflicts
-                setTimeout(() => {
-                    this.applyShapeOverrides();
-                }, 100);
 
             };
 
@@ -2484,41 +2478,7 @@ body.align-right a {
 
     }
 
-    applyShapeOverrides() {
-        console.log('🔧 [SHAPE OVERRIDES] Applying shape overrides after external CSS load');
-        
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        if (icon && this.customizationData?.triggerButtonShape) {
-            const shape = this.customizationData.triggerButtonShape;
-            console.log('🔧 [SHAPE OVERRIDES] Re-applying shape:', shape);
-            
-            // Re-apply the shape with maximum specificity
-            if (shape === 'Rounded') {
-                icon.style.setProperty('border-radius', '25px', 'important');
-                icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
-                console.log('🔧 [SHAPE OVERRIDES] Applied Rounded shape overrides');
-            } else if (shape === 'Circle') {
-                icon.style.setProperty('border-radius', '50%', 'important');
-                icon.style.setProperty('-webkit-border-radius', '50%', 'important');
-                icon.style.setProperty('-moz-border-radius', '50%', 'important');
-                console.log('🔧 [SHAPE OVERRIDES] Applied Circle shape overrides');
-            } else if (shape === 'Square') {
-                icon.style.setProperty('border-radius', '0px', 'important');
-                icon.style.setProperty('-webkit-border-radius', '0px', 'important');
-                icon.style.setProperty('-moz-border-radius', '0px', 'important');
-                console.log('🔧 [SHAPE OVERRIDES] Applied Square shape overrides');
-            }
-            
-            // Verify the shape was applied
-            const computedStyle = window.getComputedStyle(icon).borderRadius;
-            console.log('🔧 [SHAPE OVERRIDES] Final computed border-radius:', computedStyle);
-        }
-    }
+
 
     createWidget() {
 
@@ -2795,49 +2755,61 @@ body.align-right a {
             -moz-border-radius: 0px !important;
         }
         
-        /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE - SIMPLIFIED AND MORE EFFECTIVE */
-        .accessibility-icon[data-shape="rounded"],
+        /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE */
         .accessibility-icon.rounded,
+        .accessibility-icon[data-shape="rounded"],
         .accessibility-icon.rounded[data-shape="rounded"],
         .accessibility-icon[data-shape="rounded"].rounded {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
-            border-top-left-radius: 25px !important;
-            border-top-right-radius: 25px !important;
-            border-bottom-left-radius: 25px !important;
-            border-bottom-right-radius: 25px !important;
         }
         
-        /* Override any external CSS with maximum force - target all possible selectors */
-        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]):not([data-shape="square"]) {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Force rounded shape with absolute maximum specificity - target shadow DOM */
+        /* Force rounded shape with absolute maximum specificity */
         .accessibility-icon.rounded[data-shape="rounded"] {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
         }
         
-        /* ULTRA-AGGRESSIVE OVERRIDE - Override any external CSS */
+        /* Override any external CSS that might be forcing circle shape */
+        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Force rounded shape with absolute maximum specificity */
+        .accessibility-icon.rounded,
         .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
-            border-top-left-radius: 25px !important;
-            border-top-right-radius: 25px !important;
-            border-bottom-left-radius: 25px !important;
-            border-bottom-right-radius: 25px !important;
         }
         
-        /* Override any universal selectors that might be forcing 50% */
-        * .accessibility-icon[data-shape="rounded"],
-        body .accessibility-icon[data-shape="rounded"],
-        html .accessibility-icon[data-shape="rounded"] {
+        /* Override any external CSS that might be forcing circle shape */
+        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Maximum specificity override for rounded shape */
+        .accessibility-icon.rounded[data-shape="rounded"] {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Force rounded shape with absolute maximum specificity */
+        .accessibility-icon[data-shape="rounded"].rounded {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Override any external CSS with maximum force */
+        .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
@@ -2970,7 +2942,7 @@ body.align-right a {
             /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
 
             .accessibility-icon:focus {
-
+                
                 
             }
 
@@ -3023,7 +2995,7 @@ body.align-right a {
 
             .toggle-switch input:focus + .slider {
 
-                 /* Removed conflicting outline: none */
+                 outline: none !important;
             }
             
             /* Override for accessibility icon to show focus when keyboard navigation is active */
@@ -3045,14 +3017,14 @@ body.align-right a {
 
             .profile-item:focus-within {
 
-                /* Removed conflicting outline: none */
+                outline: none !important;
             }
 
 
 
             .profile-item:focus {
 
-               
+               outline: none !important;
             }
 
 
@@ -3085,15 +3057,17 @@ body.align-right a {
 
             /* Focus indicators for keyboard navigation */
 
+            .accessibility-icon:focus,
+
             .accessibility-panel button:focus,
 
             .accessibility-panel input:focus,
 
             .accessibility-panel label:focus {
 
-                /* Removed conflicting outline: none */
-                /* Removed conflicting outline-offset */
-                /* Removed conflicting box-shadow: none */
+                
+                outline-offset: 0px !important;
+                box-shadow: none !important;
 
             }
 
@@ -3120,25 +3094,6 @@ body.align-right a {
                 background: rgba(99, 102, 241, 0.1) !important;
                 border-radius: 4px !important;
                 transition: outline 0.2s ease, background 0.2s ease !important;
-            }
-            
-            /* Mobile-specific focus outline rules */
-            @media (max-width: 768px) {
-                .accessibility-panel button:focus,
-                .accessibility-panel input:focus,
-                .accessibility-panel select:focus,
-                .accessibility-panel label:focus,
-                .accessibility-panel .toggle-switch:focus,
-                .accessibility-panel .profile-item:focus,
-                .accessibility-icon:focus,
-                #accessibility-icon:focus {
-                    outline: 3px solid #6366f1 !important;
-                    outline-offset: 2px !important;
-                    background: rgba(99, 102, 241, 0.1) !important;
-                    border-radius: 4px !important;
-                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
-                    transition: outline 0.2s ease, background 0.2s ease !important;
-                }
             }
 
             /* High contrast focus for better visibility */
@@ -3349,7 +3304,7 @@ body.align-right a {
                 justify-content: center !important;
                 box-sizing: border-box !important;
                 margin: 0 !important;
-                /* Removed conflicting outline: none */
+                outline: none !important;
 
             }
 
@@ -3862,7 +3817,7 @@ body.align-right a {
 
                 left: 12px;
 
-                transform: translateY(-50%);
+                transform: translateY(-50%)
 
                 font-size: 12px;
 
@@ -4211,52 +4166,19 @@ body.align-right a {
 
 
             .language-option.selected,
-            .language-option[aria-selected="true"],
-            .language-option[data-selected="true"] {
+            .language-option[aria-selected="true"] {
+
                 background: #6366f1 !important;
+
                 color: #ffffff !important;
-                border: 2px solid #4f46e5 !important;
-                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
-                position: relative !important;
-                z-index: 10 !important;
+
             }
 
             .language-option.selected:hover,
-            .language-option[aria-selected="true"]:hover,
-            .language-option[data-selected="true"]:hover {
-                background: #4f46e5 !important;
-                border: 2px solid #3730a3 !important;
-                box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3) !important;
-            }
-            
-            /* Ultra-specific rules to override any external CSS */
-            .accessibility-panel .language-option.selected,
-            .accessibility-panel .language-option[aria-selected="true"],
-            .accessibility-panel .language-option[data-selected="true"] {
-                background: #6366f1 !important;
-                color: #ffffff !important;
-                border: 2px solid #4f46e5 !important;
-                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
-                position: relative !important;
-                z-index: 10 !important;
-            }
-            
-            /* Even more specific rules for maximum override */
-            .accessibility-panel #language-dropdown .language-option.selected,
-            .accessibility-panel #language-dropdown .language-option[aria-selected="true"],
-            .accessibility-panel #language-dropdown .language-option[data-selected="true"] {
-                background: #6366f1 !important;
-                color: #ffffff !important;
-                border: 2px solid #4f46e5 !important;
-                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
-                position: relative !important;
-                z-index: 10 !important;
-            }
+            .language-option[aria-selected="true"]:hover {
 
-            /* Also support highlighting via span classes (fallback the user asked for) */
-            .language-option .language-name.selected,
-            .language-option .flag.selected {
-                color: #ffffff !important;
+                background: #4f46e5 !important;
+
             }
 
 
@@ -4317,7 +4239,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.05;
+                --vision-font-scale: 1.15;
 
             }
 
@@ -4974,6 +4896,9 @@ body.align-right a {
             .profile-item.has-dropdown {
 
                 position: relative !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
 
             }
 
@@ -4983,11 +4908,11 @@ body.align-right a {
 
             .profile-item.has-dropdown .toggle-switch {
 
-                position: absolute !important;
+                position: relative !important;
 
-                left: 20px !important;
+                left: auto !important;
 
-                top: 20px !important;
+                top: auto !important;
 
                 transform: none !important;
 
@@ -5001,11 +4926,11 @@ body.align-right a {
 
             .profile-item.has-dropdown .profile-info {
 
-                display: block !important;
-
-                padding-left: 100px !important;
-
-                margin-bottom: 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                flex: 1 !important;
+                padding-left: 0 !important;
+                margin-bottom: 0 !important;
 
             }
 
@@ -5036,16 +4961,6 @@ body.align-right a {
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 
                 transition: all 0.3s ease;
-                
-                position: static !important;
-                
-                left: auto !important;
-                
-                right: auto !important;
-                
-                top: auto !important;
-                
-                bottom: auto !important;
 
             }
 
@@ -8450,14 +8365,9 @@ html body.big-white-cursor * {
 
             
 
-            // Mark current language as selected - call immediately and after delay
-            console.log('🎯 [LANGUAGE SELECTION] Calling updateSelectedLanguage() immediately');
-            this.updateSelectedLanguage();
-
+            // Mark current language as selected
             setTimeout(() => {
-                console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage() from showLanguageDropdown (delayed)');
             this.updateSelectedLanguage();
-                console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed from showLanguageDropdown (delayed)');
             }, 100);
 
             // Announce to screen reader
@@ -8500,10 +8410,6 @@ html body.big-white-cursor * {
 
         const languageOptions = this.shadowRoot.querySelectorAll('.language-option');
         console.log('🎯 [LANGUAGE SELECTION] Found language options:', languageOptions.length);
-        
-        // Debug: Check if dropdown is visible
-        const dropdown = this.shadowRoot.getElementById('language-dropdown');
-        console.log('🎯 [LANGUAGE SELECTION] Dropdown visible:', dropdown ? dropdown.style.display !== 'none' : 'dropdown not found');
 
         // Normalize language value to a two-letter code used in data-lang
         const normalizeLang = (lang) => {
@@ -8535,11 +8441,6 @@ html body.big-white-cursor * {
             // clear any inline fallback styles
             option.style.background = '';
             option.style.color = '';
-            // clear span-level fallback marking
-            const nameEl = option.querySelector('.language-name');
-            const flagEl = option.querySelector('.flag');
-            if (nameEl) nameEl.classList.remove('selected');
-            if (flagEl) flagEl.classList.remove('selected');
 
             // apply selected state
             if (normalizeLang(option.dataset.lang) === normalizedCurrent) {
@@ -8547,33 +8448,11 @@ html body.big-white-cursor * {
                 option.classList.add('selected');
                 option.setAttribute('aria-selected', 'true');
                 option.setAttribute('data-selected', 'true');
-                
-                // Ultra-aggressive inline styles to guarantee visibility over external CSS
-                option.style.setProperty('background', '#6366f1', 'important');
-                option.style.setProperty('color', '#ffffff', 'important');
-                option.style.setProperty('border', '2px solid #4f46e5', 'important');
-                option.style.setProperty('box-shadow', '0 0 0 2px rgba(99, 102, 241, 0.3)', 'important');
-                option.style.setProperty('position', 'relative', 'important');
-                option.style.setProperty('z-index', '10', 'important');
-                
-                // Also set direct style properties as backup
+                // Fallback inline styles to guarantee visibility over external CSS
                 option.style.background = '#6366f1';
                 option.style.color = '#ffffff';
-                option.style.border = '2px solid #4f46e5';
-                option.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.3)';
-                option.style.position = 'relative';
-                option.style.zIndex = '10';
-
-                // Also add span-level class so UI can style via span.selected if needed
-                if (nameEl) nameEl.classList.add('selected');
-                if (flagEl) flagEl.classList.add('selected');
-                
                 console.log('🎯 [LANGUAGE SELECTION] Option classes after setting:', option.className);
                 console.log('🎯 [LANGUAGE SELECTION] Option aria-selected:', option.getAttribute('aria-selected'));
-                console.log('🎯 [LANGUAGE SELECTION] Option inline background:', option.style.background);
-                console.log('🎯 [LANGUAGE SELECTION] Option inline color:', option.style.color);
-                console.log('🎯 [LANGUAGE SELECTION] Option computed background:', window.getComputedStyle(option).background);
-                console.log('🎯 [LANGUAGE SELECTION] Option computed color:', window.getComputedStyle(option).color);
             } else {
                 console.log('🎯 [LANGUAGE SELECTION] Option not selected:', option.dataset.lang);
             }
@@ -13687,56 +13566,6 @@ html body.big-white-cursor * {
 
             
 
-            // Fix layout positioning for mobile
-
-            if (window.innerWidth <= 768) {
-
-                // Ensure profile item has proper spacing for toggle
-
-                usefulLinksModule.style.paddingLeft = '50px';
-
-                usefulLinksModule.style.minHeight = '40px';
-
-                usefulLinksModule.style.position = 'relative';
-
-                
-
-                // Ensure profile info stays in place
-
-                if (profileInfo) {
-
-                    profileInfo.style.position = 'static';
-
-                    profileInfo.style.left = 'auto';
-
-                    profileInfo.style.right = 'auto';
-
-                    profileInfo.style.width = '100%';
-
-                }
-
-                
-
-                // Ensure toggle is positioned correctly
-
-                if (toggleSwitch) {
-
-                    toggleSwitch.style.position = 'absolute';
-
-                    toggleSwitch.style.left = '8px';
-
-                    toggleSwitch.style.top = '8px';
-
-                    toggleSwitch.style.zIndex = '5';
-
-                }
-
-                console.log('Accessibility Widget: Applied mobile layout fixes');
-
-            }
-
-            
-
             // Add class to profile-item to indicate dropdown is present
 
             usefulLinksModule.classList.add('has-dropdown');
@@ -13755,86 +13584,20 @@ html body.big-white-cursor * {
 
             usefulLinksModule.style.flexWrap = 'unset';
 
-            
-
-            // Ensure dropdown content is positioned correctly on mobile
-
-            if (window.innerWidth <= 768) {
-
-                dropdownContainer.style.position = 'static';
-
-                dropdownContainer.style.left = 'auto';
-
-                dropdownContainer.style.right = 'auto';
-
-                dropdownContainer.style.width = '100%';
-
-                dropdownContainer.style.marginTop = '8px';
-
-                dropdownContainer.style.marginLeft = '0';
-
-                dropdownContainer.style.marginRight = '0';
-
-                
-
-                // Force extremely small size with inline styles
-
-                dropdownContainer.style.fontSize = '6px';
-
-                dropdownContainer.style.padding = '1px 2px';
-
-                dropdownContainer.style.minHeight = '16px';
-
-                dropdownContainer.style.height = '16px';
-
-                dropdownContainer.style.lineHeight = '1';
-
-                dropdownContainer.style.borderRadius = '2px';
-
-                
-
-                // Also style the select element inside
-
-                const selectElement = dropdownContainer.querySelector('select');
-
-                if (selectElement) {
-
-                    selectElement.style.fontSize = '6px';
-
-                    selectElement.style.padding = '0px 2px';
-
-                    selectElement.style.minHeight = '14px';
-
-                    selectElement.style.height = '14px';
-
-                    selectElement.style.lineHeight = '1';
-
-                    selectElement.style.borderRadius = '2px';
-
-                    selectElement.style.border = '1px solid #ccc';
-
-                }
-
-                
-
-                console.log('Accessibility Widget: Applied mobile positioning and EXTREMELY SMALL size to dropdown');
-
-            }
-
             usefulLinksModule.style.flexFlow = 'unset';
 
             usefulLinksModule.style.flex = 'unset';
 
             
 
-            // Move toggle inside profile-info to keep them together
-
-            profileInfo.appendChild(toggleSwitch);
+            // Keep toggle in its original position - don't move it
+            // profileInfo.appendChild(toggleSwitch); // REMOVED - this was causing positioning issues
 
             
 
-            // Insert dropdown AFTER the profile-item, not inside it
-            usefulLinksModule.parentNode.insertBefore(dropdownContainer, usefulLinksModule.nextSibling);
+            // Insert dropdown after profile-info
+
+            profileInfo.parentNode.insertBefore(dropdownContainer, profileInfo.nextSibling);
 
             
 
@@ -14541,28 +14304,23 @@ html body.big-white-cursor * {
 
             
 
-            // Apply to interactive elements (both inside and outside the panel)
+            // Apply to interactive elements not inside the panel (allow the icon itself)
 
-            if (isInteractiveElement) {
+            if (!activeElement.closest('.accessibility-panel') && 
 
-                console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
-                console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
+                isInteractiveElement) {
 
-                // Apply focus styles with maximum specificity
-                activeElement.style.setProperty('outline', '3px solid #6366f1', 'important');
-                activeElement.style.setProperty('outline-offset', '2px', 'important');
-                activeElement.style.setProperty('background', 'rgba(99, 102, 241, 0.1)', 'important');
-                activeElement.style.setProperty('border-radius', '4px', 'important');
-                activeElement.style.setProperty('transition', 'outline 0.2s ease, background 0.2s ease', 'important');
-                activeElement.style.setProperty('box-shadow', '0 0 0 3px rgba(99, 102, 241, 0.3)', 'important');
-                
-                // Also set direct style properties as backup
+                console.log('Accessibility Widget: Applying focus styles to currently focused element:', activeElement);
+
                 activeElement.style.outline = '3px solid #6366f1';
+
                 activeElement.style.outlineOffset = '2px';
+
                 activeElement.style.background = 'rgba(99, 102, 241, 0.1)';
+
                 activeElement.style.borderRadius = '4px';
+
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
-                activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
                 
 
@@ -14580,14 +14338,11 @@ html body.big-white-cursor * {
 
         this.highlightFocusHandler = (e) => {
 
-            console.log('🎯 [FOCUS DEBUG] Focus event triggered on:', e.target);
-            console.log('🎯 [FOCUS DEBUG] Target tag name:', e.target.tagName);
-            console.log('🎯 [FOCUS DEBUG] Target classes:', e.target.className);
-            console.log('🎯 [FOCUS DEBUG] Target ID:', e.target.id);
+            console.log('Accessibility Widget: Focus event triggered on:', e.target);
 
-            console.log('🎯 [FOCUS DEBUG] Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
-            console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
-            console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
+            console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
             
             // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
@@ -14640,6 +14395,7 @@ html body.big-white-cursor * {
 
                     focusedElement === document.documentElement ||
 
+                    focusedElement.closest('.accessibility-panel') ||
 
                     !isInteractiveElement) {
 
@@ -16831,107 +16587,11 @@ html body.big-white-cursor * {
 
     enableMuteSound() {
 
-        console.log('🔇 [MUTE SOUND] Mute sound enabled - starting ultra-aggressive muting');
+        console.log('Accessibility Widget: Mute sound enabled');
 
         
 
-        // Store original volume states
-
-        this.originalVolumeStates = new Map();
-
-        this.muteSoundEnabled = true;
-
-        
-
-        // Override HTMLMediaElement methods to force muting
-
-        this.originalPlay = HTMLMediaElement.prototype.play;
-
-        this.originalPause = HTMLMediaElement.prototype.pause;
-
-        
-
-        // Override play method to ensure muted playback - ULTRA AGGRESSIVE
-
-        HTMLMediaElement.prototype.play = function() {
-
-            if (window.accessibilityWidget && window.accessibilityWidget.muteSoundEnabled) {
-
-                console.log('Accessibility Widget: Override play - ULTRA AGGRESSIVE muting');
-
-                this.volume = 0;
-
-                this.muted = true;
-
-                // Force pause immediately to prevent any sound
-
-                this.pause();
-
-                // Multiple aggressive attempts to ensure muting
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('Accessibility Widget: Re-applied mute after play override (attempt 1)');
-
-                }, 1);
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('Accessibility Widget: Re-applied mute after play override (attempt 2)');
-
-                }, 10);
-
-                setTimeout(() => {
-
-                    this.volume = 0;
-
-                    this.muted = true;
-
-                    this.pause();
-
-                    console.log('Accessibility Widget: Re-applied mute after play override (attempt 3)');
-
-                }, 50);
-
-            }
-
-            return this.originalPlay.call(this);
-
-        };
-
-        
-
-        // Make widget instance globally accessible
-
-        window.accessibilityWidget = this;
-
-        
-
-        // Override pause method
-
-        HTMLMediaElement.prototype.pause = function() {
-
-            return this.originalPause.call(this);
-
-        };
-
-        
-
-        // Function to mute all existing and future audio/video elements
-
-        const muteAllMedia = () => {
+        // Find all audio and video elements
 
         const audioElements = document.querySelectorAll('audio');
 
@@ -16939,619 +16599,33 @@ html body.big-white-cursor * {
 
         
 
-            console.log(`🔇 [MUTE SOUND] Found ${audioElements.length} audio and ${videoElements.length} video elements to mute`);
+        // Store original volume and set volume to 0 (allows playback but no sound)
 
+        this.originalVolumeStates = new Map();
 
         
-            // Handle audio elements
 
         audioElements.forEach((element, index) => {
 
-                const elementId = `audio-${index}-${Date.now()}`;
-
-                if (!this.originalVolumeStates.has(elementId)) {
-
-                    this.originalVolumeStates.set(elementId, element.volume);
-
-                }
-
-                // ULTRA AGGRESSIVE: Force mute and pause immediately
+            this.originalVolumeStates.set(`audio-${index}`, element.volume);
 
             element.volume = 0;
-
-                element.muted = true;
-
-                element.pause(); // Always pause, even if not playing
-
-                
-
-                // If audio is currently playing, immediately pause and mute with multiple attempts
-
-                if (!element.paused) {
-
-                    console.log(`Accessibility Widget: Audio element ${index} is playing, ULTRA AGGRESSIVE muting`);
-
-                    element.pause();
-
-                    element.volume = 0;
-
-                    element.muted = true;
-
-                    
-
-                    // Multiple aggressive attempts to ensure muting
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to audio element ${index} (attempt 1)`);
-
-                    }, 1);
-
-                    
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to audio element ${index} (attempt 2)`);
-
-                    }, 10);
-
-                    
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to audio element ${index} (attempt 3)`);
-
-                    }, 50);
-
-                }
-
-                
-
-                console.log(`🔇 [MUTE SOUND] Muted audio element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
-
-            });
-
-            
-
-            // Handle video elements
-
-        videoElements.forEach((element, index) => {
-
-                const elementId = `video-${index}-${Date.now()}`;
-
-                if (!this.originalVolumeStates.has(elementId)) {
-
-                    this.originalVolumeStates.set(elementId, element.volume);
-
-                }
-
-                // ULTRA AGGRESSIVE: Force mute and pause immediately
-
-            element.volume = 0;
-
-                element.muted = true;
-
-                element.pause(); // Always pause, even if not playing
-
-                
-
-                // If video is currently playing, immediately pause and mute with multiple attempts
-
-                if (!element.paused) {
-
-                    console.log(`Accessibility Widget: Video element ${index} is playing, ULTRA AGGRESSIVE muting`);
-
-                    element.pause();
-
-                    element.volume = 0;
-
-                    element.muted = true;
-
-                    
-
-                    // Multiple aggressive attempts to ensure muting
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to video element ${index} (attempt 1)`);
-
-                    }, 1);
-
-                    
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to video element ${index} (attempt 2)`);
-
-                    }, 10);
-
-                    
-
-                    setTimeout(() => {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                        console.log(`Accessibility Widget: Re-applied mute to video element ${index} (attempt 3)`);
-
-                    }, 50);
-
-                }
-
-                
-
-                console.log(`🔇 [MUTE SOUND] Muted video element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
-
-            });
-
-            
-
-            // Also try to mute any iframe elements that might contain audio/video
-
-            const iframes = document.querySelectorAll('iframe');
-
-            iframes.forEach((iframe, index) => {
-
-                try {
-
-                    // Try to access iframe content (only works if same origin)
-
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-                    if (iframeDoc) {
-
-                        const iframeAudio = iframeDoc.querySelectorAll('audio');
-
-                        const iframeVideo = iframeDoc.querySelectorAll('video');
-
-                        iframeAudio.forEach((element) => {
-
-                            element.volume = 0;
-
-                            element.muted = true;
-
-                            if (!element.paused) {
-
-                                element.pause();
-
-                            }
-
-                        });
-
-                        iframeVideo.forEach((element) => {
-
-                            element.volume = 0;
-
-                            element.muted = true;
-
-                            if (!element.paused) {
-
-                                element.pause();
-
-                            }
-
-                        });
-
-                        console.log(`Accessibility Widget: Muted ${iframeAudio.length} audio and ${iframeVideo.length} video elements in iframe ${index}`);
-
-                    }
-
-                } catch (e) {
-
-                    console.log(`Accessibility Widget: Cannot access iframe ${index} content (cross-origin)`);
-
-                }
-
-            });
-
-            
-
-            console.log(`Accessibility Widget: Muted ${audioElements.length} audio and ${videoElements.length} video elements`);
-
-        };
-
-        
-
-        // Mute existing elements immediately and aggressively
-
-        muteAllMedia();
-
-        
-
-        // Additional immediate aggressive muting for already playing media
-
-        setTimeout(() => {
-
-            console.log('Accessibility Widget: Additional immediate muting for already playing media');
-
-            muteAllMedia();
-
-        }, 1);
-
-        
-
-        setTimeout(() => {
-
-            console.log('Accessibility Widget: Second immediate muting for already playing media');
-
-            muteAllMedia();
-
-        }, 10);
-
-        
-
-        // Add event listeners to catch any media that starts playing
-
-        this.audioVideoEventListeners = [];
-
-        const addMuteListeners = () => {
-
-            const audioElements = document.querySelectorAll('audio');
-
-            const videoElements = document.querySelectorAll('video');
-
-            
-
-            [...audioElements, ...videoElements].forEach((element) => {
-
-                const muteHandler = () => {
-
-                    if (this.muteSoundEnabled) {
-
-                        console.log('Accessibility Widget: Event listener caught playing media - immediately muting');
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        element.pause();
-
-                    }
-
-                };
-
-                
-
-                element.addEventListener('play', muteHandler);
-
-                element.addEventListener('playing', muteHandler);
-
-                element.addEventListener('loadstart', muteHandler);
-
-                this.audioVideoEventListeners.push({ element, muteHandler });
-
-            });
-
-        };
-
-        
-
-        // Add listeners to existing elements
-
-        addMuteListeners();
-
-        
-
-        // Also try to mute Web Audio API contexts
-
-        try {
-
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-
-            if (AudioContext) {
-
-                // Get all existing audio contexts
-
-                const contexts = [];
-
-                // Try to find audio contexts (this is tricky as they're not easily accessible)
-
-                console.log('Accessibility Widget: Web Audio API detected, attempting to mute audio contexts');
-
-            }
-
-        } catch (e) {
-
-            console.log('Accessibility Widget: Web Audio API not available or error accessing it');
-
-        }
-
-        
-
-        // Also try to mute any audio elements that might be created by JavaScript libraries
-
-        const allElements = document.querySelectorAll('*');
-
-        allElements.forEach((element) => {
-
-            // Check if element has audio-related properties
-
-            if (element.volume !== undefined) {
-
-                element.volume = 0;
-
-                if (element.muted !== undefined) {
-
-                    element.muted = true;
-
-                }
-
-                console.log(`Accessibility Widget: Muted element with volume property:`, element.tagName, element);
-
-            }
 
         });
 
         
 
-        // Set up observer to handle dynamically added elements
+        videoElements.forEach((element, index) => {
 
-        if (!this.muteSoundObserver) {
+            this.originalVolumeStates.set(`video-${index}`, element.volume);
 
-            this.muteSoundObserver = new MutationObserver((mutations) => {
+            element.volume = 0;
 
-                if (this.muteSoundEnabled) {
-
-                    let hasNewMedia = false;
-
-                    mutations.forEach((mutation) => {
-
-                        mutation.addedNodes.forEach((node) => {
-
-                            if (node.nodeType === Node.ELEMENT_NODE) {
-
-                                // Check if the added node is audio/video
-
-                                if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-
-                                    hasNewMedia = true;
-
-                                }
-
-                                // Check for audio/video elements within the added node
-
-                                const mediaElements = node.querySelectorAll ? node.querySelectorAll('audio, video') : [];
-
-                                if (mediaElements.length > 0) {
-
-                                    hasNewMedia = true;
-
-                                }
-
-                            }
-
-                        });
-
-                    });
-
-                    
-
-                    if (hasNewMedia) {
-
-                        console.log('Accessibility Widget: New media elements detected, applying mute');
-
-                        muteAllMedia();
-
-                        // Also add event listeners to new elements
-
-                        setTimeout(() => {
-
-                            if (this.muteSoundEnabled) {
-
-                                addMuteListeners();
-
-                            }
-
-                        }, 100);
-
-                    }
-
-                }
-
-            });
-
-            
-
-            // Start observing the entire document
-
-            this.muteSoundObserver.observe(document.body, {
-
-                childList: true,
-
-                subtree: true
-
-            });
-
-        }
+        });
 
         
 
-        // Also mute any new elements that might be added
-
-        setTimeout(() => {
-
-            if (this.muteSoundEnabled) {
-
-                muteAllMedia();
-
-            }
-
-        }, 100);
-
-        
-
-        // Set up a more aggressive muting approach
-
-        this.muteSoundInterval = setInterval(() => {
-
-            if (this.muteSoundEnabled) {
-
-                // Re-mute all audio/video elements periodically
-
-                const audioElements = document.querySelectorAll('audio');
-
-                const videoElements = document.querySelectorAll('video');
-
-                
-
-                audioElements.forEach((element) => {
-
-                    if (element.volume > 0 || !element.muted) {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        
-
-                        // If it's playing, pause it
-
-                        if (!element.paused) {
-
-                            element.pause();
-
-                        }
-
-                        
-
-                        console.log('Accessibility Widget: Re-muted audio element that was unmuted');
-
-                    }
-
-                });
-
-                
-
-                videoElements.forEach((element) => {
-
-                    if (element.volume > 0 || !element.muted) {
-
-                        element.volume = 0;
-
-                        element.muted = true;
-
-                        
-
-                        // If it's playing, pause it
-
-                        if (!element.paused) {
-
-                            element.pause();
-
-                        }
-
-                        
-
-                        console.log('Accessibility Widget: Re-muted video element that was unmuted');
-
-                    }
-
-                });
-
-                
-
-                // Also check iframe content
-
-                const iframes = document.querySelectorAll('iframe');
-
-                iframes.forEach((iframe) => {
-
-                    try {
-
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-                        if (iframeDoc) {
-
-                            const iframeAudio = iframeDoc.querySelectorAll('audio');
-
-                            const iframeVideo = iframeDoc.querySelectorAll('video');
-
-                            
-
-                            iframeAudio.forEach((element) => {
-
-                                if (element.volume > 0 || !element.muted) {
-
-                                    element.volume = 0;
-
-                                    element.muted = true;
-
-                                    if (!element.paused) {
-
-                                        element.pause();
-
-                                    }
-
-                                }
-
-                            });
-
-                            
-
-                            iframeVideo.forEach((element) => {
-
-                                if (element.volume > 0 || !element.muted) {
-
-                                    element.volume = 0;
-
-                                    element.muted = true;
-
-                                    if (!element.paused) {
-
-                                        element.pause();
-
-                                    }
-
-                                }
-
-                            });
-
-                        }
-
-                    } catch (e) {
-
-                        // Cross-origin iframe, skip
-
-                    }
-
-                });
-
-            }
-
-        }, 50); // Check every 50ms for ultra-aggressive muting
+        console.log(`Accessibility Widget: Set volume to 0 for ${audioElements.length} audio and ${videoElements.length} video elements`);
 
     }
 
@@ -17563,93 +16637,25 @@ html body.big-white-cursor * {
 
         
 
-        this.muteSoundEnabled = false;
+        // Restore original volume states
 
-        
-
-        // Restore original HTMLMediaElement methods
-
-        if (this.originalPlay) {
-
-            HTMLMediaElement.prototype.play = this.originalPlay;
-
-        }
-
-        if (this.originalPause) {
-
-            HTMLMediaElement.prototype.pause = this.originalPause;
-
-        }
-
-        
-
-        // Stop observing for new elements
-
-        if (this.muteSoundObserver) {
-
-            this.muteSoundObserver.disconnect();
-
-            this.muteSoundObserver = null;
-
-        }
-
-        
-
-        // Clear the interval that re-mutes elements
-
-        if (this.muteSoundInterval) {
-
-            clearInterval(this.muteSoundInterval);
-
-            this.muteSoundInterval = null;
-
-        }
-
-        
-
-        // Remove event listeners
-
-        if (this.audioVideoEventListeners) {
-
-            this.audioVideoEventListeners.forEach(({ element, muteHandler }) => {
-
-                element.removeEventListener('play', muteHandler);
-
-                element.removeEventListener('playing', muteHandler);
-
-                element.removeEventListener('loadstart', muteHandler);
-
-            });
-
-            this.audioVideoEventListeners = [];
-
-        }
-
-        
-
-        // Restore original volume states for all elements
+        if (this.originalVolumeStates) {
 
             const audioElements = document.querySelectorAll('audio');
 
             const videoElements = document.querySelectorAll('video');
 
-        
-
-        console.log(`Accessibility Widget: Restoring volume for ${audioElements.length} audio and ${videoElements.length} video elements`);
-
             
 
             audioElements.forEach((element, index) => {
 
-            // Restore to full volume
+                const originalVolume = this.originalVolumeStates.get(`audio-${index}`);
 
-            element.volume = 1;
+                if (originalVolume !== undefined) {
 
-            element.muted = false;
+                    element.volume = originalVolume;
 
-            
-
-            console.log(`Accessibility Widget: Restored audio element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
+                }
 
             });
 
@@ -17657,69 +16663,17 @@ html body.big-white-cursor * {
 
             videoElements.forEach((element, index) => {
 
-            // Restore to full volume
+                const originalVolume = this.originalVolumeStates.get(`video-${index}`);
 
-            element.volume = 1;
+                if (originalVolume !== undefined) {
 
-            element.muted = false;
-
-            
-
-            console.log(`Accessibility Widget: Restored video element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
-
-        });
-
-        
-
-        // Also restore iframe content
-
-        const iframes = document.querySelectorAll('iframe');
-
-        iframes.forEach((iframe, index) => {
-
-            try {
-
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-                if (iframeDoc) {
-
-                    const iframeAudio = iframeDoc.querySelectorAll('audio');
-
-                    const iframeVideo = iframeDoc.querySelectorAll('video');
-
-                    iframeAudio.forEach((element) => {
-
-                        element.volume = 1;
-
-                        element.muted = false;
-
-                    });
-
-                    iframeVideo.forEach((element) => {
-
-                        element.volume = 1;
-
-                        element.muted = false;
-
-                    });
-
-                    console.log(`Accessibility Widget: Restored ${iframeAudio.length} audio and ${iframeVideo.length} video elements in iframe ${index}`);
+                    element.volume = originalVolume;
 
                 }
 
-            } catch (e) {
+            });
 
-                console.log(`Accessibility Widget: Cannot access iframe ${index} content (cross-origin)`);
-
-            }
-
-        });
-
-        
-
-        // Clear stored states
-
-        if (this.originalVolumeStates) {
+            
 
             this.originalVolumeStates.clear();
 
@@ -17727,19 +16681,7 @@ html body.big-white-cursor * {
 
         
 
-        // Force a page refresh to ensure all audio contexts are reset
-
-        console.log('Accessibility Widget: Mute sound disabled - refreshing page to reset audio contexts');
-
-        setTimeout(() => {
-
-            window.location.reload();
-
-        }, 500); // Small delay to ensure all changes are applied
-
-        
-
-        console.log(`Accessibility Widget: Restored volume for ${audioElements.length} audio and ${videoElements.length} video elements`);
+        console.log('Accessibility Widget: Restored original audio/video volume states');
 
     }
 
@@ -18303,28 +17245,23 @@ html body.big-white-cursor * {
 
             
 
-            // Apply to interactive elements (both inside and outside the panel)
+            // Apply to interactive elements not inside the panel (allow the icon itself)
 
-            if (isInteractiveElement) {
+            if (!activeElement.closest('.accessibility-panel') && 
 
-                console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
-                console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
+                isInteractiveElement) {
 
-                // Apply focus styles with maximum specificity
-                activeElement.style.setProperty('outline', '3px solid #6366f1', 'important');
-                activeElement.style.setProperty('outline-offset', '2px', 'important');
-                activeElement.style.setProperty('background', 'rgba(99, 102, 241, 0.1)', 'important');
-                activeElement.style.setProperty('border-radius', '4px', 'important');
-                activeElement.style.setProperty('transition', 'outline 0.2s ease, background 0.2s ease', 'important');
-                activeElement.style.setProperty('box-shadow', '0 0 0 3px rgba(99, 102, 241, 0.3)', 'important');
-                
-                // Also set direct style properties as backup
+                console.log('Accessibility Widget: Applying focus styles to currently focused element:', activeElement);
+
                 activeElement.style.outline = '3px solid #6366f1';
+
                 activeElement.style.outlineOffset = '2px';
+
                 activeElement.style.background = 'rgba(99, 102, 241, 0.1)';
+
                 activeElement.style.borderRadius = '4px';
+
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
-                activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
                 
 
@@ -18342,14 +17279,11 @@ html body.big-white-cursor * {
 
         this.highlightFocusHandler = (e) => {
 
-            console.log('🎯 [FOCUS DEBUG] Focus event triggered on:', e.target);
-            console.log('🎯 [FOCUS DEBUG] Target tag name:', e.target.tagName);
-            console.log('🎯 [FOCUS DEBUG] Target classes:', e.target.className);
-            console.log('🎯 [FOCUS DEBUG] Target ID:', e.target.id);
+            console.log('Accessibility Widget: Focus event triggered on:', e.target);
 
-            console.log('🎯 [FOCUS DEBUG] Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
-            console.log('🎯 [FOCUS DEBUG] Is keyboard navigation:', this.isKeyboardNavigation);
-            console.log('🎯 [FOCUS DEBUG] Last interaction method:', this.lastInteractionMethod);
+            console.log('Accessibility Widget: Body has highlight-focus class:', document.body.classList.contains('highlight-focus'));
+            console.log('Accessibility Widget: Is keyboard navigation:', this.isKeyboardNavigation);
+            console.log('Accessibility Widget: Last interaction method:', this.lastInteractionMethod);
             
             // Special debugging for accessibility icon
             if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
@@ -18402,6 +17336,7 @@ html body.big-white-cursor * {
 
                     focusedElement === document.documentElement ||
 
+                    focusedElement.closest('.accessibility-panel') ||
 
                     !isInteractiveElement) {
 
@@ -20304,466 +19239,6 @@ html body.big-white-cursor * {
 
     }
 
-    
-
-    disableAutoplay() {
-
-        console.log('Accessibility Widget: Disabling autoplay for seizure safety');
-
-        
-
-        // Disable autoplay for all video elements
-
-        const videos = document.querySelectorAll('video');
-
-        videos.forEach((video, index) => {
-
-            video.autoplay = false;
-
-            video.removeAttribute('autoplay');
-
-            if (!video.paused) {
-
-                video.pause();
-
-            }
-
-            console.log(`Accessibility Widget: Disabled autoplay for video ${index}`);
-
-        });
-
-        
-
-        // Disable autoplay for all audio elements
-
-        const audios = document.querySelectorAll('audio');
-
-        audios.forEach((audio, index) => {
-
-            audio.autoplay = false;
-
-            audio.removeAttribute('autoplay');
-
-            if (!audio.paused) {
-
-                audio.pause();
-
-            }
-
-            console.log(`Accessibility Widget: Disabled autoplay for audio ${index}`);
-
-        });
-
-        
-
-        // Override HTMLMediaElement autoplay property
-
-        if (!this.originalAutoplayDescriptor) {
-
-            this.originalAutoplayDescriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'autoplay');
-
-        }
-
-        
-
-        Object.defineProperty(HTMLMediaElement.prototype, 'autoplay', {
-
-            get: function() {
-
-                return false;
-
-            },
-
-            set: function(value) {
-
-                // Ignore any attempts to set autoplay
-
-                console.log('Accessibility Widget: Blocked autoplay attempt for seizure safety');
-
-            },
-
-            configurable: true
-
-        });
-
-        
-
-        // Set up observer to catch new media elements
-
-        if (!this.autoplayObserver) {
-
-            this.autoplayObserver = new MutationObserver((mutations) => {
-
-                mutations.forEach((mutation) => {
-
-                    mutation.addedNodes.forEach((node) => {
-
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-
-                            if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO') {
-
-                                node.autoplay = false;
-
-                                node.removeAttribute('autoplay');
-
-                                if (!node.paused) {
-
-                                    node.pause();
-
-                                }
-
-                                console.log('Accessibility Widget: Disabled autoplay for new media element');
-
-                            }
-
-                            
-
-                            // Check for media elements within the added node
-
-                            const mediaElements = node.querySelectorAll ? node.querySelectorAll('video, audio') : [];
-
-                            mediaElements.forEach((element) => {
-
-                                element.autoplay = false;
-
-                                element.removeAttribute('autoplay');
-
-                                if (!element.paused) {
-
-                                    element.pause();
-
-                                }
-
-                                console.log('Accessibility Widget: Disabled autoplay for nested media element');
-
-                            });
-
-                        }
-
-                    });
-
-                });
-
-            });
-
-            
-
-            this.autoplayObserver.observe(document.body, {
-
-                childList: true,
-
-                subtree: true
-
-            });
-
-        }
-
-    }
-
-    
-
-    disableSeizureInducingAnimations() {
-
-        console.log('Accessibility Widget: Disabling seizure-inducing animations');
-
-        
-
-        // Disable CSS animations and transitions globally
-
-        const style = document.createElement('style');
-
-        style.id = 'seizure-safe-animations';
-
-        style.textContent = `
-
-            /* Disable all animations and transitions */
-
-            body.seizure-safe *,
-
-            body.seizure-safe *::before,
-
-            body.seizure-safe *::after {
-
-                animation: none !important;
-
-                transition: none !important;
-
-                transform: none !important;
-
-                animation-duration: 0s !important;
-
-                animation-delay: 0s !important;
-
-                animation-iteration-count: 0 !important;
-
-                transition-duration: 0s !important;
-
-                transition-delay: 0s !important;
-
-                animation-play-state: paused !important;
-
-            }
-
-            
-
-            /* Disable hover animations specifically */
-
-            body.seizure-safe *:hover,
-
-            body.seizure-safe *:hover::before,
-
-            body.seizure-safe *:hover::after {
-
-                animation: none !important;
-
-                transition: none !important;
-
-                transform: none !important;
-
-            }
-
-            
-
-            /* Disable scroll animations */
-
-            body.seizure-safe [data-aos],
-
-            body.seizure-safe .animate__animated,
-
-            body.seizure-safe .wow,
-
-            body.seizure-safe .scroll-animate {
-
-                animation: none !important;
-
-                transition: none !important;
-
-                transform: none !important;
-
-            }
-
-            
-
-            /* Disable parallax and scroll effects */
-
-            body.seizure-safe [data-parallax],
-
-            body.seizure-safe .parallax,
-
-            body.seizure-safe .scroll-effect {
-
-                transform: none !important;
-
-                animation: none !important;
-
-                transition: none !important;
-
-            }
-
-            
-
-            /* Disable carousel/slider autoplay */
-
-            body.seizure-safe .carousel,
-
-            body.seizure-safe .slider,
-
-            body.seizure-safe .swiper {
-
-                animation: none !important;
-
-            }
-
-            
-
-            /* Disable loading animations */
-
-            body.seizure-safe .loading,
-
-            body.seizure-safe .spinner,
-
-            body.seizure-safe .pulse {
-
-                animation: none !important;
-
-            }
-
-        `;
-
-        document.head.appendChild(style);
-
-        
-
-        // Disable JavaScript-based animations
-
-        this.disableJavaScriptAnimations();
-
-    }
-
-    
-
-    disableJavaScriptAnimations() {
-
-        console.log('Accessibility Widget: Disabling JavaScript-based animations');
-
-        
-
-        // Override common animation libraries
-
-        if (window.anime) {
-
-            window.anime = () => {};
-
-        }
-
-        
-
-        if (window.gsap) {
-
-            window.gsap.to = () => {};
-
-            window.gsap.from = () => {};
-
-            window.gsap.fromTo = () => {};
-
-        }
-
-        
-
-        if (window.ScrollMagic) {
-
-            window.ScrollMagic = () => {};
-
-        }
-
-        
-
-        if (window.AOS) {
-
-            window.AOS = { init: () => {}, refresh: () => {} };
-
-        }
-
-        
-
-        // Disable Intersection Observer animations
-
-        const originalIntersectionObserver = window.IntersectionObserver;
-
-        window.IntersectionObserver = function(callback, options) {
-
-            return new originalIntersectionObserver((entries, observer) => {
-
-                // Don't trigger animations, just observe
-
-                entries.forEach(entry => {
-
-                    if (entry.isIntersecting) {
-
-                        // Remove animation classes instead of adding them
-
-                        entry.target.classList.remove('animate', 'animated', 'fade-in', 'slide-in', 'zoom-in');
-
-                    }
-
-                });
-
-            }, options);
-
-        };
-
-        
-
-        // Disable scroll event animations
-
-        const originalAddEventListener = EventTarget.prototype.addEventListener;
-
-        EventTarget.prototype.addEventListener = function(type, listener, options) {
-
-            if (type === 'scroll' && typeof listener === 'function') {
-
-                // Wrap scroll listeners to prevent animations
-
-                const wrappedListener = function(event) {
-
-                    // Prevent scroll-based animations
-
-                    event.preventDefault = () => {};
-
-                    return listener.call(this, event);
-
-                };
-
-                return originalAddEventListener.call(this, type, wrappedListener, options);
-
-            }
-
-            return originalAddEventListener.call(this, type, listener, options);
-
-        };
-
-    }
-
-    
-
-    enableAutoplay() {
-
-        console.log('Accessibility Widget: Re-enabling autoplay');
-
-        
-
-        // Restore original autoplay property
-
-        if (this.originalAutoplayDescriptor) {
-
-            Object.defineProperty(HTMLMediaElement.prototype, 'autoplay', this.originalAutoplayDescriptor);
-
-        }
-
-        
-
-        // Disconnect autoplay observer
-
-        if (this.autoplayObserver) {
-
-            this.autoplayObserver.disconnect();
-
-            this.autoplayObserver = null;
-
-        }
-
-    }
-
-    
-
-    enableSeizureInducingAnimations() {
-
-        console.log('Accessibility Widget: Re-enabling animations');
-
-        
-
-        // Remove seizure-safe animation styles
-
-        const seizureAnimationStyle = document.getElementById('seizure-safe-animations');
-
-        if (seizureAnimationStyle) {
-
-            seizureAnimationStyle.remove();
-
-        }
-
-        
-
-        // Restore original animation libraries
-
-        // Note: This is a simplified restoration - in a real implementation,
-
-        // you'd want to store the original functions and restore them
-
-        console.log('Accessibility Widget: Animations re-enabled (some library overrides may persist)');
-
-    }
-
 
 
     disableSeizureSafe() {
@@ -20773,14 +19248,6 @@ html body.big-white-cursor * {
         document.body.classList.remove('seizure-safe');
 
         this.removeSeizureSafeStyles();
-
-        
-
-        // Re-enable autoplay and animations
-
-        this.enableAutoplay();
-
-        this.enableSeizureInducingAnimations();
 
         
 
@@ -23374,122 +21841,33 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Set proper toggle switch sizes for mobile (label.toggle-switch contains input + span.slider)
+        // Reduce toggle switch sizes (label.toggle-switch contains input + span.slider)
         const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
         if (toggles && toggles.length > 0) {
             toggles.forEach((toggle, index) => {
-                toggle.style.setProperty('width', '44px', 'important');
-                toggle.style.setProperty('height', '24px', 'important');
-                console.log(`📱 [MOBILE SIZES] Set proper toggle ${index + 1} size`);
+                toggle.style.setProperty('width', '38px', 'important');
+                toggle.style.setProperty('height', '22px', 'important');
+                console.log(`📱 [MOBILE SIZES] Reduced toggle ${index + 1} size`);
             });
         }
         
-        // Set proper toggle slider knob (.slider and its pseudo knob)
+        // Reduce toggle slider knob (.slider and its pseudo knob)
         const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
         if (sliders && sliders.length > 0) {
             sliders.forEach((slider, index) => {
                 // Track and bar
-                slider.style.setProperty('height', '24px', 'important');
-                slider.style.setProperty('border-radius', '24px', 'important');
+                slider.style.setProperty('height', '22px', 'important');
+                slider.style.setProperty('border-radius', '22px', 'important');
                 slider.style.setProperty('padding', '0', 'important');
                 slider.style.setProperty('box-sizing', 'border-box', 'important');
-                // Inject proper stylesheet for the knob (:before) and toggle states
+                // Inject a tiny stylesheet to shrink the knob (:before)
                 const style = document.createElement('style');
                 style.textContent = `
-                    @media (max-width: 768px) {
-                        /* Ensure the toggle wrapper has proper box and doesn't collapse */
-                        label.toggle-switch {
-                            display: inline-block !important;
-                            position: relative !important;
-                            width: 44px !important;
-                            height: 24px !important;
-                            vertical-align: middle !important;
-                            flex-shrink: 0 !important;
-                        }
-                        
-                        /* Align text and toggle horizontally for all profile items */
-                        .profile-item {
-                            display: flex !important;
-                            align-items: center !important;
-                            gap: 8px !important;
-                        }
-                        
-                        /* Special handling for dropdown items to prevent layout conflicts */
-                        .profile-item.has-dropdown {
-                            position: relative !important;
-                            display: flex !important;
-                            align-items: center !important;
-                            padding-left: 60px !important;
-                            min-height: 50px !important;
-                        }
-                        
-                        /* Override any external CSS that might conflict */
-                        .accessibility-panel .profile-item.has-dropdown,
-                        .accessibility-widget .profile-item.has-dropdown,
-                        #accessibility-panel .profile-item.has-dropdown {
-                            display: flex !important;
-                            align-items: center !important;
-                            position: relative !important;
-                        }
-                        .profile-item.has-dropdown .profile-info {
-                            position: static !important;
-                            width: 100% !important;
-                            padding-left: 0 !important;
-                            margin-left: 0 !important;
-                        }
-                        .profile-item.has-dropdown .toggle-switch {
-                            position: absolute !important;
-                            left: 15px !important;
-                            top: 50% !important;
-                            transform: translateY(-50%) !important;
-                            width: 44px !important;
-                            height: 24px !important;
-                        }
-
-                        /* Root cause fix: make the slider a real rounded track, not inheriting generic .slider styles */
-                        label.toggle-switch > .slider {
-                            display: block !important;
-                            position: relative !important;
-                            width: 100% !important;
-                            height: 100% !important;
-                            border-radius: 24px !important;
-                            overflow: hidden !important;
-                            box-sizing: border-box !important;
-                            background-clip: padding-box !important;
-                        }
-
-                        .toggle-switch > input + .slider:before { 
-                            width: 18px !important; 
-                            height: 18px !important; 
-                            top: 50% !important; 
-                            left: 3px !important; 
-                            transform: translateY(-50%) !important;
-                            border-radius: 50% !important; 
-                            background-color: #ffffff !important;
-                            border: 1px solid #d1d5db !important;
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-                        }
-                        .toggle-switch > input:checked + .slider:before { 
-                            transform: translateX(20px) !important; 
-                            background-color: #ffffff !important;
-                            border: 1px solid #4f46e5 !important;
-                        }
-                        .toggle-switch .slider {
-                            background-color: #e5e7eb !important;
-                            border: 1px solid #d1d5db !important;
-                            height: 24px !important;
-                            border-radius: 24px !important;
-                            width: 44px !important;
-                            overflow: hidden !important;
-                        }
-                        .toggle-switch > input:checked + .slider {
-                            background-color: #6366f1 !important;
-                            border: 1px solid #4f46e5 !important;
-                        }
-                    }
+                    .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
+                    .toggle-switch > input:checked + .slider:before { transform: translateX(18px) !important; }
                 `;
                 this.shadowRoot?.appendChild(style);
-                console.log(`📱 [MOBILE SIZES] Set proper toggle slider ${index + 1} size`);
+                console.log(`📱 [MOBILE SIZES] Reduced toggle slider ${index + 1} size`);
             });
         }
         
@@ -23596,32 +21974,6 @@ applyCustomizations(customizationData) {
                     width: auto !important;
                     min-width: 32px !important;
                 }
-                
-                /* Mobile focus outline for all interactive elements */
-                .accessibility-panel button:focus,
-                .accessibility-panel input:focus,
-                .accessibility-panel select:focus,
-                .accessibility-panel label:focus,
-                .accessibility-panel .toggle-switch:focus,
-                .accessibility-panel .profile-item:focus {
-                    outline: 3px solid #6366f1 !important;
-                    outline-offset: 2px !important;
-                    background: rgba(99, 102, 241, 0.1) !important;
-                    border-radius: 4px !important;
-                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
-                    transition: outline 0.2s ease, background 0.2s ease !important;
-                }
-                
-                /* Ensure accessibility icon focus works on mobile */
-                .accessibility-icon:focus,
-                #accessibility-icon:focus {
-                    outline: 3px solid #6366f1 !important;
-                    outline-offset: 2px !important;
-                    background: rgba(99, 102, 241, 0.1) !important;
-                    border-radius: 4px !important;
-                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
-                    transition: outline 0.2s ease, background 0.2s ease !important;
-                }
             }
         `;
         this.shadowRoot?.appendChild(mobileControlStyle);
@@ -23639,279 +21991,102 @@ applyCustomizations(customizationData) {
             });
         }
         
-        // Remove conflicting inline styles for useful links dropdown
+        // Reduce useful links dropdown size more aggressively
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.removeProperty('font-size');
-            usefulLinksDropdown.style.removeProperty('padding');
-            usefulLinksDropdown.style.removeProperty('min-height');
-            usefulLinksDropdown.style.removeProperty('margin');
-            usefulLinksDropdown.style.removeProperty('border-radius');
-            usefulLinksDropdown.style.removeProperty('border');
-            usefulLinksDropdown.style.removeProperty('background');
-            usefulLinksDropdown.style.removeProperty('box-shadow');
-            console.log('📱 [MOBILE SIZES] Removed conflicting inline styles for useful links dropdown');
+            usefulLinksDropdown.style.setProperty('font-size', '10px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '28px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '6px 0', 'important');
+            usefulLinksDropdown.style.setProperty('border-radius', '6px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links dropdown size');
         }
         
-        // Remove conflicting inline styles for useful links select
+        // Reduce useful links content select size more aggressively
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.removeProperty('font-size');
-            usefulLinksSelect.style.removeProperty('padding');
-            usefulLinksSelect.style.removeProperty('min-height');
-            usefulLinksSelect.style.removeProperty('height');
-            usefulLinksSelect.style.removeProperty('line-height');
-            usefulLinksSelect.style.removeProperty('border-radius');
-            usefulLinksSelect.style.removeProperty('border');
-            usefulLinksSelect.style.removeProperty('background');
-            usefulLinksSelect.style.removeProperty('color');
-            usefulLinksSelect.style.removeProperty('font-weight');
-            console.log('📱 [MOBILE SIZES] Removed conflicting inline styles for useful links select');
+            usefulLinksSelect.style.setProperty('font-size', '10px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '4px 6px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('height', '24px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.1', 'important');
+            usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
+            usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
+            usefulLinksSelect.style.setProperty('border-radius', '4px', 'important');
+            console.log('📱 [MOBILE SIZES] Reduced useful links select size');
         }
         
-        // Add mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE
+        // Add mobile-specific CSS for Useful Links dropdown
         const mobileUsefulLinksStyle = document.createElement('style');
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 12px !important;
-                    padding: 6px 10px !important;
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
                     min-height: 28px !important;
-                    height: auto !important;
                     margin: 6px 0 !important;
-                    border-radius: 4px !important;
-                    box-sizing: border-box !important;
-                    width: 100% !important;
-                    line-height: 1.1 !important;
-                    border: 1px solid #d1d5db !important;
-                    background: #f9fafb !important;
-                    max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    border-radius: 6px !important;
                 }
                 .useful-links-content {
-                    padding: 8px 12px !important;
-                    box-sizing: border-box !important;
-                    margin: 0 !important;
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                    padding: 6px !important;
                 }
                 .useful-links-content select {
-                    font-size: 12px !important;
-                    padding: 4px 8px !important;
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
                     min-height: 24px !important;
                     height: 24px !important;
                     line-height: 1.1 !important;
-                    border-radius: 3px !important;
-                    max-width: 100% !important;
-                    width: 100% !important;
-                    box-sizing: border-box !important;
-                    border: 1px solid #d1d5db !important;
-                    background: white !important;
-                    color: #374151 !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    font-weight: 400 !important;
+                    border-radius: 4px !important;
                 }
                 .useful-links-content select option {
-                    font-size: 12px !important;
-                    padding: 4px 8px !important;
+                    font-size: 10px !important;
+                    padding: 4px 6px !important;
                     line-height: 1.1 !important;
-                    font-weight: 400 !important;
                 }
-                
             }
         `;
         this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
-        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown - REASONABLE SIZE with text movement prevention');
-        
-        // Add CSS to hide ON/OFF text on mobile screens
-        const mobileToggleTextStyle = document.createElement('style');
-        mobileToggleTextStyle.textContent = `
-            @media (max-width: 768px) {
-                /* Hide ON/OFF text on mobile screens */
-                .toggle-switch > input + .slider::after {
-                    content: "" !important;
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                }
-                .toggle-switch > input:checked + .slider::after {
-                    content: "" !important;
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                }
-                /* Hide any text in the slider */
-                .toggle-switch .slider::before {
-                    content: "" !important;
-                }
-                .toggle-switch .slider::after {
-                    content: "" !important;
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                }
-                /* Make toggles visible when OFF - add grey background */
-                .toggle-switch .slider {
-                    background-color: #e5e7eb !important;
-                    border: 1px solid #d1d5db !important;
-                }
-                /* Ensure the slider shows purple color when ON */
-                .toggle-switch > input:checked + .slider {
-                    background-color: #6366f1 !important;
-                    border: 1px solid #4f46e5 !important;
-                }
-                /* Make the toggle knob visible when OFF */
-                .toggle-switch .slider:before {
-                    background-color: #ffffff !important;
-                    border: 1px solid #d1d5db !important;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-                }
-                /* Make the toggle knob visible when ON */
-                .toggle-switch > input:checked + .slider:before {
-                    background-color: #ffffff !important;
-                    border: 1px solid #4f46e5 !important;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-                }
-            }
-        `;
-        this.shadowRoot?.appendChild(mobileToggleTextStyle);
-        console.log('📱 [MOBILE SIZES] Added CSS to hide ON/OFF text on mobile screens');
+        console.log('📱 [MOBILE SIZES] Added mobile-specific CSS for Useful Links dropdown');
 
         // Prevent Useful Links title from shifting when toggle is ON (mobile)
         const usefulLinksProfile = this.shadowRoot?.querySelector('.profile-item.has-dropdown');
         if (usefulLinksProfile) {
             const profileInfo = usefulLinksProfile.querySelector('.profile-info');
             const toggle = usefulLinksProfile.querySelector('.toggle-switch');
-            
-            // Keep the profile item in normal flow but with proper spacing
-            usefulLinksProfile.style.setProperty('position', 'relative', 'important');
-            usefulLinksProfile.style.setProperty('display', 'block', 'important');
-            usefulLinksProfile.style.setProperty('padding-left', '50px', 'important');
-            usefulLinksProfile.style.setProperty('min-height', '40px', 'important');
-            
             if (profileInfo) {
-                // Keep text in normal flow but with proper positioning
-                profileInfo.style.setProperty('position', 'static', 'important');
-                profileInfo.style.setProperty('left', 'auto', 'important');
-                profileInfo.style.setProperty('right', 'auto', 'important');
-                profileInfo.style.setProperty('flex', 'none', 'important');
-                profileInfo.style.setProperty('min-width', 'auto', 'important');
-                profileInfo.style.setProperty('padding-left', '0', 'important');
-                profileInfo.style.setProperty('margin-left', '0', 'important');
-                profileInfo.style.setProperty('width', '100%', 'important');
+                // Reduce left padding so text doesn't get pushed too far on mobile
+                profileInfo.style.setProperty('padding-left', '64px', 'important');
+                profileInfo.style.setProperty('min-width', '0', 'important');
+                profileInfo.style.setProperty('flex', '1', 'important');
             }
-            
             if (toggle) {
-                // Pin toggle absolutely but ensure it doesn't interfere with content
+                // Keep toggle pinned so it doesn't affect text flow
                 toggle.style.setProperty('position', 'absolute', 'important');
-                toggle.style.setProperty('left', '8px', 'important');
-                toggle.style.setProperty('top', '8px', 'important');
+                toggle.style.setProperty('left', '12px', 'important');
+                toggle.style.setProperty('top', '12px', 'important');
                 toggle.style.setProperty('transform', 'none', 'important');
                 toggle.style.setProperty('margin', '0', 'important');
-                toggle.style.setProperty('z-index', '5', 'important');
             }
-            console.log('📱 [MOBILE SIZES] Fixed Useful Links layout to prevent text shift');
+            console.log('📱 [MOBILE SIZES] Adjusted Useful Links layout to prevent text shift');
         }
         
-        // Fix toggle width and prevent text sliding on mobile
+        // Increase toggle width when ON to fit text properly and fix text sliding
         const style = document.createElement('style');
         style.textContent = `
-            @media (max-width: 768px) {
-                /* Keep slider width fixed so text never shifts */
-                .toggle-switch .slider { 
-                    width: 50px !important; 
-                    height: 28px !important; 
-                    position: relative !important;
-                    background-color: #e5e7eb !important;
-                    border: 1px solid #d1d5db !important;
-                }
-                .toggle-switch > input:checked + .slider { 
-                    width: 50px !important; 
-                    background-color: #6366f1 !important;
-                    border: 1px solid #4f46e5 !important;
-                }
-                .toggle-switch > input:checked + .slider:before { 
-                    transform: translateX(22px) !important; 
-                    width: 24px !important;
-                    height: 24px !important;
-                }
-                .toggle-switch .slider:before {
-                    width: 24px !important;
-                    height: 24px !important;
-                    background-color: #ffffff !important;
-                    border: 1px solid #d1d5db !important;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-                }
-                .toggle-switch > input:checked + .slider:before {
-                    background-color: #ffffff !important;
-                    border: 1px solid #4f46e5 !important;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-                }
-                .profile-item .profile-info { 
-                    position: static !important;
-                    left: auto !important;
-                    right: auto !important;
-                    width: 100% !important;
-                    min-width: auto !important;
-                }
-                /* Prevent any text shifting */
-                .profile-item.has-dropdown {
-                    position: relative !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    padding-left: 50px !important;
-                    min-height: 40px !important;
-                }
-                .profile-item.has-dropdown .toggle-switch {
-                    position: absolute !important;
-                    left: 8px !important;
-                    top: 8px !important;
-                    z-index: 5 !important;
-                }
-                /* Ensure dropdown content stays in place */
-                .profile-item.has-dropdown .useful-links-content {
-                    position: static !important;
-                    left: auto !important;
-                    right: auto !important;
-                    width: 100% !important;
-                    margin-top: 8px !important;
-                }
-            }
+            .toggle-switch > input:checked + .slider { width: 100% !important; }
+            .toggle-switch > input:checked + .slider:before { transform: translateX(20px) !important; }
+            .profile-item .profile-info { flex: 1 !important; min-width: 0 !important; }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
                 white-space: nowrap !important; 
                 overflow: hidden !important; 
                 text-overflow: ellipsis !important; 
                 max-width: 100% !important; 
             }
-            /* Hide ON/OFF text on mobile screens */
-            .toggle-switch > input + .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
+            /* Make ON text smaller on mobile to fit inside purple toggle area */
             .toggle-switch > input:checked + .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            /* Also hide any text that might be in the slider itself */
-            .toggle-switch .slider::before {
-                content: "" !important;
-            }
-            .toggle-switch .slider::after {
-                content: "" !important;
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
+                font-size: 8px !important;
+                font-weight: 600 !important;
+                line-height: 1 !important;
             }
         `;
         this.shadowRoot?.appendChild(style);
@@ -24277,23 +22452,22 @@ applyCustomizations(customizationData) {
             
             console.log('🖥️ [DESKTOP SHAPE] Target border-radius:', borderRadius);
             
-            // Apply the border-radius with !important to override external CSS
+            // Apply the border-radius with maximum specificity
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
             icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
-            
-            // Also set individual corner radius for maximum compatibility
-            icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
-            icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
-            icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
-            icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
-            
             console.log('🖥️ [DESKTOP SHAPE] Applied border-radius with !important:', borderRadius);
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
             icon.classList.add(shape.toLowerCase());
             console.log('🖥️ [DESKTOP SHAPE] Updated classes to:', icon.className);
+            
+            // Force the shape with direct style assignment as backup
+            icon.style.borderRadius = borderRadius;
+            icon.style.webkitBorderRadius = borderRadius;
+            icon.style.mozBorderRadius = borderRadius;
+            console.log('🖥️ [DESKTOP SHAPE] Applied direct style assignment as backup');
             
             // Force a reflow to ensure styles are applied
             icon.offsetHeight;
@@ -24364,11 +22538,72 @@ applyCustomizations(customizationData) {
             console.log('[CK] Icon inline style border-radius:', icon.style.borderRadius);
             console.log('[CK] Icon final HTML:', icon.outerHTML);
             
-            // Let CSS handle the shape naturally - no aggressive timeouts needed
+            // Force apply after a short delay to override any conflicting styles
+            setTimeout(() => {
+                console.log('[CK] === TIMEOUT FORCE APPLICATION ===');
+                if (shape === 'Rounded') {
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    console.log('[CK] Force applied rounded shape after timeout');
+                }
+                
+                const finalComputedStyle = window.getComputedStyle(icon);
+                const finalBorderRadius = finalComputedStyle.borderRadius;
+                console.log('[CK] Final computed border-radius after timeout:', finalBorderRadius);
+            }, 100);
             
-            // Let CSS handle the shape naturally - no aggressive timeouts needed
+            // Additional force application after external CSS loads
+            setTimeout(() => {
+                console.log('[CK] === EXTERNAL CSS OVERRIDE FORCE ===');
+                if (shape === 'Rounded') {
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    console.log('[CK] External CSS override applied');
+                }
+                
+                const finalComputedStyle2 = window.getComputedStyle(icon);
+                const finalBorderRadius2 = finalComputedStyle2.borderRadius;
+                console.log('[CK] Final computed border-radius after external CSS override:', finalBorderRadius2);
+            }, 500);
             
-            // Let CSS handle the shape naturally - no aggressive timeouts needed
+            // Final aggressive force application
+            setTimeout(() => {
+                console.log('[CK] === FINAL AGGRESSIVE FORCE ===');
+                if (shape === 'Rounded') {
+                    // Remove any conflicting styles first
+                    icon.style.removeProperty('border-radius');
+                    icon.style.removeProperty('-webkit-border-radius');
+                    icon.style.removeProperty('-moz-border-radius');
+                    
+                    // Apply rounded shape with maximum force
+                    icon.style.setProperty('border-radius', '25px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    
+                    // Force reflow
+                    icon.offsetHeight;
+                    
+                    console.log('[CK] Final aggressive force applied');
+                }
+                
+                const finalComputedStyle3 = window.getComputedStyle(icon);
+                const finalBorderRadius3 = finalComputedStyle3.borderRadius;
+                console.log('[CK] Final computed border-radius after aggressive force:', finalBorderRadius3);
+            }, 1000);
         } else {
             console.error('[CK] Icon not found!');
         }
@@ -25079,21 +23314,23 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE SHAPE] - Computed after clearing:', window.getComputedStyle(icon).borderRadius);
                 console.log('📱 [MOBILE SHAPE] - Target border-radius:', borderRadius);
                 
-                // Apply shape naturally - let CSS handle it
-                icon.setAttribute('data-shape', shape.toLowerCase());
-                icon.classList.remove('circle', 'square');
-                icon.classList.add(shape.toLowerCase());
-                
-                // Apply border-radius with !important to override external CSS
+                // Apply with maximum force - multiple attempts to override any external CSS
                 icon.style.setProperty('border-radius', borderRadius, 'important');
                 icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
                 icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
+                icon.style.setProperty('display', 'flex', 'important');
+                icon.style.setProperty('align-items', 'center', 'important');
+                icon.style.setProperty('justify-content', 'center', 'important');
                 
-                // Also set individual corner radius for maximum compatibility
-                icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
-                icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
-                icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
-                icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
+                // Force the shape with multiple approaches
+                icon.setAttribute('data-shape', 'rounded');
+                icon.classList.remove('circle', 'square');
+                icon.classList.add('rounded');
+                
+                // Additional force with direct style assignment
+                icon.style.borderRadius = borderRadius;
+                icon.style.webkitBorderRadius = borderRadius;
+                icon.style.mozBorderRadius = borderRadius;
                 
                 console.log('📱 [MOBILE SHAPE] IMMEDIATELY AFTER SETTING:');
                 console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
