@@ -2756,61 +2756,29 @@ body.align-right a {
             -moz-border-radius: 0px !important;
         }
         
-        /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE */
-        .accessibility-icon.rounded,
+        /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE - SIMPLIFIED AND MORE EFFECTIVE */
         .accessibility-icon[data-shape="rounded"],
+        .accessibility-icon.rounded,
         .accessibility-icon.rounded[data-shape="rounded"],
         .accessibility-icon[data-shape="rounded"].rounded {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
+            border-top-left-radius: 25px !important;
+            border-top-right-radius: 25px !important;
+            border-bottom-left-radius: 25px !important;
+            border-bottom-right-radius: 25px !important;
         }
         
-        /* Force rounded shape with absolute maximum specificity */
+        /* Override any external CSS with maximum force - target all possible selectors */
+        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]):not([data-shape="square"]) {
+            border-radius: 25px !important;
+            -webkit-border-radius: 25px !important;
+            -moz-border-radius: 25px !important;
+        }
+        
+        /* Force rounded shape with absolute maximum specificity - target shadow DOM */
         .accessibility-icon.rounded[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Override any external CSS that might be forcing circle shape */
-        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Force rounded shape with absolute maximum specificity */
-        .accessibility-icon.rounded,
-        .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Override any external CSS that might be forcing circle shape */
-        .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Maximum specificity override for rounded shape */
-        .accessibility-icon.rounded[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Force rounded shape with absolute maximum specificity */
-        .accessibility-icon[data-shape="rounded"].rounded {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
-        }
-        
-        /* Override any external CSS with maximum force */
-        .accessibility-icon[data-shape="rounded"] {
             border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
             -moz-border-radius: 25px !important;
@@ -4190,6 +4158,8 @@ body.align-right a {
                 color: #ffffff !important;
                 border: 2px solid #4f46e5 !important;
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+                position: relative !important;
+                z-index: 10 !important;
             }
 
             .language-option.selected:hover,
@@ -4208,6 +4178,20 @@ body.align-right a {
                 color: #ffffff !important;
                 border: 2px solid #4f46e5 !important;
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+                position: relative !important;
+                z-index: 10 !important;
+            }
+            
+            /* Even more specific rules for maximum override */
+            .accessibility-panel #language-dropdown .language-option.selected,
+            .accessibility-panel #language-dropdown .language-option[aria-selected="true"],
+            .accessibility-panel #language-dropdown .language-option[data-selected="true"] {
+                background: #6366f1 !important;
+                color: #ffffff !important;
+                border: 2px solid #4f46e5 !important;
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+                position: relative !important;
+                z-index: 10 !important;
             }
 
             /* Also support highlighting via span classes (fallback the user asked for) */
@@ -8500,12 +8484,16 @@ html body.big-white-cursor * {
                 option.style.setProperty('color', '#ffffff', 'important');
                 option.style.setProperty('border', '2px solid #4f46e5', 'important');
                 option.style.setProperty('box-shadow', '0 0 0 2px rgba(99, 102, 241, 0.3)', 'important');
+                option.style.setProperty('position', 'relative', 'important');
+                option.style.setProperty('z-index', '10', 'important');
                 
                 // Also set direct style properties as backup
                 option.style.background = '#6366f1';
                 option.style.color = '#ffffff';
                 option.style.border = '2px solid #4f46e5';
                 option.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.3)';
+                option.style.position = 'relative';
+                option.style.zIndex = '10';
 
                 // Also add span-level class so UI can style via span.selected if needed
                 if (nameEl) nameEl.classList.add('selected');
@@ -14492,14 +14480,19 @@ html body.big-white-cursor * {
                 console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
                 console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
 
+                // Apply focus styles with maximum specificity
+                activeElement.style.setProperty('outline', '3px solid #6366f1', 'important');
+                activeElement.style.setProperty('outline-offset', '2px', 'important');
+                activeElement.style.setProperty('background', 'rgba(99, 102, 241, 0.1)', 'important');
+                activeElement.style.setProperty('border-radius', '4px', 'important');
+                activeElement.style.setProperty('transition', 'outline 0.2s ease, background 0.2s ease', 'important');
+                activeElement.style.setProperty('box-shadow', '0 0 0 3px rgba(99, 102, 241, 0.3)', 'important');
+                
+                // Also set direct style properties as backup
                 activeElement.style.outline = '3px solid #6366f1';
-
                 activeElement.style.outlineOffset = '2px';
-
                 activeElement.style.background = 'rgba(99, 102, 241, 0.1)';
-
                 activeElement.style.borderRadius = '4px';
-
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
                 activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
@@ -16770,7 +16763,7 @@ html body.big-white-cursor * {
 
     enableMuteSound() {
 
-        console.log('Accessibility Widget: Mute sound enabled');
+        console.log('🔇 [MUTE SOUND] Mute sound enabled - starting ultra-aggressive muting');
 
         
 
@@ -16878,7 +16871,7 @@ html body.big-white-cursor * {
 
             
 
-            console.log(`Accessibility Widget: Found ${audioElements.length} audio and ${videoElements.length} video elements to mute`);
+            console.log(`🔇 [MUTE SOUND] Found ${audioElements.length} audio and ${videoElements.length} video elements to mute`);
 
             
 
@@ -16964,7 +16957,7 @@ html body.big-white-cursor * {
 
                 
 
-                console.log(`Accessibility Widget: Muted audio element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
+                console.log(`🔇 [MUTE SOUND] Muted audio element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
 
             });
 
@@ -17052,7 +17045,7 @@ html body.big-white-cursor * {
 
                 
 
-                console.log(`Accessibility Widget: Muted video element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
+                console.log(`🔇 [MUTE SOUND] Muted video element ${index}, volume: ${element.volume}, muted: ${element.muted}, paused: ${element.paused}`);
 
             });
 
@@ -17490,7 +17483,7 @@ html body.big-white-cursor * {
 
             }
 
-        }, 100); // Check every 100ms for more aggressive muting
+        }, 50); // Check every 50ms for ultra-aggressive muting
 
     }
 
@@ -18249,14 +18242,19 @@ html body.big-white-cursor * {
                 console.log('🎯 [FOCUS DEBUG] Applying focus styles to currently focused element:', activeElement);
                 console.log('🎯 [FOCUS DEBUG] Element is inside panel:', !!activeElement.closest('.accessibility-panel'));
 
+                // Apply focus styles with maximum specificity
+                activeElement.style.setProperty('outline', '3px solid #6366f1', 'important');
+                activeElement.style.setProperty('outline-offset', '2px', 'important');
+                activeElement.style.setProperty('background', 'rgba(99, 102, 241, 0.1)', 'important');
+                activeElement.style.setProperty('border-radius', '4px', 'important');
+                activeElement.style.setProperty('transition', 'outline 0.2s ease, background 0.2s ease', 'important');
+                activeElement.style.setProperty('box-shadow', '0 0 0 3px rgba(99, 102, 241, 0.3)', 'important');
+                
+                // Also set direct style properties as backup
                 activeElement.style.outline = '3px solid #6366f1';
-
                 activeElement.style.outlineOffset = '2px';
-
                 activeElement.style.background = 'rgba(99, 102, 241, 0.1)';
-
                 activeElement.style.borderRadius = '4px';
-
                 activeElement.style.transition = 'outline 0.2s ease, background 0.2s ease';
                 activeElement.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
 
@@ -23312,8 +23310,8 @@ applyCustomizations(customizationData) {
         const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
         if (toggles && toggles.length > 0) {
             toggles.forEach((toggle, index) => {
-                toggle.style.setProperty('width', '50px', 'important');
-                toggle.style.setProperty('height', '28px', 'important');
+                toggle.style.setProperty('width', '44px', 'important');
+                toggle.style.setProperty('height', '24px', 'important');
                 console.log(`📱 [MOBILE SIZES] Set proper toggle ${index + 1} size`);
             });
         }
@@ -23323,15 +23321,38 @@ applyCustomizations(customizationData) {
         if (sliders && sliders.length > 0) {
             sliders.forEach((slider, index) => {
                 // Track and bar
-                slider.style.setProperty('height', '28px', 'important');
-                slider.style.setProperty('border-radius', '28px', 'important');
+                slider.style.setProperty('height', '24px', 'important');
+                slider.style.setProperty('border-radius', '24px', 'important');
                 slider.style.setProperty('padding', '0', 'important');
                 slider.style.setProperty('box-sizing', 'border-box', 'important');
-                // Inject proper stylesheet for the knob (:before)
+                // Inject proper stylesheet for the knob (:before) and toggle states
                 const style = document.createElement('style');
                 style.textContent = `
-                    .toggle-switch > input + .slider:before { width: 24px !important; height: 24px !important; top: 2px !important; left: 2px !important; border-radius: 50% !important; }
-                    .toggle-switch > input:checked + .slider:before { transform: translateX(22px) !important; }
+                    @media (max-width: 768px) {
+                        .toggle-switch > input + .slider:before { 
+                            width: 18px !important; 
+                            height: 18px !important; 
+                            top: 3px !important; 
+                            left: 3px !important; 
+                            border-radius: 50% !important; 
+                            background-color: #ffffff !important;
+                            border: 1px solid #d1d5db !important;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                        }
+                        .toggle-switch > input:checked + .slider:before { 
+                            transform: translateX(20px) !important; 
+                            background-color: #ffffff !important;
+                            border: 1px solid #4f46e5 !important;
+                        }
+                        .toggle-switch .slider {
+                            background-color: #e5e7eb !important;
+                            border: 1px solid #d1d5db !important;
+                        }
+                        .toggle-switch > input:checked + .slider {
+                            background-color: #6366f1 !important;
+                            border: 1px solid #4f46e5 !important;
+                        }
+                    }
                 `;
                 this.shadowRoot?.appendChild(style);
                 console.log(`📱 [MOBILE SIZES] Set proper toggle slider ${index + 1} size`);
@@ -23487,11 +23508,14 @@ applyCustomizations(customizationData) {
         // Set useful links dropdown to reasonable mobile size
         const usefulLinksDropdown = this.shadowRoot?.querySelector('.useful-links-dropdown');
         if (usefulLinksDropdown) {
-            usefulLinksDropdown.style.setProperty('font-size', '14px', 'important');
-            usefulLinksDropdown.style.setProperty('padding', '8px 12px', 'important');
-            usefulLinksDropdown.style.setProperty('min-height', '40px', 'important');
-            usefulLinksDropdown.style.setProperty('margin', '8px 0', 'important');
+            usefulLinksDropdown.style.setProperty('font-size', '16px', 'important');
+            usefulLinksDropdown.style.setProperty('padding', '12px 16px', 'important');
+            usefulLinksDropdown.style.setProperty('min-height', '50px', 'important');
+            usefulLinksDropdown.style.setProperty('margin', '12px 0', 'important');
             usefulLinksDropdown.style.setProperty('border-radius', '8px', 'important');
+            usefulLinksDropdown.style.setProperty('border', '2px solid #e2e8f0', 'important');
+            usefulLinksDropdown.style.setProperty('background', '#f8fafc', 'important');
+            usefulLinksDropdown.style.setProperty('box-shadow', '0 2px 6px rgba(0, 0, 0, 0.06)', 'important');
             usefulLinksDropdown.style.setProperty('display', 'block', 'important');
             usefulLinksDropdown.style.setProperty('visibility', 'visible', 'important');
             usefulLinksDropdown.style.setProperty('opacity', '1', 'important');
@@ -23501,14 +23525,18 @@ applyCustomizations(customizationData) {
         // Set useful links content select to reasonable mobile size
         const usefulLinksSelect = this.shadowRoot?.querySelector('.useful-links-content select');
         if (usefulLinksSelect) {
-            usefulLinksSelect.style.setProperty('font-size', '14px', 'important');
-            usefulLinksSelect.style.setProperty('padding', '8px 12px', 'important');
-            usefulLinksSelect.style.setProperty('min-height', '36px', 'important');
-            usefulLinksSelect.style.setProperty('height', '36px', 'important');
-            usefulLinksSelect.style.setProperty('line-height', '1.2', 'important');
+            usefulLinksSelect.style.setProperty('font-size', '16px', 'important');
+            usefulLinksSelect.style.setProperty('padding', '10px 14px', 'important');
+            usefulLinksSelect.style.setProperty('min-height', '44px', 'important');
+            usefulLinksSelect.style.setProperty('height', '44px', 'important');
+            usefulLinksSelect.style.setProperty('line-height', '1.3', 'important');
             usefulLinksSelect.style.setProperty('max-width', '100%', 'important');
             usefulLinksSelect.style.setProperty('box-sizing', 'border-box', 'important');
             usefulLinksSelect.style.setProperty('border-radius', '6px', 'important');
+            usefulLinksSelect.style.setProperty('border', '2px solid #d1d5db', 'important');
+            usefulLinksSelect.style.setProperty('background', 'white', 'important');
+            usefulLinksSelect.style.setProperty('color', '#374151', 'important');
+            usefulLinksSelect.style.setProperty('font-weight', '500', 'important');
             usefulLinksSelect.style.setProperty('display', 'block', 'important');
             usefulLinksSelect.style.setProperty('visibility', 'visible', 'important');
             usefulLinksSelect.style.setProperty('opacity', '1', 'important');
@@ -23520,20 +23548,22 @@ applyCustomizations(customizationData) {
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 40px !important;
+                    font-size: 16px !important;
+                    padding: 12px 16px !important;
+                    min-height: 50px !important;
                     height: auto !important;
-                    margin: 8px 0 !important;
+                    margin: 12px 0 !important;
                     border-radius: 8px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.2 !important;
-                    border: 1px solid #ccc !important;
+                    line-height: 1.3 !important;
+                    border: 2px solid #e2e8f0 !important;
+                    background: #f8fafc !important;
                     max-width: 100% !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
                 }
                 .useful-links-content {
                     padding: 8px 12px !important;
@@ -23546,56 +23576,65 @@ applyCustomizations(customizationData) {
                     opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 36px !important;
-                    height: 36px !important;
-                    line-height: 1.2 !important;
+                    font-size: 16px !important;
+                    padding: 10px 14px !important;
+                    min-height: 44px !important;
+                    height: 44px !important;
+                    line-height: 1.3 !important;
                     border-radius: 6px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
-                    border: 1px solid #ccc !important;
+                    border: 2px solid #d1d5db !important;
+                    background: white !important;
+                    color: #374151 !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
+                    font-weight: 500 !important;
                 }
                 .useful-links-content select option {
-                    font-size: 14px !important;
-                    padding: 4px 8px !important;
-                    line-height: 1.2 !important;
+                    font-size: 16px !important;
+                    padding: 8px 12px !important;
+                    line-height: 1.3 !important;
+                    font-weight: 500 !important;
                 }
                 /* Override any existing styles with maximum specificity */
                 .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 40px !important;
+                    font-size: 16px !important;
+                    padding: 12px 16px !important;
+                    min-height: 50px !important;
                     height: auto !important;
-                    margin: 8px 0 !important;
+                    margin: 12px 0 !important;
                     border-radius: 8px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.2 !important;
-                    border: 1px solid #ccc !important;
+                    line-height: 1.3 !important;
+                    border: 2px solid #e2e8f0 !important;
+                    background: #f8fafc !important;
                     max-width: 100% !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
                 }
                 .accessibility-panel .profile-item.has-dropdown .useful-links-content select {
-                    font-size: 14px !important;
-                    padding: 8px 12px !important;
-                    min-height: 36px !important;
-                    height: 36px !important;
-                    line-height: 1.2 !important;
+                    font-size: 16px !important;
+                    padding: 10px 14px !important;
+                    min-height: 44px !important;
+                    height: 44px !important;
+                    line-height: 1.3 !important;
                     border-radius: 6px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
-                    border: 1px solid #ccc !important;
+                    border: 2px solid #d1d5db !important;
+                    background: white !important;
+                    color: #374151 !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
+                    font-weight: 500 !important;
                 }
                 
                 /* AGGRESSIVE FIX: Prevent any text shifting in Useful Links */
@@ -24194,22 +24233,23 @@ applyCustomizations(customizationData) {
             
             console.log('🖥️ [DESKTOP SHAPE] Target border-radius:', borderRadius);
             
-            // Apply the border-radius with maximum specificity
+            // Apply the border-radius with !important to override external CSS
             icon.style.setProperty('border-radius', borderRadius, 'important');
             icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
             icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
+            
+            // Also set individual corner radius for maximum compatibility
+            icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
+            icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
+            icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
+            icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
+            
             console.log('🖥️ [DESKTOP SHAPE] Applied border-radius with !important:', borderRadius);
             
             // Update CSS classes
             icon.classList.remove('circle', 'rounded', 'square');
             icon.classList.add(shape.toLowerCase());
             console.log('🖥️ [DESKTOP SHAPE] Updated classes to:', icon.className);
-            
-            // Force the shape with direct style assignment as backup
-            icon.style.borderRadius = borderRadius;
-            icon.style.webkitBorderRadius = borderRadius;
-            icon.style.mozBorderRadius = borderRadius;
-            console.log('🖥️ [DESKTOP SHAPE] Applied direct style assignment as backup');
             
             // Force a reflow to ensure styles are applied
             icon.offsetHeight;
@@ -24280,72 +24320,11 @@ applyCustomizations(customizationData) {
             console.log('[CK] Icon inline style border-radius:', icon.style.borderRadius);
             console.log('[CK] Icon final HTML:', icon.outerHTML);
             
-            // Force apply after a short delay to override any conflicting styles
-            setTimeout(() => {
-                console.log('[CK] === TIMEOUT FORCE APPLICATION ===');
-                if (shape === 'Rounded') {
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
-                    console.log('[CK] Force applied rounded shape after timeout');
-                }
-                
-                const finalComputedStyle = window.getComputedStyle(icon);
-                const finalBorderRadius = finalComputedStyle.borderRadius;
-                console.log('[CK] Final computed border-radius after timeout:', finalBorderRadius);
-            }, 100);
+            // Let CSS handle the shape naturally - no aggressive timeouts needed
             
-            // Additional force application after external CSS loads
-            setTimeout(() => {
-                console.log('[CK] === EXTERNAL CSS OVERRIDE FORCE ===');
-                if (shape === 'Rounded') {
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
-                    console.log('[CK] External CSS override applied');
-                }
-                
-                const finalComputedStyle2 = window.getComputedStyle(icon);
-                const finalBorderRadius2 = finalComputedStyle2.borderRadius;
-                console.log('[CK] Final computed border-radius after external CSS override:', finalBorderRadius2);
-            }, 500);
+            // Let CSS handle the shape naturally - no aggressive timeouts needed
             
-            // Final aggressive force application
-            setTimeout(() => {
-                console.log('[CK] === FINAL AGGRESSIVE FORCE ===');
-                if (shape === 'Rounded') {
-                    // Remove any conflicting styles first
-                    icon.style.removeProperty('border-radius');
-                    icon.style.removeProperty('-webkit-border-radius');
-                    icon.style.removeProperty('-moz-border-radius');
-                    
-                    // Apply rounded shape with maximum force
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
-                    
-                    // Force reflow
-                    icon.offsetHeight;
-                    
-                    console.log('[CK] Final aggressive force applied');
-                }
-                
-                const finalComputedStyle3 = window.getComputedStyle(icon);
-                const finalBorderRadius3 = finalComputedStyle3.borderRadius;
-                console.log('[CK] Final computed border-radius after aggressive force:', finalBorderRadius3);
-            }, 1000);
+            // Let CSS handle the shape naturally - no aggressive timeouts needed
         } else {
             console.error('[CK] Icon not found!');
         }
@@ -25056,23 +25035,21 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE SHAPE] - Computed after clearing:', window.getComputedStyle(icon).borderRadius);
                 console.log('📱 [MOBILE SHAPE] - Target border-radius:', borderRadius);
                 
-                // Apply with maximum force - multiple attempts to override any external CSS
+                // Apply shape naturally - let CSS handle it
+                icon.setAttribute('data-shape', shape.toLowerCase());
+                icon.classList.remove('circle', 'square');
+                icon.classList.add(shape.toLowerCase());
+                
+                // Apply border-radius with !important to override external CSS
                 icon.style.setProperty('border-radius', borderRadius, 'important');
                 icon.style.setProperty('-webkit-border-radius', borderRadius, 'important');
                 icon.style.setProperty('-moz-border-radius', borderRadius, 'important');
-                icon.style.setProperty('display', 'flex', 'important');
-                icon.style.setProperty('align-items', 'center', 'important');
-                icon.style.setProperty('justify-content', 'center', 'important');
                 
-                // Force the shape with multiple approaches
-                icon.setAttribute('data-shape', 'rounded');
-                icon.classList.remove('circle', 'square');
-                icon.classList.add('rounded');
-                
-                // Additional force with direct style assignment
-                icon.style.borderRadius = borderRadius;
-                icon.style.webkitBorderRadius = borderRadius;
-                icon.style.mozBorderRadius = borderRadius;
+                // Also set individual corner radius for maximum compatibility
+                icon.style.setProperty('border-top-left-radius', borderRadius, 'important');
+                icon.style.setProperty('border-top-right-radius', borderRadius, 'important');
+                icon.style.setProperty('border-bottom-left-radius', borderRadius, 'important');
+                icon.style.setProperty('border-bottom-right-radius', borderRadius, 'important');
                 
                 console.log('📱 [MOBILE SHAPE] IMMEDIATELY AFTER SETTING:');
                 console.log('📱 [MOBILE SHAPE] - Inline border-radius:', icon.style.borderRadius);
