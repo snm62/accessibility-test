@@ -2,7 +2,7 @@ class AccessibilityWidget {
 constructor() {
 
         this.settings = {};
-        
+
 
         this.contentScale = 100; // Start at 100% (normal size)
 
@@ -2911,7 +2911,7 @@ body.align-right a {
             /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
 
             .accessibility-icon:focus {
-                
+
                 
             }
 
@@ -8384,10 +8384,10 @@ html body.big-white-cursor * {
             // Mark current language as selected - call immediately and after delay
             console.log('🎯 [LANGUAGE SELECTION] Calling updateSelectedLanguage() immediately');
             this.updateSelectedLanguage();
-            
+
             setTimeout(() => {
                 console.log('🎯 [LANGUAGE SELECTION] About to call updateSelectedLanguage() from showLanguageDropdown (delayed)');
-                this.updateSelectedLanguage();
+            this.updateSelectedLanguage();
                 console.log('🎯 [LANGUAGE SELECTION] updateSelectedLanguage() completed from showLanguageDropdown (delayed)');
             }, 100);
 
@@ -16865,19 +16865,19 @@ html body.big-white-cursor * {
 
         const muteAllMedia = () => {
 
-            const audioElements = document.querySelectorAll('audio');
+        const audioElements = document.querySelectorAll('audio');
 
-            const videoElements = document.querySelectorAll('video');
+        const videoElements = document.querySelectorAll('video');
 
-            
+        
 
             console.log(`🔇 [MUTE SOUND] Found ${audioElements.length} audio and ${videoElements.length} video elements to mute`);
 
-            
 
+        
             // Handle audio elements
 
-            audioElements.forEach((element, index) => {
+        audioElements.forEach((element, index) => {
 
                 const elementId = `audio-${index}-${Date.now()}`;
 
@@ -16889,7 +16889,7 @@ html body.big-white-cursor * {
 
                 // ULTRA AGGRESSIVE: Force mute and pause immediately
 
-                element.volume = 0;
+            element.volume = 0;
 
                 element.muted = true;
 
@@ -16965,7 +16965,7 @@ html body.big-white-cursor * {
 
             // Handle video elements
 
-            videoElements.forEach((element, index) => {
+        videoElements.forEach((element, index) => {
 
                 const elementId = `video-${index}-${Date.now()}`;
 
@@ -16977,7 +16977,7 @@ html body.big-white-cursor * {
 
                 // ULTRA AGGRESSIVE: Force mute and pause immediately
 
-                element.volume = 0;
+            element.volume = 0;
 
                 element.muted = true;
 
@@ -17561,17 +17561,17 @@ html body.big-white-cursor * {
 
         // Restore original volume states for all elements
 
-        const audioElements = document.querySelectorAll('audio');
+            const audioElements = document.querySelectorAll('audio');
 
-        const videoElements = document.querySelectorAll('video');
+            const videoElements = document.querySelectorAll('video');
 
         
 
         console.log(`Accessibility Widget: Restoring volume for ${audioElements.length} audio and ${videoElements.length} video elements`);
 
-        
+            
 
-        audioElements.forEach((element, index) => {
+            audioElements.forEach((element, index) => {
 
             // Restore to full volume
 
@@ -17583,11 +17583,11 @@ html body.big-white-cursor * {
 
             console.log(`Accessibility Widget: Restored audio element ${index}, volume: ${element.volume}, muted: ${element.muted}`);
 
-        });
+            });
 
-        
+            
 
-        videoElements.forEach((element, index) => {
+            videoElements.forEach((element, index) => {
 
             // Restore to full volume
 
@@ -23339,8 +23339,8 @@ applyCustomizations(customizationData) {
                             flex-shrink: 0 !important;
                         }
                         
-                        /* Align text and toggle horizontally */
-                        .profile-item {
+                        /* Align text and toggle horizontally - but not for has-dropdown items */
+                        .profile-item:not(.has-dropdown) {
                             display: flex !important;
                             align-items: center !important;
                             gap: 8px !important;
@@ -23582,22 +23582,21 @@ applyCustomizations(customizationData) {
         mobileUsefulLinksStyle.textContent = `
             @media (max-width: 768px) {
                 .useful-links-dropdown {
-                    font-size: 16px !important;
-                    padding: 12px 16px !important;
-                    min-height: 50px !important;
+                    font-size: 14px !important;
+                    padding: 8px 12px !important;
+                    min-height: 36px !important;
                     height: auto !important;
-                    margin: 12px 0 !important;
-                    border-radius: 8px !important;
+                    margin: 8px 0 !important;
+                    border-radius: 6px !important;
                     box-sizing: border-box !important;
                     width: 100% !important;
-                    line-height: 1.3 !important;
-                    border: 2px solid #e2e8f0 !important;
-                    background: #f8fafc !important;
+                    line-height: 1.2 !important;
+                    border: 1px solid #d1d5db !important;
+                    background: #f9fafb !important;
                     max-width: 100% !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
                 }
                 .useful-links-content {
                     padding: 8px 12px !important;
@@ -23610,111 +23609,49 @@ applyCustomizations(customizationData) {
                     opacity: 1 !important;
                 }
                 .useful-links-content select {
-                    font-size: 16px !important;
-                    padding: 10px 14px !important;
-                    min-height: 44px !important;
-                    height: 44px !important;
-                    line-height: 1.3 !important;
-                    border-radius: 6px !important;
+                    font-size: 14px !important;
+                    padding: 6px 10px !important;
+                    min-height: 32px !important;
+                    height: 32px !important;
+                    line-height: 1.2 !important;
+                    border-radius: 4px !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
-                    border: 2px solid #d1d5db !important;
+                    border: 1px solid #d1d5db !important;
                     background: white !important;
                     color: #374151 !important;
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
-                    font-weight: 500 !important;
+                    font-weight: 400 !important;
                 }
                 .useful-links-content select option {
-                    font-size: 16px !important;
-                    padding: 8px 12px !important;
-                    line-height: 1.3 !important;
-                    font-weight: 500 !important;
-                }
-                /* Override any existing styles with maximum specificity */
-                .accessibility-panel .profile-item.has-dropdown .useful-links-dropdown {
-                    font-size: 16px !important;
-                    padding: 12px 16px !important;
-                    min-height: 50px !important;
-                    height: auto !important;
-                    margin: 12px 0 !important;
-                    border-radius: 8px !important;
-                    box-sizing: border-box !important;
-                    width: 100% !important;
-                    line-height: 1.3 !important;
-                    border: 2px solid #e2e8f0 !important;
-                    background: #f8fafc !important;
-                    max-width: 100% !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
-                }
-                .accessibility-panel .profile-item.has-dropdown .useful-links-content select {
-                    font-size: 16px !important;
-                    padding: 10px 14px !important;
-                    min-height: 44px !important;
-                    height: 44px !important;
-                    line-height: 1.3 !important;
-                    border-radius: 6px !important;
-                    max-width: 100% !important;
-                    width: 100% !important;
-                    box-sizing: border-box !important;
-                    border: 2px solid #d1d5db !important;
-                    background: white !important;
-                    color: #374151 !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    font-weight: 500 !important;
+                    font-size: 14px !important;
+                    padding: 6px 10px !important;
+                    line-height: 1.2 !important;
+                    font-weight: 400 !important;
                 }
                 
-                /* AGGRESSIVE FIX: Prevent any text shifting in Useful Links */
+                /* Clean layout for Useful Links on mobile */
                 .profile-item.has-dropdown {
                     position: relative !important;
                     display: block !important;
-                    padding-left: 50px !important;
-                    min-height: 40px !important;
-                    overflow: visible !important;
+                    padding-left: 60px !important;
+                    min-height: 50px !important;
                 }
                 .profile-item.has-dropdown .profile-info {
                     position: static !important;
-                    left: auto !important;
-                    right: auto !important;
                     width: 100% !important;
-                    min-width: auto !important;
-                    max-width: none !important;
-                    flex: none !important;
                     padding-left: 0 !important;
                     margin-left: 0 !important;
-                    transform: none !important;
-                    transition: none !important;
                 }
                 .profile-item.has-dropdown .toggle-switch {
                     position: absolute !important;
-                    left: 8px !important;
-                    top: 8px !important;
-                    z-index: 5 !important;
-                    transform: none !important;
-                    margin: 0 !important;
-                    width: 50px !important;
-                    height: 28px !important;
-                }
-                .profile-item.has-dropdown .toggle-switch .slider {
-                    width: 50px !important;
-                    height: 28px !important;
-                    position: relative !important;
-                    transform: none !important;
-                }
-                .profile-item.has-dropdown .toggle-switch .slider:before {
-                    width: 24px !important;
+                    left: 10px !important;
+                    top: 10px !important;
+                    width: 44px !important;
                     height: 24px !important;
-                    transform: none !important;
-                }
-                .profile-item.has-dropdown .toggle-switch > input:checked + .slider:before {
-                    transform: translateX(22px) !important;
                 }
             }
         `;
