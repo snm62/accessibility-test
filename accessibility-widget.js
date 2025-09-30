@@ -96,10 +96,7 @@ constructor() {
 
             } else {
 
-                console.log('Accessibility Widget: No customization data found, using defaults');
-                
-                // Show the icon with default styling
-                this.showIcon();
+                console.log('Accessibility Widget: No customization data found from KV; keeping icon hidden until styles are available');
 
             }
 
@@ -3017,14 +3014,22 @@ body.align-right a {
 
             .profile-item:focus-within {
 
-                outline: none !important;
+                outline: 3px solid #6366f1 !important;
+                outline-offset: 2px !important;
+                background: rgba(99, 102, 241, 0.1) !important;
+                border-radius: 4px !important;
+                transition: outline 0.2s ease, background 0.2s ease !important;
             }
 
 
 
             .profile-item:focus {
 
-               outline: none !important;
+               outline: 3px solid #6366f1 !important;
+               outline-offset: 2px !important;
+               background: rgba(99, 102, 241, 0.1) !important;
+               border-radius: 4px !important;
+               transition: outline 0.2s ease, background 0.2s ease !important;
             }
 
 
@@ -19167,7 +19172,8 @@ html body.big-white-cursor * {
 
         this.addSeizureSafeStyles();
 
-        
+        // Stop autoplay videos to prevent seizures
+        this.stopAutoplayVideos();
 
         // Stop any JavaScript-based animations (like the slider auto-slide)
 
@@ -19263,6 +19269,57 @@ html body.big-white-cursor * {
 
         console.log('Accessibility Widget: Seizure safe profile disabled');
 
+    }
+
+    // Stop autoplay videos to prevent seizures
+    stopAutoplayVideos() {
+        console.log('Accessibility Widget: Stopping autoplay videos for seizure safety');
+        
+        // Find all video and audio elements
+        const videos = document.querySelectorAll('video');
+        const audios = document.querySelectorAll('audio');
+        
+        // Stop and pause all videos
+        videos.forEach((video, index) => {
+            if (video.autoplay || video.getAttribute('autoplay') !== null) {
+                video.pause();
+                video.currentTime = 0;
+                video.removeAttribute('autoplay');
+                video.setAttribute('data-seizure-safe-paused', 'true');
+                console.log(`Accessibility Widget: Stopped autoplay video ${index + 1}`);
+            }
+        });
+        
+        // Stop and pause all audio
+        audios.forEach((audio, index) => {
+            if (audio.autoplay || audio.getAttribute('autoplay') !== null) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.removeAttribute('autoplay');
+                audio.setAttribute('data-seizure-safe-paused', 'true');
+                console.log(`Accessibility Widget: Stopped autoplay audio ${index + 1}`);
+            }
+        });
+        
+        // Add CSS to prevent future autoplay
+        if (!document.getElementById('seizure-safe-autoplay-css')) {
+            const style = document.createElement('style');
+            style.id = 'seizure-safe-autoplay-css';
+            style.textContent = `
+                .seizure-safe video[autoplay],
+                .seizure-safe audio[autoplay] {
+                    animation-play-state: paused !important;
+                }
+                .seizure-safe video,
+                .seizure-safe audio {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        console.log('Accessibility Widget: Autoplay videos stopped for seizure safety');
     }
 
 
@@ -23130,6 +23187,7 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
                 
                 // Set base positioning with higher specificity
+                icon.style.setProperty('visibility', 'hidden');
                 icon.style.setProperty('position', 'fixed', 'important');
                 icon.style.setProperty('z-index', '9999', 'important');
                 
@@ -23167,6 +23225,9 @@ applyCustomizations(customizationData) {
                     icon.style.setProperty('transform', 'translateY(-50%)', 'important');
                     console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%) with !important');
                 }
+
+                // Reveal after initial positioning is applied
+                icon.style.removeProperty('visibility');
                 
                 console.log('📱 [MOBILE POSITION] IMMEDIATELY AFTER SETTING - Current styles:');
                 console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
@@ -23177,51 +23238,7 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
                 console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
                 
-                // Force reapply after a short delay to override any conflicting CSS
-                setTimeout(() => {
-                    console.log('📱 [MOBILE POSITION] REAPPLYING AFTER DELAY...');
-                    if (horizontalPos === 'Right' || horizontalPos === 'right') {
-                        icon.style.setProperty('right', '20px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
-                    } else if (horizontalPos === 'Left' || horizontalPos === 'left') {
-                        icon.style.setProperty('left', '20px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
-                    }
-                    
-                    if (verticalPos === 'Middle' || verticalPos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                    } else if (verticalPos === 'Top' || verticalPos === 'top') {
-                        icon.style.setProperty('top', '20px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
-                    } else if (verticalPos === 'Bottom' || verticalPos === 'bottom') {
-                        icon.style.setProperty('bottom', '20px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
-                    }
-                    
-                    console.log('📱 [MOBILE POSITION] FINAL STYLES AFTER DELAY:');
-                    console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
-                    console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
-                    console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
-                    console.log('📱 [MOBILE POSITION] - bottom:', icon.style.bottom);
-                    console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
-                    console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
-                    console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
-                    
-                    // Check computed styles
-                    const computedStyle = window.getComputedStyle(icon);
-                    console.log('📱 [MOBILE POSITION] COMPUTED STYLES:');
-                    console.log('📱 [MOBILE POSITION] - computed left:', computedStyle.left);
-                    console.log('📱 [MOBILE POSITION] - computed right:', computedStyle.right);
-                    console.log('📱 [MOBILE POSITION] - computed top:', computedStyle.top);
-                    console.log('📱 [MOBILE POSITION] - computed bottom:', computedStyle.bottom);
-                    console.log('📱 [MOBILE POSITION] - computed transform:', computedStyle.transform);
-                    console.log('📱 [MOBILE POSITION] - computed position:', computedStyle.position);
-                    console.log('📱 [MOBILE POSITION] - computed z-index:', computedStyle.zIndex);
-                }, 100);
+                // Removed delayed reapply to prevent initial flash/jump on load
                 
                 console.log('📱 [MOBILE POSITION] Mobile icon positioned:', horizontalPos, verticalPos, '- COMPLETED');
             }
