@@ -23325,6 +23325,16 @@ applyCustomizations(customizationData) {
                         console.log('📱 [MOBILE POSITION] RE-APPLIED MIDDLE POSITIONING');
                     }
                     
+                    // Re-apply stored offsets after re-positioning
+                    if (this.mobileHorizontalOffset !== undefined) {
+                        console.log('📱 [MOBILE POSITION] Re-applying stored horizontal offset after timeout:', this.mobileHorizontalOffset);
+                        this.updateMobileTriggerOffset('horizontal', this.mobileHorizontalOffset);
+                    }
+                    if (this.mobileVerticalOffset !== undefined) {
+                        console.log('📱 [MOBILE POSITION] Re-applying stored vertical offset after timeout:', this.mobileVerticalOffset);
+                        this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
+                    }
+                    
                     console.log('📱 [MOBILE POSITION] FINAL VERIFICATION:');
                     console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
                     console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
