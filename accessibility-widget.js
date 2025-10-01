@@ -207,23 +207,23 @@ window.addEventListener('resize', () => {
             panel.offsetHeight; // Trigger reflow
             panel.style.display = '';
             
-            if (isMobile) {
-                // Apply mobile settings - force small panel near icon
+        if (isMobile) {
+            // Apply mobile settings - force small panel near icon
                 console.log('📱 [WINDOW RESIZE] Window resized to mobile - applying mobile styles');
-                this.applyMobileResponsiveStyles();
-                
-                // Reapply mobile positioning if it was set
-                if (this.customizationData) {
-                    if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
+            this.applyMobileResponsiveStyles();
+            
+            // Reapply mobile positioning if it was set
+            if (this.customizationData) {
+                if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
                         console.log('📱 [WINDOW RESIZE] Reapplying combined mobile positioning on resize');
-                        this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
-                    }
+                    this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
                 }
-            } else {
-                // Apply desktop settings
-                console.log('📱 [WINDOW RESIZE] Window resized to desktop - removing mobile styles');
-                this.removeMobileResponsiveStyles();
             }
+        } else {
+            // Apply desktop settings
+                console.log('📱 [WINDOW RESIZE] Window resized to desktop - removing mobile styles');
+            this.removeMobileResponsiveStyles();
+        }
         }, 100); // Small delay to ensure proper rendering
     } else {
         console.log('📱 [WINDOW RESIZE] Icon or panel not found - skipping responsive styles');
@@ -3224,6 +3224,12 @@ body.align-right a {
 
                 pointer-events: auto;
 
+                /* Text wrapping to prevent cutoff */
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto !important;
+
                 /* Make panel a containing block for modal */
                 position: relative;
 
@@ -3499,9 +3505,13 @@ body.align-right a {
 
             .profile-item {
 
-                word-wrap: break-word;
+                word-wrap: break-word !important;
 
-                overflow-wrap: break-word;
+                overflow-wrap: break-word !important;
+                
+                word-break: break-word !important;
+                
+                hyphens: auto !important;
 
             }
 
@@ -3520,6 +3530,14 @@ body.align-right a {
             .profile-info div {
 
                 min-width: 0; /* Allow text to wrap */
+                
+                word-wrap: break-word !important;
+                
+                word-break: break-word !important;
+                
+                overflow-wrap: break-word !important;
+                
+                hyphens: auto !important;
 
             }
 
@@ -3741,11 +3759,19 @@ body.align-right a {
 
                 font-weight: 600;
 
-                white-space: nowrap;
+                white-space: normal !important;
 
-                overflow: hidden;
+                overflow: visible !important;
 
-                text-overflow: ellipsis;
+                text-overflow: unset !important;
+                
+                word-wrap: break-word !important;
+                
+                word-break: break-word !important;
+                
+                overflow-wrap: break-word !important;
+                
+                hyphens: auto !important;
 
             }
 
@@ -3759,11 +3785,19 @@ body.align-right a {
 
                 color: #64748b;
 
-                white-space: nowrap;
+                white-space: normal !important;
 
-                overflow: hidden;
+                overflow: visible !important;
 
-                text-overflow: ellipsis;
+                text-overflow: unset !important;
+                
+                word-wrap: break-word !important;
+                
+                word-break: break-word !important;
+                
+                overflow-wrap: break-word !important;
+                
+                hyphens: auto !important;
 
             }
 
@@ -22312,12 +22346,21 @@ applyCustomizations(customizationData) {
             @media (max-width: 768px) {
                 .toggle-switch > input:checked + .slider { width: 100% !important; }
             }
-            .profile-item .profile-info { min-width: 0 !important; }
+            .profile-item .profile-info { 
+                min-width: 0 !important; 
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
             .profile-item .profile-info h4, .profile-item .profile-info p { 
-                white-space: nowrap !important; 
-                overflow: hidden !important; 
-                text-overflow: ellipsis !important; 
+                white-space: normal !important; 
+                overflow: visible !important; 
+                text-overflow: unset !important; 
                 max-width: 100% !important; 
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto !important;
             }
             /* Ensure useful links toggle works correctly */
             #useful-links:checked + .slider:before {
@@ -22886,10 +22929,16 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             
+            // Add text wrapping to ensure all text is visible
+            panel.style.setProperty('word-wrap', 'break-word', 'important');
+            panel.style.setProperty('word-break', 'break-word', 'important');
+            panel.style.setProperty('overflow-wrap', 'break-word', 'important');
+            panel.style.setProperty('hyphens', 'auto', 'important');
+            
             console.log('🔧 [BASE CSS] Applied essential panel CSS properties');
         }
     }
-
+    
     // Force apply mobile responsive styles
     applyMobileResponsiveStyles() {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
