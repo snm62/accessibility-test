@@ -22883,6 +22883,7 @@ applyCustomizations(customizationData) {
             
             // Only apply desktop offsets on desktop/tablet
             if (!isMobile) {
+                console.log('[CK] updateTriggerOffset() - Applying desktop offset');
                 console.log('[CK] updateTriggerOffset() - Current positioning:');
                 console.log('[CK] updateTriggerOffset() - left:', icon.style.left);
                 console.log('[CK] updateTriggerOffset() - right:', icon.style.right);
@@ -22891,52 +22892,52 @@ applyCustomizations(customizationData) {
                 console.log('[CK] updateTriggerOffset() - transform:', icon.style.transform);
                 
                 if (direction === 'horizontal') {
-                    if (icon.style.left !== 'auto' && icon.style.left !== '') {
+                    // Check which side the icon is positioned on
+                    if (icon.style.left && icon.style.left !== 'auto' && icon.style.left !== '') {
                         // Icon is positioned from left
                         const currentLeft = icon.style.left;
-                        if (currentLeft === '20px') {
-                            icon.style.setProperty('left', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied horizontal offset to left:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('left', `calc(${currentLeft} + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied horizontal offset to left:', `calc(${currentLeft} + ${offset}px)`);
-                        }
-                    } else if (icon.style.right !== 'auto' && icon.style.right !== '') {
+                        const newLeft = currentLeft.includes('calc') ? 
+                            currentLeft.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentLeft} + ${offset}px)`;
+                        icon.style.setProperty('left', newLeft, 'important');
+                        console.log('[CK] updateTriggerOffset() - Applied horizontal offset to left:', newLeft);
+                    } else if (icon.style.right && icon.style.right !== 'auto' && icon.style.right !== '') {
                         // Icon is positioned from right
                         const currentRight = icon.style.right;
-                        if (currentRight === '20px') {
-                            icon.style.setProperty('right', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied horizontal offset to right:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('right', `calc(${currentRight} + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied horizontal offset to right:', `calc(${currentRight} + ${offset}px)`);
-                        }
+                        const newRight = currentRight.includes('calc') ? 
+                            currentRight.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentRight} + ${offset}px)`;
+                        icon.style.setProperty('right', newRight, 'important');
+                        console.log('[CK] updateTriggerOffset() - Applied horizontal offset to right:', newRight);
                     }
                 } else if (direction === 'vertical') {
-                    if (icon.style.top !== 'auto' && icon.style.top !== '') {
+                    // Check which side the icon is positioned on
+                    if (icon.style.top && icon.style.top !== 'auto' && icon.style.top !== '') {
                         // Icon is positioned from top
                         const currentTop = icon.style.top;
-                        if (currentTop === '20px') {
-                            icon.style.setProperty('top', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to top:', `calc(20px + ${offset}px)`);
-                        } else if (currentTop === '50%') {
-                            // For middle position, we need to adjust the transform instead
-                            icon.style.setProperty('transform', `translateY(calc(-50% + ${offset}px))`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to middle position:', `translateY(calc(-50% + ${offset}px))`);
+                        if (currentTop === '50%') {
+                            // For middle position, adjust the transform
+                            const currentTransform = icon.style.transform || 'translateY(-50%)';
+                            const newTransform = currentTransform.includes('calc') ? 
+                                currentTransform.replace(')', ` + ${offset}px)`) : 
+                                `translateY(calc(-50% + ${offset}px))`;
+                            icon.style.setProperty('transform', newTransform, 'important');
+                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to middle position:', newTransform);
                         } else {
-                            icon.style.setProperty('top', `calc(${currentTop} + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to top:', `calc(${currentTop} + ${offset}px)`);
+                            const newTop = currentTop.includes('calc') ? 
+                                currentTop.replace(')', ` + ${offset}px)`) : 
+                                `calc(${currentTop} + ${offset}px)`;
+                            icon.style.setProperty('top', newTop, 'important');
+                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to top:', newTop);
                         }
-                    } else if (icon.style.bottom !== 'auto' && icon.style.bottom !== '') {
+                    } else if (icon.style.bottom && icon.style.bottom !== 'auto' && icon.style.bottom !== '') {
                         // Icon is positioned from bottom
                         const currentBottom = icon.style.bottom;
-                        if (currentBottom === '20px') {
-                            icon.style.setProperty('bottom', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to bottom:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('bottom', `calc(${currentBottom} + ${offset}px)`, 'important');
-                            console.log('[CK] updateTriggerOffset() - Applied vertical offset to bottom:', `calc(${currentBottom} + ${offset}px)`);
-                        }
+                        const newBottom = currentBottom.includes('calc') ? 
+                            currentBottom.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentBottom} + ${offset}px)`;
+                        icon.style.setProperty('bottom', newBottom, 'important');
+                        console.log('[CK] updateTriggerOffset() - Applied vertical offset to bottom:', newBottom);
                     }
                 }
                 
@@ -23493,6 +23494,7 @@ applyCustomizations(customizationData) {
             console.log('[CK] updateMobileTriggerOffset() - Is mobile:', isMobile);
             
             if (isMobile) {
+                console.log('[CK] updateMobileTriggerOffset() - Applying mobile offset');
                 console.log('[CK] updateMobileTriggerOffset() - Current positioning:');
                 console.log('[CK] updateMobileTriggerOffset() - left:', icon.style.left);
                 console.log('[CK] updateMobileTriggerOffset() - right:', icon.style.right);
@@ -23501,52 +23503,52 @@ applyCustomizations(customizationData) {
                 console.log('[CK] updateMobileTriggerOffset() - transform:', icon.style.transform);
                 
                 if (direction === 'horizontal') {
-                    if (icon.style.left !== 'auto' && icon.style.left !== '') {
+                    // Check which side the icon is positioned on
+                    if (icon.style.left && icon.style.left !== 'auto' && icon.style.left !== '') {
                         // Icon is positioned from left
                         const currentLeft = icon.style.left;
-                        if (currentLeft === '20px') {
-                            icon.style.setProperty('left', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to left:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('left', `calc(${currentLeft} + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to left:', `calc(${currentLeft} + ${offset}px)`);
-                        }
-                    } else if (icon.style.right !== 'auto' && icon.style.right !== '') {
+                        const newLeft = currentLeft.includes('calc') ? 
+                            currentLeft.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentLeft} + ${offset}px)`;
+                        icon.style.setProperty('left', newLeft, 'important');
+                        console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to left:', newLeft);
+                    } else if (icon.style.right && icon.style.right !== 'auto' && icon.style.right !== '') {
                         // Icon is positioned from right
                         const currentRight = icon.style.right;
-                        if (currentRight === '20px') {
-                            icon.style.setProperty('right', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to right:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('right', `calc(${currentRight} + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to right:', `calc(${currentRight} + ${offset}px)`);
-                        }
+                        const newRight = currentRight.includes('calc') ? 
+                            currentRight.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentRight} + ${offset}px)`;
+                        icon.style.setProperty('right', newRight, 'important');
+                        console.log('[CK] updateMobileTriggerOffset() - Applied horizontal offset to right:', newRight);
                     }
                 } else if (direction === 'vertical') {
-                    if (icon.style.top !== 'auto' && icon.style.top !== '') {
+                    // Check which side the icon is positioned on
+                    if (icon.style.top && icon.style.top !== 'auto' && icon.style.top !== '') {
                         // Icon is positioned from top
                         const currentTop = icon.style.top;
-                        if (currentTop === '20px') {
-                            icon.style.setProperty('top', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to top:', `calc(20px + ${offset}px)`);
-                        } else if (currentTop === '50%') {
-                            // For middle position, we need to adjust the transform instead
-                            icon.style.setProperty('transform', `translateY(calc(-50% + ${offset}px))`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to middle position:', `translateY(calc(-50% + ${offset}px))`);
+                        if (currentTop === '50%') {
+                            // For middle position, adjust the transform
+                            const currentTransform = icon.style.transform || 'translateY(-50%)';
+                            const newTransform = currentTransform.includes('calc') ? 
+                                currentTransform.replace(')', ` + ${offset}px)`) : 
+                                `translateY(calc(-50% + ${offset}px))`;
+                            icon.style.setProperty('transform', newTransform, 'important');
+                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to middle position:', newTransform);
                         } else {
-                            icon.style.setProperty('top', `calc(${currentTop} + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to top:', `calc(${currentTop} + ${offset}px)`);
+                            const newTop = currentTop.includes('calc') ? 
+                                currentTop.replace(')', ` + ${offset}px)`) : 
+                                `calc(${currentTop} + ${offset}px)`;
+                            icon.style.setProperty('top', newTop, 'important');
+                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to top:', newTop);
                         }
-                    } else if (icon.style.bottom !== 'auto' && icon.style.bottom !== '') {
+                    } else if (icon.style.bottom && icon.style.bottom !== 'auto' && icon.style.bottom !== '') {
                         // Icon is positioned from bottom
                         const currentBottom = icon.style.bottom;
-                        if (currentBottom === '20px') {
-                            icon.style.setProperty('bottom', `calc(20px + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to bottom:', `calc(20px + ${offset}px)`);
-                        } else {
-                            icon.style.setProperty('bottom', `calc(${currentBottom} + ${offset}px)`, 'important');
-                            console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to bottom:', `calc(${currentBottom} + ${offset}px)`);
-                        }
+                        const newBottom = currentBottom.includes('calc') ? 
+                            currentBottom.replace(')', ` + ${offset}px)`) : 
+                            `calc(${currentBottom} + ${offset}px)`;
+                        icon.style.setProperty('bottom', newBottom, 'important');
+                        console.log('[CK] updateMobileTriggerOffset() - Applied vertical offset to bottom:', newBottom);
                     }
                 }
                 
