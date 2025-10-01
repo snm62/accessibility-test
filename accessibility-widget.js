@@ -3202,7 +3202,9 @@ body.align-right a {
 
                 width: 500px !important;
 
-                height: 700px !important;
+                height: auto !important;
+                max-height: 80vh !important;
+                min-height: 400px !important;
 
                 background: #ffffff !important;
 
@@ -3282,7 +3284,9 @@ body.align-right a {
 
                     margin: 0 10px !important;
 
-                    height: 700px !important;
+                    height: auto !important;
+                    max-height: 85vh !important;
+                    min-height: 350px !important;
 
                 }
 
@@ -21628,6 +21632,14 @@ applyCustomizations(customizationData) {
         console.log('[CK] applyLanguage() - Language saved to localStorage:', language);
         
         const content = this.translations[language] || this.translations.en;
+        
+        // Ensure toggle text is always available
+        if (!content.toggleOn) {
+            content.toggleOn = "ON";
+        }
+        if (!content.toggleOff) {
+            content.toggleOff = "OFF";
+        }
         console.log('[CK] applyLanguage() - Using content for language:', language);
         console.log('[CK] applyLanguage() - Content keys:', Object.keys(content));
         
@@ -21791,9 +21803,13 @@ applyCustomizations(customizationData) {
     
     updateToggleText(content) {
         console.log('[CK] updateToggleText() - Updating toggle switch text');
+        console.log('[CK] updateToggleText() - Content received:', content);
+        console.log('[CK] updateToggleText() - ToggleOn:', content.toggleOn);
+        console.log('[CK] updateToggleText() - ToggleOff:', content.toggleOff);
         
         // Update CSS custom properties for toggle text
         if (content.toggleOn && content.toggleOff) {
+            // Create style element for shadow DOM
             const style = document.createElement('style');
             style.id = 'toggle-text-translation';
             style.textContent = `
@@ -21805,19 +21821,33 @@ applyCustomizations(customizationData) {
                 }
             `;
             
-            // Remove existing toggle text style if it exists
-            const existingStyle = document.getElementById('toggle-text-translation');
+            console.log('[CK] updateToggleText() - CSS to be applied:', style.textContent);
+            
+            // Remove existing toggle text style if it exists from shadow DOM
+            const existingStyle = this.shadowRoot?.getElementById('toggle-text-translation');
             if (existingStyle) {
+                console.log('[CK] updateToggleText() - Removing existing style');
                 existingStyle.remove();
             }
             
-            // Add the new style
-            document.head.appendChild(style);
-            
-            console.log('[CK] updateToggleText() - Toggle text updated:', {
-                toggleOn: content.toggleOn,
-                toggleOff: content.toggleOff
-            });
+            // Add the new style to shadow DOM
+            if (this.shadowRoot) {
+                this.shadowRoot.appendChild(style);
+                console.log('[CK] updateToggleText() - Toggle text updated in shadow DOM:', {
+                    toggleOn: content.toggleOn,
+                    toggleOff: content.toggleOff
+                });
+                
+                // Force a re-render to ensure the changes take effect
+                const toggles = this.shadowRoot.querySelectorAll('.slider');
+                toggles.forEach(toggle => {
+                    toggle.style.display = 'none';
+                    toggle.offsetHeight; // Trigger reflow
+                    toggle.style.display = '';
+                });
+            } else {
+                console.log('[CK] updateToggleText() - Shadow DOM not found');
+            }
         } else {
             console.log('[CK] updateToggleText() - Toggle text not found in content');
         }
@@ -22852,14 +22882,6 @@ applyCustomizations(customizationData) {
             const screenWidth = window.innerWidth;
             const isMobile = screenWidth <= 768;
             
-            // Calculate responsive height based on screen size
-            let panelHeight;
-            if (isMobile) {
-                panelHeight = Math.min(700, screenHeight * 0.9); // 90% of screen height on mobile
-            } else {
-                panelHeight = Math.min(700, screenHeight * 0.8); // 80% of screen height on desktop
-            }
-            
             // Apply essential base CSS properties that should never be removed
             panel.style.setProperty('position', 'fixed', 'important');
             panel.style.setProperty('z-index', '100000', 'important');
@@ -22872,9 +22894,16 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             
-            // Apply responsive height
-            panel.style.setProperty('height', `${panelHeight}px`, 'important');
-            panel.style.setProperty('max-height', `${panelHeight}px`, 'important');
+            // Apply flexible height that adapts to content
+            if (isMobile) {
+                panel.style.setProperty('height', 'auto', 'important');
+                panel.style.setProperty('max-height', '85vh', 'important');
+                panel.style.setProperty('min-height', '350px', 'important');
+            } else {
+                panel.style.setProperty('height', 'auto', 'important');
+                panel.style.setProperty('max-height', '80vh', 'important');
+                panel.style.setProperty('min-height', '400px', 'important');
+            }
             
             // Ensure proper width
             if (isMobile) {
@@ -22890,7 +22919,7 @@ applyCustomizations(customizationData) {
             panel.offsetHeight; // Trigger reflow
             panel.style.display = '';
             
-            console.log('🔧 [BASE CSS] Applied essential panel CSS properties with responsive height:', panelHeight);
+            console.log('🔧 [BASE CSS] Applied essential panel CSS properties with flexible height');
         }
     }
 
