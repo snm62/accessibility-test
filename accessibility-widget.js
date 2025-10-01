@@ -20324,46 +20324,14 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                .vision-impaired {
-                    filter: contrast(1.5) brightness(1.2) !important;
-                }
-                
                 .vision-impaired * {
-                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
-                }
-                
-                .vision-impaired img {
-                    filter: contrast(1.3) brightness(1.1) !important;
-                }
-                
-                .vision-impaired a {
-                    text-decoration: underline !important;
-                    font-weight: bold !important;
-                }
-                
-                .vision-impaired button,
-                .vision-impaired input,
-                .vision-impaired select,
-                .vision-impaired textarea {
-                    border: 2px solid #000 !important;
-                    background: #fff !important;
-                    color: #000 !important;
-                }
-                
-                .vision-impaired h1,
-                .vision-impaired h2,
-                .vision-impaired h3,
-                .vision-impaired h4,
-                .vision-impaired h5,
-                .vision-impaired h6 {
-                    text-shadow: 2px 2px 4px rgba(0,0,0,0.9) !important;
-                    font-weight: bold !important;
+                    font-size: 105% !important;
                 }
             `;
             document.head.appendChild(style);
         }
         
-        console.log('Accessibility Widget: Vision impaired styles applied via CSS classes');
+        console.log('Accessibility Widget: Vision impaired styles applied - font size increased by 5%');
         
         // Ensure the Shadow DOM host gets the vision-impaired class
         this.updateWidgetAppearance();
@@ -21464,16 +21432,43 @@ applyCustomizations(customizationData) {
     // Show the icon after customizations are loaded
     showIcon() {
         const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        if (icon) {
-            console.log('[CK] showIcon() - Showing icon with customizations applied');
-            icon.style.display = 'flex';
-            icon.style.visibility = 'visible';
-            icon.style.opacity = '1';
-            icon.style.transition = 'opacity 0.3s ease';
-        } else {
+        if (!icon) {
             console.warn('[CK] showIcon() - Icon not found in shadow DOM');
+            return;
+        }
+
+        // Check device type
+        const isMobile = window.innerWidth <= 768;
+        const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
+        const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
+
+        console.log('[CK] showIcon() - Device check:', { isMobile, hideTrigger, mobileVisibility });
+
+        // Desktop/Tablet logic: hide if hideTriggerButton is Yes
+        if (!isMobile && hideTrigger) {
+            console.log('[CK] showIcon() - Desktop/Tablet: hideTriggerButton is Yes; hiding icon');
+            icon.style.display = 'none';
+            icon.style.visibility = 'hidden';
+            icon.style.opacity = '0';
+            return;
+        }
+
+        // Mobile logic: hide if showOnMobile is Hide
+        if (isMobile && mobileVisibility === 'Hide') {
+            console.log('[CK] showIcon() - Mobile: showOnMobile is Hide; hiding icon on mobile');
+            icon.style.display = 'none';
+            icon.style.visibility = 'hidden';
+            icon.style.opacity = '0';
+            return;
+        }
+
+        // Show icon if visibility rules pass
+        console.log('[CK] showIcon() - Showing icon (visibility rules passed)');
+        icon.style.display = 'flex';
+        icon.style.visibility = 'visible';
+        icon.style.opacity = '1';
+        icon.style.transition = 'opacity 0.3s ease';
     }
-}
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
