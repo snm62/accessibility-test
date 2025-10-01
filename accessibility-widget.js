@@ -1322,7 +1322,7 @@ if (window.innerWidth <= 768) {
 }
 
 .accessibility-icon[data-shape="rounded"] {
-    border-radius: 25px;
+    border-radius: 12px;
 }
 
 .accessibility-icon[data-shape="square"] {
@@ -1341,7 +1341,7 @@ if (window.innerWidth <= 768) {
 
 /* Additional shape classes for compatibility */
 .accessibility-icon.rounded {
-    border-radius: 25px;
+    border-radius: 12px;
 }
 
 .accessibility-icon.circle {
@@ -1629,7 +1629,7 @@ if (window.innerWidth <= 768) {
 }
 
 /* Larger Displays (Desktops) */
-@media (min-width: 1025px) {
+@media (min-width: 1012px) {
     .accessibility-panel {
         width: 500px;
         max-width: 500px;
@@ -1799,7 +1799,7 @@ if (window.innerWidth <= 768) {
     
     /* Mobile shape adjustments */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
+        border-radius: 12px;
     }
 }
 
@@ -1851,9 +1851,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on medium mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 12px !important;
+        -webkit-border-radius: 12px !important;
+        -moz-border-radius: 12px !important;
     }
 }
 
@@ -1944,9 +1944,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on small mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 12px;
+        -webkit-border-radius: 12px;
+        -moz-border-radius: 12px;
     }
 }
 
@@ -1984,9 +1984,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on small mobile */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
-        -webkit-border-radius: 25px;
-        -moz-border-radius: 25px;
+        border-radius: 12px;
+        -webkit-border-radius: 12px;
+        -moz-border-radius: 12px;
     }
 }
 
@@ -2006,9 +2006,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on large tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 12px !important;
+        -webkit-border-radius: 12px !important;
+        -moz-border-radius: 12px !important;
     }
     
     .accessibility-icon {
@@ -2054,9 +2054,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on tablets */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 12px !important;
+        -webkit-border-radius: 12px !important;
+        -moz-border-radius: 12px !important;
     }
     
     .accessibility-icon {
@@ -2084,9 +2084,9 @@ if (window.innerWidth <= 768) {
     
     /* Ensure rounded shape works on iPad Mini */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px !important;
-        -webkit-border-radius: 25px !important;
-        -moz-border-radius: 25px !important;
+        border-radius: 12px !important;
+        -webkit-border-radius: 12px !important;
+        -moz-border-radius: 12px !important;
     }
     
     .accessibility-icon {
@@ -2352,7 +2352,7 @@ if (window.innerWidth <= 768) {
     
     /* Mobile shape adjustments */
     .accessibility-icon[data-shape="rounded"] {
-        border-radius: 25px;
+        border-radius: 12px;
     }
     
     .profile-item h4 {
@@ -2741,9 +2741,9 @@ body.align-right a {
         }
         
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         .accessibility-icon[data-shape="square"] {
@@ -2757,59 +2757,59 @@ body.align-right a {
         .accessibility-icon[data-shape="rounded"],
         .accessibility-icon.rounded[data-shape="rounded"],
         .accessibility-icon[data-shape="rounded"].rounded {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Force rounded shape with absolute maximum specificity */
         .accessibility-icon.rounded[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Override any external CSS that might be forcing circle shape */
         .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Force rounded shape with absolute maximum specificity */
         .accessibility-icon.rounded,
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Override any external CSS that might be forcing circle shape */
         .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Maximum specificity override for rounded shape */
         .accessibility-icon.rounded[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Force rounded shape with absolute maximum specificity */
         .accessibility-icon[data-shape="rounded"].rounded {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Override any external CSS with maximum force */
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 25px !important;
-            -webkit-border-radius: 25px !important;
-            -moz-border-radius: 25px !important;
+            border-radius: 12px !important;
+            -webkit-border-radius: 12px !important;
+            -moz-border-radius: 12px !important;
         }
         
         /* Force panel positioning */
@@ -5112,7 +5112,7 @@ html body.big-white-cursor * {
             .hide-interface-modal .modal-content {
                 background: white;
                 border-radius: 12px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
                 /* Position the modal dialog in the center of viewable area */
                 position: absolute;
                 top: 50%;
@@ -18234,7 +18234,7 @@ html body.big-white-cursor * {
 
             color: white;
 
-            padding: 15px 25px;
+            padding: 15px 12px;
 
             border-radius: 8px;
 
@@ -21468,6 +21468,15 @@ applyCustomizations(customizationData) {
         icon.style.visibility = 'visible';
         icon.style.opacity = '1';
         icon.style.transition = 'opacity 0.3s ease';
+        
+        // Apply mobile positioning if on mobile and we have mobile position data
+        if (isMobile && this.customizationData?.mobileTriggerHorizontalPosition && this.customizationData?.mobileTriggerVerticalPosition) {
+            console.log('[CK] showIcon() - Applying mobile positioning on show');
+            this.updateMobileTriggerCombinedPosition(
+                this.customizationData.mobileTriggerHorizontalPosition, 
+                this.customizationData.mobileTriggerVerticalPosition
+            );
+        }
     }
 
     applyLanguage(language) {
@@ -22581,13 +22590,13 @@ applyCustomizations(customizationData) {
             setTimeout(() => {
                 console.log('[CK] === TIMEOUT FORCE APPLICATION ===');
                 if (shape === 'Rounded') {
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-radius', '12px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '12px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '12px', 'important');
                     console.log('[CK] Force applied rounded shape after timeout');
                 }
                 
@@ -22600,13 +22609,13 @@ applyCustomizations(customizationData) {
             setTimeout(() => {
                 console.log('[CK] === EXTERNAL CSS OVERRIDE FORCE ===');
                 if (shape === 'Rounded') {
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-radius', '12px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '12px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '12px', 'important');
                     console.log('[CK] External CSS override applied');
                 }
                 
@@ -22625,13 +22634,13 @@ applyCustomizations(customizationData) {
                     icon.style.removeProperty('-moz-border-radius');
                     
                     // Apply rounded shape with maximum force
-                    icon.style.setProperty('border-radius', '25px', 'important');
-                    icon.style.setProperty('-webkit-border-radius', '25px', 'important');
-                    icon.style.setProperty('-moz-border-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-top-right-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-left-radius', '25px', 'important');
-                    icon.style.setProperty('border-bottom-right-radius', '25px', 'important');
+                    icon.style.setProperty('border-radius', '12px', 'important');
+                    icon.style.setProperty('-webkit-border-radius', '12px', 'important');
+                    icon.style.setProperty('-moz-border-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-top-right-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-left-radius', '12px', 'important');
+                    icon.style.setProperty('border-bottom-right-radius', '12px', 'important');
                     
                     // Force reflow
                     icon.offsetHeight;
@@ -23220,6 +23229,9 @@ applyCustomizations(customizationData) {
                     console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%) with !important');
                 }
 
+                // Force a reflow to ensure styles are applied
+                icon.offsetHeight;
+                
                 console.log('📱 [MOBILE POSITION] IMMEDIATELY AFTER SETTING - Current styles:');
                 console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
                 console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
@@ -23228,6 +23240,23 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
                 console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
                 console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
+                
+                // Additional force with a small delay to ensure positioning sticks
+                setTimeout(() => {
+                    // Re-apply positioning to ensure it sticks after any other CSS loads
+                    if (verticalPos === 'Middle' || verticalPos === 'middle') {
+                        icon.style.setProperty('top', '50%', 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
+                        console.log('📱 [MOBILE POSITION] RE-APPLIED MIDDLE POSITIONING');
+                    }
+                    
+                    console.log('📱 [MOBILE POSITION] FINAL VERIFICATION:');
+                    console.log('📱 [MOBILE POSITION] - top:', icon.style.top);
+                    console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
+                    console.log('📱 [MOBILE POSITION] - computed top:', window.getComputedStyle(icon).top);
+                    console.log('📱 [MOBILE POSITION] - computed transform:', window.getComputedStyle(icon).transform);
+                }, 100);
                 
                 console.log('📱 [MOBILE POSITION] Mobile icon positioned:', horizontalPos, verticalPos, '- COMPLETED');
             }
