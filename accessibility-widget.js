@@ -184,7 +184,7 @@ constructor() {
 
             });
             // Add this in your init function after the existing code
-// Add window resize listener for mobile responsiveness
+// Add window resize listener for mobile responsiveness and screen scaling
 window.addEventListener('resize', () => {
     const screenWidth = window.innerWidth;
     const isMobile = screenWidth <= 768;
@@ -197,23 +197,38 @@ window.addEventListener('resize', () => {
     console.log('📱 [WINDOW RESIZE] Panel found:', !!panel);
     
     if (icon && panel) {
-        if (isMobile) {
-            // Apply mobile settings - force small panel near icon
-            console.log('📱 [WINDOW RESIZE] Window resized to mobile - applying mobile styles');
-            this.applyMobileResponsiveStyles();
+        // Add a small delay to ensure proper rendering after resize
+        setTimeout(() => {
+            // First, ensure panel maintains proper CSS specificity and scroll behavior
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '100001', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('overflow-x', 'hidden', 'important');
+            panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             
-            // Reapply mobile positioning if it was set
-            if (this.customizationData) {
-                if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
-                    console.log('📱 [WINDOW RESIZE] Reapplying combined mobile positioning on resize');
-                    this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
+            // Force re-render to ensure styles are applied
+            panel.style.display = 'none';
+            panel.offsetHeight; // Trigger reflow
+            panel.style.display = '';
+            
+            if (isMobile) {
+                // Apply mobile settings - force small panel near icon
+                console.log('📱 [WINDOW RESIZE] Window resized to mobile - applying mobile styles');
+                this.applyMobileResponsiveStyles();
+                
+                // Reapply mobile positioning if it was set
+                if (this.customizationData) {
+                    if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
+                        console.log('📱 [WINDOW RESIZE] Reapplying combined mobile positioning on resize');
+                        this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
+                    }
                 }
+            } else {
+                // Apply desktop settings
+                console.log('📱 [WINDOW RESIZE] Window resized to desktop - removing mobile styles');
+                this.removeMobileResponsiveStyles();
             }
-        } else {
-            // Apply desktop settings
-            console.log('📱 [WINDOW RESIZE] Window resized to desktop - removing mobile styles');
-            this.removeMobileResponsiveStyles();
-        }
+        }, 100); // Small delay to ensure proper rendering
     } else {
         console.log('📱 [WINDOW RESIZE] Icon or panel not found - skipping responsive styles');
     }
@@ -2939,7 +2954,7 @@ body.align-right a {
             /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
 
             .accessibility-icon:focus {
-                
+
                 
             }
 
@@ -21406,17 +21421,29 @@ applyCustomizations(customizationData) {
             }
         }
         
+        // Store mobile offsets to be applied after positioning
         if (customizationData.mobileTriggerHorizontalOffset) {
-            console.log('[CK] applyCustomizations() - Setting mobile trigger horizontal offset:', customizationData.mobileTriggerHorizontalOffset);
-            this.updateMobileTriggerOffset('horizontal', customizationData.mobileTriggerHorizontalOffset);
+            console.log('[CK] applyCustomizations() - Storing mobile trigger horizontal offset for later application:', customizationData.mobileTriggerHorizontalOffset);
+            this.mobileHorizontalOffset = customizationData.mobileTriggerHorizontalOffset;
         }
         
         if (customizationData.mobileTriggerVerticalOffset) {
-            console.log('[CK] applyCustomizations() - Setting mobile trigger vertical offset:', customizationData.mobileTriggerVerticalOffset);
-            this.updateMobileTriggerOffset('vertical', customizationData.mobileTriggerVerticalOffset);
+            console.log('[CK] applyCustomizations() - Storing mobile trigger vertical offset for later application:', customizationData.mobileTriggerVerticalOffset);
+            this.mobileVerticalOffset = customizationData.mobileTriggerVerticalOffset;
         }
         
         console.log('[CK] applyCustomizations() - Successfully applied all customization data');
+        
+        // Apply mobile offsets after all positioning has been applied
+        if (this.mobileHorizontalOffset !== undefined) {
+            console.log('[CK] applyCustomizations() - Applying stored mobile horizontal offset:', this.mobileHorizontalOffset);
+            this.updateMobileTriggerOffset('horizontal', this.mobileHorizontalOffset);
+        }
+        
+        if (this.mobileVerticalOffset !== undefined) {
+            console.log('[CK] applyCustomizations() - Applying stored mobile vertical offset:', this.mobileVerticalOffset);
+            this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
+        }
         
         // Show the icon now that customizations have been applied
         this.showIcon();
@@ -21464,10 +21491,10 @@ applyCustomizations(customizationData) {
 
         // Show icon if visibility rules pass
         console.log('[CK] showIcon() - Showing icon (visibility rules passed)');
-        icon.style.display = 'flex';
-        icon.style.visibility = 'visible';
-        icon.style.opacity = '1';
-        icon.style.transition = 'opacity 0.3s ease';
+            icon.style.display = 'flex';
+            icon.style.visibility = 'visible';
+            icon.style.opacity = '1';
+            icon.style.transition = 'opacity 0.3s ease';
         
         // Apply mobile positioning if on mobile and we have mobile position data
         if (isMobile && this.customizationData?.mobileTriggerHorizontalPosition && this.customizationData?.mobileTriggerVerticalPosition) {
@@ -21476,8 +21503,8 @@ applyCustomizations(customizationData) {
                 this.customizationData.mobileTriggerHorizontalPosition, 
                 this.customizationData.mobileTriggerVerticalPosition
             );
-        }
     }
+}
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
@@ -22680,6 +22707,13 @@ applyCustomizations(customizationData) {
             const screenWidth = window.innerWidth;
             console.log('📱 [MOBILE RESPONSIVE] Screen width:', screenWidth);
             
+            // Ensure panel has proper CSS specificity and scroll behavior
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '100001', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('overflow-x', 'hidden', 'important');
+            panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            
             // Log current font sizes before changes
             const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
             console.log('📱 [MOBILE RESPONSIVE] Current panel font-size:', currentPanelFontSize);
@@ -22835,6 +22869,12 @@ applyCustomizations(customizationData) {
             
             console.log('📱 [REMOVE MOBILE] Removing mobile responsive styles - restoring desktop styles');
             
+            // Ensure panel maintains proper CSS specificity and scroll behavior
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '100001', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('overflow-x', 'hidden', 'important');
+            
             // Remove mobile-specific styles to allow desktop CSS to take over
             console.log('📱 [REMOVE MOBILE] Removing panel font-size property');
             panel.style.removeProperty('width');
@@ -22844,7 +22884,6 @@ applyCustomizations(customizationData) {
             panel.style.removeProperty('top');
             panel.style.removeProperty('transform');
             panel.style.removeProperty('max-height');
-            panel.style.removeProperty('overflow-y');
             panel.style.removeProperty('font-size');
             panel.style.removeProperty('padding');
             
@@ -22900,7 +22939,7 @@ applyCustomizations(customizationData) {
 
                 const normalizedOffset = (typeof offset === 'number' || /^-?\d+$/.test(String(offset))) ? `${offset}px` : String(offset);
                 
-                if (direction === 'horizontal') {
+            if (direction === 'horizontal') {
                     // Check which side the icon is positioned on
                     console.log('[CK] updateTriggerOffset() - Checking horizontal positioning...');
                     console.log('[CK] updateTriggerOffset() - currentLeftRaw:', currentLeftRaw, 'is not auto:', currentLeftRaw !== 'auto', 'is not 0px:', currentLeftRaw !== '0px');
@@ -22930,8 +22969,8 @@ applyCustomizations(customizationData) {
                         icon.style.setProperty('left', newLeft, 'important');
                         icon.style.setProperty('right', 'auto', 'important');
                         console.log('[CK] updateTriggerOffset() - Applied horizontal offset to default left:', newLeft);
-                    }
-                } else if (direction === 'vertical') {
+                }
+            } else if (direction === 'vertical') {
                     // Check which side the icon is positioned on
                     console.log('[CK] updateTriggerOffset() - Checking vertical positioning...');
                     console.log('[CK] updateTriggerOffset() - currentTopRaw:', currentTopRaw, 'is not auto:', currentTopRaw !== 'auto', 'is not 0px:', currentTopRaw !== '0px');
@@ -22948,7 +22987,7 @@ applyCustomizations(customizationData) {
                                 `translateY(calc(-50% + ${normalizedOffset}))`;
                             icon.style.setProperty('transform', newTransform, 'important');
                             console.log('[CK] updateTriggerOffset() - Applied vertical offset to middle position:', newTransform);
-                        } else {
+                    } else {
                             const newTop = currentTop.includes('calc') ? 
                                 currentTop.replace(')', ` + ${normalizedOffset})`) : 
                                 `calc(${currentTop} + ${normalizedOffset})`;
