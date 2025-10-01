@@ -199,12 +199,8 @@ window.addEventListener('resize', () => {
     if (icon && panel) {
         // Add a small delay to ensure proper rendering after resize
         setTimeout(() => {
-            // First, ensure panel maintains proper CSS specificity and scroll behavior
-            panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('z-index', '100001', 'important');
-            panel.style.setProperty('overflow-y', 'auto', 'important');
-            panel.style.setProperty('overflow-x', 'hidden', 'important');
-            panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            // First, ensure base panel CSS is applied
+            this.ensureBasePanelCSS();
             
             // Force re-render to ensure styles are applied
             panel.style.display = 'none';
@@ -20986,6 +20982,7 @@ html body.big-white-cursor * {
                     console.log('Accessibility Widget: Panel hidden');
                 } else {
                     // Show panel
+                    this.ensureBasePanelCSS(); // Ensure base CSS is applied
                     this.updateInterfacePosition(); // Position panel next to icon
                     panel.style.display = 'block';
                     panel.style.visibility = 'visible';
@@ -21017,7 +21014,7 @@ html body.big-white-cursor * {
                 } else {
 
                     // Open panel
-
+                    this.ensureBasePanelCSS(); // Ensure base CSS is applied
                     panel.classList.add('active');
 
                     panel.setAttribute('aria-hidden', 'false');
@@ -22694,6 +22691,25 @@ applyCustomizations(customizationData) {
         }
     }
     
+    // Ensure base panel CSS is always applied
+    ensureBasePanelCSS() {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        if (panel) {
+            // Apply essential base CSS properties that should never be removed
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '100000', 'important');
+            panel.style.setProperty('background', '#ffffff', 'important');
+            panel.style.setProperty('box-shadow', '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 'important');
+            panel.style.setProperty('border-radius', '8px', 'important');
+            panel.style.setProperty('font-family', "'DM Sans', sans-serif", 'important');
+            panel.style.setProperty('pointer-events', 'auto', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('overflow-x', 'hidden', 'important');
+            panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            console.log('🔧 [BASE CSS] Applied essential panel CSS properties');
+        }
+    }
+
     // Force apply mobile responsive styles
     applyMobileResponsiveStyles() {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
@@ -22704,15 +22720,11 @@ applyCustomizations(customizationData) {
         console.log('📱 [MOBILE RESPONSIVE] Icon found:', !!icon);
         
         if (panel && icon) {
+            // First ensure base CSS is applied
+            this.ensureBasePanelCSS();
+            
             const screenWidth = window.innerWidth;
             console.log('📱 [MOBILE RESPONSIVE] Screen width:', screenWidth);
-            
-            // Ensure panel has proper CSS specificity and scroll behavior
-            panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('z-index', '100001', 'important');
-            panel.style.setProperty('overflow-y', 'auto', 'important');
-            panel.style.setProperty('overflow-x', 'hidden', 'important');
-            panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             
             // Log current font sizes before changes
             const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
@@ -22863,17 +22875,14 @@ applyCustomizations(customizationData) {
         console.log('📱 [REMOVE MOBILE] Icon found:', !!icon);
         
         if (panel && icon) {
+            // First ensure base CSS is applied
+            this.ensureBasePanelCSS();
+            
             // Log current font sizes before removing
             const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
             console.log('📱 [REMOVE MOBILE] Current panel font-size before removal:', currentPanelFontSize);
             
             console.log('📱 [REMOVE MOBILE] Removing mobile responsive styles - restoring desktop styles');
-            
-            // Ensure panel maintains proper CSS specificity and scroll behavior
-            panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('z-index', '100001', 'important');
-            panel.style.setProperty('overflow-y', 'auto', 'important');
-            panel.style.setProperty('overflow-x', 'hidden', 'important');
             
             // Remove mobile-specific styles to allow desktop CSS to take over
             console.log('📱 [REMOVE MOBILE] Removing panel font-size property');
