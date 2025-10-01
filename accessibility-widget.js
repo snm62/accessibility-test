@@ -1925,7 +1925,11 @@ setInterval(() => {
     /* Medium close button for medium mobile screens */
     .close-btn {
         /* Font size controlled by JavaScript */
-        padding: 6px !important;
+        padding: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
     }
     
     /* Ensure rounded shape works on medium mobile */
@@ -2018,7 +2022,11 @@ setInterval(() => {
     /* Smaller close button for small screens */
     .close-btn {
         /* Font size controlled by JavaScript */
-        padding: 4px;
+        padding: 8px;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
     }
     
     /* Ensure rounded shape works on small mobile */
@@ -3366,13 +3374,13 @@ body.align-right a {
 
                 font-size: 24px;
 
-                padding: 0 !important;
+                padding: 12px !important;
 
                 position: absolute !important;
 
-                top: 12px !important;
+                top: 8px !important;
 
-                left: 18px !important;
+                left: 12px !important;
 
                 z-index: 1005 !important;
 
@@ -3382,19 +3390,21 @@ body.align-right a {
 
                 color: white;
 
-                /* Match hide interface modal close button approach */
-                width: 30px !important;
-                height: 30px !important;
-                min-width: 30px !important;
-                min-height: 30px !important;
-                max-width: 30px !important;
-                max-height: 30px !important;
+                /* Increased clickable area */
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+                max-width: 48px !important;
+                max-height: 48px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 box-sizing: border-box !important;
                 margin: 0 !important;
                 outline: none !important;
+                border-radius: 8px !important;
+                transition: background-color 0.2s ease !important;
 
             }
 
@@ -3403,6 +3413,7 @@ body.align-right a {
             .close-btn:hover {
 
                 color: white;
+                background-color: rgba(255, 255, 255, 0.1) !important;
 
             }
 
