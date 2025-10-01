@@ -3405,6 +3405,10 @@ body.align-right a {
                 outline: none !important;
                 border-radius: 8px !important;
                 transition: background-color 0.2s ease !important;
+                
+                /* Ensure the entire button area is clickable */
+                position: relative !important;
+                overflow: visible !important;
 
             }
 
@@ -3417,13 +3421,50 @@ body.align-right a {
 
             }
 
-            /* Force close button clickable area alignment */
+            /* Ensure entire close button area is clickable */
             .close-btn * {
                 pointer-events: none !important;
             }
 
             .close-btn {
                 pointer-events: auto !important;
+                cursor: pointer !important;
+            }
+            
+            /* Make sure the button itself captures all clicks */
+            .close-btn::before,
+            .close-btn::after {
+                pointer-events: none !important;
+            }
+            
+            /* Ensure the button background captures all clicks */
+            .close-btn {
+                background-color: transparent !important;
+                background-image: none !important;
+            }
+            
+            /* Make sure no child elements interfere with clicks */
+            .close-btn i,
+            .close-btn span,
+            .close-btn div {
+                pointer-events: none !important;
+                user-select: none !important;
+                position: relative !important;
+                z-index: 2 !important;
+            }
+            
+            /* Create a full-coverage clickable area */
+            .close-btn::before {
+                content: '' !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                pointer-events: auto !important;
+                z-index: 1 !important;
             }
 
 
@@ -19516,33 +19557,90 @@ html body.big-white-cursor * {
 
             
 
-            /* Stop all animations and transitions, but preserve slider functionality */
-
-            body.seizure-safe *:not(.slider-track):not(.slide):not(.slider-btn):not(.dot):not(.slider-wrapper):not(.slider-container),
-
-            body.seizure-safe *::before,
-
-            body.seizure-safe *::after {
-
+            /* Stop only seizure-triggering animations, preserve essential functionality */
+            
+            /* Target specific seizure-triggering elements */
+            body.seizure-safe [class*="animate"],
+            body.seizure-safe [class*="fade"],
+            body.seizure-safe [class*="slide"],
+            body.seizure-safe [class*="bounce"],
+            body.seizure-safe [class*="pulse"],
+            body.seizure-safe [class*="shake"],
+            body.seizure-safe [class*="flash"],
+            body.seizure-safe [class*="blink"],
+            body.seizure-safe [class*="glow"],
+            body.seizure-safe [class*="spin"],
+            body.seizure-safe [class*="rotate"],
+            body.seizure-safe [class*="scale"],
+            body.seizure-safe [class*="zoom"],
+            body.seizure-safe [class*="wiggle"],
+            body.seizure-safe [class*="jiggle"],
+            body.seizure-safe [class*="twist"],
+            body.seizure-safe [class*="flip"],
+            body.seizure-safe [class*="swing"],
+            body.seizure-safe [class*="wobble"],
+            body.seizure-safe [class*="tilt"],
+            body.seizure-safe [class*="shake"],
+            body.seizure-safe [class*="bounce"],
+            body.seizure-safe [class*="pulse"],
+            body.seizure-safe [class*="flash"],
+            body.seizure-safe [class*="blink"],
+            body.seizure-safe [class*="glow"],
+            body.seizure-safe [class*="spin"],
+            body.seizure-safe [class*="rotate"],
+            body.seizure-safe [class*="scale"],
+            body.seizure-safe [class*="zoom"],
+            body.seizure-safe [class*="wiggle"],
+            body.seizure-safe [class*="jiggle"],
+            body.seizure-safe [class*="twist"],
+            body.seizure-safe [class*="flip"],
+            body.seizure-safe [class*="swing"],
+            body.seizure-safe [class*="wobble"],
+            body.seizure-safe [class*="tilt"] {
                 animation: none !important;
-
                 transition: none !important;
-
-                transform: none !important;
-
                 animation-duration: 0s !important;
-
                 animation-delay: 0s !important;
-
                 animation-iteration-count: 0 !important;
-
                 transition-duration: 0s !important;
-
                 transition-delay: 0s !important;
-
+            }
+            
+            /* Stop common seizure-triggering animations */
+            body.seizure-safe *[style*="animation"],
+            body.seizure-safe *[style*="transition"] {
+                animation: none !important;
+                transition: none !important;
             }
 
             
+
+            /* Preserve portfolio functionality while maintaining seizure safety */
+            body.seizure-safe .portfolio-card,
+            body.seizure-safe .hover-circle,
+            body.seizure-safe .bg-overlay,
+            body.seizure-safe .portfolio-hover-img,
+            body.seizure-safe .portfolio-desc-wrapper,
+            body.seizure-safe .portfolio-filters,
+            body.seizure-safe .curved-text-container {
+                /* Allow essential portfolio animations but reduce intensity */
+                transition: opacity 0.2s ease, transform 0.2s ease !important;
+                animation: none !important;
+            }
+            
+            /* Preserve accessibility widget functionality */
+            body.seizure-safe .accessibility-icon,
+            body.seizure-safe .accessibility-panel,
+            body.seizure-safe .toggle-switch,
+            body.seizure-safe .slider,
+            body.seizure-safe .profile-item,
+            body.seizure-safe .action-btn,
+            body.seizure-safe .close-btn,
+            body.seizure-safe .language-selector {
+                /* Allow essential UI animations */
+                transition: opacity 0.2s ease, transform 0.2s ease !important;
+                animation: none !important;
+            }
 
             /* Allow slider track to maintain its left positioning for navigation */
 
