@@ -3202,9 +3202,7 @@ body.align-right a {
 
                 width: 500px !important;
 
-                height: auto !important;
-                max-height: 80vh !important;
-                min-height: 400px !important;
+                height: 700px !important;
 
                 background: #ffffff !important;
 
@@ -3284,9 +3282,7 @@ body.align-right a {
 
                     margin: 0 10px !important;
 
-                    height: auto !important;
-                    max-height: 85vh !important;
-                    min-height: 350px !important;
+                    height: 700px !important;
 
                 }
 
@@ -22878,10 +22874,6 @@ applyCustomizations(customizationData) {
     ensureBasePanelCSS() {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         if (panel) {
-            const screenHeight = window.innerHeight;
-            const screenWidth = window.innerWidth;
-            const isMobile = screenWidth <= 768;
-            
             // Apply essential base CSS properties that should never be removed
             panel.style.setProperty('position', 'fixed', 'important');
             panel.style.setProperty('z-index', '100000', 'important');
@@ -22894,32 +22886,7 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             
-            // Apply flexible height that adapts to content
-            if (isMobile) {
-                panel.style.setProperty('height', 'auto', 'important');
-                panel.style.setProperty('max-height', '85vh', 'important');
-                panel.style.setProperty('min-height', '350px', 'important');
-            } else {
-                panel.style.setProperty('height', 'auto', 'important');
-                panel.style.setProperty('max-height', '80vh', 'important');
-                panel.style.setProperty('min-height', '400px', 'important');
-            }
-            
-            // Ensure proper width
-            if (isMobile) {
-                panel.style.setProperty('width', '95vw', 'important');
-                panel.style.setProperty('max-width', '400px', 'important');
-            } else {
-                panel.style.setProperty('width', '500px', 'important');
-                panel.style.setProperty('max-width', '500px', 'important');
-            }
-            
-            // Force re-render to ensure styles are applied
-            panel.style.display = 'none';
-            panel.offsetHeight; // Trigger reflow
-            panel.style.display = '';
-            
-            console.log('🔧 [BASE CSS] Applied essential panel CSS properties with flexible height');
+            console.log('🔧 [BASE CSS] Applied essential panel CSS properties');
         }
     }
 
