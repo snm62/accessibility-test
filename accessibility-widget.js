@@ -22480,8 +22480,8 @@ applyCustomizations(customizationData) {
                 borderRadius = '50%';
                 console.log('🖥️ [DESKTOP SHAPE] Detected Circle shape, setting border-radius to 50%');
             } else if (shape === 'Rounded') {
-                borderRadius = '25px';
-                console.log('🖥️ [DESKTOP SHAPE] Detected Rounded shape, setting border-radius to 25px');
+                borderRadius = '12px';
+                console.log('🖥️ [DESKTOP SHAPE] Detected Rounded shape, setting border-radius to 12px for rounded square');
             } else if (shape === 'Square') {
                 borderRadius = '0px';
                 console.log('🖥️ [DESKTOP SHAPE] Detected Square shape, setting border-radius to 0px');
@@ -23182,7 +23182,6 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
                 
                 // Set base positioning with higher specificity
-                icon.style.setProperty('visibility', 'hidden');
                 icon.style.setProperty('position', 'fixed', 'important');
                 icon.style.setProperty('z-index', '9999', 'important');
                 
@@ -23221,9 +23220,6 @@ applyCustomizations(customizationData) {
                     console.log('📱 [MOBILE POSITION] Set top: 50%, bottom: auto, transform: translateY(-50%) with !important');
                 }
 
-                // Reveal after initial positioning is applied
-                icon.style.removeProperty('visibility');
-                
                 console.log('📱 [MOBILE POSITION] IMMEDIATELY AFTER SETTING - Current styles:');
                 console.log('📱 [MOBILE POSITION] - left:', icon.style.left);
                 console.log('📱 [MOBILE POSITION] - right:', icon.style.right);
@@ -23232,8 +23228,6 @@ applyCustomizations(customizationData) {
                 console.log('📱 [MOBILE POSITION] - transform:', icon.style.transform);
                 console.log('📱 [MOBILE POSITION] - position:', icon.style.position);
                 console.log('📱 [MOBILE POSITION] - z-index:', icon.style.zIndex);
-                
-                // Removed delayed reapply to prevent initial flash/jump on load
                 
                 console.log('📱 [MOBILE POSITION] Mobile icon positioned:', horizontalPos, verticalPos, '- COMPLETED');
             }
@@ -23299,8 +23293,8 @@ applyCustomizations(customizationData) {
                     borderRadius = '50%';
                     console.log('📱 [MOBILE SHAPE] Detected Circle shape, setting border-radius to 50%');
                 } else if (shape === 'Rounded' || shape === 'rounded') {
-                    borderRadius = '25px';
-                    console.log('📱 [MOBILE SHAPE] Detected Rounded shape, setting border-radius to 25px');
+                    borderRadius = '12px';
+                    console.log('📱 [MOBILE SHAPE] Detected Rounded shape, setting border-radius to 12px for rounded square');
                 } else if (shape === 'Square' || shape === 'square') {
                     borderRadius = '0px';
                     console.log('📱 [MOBILE SHAPE] Detected Square shape, setting border-radius to 0px');
