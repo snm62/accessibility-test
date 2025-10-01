@@ -234,6 +234,74 @@ window.addEventListener('resize', () => {
 if (window.innerWidth <= 768) {
     this.applyMobileResponsiveStyles();
 }
+
+// Add listener for display scaling changes and device pixel ratio changes
+window.addEventListener('resize', () => {
+    // Force re-application of base CSS after any resize to maintain styling
+    setTimeout(() => {
+        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+        if (panel) {
+            console.log('🔧 [SCALING RESIZE] Display scaling or size changed - reapplying base CSS');
+            this.ensureBasePanelCSS();
+        }
+    }, 50);
+});
+
+// Add listener for device pixel ratio changes (display scaling)
+if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(min-resolution: 1.5dppx)');
+    const handlePixelRatioChange = () => {
+        console.log('🔧 [PIXEL RATIO] Device pixel ratio changed - reapplying base CSS');
+        setTimeout(() => {
+            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            if (panel) {
+                this.ensureBasePanelCSS();
+            }
+        }, 100);
+    };
+    
+    mediaQuery.addListener(handlePixelRatioChange);
+}
+
+// Add MutationObserver to watch for style changes and reapply base CSS
+if (this.shadowRoot) {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                if (panel && panel === mutation.target) {
+                    console.log('🔧 [MUTATION] Panel style changed - ensuring base CSS is maintained');
+                    setTimeout(() => {
+                        this.ensureBasePanelCSS();
+                    }, 10);
+                }
+            }
+        });
+    });
+    
+    // Start observing the panel for style changes
+    const panel = this.shadowRoot?.getElementById('accessibility-panel');
+    if (panel) {
+        observer.observe(panel, { attributes: true, attributeFilter: ['style'] });
+    }
+}
+
+// Add periodic check to ensure panel maintains its CSS (every 2 seconds)
+setInterval(() => {
+    const panel = this.shadowRoot?.getElementById('accessibility-panel');
+    if (panel && panel.style.display !== 'none') {
+        // Check if essential CSS properties are missing
+        const computedStyle = window.getComputedStyle(panel);
+        const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && computedStyle.backgroundColor !== 'transparent';
+        const hasBoxShadow = computedStyle.boxShadow !== 'none';
+        const hasBorderRadius = computedStyle.borderRadius !== '0px';
+        
+        if (!hasBackground || !hasBoxShadow || !hasBorderRadius) {
+            console.log('🔧 [PERIODIC CHECK] Panel missing essential CSS - reapplying base CSS');
+            this.ensureBasePanelCSS();
+        }
+    }
+}, 2000);
             
 
             // Keyboard event for icon
@@ -22695,6 +22763,18 @@ applyCustomizations(customizationData) {
     ensureBasePanelCSS() {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
         if (panel) {
+            const screenHeight = window.innerHeight;
+            const screenWidth = window.innerWidth;
+            const isMobile = screenWidth <= 768;
+            
+            // Calculate responsive height based on screen size
+            let panelHeight;
+            if (isMobile) {
+                panelHeight = Math.min(700, screenHeight * 0.9); // 90% of screen height on mobile
+            } else {
+                panelHeight = Math.min(700, screenHeight * 0.8); // 80% of screen height on desktop
+            }
+            
             // Apply essential base CSS properties that should never be removed
             panel.style.setProperty('position', 'fixed', 'important');
             panel.style.setProperty('z-index', '100000', 'important');
@@ -22706,7 +22786,26 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('overflow-y', 'auto', 'important');
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-            console.log('🔧 [BASE CSS] Applied essential panel CSS properties');
+            
+            // Apply responsive height
+            panel.style.setProperty('height', `${panelHeight}px`, 'important');
+            panel.style.setProperty('max-height', `${panelHeight}px`, 'important');
+            
+            // Ensure proper width
+            if (isMobile) {
+                panel.style.setProperty('width', '95vw', 'important');
+                panel.style.setProperty('max-width', '400px', 'important');
+            } else {
+                panel.style.setProperty('width', '500px', 'important');
+                panel.style.setProperty('max-width', '500px', 'important');
+            }
+            
+            // Force re-render to ensure styles are applied
+            panel.style.display = 'none';
+            panel.offsetHeight; // Trigger reflow
+            panel.style.display = '';
+            
+            console.log('🔧 [BASE CSS] Applied essential panel CSS properties with responsive height:', panelHeight);
         }
     }
 
