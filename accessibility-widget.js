@@ -6821,7 +6821,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "Hide Accessibility Interface?",
                 hideInterfaceModalText: "Please note: If you choose to hide the accessibility interface, you won't be able to see it anymore, unless you clear your browsing history and data. Are you sure that you wish to hide the interface?",
                 hideInterfaceModalAccept: "Accept",
-                hideInterfaceModalCancel: "Cancel"
+                hideInterfaceModalCancel: "Cancel",
+
+                // Toggle switch text
+                toggleOn: "ON",
+                toggleOff: "OFF"
 
             },
 
@@ -6919,7 +6923,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "¿Ocultar Interfaz de Accesibilidad?",
                 hideInterfaceModalText: "Tenga en cuenta: Si elige ocultar la interfaz de accesibilidad, no podrá verla más, a menos que borre el historial de navegación y los datos. ¿Está seguro de que desea ocultar la interfaz?",
                 hideInterfaceModalAccept: "Aceptar",
-                hideInterfaceModalCancel: "Cancelar"
+                hideInterfaceModalCancel: "Cancelar",
+
+                // Toggle switch text
+                toggleOn: "SÍ",
+                toggleOff: "NO"
             },
 
             de: {
@@ -7102,7 +7110,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "Barrierefreiheits-Interface ausblenden?",
                 hideInterfaceModalText: "Bitte beachten Sie: Wenn Sie sich entscheiden, das Barrierefreiheits-Interface auszublenden, können Sie es nicht mehr sehen, es sei denn, Sie löschen Ihren Browserverlauf und Ihre Daten. Sind Sie sicher, dass Sie das Interface ausblenden möchten?",
                 hideInterfaceModalAccept: "Akzeptieren",
-                hideInterfaceModalCancel: "Abbrechen"
+                hideInterfaceModalCancel: "Abbrechen",
+
+                // Toggle switch text
+                toggleOn: "EIN",
+                toggleOff: "AUS"
 
             },
 
@@ -7200,7 +7212,11 @@ html body.big-white-cursor * {
     hideInterfaceModalTitle: "Masquer l'Interface d'Accessibilité?",
     hideInterfaceModalText: "Veuillez noter: Si vous choisissez de masquer l'interface d'accessibilité, vous ne pourrez plus la voir, sauf si vous effacez votre historique de navigation et vos données. Êtes-vous sûr de vouloir masquer l'interface?",
     hideInterfaceModalAccept: "Accepter",
-    hideInterfaceModalCancel: "Annuler"
+    hideInterfaceModalCancel: "Annuler",
+
+    // Toggle switch text
+    toggleOn: "OUI",
+    toggleOff: "NON"
 },
 
             pt: {
@@ -7297,7 +7313,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "Ocultar Interface de Acessibilidade?",
                 hideInterfaceModalText: "Por favor, note: Se você escolher ocultar a interface de acessibilidade, não conseguirá vê-la novamente, a menos que limpe o histórico de navegação e os dados. Tem certeza de que deseja ocultar a interface?",
                 hideInterfaceModalAccept: "Aceitar",
-                hideInterfaceModalCancel: "Cancelar"
+                hideInterfaceModalCancel: "Cancelar",
+
+                // Toggle switch text
+                toggleOn: "SIM",
+                toggleOff: "NÃO"
             },
 
             it: {
@@ -7394,7 +7414,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "Nascondere l'Interfaccia di Accessibilità?",
                 hideInterfaceModalText: "Si prega di notare: Se scegli di nascondere l'interfaccia di accessibilità, non potrai più vederla, a meno che non cancelli la cronologia di navigazione e i dati. Sei sicuro di voler nascondere l'interfaccia?",
                 hideInterfaceModalAccept: "Accetta",
-                hideInterfaceModalCancel: "Annulla"
+                hideInterfaceModalCancel: "Annulla",
+
+                // Toggle switch text
+                toggleOn: "SÌ",
+                toggleOff: "NO"
 },
 
             il: {
@@ -7491,7 +7515,11 @@ html body.big-white-cursor * {
     hideInterfaceModalTitle: "להסתיר את ממשק הנגישות?",
     hideInterfaceModalText: "שימו לב: אם תבחרו להסתיר את ממשק הנגישות, לא תוכלו לראות אותו יותר, אלא אם תמחקו את היסטוריית הגלישה והנתונים. האם אתם בטוחים שברצונכם להסתיר את הממשק?",
     hideInterfaceModalAccept: "קבל",
-    hideInterfaceModalCancel: "בטל"
+    hideInterfaceModalCancel: "בטל",
+
+    // Toggle switch text
+    toggleOn: "כן",
+    toggleOff: "לא"
             },
 
             he: {
@@ -7674,7 +7702,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "להסתיר את ממשק הנגישות?",
                 hideInterfaceModalText: "שימו לב: אם תבחרו להסתיר את ממשק הנגישות, לא תוכלו לראות אותו יותר, אלא אם תמחקו את היסטוריית הגלישה והנתונים. האם אתם בטוחים שברצונכם להסתיר את הממשק?",
                 hideInterfaceModalAccept: "קבל",
-                hideInterfaceModalCancel: "בטל"
+                hideInterfaceModalCancel: "בטל",
+
+                // Toggle switch text
+                toggleOn: "כן",
+                toggleOff: "לא"
 
             },
 
@@ -7772,7 +7804,11 @@ html body.big-white-cursor * {
     hideInterfaceModalTitle: "Скрыть интерфейс доступности?",
     hideInterfaceModalText: "Обратите внимание: Если вы решите скрыть интерфейс доступности, вы больше не сможете его видеть, если только не очистите историю браузера и данные. Вы уверены, что хотите скрыть интерфейс?",
     hideInterfaceModalAccept: "Принять",
-    hideInterfaceModalCancel: "Отмена"
+    hideInterfaceModalCancel: "Отмена",
+
+    // Toggle switch text
+    toggleOn: "ВКЛ",
+    toggleOff: "ВЫКЛ"
 },
             tw: {
     title: "無障礙調整",
@@ -7868,7 +7904,11 @@ html body.big-white-cursor * {
     hideInterfaceModalTitle: "隱藏無障礙介面？",
     hideInterfaceModalText: "請注意：如果您選擇隱藏無障礙介面，除非清除瀏覽歷史記錄和數據，否則將無法再看到它。您確定要隱藏介面嗎？",
     hideInterfaceModalAccept: "接受",
-    hideInterfaceModalCancel: "取消"
+    hideInterfaceModalCancel: "取消",
+
+    // Toggle switch text
+    toggleOn: "開啟",
+    toggleOff: "關閉"
 },
             ar: {
 
@@ -8050,7 +8090,11 @@ html body.big-white-cursor * {
                 hideInterfaceModalTitle: "إخفاء واجهة إمكانية الوصول؟",
                 hideInterfaceModalText: "يرجى ملاحظة: إذا اخترت إخفاء واجهة إمكانية الوصول، لن تتمكن من رؤيتها مرة أخرى، إلا إذا قمت بمسح سجل التصفح والبيانات. هل أنت متأكد من أنك تريد إخفاء الواجهة؟",
                 hideInterfaceModalAccept: "قبول",
-                hideInterfaceModalCancel: "إلغاء"
+                hideInterfaceModalCancel: "إلغاء",
+
+                // Toggle switch text
+                toggleOn: "نعم",
+                toggleOff: "لا"
 
             },
             ae: {
@@ -8147,11 +8191,15 @@ html body.big-white-cursor * {
     hideInterfaceModalTitle: "إخفاء واجهة إمكانية الوصول؟",
     hideInterfaceModalText: "يرجى ملاحظة: إذا اخترت إخفاء واجهة إمكانية الوصول، لن تتمكن من رؤيتها مرة أخرى، إلا إذا قمت بمسح سجل التصفح والبيانات. هل أنت متأكد من أنك تريد إخفاء الواجهة؟",
     hideInterfaceModalAccept: "قبول",
-    hideInterfaceModalCancel: "إلغاء"
-},
-            zh: { title: "无障碍调整", seizureSafe: "癫痫安全配置文件", seizureSafeDesc: "清除闪烁并减少颜色", visionImpaired: "视力障碍配置文件", visionImpairedDesc: "增强网站的视觉效果", adhdFriendly: "多动症友好配置文件", adhdFriendlyDesc: "减少干扰并帮助集中注意力", fontSizing: "字体大小", fontSizingDesc: "增加或减少字体大小", adjustLineHeight: "调整行高", adjustLineHeightDesc: "增加或减少行高", adjustLetterSpacing: "调整字母间距", adjustLetterSpacingDesc: "增加或减少字母间距", contentScaling: "内容缩放", contentScalingDesc: "增加或减少内容大小", resetSettings: "重置设置", statement: "声明", hideInterface: "隐藏界面", accessibilityFeatures: "无障碍功能" },
+    hideInterfaceModalCancel: "إلغاء",
 
-            ja: { title: "アクセシビリティ調整", seizureSafe: "発作安全プロファイル", seizureSafeDesc: "フラッシュを除去し、色を減らします", visionImpaired: "視覚障害者プロファイル", visionImpairedDesc: "ウェブサイトの視覚要素を向上させます", adhdFriendly: "ADHDフレンドリープロファイル", adhdFriendlyDesc: "注意散漫を減らし、集中力を高めます", fontSizing: "フォントサイズ", fontSizingDesc: "フォントサイズを増減します", adjustLineHeight: "行の高さを調整", adjustLineHeightDesc: "行の高さを増減します", adjustLetterSpacing: "文字間隔を調整", adjustLetterSpacingDesc: "文字間隔を増減します", contentScaling: "コンテンツスケーリング", contentScalingDesc: "コンテンツサイズを増減します", resetSettings: "設定をリセット", statement: "ステートメント", hideInterface: "インターフェースを非表示", accessibilityFeatures: "アクセシビリティ機能" },
+    // Toggle switch text
+    toggleOn: "نعم",
+    toggleOff: "لا"
+},
+            zh: { title: "无障碍调整", seizureSafe: "癫痫安全配置文件", seizureSafeDesc: "清除闪烁并减少颜色", visionImpaired: "视力障碍配置文件", visionImpairedDesc: "增强网站的视觉效果", adhdFriendly: "多动症友好配置文件", adhdFriendlyDesc: "减少干扰并帮助集中注意力", fontSizing: "字体大小", fontSizingDesc: "增加或减少字体大小", adjustLineHeight: "调整行高", adjustLineHeightDesc: "增加或减少行高", adjustLetterSpacing: "调整字母间距", adjustLetterSpacingDesc: "增加或减少字母间距", contentScaling: "内容缩放", contentScalingDesc: "增加或减少内容大小", resetSettings: "重置设置", statement: "声明", hideInterface: "隐藏界面", accessibilityFeatures: "无障碍功能", toggleOn: "开启", toggleOff: "关闭" },
+
+            ja: { title: "アクセシビリティ調整", seizureSafe: "発作安全プロファイル", seizureSafeDesc: "フラッシュを除去し、色を減らします", visionImpaired: "視覚障害者プロファイル", visionImpairedDesc: "ウェブサイトの視覚要素を向上させます", adhdFriendly: "ADHDフレンドリープロファイル", adhdFriendlyDesc: "注意散漫を減らし、集中力を高めます", fontSizing: "フォントサイズ", fontSizingDesc: "フォントサイズを増減します", adjustLineHeight: "行の高さを調整", adjustLineHeightDesc: "行の高さを増減します", adjustLetterSpacing: "文字間隔を調整", adjustLetterSpacingDesc: "文字間隔を増減します", contentScaling: "コンテンツスケーリング", contentScalingDesc: "コンテンツサイズを増減します", resetSettings: "設定をリセット", statement: "ステートメント", hideInterface: "インターフェースを非表示", accessibilityFeatures: "アクセシビリティ機能", toggleOn: "オン", toggleOff: "オフ" },
 
             pl: { title: "Ustawienia dostępności", seizureSafe: "Profil bezpieczny dla napadów", seizureSafeDesc: "Usuwa błyski i zmniejsza kolory", visionImpaired: "Profil dla osób niedowidzących", visionImpairedDesc: "Poprawia elementy wizualne strony", adhdFriendly: "Profil przyjazny dla ADHD", adhdFriendlyDesc: "Zmniejsza rozpraszanie i pomaga się skupić", fontSizing: "Rozmiar czcionki", fontSizingDesc: "Zwiększ lub zmniejsz rozmiar czcionki", adjustLineHeight: "Dostosuj wysokość linii", adjustLineHeightDesc: "Zwiększ lub zmniejsz wysokość linii", adjustLetterSpacing: "Dostosuj odstępy między literami", adjustLetterSpacingDesc: "Zwiększ lub zmniejsz odstępy między literami", contentScaling: "Skalowanie treści", contentScalingDesc: "Zwiększ lub zmniejsz rozmiar treści", resetSettings: "Resetuj ustawienia", statement: "Oświadczenie", hideInterface: "Ukryj interfejs", accessibilityFeatures: "Funkcje dostępności" },
 
@@ -21674,6 +21722,9 @@ applyCustomizations(customizationData) {
         // Update detailed descriptions and notes
         this.updateDetailedDescriptions(content);
         
+        // Update toggle switch text
+        this.updateToggleText(content);
+        
         console.log('[CK] applyLanguage() - Language applied successfully');
     }
     
@@ -21735,6 +21786,40 @@ applyCustomizations(customizationData) {
         if (screenReaderActivates && content.activatesWithKeyboardNav) {
             screenReaderActivates.textContent = content.activatesWithKeyboardNav;
             console.log('[CK] Updated screen reader activates text');
+        }
+    }
+    
+    updateToggleText(content) {
+        console.log('[CK] updateToggleText() - Updating toggle switch text');
+        
+        // Update CSS custom properties for toggle text
+        if (content.toggleOn && content.toggleOff) {
+            const style = document.createElement('style');
+            style.id = 'toggle-text-translation';
+            style.textContent = `
+                .slider::after {
+                    content: "${content.toggleOff}" !important;
+                }
+                input:checked + .slider::after {
+                    content: "${content.toggleOn}" !important;
+                }
+            `;
+            
+            // Remove existing toggle text style if it exists
+            const existingStyle = document.getElementById('toggle-text-translation');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
+            // Add the new style
+            document.head.appendChild(style);
+            
+            console.log('[CK] updateToggleText() - Toggle text updated:', {
+                toggleOn: content.toggleOn,
+                toggleOff: content.toggleOff
+            });
+        } else {
+            console.log('[CK] updateToggleText() - Toggle text not found in content');
         }
     }
     
