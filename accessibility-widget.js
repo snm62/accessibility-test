@@ -22902,7 +22902,11 @@ applyCustomizations(customizationData) {
                 
                 if (direction === 'horizontal') {
                     // Check which side the icon is positioned on
-                    if (currentLeftRaw && currentLeftRaw !== 'auto' && currentLeftRaw !== '0px') {
+                    console.log('[CK] updateTriggerOffset() - Checking horizontal positioning...');
+                    console.log('[CK] updateTriggerOffset() - currentLeftRaw:', currentLeftRaw, 'is not auto:', currentLeftRaw !== 'auto', 'is not 0px:', currentLeftRaw !== '0px');
+                    console.log('[CK] updateTriggerOffset() - currentRightRaw:', currentRightRaw, 'is not auto:', currentRightRaw !== 'auto', 'is not 0px:', currentRightRaw !== '0px');
+                    
+                    if (currentLeftRaw && currentLeftRaw !== 'auto' && currentLeftRaw !== '0px' && currentLeftRaw !== '0') {
                         // Icon is positioned from left
                         const currentLeft = currentLeftRaw;
                         const newLeft = currentLeft.includes('calc') ? 
@@ -22910,7 +22914,7 @@ applyCustomizations(customizationData) {
                             `calc(${currentLeft} + ${normalizedOffset})`;
                         icon.style.setProperty('left', newLeft, 'important');
                         console.log('[CK] updateTriggerOffset() - Applied horizontal offset to left:', newLeft);
-                    } else if (currentRightRaw && currentRightRaw !== 'auto' && currentRightRaw !== '0px') {
+                    } else if (currentRightRaw && currentRightRaw !== 'auto' && currentRightRaw !== '0px' && currentRightRaw !== '0') {
                         // Icon is positioned from right
                         const currentRight = currentRightRaw;
                         const newRight = currentRight.includes('calc') ? 
@@ -22918,10 +22922,22 @@ applyCustomizations(customizationData) {
                             `calc(${currentRight} + ${normalizedOffset})`;
                         icon.style.setProperty('right', newRight, 'important');
                         console.log('[CK] updateTriggerOffset() - Applied horizontal offset to right:', newRight);
+                    } else {
+                        console.log('[CK] updateTriggerOffset() - No valid horizontal positioning found, trying to apply to left as default');
+                        // Default to left positioning if no clear positioning is found
+                        const defaultLeft = '20px';
+                        const newLeft = `calc(${defaultLeft} + ${normalizedOffset})`;
+                        icon.style.setProperty('left', newLeft, 'important');
+                        icon.style.setProperty('right', 'auto', 'important');
+                        console.log('[CK] updateTriggerOffset() - Applied horizontal offset to default left:', newLeft);
                     }
                 } else if (direction === 'vertical') {
                     // Check which side the icon is positioned on
-                    if (currentTopRaw && currentTopRaw !== 'auto' && currentTopRaw !== '0px') {
+                    console.log('[CK] updateTriggerOffset() - Checking vertical positioning...');
+                    console.log('[CK] updateTriggerOffset() - currentTopRaw:', currentTopRaw, 'is not auto:', currentTopRaw !== 'auto', 'is not 0px:', currentTopRaw !== '0px');
+                    console.log('[CK] updateTriggerOffset() - currentBottomRaw:', currentBottomRaw, 'is not auto:', currentBottomRaw !== 'auto', 'is not 0px:', currentBottomRaw !== '0px');
+                    
+                    if (currentTopRaw && currentTopRaw !== 'auto' && currentTopRaw !== '0px' && currentTopRaw !== '0') {
                         // Icon is positioned from top
                         const currentTop = currentTopRaw;
                         if (currentTop === '50%') {
@@ -22939,7 +22955,7 @@ applyCustomizations(customizationData) {
                             icon.style.setProperty('top', newTop, 'important');
                             console.log('[CK] updateTriggerOffset() - Applied vertical offset to top:', newTop);
                         }
-                    } else if (currentBottomRaw && currentBottomRaw !== 'auto' && currentBottomRaw !== '0px') {
+                    } else if (currentBottomRaw && currentBottomRaw !== 'auto' && currentBottomRaw !== '0px' && currentBottomRaw !== '0') {
                         // Icon is positioned from bottom
                         const currentBottom = currentBottomRaw;
                         const newBottom = currentBottom.includes('calc') ? 
@@ -22947,6 +22963,14 @@ applyCustomizations(customizationData) {
                             `calc(${currentBottom} + ${normalizedOffset})`;
                         icon.style.setProperty('bottom', newBottom, 'important');
                         console.log('[CK] updateTriggerOffset() - Applied vertical offset to bottom:', newBottom);
+                    } else {
+                        console.log('[CK] updateTriggerOffset() - No valid vertical positioning found, trying to apply to top as default');
+                        // Default to top positioning if no clear positioning is found
+                        const defaultTop = '20px';
+                        const newTop = `calc(${defaultTop} + ${normalizedOffset})`;
+                        icon.style.setProperty('top', newTop, 'important');
+                        icon.style.setProperty('bottom', 'auto', 'important');
+                        console.log('[CK] updateTriggerOffset() - Applied vertical offset to default top:', newTop);
                     }
                 }
                 
