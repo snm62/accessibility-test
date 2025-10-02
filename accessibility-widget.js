@@ -3349,7 +3349,7 @@ body.align-right a {
 
                 flex-direction: column;
 
-                padding: 15px 20px 20px 20px;
+                padding: 10px 20px 20px 20px;
 
                 background: transparent !important;
 
@@ -3379,7 +3379,7 @@ body.align-right a {
 
                 position: absolute;
 
-                top: 4px;
+                top: 2px;
 
                 left: 4px;
 
@@ -3407,9 +3407,9 @@ body.align-right a {
 
                 position: absolute !important;
 
-                top: 2px !important;
+                top: 0px !important;
 
-                left: 8px !important;
+                left: 6px !important;
 
                 z-index: 1005 !important;
 
@@ -3526,7 +3526,7 @@ body.align-right a {
 
                 text-align: center;
 
-                margin: 0 0 15px 0;
+                margin: 0 0 10px 0;
 
                 color: #ffffff;
 
