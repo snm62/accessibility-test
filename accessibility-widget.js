@@ -1412,15 +1412,15 @@ setInterval(() => {
     border-radius: 0px;
 }
 
-        /* Ensure panel always appears on top of icon */
-        .accessibility-panel {
-            z-index: 100001 !important;
-            position: fixed !important;
+/* Ensure panel always appears on top of icon */
+.accessibility-panel {
+    z-index: 100001 !important;
+    position: fixed !important;
             overflow-y: auto !important;
             scroll-behavior: smooth !important;
             -webkit-overflow-scrolling: touch !important;
             overscroll-behavior: contain !important;
-        }
+}
 
 .accessibility-icon {
     z-index: 99998 !important;
@@ -3349,7 +3349,7 @@ body.align-right a {
 
                 flex-direction: column;
 
-                padding: 20px;
+                padding: 15px 20px 20px 20px;
 
                 background: transparent !important;
 
@@ -3407,7 +3407,7 @@ body.align-right a {
 
                 position: absolute !important;
 
-                top: 4px !important;
+                top: 2px !important;
 
                 left: 8px !important;
 
@@ -3526,7 +3526,7 @@ body.align-right a {
 
                 text-align: center;
 
-                margin: 0 0 20px 0;
+                margin: 0 0 15px 0;
 
                 color: #ffffff;
 
@@ -15475,8 +15475,8 @@ html body.big-white-cursor * {
                 });
                 
                 // Save merged settings back to localStorage
-                localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
-                
+        localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
+
                 console.log('[CK] loadSettingsFromKV() - Successfully loaded and applied KV settings');
             }
             
@@ -19903,7 +19903,7 @@ html body.big-white-cursor * {
                 background: inherit !important;
                 background-color: inherit !important;
             }
-            
+
             /* Ensure accessibility widget stays above overlay */
 
             body.seizure-safe .accessibility-widget,
