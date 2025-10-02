@@ -1408,11 +1408,15 @@ setInterval(() => {
     border-radius: 0px;
 }
 
-/* Ensure panel always appears on top of icon */
-.accessibility-panel {
-    z-index: 100001 !important;
-    position: fixed !important;
-}
+        /* Ensure panel always appears on top of icon */
+        .accessibility-panel {
+            z-index: 100001 !important;
+            position: fixed !important;
+            overflow-y: auto !important;
+            scroll-behavior: smooth !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+        }
 
 .accessibility-icon {
     z-index: 99998 !important;
@@ -1496,6 +1500,9 @@ setInterval(() => {
         font-size: 14px;
         max-height: 90vh !important;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
     
     .accessibility-panel h2 {
@@ -1569,6 +1576,9 @@ setInterval(() => {
         padding: 14px;
         max-height: 90vh !important;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         /* Font size controlled by JavaScript */
     }
     
@@ -1642,6 +1652,9 @@ setInterval(() => {
         padding: 16px;
         max-height: 90vh !important;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         /* Font size controlled by JavaScript */
     }
     
@@ -1785,6 +1798,9 @@ setInterval(() => {
         max-width: 400px;
         max-height: 90vh !important;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         /* Font size controlled by JavaScript */
     }
     
@@ -1949,6 +1965,9 @@ setInterval(() => {
         max-width: 300px;
         max-height: 80vh;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
     
     .accessibility-panel h2 {
@@ -2301,6 +2320,9 @@ setInterval(() => {
         padding: 12px !important;
         max-height: 90vh !important;
         overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
     
     .accessibility-icon {
@@ -3221,6 +3243,9 @@ body.align-right a {
                 transition: left 0.3s ease;
 
                 overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
 
                 overflow-x: hidden;
 
@@ -3378,9 +3403,9 @@ body.align-right a {
 
                 position: absolute !important;
 
-                top: 8px !important;
+                top: 4px !important;
 
-                left: 12px !important;
+                left: 8px !important;
 
                 z-index: 1005 !important;
 
@@ -19696,11 +19721,19 @@ html body.big-white-cursor * {
 
             
 
-            /* Reduce color intensity (muted colors) for seizure safety */
+            /* Reduce color intensity (muted colors) for seizure safety - more targeted approach */
 
-            body.seizure-safe *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
+            body.seizure-safe img,
+            body.seizure-safe video,
+            body.seizure-safe canvas,
+            body.seizure-safe svg,
+            body.seizure-safe [class*="hero"],
+            body.seizure-safe [class*="banner"],
+            body.seizure-safe [class*="background"],
+            body.seizure-safe [class*="bg-"],
+            body.seizure-safe [style*="background"] {
 
-                filter: saturate(0.4) brightness(0.95) !important;
+                filter: saturate(0.6) brightness(0.9) !important;
 
                 transition: filter 0.3s ease !important;
 
@@ -19726,6 +19759,36 @@ html body.big-white-cursor * {
 
             
 
+            /* Fix black screen issues by overriding problematic seizure safety */
+            body.seizure-safe {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
+            
+            body.seizure-safe * {
+                background: inherit !important;
+                background-color: inherit !important;
+                filter: none !important;
+            }
+            
+            /* Only apply filters to specific media elements */
+            body.seizure-safe img,
+            body.seizure-safe video,
+            body.seizure-safe canvas {
+                filter: saturate(0.6) brightness(0.9) !important;
+            }
+            
+            /* Fix stop animation causing black screens */
+            body.stop-animation {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
+            
+            body.stop-animation * {
+                background: inherit !important;
+                background-color: inherit !important;
+            }
+            
             /* Ensure accessibility widget stays above overlay */
 
             body.seizure-safe .accessibility-widget,
@@ -23037,6 +23100,8 @@ applyCustomizations(customizationData) {
             panel.style.setProperty('overflow-y', 'auto', 'important');
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            panel.style.setProperty('scroll-behavior', 'smooth', 'important');
+            panel.style.setProperty('overscroll-behavior', 'contain', 'important');
             
             // Add text wrapping to ensure all text is visible
             panel.style.setProperty('word-wrap', 'break-word', 'important');
