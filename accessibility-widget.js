@@ -54,6 +54,10 @@ constructor() {
         this.createWidget();
 
         this.loadSettings();
+        
+        // Load user settings from KV storage
+        await this.loadSettingsFromKV();
+        
         await this.fetchCustomizationData();
         
         // Restore saved language
@@ -15365,9 +15369,120 @@ html body.big-white-cursor * {
 
 
     saveSettings() {
-
+        // Save to localStorage (existing functionality)
         localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
-
+        
+        // Also save to KV storage for persistence across devices
+        this.saveSettingsToKV();
+    }
+    
+    // Save settings to KV storage
+    async saveSettingsToKV() {
+        console.log('[CK] saveSettingsToKV() - Starting...');
+        
+        try {
+            // Get siteId first
+            const siteId = await this.getSiteId();
+            if (!siteId) {
+                console.error('[CK] saveSettingsToKV() - No siteId available, cannot save to KV');
+                return;
+            }
+            
+            if (!this.kvApiUrl) {
+                console.error('[CK] saveSettingsToKV() - kvApiUrl is not set!');
+                return;
+            }
+            
+            // Prepare settings data for KV
+            const settingsData = {
+                siteId: siteId,
+                settings: this.settings,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+            
+            console.log('[CK] saveSettingsToKV() - Saving settings to KV:', settingsData);
+            
+            const response = await fetch(`${this.kvApiUrl}/api/accessibility/save-settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settingsData)
+            });
+            
+            console.log('[CK] saveSettingsToKV() - Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[CK] saveSettingsToKV() - Failed to save to KV:', response.status, errorText);
+                return;
+            }
+            
+            const result = await response.json();
+            console.log('[CK] saveSettingsToKV() - Successfully saved to KV:', result);
+            
+        } catch (error) {
+            console.error('[CK] saveSettingsToKV() - Error saving to KV:', error);
+        }
+    }
+    
+    // Load user settings from KV storage
+    async loadSettingsFromKV() {
+        console.log('[CK] loadSettingsFromKV() - Starting...');
+        
+        try {
+            // Get siteId first
+            const siteId = await this.getSiteId();
+            if (!siteId) {
+                console.log('[CK] loadSettingsFromKV() - No siteId available, skipping KV load');
+                return;
+            }
+            
+            if (!this.kvApiUrl) {
+                console.log('[CK] loadSettingsFromKV() - kvApiUrl is not set, skipping KV load');
+                return;
+            }
+            
+            console.log('[CK] loadSettingsFromKV() - Fetching user settings from KV...');
+            
+            const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-settings?siteId=${siteId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('[CK] loadSettingsFromKV() - Response status:', response.status);
+            
+            if (!response.ok) {
+                console.log('[CK] loadSettingsFromKV() - No user settings found in KV or error:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            console.log('[CK] loadSettingsFromKV() - Loaded user settings from KV:', data);
+            
+            if (data.settings) {
+                // Merge KV settings with existing settings (KV takes precedence)
+                const kvSettings = data.settings;
+                console.log('[CK] loadSettingsFromKV() - Applying KV settings:', kvSettings);
+                
+                // Update settings object
+                Object.keys(kvSettings).forEach(key => {
+                    this.settings[key] = kvSettings[key];
+                });
+                
+                // Save merged settings back to localStorage
+                localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
+                
+                console.log('[CK] loadSettingsFromKV() - Successfully loaded and applied KV settings');
+            }
+            
+        } catch (error) {
+            console.error('[CK] loadSettingsFromKV() - Error loading from KV:', error);
+        }
     }
 
 
