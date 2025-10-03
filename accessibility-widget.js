@@ -20767,19 +20767,49 @@ html body.big-white-cursor * {
 
 
     applyVisionImpairedStyles() {
-        // Add CSS rules for vision impaired if not already added
+        // Add smart CSS rules for vision impaired that detect existing font sizes
         if (!document.getElementById('vision-impaired-css')) {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
+                /* Smart vision impaired scaling - only scale smaller fonts */
                 .vision-impaired * {
-                    font-size: 102% !important;
+                    /* Only apply scaling to elements with small font sizes */
+                    font-size: max(1em, calc(1em * 1.02)) !important;
+                }
+                
+                /* Prevent scaling on already large fonts */
+                .vision-impaired h1,
+                .vision-impaired h2,
+                .vision-impaired h3,
+                .vision-impaired h4,
+                .vision-impaired h5,
+                .vision-impaired h6 {
+                    /* Only scale if current size is less than 1.2em */
+                    font-size: max(1.2em, calc(1em * 1.02)) !important;
+                }
+                
+                /* Scale small text more, large text less */
+                .vision-impaired p,
+                .vision-impaired span,
+                .vision-impaired div,
+                .vision-impaired a {
+                    font-size: max(0.9em, calc(1em * 1.02)) !important;
+                }
+                
+                /* Don't scale elements that are already very large */
+                .vision-impaired *[style*="font-size"] {
+                    /* Preserve existing large font sizes */
+                    font-size: inherit !important;
                 }
             `;
             document.head.appendChild(style);
         }
         
-        console.log('Accessibility Widget: Vision impaired styles applied - font size increased by 2%');
+        console.log('Accessibility Widget: Smart vision impaired styles applied');
+        
+        // Apply smart scaling that detects existing font sizes
+        this.applySmartVisionScaling();
         
         // Ensure the Shadow DOM host gets the vision-impaired class
         this.updateWidgetAppearance();
@@ -20787,12 +20817,63 @@ html body.big-white-cursor * {
 
 
 
+    // Smart vision scaling that detects existing font sizes
+    applySmartVisionScaling() {
+        console.log('[CK] applySmartVisionScaling() - Starting smart font scaling...');
+        
+        // Get all text elements
+        const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
+        
+        textElements.forEach(element => {
+            // Get computed font size
+            const computedStyle = window.getComputedStyle(element);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            
+            // Only scale if font size is smaller than 16px (typical small text)
+            if (fontSize < 16) {
+                // Apply minimal scaling for small text
+                const newSize = Math.max(fontSize * 1.05, 14); // Max 5% increase, minimum 14px
+                element.style.fontSize = `${newSize}px`;
+                console.log(`[CK] Scaled element from ${fontSize}px to ${newSize}px`);
+            } else if (fontSize >= 16 && fontSize < 20) {
+                // Slight scaling for medium text
+                const newSize = Math.max(fontSize * 1.02, fontSize); // Max 2% increase
+                element.style.fontSize = `${newSize}px`;
+                console.log(`[CK] Slightly scaled element from ${fontSize}px to ${newSize}px`);
+            }
+            // Don't scale large text (20px+) to prevent layout breaking
+        });
+        
+        console.log('[CK] applySmartVisionScaling() - Smart scaling completed');
+    }
+    
+    // Remove smart vision scaling
+    removeSmartVisionScaling() {
+        console.log('[CK] removeSmartVisionScaling() - Removing smart font scaling...');
+        
+        // Get all text elements that were scaled
+        const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
+        
+        textElements.forEach(element => {
+            // Remove inline font-size styles that were added by smart scaling
+            if (element.style.fontSize && element.style.fontSize.includes('px')) {
+                element.style.fontSize = '';
+                console.log(`[CK] Removed smart scaling from element`);
+            }
+        });
+        
+        console.log('[CK] removeSmartVisionScaling() - Smart scaling removal completed');
+    }
+
     removeVisionImpairedStyles() {
         // Remove CSS rules for vision impaired
         const existingStyle = document.getElementById('vision-impaired-css');
         if (existingStyle) {
             existingStyle.remove();
         }
+        
+        // Remove smart scaling styles
+        this.removeSmartVisionScaling();
         
         console.log('Accessibility Widget: Vision impaired styles removed via CSS classes');
         
