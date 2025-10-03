@@ -1,5 +1,6 @@
 class AccessibilityWidget {
 constructor() {
+        
 
         this.settings = {};
 
