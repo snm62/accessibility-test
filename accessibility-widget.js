@@ -8570,6 +8570,21 @@ html body.big-white-cursor * {
 
             });
 
+            // Ensure option is keyboard selectable
+            option.setAttribute('role', 'option');
+            option.setAttribute('tabindex', '0');
+            option.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    option.click();
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.hideLanguageDropdown();
+                }
+            });
+
         });
 
 
@@ -24811,6 +24826,21 @@ applyCustomizations(customizationData) {
         console.log('Accessibility Widget: Found language options:', languageOptions.length);
 
         languageOptions.forEach(option => {
+            // Ensure keyboard operability
+            option.setAttribute('role', 'option');
+            option.setAttribute('tabindex', '0');
+            option.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    option.click();
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.hideLanguageDropdown();
+                }
+            });
+
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
