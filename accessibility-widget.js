@@ -4523,35 +4523,7 @@ body.align-right a {
 
 
 
-            :host(.vision-impaired) .accessibility-panel h1 {
-
-                font-size: 1.5em !important;
-
-            }
-
-
-
-            :host(.vision-impaired) .accessibility-panel h2 {
-
-                font-size: 1.3em !important;
-
-            }
-
-
-
-            :host(.vision-impaired) .accessibility-panel h3 {
-
-                font-size: 1.2em !important;
-
-            }
-
-
-
-            :host(.vision-impaired) .accessibility-panel h4 {
-
-                font-size: 1.1em !important;
-
-            }
+            /* Panel font sizes are handled by specific rules above - no additional scaling needed */
 
 
 
@@ -19706,6 +19678,13 @@ html body.big-white-cursor * {
         // Stop GSAP animations if available
         if (typeof gsap !== 'undefined') {
             gsap.killTweensOf('.portfolio-card, .hover-circle, .bg-overlay, .portfolio-desc-wrapper, .curved-text-container');
+            // Kill all GSAP animations to prevent black screen
+            gsap.killTweensOf('*');
+        }
+        
+        // Stop ScrollTrigger animations
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.killAll();
         }
         
         // Ensure portfolio elements remain visible
@@ -19730,6 +19709,36 @@ html body.big-white-cursor * {
             bg.style.opacity = '1';
             bg.style.visibility = 'visible';
         });
+        
+        // Hide curtain loader to prevent black screen
+        const curtainLoader = document.querySelector('.curtain-page-loader');
+        if (curtainLoader) {
+            curtainLoader.style.display = 'none';
+        }
+        
+        // Ensure page content is visible
+        const pageWrapper = document.querySelector('.page-wrapper');
+        if (pageWrapper) {
+            pageWrapper.style.opacity = '1';
+            pageWrapper.style.visibility = 'visible';
+            pageWrapper.style.display = 'block';
+        }
+        
+        // Make all fade elements visible
+        const fadeElements = document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in');
+        fadeElements.forEach(el => {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+            el.style.visibility = 'visible';
+        });
+        
+        // Ensure hero content is visible
+        const heroText = document.querySelector('.portfolio-hero-text');
+        if (heroText) {
+            heroText.style.opacity = '1';
+            heroText.style.transform = 'none';
+            heroText.style.visibility = 'visible';
+        }
         
         console.log('Accessibility Widget: Portfolio animations stopped for seizure safety');
     }
@@ -19915,6 +19924,55 @@ html body.big-white-cursor * {
                 opacity: 1 !important;
                 background-size: cover !important;
                 background-position: center !important;
+            }
+            
+            /* Fix curtain page loader - prevent black screen */
+            body.seizure-safe .curtain-page-loader,
+            body.seizure-safe .curtain {
+                display: none !important;
+            }
+            
+            /* Ensure page content is visible */
+            body.seizure-safe .page-wrapper,
+            body.seizure-safe .smooth-content,
+            body.seizure-safe .smooth-wrapper {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+            }
+            
+            /* Handle GSAP scroll animations - make content visible */
+            body.seizure-safe .fade-up,
+            body.seizure-safe .fade-left,
+            body.seizure-safe .fade-right,
+            body.seizure-safe .fade-in {
+                opacity: 1 !important;
+                transform: none !important;
+                animation: none !important;
+            }
+            
+            /* Ensure hero content is visible */
+            body.seizure-safe .portfolio-hero,
+            body.seizure-safe .portfolio-hero-text,
+            body.seizure-safe .portfolio-hero-content-wrapper {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+            }
+            
+            /* Handle video elements */
+            body.seizure-safe video {
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            
+            /* Ensure slider content is visible */
+            body.seizure-safe .slider-draggable,
+            body.seizure-safe .slick-slide,
+            body.seizure-safe .slide-item {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
             }
             
             /* Preserve accessibility widget functionality */
@@ -20915,10 +20973,7 @@ html body.big-white-cursor * {
             style.id = 'vision-impaired-css';
             style.textContent = `
                 /* Vision impaired - NO CSS font scaling, only JavaScript handles it */
-                .vision-impaired * {
-                    /* Completely preserve all existing font sizes */
-                    font-size: inherit !important;
-                }
+                /* Removed general font-size rule to prevent conflicts */
             `;
             document.head.appendChild(style);
         }
@@ -20946,14 +21001,15 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale very small text (less than 10px) - keep all big text exactly the same
-            if (fontSize < 10) {
-                // Apply minimal scaling for very small text only
-                const newSize = Math.max(fontSize * 1.1, 10); // 10% increase, minimum 10px
+            // Only scale extremely small text (less than 8px) - keep all other text exactly the same
+            if (fontSize < 8) {
+                // Apply very minimal scaling for extremely small text only
+                const newSize = Math.max(fontSize * 1.05, 8); // 5% increase, minimum 8px
                 element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Scaled very small text from ${fontSize}px to ${newSize}px`);
+                // Ensure positioning is maintained - don't modify any other styles
+                console.log(`[CK] Scaled extremely small text from ${fontSize}px to ${newSize}px (position maintained)`);
             } else {
-                // Keep all fonts 10px and above exactly the same - no changes
+                // Keep all fonts 8px and above exactly the same - no changes
                 console.log(`[CK] Preserved text at ${fontSize}px (no scaling - already readable)`);
             }
         });
