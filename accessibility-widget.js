@@ -4507,6 +4507,11 @@ body.align-right a {
                 padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale)) !important;
 
             }
+            
+            /* Increase gap between header and white section in vision impaired mode */
+            :host(.vision-impaired) .panel-header {
+                padding-bottom: 40px !important;
+            }
 
 
 
@@ -19746,11 +19751,44 @@ html body.big-white-cursor * {
                 transition-delay: 0s !important;
             }
             
-            /* Stop common seizure-triggering animations */
-            body.seizure-safe *[style*="animation"],
-            body.seizure-safe *[style*="transition"] {
+            /* Stop common seizure-triggering animations but allow initial page load animations */
+            body.seizure-safe *[style*="animation"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]),
+            body.seizure-safe *[style*="transition"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]) {
                 animation: none !important;
                 transition: none !important;
+            }
+            
+            /* Allow initial page load animations to complete once, then stop */
+            body.seizure-safe *[class*="fade-in"],
+            body.seizure-safe *[class*="slide-in"],
+            body.seizure-safe *[class*="load"],
+            body.seizure-safe *[class*="initial"],
+            body.seizure-safe *[class*="page-load"],
+            body.seizure-safe *[class*="appear"],
+            body.seizure-safe *[class*="show"],
+            body.seizure-safe *[class*="visible"],
+            body.seizure-safe *[class*="opacity"],
+            body.seizure-safe *[class*="transform"] {
+                /* Allow initial animation to complete once */
+                animation-fill-mode: forwards !important;
+                animation-iteration-count: 1 !important;
+                animation-duration: 0.5s !important;
+                transition-duration: 0.5s !important;
+            }
+            
+            /* Allow body and html initial animations to complete once */
+            body.seizure-safe body,
+            body.seizure-safe html {
+                /* Allow initial page load animation to complete once */
+                animation-fill-mode: forwards !important;
+                animation-iteration-count: 1 !important;
+                animation-duration: 0.5s !important;
+                transition-duration: 0.5s !important;
+            }
+            
+            /* After initial animation completes, stop all animations */
+            body.seizure-safe * {
+                animation-play-state: paused !important;
             }
 
             
@@ -20797,8 +20835,16 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Don't scale any fonts - preserve all existing font sizes
-            console.log(`[CK] Preserved font at ${fontSize}px (no scaling applied)`);
+            // Only scale very small text (less than 12px) - keep all big text exactly the same
+            if (fontSize < 12) {
+                // Apply scaling for very small text only
+                const newSize = Math.max(fontSize * 1.2, 12); // 20% increase, minimum 12px
+                element.style.fontSize = `${newSize}px`;
+                console.log(`[CK] Scaled small text from ${fontSize}px to ${newSize}px`);
+            } else {
+                // Keep all fonts 12px and above exactly the same - no changes
+                console.log(`[CK] Preserved big text at ${fontSize}px (no scaling - too big)`);
+            }
         });
         
         console.log('[CK] applySmartVisionScaling() - Smart scaling completed');
