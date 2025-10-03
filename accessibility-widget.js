@@ -3206,8 +3206,8 @@ body.align-right a {
 
             .close-btn:focus-visible,
 
-            .language-selector:focus-visible,
-            .language-selector-header:focus-visible {
+            .language-selector-header:focus-visible,
+            .language-option:focus-visible {
 
         
              outline: 2px solid #6366f1 !important;
@@ -3220,6 +3220,26 @@ body.align-right a {
             *:focus:not(:focus-visible) {
                 outline: none !important;
                 box-shadow: none !important;
+            }
+
+            /* Prevent container focus outlines that span the dropdown */
+            .language-dropdown:focus-visible,
+            .language-dropdown-content:focus-visible {
+                outline: none !important;
+                box-shadow: none !important;
+            }
+
+            /* Clip any child outlines to dropdown bounds */
+            .language-dropdown,
+            .language-dropdown-content {
+                overflow: hidden !important;
+                border-radius: 8px !important;
+            }
+
+            /* Keep option focus ring tight to the option */
+            .language-option:focus-visible {
+                outline-offset: -2px !important;
+                border-radius: 8px !important;
             }
 
 
@@ -20183,6 +20203,33 @@ html body.big-white-cursor * {
             body.seizure-safe .slider-draggable,
             body.seizure-safe .slick-slide,
             body.seizure-safe .slide-item {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+            }
+            
+            /* Stop hover reveal animations for service items */
+            body.seizure-safe .single-service-animated,
+            body.seizure-safe .single-service-animated *,
+            body.seizure-safe [class*="service-animated"],
+            body.seizure-safe [class*="service-animated"] * {
+                animation: none !important;
+                transition: none !important;
+                animation-duration: 0s !important;
+                transition-duration: 0s !important;
+            }
+            body.seizure-safe .single-service-animated .image-service-animated,
+            body.seizure-safe [class*="service-animated"] .image-service-animated {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+            }
+            body.seizure-safe .single-service-animated .big-text-service-animated,
+            body.seizure-safe .single-service-animated .wrap-text-service-animated,
+            body.seizure-safe .single-service-animated .number-service-animated,
+            body.seizure-safe [class*="service-animated"] .big-text-service-animated,
+            body.seizure-safe [class*="service-animated"] .wrap-text-service-animated,
+            body.seizure-safe [class*="service-animated"] .number-service-animated {
                 opacity: 1 !important;
                 transform: none !important;
                 visibility: visible !important;
