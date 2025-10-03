@@ -1,6 +1,5 @@
 class AccessibilityWidget {
 constructor() {
-        
 
         this.settings = {};
 
@@ -8693,8 +8692,9 @@ html body.big-white-cursor * {
                 const header = this.shadowRoot.getElementById('language-selector-header');
                 if (header) header.setAttribute('aria-expanded', 'true');
                 const options = dropdown.querySelectorAll('.language-option');
-                options.forEach((opt, idx) => {
-                    opt.setAttribute('tabindex', idx === 0 ? '0' : '-1');
+                // Make all options tabbable so Tab moves through each language
+                options.forEach((opt) => {
+                    opt.setAttribute('tabindex', '0');
                 });
                 const first = options[0];
                 if (first) first.focus();
