@@ -3349,7 +3349,7 @@ body.align-right a {
 
                 flex-direction: column;
 
-                padding: 10px 20px 25px 20px;
+                padding: 10px 20px 30px 20px;
 
                 background: transparent !important;
 
@@ -4438,7 +4438,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.01;
+                --vision-font-scale: 1.005;
 
             }
 
@@ -19874,15 +19874,13 @@ html body.big-white-cursor * {
 
             
 
-            /* Fix black screen issues by overriding problematic seizure safety */
+            /* Fix seizure safety - preserve website colors and backgrounds */
             body.seizure-safe {
-                background: transparent !important;
-                background-color: transparent !important;
+                /* Don't override body background - preserve website colors */
             }
             
             body.seizure-safe * {
-                background: inherit !important;
-                background-color: inherit !important;
+                /* Don't override element backgrounds - preserve website colors */
                 filter: none !important;
             }
             
@@ -19893,15 +19891,13 @@ html body.big-white-cursor * {
                 filter: saturate(0.6) brightness(0.9) !important;
             }
             
-            /* Fix stop animation causing black screens */
+            /* Fix stop animation - preserve website colors */
             body.stop-animation {
-                background: transparent !important;
-                background-color: transparent !important;
+                /* Don't override body background - preserve website colors */
             }
             
             body.stop-animation * {
-                background: inherit !important;
-                background-color: inherit !important;
+                /* Don't override element backgrounds - preserve website colors */
             }
 
             /* Ensure accessibility widget stays above overlay */
@@ -19962,13 +19958,13 @@ html body.big-white-cursor * {
 
             .adhd-friendly .adhd-focus {
 
-                outline: 4px solid var(--primary-color) !important;
+                outline: 2px solid var(--primary-color) !important;
 
-                outline-offset: 3px !important;
+                outline-offset: 2px !important;
 
-                background: rgba(99, 102, 241, 0.15) !important;
+                background: rgba(99, 102, 241, 0.08) !important;
 
-                filter: contrast(1.3) brightness(1.1) !important;
+                filter: contrast(1.1) brightness(1.05) !important;
 
             }
 
@@ -20092,7 +20088,7 @@ html body.big-white-cursor * {
 
             z-index: 99997;
 
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.2);
 
         `;
 
@@ -20804,15 +20800,15 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale small text (less than 16px) - keep big fonts exactly the same
-            if (fontSize < 16) {
-                // Apply scaling for small text only
-                const newSize = Math.max(fontSize * 1.08, 14); // 8% increase, minimum 14px
+            // Only scale very small text (less than 14px) - completely avoid big fonts
+            if (fontSize < 14) {
+                // Apply minimal scaling for very small text only
+                const newSize = Math.max(fontSize * 1.05, 12); // 5% increase, minimum 12px
                 element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Scaled small text from ${fontSize}px to ${newSize}px`);
+                console.log(`[CK] Scaled very small text from ${fontSize}px to ${newSize}px`);
             } else {
-                // Keep big fonts exactly the same - no changes
-                console.log(`[CK] Preserved big font at ${fontSize}px (no scaling)`);
+                // Keep all fonts 14px and above exactly the same - no changes
+                console.log(`[CK] Preserved font at ${fontSize}px (no scaling - too big)`);
             }
         });
         
