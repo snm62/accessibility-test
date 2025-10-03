@@ -3349,7 +3349,7 @@ body.align-right a {
 
                 flex-direction: column;
 
-                padding: 10px 20px 20px 20px;
+                padding: 10px 20px 25px 20px;
 
                 background: transparent !important;
 
@@ -4438,7 +4438,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.02;
+                --vision-font-scale: 1.01;
 
             }
 
@@ -20772,23 +20772,9 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                /* Smart vision impaired scaling - only scale small text, preserve big fonts */
+                /* Vision impaired - NO CSS font scaling, only JavaScript handles it */
                 .vision-impaired * {
-                    /* Don't change existing font sizes - let JavaScript handle it */
-                    font-size: inherit !important;
-                }
-                
-                /* Don't scale any elements with CSS - let JavaScript do smart scaling */
-                .vision-impaired h1,
-                .vision-impaired h2,
-                .vision-impaired h3,
-                .vision-impaired h4,
-                .vision-impaired h5,
-                .vision-impaired h6,
-                .vision-impaired p,
-                .vision-impaired span,
-                .vision-impaired div,
-                .vision-impaired a {
+                    /* Completely preserve all existing font sizes */
                     font-size: inherit !important;
                 }
             `;
