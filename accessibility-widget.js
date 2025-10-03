@@ -4462,7 +4462,7 @@ body.align-right a {
 
                 width: calc(400px * var(--vision-scale)) !important;
 
-                font-size: calc(1em * var(--vision-font-scale)) !important;
+                font-size: 1em !important;
 
             }
 
@@ -4502,9 +4502,9 @@ body.align-right a {
 
             :host(.vision-impaired) .accessibility-panel .action-btn {
 
-                font-size: calc(1em * var(--vision-font-scale)) !important;
+                font-size: 1em !important;
 
-                padding: calc(12px * var(--vision-font-scale)) calc(16px * var(--vision-font-scale)) !important;
+                padding: 12px 16px !important;
 
             }
             
@@ -19528,7 +19528,10 @@ html body.big-white-cursor * {
 
         document.body.classList.add('seizure-safe');
 
-        this.addSeizureSafeStyles();
+        // Add a small delay to allow initial page load animations to start
+        setTimeout(() => {
+            this.addSeizureSafeStyles();
+        }, 100);
 
         // Stop autoplay videos to prevent seizures
         this.stopAutoplayVideos();
@@ -19786,8 +19789,8 @@ html body.big-white-cursor * {
                 transition-duration: 0.5s !important;
             }
             
-            /* After initial animation completes, stop all animations */
-            body.seizure-safe * {
+            /* Allow initial page load animations to complete before stopping others */
+            body.seizure-safe *:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]):not([class*="page-load"]):not([class*="appear"]):not([class*="show"]):not([class*="visible"]):not([class*="opacity"]):not([class*="transform"]) {
                 animation-play-state: paused !important;
             }
 
@@ -20835,15 +20838,15 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale very small text (less than 12px) - keep all big text exactly the same
-            if (fontSize < 12) {
-                // Apply scaling for very small text only
-                const newSize = Math.max(fontSize * 1.2, 12); // 20% increase, minimum 12px
+            // Only scale very small text (less than 10px) - keep all big text exactly the same
+            if (fontSize < 10) {
+                // Apply minimal scaling for very small text only
+                const newSize = Math.max(fontSize * 1.1, 10); // 10% increase, minimum 10px
                 element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Scaled small text from ${fontSize}px to ${newSize}px`);
+                console.log(`[CK] Scaled very small text from ${fontSize}px to ${newSize}px`);
             } else {
-                // Keep all fonts 12px and above exactly the same - no changes
-                console.log(`[CK] Preserved big text at ${fontSize}px (no scaling - too big)`);
+                // Keep all fonts 10px and above exactly the same - no changes
+                console.log(`[CK] Preserved text at ${fontSize}px (no scaling - already readable)`);
             }
         });
         
