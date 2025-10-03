@@ -668,12 +668,21 @@ setInterval(() => {
 
         if (decreaseContentScaleBtn) {
 
-            decreaseContentScaleBtn.addEventListener('click', () => {
-
+            decreaseContentScaleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Decrease content scale clicked');
-
                 this.decreaseContentScale();
+            });
 
+            // Add keyboard support
+            decreaseContentScaleBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Decrease content scale activated via keyboard');
+                    this.decreaseContentScale();
+                }
             });
 
         }
@@ -684,12 +693,21 @@ setInterval(() => {
 
         if (increaseContentScaleBtn) {
 
-            increaseContentScaleBtn.addEventListener('click', () => {
-
+            increaseContentScaleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Increase content scale clicked');
-
                 this.increaseContentScale();
+            });
 
+            // Add keyboard support
+            increaseContentScaleBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Increase content scale activated via keyboard');
+                    this.increaseContentScale();
+                }
             });
 
         }
@@ -702,12 +720,21 @@ setInterval(() => {
 
         if (decreaseFontSizeBtn) {
 
-            decreaseFontSizeBtn.addEventListener('click', () => {
-
+            decreaseFontSizeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Decrease font size clicked');
-
                 this.decreaseFontSize();
+            });
 
+            // Add keyboard support
+            decreaseFontSizeBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Decrease font size activated via keyboard');
+                    this.decreaseFontSize();
+                }
             });
 
         }
@@ -718,12 +745,21 @@ setInterval(() => {
 
         if (increaseFontSizeBtn) {
 
-            increaseFontSizeBtn.addEventListener('click', () => {
-
+            increaseFontSizeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Increase font size clicked');
-
                 this.increaseFontSize();
+            });
 
+            // Add keyboard support
+            increaseFontSizeBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Increase font size activated via keyboard');
+                    this.increaseFontSize();
+                }
             });
 
         }
@@ -740,12 +776,21 @@ setInterval(() => {
 
         if (decreaseLetterSpacingBtn) {
 
-            decreaseLetterSpacingBtn.addEventListener('click', () => {
-
+            decreaseLetterSpacingBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Decrease letter spacing clicked');
-
                 this.decreaseLetterSpacing();
+            });
 
+            // Add keyboard support
+            decreaseLetterSpacingBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Decrease letter spacing activated via keyboard');
+                    this.decreaseLetterSpacing();
+                }
             });
 
         }
@@ -756,12 +801,21 @@ setInterval(() => {
 
         if (increaseLetterSpacingBtn) {
 
-            increaseLetterSpacingBtn.addEventListener('click', () => {
-
+            increaseLetterSpacingBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Accessibility Widget: Increase letter spacing clicked');
-
                 this.increaseLetterSpacing();
+            });
 
+            // Add keyboard support
+            increaseLetterSpacingBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Increase letter spacing activated via keyboard');
+                    this.increaseLetterSpacing();
+                }
             });
 
         }
@@ -3152,11 +3206,13 @@ body.align-right a {
 
             .close-btn:focus,
 
-            .language-selector:focus {
+            .language-selector:focus,
+            .language-selector-header:focus {
 
         
-             outline-offset: 0px !important;
-             box-shadow: none !important;   
+             outline: 2px solid #6366f1 !important;
+             outline-offset: 2px !important;
+             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;   
 
             }
 
@@ -12413,6 +12469,16 @@ html body.big-white-cursor * {
 
                 decreaseLineHeightBtn.addEventListener('click', this.decreaseLineHeightHandler);
 
+                // Add keyboard support
+                decreaseLineHeightBtn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Accessibility Widget: Decrease line height activated via keyboard');
+                        this.decreaseLineHeight();
+                    }
+                });
+
                 console.log('Accessibility Widget: Decrease line height event listener attached');
 
             } else {
@@ -12463,6 +12529,16 @@ html body.big-white-cursor * {
                 // Add event listener
 
                 increaseLineHeightBtn.addEventListener('click', this.increaseLineHeightHandler);
+
+                // Add keyboard support
+                increaseLineHeightBtn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Accessibility Widget: Increase line height activated via keyboard');
+                        this.increaseLineHeight();
+                    }
+                });
 
                 console.log('Accessibility Widget: Increase line height event listener attached');
 
