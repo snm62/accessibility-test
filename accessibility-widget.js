@@ -4452,7 +4452,7 @@ body.align-right a {
 
                 height: calc(60px * var(--vision-scale)) !important;
 
-                font-size: calc(24px * var(--vision-font-scale)) !important;
+                font-size: 24px !important;
 
             }
 
@@ -4470,7 +4470,7 @@ body.align-right a {
 
             :host(.vision-impaired) .accessibility-panel h2 {
 
-                font-size: calc(24px * var(--vision-font-scale)) !important;
+                font-size: 24px !important;
 
             }
 
@@ -4478,7 +4478,7 @@ body.align-right a {
 
             :host(.vision-impaired) .accessibility-panel h3 {
 
-                font-size: calc(18px * var(--vision-font-scale)) !important;
+                font-size: 18px !important;
 
             }
 
@@ -4486,7 +4486,7 @@ body.align-right a {
 
             :host(.vision-impaired) .accessibility-panel h4 {
 
-                font-size: calc(16px * var(--vision-font-scale)) !important;
+                font-size: 16px !important;
 
             }
 
@@ -4494,7 +4494,7 @@ body.align-right a {
 
             :host(.vision-impaired) .accessibility-panel p {
 
-                font-size: calc(14px * var(--vision-font-scale)) !important;
+                font-size: 14px !important;
 
             }
 
@@ -19535,6 +19535,9 @@ html body.big-white-cursor * {
 
         // Stop autoplay videos to prevent seizures
         this.stopAutoplayVideos();
+        
+        // Stop portfolio animation loops that could cause black screen
+        this.stopPortfolioAnimations();
 
         // Stop any JavaScript-based animations (like the slider auto-slide)
 
@@ -19587,6 +19590,9 @@ html body.big-white-cursor * {
         document.body.classList.remove('seizure-safe');
 
         this.removeSeizureSafeStyles();
+        
+        // Restore portfolio animations when seizure safety is disabled
+        this.restorePortfolioAnimations();
 
         
 
@@ -19681,6 +19687,79 @@ html body.big-white-cursor * {
         }
         
         console.log('Accessibility Widget: Autoplay videos stopped for seizure safety');
+    }
+    
+    // Stop portfolio animations that could cause black screen
+    stopPortfolioAnimations() {
+        console.log('Accessibility Widget: Stopping portfolio animations for seizure safety');
+        
+        // Stop requestAnimationFrame loops
+        if (window.circleRAF) {
+            cancelAnimationFrame(window.circleRAF);
+            window.circleRAF = null;
+        }
+        if (window.hoverRAF) {
+            cancelAnimationFrame(window.hoverRAF);
+            window.hoverRAF = null;
+        }
+        
+        // Stop GSAP animations if available
+        if (typeof gsap !== 'undefined') {
+            gsap.killTweensOf('.portfolio-card, .hover-circle, .bg-overlay, .portfolio-desc-wrapper, .curved-text-container');
+        }
+        
+        // Ensure portfolio elements remain visible
+        const portfolioCards = document.querySelectorAll('.portfolio-card');
+        portfolioCards.forEach(card => {
+            card.style.opacity = '1';
+            card.style.visibility = 'visible';
+            card.style.display = 'block';
+        });
+        
+        // Ensure hover circle is visible but not animated
+        const hoverCircle = document.querySelector('.hover-circle');
+        if (hoverCircle) {
+            hoverCircle.style.opacity = '1';
+            hoverCircle.style.visibility = 'visible';
+            hoverCircle.style.display = 'block';
+        }
+        
+        // Ensure background images are visible
+        const bgElements = document.querySelectorAll('.portfolio-hover-img, .bg-overlay');
+        bgElements.forEach(bg => {
+            bg.style.opacity = '1';
+            bg.style.visibility = 'visible';
+        });
+        
+        console.log('Accessibility Widget: Portfolio animations stopped for seizure safety');
+    }
+    
+    // Restore portfolio animations when seizure safety is disabled
+    restorePortfolioAnimations() {
+        console.log('Accessibility Widget: Restoring portfolio animations');
+        
+        // Remove inline styles that were set for seizure safety
+        const portfolioCards = document.querySelectorAll('.portfolio-card');
+        portfolioCards.forEach(card => {
+            card.style.opacity = '';
+            card.style.visibility = '';
+            card.style.display = '';
+        });
+        
+        const hoverCircle = document.querySelector('.hover-circle');
+        if (hoverCircle) {
+            hoverCircle.style.opacity = '';
+            hoverCircle.style.visibility = '';
+            hoverCircle.style.display = '';
+        }
+        
+        const bgElements = document.querySelectorAll('.portfolio-hover-img, .bg-overlay');
+        bgElements.forEach(bg => {
+            bg.style.opacity = '';
+            bg.style.visibility = '';
+        });
+        
+        console.log('Accessibility Widget: Portfolio animations restored');
     }
 
 
@@ -19803,10 +19882,39 @@ html body.big-white-cursor * {
             body.seizure-safe .portfolio-hover-img,
             body.seizure-safe .portfolio-desc-wrapper,
             body.seizure-safe .portfolio-filters,
-            body.seizure-safe .curved-text-container {
-                /* Allow essential portfolio animations but reduce intensity */
-                transition: opacity 0.2s ease, transform 0.2s ease !important;
+            body.seizure-safe .curved-text-container,
+            body.seizure-safe .section-portfolios {
+                /* Allow essential portfolio functionality but stop animations */
+                transition: opacity 0.3s ease !important;
                 animation: none !important;
+                /* Ensure visibility is maintained */
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+            }
+            
+            /* Ensure portfolio cards remain visible and functional */
+            body.seizure-safe .portfolio-card {
+                opacity: 1 !important;
+                transform: none !important;
+                pointer-events: auto !important;
+            }
+            
+            /* Stop hover circle animations but keep it functional */
+            body.seizure-safe .hover-circle {
+                animation: none !important;
+                transition: none !important;
+                /* Keep basic functionality */
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            
+            /* Ensure background images remain visible */
+            body.seizure-safe .portfolio-hover-img,
+            body.seizure-safe .bg-overlay {
+                opacity: 1 !important;
+                background-size: cover !important;
+                background-position: center !important;
             }
             
             /* Preserve accessibility widget functionality */
