@@ -193,6 +193,9 @@ window.addEventListener('resize', () => {
     const screenWidth = window.innerWidth;
     const isMobile = screenWidth <= 768;
     const icon = this.shadowRoot?.getElementById('accessibility-icon');
+    
+    // Update icon visibility based on device type and settings
+    this.handleWindowResize();
     const panel = this.shadowRoot?.getElementById('accessibility-panel');
     
     console.log('📱 [WINDOW RESIZE] Window resized - screen width:', screenWidth);
@@ -241,6 +244,9 @@ if (window.innerWidth <= 768) {
 
 // Add listener for display scaling changes and device pixel ratio changes
 window.addEventListener('resize', () => {
+    // Update icon visibility based on device type and settings
+    this.handleWindowResize();
+    
     // Force re-application of base CSS after any resize to maintain styling
     setTimeout(() => {
         const panel = this.shadowRoot?.getElementById('accessibility-panel');
@@ -3241,36 +3247,25 @@ body.align-right a {
                 background: #ffffff !important;
 
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-
-                z-index: 100000 !important;
-
-                transition: left 0.3s ease;
-
-                overflow-y: auto;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-
-                overflow-x: hidden;
-
-                font-family: 'DM Sans', sans-serif !important;
-
-                border-radius: 8px !important;
-
-                margin: 0 20px;
-
-                pointer-events: auto;
-
-                /* Text wrapping to prevent cutoff */
-                word-wrap: break-word !important;
-                word-break: break-word !important;
-                overflow-wrap: break-word !important;
-                hyphens: auto !important;
-
-                /* Make panel a containing block for modal */
-                position: relative;
-
-}
+                
+                /* Fix scrolling conflicts with GSAP/Lenis libraries */
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+            }
+            
+            /* Override GSAP/Lenis smooth scrolling for accessibility panel */
+            .accessibility-panel * {
+                scroll-behavior: auto !important;
+            }
+            
+            /* Ensure panel content is always scrollable */
+            .accessibility-panel .panel-content {
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
 
             .accessibility-panel.active {
 
@@ -20969,35 +20964,32 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                /* Vision impaired - Enhanced visual experience with layout preservation */
+                /* Vision impaired - Enhanced visual experience ONLY */
                 body.vision-impaired {
-                    filter: saturate(1.2) brightness(1.05) contrast(1.05) !important;
+                    filter: saturate(1.3) brightness(1.1) contrast(1.1) !important;
                 }
                 
-                /* Preserve navigation and menu layout */
-                body.vision-impaired nav,
-                body.vision-impaired .nav,
-                body.vision-impaired .menu,
-                body.vision-impaired .header,
-                body.vision-impaired .navbar,
-                body.vision-impaired .navigation {
-                    font-size: inherit !important;
-                    line-height: inherit !important;
-                    height: auto !important;
+                /* NO font scaling - preserve all original text sizes and layout */
+                /* Only visual enhancements through CSS filters are applied */
+                
+                /* Fix scrolling conflicts with GSAP/Lenis libraries */
+                .accessibility-panel {
+                    scroll-behavior: smooth !important;
+                    -webkit-overflow-scrolling: touch !important;
+                    overscroll-behavior: contain !important;
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
                 }
                 
-                /* Prevent layout breaking for elements with rem units */
-                body.vision-impaired *[style*="font-size"] {
-                    line-height: inherit !important;
-                    height: auto !important;
+                /* Override GSAP/Lenis smooth scrolling for accessibility panel */
+                .accessibility-panel * {
+                    scroll-behavior: auto !important;
                 }
                 
-                /* Preserve container heights and spacing */
-                body.vision-impaired .container,
-                body.vision-impaired .wrapper,
-                body.vision-impaired .section {
-                    height: auto !important;
-                    min-height: auto !important;
+                /* Ensure panel content is scrollable */
+                .accessibility-panel .panel-content {
+                    overflow-y: auto !important;
+                    -webkit-overflow-scrolling: touch !important;
                 }
             `;
             document.head.appendChild(style);
@@ -21014,60 +21006,49 @@ html body.big-white-cursor * {
 
 
 
-    // Ultra conservative vision scaling - only enhance extremely small text and preserve layout
+    // Vision impaired - NO font scaling, only visual enhancements
     applySmartVisionScaling() {
-        console.log('[CK] applySmartVisionScaling() - Starting ultra conservative font enhancement...');
+        console.log('[CK] applySmartVisionScaling() - Vision impaired mode: NO font scaling applied');
+        console.log('[CK] Only visual enhancements (saturation, brightness, contrast) are active');
         
-        // Get all text elements
-        const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
+        // No font scaling - preserve all original text sizes and layout
+        // Only visual enhancements through CSS filters are applied
         
-        textElements.forEach(element => {
-            // Skip navigation and menu elements to prevent layout breaking
-            if (element.closest('nav') || element.closest('.nav') || element.closest('.menu') || 
-                element.closest('.header') || element.closest('.navbar') || element.closest('.navigation')) {
-                console.log(`[CK] Skipped navigation element to preserve layout`);
-                return;
-            }
-            
-            // Get computed font size
-            const computedStyle = window.getComputedStyle(element);
-            const fontSize = parseFloat(computedStyle.fontSize);
-            
-            // Only enhance extremely small text (under 9px) and preserve layout
-            if (fontSize < 9) {
-                // Very small text: minimal increase to 10px and preserve line height
-                const originalLineHeight = computedStyle.lineHeight;
-                element.style.fontSize = '10px';
-                element.style.lineHeight = originalLineHeight; // Preserve original line height
-                element.style.height = 'auto'; // Allow height to adjust naturally
-                console.log(`[CK] Enhanced very small text from ${fontSize}px to 10px (layout preserved)`);
-            } else {
-                // Keep all fonts 9px and above exactly the same - no changes
-                console.log(`[CK] Preserved text at ${fontSize}px (no enhancement - already readable)`);
-            }
-        });
-        
-        console.log('[CK] applySmartVisionScaling() - Ultra conservative enhancement completed');
+        console.log('[CK] applySmartVisionScaling() - Visual enhancement only mode completed');
     }
     
-    // Remove smart vision scaling and restore layout
+    // Fix scrolling conflicts with GSAP/Lenis libraries
+    fixPanelScrolling() {
+        console.log('[CK] fixPanelScrolling() - Ensuring panel scrolling works with GSAP/Lenis');
+        
+        const panel = this.shadowRoot.querySelector('.accessibility-panel');
+        if (panel) {
+            // Force native scrolling behavior
+            panel.style.overflowY = 'auto';
+            panel.style.overflowX = 'hidden';
+            panel.style.scrollBehavior = 'smooth';
+            panel.style.webkitOverflowScrolling = 'touch';
+            panel.style.overscrollBehavior = 'contain';
+            
+            // Override any GSAP/Lenis interference
+            const panelElements = panel.querySelectorAll('*');
+            panelElements.forEach(element => {
+                element.style.scrollBehavior = 'auto';
+            });
+            
+            console.log('[CK] Panel scrolling fixes applied');
+        }
+    }
+    
+    // Remove smart vision scaling (no scaling to remove)
     removeSmartVisionScaling() {
-        console.log('[CK] removeSmartVisionScaling() - Removing smart font scaling and restoring layout...');
+        console.log('[CK] removeSmartVisionScaling() - No font scaling was applied, nothing to remove');
+        console.log('[CK] Only visual enhancements were active, no layout changes to restore');
         
-        // Get all text elements that were scaled
-        const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
+        // No font scaling was applied, so nothing to remove
+        // Visual enhancements are handled by CSS and will be removed when the class is removed
         
-        textElements.forEach(element => {
-            // Remove inline styles that were added by smart scaling
-            if (element.style.fontSize && element.style.fontSize.includes('px')) {
-                element.style.fontSize = '';
-                element.style.lineHeight = '';
-                element.style.height = '';
-                console.log(`[CK] Removed smart scaling and restored layout for element`);
-            }
-        });
-        
-        console.log('[CK] removeSmartVisionScaling() - Smart scaling removal and layout restoration completed');
+        console.log('[CK] removeSmartVisionScaling() - No scaling removal needed');
     }
 
     removeVisionImpairedStyles() {
@@ -21711,6 +21692,11 @@ html body.big-white-cursor * {
                     panel.style.visibility = 'visible';
                     icon.setAttribute('aria-expanded', 'true');
                     console.log('Accessibility Widget: Panel shown');
+                    
+                    // Fix scrolling conflicts with GSAP/Lenis libraries
+                    setTimeout(() => {
+                        this.fixPanelScrolling();
+                    }, 100);
                 }
                 
 
@@ -22200,12 +22186,22 @@ applyCustomizations(customizationData) {
             return;
         }
 
-        // Mobile logic: hide if showOnMobile is Hide
+        // Mobile logic: hide if showOnMobile is Hide (ignore hideTriggerButton for mobile)
         if (isMobile && mobileVisibility === 'Hide') {
             console.log('[CK] showIcon() - Mobile: showOnMobile is Hide; hiding icon on mobile');
             icon.style.display = 'none';
             icon.style.visibility = 'hidden';
             icon.style.opacity = '0';
+            return;
+        }
+        
+        // Mobile logic: show if showOnMobile is Show (ignore hideTriggerButton for mobile)
+        if (isMobile && mobileVisibility === 'Show') {
+            console.log('[CK] showIcon() - Mobile: showOnMobile is Show; showing icon on mobile');
+            icon.style.display = 'flex';
+            icon.style.visibility = 'visible';
+            icon.style.opacity = '1';
+            icon.style.transition = 'opacity 0.3s ease';
             return;
         }
 
@@ -22223,8 +22219,14 @@ applyCustomizations(customizationData) {
                 this.customizationData.mobileTriggerHorizontalPosition, 
                 this.customizationData.mobileTriggerVerticalPosition
             );
+        }
     }
-}
+    
+    // Handle window resize to update icon visibility based on device type
+    handleWindowResize() {
+        console.log('[CK] handleWindowResize() - Checking icon visibility after resize');
+        this.showIcon();
+    }
 
     applyLanguage(language) {
         console.log('[CK] applyLanguage() - Language:', language);
