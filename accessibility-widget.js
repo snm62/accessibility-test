@@ -534,15 +534,55 @@ setInterval(() => {
                             if (feature === 'content-scaling') {
                                 console.log('🎛️ [KEYBOARD TOGGLE] Forcing content scaling controls visibility:', enabled);
                                 this.toggleContentScalingControls(enabled);
+                                // Focus on the first control button when enabled
+                                if (enabled) {
+                                    setTimeout(() => {
+                                        const decreaseBtn = this.shadowRoot.getElementById('decrease-content-scale-btn');
+                                        if (decreaseBtn) {
+                                            decreaseBtn.focus();
+                                            console.log('🎛️ [KEYBOARD TOGGLE] Focused on content scaling decrease button');
+                                        }
+                                    }, 100);
+                                }
                             } else if (feature === 'font-sizing') {
                                 console.log('🔤 [KEYBOARD TOGGLE] Forcing font sizing controls visibility:', enabled);
                                 this.toggleFontSizingControls(enabled);
+                                // Focus on the first control button when enabled
+                                if (enabled) {
+                                    setTimeout(() => {
+                                        const decreaseBtn = this.shadowRoot.getElementById('decrease-font-size-btn');
+                                        if (decreaseBtn) {
+                                            decreaseBtn.focus();
+                                            console.log('🔤 [KEYBOARD TOGGLE] Focused on font sizing decrease button');
+                                        }
+                                    }, 100);
+                                }
                             } else if (feature === 'adjust-line-height') {
                                 console.log('📏 [KEYBOARD TOGGLE] Forcing line height controls visibility:', enabled);
                                 this.toggleLineHeightControls(enabled);
+                                // Focus on the first control button when enabled
+                                if (enabled) {
+                                    setTimeout(() => {
+                                        const decreaseBtn = this.shadowRoot.getElementById('decrease-line-height-btn');
+                                        if (decreaseBtn) {
+                                            decreaseBtn.focus();
+                                            console.log('📏 [KEYBOARD TOGGLE] Focused on line height decrease button');
+                                        }
+                                    }, 100);
+                                }
                             } else if (feature === 'adjust-letter-spacing') {
                                 console.log('📝 [KEYBOARD TOGGLE] Forcing letter spacing controls visibility:', enabled);
                                 this.toggleLetterSpacingControls(enabled);
+                                // Focus on the first control button when enabled
+                                if (enabled) {
+                                    setTimeout(() => {
+                                        const decreaseBtn = this.shadowRoot.getElementById('decrease-letter-spacing-btn');
+                                        if (decreaseBtn) {
+                                            decreaseBtn.focus();
+                                            console.log('📝 [KEYBOARD TOGGLE] Focused on letter spacing decrease button');
+                                        }
+                                    }, 100);
+                                }
                             }
                         } catch (err) {
                             console.warn('⚠️ [KEYBOARD TOGGLE] Failed to force control visibility:', err);
@@ -2736,6 +2776,16 @@ body.align-right a {
 
                 this.toggleLanguageDropdown();
 
+            });
+
+            // Add keyboard support for language selector
+            languageSelectorHeader.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accessibility Widget: Language selector activated via keyboard');
+                    this.toggleLanguageDropdown();
+                }
             });
 
             console.log('Accessibility Widget: Language selector event listener attached');
@@ -5661,7 +5711,7 @@ html body.big-white-cursor * {
 
                                 <div style="display: flex; align-items: center; gap: 10px;">
 
-                                    <button class="scaling-btn" id="decrease-content-scale-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-down"></i> -5%
 
@@ -5669,7 +5719,7 @@ html body.big-white-cursor * {
 
                                     <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
 
-                                    <button class="scaling-btn" id="increase-content-scale-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-up"></i> +5%
 
@@ -5823,7 +5873,7 @@ html body.big-white-cursor * {
 
                                 <div style="display: flex; align-items: center; gap: 10px;">
 
-                                    <button class="scaling-btn" id="decrease-font-size-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-down"></i> -10%
 
@@ -5831,7 +5881,7 @@ html body.big-white-cursor * {
 
                                     <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
 
-                                    <button class="scaling-btn" id="increase-font-size-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-up"></i> +10%
 
@@ -5901,7 +5951,7 @@ html body.big-white-cursor * {
 
                                 <div style="display: flex; align-items: center; gap: 10px;">
 
-                                    <button class="scaling-btn" id="decrease-line-height-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-down"></i> -10%
 
@@ -5909,7 +5959,7 @@ html body.big-white-cursor * {
 
                                     <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
 
-                                    <button class="scaling-btn" id="increase-line-height-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-up"></i> +10%
 
@@ -5951,7 +6001,7 @@ html body.big-white-cursor * {
 
                                 <div style="display: flex; align-items: center; gap: 10px;">
 
-                                    <button class="scaling-btn" id="decrease-letter-spacing-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-down"></i> -10%
 
@@ -5959,7 +6009,7 @@ html body.big-white-cursor * {
 
                                     <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
 
-                                    <button class="scaling-btn" id="increase-letter-spacing-btn" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
 
                                         <i class="fas fa-chevron-up"></i> +10%
 
