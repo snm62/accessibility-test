@@ -1657,10 +1657,11 @@ setInterval(() => {
 /* Tablets (Portrait & Landscape) & Laptops */
 @media (min-width: 769px) and (max-width: 1024px) {
     .accessibility-panel {
-        width: 70vw;
-        max-width: 450px;
-        padding: 16px;
+        width: 75vw;
+        max-width: 520px;
+        min-height: 75vh;
         max-height: 90vh !important;
+        padding: 20px;
         overflow-y: auto;
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
@@ -1733,9 +1734,11 @@ setInterval(() => {
 /* Larger Displays (Desktops) */
 @media (min-width: 1012px) {
     .accessibility-panel {
-        width: 500px;
-        max-width: 500px;
-        padding: 20px;
+        width: 600px;
+        max-width: 600px;
+        min-height: 80vh;
+        max-height: 90vh;
+        padding: 24px;
         /* Font size controlled by JavaScript */
     }
     
@@ -5380,7 +5383,7 @@ html body.big-white-cursor * {
 
             <div class="panel-header">
 
-                <div class="close-btn" id="close-panel">
+                <div class="close-btn" id="close-panel" tabindex="0" role="button" aria-label="Close accessibility panel">
 
                     ×
                 </div>
@@ -5389,11 +5392,21 @@ html body.big-white-cursor * {
 
                     <h2>Accessibility Adjustments</h2>
 
-                    <div class="action-buttons">
+                </div>
+
+                <div class="language-selector-header" id="language-selector-header" tabindex="0" role="button" aria-label="Select language" aria-expanded="false" aria-haspopup="listbox">
+
+                    <span id="current-language-header">ENGLISH</span>
+
+                    <i class="fas fa-chevron-down"></i>
+
+                </div>
+
+                <div class="action-buttons">
 
                         <div class="button-row">
 
-                            <button id="reset-settings" class="action-btn">
+                            <button id="reset-settings" class="action-btn" tabindex="0" aria-label="Reset all accessibility settings">
 
                                 <i class="fas fa-redo"></i>
 
@@ -5401,7 +5414,7 @@ html body.big-white-cursor * {
 
                             </button>
 
-                            <button id="statement" class="action-btn">
+                            <button id="statement" class="action-btn" tabindex="0" aria-label="View accessibility statement">
 
                                 <i class="fas fa-file-alt"></i>
 
@@ -5413,7 +5426,7 @@ html body.big-white-cursor * {
 
                         <div class="button-row">
 
-                            <button id="hide-interface" class="action-btn">
+                            <button id="hide-interface" class="action-btn" tabindex="0" aria-label="Hide accessibility interface">
 
                                 <i class="fas fa-eye-slash"></i>
 
@@ -5424,14 +5437,6 @@ html body.big-white-cursor * {
                         </div>
 
                     </div>
-
-                </div>
-
-                <div class="language-selector-header" id="language-selector-header">
-
-                    <span id="current-language-header">ENGLISH</span>
-
-                    <i class="fas fa-chevron-down"></i>
 
                 </div>
 
@@ -5451,7 +5456,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="seizure-safe" aria-label="Seizure Safe Profile - Clear flashes and reduces color" aria-describedby="seizure-safe-desc">
+                        <input type="checkbox" id="seizure-safe" tabindex="0" aria-label="Seizure Safe Profile - Clear flashes and reduces color" aria-describedby="seizure-safe-desc">
 
                         <span class="slider"></span>
 
@@ -5479,7 +5484,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="vision-impaired" aria-label="Vision Impaired Profile - Enhances website's visuals" aria-describedby="vision-impaired-desc">
+                        <input type="checkbox" id="vision-impaired" tabindex="0" aria-label="Vision Impaired Profile - Enhances website's visuals" aria-describedby="vision-impaired-desc">
 
                         <span class="slider"></span>
 
@@ -5507,7 +5512,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adhd-friendly">
+                        <input type="checkbox" id="adhd-friendly" tabindex="0" aria-label="ADHD Friendly Profile - Reduces distractions and highlights focus">
 
                         <span class="slider"></span>
 
@@ -5535,7 +5540,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="cognitive-disability">
+                        <input type="checkbox" id="cognitive-disability" tabindex="0" aria-label="Cognitive Disability Profile - Simplifies interface and content">
 
                         <span class="slider"></span>
 
@@ -5563,7 +5568,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="keyboard-nav">
+                        <input type="checkbox" id="keyboard-nav" tabindex="0" aria-label="Keyboard Navigation - Enable keyboard-only navigation">
 
                         <span class="slider"></span>
 
@@ -5600,7 +5605,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="screen-reader">
+                        <input type="checkbox" id="screen-reader" tabindex="0" aria-label="Screen Reader - Optimize for screen readers">
 
                         <span class="slider"></span>
 
@@ -5638,7 +5643,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="content-scaling">
+                        <input type="checkbox" id="content-scaling" tabindex="0" aria-label="Content Scaling - Adjust content size for better readability">
 
                         <span class="slider"></span>
 
@@ -5688,7 +5693,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="readable-font">
+                        <input type="checkbox" id="readable-font" tabindex="0" aria-label="Readable Font - Use dyslexia-friendly fonts">
 
                         <span class="slider"></span>
 
@@ -5716,7 +5721,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="highlight-titles">
+                        <input type="checkbox" id="highlight-titles" tabindex="0" aria-label="Highlight Titles - Emphasize headings and titles">
 
                         <span class="slider"></span>
 
@@ -5744,7 +5749,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="highlight-links">
+                        <input type="checkbox" id="highlight-links" tabindex="0" aria-label="Highlight Links - Emphasize clickable links">
 
                         <span class="slider"></span>
 
@@ -5772,7 +5777,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="text-magnifier">
+                        <input type="checkbox" id="text-magnifier" tabindex="0" aria-label="Text Magnifier - Enlarge text on hover">
 
                         <span class="slider"></span>
 
@@ -5800,7 +5805,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="font-sizing" aria-label="Adjust Font Sizing - Font size with arrow controls" aria-describedby="font-sizing-desc">
+                        <input type="checkbox" id="font-sizing" tabindex="0" aria-label="Adjust Font Sizing - Font size with arrow controls" aria-describedby="font-sizing-desc">
 
                         <span class="slider"></span>
 
@@ -5850,7 +5855,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="align-center">
+                        <input type="checkbox" id="align-center" tabindex="0" aria-label="Align Center - Center-align text content">
 
                         <span class="slider"></span>
 
@@ -5878,7 +5883,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adjust-line-height">
+                        <input type="checkbox" id="adjust-line-height" tabindex="0" aria-label="Adjust Line Height - Increase spacing between lines">
 
                         <span class="slider"></span>
 
@@ -5928,7 +5933,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adjust-letter-spacing">
+                        <input type="checkbox" id="adjust-letter-spacing" tabindex="0" aria-label="Adjust Letter Spacing - Increase spacing between letters">
 
                         <span class="slider"></span>
 
@@ -5978,7 +5983,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="align-left">
+                        <input type="checkbox" id="align-left" tabindex="0" aria-label="Align Left - Left-align text content">
 
                         <span class="slider"></span>
 
@@ -6006,7 +6011,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="align-right">
+                        <input type="checkbox" id="align-right" tabindex="0" aria-label="Align Right - Right-align text content">
 
                         <span class="slider"></span>
 
@@ -6034,7 +6039,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="dark-contrast">
+                        <input type="checkbox" id="dark-contrast" tabindex="0" aria-label="Dark Contrast - Apply dark color scheme">
 
                         <span class="slider"></span>
 
@@ -6062,7 +6067,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="light-contrast">
+                        <input type="checkbox" id="light-contrast" tabindex="0" aria-label="Light Contrast - Apply light color scheme">
 
                         <span class="slider"></span>
 
@@ -6090,7 +6095,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="high-contrast">
+                        <input type="checkbox" id="high-contrast" tabindex="0" aria-label="High Contrast - Apply high contrast colors">
 
                         <span class="slider"></span>
 
@@ -6118,7 +6123,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="high-saturation">
+                        <input type="checkbox" id="high-saturation" tabindex="0" aria-label="High Saturation - Increase color intensity">
 
                         <span class="slider"></span>
 
@@ -6146,7 +6151,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adjust-text-colors">
+                        <input type="checkbox" id="adjust-text-colors" tabindex="0" aria-label="Adjust Text Colors - Modify text color scheme">
 
                         <span class="slider"></span>
 
@@ -6186,7 +6191,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="monochrome">
+                        <input type="checkbox" id="monochrome" tabindex="0" aria-label="Monochrome - Apply grayscale color scheme">
 
                         <span class="slider"></span>
 
@@ -6214,7 +6219,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adjust-title-colors">
+                        <input type="checkbox" id="adjust-title-colors" tabindex="0" aria-label="Adjust Title Colors - Modify heading color scheme">
 
                         <span class="slider"></span>
 
@@ -6242,7 +6247,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="low-saturation">
+                        <input type="checkbox" id="low-saturation" tabindex="0" aria-label="Low Saturation - Decrease color intensity">
 
                         <span class="slider"></span>
 
@@ -6270,7 +6275,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="adjust-bg-colors">
+                        <input type="checkbox" id="adjust-bg-colors" tabindex="0" aria-label="Adjust Background Colors - Modify background color scheme">
 
                         <span class="slider"></span>
 
@@ -6298,7 +6303,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="mute-sound">
+                        <input type="checkbox" id="mute-sound" tabindex="0" aria-label="Mute Sound - Disable all audio">
 
                         <span class="slider"></span>
 
@@ -6326,7 +6331,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="hide-images">
+                        <input type="checkbox" id="hide-images" tabindex="0" aria-label="Hide Images - Hide all images on page">
 
                         <span class="slider"></span>
 
@@ -6354,7 +6359,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="read-mode">
+                        <input type="checkbox" id="read-mode" tabindex="0" aria-label="Read Mode - Simplify page for reading">
 
                         <span class="slider"></span>
 
@@ -6382,7 +6387,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="reading-guide" aria-label="Reading Guide - Movable highlight bar" aria-describedby="reading-guide-desc">
+                        <input type="checkbox" id="reading-guide" tabindex="0" aria-label="Reading Guide - Movable highlight bar" aria-describedby="reading-guide-desc">
 
                         <span class="slider"></span>
 
@@ -6410,7 +6415,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="useful-links" aria-label="Useful Links - Accessibility resources and links" aria-describedby="useful-links-desc">
+                        <input type="checkbox" id="useful-links" tabindex="0" aria-label="Useful Links - Accessibility resources and links" aria-describedby="useful-links-desc">
 
                         <span class="slider"></span>
 
@@ -6438,7 +6443,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="stop-animation">
+                        <input type="checkbox" id="stop-animation" tabindex="0" aria-label="Stop Animation - Disable all animations">
 
                         <span class="slider"></span>
 
@@ -6466,7 +6471,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="reading-mask">
+                        <input type="checkbox" id="reading-mask" tabindex="0" aria-label="Reading Mask - Focus on specific text area">
 
                         <span class="slider"></span>
 
@@ -6494,7 +6499,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="highlight-hover">
+                        <input type="checkbox" id="highlight-hover" tabindex="0" aria-label="Highlight Hover - Highlight elements on mouse hover">
 
                         <span class="slider"></span>
 
@@ -6522,7 +6527,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="highlight-focus">
+                        <input type="checkbox" id="highlight-focus" tabindex="0" aria-label="Highlight Focus - Highlight focused elements">
 
                         <span class="slider"></span>
 
@@ -6550,7 +6555,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="big-black-cursor">
+                        <input type="checkbox" id="big-black-cursor" tabindex="0" aria-label="Big Black Cursor - Larger black mouse cursor">
 
                         <span class="slider"></span>
 
@@ -6578,7 +6583,7 @@ html body.big-white-cursor * {
 
                     <label class="toggle-switch">
 
-                        <input type="checkbox" id="big-white-cursor">
+                        <input type="checkbox" id="big-white-cursor" tabindex="0" aria-label="Big White Cursor - Larger white mouse cursor">
 
                         <span class="slider"></span>
 
@@ -6633,7 +6638,7 @@ html body.big-white-cursor * {
 
                 <!-- Available languages -->
 
-                <button class="language-option" data-lang="en" data-flag="🇺🇸">
+                <button class="language-option" data-lang="en" data-flag="🇺🇸" tabindex="0" role="option" aria-label="Select English language">
 
                     <span class="flag">🇺🇸</span>
 
@@ -6641,7 +6646,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="de" data-flag="🇩🇪">
+                <button class="language-option" data-lang="de" data-flag="🇩🇪" tabindex="0" role="option" aria-label="Select German language">
 
                     <span class="flag">🇩🇪</span>
 
@@ -6649,7 +6654,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="fr" data-flag="🇫🇷">
+                <button class="language-option" data-lang="fr" data-flag="🇫🇷" tabindex="0" role="option" aria-label="Select French language">
 
                     <span class="flag">🇫🇷</span>
 
@@ -6657,7 +6662,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="he" data-flag="🇮🇱">
+                <button class="language-option" data-lang="he" data-flag="🇮🇱" tabindex="0" role="option" aria-label="Select Hebrew language">
 
                     <span class="flag">🇮🇱</span>
 
@@ -6665,7 +6670,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="ru" data-flag="🇷🇺">
+                <button class="language-option" data-lang="ru" data-flag="🇷🇺" tabindex="0" role="option" aria-label="Select Russian language">
 
                     <span class="flag">🇷🇺</span>
 
@@ -6673,7 +6678,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="ar" data-flag="🇦🇪">
+                <button class="language-option" data-lang="ar" data-flag="🇦🇪" tabindex="0" role="option" aria-label="Select Arabic language">
 
                     <span class="flag">🇦🇪</span>
 
@@ -6681,7 +6686,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="es" data-flag="🇪🇸">
+                <button class="language-option" data-lang="es" data-flag="🇪🇸" tabindex="0" role="option" aria-label="Select Spanish language">
 
                     <span class="flag">🇪🇸</span>
 
@@ -6689,7 +6694,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="pt" data-flag="🇵🇹">
+                <button class="language-option" data-lang="pt" data-flag="🇵🇹" tabindex="0" role="option" aria-label="Select Portuguese language">
 
                     <span class="flag">🇵🇹</span>
 
@@ -6697,7 +6702,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="it" data-flag="🇮🇹">
+                <button class="language-option" data-lang="it" data-flag="🇮🇹" tabindex="0" role="option" aria-label="Select Italian language">
 
                     <span class="flag">🇮🇹</span>
 
@@ -6705,7 +6710,7 @@ html body.big-white-cursor * {
 
                 </button>
 
-                <button class="language-option" data-lang="tw" data-flag="🇹🇼">
+                <button class="language-option" data-lang="tw" data-flag="🇹🇼" tabindex="0" role="option" aria-label="Select Traditional Chinese language">
 
                     <span class="flag">🇹🇼</span>
 
@@ -8354,12 +8359,20 @@ html body.big-white-cursor * {
                 panel.classList.remove('active');
 
                 console.log('Accessibility Widget: Panel closed');
+                
+                // Re-enable smooth scrolling libraries when panel is closed
+                this.enableSmoothScrollingLibraries();
 
             } else {
 
                 panel.classList.add('active');
 
                 console.log('Accessibility Widget: Panel opened');
+                
+                // Fix scrolling conflicts with GSAP/Lenis libraries
+                setTimeout(() => {
+                    this.fixPanelScrolling();
+                }, 100);
 
             }
 
@@ -20979,16 +20992,27 @@ html body.big-white-cursor * {
                     overscroll-behavior: contain !important;
                     overflow-y: auto !important;
                     overflow-x: hidden !important;
+                    position: fixed !important;
+                    z-index: 999999 !important;
+                    pointer-events: auto !important;
                 }
                 
                 /* Override GSAP/Lenis smooth scrolling for accessibility panel */
                 .accessibility-panel * {
                     scroll-behavior: auto !important;
+                    pointer-events: auto !important;
                 }
                 
                 /* Ensure panel content is scrollable */
                 .accessibility-panel .panel-content {
                     overflow-y: auto !important;
+                    -webkit-overflow-scrolling: touch !important;
+                    pointer-events: auto !important;
+                }
+                
+                /* Force scroll events to work */
+                .accessibility-panel {
+                    touch-action: pan-y !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
             `;
@@ -21036,7 +21060,83 @@ html body.big-white-cursor * {
                 element.style.scrollBehavior = 'auto';
             });
             
+            // Additional fixes for specific libraries
+            panel.style.position = 'fixed';
+            panel.style.zIndex = '999999';
+            
+            // Force scroll events to work
+            panel.addEventListener('wheel', (e) => {
+                e.stopPropagation();
+            }, { passive: false });
+            
+            panel.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: false });
+            
+            panel.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+            }, { passive: false });
+            
             console.log('[CK] Panel scrolling fixes applied');
+        }
+        
+        // Additional fix: Disable smooth scrolling libraries when panel is open
+        this.disableSmoothScrollingLibraries();
+    }
+    
+    // Disable smooth scrolling libraries that interfere with panel scrolling
+    disableSmoothScrollingLibraries() {
+        console.log('[CK] disableSmoothScrollingLibraries() - Disabling GSAP/Lenis smooth scrolling');
+        
+        // Disable Lenis smooth scrolling
+        if (window.lenis) {
+            try {
+                window.lenis.destroy();
+                console.log('[CK] Lenis smooth scrolling disabled');
+            } catch (e) {
+                console.log('[CK] Lenis not found or already disabled');
+            }
+        }
+        
+        // Disable GSAP ScrollTrigger
+        if (window.ScrollTrigger) {
+            try {
+                ScrollTrigger.killAll();
+                console.log('[CK] GSAP ScrollTrigger disabled');
+            } catch (e) {
+                console.log('[CK] ScrollTrigger not found or already disabled');
+            }
+        }
+        
+        // Disable any other smooth scrolling
+        document.body.style.scrollBehavior = 'auto';
+        document.documentElement.style.scrollBehavior = 'auto';
+        
+        // Force native scrolling
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
+    }
+    
+    // Re-enable smooth scrolling libraries when panel is closed
+    enableSmoothScrollingLibraries() {
+        console.log('[CK] enableSmoothScrollingLibraries() - Re-enabling smooth scrolling libraries');
+        
+        // Re-enable Lenis if it was active
+        if (window.innerWidth > 1280) {
+            // Only re-enable on desktop
+            try {
+                if (typeof Lenis !== 'undefined') {
+                    window.lenis = new Lenis({
+                        duration: 1.2,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        smooth: true,
+                        smoothTouch: true,
+                    });
+                    console.log('[CK] Lenis smooth scrolling re-enabled');
+                }
+            } catch (e) {
+                console.log('[CK] Could not re-enable Lenis');
+            }
         }
     }
     
@@ -21684,6 +21784,9 @@ html body.big-white-cursor * {
                     panel.style.visibility = 'hidden';
                     icon.setAttribute('aria-expanded', 'false');
                     console.log('Accessibility Widget: Panel hidden');
+                    
+                    // Re-enable smooth scrolling libraries when panel is closed
+                    this.enableSmoothScrollingLibraries();
                 } else {
                     // Show panel
                     this.ensureBasePanelCSS(); // Ensure base CSS is applied
