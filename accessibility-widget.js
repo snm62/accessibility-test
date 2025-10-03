@@ -4438,7 +4438,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.005;
+                --vision-font-scale: 1.0;
 
             }
 
@@ -19879,10 +19879,7 @@ html body.big-white-cursor * {
                 /* Don't override body background - preserve website colors */
             }
             
-            body.seizure-safe * {
-                /* Don't override element backgrounds - preserve website colors */
-                filter: none !important;
-            }
+            /* Remove all seizure safety overrides that break website colors */
             
             /* Only apply filters to specific media elements */
             body.seizure-safe img,
@@ -19958,13 +19955,13 @@ html body.big-white-cursor * {
 
             .adhd-friendly .adhd-focus {
 
-                outline: 2px solid var(--primary-color) !important;
+                outline: 1px solid var(--primary-color) !important;
 
-                outline-offset: 2px !important;
+                outline-offset: 1px !important;
 
-                background: rgba(99, 102, 241, 0.08) !important;
+                background: rgba(99, 102, 241, 0.03) !important;
 
-                filter: contrast(1.1) brightness(1.05) !important;
+                filter: contrast(1.02) brightness(1.01) !important;
 
             }
 
@@ -20088,7 +20085,7 @@ html body.big-white-cursor * {
 
             z-index: 99997;
 
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.05);
 
         `;
 
@@ -20800,16 +20797,8 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale very small text (less than 14px) - completely avoid big fonts
-            if (fontSize < 14) {
-                // Apply minimal scaling for very small text only
-                const newSize = Math.max(fontSize * 1.05, 12); // 5% increase, minimum 12px
-                element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Scaled very small text from ${fontSize}px to ${newSize}px`);
-            } else {
-                // Keep all fonts 14px and above exactly the same - no changes
-                console.log(`[CK] Preserved font at ${fontSize}px (no scaling - too big)`);
-            }
+            // Don't scale any fonts - preserve all existing font sizes
+            console.log(`[CK] Preserved font at ${fontSize}px (no scaling applied)`);
         });
         
         console.log('[CK] applySmartVisionScaling() - Smart scaling completed');
