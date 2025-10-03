@@ -4438,7 +4438,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.05;
+                --vision-font-scale: 1.02;
 
             }
 
@@ -20772,34 +20772,23 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                /* Smart vision impaired scaling - only scale smaller fonts */
+                /* Smart vision impaired scaling - only scale small text, preserve big fonts */
                 .vision-impaired * {
-                    /* Only apply scaling to elements with small font sizes */
-                    font-size: max(1em, calc(1em * 1.02)) !important;
+                    /* Don't change existing font sizes - let JavaScript handle it */
+                    font-size: inherit !important;
                 }
                 
-                /* Prevent scaling on already large fonts */
+                /* Don't scale any elements with CSS - let JavaScript do smart scaling */
                 .vision-impaired h1,
                 .vision-impaired h2,
                 .vision-impaired h3,
                 .vision-impaired h4,
                 .vision-impaired h5,
-                .vision-impaired h6 {
-                    /* Only scale if current size is less than 1.2em */
-                    font-size: max(1.2em, calc(1em * 1.02)) !important;
-                }
-                
-                /* Scale small text more, large text less */
+                .vision-impaired h6,
                 .vision-impaired p,
                 .vision-impaired span,
                 .vision-impaired div,
                 .vision-impaired a {
-                    font-size: max(0.9em, calc(1em * 1.02)) !important;
-                }
-                
-                /* Don't scale elements that are already very large */
-                .vision-impaired *[style*="font-size"] {
-                    /* Preserve existing large font sizes */
                     font-size: inherit !important;
                 }
             `;
@@ -20829,19 +20818,16 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale if font size is smaller than 16px (typical small text)
+            // Only scale small text (less than 16px) - keep big fonts exactly the same
             if (fontSize < 16) {
-                // Apply minimal scaling for small text
-                const newSize = Math.max(fontSize * 1.05, 14); // Max 5% increase, minimum 14px
+                // Apply scaling for small text only
+                const newSize = Math.max(fontSize * 1.08, 14); // 8% increase, minimum 14px
                 element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Scaled element from ${fontSize}px to ${newSize}px`);
-            } else if (fontSize >= 16 && fontSize < 20) {
-                // Slight scaling for medium text
-                const newSize = Math.max(fontSize * 1.02, fontSize); // Max 2% increase
-                element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Slightly scaled element from ${fontSize}px to ${newSize}px`);
+                console.log(`[CK] Scaled small text from ${fontSize}px to ${newSize}px`);
+            } else {
+                // Keep big fonts exactly the same - no changes
+                console.log(`[CK] Preserved big font at ${fontSize}px (no scaling)`);
             }
-            // Don't scale large text (20px+) to prevent layout breaking
         });
         
         console.log('[CK] applySmartVisionScaling() - Smart scaling completed');
