@@ -36,6 +36,23 @@ constructor() {
         this.init();
 
     }
+    // Minimal early CSS to pause motion before full seizure-safe styles load
+    applyImmediateSeizureCSS() {
+        try {
+            if (document.getElementById('accessibility-seizure-immediate')) return;
+            const style = document.createElement('style');
+            style.id = 'accessibility-seizure-immediate';
+            style.textContent = `
+                body.seizure-safe * {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        } catch (e) {
+            console.warn('Accessibility Widget: applyImmediateSeizureCSS failed', e);
+        }
+    }
 
 
 
@@ -52,11 +69,50 @@ constructor() {
         }
 
         this.createWidget();
-
+        
         this.loadSettings();
+
+        // If seizure-safe was previously enabled, apply it ASAP so it persists on refresh
+        if (this.settings && this.settings['seizure-safe']) {
+            try {
+                // Add class immediately to enable CSS guards before any library re-inits
+                document.body.classList.add('seizure-safe');
+                // Apply immediate minimal CSS to halt motion until full styles are added
+                this.applyImmediateSeizureCSS();
+                // Proceed with full enable without delay
+                this.enableSeizureSafe(true /* immediate */);
+            } catch (e) {
+                console.warn('Accessibility Widget: Failed to apply immediate seizure-safe on init', e);
+            }
+        }
+
+        // If stop-animation was previously enabled, apply it ASAP so it persists on refresh
+        if (this.settings && this.settings['stop-animation']) {
+            try {
+                document.body.classList.add('stop-animation');
+                this.enableStopAnimation();
+            } catch (e) {
+                console.warn('Accessibility Widget: Failed to apply immediate stop-animation on init', e);
+            }
+        }
         
         // Load user settings from KV storage
         await this.loadSettingsFromKV();
+        // If KV indicates seizure-safe, ensure it is enabled immediately
+        if (this.settings && this.settings['seizure-safe']) {
+            if (!document.body.classList.contains('seizure-safe')) {
+                document.body.classList.add('seizure-safe');
+            }
+            this.enableSeizureSafe(true /* immediate */);
+        }
+
+        // If KV indicates stop-animation, ensure it is enabled immediately
+        if (this.settings && this.settings['stop-animation']) {
+            if (!document.body.classList.contains('stop-animation')) {
+                document.body.classList.add('stop-animation');
+            }
+            this.enableStopAnimation();
+        }
         
         await this.fetchCustomizationData();
         
@@ -18936,7 +18992,10 @@ html body.big-white-cursor * {
 
         }
 
-        
+        // Apply same seizure-safe runtime controls but without visual changes
+        this.stopAutoplayVideos();
+        this.stopPortfolioAnimations();
+        this.lockButtonHoverStyles();
 
         // Stop any JavaScript-based animations (like the slider auto-slide)
 
@@ -18992,7 +19051,9 @@ html body.big-white-cursor * {
 
         }
 
-        
+        // Restore button styles and portfolio animations
+        this.restoreButtonHoverStyles();
+        this.restorePortfolioAnimations();
 
         // Resume JavaScript-based animations (like the slider auto-slide)
 
@@ -19774,22 +19835,29 @@ html body.big-white-cursor * {
 
     // Seizure Safe Profile Methods
 
-    enableSeizureSafe() {
+    enableSeizureSafe(immediate = false) {
 
         this.settings['seizure-safe'] = true;
 
         document.body.classList.add('seizure-safe');
 
-        // Add a small delay to allow initial page load animations to start
-        setTimeout(() => {
+        if (immediate) {
             this.addSeizureSafeStyles();
-        }, 100);
+        } else {
+            // Add a small delay to allow initial page load animations to start
+            setTimeout(() => {
+                this.addSeizureSafeStyles();
+            }, 100);
+        }
 
         // Stop autoplay videos to prevent seizures
         this.stopAutoplayVideos();
         
         // Stop portfolio animation loops that could cause black screen
         this.stopPortfolioAnimations();
+
+        // Lock button styles to prevent hover color changes
+        this.lockButtonHoverStyles();
 
         // Stop any JavaScript-based animations (like the slider auto-slide)
 
@@ -19957,9 +20025,12 @@ html body.big-white-cursor * {
         
         // Stop GSAP animations if available
         if (typeof gsap !== 'undefined') {
-            gsap.killTweensOf('.portfolio-card, .hover-circle, .bg-overlay, .portfolio-desc-wrapper, .curved-text-container');
-            // Kill all GSAP animations to prevent black screen
-            gsap.killTweensOf('*');
+            // Kill letter-by-letter text effects (TextPlugin) and any timelines
+            try { gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .fade-up-multi-text, .fade-up-multi-text-fast'); } catch(_){}
+            try { gsap.killTweensOf('*'); } catch(_){}
+            if (gsap.globalTimeline) {
+                try { gsap.globalTimeline.clear(); } catch(_){}
+            }
         }
         
         // Stop ScrollTrigger animations
@@ -20022,6 +20093,58 @@ html body.big-white-cursor * {
         
         console.log('Accessibility Widget: Portfolio animations stopped for seizure safety');
     }
+
+    // Lock current button visual state to prevent hover color changes during seizure-safe
+    lockButtonHoverStyles() {
+        try {
+            const root = document;
+            const buttons = root.querySelectorAll('a, button, [role="button"], .button, .btn');
+            this._lockedButtons = [];
+            buttons.forEach((btn) => {
+                const cs = window.getComputedStyle(btn);
+                const snapshot = {
+                    el: btn,
+                    style: {
+                        backgroundColor: btn.style.backgroundColor,
+                        color: btn.style.color,
+                        borderColor: btn.style.borderColor,
+                        boxShadow: btn.style.boxShadow,
+                        filter: btn.style.filter,
+                        transition: btn.style.transition
+                    }
+                };
+                this._lockedButtons.push(snapshot);
+                // Apply computed values inline to freeze state
+                btn.style.backgroundColor = cs.backgroundColor;
+                btn.style.color = cs.color;
+                btn.style.borderColor = cs.borderColor;
+                btn.style.boxShadow = 'none';
+                btn.style.filter = 'none';
+                btn.style.transition = 'none';
+            });
+        } catch (e) {
+            console.warn('Accessibility Widget: lockButtonHoverStyles failed', e);
+        }
+    }
+
+    // Restore original inline styles on buttons
+    restoreButtonHoverStyles() {
+        try {
+            if (!this._lockedButtons) return;
+            this._lockedButtons.forEach(({ el, style }) => {
+                if (!el) return;
+                el.style.backgroundColor = style.backgroundColor || '';
+                el.style.color = style.color || '';
+                el.style.borderColor = style.borderColor || '';
+                el.style.boxShadow = style.boxShadow || '';
+                el.style.filter = style.filter || '';
+                el.style.transition = style.transition || '';
+            });
+            this._lockedButtons = null;
+        } catch (e) {
+            console.warn('Accessibility Widget: restoreButtonHoverStyles failed', e);
+        }
+    }
     
     // Restore portfolio animations when seizure safety is disabled
     restorePortfolioAnimations() {
@@ -20049,6 +20172,8 @@ html body.big-white-cursor * {
         });
         
         console.log('Accessibility Widget: Portfolio animations restored');
+        // Restore button styles
+        this.restoreButtonHoverStyles();
     }
 
 
@@ -20124,7 +20249,11 @@ html body.big-white-cursor * {
             
             /* Stop common seizure-triggering animations but allow initial page load animations */
             body.seizure-safe *[style*="animation"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]),
-            body.seizure-safe *[style*="transition"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]) {
+            body.seizure-safe *[style*="transition"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]),
+            body.seizure-safe [data-splitting],
+            body.seizure-safe .split, 
+            body.seizure-safe .char, 
+            body.seizure-safe .word {
                 animation: none !important;
                 transition: none !important;
             }
@@ -20229,6 +20358,7 @@ html body.big-white-cursor * {
                 opacity: 1 !important;
                 transform: none !important;
                 animation: none !important;
+                transition: none !important;
             }
             
             /* Ensure hero content is visible */
