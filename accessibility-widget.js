@@ -4438,7 +4438,7 @@ body.align-right a {
 
                 --vision-scale: 1.2;
 
-                --vision-font-scale: 1.15;
+                --vision-font-scale: 1.05;
 
             }
 
@@ -20773,13 +20773,13 @@ html body.big-white-cursor * {
             style.id = 'vision-impaired-css';
             style.textContent = `
                 .vision-impaired * {
-                    font-size: 105% !important;
+                    font-size: 102% !important;
                 }
             `;
             document.head.appendChild(style);
         }
         
-        console.log('Accessibility Widget: Vision impaired styles applied - font size increased by 5%');
+        console.log('Accessibility Widget: Vision impaired styles applied - font size increased by 2%');
         
         // Ensure the Shadow DOM host gets the vision-impaired class
         this.updateWidgetAppearance();
