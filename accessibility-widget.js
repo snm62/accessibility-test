@@ -3192,28 +3192,34 @@ body.align-right a {
 
             /* Focus indicators for all interactive elements */
 
-            input:focus,
+            input:focus-visible,
 
-            button:focus,
+            button:focus-visible,
 
-            select:focus,
+            select:focus-visible,
 
-            label:focus,
+            label:focus-visible,
 
-            .action-btn:focus,
+            .action-btn:focus-visible,
 
-            .scaling-btn:focus,
+            .scaling-btn:focus-visible,
 
-            .close-btn:focus,
+            .close-btn:focus-visible,
 
-            .language-selector:focus,
-            .language-selector-header:focus {
+            .language-selector:focus-visible,
+            .language-selector-header:focus-visible {
 
         
              outline: 2px solid #6366f1 !important;
              outline-offset: 2px !important;
              box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;   
 
+            }
+
+            /* Suppress focus ring for mouse interactions */
+            *:focus:not(:focus-visible) {
+                outline: none !important;
+                box-shadow: none !important;
             }
 
 
@@ -8680,10 +8686,64 @@ html body.big-white-cursor * {
 
             
 
-            // Mark current language as selected
+            // Mark current language as selected and focus first option
             setTimeout(() => {
-            this.updateSelectedLanguage();
-            }, 100);
+                this.updateSelectedLanguage();
+                const header = this.shadowRoot.getElementById('language-selector-header');
+                if (header) header.setAttribute('aria-expanded', 'true');
+                const options = dropdown.querySelectorAll('.language-option');
+                options.forEach((opt, idx) => {
+                    opt.setAttribute('tabindex', idx === 0 ? '0' : '-1');
+                });
+                const first = options[0];
+                if (first) first.focus();
+            }, 50);
+
+            // Add keyboard navigation inside dropdown
+            const handleKeyNav = (e) => {
+                const options = Array.from(dropdown.querySelectorAll('.language-option'));
+                const activeIndex = options.findIndex(el => el === this.shadowRoot.activeElement);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = options[(activeIndex + 1 + options.length) % options.length];
+                    options.forEach(o => o.setAttribute('tabindex', '-1'));
+                    if (next) { next.setAttribute('tabindex', '0'); next.focus(); }
+                    return;
+                }
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = options[(activeIndex - 1 + options.length) % options.length];
+                    options.forEach(o => o.setAttribute('tabindex', '-1'));
+                    if (prev) { prev.setAttribute('tabindex', '0'); prev.focus(); }
+                    return;
+                }
+                if (e.key === 'Home') {
+                    e.preventDefault();
+                    options.forEach(o => o.setAttribute('tabindex', '-1'));
+                    if (options[0]) { options[0].setAttribute('tabindex', '0'); options[0].focus(); }
+                    return;
+                }
+                if (e.key === 'End') {
+                    e.preventDefault();
+                    const last = options[options.length - 1];
+                    options.forEach(o => o.setAttribute('tabindex', '-1'));
+                    if (last) { last.setAttribute('tabindex', '0'); last.focus(); }
+                    return;
+                }
+                if (e.key === 'Enter' || e.key === ' ') {
+                    const focused = this.shadowRoot.activeElement;
+                    if (focused && focused.classList.contains('language-option')) {
+                        e.preventDefault();
+                        focused.click();
+                        return;
+                    }
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.hideLanguageDropdown();
+                }
+            };
+            dropdown.addEventListener('keydown', handleKeyNav);
 
             // Announce to screen reader
 
@@ -8710,6 +8770,12 @@ html body.big-white-cursor * {
             // Announce to screen reader
 
             this.announceToScreenReader('Language selection dropdown closed');
+
+            const header = this.shadowRoot.getElementById('language-selector-header');
+            if (header) {
+                header.setAttribute('aria-expanded', 'false');
+                header.focus();
+            }
 
         }
 
