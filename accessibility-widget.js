@@ -8735,10 +8735,20 @@ html body.big-white-cursor * {
                 if (first) first.focus();
             }, 50);
 
-            // Add keyboard navigation inside dropdown
+            // Add keyboard navigation and focus trap inside dropdown
             const handleKeyNav = (e) => {
                 const options = Array.from(dropdown.querySelectorAll('.language-option'));
                 const activeIndex = options.findIndex(el => el === this.shadowRoot.activeElement);
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    // Cycle within dropdown options
+                    const direction = e.shiftKey ? -1 : 1;
+                    const nextIndex = (activeIndex === -1 ? (e.shiftKey ? options.length - 1 : 0) : (activeIndex + direction + options.length) % options.length);
+                    options.forEach(o => o.setAttribute('tabindex', '-1'));
+                    const target = options[nextIndex];
+                    if (target) { target.setAttribute('tabindex', '0'); target.focus(); }
+                    return;
+                }
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     const next = options[(activeIndex + 1 + options.length) % options.length];
@@ -8779,6 +8789,11 @@ html body.big-white-cursor * {
                     this.hideLanguageDropdown();
                 }
             };
+            // Replace existing handler if present to avoid duplicates
+            if (dropdown._langKeyNavRef) {
+                dropdown.removeEventListener('keydown', dropdown._langKeyNavRef);
+            }
+            dropdown._langKeyNavRef = handleKeyNav;
             dropdown.addEventListener('keydown', handleKeyNav);
 
             // Announce to screen reader
@@ -8802,6 +8817,8 @@ html body.big-white-cursor * {
         if (dropdown) {
 
             dropdown.style.display = 'none';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.opacity = '0';
 
             // Announce to screen reader
 
@@ -8811,6 +8828,12 @@ html body.big-white-cursor * {
             if (header) {
                 header.setAttribute('aria-expanded', 'false');
                 header.focus();
+            }
+
+            // Remove focus trap handler
+            if (dropdown._langKeyNavRef) {
+                dropdown.removeEventListener('keydown', dropdown._langKeyNavRef);
+                dropdown._langKeyNavRef = null;
             }
 
         }
@@ -15630,8 +15653,15 @@ html body.big-white-cursor * {
                 return;
             }
             
-            const result = await response.json();
-            console.log('[CK] saveSettingsToKV() - Successfully saved to KV:', result);
+            // Attempt JSON parse only if response is JSON
+            const ctSave = response.headers.get('content-type') || '';
+            if (ctSave.includes('application/json')) {
+                const result = await response.json();
+                console.log('[CK] saveSettingsToKV() - Successfully saved to KV:', result);
+            } else {
+                const text = await response.text();
+                console.log('[CK] saveSettingsToKV() - Non-JSON response, treating as success:', text?.slice(0, 200));
+            }
             
         } catch (error) {
             console.error('[CK] saveSettingsToKV() - Error saving to KV:', error);
@@ -15671,10 +15701,25 @@ html body.big-white-cursor * {
                 return;
             }
             
-            const data = await response.json();
+            // Safely parse JSON only when Content-Type is JSON
+            const ct = response.headers.get('content-type') || '';
+            let data = null;
+            if (ct.includes('application/json')) {
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    const raw = await response.text();
+                    console.warn('[CK] loadSettingsFromKV() - JSON parse failed. Raw:', raw?.slice(0, 200));
+                    return;
+                }
+            } else {
+                const raw = await response.text();
+                console.warn('[CK] loadSettingsFromKV() - Non-JSON response from KV, skipping. Raw:', raw?.slice(0, 200));
+                return;
+            }
             console.log('[CK] loadSettingsFromKV() - Loaded user settings from KV:', data);
             
-            if (data.settings) {
+            if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
                 // Merge KV settings with existing settings (KV takes precedence)
                 const kvSettings = data.settings;
                 console.log('[CK] loadSettingsFromKV() - Applying KV settings:', kvSettings);
@@ -15688,6 +15733,8 @@ html body.big-white-cursor * {
         localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
 
                 console.log('[CK] loadSettingsFromKV() - Successfully loaded and applied KV settings');
+            } else {
+                console.log('[CK] loadSettingsFromKV() - No usable settings in KV payload');
             }
             
         } catch (error) {
@@ -20223,6 +20270,7 @@ html body.big-white-cursor * {
                 opacity: 1 !important;
                 transform: none !important;
                 visibility: visible !important;
+                transition: none !important;
             }
             body.seizure-safe .single-service-animated .big-text-service-animated,
             body.seizure-safe .single-service-animated .wrap-text-service-animated,
@@ -20233,6 +20281,34 @@ html body.big-white-cursor * {
                 opacity: 1 !important;
                 transform: none !important;
                 visibility: visible !important;
+                transition: none !important;
+            }
+            /* Also neutralize hover states so reveal cannot trigger */
+            body.seizure-safe .single-service-animated:hover .image-service-animated,
+            body.seizure-safe .single-service-animated:focus-within .image-service-animated,
+            body.seizure-safe [class*="service-animated"]:hover .image-service-animated,
+            body.seizure-safe [class*="service-animated"]:focus-within .image-service-animated {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+                transition: none !important;
+            }
+            body.seizure-safe .single-service-animated:hover .big-text-service-animated,
+            body.seizure-safe .single-service-animated:hover .wrap-text-service-animated,
+            body.seizure-safe .single-service-animated:hover .number-service-animated,
+            body.seizure-safe [class*="service-animated"]:hover .big-text-service-animated,
+            body.seizure-safe [class*="service-animated"]:hover .wrap-text-service-animated,
+            body.seizure-safe [class*="service-animated"]:hover .number-service-animated {
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+                transition: none !important;
+            }
+            /* Catch-all for any hover-triggered transitions inside service blocks */
+            body.seizure-safe .single-service-animated:hover *,
+            body.seizure-safe [class*="service-animated"]:hover * {
+                transition: none !important;
+                animation: none !important;
             }
             
             /* Preserve accessibility widget functionality */
