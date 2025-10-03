@@ -20969,14 +20969,35 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                /* Vision impaired - Enhanced visual experience */
+                /* Vision impaired - Enhanced visual experience with layout preservation */
                 body.vision-impaired {
                     filter: saturate(1.2) brightness(1.05) contrast(1.05) !important;
                 }
                 
-                /* Ensure no font scaling conflicts */
-                body.vision-impaired * {
-                    /* Only JavaScript handles font scaling - no CSS interference */
+                /* Preserve navigation and menu layout */
+                body.vision-impaired nav,
+                body.vision-impaired .nav,
+                body.vision-impaired .menu,
+                body.vision-impaired .header,
+                body.vision-impaired .navbar,
+                body.vision-impaired .navigation {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    height: auto !important;
+                }
+                
+                /* Prevent layout breaking for elements with rem units */
+                body.vision-impaired *[style*="font-size"] {
+                    line-height: inherit !important;
+                    height: auto !important;
+                }
+                
+                /* Preserve container heights and spacing */
+                body.vision-impaired .container,
+                body.vision-impaired .wrapper,
+                body.vision-impaired .section {
+                    height: auto !important;
+                    min-height: auto !important;
                 }
             `;
             document.head.appendChild(style);
@@ -20993,53 +21014,60 @@ html body.big-white-cursor * {
 
 
 
-    // Conservative vision scaling - only enhance very small text with fixed sizes
+    // Ultra conservative vision scaling - only enhance extremely small text and preserve layout
     applySmartVisionScaling() {
-        console.log('[CK] applySmartVisionScaling() - Starting conservative font enhancement...');
+        console.log('[CK] applySmartVisionScaling() - Starting ultra conservative font enhancement...');
         
         // Get all text elements
         const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
         
         textElements.forEach(element => {
+            // Skip navigation and menu elements to prevent layout breaking
+            if (element.closest('nav') || element.closest('.nav') || element.closest('.menu') || 
+                element.closest('.header') || element.closest('.navbar') || element.closest('.navigation')) {
+                console.log(`[CK] Skipped navigation element to preserve layout`);
+                return;
+            }
+            
             // Get computed font size
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only enhance very small text with fixed size increases - don't touch bigger text
-            if (fontSize >= 8 && fontSize <= 10) {
-                // Small text: increase by 2px (e.g., 10px becomes 12px)
-                const newSize = fontSize + 2;
-                element.style.fontSize = `${newSize}px`;
-                console.log(`[CK] Enhanced small text from ${fontSize}px to ${newSize}px`);
-            } else if (fontSize < 8) {
-                // Very small text: set to minimum readable size
+            // Only enhance extremely small text (under 9px) and preserve layout
+            if (fontSize < 9) {
+                // Very small text: minimal increase to 10px and preserve line height
+                const originalLineHeight = computedStyle.lineHeight;
                 element.style.fontSize = '10px';
-                console.log(`[CK] Enhanced very small text from ${fontSize}px to 10px`);
+                element.style.lineHeight = originalLineHeight; // Preserve original line height
+                element.style.height = 'auto'; // Allow height to adjust naturally
+                console.log(`[CK] Enhanced very small text from ${fontSize}px to 10px (layout preserved)`);
             } else {
-                // Keep all fonts 11px and above exactly the same - no changes
+                // Keep all fonts 9px and above exactly the same - no changes
                 console.log(`[CK] Preserved text at ${fontSize}px (no enhancement - already readable)`);
             }
         });
         
-        console.log('[CK] applySmartVisionScaling() - Conservative enhancement completed');
+        console.log('[CK] applySmartVisionScaling() - Ultra conservative enhancement completed');
     }
     
-    // Remove smart vision scaling
+    // Remove smart vision scaling and restore layout
     removeSmartVisionScaling() {
-        console.log('[CK] removeSmartVisionScaling() - Removing smart font scaling...');
+        console.log('[CK] removeSmartVisionScaling() - Removing smart font scaling and restoring layout...');
         
         // Get all text elements that were scaled
         const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
         
         textElements.forEach(element => {
-            // Remove inline font-size styles that were added by smart scaling
+            // Remove inline styles that were added by smart scaling
             if (element.style.fontSize && element.style.fontSize.includes('px')) {
                 element.style.fontSize = '';
-                console.log(`[CK] Removed smart scaling from element`);
+                element.style.lineHeight = '';
+                element.style.height = '';
+                console.log(`[CK] Removed smart scaling and restored layout for element`);
             }
         });
         
-        console.log('[CK] removeSmartVisionScaling() - Smart scaling removal completed');
+        console.log('[CK] removeSmartVisionScaling() - Smart scaling removal and layout restoration completed');
     }
 
     removeVisionImpairedStyles() {
