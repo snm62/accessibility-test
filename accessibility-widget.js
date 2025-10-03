@@ -4432,7 +4432,8 @@ body.align-right a {
 
             :host(.vision-impaired) {
 
-                filter: saturate(1.1) brightness(1.05) !important;
+                /* Enhanced visual experience with increased saturation */
+                filter: saturate(1.3) brightness(1.1) contrast(1.1) !important;
 
                 /* Use CSS custom properties for responsive scaling */
 
@@ -4515,11 +4516,7 @@ body.align-right a {
 
 
 
-            :host(.vision-impaired) .accessibility-panel * {
-
-                font-size: 1em !important;
-
-            }
+            /* Panel elements use specific font sizes above - no general scaling */
 
 
 
@@ -20972,8 +20969,15 @@ html body.big-white-cursor * {
             const style = document.createElement('style');
             style.id = 'vision-impaired-css';
             style.textContent = `
-                /* Vision impaired - NO CSS font scaling, only JavaScript handles it */
-                /* Removed general font-size rule to prevent conflicts */
+                /* Vision impaired - Enhanced visual experience */
+                body.vision-impaired {
+                    filter: saturate(1.2) brightness(1.05) contrast(1.05) !important;
+                }
+                
+                /* Ensure no font scaling conflicts */
+                body.vision-impaired * {
+                    /* Only JavaScript handles font scaling - no CSS interference */
+                }
             `;
             document.head.appendChild(style);
         }
@@ -20989,9 +20993,9 @@ html body.big-white-cursor * {
 
 
 
-    // Smart vision scaling that detects existing font sizes
+    // Conservative vision scaling - only enhance very small text with fixed sizes
     applySmartVisionScaling() {
-        console.log('[CK] applySmartVisionScaling() - Starting smart font scaling...');
+        console.log('[CK] applySmartVisionScaling() - Starting conservative font enhancement...');
         
         // Get all text elements
         const textElements = document.querySelectorAll('p, span, div, a, h1, h2, h3, h4, h5, h6, li, td, th, label, button, input, textarea');
@@ -21001,20 +21005,23 @@ html body.big-white-cursor * {
             const computedStyle = window.getComputedStyle(element);
             const fontSize = parseFloat(computedStyle.fontSize);
             
-            // Only scale extremely small text (less than 8px) - keep all other text exactly the same
-            if (fontSize < 8) {
-                // Apply very minimal scaling for extremely small text only
-                const newSize = Math.max(fontSize * 1.05, 8); // 5% increase, minimum 8px
+            // Only enhance very small text with fixed size increases - don't touch bigger text
+            if (fontSize >= 8 && fontSize <= 10) {
+                // Small text: increase by 2px (e.g., 10px becomes 12px)
+                const newSize = fontSize + 2;
                 element.style.fontSize = `${newSize}px`;
-                // Ensure positioning is maintained - don't modify any other styles
-                console.log(`[CK] Scaled extremely small text from ${fontSize}px to ${newSize}px (position maintained)`);
+                console.log(`[CK] Enhanced small text from ${fontSize}px to ${newSize}px`);
+            } else if (fontSize < 8) {
+                // Very small text: set to minimum readable size
+                element.style.fontSize = '10px';
+                console.log(`[CK] Enhanced very small text from ${fontSize}px to 10px`);
             } else {
-                // Keep all fonts 8px and above exactly the same - no changes
-                console.log(`[CK] Preserved text at ${fontSize}px (no scaling - already readable)`);
+                // Keep all fonts 11px and above exactly the same - no changes
+                console.log(`[CK] Preserved text at ${fontSize}px (no enhancement - already readable)`);
             }
         });
         
-        console.log('[CK] applySmartVisionScaling() - Smart scaling completed');
+        console.log('[CK] applySmartVisionScaling() - Conservative enhancement completed');
     }
     
     // Remove smart vision scaling
