@@ -118,8 +118,8 @@
 /* Accessibility Panel - Fixed position on left side */
 .accessibility-panel {
     position: fixed !important;
-    width: 500px !important;
-    height: 700px !important;
+    width: 600px !important;
+    height: 900px !important;
     background: #ffffff !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
     z-index: 100000 !important;
@@ -562,34 +562,9 @@ input:checked + .slider:before {
 .vision-impaired {
     filter: saturate(1.1) brightness(1.05) !important;
     /* Use CSS custom properties for responsive scaling */
-    --vision-scale: 1.2;
-    --vision-font-scale: 1.15;
 }
 
-/* Responsive font scaling for text elements */
-.vision-impaired h1 {
-    font-size: calc(2.2em * var(--vision-font-scale)) !important;
-}
 
-.vision-impaired h2 {
-    font-size: calc(1.87em * var(--vision-font-scale)) !important;
-}
-
-.vision-impaired h3 {
-    font-size: calc(1.54em * var(--vision-font-scale)) !important;
-}
-
-.vision-impaired h4 {
-    font-size: calc(1.21em * var(--vision-font-scale)) !important;
-}
-
-.vision-impaired h5 {
-    font-size: calc(1.1em * var(--vision-font-scale)) !important;
-}
-
-.vision-impaired h6 {
-    font-size: calc(1.1em * var(--vision-font-scale)) !important;
-}
 
 .vision-impaired p, .vision-impaired span, .vision-impaired div, 
 .vision-impaired li, .vision-impaired td, .vision-impaired th, 
@@ -606,7 +581,7 @@ input:checked + .slider:before {
 .vision-impaired .accessibility-icon,
 .vision-impaired #accessibility-widget-container {
     font-size: 1em !important;
-    line-height: 1.6 !important;
+    line-height: 1.2 !important;
     transform: none !important;
 }
 
