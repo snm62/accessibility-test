@@ -1525,7 +1525,7 @@ setInterval(() => {
 
             link.rel = 'stylesheet';
 
-            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@77b2db8/accessibility-widget.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
             // External CSS removed to prevent conflicts with internal styles
             link.onload = () => {
                 
@@ -16258,6 +16258,12 @@ html body.big-white-cursor * {
 
         document.body.classList.add('high-contrast');
 
+        // Apply comprehensive high contrast styles that preserve positioning
+        this.applyHighContrastStyles();
+
+        // Start monitoring for dynamically added navbar elements
+        this.observeNavbarChanges();
+
         console.log('Accessibility Widget: High contrast enabled');
 
     }
@@ -16268,8 +16274,477 @@ html body.big-white-cursor * {
 
         document.body.classList.remove('high-contrast');
 
+        // Remove high contrast styles
+        this.removeHighContrastStyles();
+
+        // Stop monitoring navbar changes
+        this.stopObservingNavbarChanges();
+
         console.log('Accessibility Widget: High contrast disabled');
 
+    }
+
+    // Apply comprehensive high contrast styles that preserve positioning
+    applyHighContrastStyles() {
+        // Remove any existing high contrast styles first
+        this.removeHighContrastStyles();
+
+        const style = document.createElement('style');
+        style.id = 'accessibility-high-contrast-fix';
+        style.textContent = `
+            /* High Contrast Mode - Preserve Positioning */
+            body.high-contrast {
+                /* Ensure body maintains its positioning context */
+                position: relative !important;
+            }
+
+            /* Preserve all fixed and sticky positioning in high contrast mode */
+            body.high-contrast [style*="position: fixed"],
+            body.high-contrast [style*="position:fixed"],
+            body.high-contrast .fixed,
+            body.high-contrast .sticky,
+            body.high-contrast [class*="fixed"],
+            body.high-contrast [class*="sticky"],
+            body.high-contrast nav[style*="position: fixed"],
+            body.high-contrast nav[style*="position:fixed"],
+            body.high-contrast header[style*="position: fixed"],
+            body.high-contrast header[style*="position:fixed"],
+            body.high-contrast .navbar,
+            body.high-contrast .nav-bar,
+            body.high-contrast .navigation,
+            body.high-contrast .header,
+            body.high-contrast .top-bar,
+            body.high-contrast .menu-bar {
+                position: fixed !important;
+                z-index: 9999 !important;
+                /* Ensure these elements stay on top */
+                transform: none !important;
+                will-change: auto !important;
+                /* Prevent any filter effects from breaking positioning */
+                filter: none !important;
+                -webkit-filter: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* Specific fixes for common navbar classes and frameworks */
+            body.high-contrast .navbar-fixed-top,
+            body.high-contrast .navbar-fixed,
+            body.high-contrast .fixed-top,
+            body.high-contrast .sticky-top,
+            body.high-contrast .is-sticky,
+            body.high-contrast .is-fixed,
+            body.high-contrast [data-sticky],
+            body.high-contrast [data-fixed] {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 9999 !important;
+                transform: none !important;
+                will-change: auto !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+
+            /* Preserve sticky positioning for elements that should stick */
+            body.high-contrast [style*="position: sticky"],
+            body.high-contrast [style*="position:sticky"] {
+                position: sticky !important;
+                /* Ensure sticky elements maintain their behavior */
+                transform: none !important;
+                will-change: auto !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+
+            /* High contrast visual enhancements without breaking positioning */
+            body.high-contrast {
+                /* Apply high contrast to the page content, not positioned elements */
+                filter: contrast(1.5) brightness(1.2) !important;
+                -webkit-filter: contrast(1.5) brightness(1.2) !important;
+            }
+
+            /* But exclude fixed/sticky elements from the filter to preserve positioning */
+            body.high-contrast [style*="position: fixed"],
+            body.high-contrast [style*="position:fixed"],
+            body.high-contrast [style*="position: sticky"],
+            body.high-contrast [style*="position:sticky"],
+            body.high-contrast .fixed,
+            body.high-contrast .sticky,
+            body.high-contrast [class*="fixed"],
+            body.high-contrast [class*="sticky"],
+            body.high-contrast nav,
+            body.high-contrast header,
+            body.high-contrast .navbar,
+            body.high-contrast .nav-bar,
+            body.high-contrast .navigation,
+            body.high-contrast .header,
+            body.high-contrast .top-bar,
+            body.high-contrast .menu-bar {
+                filter: none !important;
+                -webkit-filter: none !important;
+                /* Apply high contrast colors directly instead of filters */
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                border-color: #ffffff !important;
+            }
+
+            /* Ensure links in fixed elements are visible */
+            body.high-contrast nav a,
+            body.high-contrast header a,
+            body.high-contrast .navbar a,
+            body.high-contrast .nav-bar a,
+            body.high-contrast .navigation a,
+            body.high-contrast .header a,
+            body.high-contrast .top-bar a,
+            body.high-contrast .menu-bar a {
+                color: #ffffff !important;
+                text-decoration: underline !important;
+            }
+
+            body.high-contrast nav a:hover,
+            body.high-contrast header a:hover,
+            body.high-contrast .navbar a:hover,
+            body.high-contrast .nav-bar a:hover,
+            body.high-contrast .navigation a:hover,
+            body.high-contrast .header a:hover,
+            body.high-contrast .top-bar a:hover,
+            body.high-contrast .menu-bar a:hover {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Preserve button styles in fixed elements */
+            body.high-contrast nav button,
+            body.high-contrast header button,
+            body.high-contrast .navbar button,
+            body.high-contrast .nav-bar button,
+            body.high-contrast .navigation button,
+            body.high-contrast .header button,
+            body.high-contrast .top-bar button,
+            body.high-contrast .menu-bar button {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 2px solid #ffffff !important;
+            }
+
+            body.high-contrast nav button:hover,
+            body.high-contrast header button:hover,
+            body.high-contrast .navbar button:hover,
+            body.high-contrast .nav-bar button:hover,
+            body.high-contrast .navigation button:hover,
+            body.high-contrast .header button:hover,
+            body.high-contrast .top-bar button:hover,
+            body.high-contrast .menu-bar button:hover {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+            }
+
+            /* Ensure dropdowns and menus in fixed elements work properly */
+            body.high-contrast nav .dropdown-menu,
+            body.high-contrast header .dropdown-menu,
+            body.high-contrast .navbar .dropdown-menu,
+            body.high-contrast .nav-bar .dropdown-menu,
+            body.high-contrast .navigation .dropdown-menu,
+            body.high-contrast .header .dropdown-menu,
+            body.high-contrast .top-bar .dropdown-menu,
+            body.high-contrast .menu-bar .dropdown-menu {
+                background-color: #000000 !important;
+                border: 2px solid #ffffff !important;
+                box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
+            }
+
+            body.high-contrast nav .dropdown-menu a,
+            body.high-contrast header .dropdown-menu a,
+            body.high-contrast .navbar .dropdown-menu a,
+            body.high-contrast .nav-bar .dropdown-menu a,
+            body.high-contrast .navigation .dropdown-menu a,
+            body.high-contrast .header .dropdown-menu a,
+            body.high-contrast .top-bar .dropdown-menu a,
+            body.high-contrast .menu-bar .dropdown-menu a {
+                color: #ffffff !important;
+            }
+
+            body.high-contrast nav .dropdown-menu a:hover,
+            body.high-contrast header .dropdown-menu a:hover,
+            body.high-contrast .navbar .dropdown-menu a:hover,
+            body.high-contrast .nav-bar .dropdown-menu a:hover,
+            body.high-contrast .navigation .dropdown-menu a:hover,
+            body.high-contrast .header .dropdown-menu a:hover,
+            body.high-contrast .top-bar .dropdown-menu a:hover,
+            body.high-contrast .menu-bar .dropdown-menu a:hover {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Ensure mobile menu toggles work */
+            body.high-contrast .navbar-toggler,
+            body.high-contrast .menu-toggle,
+            body.high-contrast .hamburger {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 2px solid #ffffff !important;
+            }
+
+            /* Fix for Bootstrap and other framework navbars */
+            body.high-contrast .navbar-default,
+            body.high-contrast .navbar-inverse,
+            body.high-contrast .navbar-light,
+            body.high-contrast .navbar-dark {
+                background-color: #000000 !important;
+                border-color: #ffffff !important;
+            }
+
+            /* Ensure proper z-index stacking */
+            body.high-contrast .navbar,
+            body.high-contrast .nav-bar,
+            body.high-contrast .navigation,
+            body.high-contrast .header,
+            body.high-contrast .top-bar,
+            body.high-contrast .menu-bar {
+                z-index: 9999 !important;
+            }
+
+            /* Prevent any transform or filter effects that might break positioning */
+            body.high-contrast [style*="position: fixed"],
+            body.high-contrast [style*="position:fixed"],
+            body.high-contrast [style*="position: sticky"],
+            body.high-contrast [style*="position:sticky"] {
+                transform: none !important;
+                will-change: auto !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* Additional fixes for common frameworks and libraries */
+            body.high-contrast .navbar-expand-lg,
+            body.high-contrast .navbar-expand-md,
+            body.high-contrast .navbar-expand-sm,
+            body.high-contrast .navbar-expand,
+            body.high-contrast .navbar-brand,
+            body.high-contrast .navbar-nav,
+            body.high-contrast .navbar-toggler,
+            body.high-contrast .navbar-collapse {
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+            }
+
+            /* Fix for WordPress themes and common CMS navbars */
+            body.high-contrast .main-navigation,
+            body.high-contrast .site-header,
+            body.high-contrast .site-navigation,
+            body.high-contrast .primary-menu,
+            body.high-contrast .menu-primary,
+            body.high-contrast .main-menu {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 9999 !important;
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+            }
+
+            /* Ensure submenus and dropdowns work in fixed navbars */
+            body.high-contrast .main-navigation ul,
+            body.high-contrast .site-navigation ul,
+            body.high-contrast .primary-menu ul,
+            body.high-contrast .menu-primary ul,
+            body.high-contrast .main-menu ul {
+                background-color: #000000 !important;
+                border: 2px solid #ffffff !important;
+                box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
+            }
+
+            body.high-contrast .main-navigation a,
+            body.high-contrast .site-navigation a,
+            body.high-contrast .primary-menu a,
+            body.high-contrast .menu-primary a,
+            body.high-contrast .main-menu a {
+                color: #ffffff !important;
+                text-decoration: underline !important;
+            }
+
+            body.high-contrast .main-navigation a:hover,
+            body.high-contrast .site-navigation a:hover,
+            body.high-contrast .primary-menu a:hover,
+            body.high-contrast .menu-primary a:hover,
+            body.high-contrast .main-menu a:hover {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Fix for React/Vue/Angular component navbars */
+            body.high-contrast [data-component="navbar"],
+            body.high-contrast [data-component="navigation"],
+            body.high-contrast [data-component="header"],
+            body.high-contrast .react-navbar,
+            body.high-contrast .vue-navbar,
+            body.high-contrast .angular-navbar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 9999 !important;
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+            }
+
+            /* Ensure mobile responsive navbars work */
+            body.high-contrast .mobile-nav,
+            body.high-contrast .mobile-menu,
+            body.high-contrast .mobile-header,
+            body.high-contrast .responsive-nav {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 9999 !important;
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+            }
+
+            /* Fix for sticky headers that might be affected */
+            body.high-contrast .sticky-header,
+            body.high-contrast .sticky-nav,
+            body.high-contrast .sticky-top-bar {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 9999 !important;
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+            }
+        `;
+
+        document.head.appendChild(style);
+        
+        // Apply fixes to existing navbar elements
+        this.fixExistingNavbars();
+        
+        console.log('Accessibility Widget: High contrast positioning fixes applied');
+    }
+
+    // Fix existing navbar elements that might have lost their positioning
+    fixExistingNavbars() {
+        // Find all potential navbar elements
+        const navbarSelectors = [
+            'nav', 'header', '.navbar', '.nav-bar', '.navigation', 
+            '.header', '.top-bar', '.menu-bar', '.main-navigation',
+            '.site-header', '.site-navigation', '.primary-menu',
+            '.menu-primary', '.main-menu', '.mobile-nav', '.mobile-menu',
+            '.mobile-header', '.responsive-nav', '.sticky-header',
+            '.sticky-nav', '.sticky-top-bar'
+        ];
+
+        navbarSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                // Check if element has fixed or sticky positioning
+                const computedStyle = window.getComputedStyle(element);
+                const position = computedStyle.position;
+                
+                if (position === 'fixed' || position === 'sticky') {
+                    // Ensure the element maintains its positioning
+                    element.style.setProperty('position', position, 'important');
+                    element.style.setProperty('z-index', '9999', 'important');
+                    element.style.setProperty('filter', 'none', 'important');
+                    element.style.setProperty('-webkit-filter', 'none', 'important');
+                    element.style.setProperty('transform', 'none', 'important');
+                    element.style.setProperty('will-change', 'auto', 'important');
+                    
+                    // Apply high contrast colors
+                    element.style.setProperty('background-color', '#000000', 'important');
+                    element.style.setProperty('color', '#ffffff', 'important');
+                    element.style.setProperty('border-color', '#ffffff', 'important');
+                    
+                    console.log(`Accessibility Widget: Fixed navbar element: ${selector}`);
+                }
+            });
+        });
+
+        // Also check for elements with inline styles that might be affected
+        const elementsWithInlinePosition = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"], [style*="position: sticky"], [style*="position:sticky"]');
+        elementsWithInlinePosition.forEach(element => {
+            element.style.setProperty('filter', 'none', 'important');
+            element.style.setProperty('-webkit-filter', 'none', 'important');
+            element.style.setProperty('transform', 'none', 'important');
+            element.style.setProperty('will-change', 'auto', 'important');
+            console.log('Accessibility Widget: Fixed inline positioned element');
+        });
+    }
+
+    // Remove high contrast styles
+    removeHighContrastStyles() {
+        const existingStyle = document.getElementById('accessibility-high-contrast-fix');
+        if (existingStyle) {
+            existingStyle.remove();
+            console.log('Accessibility Widget: High contrast positioning fixes removed');
+        }
+    }
+
+    // Monitor for dynamically added navbar elements
+    observeNavbarChanges() {
+        if (this.navbarObserver) {
+            this.navbarObserver.disconnect();
+        }
+
+        this.navbarObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            // Check if the added node or its children are navbar elements
+                            const navbarElements = node.querySelectorAll ? 
+                                node.querySelectorAll('nav, header, .navbar, .nav-bar, .navigation, .header, .top-bar, .menu-bar') :
+                                [];
+                            
+                            // Also check if the node itself is a navbar element
+                            const isNavbarElement = node.matches && node.matches('nav, header, .navbar, .nav-bar, .navigation, .header, .top-bar, .menu-bar');
+                            
+                            if (isNavbarElement || navbarElements.length > 0) {
+                                // Apply fixes to newly added navbar elements
+                                setTimeout(() => {
+                                    this.fixExistingNavbars();
+                                }, 100);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // Start observing
+        this.navbarObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        console.log('Accessibility Widget: Navbar change observer started');
+    }
+
+    // Stop monitoring navbar changes
+    stopObservingNavbarChanges() {
+        if (this.navbarObserver) {
+            this.navbarObserver.disconnect();
+            this.navbarObserver = null;
+            console.log('Accessibility Widget: Navbar change observer stopped');
+        }
     }
 
 
@@ -17234,6 +17709,22 @@ html body.big-white-cursor * {
 
         
 
+        // Initialize storage for original states if not exists
+
+        if (!this.originalVolumeStates) {
+
+            this.originalVolumeStates = new Map();
+
+        }
+
+        if (!this.originalPlayingStates) {
+
+            this.originalPlayingStates = new Map();
+
+        }
+
+        
+
         // Find all audio and video elements
 
         const audioElements = document.querySelectorAll('audio');
@@ -17242,33 +17733,27 @@ html body.big-white-cursor * {
 
         
 
-        // Store original volume and set volume to 0 (allows playback but no sound)
+        // Store original states and mute all media
 
-        this.originalVolumeStates = new Map();
-
-        
-
-        audioElements.forEach((element, index) => {
-
-            this.originalVolumeStates.set(`audio-${index}`, element.volume);
-
-            element.volume = 0;
-
-        });
+        this.muteAllMediaElements(audioElements, videoElements);
 
         
 
-        videoElements.forEach((element, index) => {
+        // Handle additional audio sources
 
-            this.originalVolumeStates.set(`video-${index}`, element.volume);
+        this.muteWebAudioContexts();
 
-            element.volume = 0;
-
-        });
+        this.muteIframeMedia();
 
         
 
-        console.log(`Accessibility Widget: Set volume to 0 for ${audioElements.length} audio and ${videoElements.length} video elements`);
+        // Start monitoring for dynamically added media elements
+
+        this.startMediaObserver();
+
+        
+
+        console.log(`Accessibility Widget: Muted ${audioElements.length} audio and ${videoElements.length} video elements`);
 
     }
 
@@ -17280,52 +17765,307 @@ html body.big-white-cursor * {
 
         
 
-        // Restore original volume states
+        // Stop monitoring for media changes
 
-        if (this.originalVolumeStates) {
+        this.stopMediaObserver();
 
-            const audioElements = document.querySelectorAll('audio');
+        
 
-            const videoElements = document.querySelectorAll('video');
+        // Restore original states for all media elements
 
-            
-
-            audioElements.forEach((element, index) => {
-
-                const originalVolume = this.originalVolumeStates.get(`audio-${index}`);
-
-                if (originalVolume !== undefined) {
-
-                    element.volume = originalVolume;
-
-                }
-
-            });
-
-            
-
-            videoElements.forEach((element, index) => {
-
-                const originalVolume = this.originalVolumeStates.get(`video-${index}`);
-
-                if (originalVolume !== undefined) {
-
-                    element.volume = originalVolume;
-
-                }
-
-            });
-
-            
-
-            this.originalVolumeStates.clear();
-
-        }
+        this.restoreAllMediaElements();
 
         
 
         console.log('Accessibility Widget: Restored original audio/video volume states');
 
+    }
+
+    // Comprehensive mute functionality for all media elements
+    muteAllMediaElements(audioElements, videoElements) {
+        // Process audio elements
+        audioElements.forEach((element, index) => {
+            const elementId = this.getElementId(element, 'audio', index);
+            
+            // Store original volume and playing state
+            this.originalVolumeStates.set(elementId, element.volume);
+            this.originalPlayingStates.set(elementId, !element.paused);
+            
+            // Mute the element
+            element.volume = 0;
+            element.muted = true;
+            
+            // If currently playing, pause it
+            if (!element.paused) {
+                element.pause();
+            }
+            
+            // Add event listeners to prevent unmuting
+            this.addMuteEventListeners(element);
+            
+            console.log(`Accessibility Widget: Muted audio element ${index}`);
+        });
+
+        // Process video elements
+        videoElements.forEach((element, index) => {
+            const elementId = this.getElementId(element, 'video', index);
+            
+            // Store original volume and playing state
+            this.originalVolumeStates.set(elementId, element.volume);
+            this.originalPlayingStates.set(elementId, !element.paused);
+            
+            // Mute the element
+            element.volume = 0;
+            element.muted = true;
+            
+            // If currently playing, pause it
+            if (!element.paused) {
+                element.pause();
+            }
+            
+            // Add event listeners to prevent unmuting
+            this.addMuteEventListeners(element);
+            
+            console.log(`Accessibility Widget: Muted video element ${index}`);
+        });
+    }
+
+    // Generate unique ID for media elements
+    getElementId(element, type, index) {
+        // Try to use existing ID or generate one
+        if (element.id) {
+            return `${type}-${element.id}`;
+        } else {
+            return `${type}-${index}-${Date.now()}`;
+        }
+    }
+
+    // Start monitoring for dynamically added media elements
+    startMediaObserver() {
+        if (this.mediaObserver) {
+            this.mediaObserver.disconnect();
+        }
+
+        this.mediaObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            // Check if the added node is a media element
+                            if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
+                                this.muteSingleMediaElement(node);
+                            }
+                            
+                            // Check for media elements within the added node
+                            const mediaElements = node.querySelectorAll ? 
+                                node.querySelectorAll('audio, video') : [];
+                            
+                            mediaElements.forEach(element => {
+                                this.muteSingleMediaElement(element);
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        // Start observing
+        this.mediaObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        console.log('Accessibility Widget: Media observer started');
+    }
+
+    // Stop monitoring for media changes
+    stopMediaObserver() {
+        if (this.mediaObserver) {
+            this.mediaObserver.disconnect();
+            this.mediaObserver = null;
+            console.log('Accessibility Widget: Media observer stopped');
+        }
+    }
+
+    // Mute a single media element
+    muteSingleMediaElement(element) {
+        const elementId = this.getElementId(element, element.tagName.toLowerCase(), Date.now());
+        
+        // Store original states
+        this.originalVolumeStates.set(elementId, element.volume);
+        this.originalPlayingStates.set(elementId, !element.paused);
+        
+        // Mute the element
+        element.volume = 0;
+        element.muted = true;
+        
+        // If currently playing, pause it
+        if (!element.paused) {
+            element.pause();
+        }
+        
+        // Add event listeners to prevent unmuting
+        this.addMuteEventListeners(element);
+        
+        console.log(`Accessibility Widget: Muted newly added ${element.tagName.toLowerCase()} element`);
+    }
+
+    // Add event listeners to prevent unmuting while mute is active
+    addMuteEventListeners(element) {
+        const muteHandler = (e) => {
+            if (this.settings['mute-sound']) {
+                element.volume = 0;
+                element.muted = true;
+                if (!element.paused) {
+                    element.pause();
+                }
+            }
+        };
+
+        // Store the handler for later removal
+        if (!element._muteHandlers) {
+            element._muteHandlers = [];
+        }
+
+        const volumeHandler = (e) => {
+            if (this.settings['mute-sound'] && element.volume > 0) {
+                element.volume = 0;
+            }
+        };
+
+        const playHandler = (e) => {
+            if (this.settings['mute-sound']) {
+                element.pause();
+            }
+        };
+
+        element.addEventListener('volumechange', volumeHandler);
+        element.addEventListener('play', playHandler);
+        element.addEventListener('loadeddata', muteHandler);
+
+        element._muteHandlers.push(volumeHandler, playHandler, muteHandler);
+    }
+
+    // Remove mute event listeners
+    removeMuteEventListeners(element) {
+        if (element._muteHandlers) {
+            element._muteHandlers.forEach(handler => {
+                element.removeEventListener('volumechange', handler);
+                element.removeEventListener('play', handler);
+                element.removeEventListener('loadeddata', handler);
+            });
+            element._muteHandlers = [];
+        }
+    }
+
+    // Restore all media elements to their original states
+    restoreAllMediaElements() {
+        if (!this.originalVolumeStates || !this.originalPlayingStates) {
+            return;
+        }
+
+        const audioElements = document.querySelectorAll('audio');
+        const videoElements = document.querySelectorAll('video');
+
+        // Restore audio elements
+        audioElements.forEach((element, index) => {
+            const elementId = this.getElementId(element, 'audio', index);
+            const originalVolume = this.originalVolumeStates.get(elementId);
+            const wasPlaying = this.originalPlayingStates.get(elementId);
+
+            if (originalVolume !== undefined) {
+                // Remove mute event listeners
+                this.removeMuteEventListeners(element);
+                
+                element.volume = originalVolume;
+                element.muted = false;
+                
+                // Resume playing if it was playing before
+                if (wasPlaying && element.paused) {
+                    element.play().catch(e => {
+                        console.log('Accessibility Widget: Could not resume audio playback:', e);
+                    });
+                }
+            }
+        });
+
+        // Restore video elements
+        videoElements.forEach((element, index) => {
+            const elementId = this.getElementId(element, 'video', index);
+            const originalVolume = this.originalVolumeStates.get(elementId);
+            const wasPlaying = this.originalPlayingStates.get(elementId);
+
+            if (originalVolume !== undefined) {
+                // Remove mute event listeners
+                this.removeMuteEventListeners(element);
+                
+                element.volume = originalVolume;
+                element.muted = false;
+                
+                // Resume playing if it was playing before
+                if (wasPlaying && element.paused) {
+                    element.play().catch(e => {
+                        console.log('Accessibility Widget: Could not resume video playback:', e);
+                    });
+                }
+            }
+        });
+
+        // Clear stored states
+        this.originalVolumeStates.clear();
+        this.originalPlayingStates.clear();
+    }
+
+    // Additional method to handle Web Audio API and other audio contexts
+    muteWebAudioContexts() {
+        // Handle Web Audio API contexts
+        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+            try {
+                const AudioContextClass = AudioContext || webkitAudioContext;
+                if (this.audioContext) {
+                    this.audioContext.suspend();
+                }
+            } catch (e) {
+                console.log('Accessibility Widget: Could not suspend Web Audio Context:', e);
+            }
+        }
+
+        // Handle other audio sources that might not be in DOM
+        const audioSources = document.querySelectorAll('source[type*="audio"], source[type*="video"]');
+        audioSources.forEach(source => {
+            const parent = source.parentElement;
+            if (parent && (parent.tagName === 'AUDIO' || parent.tagName === 'VIDEO')) {
+                parent.volume = 0;
+                parent.muted = true;
+                if (!parent.paused) {
+                    parent.pause();
+                }
+            }
+        });
+    }
+
+    // Method to handle iframe embedded media (YouTube, Vimeo, etc.)
+    muteIframeMedia() {
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+            try {
+                // Try to access iframe content (may fail due to CORS)
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (iframeDoc) {
+                    const iframeAudio = iframeDoc.querySelectorAll('audio, video');
+                    iframeAudio.forEach(element => {
+                        element.volume = 0;
+                        element.muted = true;
+                        if (!element.paused) {
+                            element.pause();
+                        }
+                    });
+                }
+            } catch (e) {
+                // CORS restrictions - this is expected for cross-origin iframes
+                console.log('Accessibility Widget: Cannot access iframe content due to CORS:', e);
+            }
+        });
     }
 
     // Hide Images Methods
@@ -21443,8 +22183,240 @@ html body.big-white-cursor * {
                     filter: saturate(1.3) brightness(1.1) contrast(1.1) !important;
                 }
                 
+                /* OVERRIDE EXTERNAL CSS - Prevent any font scaling from external stylesheets */
+                body.vision-impaired h1,
+                body.vision-impaired h2,
+                body.vision-impaired h3,
+                body.vision-impaired h4,
+                body.vision-impaired h5,
+                body.vision-impaired h6,
+                body.vision-impaired .navbar,
+                body.vision-impaired .nav,
+                body.vision-impaired .navigation,
+                body.vision-impaired .header,
+                body.vision-impaired .hero,
+                body.vision-impaired .title,
+                body.vision-impaired .headline,
+                body.vision-impaired .logo,
+                body.vision-impaired .brand,
+                body.vision-impaired nav,
+                body.vision-impaired header,
+                body.vision-impaired [class*="nav"],
+                body.vision-impaired [class*="header"],
+                body.vision-impaired [class*="hero"],
+                body.vision-impaired [class*="title"],
+                body.vision-impaired [class*="headline"],
+                body.vision-impaired [class*="logo"],
+                body.vision-impaired [class*="brand"] {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    /* Override any calc() scaling from external CSS */
+                    font-size: unset !important;
+                }
+                
+                /* Override any vision-impaired scaling from external CSS */
+                .vision-impaired h1,
+                .vision-impaired h2,
+                .vision-impaired h3,
+                .vision-impaired h4,
+                .vision-impaired h5,
+                .vision-impaired h6,
+                .vision-impaired .navbar,
+                .vision-impaired .nav,
+                .vision-impaired .navigation,
+                .vision-impaired .header,
+                .vision-impaired .hero,
+                .vision-impaired .title,
+                .vision-impaired .headline,
+                .vision-impaired .logo,
+                .vision-impaired .brand,
+                .vision-impaired nav,
+                .vision-impaired header,
+                .vision-impaired [class*="nav"],
+                .vision-impaired [class*="header"],
+                .vision-impaired [class*="hero"],
+                .vision-impaired [class*="title"],
+                .vision-impaired [class*="headline"],
+                .vision-impaired [class*="logo"],
+                .vision-impaired [class*="brand"] {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    /* Override any calc() scaling from external CSS */
+                    font-size: unset !important;
+                }
+                
+                /* AGGRESSIVE OVERRIDE - Force remove any external vision-impaired scaling */
+                body.vision-impaired * {
+                    /* Reset any vision-impaired scaling from external CSS */
+                    --vision-scale: 1 !important;
+                    --vision-font-scale: 1 !important;
+                }
+                
+                /* Force override any calc() font-size from external CSS */
+                body.vision-impaired h1,
+                body.vision-impaired h2,
+                body.vision-impaired h3,
+                body.vision-impaired h4,
+                body.vision-impaired h5,
+                body.vision-impaired h6 {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    /* Override any calc() scaling */
+                    font-size: unset !important;
+                    /* Force original size */
+                    font-size: initial !important;
+                }
+                
+                /* Override any external vision-impaired CSS rules */
+                .vision-impaired h1,
+                .vision-impaired h2,
+                .vision-impaired h3,
+                .vision-impaired h4,
+                .vision-impaired h5,
+                .vision-impaired h6 {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    font-size: unset !important;
+                    font-size: initial !important;
+                }
+                
+                /* PRESERVE LARGE TEXT AND NAVIGATION - NO SCALING */
+                body.vision-impaired h1,
+                body.vision-impaired h2,
+                body.vision-impaired h3,
+                body.vision-impaired h4,
+                body.vision-impaired h5,
+                body.vision-impaired h6,
+                body.vision-impaired .nav,
+                body.vision-impaired .navbar,
+                body.vision-impaired .navigation,
+                body.vision-impaired .header,
+                body.vision-impaired .hero,
+                body.vision-impaired .title,
+                body.vision-impaired .headline,
+                body.vision-impaired .logo,
+                body.vision-impaired .brand,
+                body.vision-impaired nav,
+                body.vision-impaired header,
+                body.vision-impaired [class*="nav"],
+                body.vision-impaired [class*="header"],
+                body.vision-impaired [class*="hero"],
+                body.vision-impaired [class*="title"],
+                body.vision-impaired [class*="headline"],
+                body.vision-impaired [class*="logo"],
+                body.vision-impaired [class*="brand"] {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                /* ONLY ENHANCE SMALL TEXT - Target specific small text elements */
+                body.vision-impaired p,
+                body.vision-impaired span,
+                body.vision-impaired div,
+                body.vision-impaired a,
+                body.vision-impaired li,
+                body.vision-impaired td,
+                body.vision-impaired th,
+                body.vision-impaired label,
+                body.vision-impaired small,
+                body.vision-impaired .small,
+                body.vision-impaired .text-sm,
+                body.vision-impaired .caption,
+                body.vision-impaired .description,
+                body.vision-impaired .content,
+                body.vision-impaired .body-text,
+                body.vision-impaired .paragraph {
+                    /* Only enhance if font-size is small (less than 18px) */
+                    font-size: max(1.1em, 16px) !important;
+                    line-height: 1.4 !important;
+                }
+                
+                /* Preserve button and form element sizes */
+                body.vision-impaired button,
+                body.vision-impaired input,
+                body.vision-impaired select,
+                body.vision-impaired textarea,
+                body.vision-impaired .btn,
+                body.vision-impaired .button {
+                    font-size: inherit !important;
+                    padding: inherit !important;
+                    height: inherit !important;
+                    width: inherit !important;
+                }
+                
                 /* NO font scaling - preserve all original text sizes and layout */
                 /* Only visual enhancements through CSS filters are applied */
+                
+                /* SPECIFIC FIXES FOR NAVIGATION AND LARGE TEXT */
+                body.vision-impaired .navbar-brand,
+                body.vision-impaired .nav-link,
+                body.vision-impaired .nav-item,
+                body.vision-impaired .menu-item,
+                body.vision-impaired .menu-link,
+                body.vision-impaired .hero-title,
+                body.vision-impaired .hero-text,
+                body.vision-impaired .main-title,
+                body.vision-impaired .page-title,
+                body.vision-impaired .section-title,
+                body.vision-impaired .display-1,
+                body.vision-impaired .display-2,
+                body.vision-impaired .display-3,
+                body.vision-impaired .display-4,
+                body.vision-impaired .jumbotron,
+                body.vision-impaired .banner,
+                body.vision-impaired .masthead {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    margin: inherit !important;
+                    padding: inherit !important;
+                }
+                
+                /* Prevent any scaling on large text elements */
+                body.vision-impaired [style*="font-size: 2"],
+                body.vision-impaired [style*="font-size: 3"],
+                body.vision-impaired [style*="font-size: 4"],
+                body.vision-impaired [style*="font-size: 5"],
+                body.vision-impaired [style*="font-size: 6"],
+                body.vision-impaired [style*="font-size: 7"],
+                body.vision-impaired [style*="font-size: 8"],
+                body.vision-impaired [style*="font-size: 9"],
+                body.vision-impaired [style*="font-size: 10"] {
+                    font-size: inherit !important;
+                    line-height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                /* Ensure navigation stays in place */
+                body.vision-impaired .navbar,
+                body.vision-impaired .nav,
+                body.vision-impaired .navigation,
+                body.vision-impaired .header,
+                body.vision-impaired .top-bar,
+                body.vision-impaired .menu-bar {
+                    position: inherit !important;
+                    top: inherit !important;
+                    left: inherit !important;
+                    right: inherit !important;
+                    width: inherit !important;
+                    height: inherit !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
                 
                 /* Fix scrolling conflicts with GSAP/Lenis libraries */
                 .accessibility-panel {
@@ -21499,7 +22471,87 @@ html body.big-white-cursor * {
         // No font scaling - preserve all original text sizes and layout
         // Only visual enhancements through CSS filters are applied
         
+        // Additional protection: Ensure no elements get scaled
+        const largeTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .navbar, .nav, .header, .hero, .title, .headline, .logo, .brand, nav, header');
+        largeTextElements.forEach(element => {
+            // Force override any external CSS
+            element.style.setProperty('font-size', 'inherit', 'important');
+            element.style.setProperty('line-height', 'inherit', 'important');
+            element.style.setProperty('transform', 'none', 'important');
+            element.style.setProperty('scale', '1', 'important');
+            element.style.setProperty('zoom', '1', 'important');
+            // Override any calc() values from external CSS
+            element.style.setProperty('font-size', 'unset', 'important');
+            element.style.setProperty('font-size', 'initial', 'important');
+            // Reset CSS custom properties
+            element.style.setProperty('--vision-scale', '1', 'important');
+            element.style.setProperty('--vision-font-scale', '1', 'important');
+        });
+        
+        // Only enhance small text elements
+        const smallTextElements = document.querySelectorAll('p, span, div, a, li, td, th, label, small, .small, .text-sm, .caption, .description, .content, .body-text, .paragraph');
+        smallTextElements.forEach(element => {
+            const computedStyle = window.getComputedStyle(element);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            
+            // Only enhance if font size is small (less than 18px)
+            if (fontSize < 18) {
+                element.style.setProperty('font-size', 'max(1.1em, 16px)', 'important');
+                element.style.setProperty('line-height', '1.4', 'important');
+            }
+        });
+        
+        // Force override any external vision-impaired CSS
+        this.overrideExternalVisionCSS();
+        
         console.log('[CK] applySmartVisionScaling() - Visual enhancement only mode completed');
+    }
+    
+    // Override any external vision-impaired CSS that might be loaded
+    overrideExternalVisionCSS() {
+        // Remove any external vision-impaired stylesheets
+        const externalStyles = document.querySelectorAll('style, link[rel="stylesheet"]');
+        externalStyles.forEach(style => {
+            if (style.textContent && style.textContent.includes('vision-impaired')) {
+                // Remove or override external vision-impaired CSS
+                const newStyle = document.createElement('style');
+                newStyle.textContent = `
+                    /* Override external vision-impaired CSS */
+                    .vision-impaired h1,
+                    .vision-impaired h2,
+                    .vision-impaired h3,
+                    .vision-impaired h4,
+                    .vision-impaired h5,
+                    .vision-impaired h6,
+                    .vision-impaired .navbar,
+                    .vision-impaired .nav,
+                    .vision-impaired .navigation,
+                    .vision-impaired .header,
+                    .vision-impaired .hero,
+                    .vision-impaired .title,
+                    .vision-impaired .headline,
+                    .vision-impaired .logo,
+                    .vision-impaired .brand,
+                    .vision-impaired nav,
+                    .vision-impaired header {
+                        font-size: inherit !important;
+                        line-height: inherit !important;
+                        transform: none !important;
+                        scale: 1 !important;
+                        zoom: 1 !important;
+                        font-size: unset !important;
+                        font-size: initial !important;
+                    }
+                `;
+                document.head.appendChild(newStyle);
+            }
+        });
+        
+        // Force reset CSS custom properties
+        document.documentElement.style.setProperty('--vision-scale', '1', 'important');
+        document.documentElement.style.setProperty('--vision-font-scale', '1', 'important');
+        
+        console.log('[CK] Override external vision-impaired CSS completed');
     }
     
     // Fix scrolling conflicts with GSAP/Lenis libraries
