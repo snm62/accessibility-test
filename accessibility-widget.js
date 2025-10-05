@@ -438,8 +438,33 @@
                 }
             `;
             document.head.appendChild(immediateStyle);
-            // Correction layer: preserve site layout styles while keeping animations disabled
+            // Master layer: globally disable CSS animations/transitions without altering layout
             try {
+                if (!document.getElementById('accessibility-seizure-master')) {
+                    const master = document.createElement('style');
+                    master.id = 'accessibility-seizure-master';
+                    master.textContent = `
+                        /* Hard stop for CSS animations and transitions */
+                        body.seizure-safe *,
+                        body.seizure-safe *::before,
+                        body.seizure-safe *::after {
+                            animation: none !important;
+                            animation-name: none !important;
+                            animation-duration: 0.0001s !important;
+                            animation-iteration-count: 1 !important;
+                            animation-play-state: paused !important;
+                            transition: none !important;
+                            transition-property: none !important;
+                            transition-duration: 0s !important;
+                            scroll-behavior: auto !important;
+                        }
+                        /* Do not affect cursor appearance */
+                        body.seizure-safe * { cursor: inherit; }
+                    `;
+                    document.head.appendChild(master);
+                }
+
+                // Correction layer: preserve site layout styles while keeping animations disabled
                 if (!document.getElementById('accessibility-seizure-correction')) {
                     const correction = document.createElement('style');
                     correction.id = 'accessibility-seizure-correction';
