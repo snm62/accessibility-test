@@ -815,6 +815,62 @@
                         }
                     }, { once: true });
 
+                    // Watch for seizure-safe class being toggled later and (re)install hard blockers
+                    try {
+                        if (!window.__seizureClassWatcher) {
+                            const classWatcher = new MutationObserver(() => {
+                                if (document.body.classList.contains('seizure-safe')) {
+                                    try { window.__applySeizureSafeDOMFreeze(); } catch (_) {}
+                                    try { window.__installStyleHardBlockers && window.__installStyleHardBlockers(); } catch (_) {}
+                                }
+                            });
+                            classWatcher.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+                            window.__seizureClassWatcher = classWatcher;
+                        }
+                    } catch (_) {}
+
+                    // Install hard blockers at the API level for inline styles when seizure-safe is active
+                    try {
+                        if (!window.__installStyleHardBlockers) {
+                            window.__installStyleHardBlockers = function() {
+                                if (!document.body.classList.contains('seizure-safe')) return;
+                                try {
+                                    if (!window.__origSetProperty) {
+                                        window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
+                                        CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
+                                            const n = String(name).toLowerCase();
+                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'transform' || n === 'opacity' || n === 'filter') {
+                                                // Block writes in seizure-safe
+                                                return undefined;
+                                            }
+                                            return window.__origSetProperty.call(this, name, value, priority);
+                                        };
+                                    }
+                                } catch (_) {}
+                                try {
+                                    if (!window.__origStyleAttrSetter) {
+                                        window.__origStyleAttrSetter = Element.prototype.setAttribute;
+                                        Element.prototype.setAttribute = function(attr, val) {
+                                            if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
+                                                // Strip blacklisted properties from inline style strings
+                                                let cleaned = val
+                                                    .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)transform\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
+                                                return window.__origStyleAttrSetter.call(this, attr, cleaned);
+                                            }
+                                            return window.__origStyleAttrSetter.call(this, attr, val);
+                                        };
+                                    }
+                                } catch (_) {}
+                            };
+                        }
+                        // Apply immediately if already in seizure-safe
+                        window.__installStyleHardBlockers();
+                    } catch (_) {}
+
                     // Observe future DOM changes to keep things frozen while seizure-safe is active
                     try {
                         const observer = new MutationObserver(() => {
