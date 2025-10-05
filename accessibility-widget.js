@@ -703,6 +703,88 @@
 
                     // Apply immediately and also on DOMContentLoaded as a second safety
                     window.__applySeizureSafeDOMFreeze();
+                    // Install aggressive animation blocker to neutralize JS-driven animations
+                    try {
+                        if (!window.__animationBlockerInstalled) {
+                            window.__animationBlockerInstalled = true;
+                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [class*="nav"], [class*="header"], [data-allow-transform]';
+
+                            const isExempt = (el) => {
+                                try { return !!el.closest(EXEMPT_SELECTOR); } catch (_) { return false; }
+                            };
+
+                            const neutralizeElement = (el) => {
+                                if (!el || isExempt(el)) return;
+                                try {
+                                    el.style.animation = 'none';
+                                    el.style.transition = 'none';
+                                    el.style.willChange = 'auto';
+                                    el.style.filter = 'none';
+                                    // Only neutralize transform/opacity if not exempt
+                                    el.style.transform = 'none';
+                                    el.style.opacity = '1';
+                                } catch (_) {}
+                            };
+
+                            // Initial sweep - limit to first 5000 elements for safety
+                            try {
+                                const all = document.querySelectorAll('*');
+                                let count = 0;
+                                for (const el of all) {
+                                    neutralizeElement(el);
+                                    count++;
+                                    if (count > 5000) break;
+                                }
+                            } catch (_) {}
+
+                            // Observe future changes to styles/classes and neutralize
+                            try {
+                                const styleObserver = new MutationObserver((mutations) => {
+                                    if (!(document.body && document.body.classList.contains('seizure-safe'))) return;
+                                    for (const m of mutations) {
+                                        const target = m.target;
+                                        if (!(target instanceof Element)) continue;
+                                        if (isExempt(target)) continue;
+                                        try {
+                                            const inline = (target.getAttribute && target.getAttribute('style')) || '';
+                                            if (/animation|transition|transform|opacity|filter/i.test(inline)) {
+                                                neutralizeElement(target);
+                                            }
+                                            // Common animation class keywords
+                                            const cls = target.className ? String(target.className) : '';
+                                            if (/(animate|fade|slide|zoom|parallax|reveal|scroll|marquee)/i.test(cls)) {
+                                                neutralizeElement(target);
+                                            }
+                                        } catch (_) {}
+                                    }
+                                });
+                                styleObserver.observe(document.documentElement, {
+                                    subtree: true,
+                                    childList: true,
+                                    attributes: true,
+                                    attributeFilter: ['style', 'class']
+                                });
+                                window.__seizureStyleObserver = styleObserver;
+                            } catch (_) {}
+
+                            // Also force scroll-behavior and snap off for all scrollable containers
+                            try {
+                                const scrollables = document.querySelectorAll('*');
+                                let sCount = 0;
+                                for (const el of scrollables) {
+                                    try {
+                                        const cs = getComputedStyle(el);
+                                        if ((cs.overflowX !== 'visible' || cs.overflowY !== 'visible') && !isExempt(el)) {
+                                            el.style.scrollBehavior = 'auto';
+                                            el.style.scrollSnapType = 'none';
+                                        }
+                                    } catch (_) {}
+                                    sCount++;
+                                    if (sCount > 5000) break;
+                                }
+                            } catch (_) {}
+                        }
+                    } catch (_) {}
                     document.addEventListener('DOMContentLoaded', function() {
                         if (document.body && document.body.classList.contains('seizure-safe')) {
                             window.__applySeizureSafeDOMFreeze();
