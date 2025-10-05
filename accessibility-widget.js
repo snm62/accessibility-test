@@ -492,14 +492,11 @@
                             width: unset !important;
                             height: unset !important;
                         }
-                        /* Explicitly preserve sticky/transform behaviors for common nav/card/section elements */
+                        /* Preserve only genuine navigation/header and explicit opt-outs */
                         body.seizure-safe nav,
                         body.seizure-safe header,
                         body.seizure-safe .navbar,
-                        body.seizure-safe [class*="nav"],
-                        body.seizure-safe [class*="header"],
-                        body.seizure-safe [class*="card"],
-                        body.seizure-safe [class*="section"],
+                        body.seizure-safe [role="navigation"],
                         body.seizure-safe [data-allow-transform] {
                             transform: unset !important;
                             position: unset !important;
@@ -707,7 +704,7 @@
                     try {
                         if (!window.__animationBlockerInstalled) {
                             window.__animationBlockerInstalled = true;
-                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [class*="nav"], [class*="header"], [data-allow-transform]';
+                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
 
                             const isExempt = (el) => {
                                 try { return !!el.closest(EXEMPT_SELECTOR); } catch (_) { return false; }
