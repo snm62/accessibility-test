@@ -398,6 +398,107 @@
                 }
             `;
             document.head.appendChild(immediateStyle);
+
+            // Runtime guards: stop JS-driven animations and reveal typewriter/progress instantly
+            try {
+                if (!window.__seizureGuardsApplied) {
+                    window.__seizureGuardsApplied = true;
+
+                    // Save originals
+                    window.__origRequestAnimationFrame = window.requestAnimationFrame;
+                    window.__origCancelAnimationFrame = window.cancelAnimationFrame;
+                    window.__origSetInterval = window.setInterval;
+                    window.__origClearInterval = window.clearInterval;
+
+                    // Disable rAF callbacks while seizure-safe is active
+                    window.requestAnimationFrame = function(callback) {
+                        if (document.body && document.body.classList.contains('seizure-safe')) {
+                            return 0;
+                        }
+                        return window.__origRequestAnimationFrame(callback);
+                    };
+                    window.cancelAnimationFrame = function(id) {
+                        try { return window.__origCancelAnimationFrame(id); } catch (_) { return; }
+                    };
+
+                    // Disable setInterval callbacks while seizure-safe is active
+                    window.setInterval = function(handler, timeout, ...args) {
+                        if (document.body && document.body.classList.contains('seizure-safe')) {
+                            return -1;
+                        }
+                        return window.__origSetInterval(handler, timeout, ...args);
+                    };
+                    window.clearInterval = function(id) {
+                        try { return window.__origClearInterval(id); } catch (_) { return; }
+                    };
+
+                    // Helper to reveal typewriter text and freeze progress visuals
+                    window.__applySeizureSafeDOMFreeze = function() {
+                        try {
+                            // Reveal typewriter/typing effects by consolidating text
+                            const typeSelectors = [
+                                '[class*="typewriter"]', '[class*="typing"]', '[data-typing]', '[data-typewriter]'
+                            ];
+                            document.querySelectorAll(typeSelectors.join(',')).forEach(el => {
+                                try {
+                                    const datasetText = el.getAttribute('data-full-text') || el.getAttribute('data-text') || '';
+                                    if (datasetText) {
+                                        el.textContent = datasetText;
+                                        return;
+                                    }
+                                    // If split into character spans, join them
+                                    const charSpans = el.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"]');
+                                    if (charSpans && charSpans.length > 0) {
+                                        let joined = '';
+                                        charSpans.forEach(n => { joined += n.textContent || ''; });
+                                        el.textContent = joined;
+                                    }
+                                } catch (_) { /* ignore per-element errors */ }
+                            });
+
+                            // Freeze progress bars and indicators (keep current visual state)
+                            const progressSelectors = [
+                                'progress', '[role="progressbar"]', '[class*="progress"]', '[class*="indicator"]', '[class*="bar"]'
+                            ];
+                            document.querySelectorAll(progressSelectors.join(',')).forEach(el => {
+                                try {
+                                    const cs = window.getComputedStyle(el);
+                                    // Lock width/transform/transition to current
+                                    el.style.transition = 'none';
+                                    el.style.animation = 'none';
+                                    if (cs.width && cs.width !== 'auto') el.style.width = cs.width;
+                                    if (cs.transform && cs.transform !== 'none') el.style.transform = 'none';
+                                    // For ARIA progressbar, keep the current value and stop changing
+                                    if (el.getAttribute && el.getAttribute('role') === 'progressbar') {
+                                        const now = el.getAttribute('aria-valuenow');
+                                        if (now) el.setAttribute('aria-valuenow', now);
+                                    }
+                                } catch (_) { /* ignore per-element errors */ }
+                            });
+                        } catch (err) {
+                            console.warn('Accessibility Widget: DOM freeze failed', err);
+                        }
+                    };
+
+                    // Apply immediately
+                    window.__applySeizureSafeDOMFreeze();
+
+                    // Observe future DOM changes to keep things frozen while seizure-safe is active
+                    try {
+                        const observer = new MutationObserver(() => {
+                            if (document.body && document.body.classList.contains('seizure-safe')) {
+                                window.__applySeizureSafeDOMFreeze();
+                            }
+                        });
+                        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
+                        window.__seizureObserver = observer;
+                    } catch (obsErr) {
+                        console.warn('Accessibility Widget: MutationObserver setup failed', obsErr);
+                    }
+                }
+            } catch (guardErr) {
+                console.warn('Accessibility Widget: runtime seizure-safe guards failed', guardErr);
+            }
         }
     } catch (e) {
         console.warn('Accessibility Widget: Immediate seizure-safe check failed', e);
@@ -21909,24 +22010,55 @@ class AccessibilityWidget {
                 // Apply gentle small-text upscale without touching large text
                 // Threshold: keep >= 18px unchanged; bump < 14px up to 16px; 14-17px kept
                 this.__vi_scaled = this.__vi_scaled || new WeakSet();
-                const textSelector = 'p, span, a, li, td, th, label, small, em, strong, i, b, input, textarea, select, button';
+                // Expanded to include more small-text containers
+                const textSelector = 'p, span, div, a, li, td, th, label, small, em, strong, i, b, sup, sub, figcaption, caption, summary, input, textarea, select, button';
                 document.querySelectorAll(textSelector).forEach(el => {
                     if (this.__vi_scaled.has(el)) return;
                     const cs = getComputedStyle(el);
                     const sizePx = parseFloat(cs.fontSize);
                     if (Number.isFinite(sizePx)) {
                         if (sizePx < 14) {
-                            // Promote to 16px for readability
-                            el.style.fontSize = '16px';
+                            // Promote to 16px for readability; add !important to overcome theme overrides
+                            el.style.setProperty('font-size', '16px', 'important');
                             // Preserve line-height ratio to avoid crowding
                             if (cs.lineHeight !== 'normal') {
-                                el.style.lineHeight = cs.lineHeight;
+                                el.style.setProperty('line-height', cs.lineHeight);
                             }
                             this.__vi_scaled.add(el);
                         }
                         // 14-17px unchanged; >=18px unchanged by design
                     }
                 });
+
+                // Observe dynamic DOM changes to scale newly inserted small text
+                try {
+                    if (this.__vi_observer) {
+                        this.__vi_observer.disconnect();
+                    }
+                    this.__vi_observer = new MutationObserver((mutations) => {
+                        mutations.forEach((m) => {
+                            // Handle added nodes
+                            m.addedNodes && m.addedNodes.forEach(node => {
+                                if (!(node instanceof Element)) return;
+                                // Check the node itself and its descendants
+                                const candidates = [node, ...node.querySelectorAll ? node.querySelectorAll(textSelector) : []];
+                                candidates.forEach(el => {
+                                    if (this.__vi_scaled.has(el)) return;
+                                    const cs = getComputedStyle(el);
+                                    const sizePx = parseFloat(cs.fontSize);
+                                    if (Number.isFinite(sizePx) && sizePx < 14) {
+                                        el.style.setProperty('font-size', '16px', 'important');
+                                        if (cs.lineHeight !== 'normal') {
+                                            el.style.setProperty('line-height', cs.lineHeight);
+                                        }
+                                        this.__vi_scaled.add(el);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                    this.__vi_observer.observe(document.body, { childList: true, subtree: true });
+                } catch (_) { /* noop */ }
 
                 // Ensure interactive paddings preserved
                 document.querySelectorAll(interactiveSelectors).forEach(el => {
@@ -21964,6 +22096,12 @@ class AccessibilityWidget {
                         }
                     });
                     this.__vi_scaled = new WeakSet();
+                }
+
+                // Disconnect observer if present
+                if (this.__vi_observer) {
+                    try { this.__vi_observer.disconnect(); } catch(_) {}
+                    this.__vi_observer = null;
                 }
 
                 // Restore paddings and line-height on interactive elements
