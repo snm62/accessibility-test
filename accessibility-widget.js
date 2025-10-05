@@ -438,6 +438,53 @@
                 }
             `;
             document.head.appendChild(immediateStyle);
+            // Correction layer: preserve site layout styles while keeping animations disabled
+            try {
+                if (!document.getElementById('accessibility-seizure-correction')) {
+                    const correction = document.createElement('style');
+                    correction.id = 'accessibility-seizure-correction';
+                    correction.textContent = `
+                        /* Keep animations disabled */
+                        body.seizure-safe * {
+                            animation: none !important;
+                            transition: none !important;
+                        }
+                        /* Restore layout-affecting properties to stylesheet values */
+                        body.seizure-safe *,
+                        body.seizure-safe *::before,
+                        body.seizure-safe *::after {
+                            transform: unset !important;
+                            translate: unset !important;
+                            scale: unset !important;
+                            rotate: unset !important;
+                            opacity: unset !important;
+                            visibility: unset !important;
+                            position: unset !important;
+                            top: unset !important;
+                            left: unset !important;
+                            right: unset !important;
+                            bottom: unset !important;
+                            width: unset !important;
+                            height: unset !important;
+                        }
+                        /* Explicitly preserve sticky/transform behaviors for common nav/card/section elements */
+                        body.seizure-safe nav,
+                        body.seizure-safe header,
+                        body.seizure-safe .navbar,
+                        body.seizure-safe [class*="nav"],
+                        body.seizure-safe [class*="header"],
+                        body.seizure-safe [class*="card"],
+                        body.seizure-safe [class*="section"],
+                        body.seizure-safe [data-allow-transform] {
+                            transform: unset !important;
+                            position: unset !important;
+                            opacity: unset !important;
+                            visibility: unset !important;
+                        }
+                    `;
+                    document.head.appendChild(correction);
+                }
+            } catch (_) {}
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
 
@@ -527,6 +574,67 @@
                                     }
                                 } catch (_) { /* ignore per-element errors */ }
                             });
+
+                            // Preserve manual slider navigation controls: arrows and dots must remain functional
+                            const sliderControlSelectors = [
+                                '.swiper-button-next', '.swiper-button-prev', '.swiper-pagination-bullet', '.swiper-pagination-clickable',
+                                '.slick-next', '.slick-prev', '.slick-dots li', '.slick-dots button',
+                                '.glide__arrow', '.glide__bullet',
+                                '.splide__arrow', '.splide__pagination__page',
+                                '.carousel-control-next', '.carousel-control-prev', '.carousel-indicators li', '.carousel-indicators button',
+                                '[data-slide]', '[data-bs-slide]', '[data-glide-dir]'
+                            ];
+                            document.querySelectorAll(sliderControlSelectors.join(',')).forEach(ctrl => {
+                                try {
+                                    ctrl.style.pointerEvents = 'auto';
+                                    ctrl.style.cursor = 'pointer';
+                                    // Ensure visibility and opacity aren't suppressed
+                                    ctrl.style.visibility = '';
+                                    ctrl.style.opacity = '';
+                                } catch (_) {}
+                            });
+
+                            // Pause autoplay for common slider libraries while keeping navigation enabled
+                            try {
+                                // Swiper
+                                const swipers = document.querySelectorAll('.swiper, .swiper-container');
+                                swipers.forEach(el => {
+                                    const inst = el.swiper || el.__swiper || (el._swiper || null);
+                                    if (inst && inst.autoplay && typeof inst.autoplay.stop === 'function') {
+                                        inst.autoplay.stop();
+                                    }
+                                });
+                            } catch (_) {}
+                            try {
+                                // Slick (requires jQuery)
+                                const jq = window.jQuery || window.$;
+                                if (jq) {
+                                    jq('.slick-slider').each(function() {
+                                        try { jq(this).slick && jq(this).slick('slickPause'); } catch (e) {}
+                                    });
+                                }
+                            } catch (_) {}
+                            try {
+                                // Splide
+                                document.querySelectorAll('.splide').forEach(el => {
+                                    const inst = el.splide || el._splide || null;
+                                    if (inst && typeof inst.options === 'object') {
+                                        try { inst.options = Object.assign({}, inst.options, { autoplay: false }); } catch (e) {}
+                                        if (inst.Components && inst.Components.Autoplay && typeof inst.Components.Autoplay.pause === 'function') {
+                                            inst.Components.Autoplay.pause();
+                                        }
+                                    }
+                                });
+                            } catch (_) {}
+                            try {
+                                // Glide.js
+                                document.querySelectorAll('.glide').forEach(el => {
+                                    const inst = el._glide || null;
+                                    if (inst && typeof inst.pause === 'function') {
+                                        inst.pause();
+                                    }
+                                });
+                            } catch (_) {}
 
                             // Do NOT alter nav/header elements so sticky/navbars continue working normally
                             // This function intentionally skips any changes to nav/header; CSS exceptions added below
