@@ -893,6 +893,37 @@
     }
 })();
 
+// Ensure the seizure-safe toggle actually applies classes and storage immediately
+(function() {
+    try {
+        function bindSeizureSafeToggle() {
+            const input = document.getElementById('seizure-safe');
+            if (!input) return;
+            const enabled = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+            try { input.checked = enabled; } catch (_) {}
+            if (!input.__seizureBound) {
+                input.addEventListener('change', function() {
+                    const on = !!this.checked;
+                    localStorage.setItem('accessibility-widget-seizure-safe', on ? 'true' : 'false');
+                    try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
+                    try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
+                    if (on) {
+                        try { window.__applySeizureSafeDOMFreeze && window.__applySeizureSafeDOMFreeze(); } catch (_) {}
+                    }
+                });
+                input.__seizureBound = true;
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindSeizureSafeToggle, { once: true });
+        } else {
+            bindSeizureSafeToggle();
+        }
+    } catch (e) {
+        console.warn('Accessibility Widget: Seizure-safe toggle binding failed', e);
+    }
+})();
+
 // CRITICAL: Immediate Vision Impaired profile - apply on first paint if previously enabled
 (function() {
     try {
