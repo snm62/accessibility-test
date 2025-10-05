@@ -16,22 +16,6 @@
                     transition: none !important;
                     animation-play-state: paused !important;
                 }
-                
-                /* CRITICAL: Disable ALL hover effects immediately */
-                body.seizure-safe *:hover,
-                body.seizure-safe *:focus,
-                body.seizure-safe *:active,
-                body.seizure-safe *:focus-within {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    border-color: inherit !important;
-                    box-shadow: none !important;
-                    filter: none !important;
-                    transform: none !important;
-                    opacity: inherit !important;
-                    transition: none !important;
-                    animation: none !important;
-                }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
                 body.seizure-safe .char,
@@ -21099,36 +21083,32 @@ class AccessibilityWidget {
         lockButtonHoverStyles() {
             try {
                 const root = document;
-                // Target all interactive elements, not just buttons
-                const interactiveElements = root.querySelectorAll('a, button, [role="button"], .button, .btn, input, select, textarea, [tabindex], [onclick], [onmouseover], [onmouseout], .card, .portfolio-card, .service-card, .blog-card, [class*="card"], nav, .nav, .navbar, .navigation, .menu, [class*="nav"]');
+                // Only target actual buttons and links, not all interactive elements
+                const buttons = root.querySelectorAll('a, button, [role="button"], .button, .btn');
                 this._lockedButtons = [];
-                interactiveElements.forEach((element) => {
-                    const cs = window.getComputedStyle(element);
+                buttons.forEach((btn) => {
+                    const cs = window.getComputedStyle(btn);
                     const snapshot = {
-                        el: element,
+                        el: btn,
                         style: {
-                            backgroundColor: element.style.backgroundColor,
-                            color: element.style.color,
-                            borderColor: element.style.borderColor,
-                            boxShadow: element.style.boxShadow,
-                            filter: element.style.filter,
-                            transition: element.style.transition,
-                            transform: element.style.transform,
-                            opacity: element.style.opacity
+                            backgroundColor: btn.style.backgroundColor,
+                            color: btn.style.color,
+                            borderColor: btn.style.borderColor,
+                            boxShadow: btn.style.boxShadow,
+                            filter: btn.style.filter,
+                            transition: btn.style.transition
                         }
                     };
                     this._lockedButtons.push(snapshot);
                     // Apply computed values inline to freeze state
-                    element.style.backgroundColor = cs.backgroundColor;
-                    element.style.color = cs.color;
-                    element.style.borderColor = cs.borderColor;
-                    element.style.boxShadow = 'none';
-                    element.style.filter = 'none';
-                    element.style.transition = 'none';
-                    element.style.transform = 'none';
-                    element.style.opacity = cs.opacity;
+                    btn.style.backgroundColor = cs.backgroundColor;
+                    btn.style.color = cs.color;
+                    btn.style.borderColor = cs.borderColor;
+                    btn.style.boxShadow = 'none';
+                    btn.style.filter = 'none';
+                    btn.style.transition = 'none';
                 });
-                console.log('Accessibility Widget: Locked hover styles for', interactiveElements.length, 'interactive elements');
+                console.log('Accessibility Widget: Locked hover styles for', buttons.length, 'buttons and links');
             } catch (e) {
                 console.warn('Accessibility Widget: lockButtonHoverStyles failed', e);
             }
@@ -21146,11 +21126,9 @@ class AccessibilityWidget {
                     el.style.boxShadow = style.boxShadow || '';
                     el.style.filter = style.filter || '';
                     el.style.transition = style.transition || '';
-                    el.style.transform = style.transform || '';
-                    el.style.opacity = style.opacity || '';
                 });
                 this._lockedButtons = null;
-                console.log('Accessibility Widget: Restored hover styles for interactive elements');
+                console.log('Accessibility Widget: Restored hover styles for buttons and links');
             } catch (e) {
                 console.warn('Accessibility Widget: restoreButtonHoverStyles failed', e);
             }
@@ -21209,77 +21187,6 @@ class AccessibilityWidget {
                 
     
                 /* Stop only seizure-triggering animations, preserve essential functionality */
-                
-                /* CRITICAL: Disable ALL hover effects to prevent seizure triggers */
-                body.seizure-safe *:hover,
-                body.seizure-safe *:focus,
-                body.seizure-safe *:active,
-                body.seizure-safe *:focus-within {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    border-color: inherit !important;
-                    box-shadow: none !important;
-                    filter: none !important;
-                    transform: none !important;
-                    opacity: inherit !important;
-                    transition: none !important;
-                    animation: none !important;
-                }
-                
-                /* Disable hover effects on all interactive elements */
-                body.seizure-safe a:hover,
-                body.seizure-safe button:hover,
-                body.seizure-safe [role="button"]:hover,
-                body.seizure-safe .button:hover,
-                body.seizure-safe .btn:hover,
-                body.seizure-safe input:hover,
-                body.seizure-safe select:hover,
-                body.seizure-safe textarea:hover {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    border-color: inherit !important;
-                    box-shadow: none !important;
-                    filter: none !important;
-                    transform: none !important;
-                    opacity: inherit !important;
-                    transition: none !important;
-                    animation: none !important;
-                }
-                
-                /* Disable hover effects on cards and containers */
-                body.seizure-safe .card:hover,
-                body.seizure-safe .portfolio-card:hover,
-                body.seizure-safe .service-card:hover,
-                body.seizure-safe .blog-card:hover,
-                body.seizure-safe [class*="card"]:hover {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    border-color: inherit !important;
-                    box-shadow: none !important;
-                    filter: none !important;
-                    transform: none !important;
-                    opacity: inherit !important;
-                    transition: none !important;
-                    animation: none !important;
-                }
-                
-                /* Disable hover effects on navigation elements */
-                body.seizure-safe nav:hover,
-                body.seizure-safe .nav:hover,
-                body.seizure-safe .navbar:hover,
-                body.seizure-safe .navigation:hover,
-                body.seizure-safe .menu:hover,
-                body.seizure-safe [class*="nav"]:hover {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    border-color: inherit !important;
-                    box-shadow: none !important;
-                    filter: none !important;
-                    transform: none !important;
-                    opacity: inherit !important;
-                    transition: none !important;
-                    animation: none !important;
-                }
                 
                 /* Target specific seizure-triggering elements */
                 body.seizure-safe [class*="animate"],
@@ -22630,7 +22537,7 @@ class AccessibilityWidget {
                     body.vision-impaired h5:not([style*="font-size"]),
                     body.vision-impaired h6:not([style*="font-size"]) {
                         /* Only apply if no inline font-size is set (preserves accessibility widget sizing) */
-                        font-size: inherit;
+                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
                         line-height: inherit;
                     }
                     
@@ -22641,7 +22548,7 @@ class AccessibilityWidget {
                     .vision-impaired h4:not([style*="font-size"]),
                     .vision-impaired h5:not([style*="font-size"]),
                     .vision-impaired h6:not([style*="font-size"]) {
-                        font-size: inherit;
+                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
                         line-height: inherit;
                     }
                     
@@ -22670,7 +22577,7 @@ class AccessibilityWidget {
                     body.vision-impaired [class*="headline"]:not([style*="font-size"]),
                     body.vision-impaired [class*="logo"]:not([style*="font-size"]),
                     body.vision-impaired [class*="brand"]:not([style*="font-size"]) {
-                        font-size: inherit;
+                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
                         line-height: inherit;
                         transform: none;
                         scale: 1;
@@ -22745,7 +22652,7 @@ class AccessibilityWidget {
                     /* ENSURE ACCESSIBILITY WIDGET FONT SIZING TAKES PRECEDENCE */
                     body.vision-impaired [style*="font-size"] {
                         /* Preserve any inline font-size styles set by accessibility widget */
-                        font-size: inherit !important;
+                        /* REMOVED: font-size: inherit !important; - This was causing large text to become small */
                     }
                     
                     /* Override any vision-impaired CSS that might interfere with font sizing */
@@ -22760,7 +22667,7 @@ class AccessibilityWidget {
                     body.vision-impaired [style*="font-size"] div,
                     body.vision-impaired [style*="font-size"] a,
                     body.vision-impaired [style*="font-size"] li {
-                        font-size: inherit !important;
+                        /* REMOVED: font-size: inherit !important; - This was causing large text to become small */
                         line-height: inherit !important;
                     }
                     
