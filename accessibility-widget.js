@@ -438,6 +438,33 @@
                 }
             `;
             document.head.appendChild(immediateStyle);
+            // Reinforce at root: cover both html.seizure-safe and body.seizure-safe
+            try {
+                if (!document.getElementById('accessibility-seizure-reinforce')) {
+                    const reinforce = document.createElement('style');
+                    reinforce.id = 'accessibility-seizure-reinforce';
+                    reinforce.textContent = `
+                        html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
+                        body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                            animation: none !important;
+                            animation-name: none !important;
+                            animation-duration: 0.0001s !important;
+                            animation-play-state: paused !important;
+                            transition: none !important;
+                            transition-property: none !important;
+                        }
+                        /* Keep cursors intact */
+                        html.seizure-safe a[href], html.seizure-safe button, html.seizure-safe [role="button"], html.seizure-safe [onclick],
+                        html.seizure-safe input[type="button"], html.seizure-safe input[type="submit"], html.seizure-safe input[type="reset"],
+                        html.seizure-safe .btn, html.seizure-safe .button, html.seizure-safe [class*="btn"], html.seizure-safe [class*="button"],
+                        html.seizure-safe [tabindex]:not([tabindex="-1"]) { cursor: pointer !important; }
+                        html.seizure-safe input[type="text"], html.seizure-safe input[type="email"], html.seizure-safe input[type="search"],
+                        html.seizure-safe input[type="tel"], html.seizure-safe input[type="url"], html.seizure-safe input[type="password"],
+                        html.seizure-safe textarea, html.seizure-safe [contenteditable="true"] { cursor: text !important; }
+                    `;
+                    document.head.appendChild(reinforce);
+                }
+            } catch (_) {}
             // Master layer: globally disable CSS animations/transitions without altering layout
             try {
                 if (!document.getElementById('accessibility-seizure-master')) {
