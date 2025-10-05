@@ -1,3 +1,50 @@
+// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+(function() {
+    try {
+        // Check localStorage immediately for seizure-safe mode
+        const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+        if (seizureSafeFromStorage === 'true') {
+            console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
+            document.body.classList.add('seizure-safe');
+            
+            // Apply immediate CSS to stop all animations
+            const immediateStyle = document.createElement('style');
+            immediateStyle.id = 'accessibility-seizure-immediate-early';
+            immediateStyle.textContent = `
+                body.seizure-safe * {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                }
+                body.seizure-safe [data-splitting],
+                body.seizure-safe .split,
+                body.seizure-safe .char,
+                body.seizure-safe .word,
+                body.seizure-safe [data-splitting] .char,
+                body.seizure-safe [data-splitting] .word,
+                body.seizure-safe .split .char,
+                body.seizure-safe .split .word {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: inline !important;
+                    transform: none !important;
+                }
+                body.seizure-safe [data-splitting],
+                body.seizure-safe .split {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
+                }
+            `;
+            document.head.appendChild(immediateStyle);
+        }
+    } catch (e) {
+        console.warn('Accessibility Widget: Immediate seizure-safe check failed', e);
+    }
+})();
+
 class AccessibilityWidget {
     constructor() {
     
@@ -32,10 +79,101 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: kvApiUrl set to:', this.kvApiUrl);
     
             console.log('Accessibility Widget: Initializing...');
-    
+
+            // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
+            this.checkAndApplyImmediateSeizureSafe();
+            
+            // Set up aggressive monitoring for any text animations that might start
+            this.setupSeizureSafeMonitoring();
+
             this.init();
     
         }
+        
+        // Check and apply seizure-safe mode immediately before any animations start
+        checkAndApplyImmediateSeizureSafe() {
+            try {
+                // Check localStorage first for immediate application
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                if (seizureSafeFromStorage === 'true') {
+                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                    document.body.classList.add('seizure-safe');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
+                    return true;
+                }
+                
+                // Also check if seizure-safe class is already present
+                if (document.body.classList.contains('seizure-safe')) {
+                    console.log('Accessibility Widget: Seizure-safe class already present, applying immediate CSS');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
+                    return true;
+                }
+                
+                return false;
+            } catch (e) {
+                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
+                return false;
+            }
+        }
+        
+        // Set up aggressive monitoring for text animations when seizure-safe mode is active
+        setupSeizureSafeMonitoring() {
+            try {
+                // Only set up monitoring if seizure-safe mode is active
+                if (!document.body.classList.contains('seizure-safe')) {
+                    return;
+                }
+                
+                console.log('Accessibility Widget: Setting up aggressive seizure-safe monitoring');
+                
+                // Use MutationObserver to catch any text animations that start
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                            // Check for any new text animation elements
+                            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
+                            textElements.forEach(element => {
+                                if (element.style.animation || element.style.transition || element.style.opacity !== '1') {
+                                    // Force complete the animation immediately
+                                    element.style.animation = 'none';
+                                    element.style.transition = 'none';
+                                    element.style.opacity = '1';
+                                    element.style.visibility = 'visible';
+                                    element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
+                                    element.style.transform = 'none';
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                // Start observing
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+                
+                // Also run a periodic check every 100ms for the first 5 seconds
+                let checkCount = 0;
+                const interval = setInterval(() => {
+                    if (checkCount >= 50 || !document.body.classList.contains('seizure-safe')) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    
+                    this.forceCompleteTextAnimations();
+                    checkCount++;
+                }, 100);
+                
+            } catch (e) {
+                console.warn('Accessibility Widget: setupSeizureSafeMonitoring failed', e);
+            }
+        }
+        
         // Minimal early CSS to pause motion before full seizure-safe styles load
         applyImmediateSeizureCSS() {
             try {
@@ -46,6 +184,41 @@ class AccessibilityWidget {
                     body.seizure-safe * {
                         animation-play-state: paused !important;
                         transition: none !important;
+                    }
+                    
+                    /* CRITICAL: Immediately stop and complete letter-by-letter animations */
+                    body.seizure-safe [data-splitting],
+                    body.seizure-safe .split,
+                    body.seizure-safe .char,
+                    body.seizure-safe .word,
+                    body.seizure-safe [data-splitting] .char,
+                    body.seizure-safe [data-splitting] .word,
+                    body.seizure-safe .split .char,
+                    body.seizure-safe .split .word {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        display: inline !important;
+                        transform: none !important;
+                    }
+                    
+                    /* Ensure parent containers are visible */
+                    body.seizure-safe [data-splitting],
+                    body.seizure-safe .split {
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        display: block !important;
+                    }
+                    
+                    /* Stop any GSAP or other library animations immediately */
+                    body.seizure-safe *[style*="animation"],
+                    body.seizure-safe *[style*="transition"],
+                    body.seizure-safe *[style*="opacity"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
                     }
                 `;
                 document.head.appendChild(style);
