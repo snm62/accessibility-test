@@ -920,6 +920,26 @@
     }
 })();
 
+// Vision Impaired helper: apply text-size-only adjustment
+function applyVisionImpaired(on) {
+    try {
+        document.documentElement.classList.toggle('vision-impaired', !!on);
+        document.body.classList.toggle('vision-impaired', !!on);
+        let style = document.getElementById('accessibility-vision-impaired-immediate-early');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'accessibility-vision-impaired-immediate-early';
+            document.head.appendChild(style);
+        }
+        style.textContent = on ? `
+            html.vision-impaired, body.vision-impaired { }
+            body.vision-impaired :where(h1,h2,h3,h4,h5,h6,p,li,a,label,span,div,input,textarea,button,small) {
+                font-size: 1.15em !important;
+            }
+        ` : '';
+    } catch (_) {}
+}
+
 // Ensure the seizure-safe toggle actually applies classes and storage immediately
 (function() {
     try {
@@ -4371,6 +4391,30 @@ class AccessibilityWidget {
             setTimeout(() => {
                 this.setupHideInterfaceModal();
             }, 200);
+
+            // Vision Impaired: apply saved state and bind toggle inside Shadow DOM
+            try {
+                const viEnabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                applyVisionImpaired(viEnabled);
+
+                const bindVIToggle = () => {
+                    const viToggle = this.shadowRoot && this.shadowRoot.getElementById('vision-impaired');
+                    if (!viToggle || viToggle.__viBound) return;
+                    try { viToggle.checked = viEnabled; } catch (_) {}
+                    viToggle.addEventListener('change', () => {
+                        const on = !!viToggle.checked;
+                        localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
+                        applyVisionImpaired(on);
+                    });
+                    viToggle.__viBound = true;
+                };
+                bindVIToggle();
+                try {
+                    const viObs = new MutationObserver(() => bindVIToggle());
+                    viObs.observe(this.shadowRoot, { subtree: true, childList: true });
+                    this.__viObs = viObs;
+                } catch (_) {}
+            } catch (_) {}
     
         }
     
