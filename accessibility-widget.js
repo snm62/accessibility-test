@@ -307,6 +307,74 @@
                     visibility: visible !important;
                     transform: none !important;
                 }
+                
+                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
+                body.seizure-safe *[class*="scroll"],
+                body.seizure-safe *[class*="progress"],
+                body.seizure-safe *[class*="bar"],
+                body.seizure-safe *[class*="line"],
+                body.seizure-safe *[class*="timeline"],
+                body.seizure-safe *[class*="track"],
+                body.seizure-safe *[class*="path"],
+                body.seizure-safe *[class*="stroke"],
+                body.seizure-safe *[class*="fill"],
+                body.seizure-safe *[class*="gradient"],
+                body.seizure-safe *[class*="wave"],
+                body.seizure-safe *[class*="flow"],
+                body.seizure-safe *[class*="stream"],
+                body.seizure-safe *[class*="runner"],
+                body.seizure-safe *[class*="mover"],
+                body.seizure-safe *[class*="slider"],
+                body.seizure-safe *[class*="indicator"],
+                body.seizure-safe *[class*="stopper"],
+                body.seizure-safe *[class*="marker"],
+                body.seizure-safe *[class*="pointer"],
+                body.seizure-safe *[class*="cursor"],
+                body.seizure-safe *[class*="dot"],
+                body.seizure-safe *[class*="circle"],
+                body.seizure-safe *[class*="ring"],
+                body.seizure-safe *[class*="orbit"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
+                body.seizure-safe progress,
+                body.seizure-safe [role="progressbar"],
+                body.seizure-safe [class*="progress"],
+                body.seizure-safe [class*="bar"],
+                body.seizure-safe [class*="indicator"],
+                body.seizure-safe [class*="track"],
+                body.seizure-safe [class*="line"],
+                body.seizure-safe [class*="path"],
+                body.seizure-safe [class*="stroke"],
+                body.seizure-safe [class*="fill"],
+                body.seizure-safe [class*="gradient"],
+                body.seizure-safe [class*="wave"],
+                body.seizure-safe [class*="flow"],
+                body.seizure-safe [class*="stream"],
+                body.seizure-safe [class*="runner"],
+                body.seizure-safe [class*="mover"],
+                body.seizure-safe [class*="slider"],
+                body.seizure-safe [class*="stopper"],
+                body.seizure-safe [class*="marker"],
+                body.seizure-safe [class*="pointer"],
+                body.seizure-safe [class*="cursor"],
+                body.seizure-safe [class*="dot"],
+                body.seizure-safe [class*="circle"],
+                body.seizure-safe [class*="ring"],
+                body.seizure-safe [class*="orbit"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
                 body.seizure-safe .char,
@@ -557,6 +625,30 @@ class AccessibilityWidget {
                     const imageElements = document.querySelectorAll('img, [class*="image"], [class*="img"], [class*="photo"], [class*="picture"], [class*="gallery"], [class*="portfolio"], [class*="card"], [class*="item"]');
                     
                     imageElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations
+                    const scrollAnimationElements = document.querySelectorAll('*[class*="scroll"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="timeline"], *[class*="track"], *[class*="path"], *[class*="stroke"], *[class*="fill"], *[class*="gradient"], *[class*="wave"], *[class*="flow"], *[class*="stream"], *[class*="runner"], *[class*="mover"], *[class*="slider"], *[class*="indicator"], *[class*="stopper"], *[class*="marker"], *[class*="pointer"], *[class*="cursor"], *[class*="dot"], *[class*="circle"], *[class*="ring"], *[class*="orbit"]');
+                    
+                    scrollAnimationElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations
+                    const progressElements = document.querySelectorAll('progress, [role="progressbar"], [class*="progress"], [class*="bar"], [class*="indicator"], [class*="track"], [class*="line"], [class*="path"], [class*="stroke"], [class*="fill"], [class*="gradient"], [class*="wave"], [class*="flow"], [class*="stream"], [class*="runner"], [class*="mover"], [class*="slider"], [class*="stopper"], [class*="marker"], [class*="pointer"], [class*="cursor"], [class*="dot"], [class*="circle"], [class*="ring"], [class*="orbit"]');
+                    
+                    progressElements.forEach(element => {
                         element.style.animation = 'none';
                         element.style.transition = 'none';
                         element.style.animationFillMode = 'forwards';
@@ -1752,25 +1844,7 @@ class AccessibilityWidget {
     
                             e.preventDefault();
     
-                            console.log('Accessibility Widget: Alt+V pressed, toggling vision impaired');
-    
-                            const currentVisionState = this.settings['vision-impaired'];
-    
-                            if (currentVisionState) {
-    
-                                this.disableVisionImpaired();
-    
-                            } else {
-    
-                                this.enableVisionImpaired();
-    
-                            }
-    
-                            // Update toggle switch in panel
-    
-                            this.updateToggleSwitch('vision-impaired', !currentVisionState);
-    
-                            const visionStatus = !currentVisionState ? 'enabled' : 'disabled';
+                            console.log('Accessibility Widget: Alt+V pressed, vision impaired feature removed');
     
                             this.announceToScreenReader(`Vision impaired mode ${visionStatus}`);
     
@@ -5368,91 +5442,35 @@ class AccessibilityWidget {
     
     
     
-                /* Vision Impaired - Responsive scaling approach */
-    
-                :host(.vision-impaired) {
-    
-                    /* Enhanced visual experience with increased saturation */
-                    filter: saturate(1.3) brightness(1.1) contrast(1.1) !important;
-    
-                    /* Use CSS custom properties for responsive scaling */
-    
-                    --vision-scale: 1.2;
-    
-                    --vision-font-scale: 1.0;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                /* Scale icon and panel with responsive units */
-    
-                :host(.vision-impaired) .accessibility-icon {
-    
-                    width: calc(60px * var(--vision-scale)) !important;
-    
-                    height: calc(60px * var(--vision-scale)) !important;
-    
-                    font-size: 24px !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel {
-    
-                    width: calc(400px * var(--vision-scale)) !important;
-    
-                    font-size: 1em !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel h2 {
-    
-                    font-size: 24px !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel h3 {
-    
-                    font-size: 18px !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel h4 {
-    
-                    font-size: 16px !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel p {
-    
-                    font-size: 14px !important;
-    
-                }
+                /* Vision impaired feature removed */
     
     
     
-                :host(.vision-impaired) .accessibility-panel .action-btn {
-    
-                    font-size: 1em !important;
-    
-                    padding: 12px 16px !important;
-    
-                }
-                
-                /* Increase gap between header and white section in vision impaired mode */
-                :host(.vision-impaired) .panel-header {
-                    padding-bottom: 40px !important;
-                }
+                /* Vision impaired feature removed */
     
     
     
@@ -6420,31 +6438,7 @@ class AccessibilityWidget {
     
     
     
-                    <!-- Module 2: Vision Impaired Profile -->
-    
-                    <div class="profile-item">
-    
-                        <label class="toggle-switch">
-    
-                            <input type="checkbox" id="vision-impaired" tabindex="0" aria-label="Vision Impaired Profile - Enhances website's visuals" aria-describedby="vision-impaired-desc">
-    
-                            <span class="slider"></span>
-    
-                        </label>
-    
-                        <div class="profile-info">
-    
-                            <div>
-    
-                                <h4>Vision Impaired Profile</h4>
-    
-                                <p id="vision-impaired-desc">Enhances website's visuals</p>
-    
-                            </div>
-    
-                        </div>
-    
-                    </div>
+                    <!-- Vision impaired feature removed -->
     
     
     
@@ -7682,9 +7676,7 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "Clear flashes & reduces color",
     
-                    visionImpaired: "Vision Impaired Profile", 
-    
-                    visionImpairedDesc: "Enhances website's visuals",
+                    // Vision impaired feature removed
     
                     adhdFriendly: "ADHD Friendly Profile",
     
@@ -7865,8 +7857,7 @@ class AccessibilityWidget {
                     profilesTitle: "Elige el perfil de accesibilidad adecuado para ti",
         seizureSafe: "Perfil Anti-Convulsiones",
                     seizureSafeDesc: "Elimina destellos y reduce colores",
-        visionImpaired: "Perfil de Deficiencia Visual",
-        visionImpairedDesc: "Mejora los elementos visuales del sitio web",
+        // Vision impaired feature removed
                     adhdFriendly: "Perfil Amigable para TDAH",
                     adhdFriendlyDesc: "Más enfoque y menos distracciones",
                     cognitiveDisability: "Perfil de Discapacidad Cognitiva",
@@ -7971,9 +7962,7 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "Entfernt Blitze und reduziert Farben",
     
-                    visionImpaired: "Profil für Sehbehinderte",
-    
-                    visionImpairedDesc: "Verbessert die visuellen Elemente der Website",
+                    // Vision impaired feature removed
     
                     adhdFriendly: "ADHS-freundliches Profil",
     
@@ -8154,8 +8143,7 @@ class AccessibilityWidget {
         profilesTitle: "Choisissez le bon profil d'accessibilité pour vous",
         seizureSafe: "Profil Anti-Épilepsie",
         seizureSafeDesc: "Élimine les flashs et réduit les couleurs",
-        visionImpaired: "Profil Déficience Visuelle",
-        visionImpairedDesc: "Améliore les visuels du site web",
+        // Vision impaired feature removed
         adhdFriendly: "Profil TDAH",
         adhdFriendlyDesc: "Plus de concentration et moins de distractions",
         cognitiveDisability: "Profil Déficience Cognitive",
@@ -8255,8 +8243,7 @@ class AccessibilityWidget {
         profilesTitle: "Escolha o perfil de acessibilidade certo para você",
         seizureSafe: "Perfil Anti-Convulsões",
         seizureSafeDesc: "Elimina flashes e reduz cores",
-        visionImpaired: "Perfil de Deficiência Visual",
-                    visionImpairedDesc: "Melhora os elementos visuais do site",
+        // Vision impaired feature removed
                     adhdFriendly: "Perfil Amigável para TDAH",
         adhdFriendlyDesc: "Mais foco e menos distrações",
                     cognitiveDisability: "Perfil de Deficiência Cognitiva",
@@ -8356,8 +8343,7 @@ class AccessibilityWidget {
                     profilesTitle: "Scegli il profilo di accessibilità giusto per te",
         seizureSafe: "Profilo Anti-Epilettico",
         seizureSafeDesc: "Elimina i flash e riduce i colori",
-                    visionImpaired: "Profilo per Ipovedenti",
-        visionImpairedDesc: "Migliora gli elementi visivi del sito web",
+        // Vision impaired feature removed
                     adhdFriendly: "Profilo Amichevole per ADHD",
         adhdFriendlyDesc: "Più concentrazione e meno distrazioni",
         cognitiveDisability: "Profilo per Disabilità Cognitive",
@@ -8457,8 +8443,7 @@ class AccessibilityWidget {
         profilesTitle: "בחרו את פרופיל הנגישות הנכון עבורכם",
         seizureSafe: "פרופיל בטוח מפני התקפים",
         seizureSafeDesc: "מבטל הבזקים ומפחית צבעים",
-        visionImpaired: "פרופיל לקויי ראייה",
-        visionImpairedDesc: "משפר את המראה החזותי של האתר",
+        // Vision impaired feature removed
         adhdFriendly: "פרופיל ידידותי ל-ADHD",
         adhdFriendlyDesc: "יותר ריכוז ופחות הסחות דעת",
         cognitiveDisability: "פרופיל לקות קוגניטיבית",
@@ -8563,9 +8548,7 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "מסיר הבזקים ומפחית צבעים",
     
-                    visionImpaired: "פרופיל לבעלי לקות ראייה",
-    
-                    visionImpairedDesc: "משפר את האלמנטים הוויזואליים של האתר",
+                    // Vision impaired feature removed
     
                     adhdFriendly: "פרופיל ידידותי ל-ADHD",
     
@@ -8746,8 +8729,7 @@ class AccessibilityWidget {
         profilesTitle: "Выберите подходящий профиль доступности",
         seizureSafe: "Профиль против эпилепсии",
         seizureSafeDesc: "Устраняет вспышки и снижает цвета",
-                    visionImpaired: "Профиль для слабовидящих",
-                    visionImpairedDesc: "Улучшает визуальные элементы сайта",
+                    // Vision impaired feature removed
                     adhdFriendly: "Профиль для СДВГ",
         adhdFriendlyDesc: "Больше концентрации и меньше отвлекающих факторов",
                     cognitiveDisability: "Профиль когнитивных нарушений",
@@ -8846,8 +8828,7 @@ class AccessibilityWidget {
         profilesTitle: "為您選擇合適的無障礙設定檔",
         seizureSafe: "防癲癇設定檔",
         seizureSafeDesc: "消除閃爍並減少顏色",
-        visionImpaired: "視力受損設定檔",
-        visionImpairedDesc: "增強網站的視覺效果",
+        // Vision impaired feature removed
         adhdFriendly: "ADHD友善設定檔",
         adhdFriendlyDesc: "更多專注，更少分心",
         cognitiveDisability: "認知障礙設定檔",
@@ -8951,9 +8932,7 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "يزيل الومضات ويقلل الألوان",
     
-                    visionImpaired: "ملف للمعاقين بصرياً",
-    
-                    visionImpairedDesc: "يحسن العناصر البصرية للموقع",
+                    // Vision impaired feature removed
     
                     adhdFriendly: "ملف صديق لاضطراب فرط الحركة",
     
@@ -9133,8 +9112,7 @@ class AccessibilityWidget {
         profilesTitle: "اختر ملف إمكانية الوصول المناسب لك",
         seizureSafe: "ملف آمن من النوبات",
         seizureSafeDesc: "يزيل الومضات ويقلل الألوان",
-        visionImpaired: "ملف ضعاف البصر",
-        visionImpairedDesc: "يحسن العناصر البصرية للموقع",
+        // Vision impaired feature removed
         adhdFriendly: "ملف صديق لاضطراب فرط الحركة",
         adhdFriendlyDesc: "مزيد من التركيز وأقل تشتيت",
         cognitiveDisability: "ملف الإعاقة المعرفية",
@@ -9937,9 +9915,7 @@ class AccessibilityWidget {
     
                     case 'vision-impaired':
     
-                        if (title) title.textContent = this.getTranslation(langCode, 'visionImpaired', 'Vision Impaired Profile');
-    
-                        if (desc) desc.textContent = this.getTranslation(langCode, 'visionImpairedDesc', 'Enhances website\'s visuals');
+                        console.log('Accessibility Widget: Vision impaired feature removed');
     
                         break;
     
@@ -11368,7 +11344,7 @@ class AccessibilityWidget {
     
                     case 'vision-impaired':
     
-                        this.enableVisionImpaired();
+                        console.log('Accessibility Widget: Vision impaired feature removed');
     
                         break;
     
@@ -11540,7 +11516,7 @@ class AccessibilityWidget {
     
                     case 'vision-impaired':
     
-                        this.disableVisionImpaired();
+                        console.log('Accessibility Widget: Vision impaired feature removed');
     
                         break;
     
@@ -16066,7 +16042,7 @@ class AccessibilityWidget {
     
             this.disableSeizureSafe();
     
-            this.disableVisionImpaired();
+            // Vision impaired feature removed
     
             this.disableADHDFriendly();
     
@@ -20792,6 +20768,74 @@ class AccessibilityWidget {
                         visibility: visible !important;
                         transform: none !important;
                     }
+                    
+                    /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
+                    .stop-animation *[class*="scroll"],
+                    .stop-animation *[class*="progress"],
+                    .stop-animation *[class*="bar"],
+                    .stop-animation *[class*="line"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="track"],
+                    .stop-animation *[class*="path"],
+                    .stop-animation *[class*="stroke"],
+                    .stop-animation *[class*="fill"],
+                    .stop-animation *[class*="gradient"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="stream"],
+                    .stop-animation *[class*="runner"],
+                    .stop-animation *[class*="mover"],
+                    .stop-animation *[class*="slider"],
+                    .stop-animation *[class*="indicator"],
+                    .stop-animation *[class*="stopper"],
+                    .stop-animation *[class*="marker"],
+                    .stop-animation *[class*="pointer"],
+                    .stop-animation *[class*="cursor"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="circle"],
+                    .stop-animation *[class*="ring"],
+                    .stop-animation *[class*="orbit"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
+                    .stop-animation progress,
+                    .stop-animation [role="progressbar"],
+                    .stop-animation [class*="progress"],
+                    .stop-animation [class*="bar"],
+                    .stop-animation [class*="indicator"],
+                    .stop-animation [class*="track"],
+                    .stop-animation [class*="line"],
+                    .stop-animation [class*="path"],
+                    .stop-animation [class*="stroke"],
+                    .stop-animation [class*="fill"],
+                    .stop-animation [class*="gradient"],
+                    .stop-animation [class*="wave"],
+                    .stop-animation [class*="flow"],
+                    .stop-animation [class*="stream"],
+                    .stop-animation [class*="runner"],
+                    .stop-animation [class*="mover"],
+                    .stop-animation [class*="slider"],
+                    .stop-animation [class*="stopper"],
+                    .stop-animation [class*="marker"],
+                    .stop-animation [class*="pointer"],
+                    .stop-animation [class*="cursor"],
+                    .stop-animation [class*="dot"],
+                    .stop-animation [class*="circle"],
+                    .stop-animation [class*="ring"],
+                    .stop-animation [class*="orbit"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
     
                 `;
     
@@ -23325,472 +23369,22 @@ class AccessibilityWidget {
     
     
     
-        // Vision Impaired Profile Methods
-    
-        enableVisionImpaired() {
-    
-            this.settings['vision-impaired'] = true;
-    
-            console.log('Accessibility Widget: Enabling vision impaired profile');
-    
-            document.body.classList.add('vision-impaired');
-    
-            this.applyVisionImpairedStyles();
-    
-            this.saveSettings();
-    
-        }
     
     
     
-        disableVisionImpaired() {
-    
-            this.settings['vision-impaired'] = false;
-    
-            console.log('Accessibility Widget: Disabling vision impaired profile');
-    
-            document.body.classList.remove('vision-impaired');
-    
-            this.removeVisionImpairedStyles();
-    
-            this.saveSettings();
-    
-        }
     
     
     
-        applyVisionImpairedStyles() {
-            // Add smart CSS rules for vision impaired that detect existing font sizes
-            if (!document.getElementById('vision-impaired-css')) {
-                const style = document.createElement('style');
-                style.id = 'vision-impaired-css';
-                style.textContent = `
-                    /* Vision impaired - Enhanced visual experience ONLY */
-                    body.vision-impaired {
-                        filter: saturate(1.3) brightness(1.1) contrast(1.1) !important;
-                    }
-                    
-                    /* OVERRIDE EXTERNAL CSS - Prevent any font scaling from external stylesheets */
-                    body.vision-impaired h1,
-                    body.vision-impaired h2,
-                    body.vision-impaired h3,
-                    body.vision-impaired h4,
-                    body.vision-impaired h5,
-                    body.vision-impaired h6,
-                    body.vision-impaired .navbar,
-                    body.vision-impaired .nav,
-                    body.vision-impaired .navigation,
-                    body.vision-impaired .header,
-                    body.vision-impaired .hero,
-                    body.vision-impaired .title,
-                    body.vision-impaired .headline,
-                    body.vision-impaired .logo,
-                    body.vision-impaired .brand,
-                    body.vision-impaired nav,
-                    body.vision-impaired header,
-                    body.vision-impaired [class*="nav"],
-                    body.vision-impaired [class*="header"],
-                    body.vision-impaired [class*="hero"],
-                    body.vision-impaired [class*="title"],
-                    body.vision-impaired [class*="headline"],
-                    body.vision-impaired [class*="logo"],
-                    body.vision-impaired [class*="brand"] {
-                        font-size: inherit !important;
-                        line-height: inherit !important;
-                        transform: none !important;
-                        scale: 1 !important;
-                        zoom: 1 !important;
-                        /* Override any calc() scaling from external CSS */
-                        font-size: unset !important;
-                    }
-                    
-                    /* Override any vision-impaired scaling from external CSS */
-                    .vision-impaired h1,
-                    .vision-impaired h2,
-                    .vision-impaired h3,
-                    .vision-impaired h4,
-                    .vision-impaired h5,
-                    .vision-impaired h6,
-                    .vision-impaired .navbar,
-                    .vision-impaired .nav,
-                    .vision-impaired .navigation,
-                    .vision-impaired .header,
-                    .vision-impaired .hero,
-                    .vision-impaired .title,
-                    .vision-impaired .headline,
-                    .vision-impaired .logo,
-                    .vision-impaired .brand,
-                    .vision-impaired nav,
-                    .vision-impaired header,
-                    .vision-impaired [class*="nav"],
-                    .vision-impaired [class*="header"],
-                    .vision-impaired [class*="hero"],
-                    .vision-impaired [class*="title"],
-                    .vision-impaired [class*="headline"],
-                    .vision-impaired [class*="logo"],
-                    .vision-impaired [class*="brand"] {
-                        font-size: inherit !important;
-                        line-height: inherit !important;
-                        transform: none !important;
-                        scale: 1 !important;
-                        zoom: 1 !important;
-                        /* Override any calc() scaling from external CSS */
-                        font-size: unset !important;
-                    }
-                    
-                    /* AGGRESSIVE OVERRIDE - Force remove any external vision-impaired scaling */
-                    body.vision-impaired * {
-                        /* Reset any vision-impaired scaling from external CSS */
-                        --vision-scale: 1 !important;
-                        --vision-font-scale: 1 !important;
-                    }
-                    
-                    /* Only override external CSS, not accessibility widget font sizing */
-                    body.vision-impaired h1:not([style*="font-size"]),
-                    body.vision-impaired h2:not([style*="font-size"]),
-                    body.vision-impaired h3:not([style*="font-size"]),
-                    body.vision-impaired h4:not([style*="font-size"]),
-                    body.vision-impaired h5:not([style*="font-size"]),
-                    body.vision-impaired h6:not([style*="font-size"]) {
-                        /* Only apply if no inline font-size is set (preserves accessibility widget sizing) */
-                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
-                        line-height: inherit;
-                    }
-                    
-                    /* Override external vision-impaired CSS only when no inline styles are present */
-                    .vision-impaired h1:not([style*="font-size"]),
-                    .vision-impaired h2:not([style*="font-size"]),
-                    .vision-impaired h3:not([style*="font-size"]),
-                    .vision-impaired h4:not([style*="font-size"]),
-                    .vision-impaired h5:not([style*="font-size"]),
-                    .vision-impaired h6:not([style*="font-size"]) {
-                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
-                        line-height: inherit;
-                    }
-                    
-                    /* PRESERVE LARGE TEXT AND NAVIGATION - NO SCALING (only when no inline styles) */
-                    body.vision-impaired h1:not([style*="font-size"]),
-                    body.vision-impaired h2:not([style*="font-size"]),
-                    body.vision-impaired h3:not([style*="font-size"]),
-                    body.vision-impaired h4:not([style*="font-size"]),
-                    body.vision-impaired h5:not([style*="font-size"]),
-                    body.vision-impaired h6:not([style*="font-size"]),
-                    body.vision-impaired .nav:not([style*="font-size"]),
-                    body.vision-impaired .navbar:not([style*="font-size"]),
-                    body.vision-impaired .navigation:not([style*="font-size"]),
-                    body.vision-impaired .header:not([style*="font-size"]),
-                    body.vision-impaired .hero:not([style*="font-size"]),
-                    body.vision-impaired .title:not([style*="font-size"]),
-                    body.vision-impaired .headline:not([style*="font-size"]),
-                    body.vision-impaired .logo:not([style*="font-size"]),
-                    body.vision-impaired .brand:not([style*="font-size"]),
-                    body.vision-impaired nav:not([style*="font-size"]),
-                    body.vision-impaired header:not([style*="font-size"]),
-                    body.vision-impaired [class*="nav"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="header"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="hero"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="title"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="headline"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="logo"]:not([style*="font-size"]),
-                    body.vision-impaired [class*="brand"]:not([style*="font-size"]) {
-                        /* REMOVED: font-size: inherit; - This was causing large text to become small */
-                        line-height: inherit;
-                        transform: none;
-                        scale: 1;
-                        zoom: 1;
-                    }
-                    
-                    /* CRITICAL: Protect all elements with large font sizes from being shrunk */
-                    body.vision-impaired * {
-                        /* Only apply vision enhancement if font size is small */
-                        /* This prevents large text from being affected */
-                    }
-                    
-                    /* Force protection for any element with font-size >= 18px */
-                    body.vision-impaired *[style*="font-size"] {
-                        /* Preserve any inline font-size styles - don't override them */
-                    }
-                    
-                    /* ONLY ENHANCE SMALL TEXT - Target specific small text elements (only when no inline styles) */
-                    body.vision-impaired small:not([style*="font-size"]),
-                    body.vision-impaired .small:not([style*="font-size"]),
-                    body.vision-impaired .text-sm:not([style*="font-size"]),
-                    body.vision-impaired .caption:not([style*="font-size"]),
-                    body.vision-impaired .description:not([style*="font-size"]) {
-                        /* Only enhance truly small text elements */
-                        font-size: max(1.1em, 16px);
-                        line-height: 1.4;
-                    }
-                    
-                    /* REMOVED: Applied to p, span, div, a, li, td, th, label, content, body-text, paragraph */
-                    /* These were affecting larger text elements */
-                    
-                    /* Preserve button and form element sizes */
-                    body.vision-impaired button,
-                    body.vision-impaired input,
-                    body.vision-impaired select,
-                    body.vision-impaired textarea,
-                    body.vision-impaired .btn,
-                    body.vision-impaired .button {
-                        font-size: inherit !important;
-                        padding: inherit !important;
-                        height: inherit !important;
-                        width: inherit !important;
-                    }
-                    
-                    /* NO font scaling - preserve all original text sizes and layout */
-                    /* Only visual enhancements through CSS filters are applied */
-                    
-                    /* SPECIFIC FIXES FOR NAVIGATION AND LARGE TEXT */
-                    body.vision-impaired .navbar-brand,
-                    body.vision-impaired .nav-link,
-                    body.vision-impaired .nav-item,
-                    body.vision-impaired .menu-item,
-                    body.vision-impaired .menu-link,
-                    body.vision-impaired .hero-title,
-                    body.vision-impaired .hero-text,
-                    body.vision-impaired .main-title,
-                    body.vision-impaired .page-title,
-                    body.vision-impaired .section-title,
-                    body.vision-impaired .display-1,
-                    body.vision-impaired .display-2,
-                    body.vision-impaired .display-3,
-                    body.vision-impaired .display-4,
-                    body.vision-impaired .jumbotron,
-                    body.vision-impaired .banner,
-                    body.vision-impaired .masthead {
-                        font-size: inherit !important;
-                        line-height: inherit !important;
-                        transform: none !important;
-                        scale: 1 !important;
-                        zoom: 1 !important;
-                        margin: inherit !important;
-                        padding: inherit !important;
-                    }
-                    
-                    /* ENSURE ACCESSIBILITY WIDGET FONT SIZING TAKES PRECEDENCE */
-                    body.vision-impaired [style*="font-size"] {
-                        /* Preserve any inline font-size styles set by accessibility widget */
-                        /* REMOVED: font-size: inherit !important; - This was causing large text to become small */
-                    }
-                    
-                    /* Override any vision-impaired CSS that might interfere with font sizing */
-                    body.vision-impaired [style*="font-size"] h1,
-                    body.vision-impaired [style*="font-size"] h2,
-                    body.vision-impaired [style*="font-size"] h3,
-                    body.vision-impaired [style*="font-size"] h4,
-                    body.vision-impaired [style*="font-size"] h5,
-                    body.vision-impaired [style*="font-size"] h6,
-                    body.vision-impaired [style*="font-size"] p,
-                    body.vision-impaired [style*="font-size"] span,
-                    body.vision-impaired [style*="font-size"] div,
-                    body.vision-impaired [style*="font-size"] a,
-                    body.vision-impaired [style*="font-size"] li {
-                        /* REMOVED: font-size: inherit !important; - This was causing large text to become small */
-                        line-height: inherit !important;
-                    }
-                    
-                    /* Ensure navigation stays in place */
-                    body.vision-impaired .navbar,
-                    body.vision-impaired .nav,
-                    body.vision-impaired .navigation,
-                    body.vision-impaired .header,
-                    body.vision-impaired .top-bar,
-                    body.vision-impaired .menu-bar {
-                        position: inherit !important;
-                        top: inherit !important;
-                        left: inherit !important;
-                        right: inherit !important;
-                        width: inherit !important;
-                        height: inherit !important;
-                        transform: none !important;
-                        scale: 1 !important;
-                        zoom: 1 !important;
-                    }
-                    
-                    /* Fix scrolling conflicts with GSAP/Lenis libraries */
-                    .accessibility-panel {
-                        scroll-behavior: smooth !important;
-                        -webkit-overflow-scrolling: touch !important;
-                        overscroll-behavior: contain !important;
-                        overflow-y: auto !important;
-                        overflow-x: hidden !important;
-                        position: fixed !important;
-                        z-index: 999999 !important;
-                        pointer-events: auto !important;
-                    }
-                    
-                    /* Override GSAP/Lenis smooth scrolling for accessibility panel */
-                    .accessibility-panel * {
-                        scroll-behavior: auto !important;
-                        pointer-events: auto !important;
-                    }
-                    
-                    /* Ensure panel content is scrollable */
-                    .accessibility-panel .panel-content {
-                        overflow-y: auto !important;
-                        -webkit-overflow-scrolling: touch !important;
-                        pointer-events: auto !important;
-                    }
-                    
-                    /* Force scroll events to work */
-                    .accessibility-panel {
-                        touch-action: pan-y !important;
-                        -webkit-overflow-scrolling: touch !important;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            console.log('Accessibility Widget: Smart vision impaired styles applied');
-            
-            // Apply smart scaling that detects existing font sizes
-            this.applySmartVisionScaling();
-            
-            // Ensure the Shadow DOM host gets the vision-impaired class
-            this.updateWidgetAppearance();
-        }
+        // Vision impaired functions removed
     
     
     
-        // Vision impaired - NO font scaling, only visual enhancements
-        applySmartVisionScaling() {
-            console.log('[CK] applySmartVisionScaling() - Vision impaired mode: NO font scaling applied');
-            console.log('[CK] Only visual enhancements (saturation, brightness, contrast) are active');
-            
-            // No font scaling - preserve all original text sizes and layout
-            // Only visual enhancements through CSS filters are applied
-            
-            // Additional protection: Ensure no elements get scaled
-            const largeTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .navbar, .nav, .header, .hero, .title, .headline, .logo, .brand, nav, header');
-            largeTextElements.forEach(element => {
-                // Force override any external CSS
-                element.style.setProperty('font-size', 'inherit', 'important');
-                element.style.setProperty('line-height', 'inherit', 'important');
-                element.style.setProperty('transform', 'none', 'important');
-                element.style.setProperty('scale', '1', 'important');
-                element.style.setProperty('zoom', '1', 'important');
-                // Override any calc() values from external CSS
-                element.style.setProperty('font-size', 'unset', 'important');
-                element.style.setProperty('font-size', 'initial', 'important');
-                // Reset CSS custom properties
-                element.style.setProperty('--vision-scale', '1', 'important');
-                element.style.setProperty('--vision-font-scale', '1', 'important');
-            });
-            
-            // PROTECT LARGE TEXT: Ensure headings and large text elements maintain their size
-            const protectedTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .nav, .navbar, .navigation, .header, .hero, .title, .headline, .logo, .brand, nav, header, [class*="nav"], [class*="header"], [class*="hero"], [class*="title"], [class*="headline"], [class*="logo"], [class*="brand"]');
-            protectedTextElements.forEach(element => {
-                const computedStyle = window.getComputedStyle(element);
-                const fontSize = parseFloat(computedStyle.fontSize);
-                
-                // If the element has a large font size (18px or more), protect it from being changed
-                if (fontSize >= 18) {
-                    element.style.setProperty('font-size', fontSize + 'px', 'important');
-                    element.style.setProperty('line-height', 'inherit', 'important');
-                }
-            });
-            
-            // Only enhance truly small text elements - be more restrictive
-            const smallTextElements = document.querySelectorAll('small, .small, .text-sm, .caption, .description, .content, .body-text, .paragraph');
-            smallTextElements.forEach(element => {
-                const computedStyle = window.getComputedStyle(element);
-                const fontSize = parseFloat(computedStyle.fontSize);
-                
-                // Only enhance if font size is very small (less than 14px) to avoid affecting larger text
-                if (fontSize < 14) {
-                    element.style.setProperty('font-size', 'max(1.1em, 16px)', 'important');
-                    element.style.setProperty('line-height', '1.4', 'important');
-                }
-            });
-            
-            // Force override any external vision-impaired CSS
-            this.overrideExternalVisionCSS();
-            
-            // CRITICAL: Add additional protection for larger text elements
-            this.protectLargeTextElements();
-            
-            console.log('[CK] applySmartVisionScaling() - Visual enhancement only mode completed');
-        }
+        // Vision impaired functions removed
         
-        // Protect large text elements from being shrunk by vision-impaired mode
-        protectLargeTextElements() {
-            try {
-                console.log('Accessibility Widget: Protecting large text elements from vision-impaired mode');
-                
-                // Get all text elements
-                const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, button, input, textarea, select');
-                
-                allTextElements.forEach(element => {
-                    const computedStyle = window.getComputedStyle(element);
-                    const fontSize = parseFloat(computedStyle.fontSize);
-                    
-                    // If the element has a large font size (18px or more), protect it
-                    if (fontSize >= 18) {
-                        // Set the font size with !important to prevent it from being overridden
-                        element.style.setProperty('font-size', fontSize + 'px', 'important');
-                        element.style.setProperty('line-height', computedStyle.lineHeight, 'important');
-                        
-                        // Also protect against any vision-impaired CSS that might try to change it
-                        element.style.setProperty('--vision-font-scale', '1', 'important');
-                        element.style.setProperty('--vision-scale', '1', 'important');
-                        
-                        console.log('Accessibility Widget: Protected large text element:', element.tagName, 'font-size:', fontSize + 'px');
-                    }
-                });
-                
-                console.log('Accessibility Widget: Large text elements protection completed');
-            } catch (e) {
-                console.warn('Accessibility Widget: protectLargeTextElements failed', e);
-            }
-        }
+        // Vision impaired functions removed
         
         // Override any external vision-impaired CSS that might be loaded
-        overrideExternalVisionCSS() {
-            // Remove any external vision-impaired stylesheets
-            const externalStyles = document.querySelectorAll('style, link[rel="stylesheet"]');
-            externalStyles.forEach(style => {
-                if (style.textContent && style.textContent.includes('vision-impaired')) {
-                    // Remove or override external vision-impaired CSS
-                    const newStyle = document.createElement('style');
-                    newStyle.textContent = `
-                        /* Override external vision-impaired CSS */
-                        .vision-impaired h1,
-                        .vision-impaired h2,
-                        .vision-impaired h3,
-                        .vision-impaired h4,
-                        .vision-impaired h5,
-                        .vision-impaired h6,
-                        .vision-impaired .navbar,
-                        .vision-impaired .nav,
-                        .vision-impaired .navigation,
-                        .vision-impaired .header,
-                        .vision-impaired .hero,
-                        .vision-impaired .title,
-                        .vision-impaired .headline,
-                        .vision-impaired .logo,
-                        .vision-impaired .brand,
-                        .vision-impaired nav,
-                        .vision-impaired header {
-                            font-size: inherit !important;
-                            line-height: inherit !important;
-                            transform: none !important;
-                            scale: 1 !important;
-                            zoom: 1 !important;
-                            font-size: unset !important;
-                            font-size: initial !important;
-                        }
-                    `;
-                    document.head.appendChild(newStyle);
-                }
-            });
-            
-            // Force reset CSS custom properties
-            document.documentElement.style.setProperty('--vision-scale', '1', 'important');
-            document.documentElement.style.setProperty('--vision-font-scale', '1', 'important');
-            
-            console.log('[CK] Override external vision-impaired CSS completed');
-        }
+        // Vision impaired functions removed
         
         // Fix scrolling conflicts with GSAP/Lenis libraries
         fixPanelScrolling() {
@@ -23891,68 +23485,11 @@ class AccessibilityWidget {
             }
         }
         
-        // Remove smart vision scaling (no scaling to remove)
-        removeSmartVisionScaling() {
-            console.log('[CK] removeSmartVisionScaling() - No font scaling was applied, nothing to remove');
-            console.log('[CK] Only visual enhancements were active, no layout changes to restore');
-            
-            // No font scaling was applied, so nothing to remove
-            // Visual enhancements are handled by CSS and will be removed when the class is removed
-            
-            console.log('[CK] removeSmartVisionScaling() - No scaling removal needed');
-        }
+        // Vision impaired functions removed
     
-        removeVisionImpairedStyles() {
-            // Remove CSS rules for vision impaired
-            const existingStyle = document.getElementById('vision-impaired-css');
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-            
-            // Remove smart scaling styles
-            this.removeSmartVisionScaling();
-            
-            // CRITICAL: Restore original font sizes by removing inline styles that were added by vision-impaired
-            this.restoreOriginalFontSizes();
-            
-            console.log('Accessibility Widget: Vision impaired styles removed via CSS classes');
-            
-            // Ensure the Shadow DOM host gets updated
-            this.updateWidgetAppearance();
-        }
+        // Vision impaired functions removed
         
-        // Restore original font sizes when vision-impaired mode is disabled
-        restoreOriginalFontSizes() {
-            try {
-                console.log('Accessibility Widget: Restoring original font sizes after vision-impaired mode');
-                
-                // Find all elements that might have been affected by vision-impaired mode
-                const affectedElements = document.querySelectorAll('small, .small, .text-sm, .caption, .description, p, span, div, a, li, td, th, label');
-                
-                affectedElements.forEach(element => {
-                    // Check if the element has inline font-size styles that were added by vision-impaired
-                    const currentFontSize = element.style.fontSize;
-                    if (currentFontSize && (currentFontSize.includes('max(1.1em, 16px)') || currentFontSize.includes('16px'))) {
-                        // Remove the inline font-size style to restore original
-                        element.style.fontSize = '';
-                        console.log('Accessibility Widget: Restored font size for element:', element.tagName, element.className);
-                    }
-                });
-                
-                // Also restore any elements that might have had their font-size changed by vision-impaired CSS
-                const allElements = document.querySelectorAll('*');
-                allElements.forEach(element => {
-                    // Check if element has vision-impaired related inline styles
-                    if (element.style.fontSize && element.style.fontSize.includes('max(1.1em, 16px)')) {
-                        element.style.fontSize = '';
-                    }
-                });
-                
-                console.log('Accessibility Widget: Original font sizes restored');
-            } catch (e) {
-                console.warn('Accessibility Widget: restoreOriginalFontSizes failed', e);
-            }
-        }
+        // Vision impaired functions removed
     
     
     
