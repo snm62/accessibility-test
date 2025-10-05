@@ -645,6 +645,77 @@ class AccessibilityWidget {
                         element.style.transform = 'none';
                     });
                     
+                    // GENERIC ANIMATION CATCH-ALL: Stop all possible animations with generic selectors
+                    const genericAnimationElements = document.querySelectorAll('*[class*="item"], *[class*="content"], *[class*="count"], *[class*="counter"], *[class*="text"], *[class*="header"], *[class*="connector"], *[class*="dot"], *[class*="timeline"], *[class*="step"], *[class*="stage"], *[class*="phase"], *[class*="card"], *[class*="block"], *[class*="section"], *[class*="container"], *[class*="wrapper"], *[class*="element"], *[class*="component"]');
+                    
+                    genericAnimationElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        element.style.translate = 'none';
+                        element.style.rotate = 'none';
+                        element.style.scale = 'none';
+                    });
+                    
+                    // SVG LINE ANIMATIONS: Stop all SVG stroke animations
+                    const svgElements = document.querySelectorAll('svg, svg path, svg line, svg polyline, svg polygon, svg circle, svg rect, svg ellipse, svg rect, svg g');
+                    svgElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        
+                        // Force SVG stroke animations to complete
+                        if (element.tagName === 'path' || element.tagName === 'line' || element.tagName === 'polyline' || element.tagName === 'polygon') {
+                            const computedStyle = window.getComputedStyle(element);
+                            const pathLength = element.getTotalLength ? element.getTotalLength() : 0;
+                            if (pathLength > 0) {
+                                element.style.strokeDasharray = pathLength;
+                                element.style.strokeDashoffset = '0';
+                            }
+                        }
+                    });
+                    
+                    // TIMELINE ANIMATIONS: Stop all timeline-related animations
+                    const timelineElements = document.querySelectorAll('.timeline-item, .timeline-item-content, .timeline-count, .timeline-counter, .timeline-text, .timeline-header, .timeline-content, .connector-dots, .dot-1, .dot-2, .dot-3, .dot-4, .dot-5, *[class*="timeline"], *[class*="connector"], *[class*="dot"]');
+                    
+                    timelineElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        element.style.translate = 'none';
+                        element.style.rotate = 'none';
+                        element.style.scale = 'none';
+                    });
+                    
+                    // STOPPER AND MARKER ELEMENTS: Stop all stopper animations and reset positioning
+                    const stopperElements = document.querySelectorAll('*[class*="stopper"], *[class*="marker"], *[class*="pointer"], *[class*="cursor"], *[class*="dot"], *[class*="circle"], *[class*="ring"], *[class*="orbit"], *[class*="indicator"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="track"], *[class*="path"]');
+                    
+                    stopperElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        
+                        // Reset positioning to prevent overlapping text
+                        element.style.position = 'static';
+                        element.style.top = 'auto';
+                        element.style.left = 'auto';
+                        element.style.right = 'auto';
+                        element.style.bottom = 'auto';
+                        element.style.zIndex = 'auto';
+                    });
+                    
                     // PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations
                     const progressElements = document.querySelectorAll('progress, [role="progressbar"], [class*="progress"], [class*="bar"], [class*="indicator"], [class*="track"], [class*="line"], [class*="path"], [class*="stroke"], [class*="fill"], [class*="gradient"], [class*="wave"], [class*="flow"], [class*="stream"], [class*="runner"], [class*="mover"], [class*="slider"], [class*="stopper"], [class*="marker"], [class*="pointer"], [class*="cursor"], [class*="dot"], [class*="circle"], [class*="ring"], [class*="orbit"]');
                     
@@ -888,6 +959,119 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
+                    }
+                    
+                    /* SVG LINE ANIMATIONS: Stop all SVG stroke animations immediately */
+                    body.seizure-safe svg,
+                    body.seizure-safe svg path,
+                    body.seizure-safe svg line,
+                    body.seizure-safe svg polyline,
+                    body.seizure-safe svg polygon,
+                    body.seizure-safe svg circle,
+                    body.seizure-safe svg rect,
+                    body.seizure-safe svg ellipse,
+                    body.seizure-safe svg g {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
+                    body.seizure-safe *[class*="scroll"],
+                    body.seizure-safe *[class*="progress"],
+                    body.seizure-safe *[class*="bar"],
+                    body.seizure-safe *[class*="line"],
+                    body.seizure-safe *[class*="timeline"],
+                    body.seizure-safe *[class*="track"],
+                    body.seizure-safe *[class*="path"],
+                    body.seizure-safe *[class*="stroke"],
+                    body.seizure-safe *[class*="fill"],
+                    body.seizure-safe *[class*="gradient"],
+                    body.seizure-safe *[class*="wave"],
+                    body.seizure-safe *[class*="flow"],
+                    body.seizure-safe *[class*="stream"],
+                    body.seizure-safe *[class*="runner"],
+                    body.seizure-safe *[class*="mover"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
+                    body.seizure-safe *[class*="item"],
+                    body.seizure-safe *[class*="content"],
+                    body.seizure-safe *[class*="count"],
+                    body.seizure-safe *[class*="counter"],
+                    body.seizure-safe *[class*="text"],
+                    body.seizure-safe *[class*="header"],
+                    body.seizure-safe *[class*="connector"],
+                    body.seizure-safe *[class*="dot"],
+                    body.seizure-safe *[class*="timeline"],
+                    body.seizure-safe *[class*="step"],
+                    body.seizure-safe *[class*="stage"],
+                    body.seizure-safe *[class*="phase"],
+                    body.seizure-safe *[class*="card"],
+                    body.seizure-safe *[class*="block"],
+                    body.seizure-safe *[class*="section"],
+                    body.seizure-safe *[class*="container"],
+                    body.seizure-safe *[class*="wrapper"],
+                    body.seizure-safe *[class*="element"],
+                    body.seizure-safe *[class*="component"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        translate: none !important;
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
+                    body.seizure-safe *[style*="animation"],
+                    body.seizure-safe *[style*="transition"],
+                    body.seizure-safe *[style*="transform"],
+                    body.seizure-safe *[style*="opacity"],
+                    body.seizure-safe *[style*="visibility"],
+                    body.seizure-safe *[data-animation],
+                    body.seizure-safe *[data-transition],
+                    body.seizure-safe *[data-transform] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        translate: none !important;
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
+                    body.seizure-safe *[class*="stopper"],
+                    body.seizure-safe *[class*="marker"],
+                    body.seizure-safe *[class*="pointer"],
+                    body.seizure-safe *[class*="cursor"],
+                    body.seizure-safe *[class*="dot"],
+                    body.seizure-safe *[class*="circle"],
+                    body.seizure-safe *[class*="ring"],
+                    body.seizure-safe *[class*="orbit"],
+                    body.seizure-safe *[class*="indicator"],
+                    body.seizure-safe *[class*="slider"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        position: static !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        z-index: auto !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -1841,13 +2025,27 @@ class AccessibilityWidget {
                             return;
     
                         case 'v': // Toggle vision impaired
-    
+
                             e.preventDefault();
-    
-                            console.log('Accessibility Widget: Alt+V pressed, vision impaired feature removed');
-    
-                            this.announceToScreenReader(`Vision impaired mode ${visionStatus}`);
-    
+
+                            console.log('Accessibility Widget: Alt+V pressed, toggling vision impaired');
+
+                            // Ensure setting exists
+                            if (typeof this.settings['vision-impaired'] !== 'boolean') {
+                                this.settings['vision-impaired'] = false;
+                            }
+
+                            const viCurrent = this.settings['vision-impaired'];
+
+                            if (viCurrent) {
+                                this.disableVisionImpaired();
+                            } else {
+                                this.enableVisionImpaired();
+                            }
+
+                            const viStatus = !viCurrent ? 'enabled' : 'disabled';
+                            this.announceToScreenReader(`Vision impaired mode ${viStatus}`);
+
                             return;
     
                         case 'h': // Toggle ADHD friendly
@@ -20836,6 +21034,120 @@ class AccessibilityWidget {
                         visibility: visible !important;
                         transform: none !important;
                     }
+                    
+                    /* SVG LINE ANIMATIONS: Stop all SVG stroke animations */
+                    .stop-animation svg,
+                    .stop-animation svg path,
+                    .stop-animation svg line,
+                    .stop-animation svg polyline,
+                    .stop-animation svg polygon,
+                    .stop-animation svg circle,
+                    .stop-animation svg rect,
+                    .stop-animation svg ellipse,
+                    .stop-animation svg g {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
+                    .stop-animation *[class*="scroll"],
+                    .stop-animation *[class*="progress"],
+                    .stop-animation *[class*="bar"],
+                    .stop-animation *[class*="line"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="track"],
+                    .stop-animation *[class*="path"],
+                    .stop-animation *[class*="stroke"],
+                    .stop-animation *[class*="fill"],
+                    .stop-animation *[class*="gradient"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="stream"],
+                    .stop-animation *[class*="runner"],
+                    .stop-animation *[class*="mover"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
+                    .stop-animation *[class*="item"],
+                    .stop-animation *[class*="content"],
+                    .stop-animation *[class*="count"],
+                    .stop-animation *[class*="counter"],
+                    .stop-animation *[class*="text"],
+                    .stop-animation *[class*="header"],
+                    .stop-animation *[class*="connector"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="step"],
+                    .stop-animation *[class*="stage"],
+                    .stop-animation *[class*="phase"],
+                    .stop-animation *[class*="card"],
+                    .stop-animation *[class*="block"],
+                    .stop-animation *[class*="section"],
+                    .stop-animation *[class*="container"],
+                    .stop-animation *[class*="wrapper"],
+                    .stop-animation *[class*="element"],
+                    .stop-animation *[class*="component"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        translate: none !important;
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
+                    .stop-animation *[style*="animation"],
+                    .stop-animation *[style*="transition"],
+                    .stop-animation *[style*="transform"],
+                    .stop-animation *[style*="opacity"],
+                    .stop-animation *[style*="visibility"],
+                    .stop-animation *[data-animation],
+                    .stop-animation *[data-transition],
+                    .stop-animation *[data-transform] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        translate: none !important;
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    
+                    /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
+                    .stop-animation *[class*="stopper"],
+                    .stop-animation *[class*="marker"],
+                    .stop-animation *[class*="pointer"],
+                    .stop-animation *[class*="cursor"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="circle"],
+                    .stop-animation *[class*="ring"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="indicator"],
+                    .stop-animation *[class*="slider"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        position: static !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        z-index: auto !important;
+                    }
     
                 `;
     
@@ -21809,6 +22121,113 @@ class AccessibilityWidget {
     
         }
     
+        // Vision Impaired - lightweight, non-aggressive
+        enableVisionImpaired() {
+            try {
+                this.settings['vision-impaired'] = true;
+                document.body.classList.add('vision-impaired');
+
+                // Lock paddings for interactive elements to avoid layout shifts
+                this.__vi_locked = this.__vi_locked || new WeakMap();
+                const interactiveSelectors = 'a, button, [role="button"], input, select, textarea, [tabindex]';
+                document.querySelectorAll(interactiveSelectors).forEach(el => {
+                    if (!this.__vi_locked.has(el)) {
+                        const cs = getComputedStyle(el);
+                        this.__vi_locked.set(el, {
+                            paddingTop: cs.paddingTop,
+                            paddingRight: cs.paddingRight,
+                            paddingBottom: cs.paddingBottom,
+                            paddingLeft: cs.paddingLeft,
+                            lineHeight: cs.lineHeight
+                        });
+                    }
+                });
+
+                // Apply gentle small-text upscale without touching large text
+                // Threshold: keep >= 18px unchanged; bump < 14px up to 16px; 14-17px kept
+                this.__vi_scaled = this.__vi_scaled || new WeakSet();
+                const textSelector = 'p, span, a, li, td, th, label, small, em, strong, i, b, input, textarea, select, button';
+                document.querySelectorAll(textSelector).forEach(el => {
+                    if (this.__vi_scaled.has(el)) return;
+                    const cs = getComputedStyle(el);
+                    const sizePx = parseFloat(cs.fontSize);
+                    if (Number.isFinite(sizePx)) {
+                        if (sizePx < 14) {
+                            // Promote to 16px for readability
+                            el.style.fontSize = '16px';
+                            // Preserve line-height ratio to avoid crowding
+                            if (cs.lineHeight !== 'normal') {
+                                el.style.lineHeight = cs.lineHeight;
+                            }
+                            this.__vi_scaled.add(el);
+                        }
+                        // 14-17px unchanged; >=18px unchanged by design
+                    }
+                });
+
+                // Ensure interactive paddings preserved
+                document.querySelectorAll(interactiveSelectors).forEach(el => {
+                    const lock = this.__vi_locked.get(el);
+                    if (!lock) return;
+                    el.style.paddingTop = lock.paddingTop;
+                    el.style.paddingRight = lock.paddingRight;
+                    el.style.paddingBottom = lock.paddingBottom;
+                    el.style.paddingLeft = lock.paddingLeft;
+                    // Keep line-height stable to prevent height jumps
+                    el.style.lineHeight = lock.lineHeight;
+                });
+
+                // Persist and sync
+                this.saveSettings();
+                this.updateWidgetAppearance();
+                console.log('Accessibility Widget: Vision impaired enabled (lightweight)');
+            } catch (e) {
+                console.warn('Accessibility Widget: enableVisionImpaired failed', e);
+            }
+        }
+
+        disableVisionImpaired() {
+            try {
+                this.settings['vision-impaired'] = false;
+                document.body.classList.remove('vision-impaired');
+
+                // Restore any inline font-size/line-height we set
+                if (this.__vi_scaled) {
+                    const textSelector = 'p, span, a, li, td, th, label, small, em, strong, i, b, input, textarea, select, button';
+                    document.querySelectorAll(textSelector).forEach(el => {
+                        if (this.__vi_scaled.has(el)) {
+                            el.style.fontSize = '';
+                            el.style.lineHeight = '';
+                        }
+                    });
+                    this.__vi_scaled = new WeakSet();
+                }
+
+                // Restore paddings and line-height on interactive elements
+                if (this.__vi_locked) {
+                    const interactiveSelectors = 'a, button, [role="button"], input, select, textarea, [tabindex]';
+                    document.querySelectorAll(interactiveSelectors).forEach(el => {
+                        const lock = this.__vi_locked.get(el);
+                        if (lock) {
+                            el.style.paddingTop = '';
+                            el.style.paddingRight = '';
+                            el.style.paddingBottom = '';
+                            el.style.paddingLeft = '';
+                            el.style.lineHeight = '';
+                            this.__vi_locked.delete(el);
+                        }
+                    });
+                }
+
+                // Persist and sync
+                this.saveSettings();
+                this.updateWidgetAppearance();
+                console.log('Accessibility Widget: Vision impaired disabled');
+            } catch (e) {
+                console.warn('Accessibility Widget: disableVisionImpaired failed', e);
+            }
+        }
+
         // Stop autoplay videos to prevent seizures
         stopAutoplayVideos() {
             console.log('Accessibility Widget: Stopping autoplay videos for seizure safety');
@@ -22607,6 +23026,119 @@ class AccessibilityWidget {
     
                     filter: contrast(1.02) brightness(1.01) !important;
     
+                }
+                
+                /* SVG LINE ANIMATIONS: Stop all SVG stroke animations */
+                body.seizure-safe svg,
+                body.seizure-safe svg path,
+                body.seizure-safe svg line,
+                body.seizure-safe svg polyline,
+                body.seizure-safe svg polygon,
+                body.seizure-safe svg circle,
+                body.seizure-safe svg rect,
+                body.seizure-safe svg ellipse,
+                body.seizure-safe svg g {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
+                body.seizure-safe *[class*="scroll"],
+                body.seizure-safe *[class*="progress"],
+                body.seizure-safe *[class*="bar"],
+                body.seizure-safe *[class*="line"],
+                body.seizure-safe *[class*="timeline"],
+                body.seizure-safe *[class*="track"],
+                body.seizure-safe *[class*="path"],
+                body.seizure-safe *[class*="stroke"],
+                body.seizure-safe *[class*="fill"],
+                body.seizure-safe *[class*="gradient"],
+                body.seizure-safe *[class*="wave"],
+                body.seizure-safe *[class*="flow"],
+                body.seizure-safe *[class*="stream"],
+                body.seizure-safe *[class*="runner"],
+                body.seizure-safe *[class*="mover"] {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
+                body.seizure-safe *[class*="item"],
+                body.seizure-safe *[class*="content"],
+                body.seizure-safe *[class*="count"],
+                body.seizure-safe *[class*="counter"],
+                body.seizure-safe *[class*="text"],
+                body.seizure-safe *[class*="header"],
+                body.seizure-safe *[class*="connector"],
+                body.seizure-safe *[class*="dot"],
+                body.seizure-safe *[class*="timeline"],
+                body.seizure-safe *[class*="step"],
+                body.seizure-safe *[class*="stage"],
+                body.seizure-safe *[class*="phase"],
+                body.seizure-safe *[class*="card"],
+                body.seizure-safe *[class*="block"],
+                body.seizure-safe *[class*="section"],
+                body.seizure-safe *[class*="container"],
+                body.seizure-safe *[class*="wrapper"],
+                body.seizure-safe *[class*="element"],
+                body.seizure-safe *[class*="component"] {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    translate: none !important;
+                    rotate: none !important;
+                    scale: none !important;
+                }
+                
+                /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
+                body.seizure-safe *[style*="animation"],
+                body.seizure-safe *[style*="transition"],
+                body.seizure-safe *[style*="transform"],
+                body.seizure-safe *[style*="opacity"],
+                body.seizure-safe *[style*="visibility"],
+                body.seizure-safe *[data-animation],
+                body.seizure-safe *[data-transition],
+                body.seizure-safe *[data-transform] {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    translate: none !important;
+                    rotate: none !important;
+                    scale: none !important;
+                }
+                
+                /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
+                body.seizure-safe *[class*="stopper"],
+                body.seizure-safe *[class*="marker"],
+                body.seizure-safe *[class*="pointer"],
+                body.seizure-safe *[class*="cursor"],
+                body.seizure-safe *[class*="dot"],
+                body.seizure-safe *[class*="circle"],
+                body.seizure-safe *[class*="ring"],
+                body.seizure-safe *[class*="orbit"],
+                body.seizure-safe *[class*="indicator"],
+                body.seizure-safe *[class*="slider"] {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    position: static !important;
+                    top: auto !important;
+                    left: auto !important;
+                    right: auto !important;
+                    bottom: auto !important;
+                    z-index: auto !important;
                 }
     
             `;
