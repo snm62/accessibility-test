@@ -79,6 +79,33 @@
                     width: auto !important;
                     height: auto !important;
                 }
+
+                /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
+                body.seizure-safe a[href],
+                body.seizure-safe button,
+                body.seizure-safe [role="button"],
+                body.seizure-safe [onclick],
+                body.seizure-safe input[type="button"],
+                body.seizure-safe input[type="submit"],
+                body.seizure-safe input[type="reset"],
+                body.seizure-safe .btn,
+                body.seizure-safe .button,
+                body.seizure-safe [class*="btn"],
+                body.seizure-safe [class*="button"],
+                body.seizure-safe [tabindex]:not([tabindex="-1"]) {
+                    cursor: pointer !important;
+                }
+                /* Keep text cursor for text-editable fields */
+                body.seizure-safe input[type="text"],
+                body.seizure-safe input[type="email"],
+                body.seizure-safe input[type="search"],
+                body.seizure-safe input[type="tel"],
+                body.seizure-safe input[type="url"],
+                body.seizure-safe input[type="password"],
+                body.seizure-safe textarea,
+                body.seizure-safe [contenteditable="true"] {
+                    cursor: text !important;
+                }
                 
                 /* Preserve original layout for specific elements */
                 body.seizure-safe img,
@@ -206,6 +233,19 @@
                     transform: none !important;
                     animation: none !important;
                     transition: none !important;
+                }
+
+                /* Do NOT interfere with navbars/headers sticky/transform behavior */
+                body.seizure-safe nav,
+                body.seizure-safe header,
+                body.seizure-safe .navbar,
+                body.seizure-safe [class*="nav"],
+                body.seizure-safe [class*="header"] {
+                    animation: initial !important;
+                    transition: initial !important;
+                    transform: initial !important;
+                    position: initial !important;
+                    will-change: initial !important;
                 }
                 
                 /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
@@ -398,39 +438,51 @@
                 }
             `;
             document.head.appendChild(immediateStyle);
+            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
+            try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
 
             // Runtime guards: stop JS-driven animations and reveal typewriter/progress instantly
             try {
                 if (!window.__seizureGuardsApplied) {
                     window.__seizureGuardsApplied = true;
 
-                    // Save originals
-                    window.__origRequestAnimationFrame = window.requestAnimationFrame;
-                    window.__origCancelAnimationFrame = window.cancelAnimationFrame;
-                    window.__origSetInterval = window.setInterval;
-                    window.__origClearInterval = window.clearInterval;
+                    // NOTE: Do not globally override timers/animation frames to avoid breaking sticky/nav behavior
+                    if (!window.__origRequestAnimationFrame) window.__origRequestAnimationFrame = window.requestAnimationFrame;
+                    if (!window.__origCancelAnimationFrame) window.__origCancelAnimationFrame = window.cancelAnimationFrame;
+                    if (!window.__origSetInterval) window.__origSetInterval = window.setInterval;
+                    if (!window.__origSetTimeout) window.__origSetTimeout = window.setTimeout;
+                    if (!window.__origClearInterval) window.__origClearInterval = window.clearInterval;
+                    if (!window.__origClearTimeout) window.__origClearTimeout = window.clearTimeout;
+                    // Ensure originals are active
+                    window.requestAnimationFrame = window.__origRequestAnimationFrame;
+                    window.cancelAnimationFrame = window.__origCancelAnimationFrame;
+                    window.setInterval = window.__origSetInterval;
+                    window.setTimeout = window.__origSetTimeout;
+                    window.clearInterval = window.__origClearInterval;
+                    window.clearTimeout = window.__origClearTimeout;
 
-                    // Disable rAF callbacks while seizure-safe is active
-                    window.requestAnimationFrame = function(callback) {
-                        if (document.body && document.body.classList.contains('seizure-safe')) {
-                            return 0;
+                    // Disable Web Animations API
+                    try {
+                        if (!window.__origElementAnimate) {
+                            window.__origElementAnimate = Element.prototype.animate;
+                            Element.prototype.animate = function() {
+                                // return a stub Animation
+                                return {
+                                    cancel: function(){},
+                                    finish: function(){},
+                                    play: function(){},
+                                    pause: function(){},
+                                    reverse: function(){},
+                                    updatePlaybackRate: function(){},
+                                    addEventListener: function(){},
+                                    removeEventListener: function(){},
+                                    dispatchEvent: function(){ return false; },
+                                    currentTime: 0,
+                                    playState: 'finished',
+                                };
+                            };
                         }
-                        return window.__origRequestAnimationFrame(callback);
-                    };
-                    window.cancelAnimationFrame = function(id) {
-                        try { return window.__origCancelAnimationFrame(id); } catch (_) { return; }
-                    };
-
-                    // Disable setInterval callbacks while seizure-safe is active
-                    window.setInterval = function(handler, timeout, ...args) {
-                        if (document.body && document.body.classList.contains('seizure-safe')) {
-                            return -1;
-                        }
-                        return window.__origSetInterval(handler, timeout, ...args);
-                    };
-                    window.clearInterval = function(id) {
-                        try { return window.__origClearInterval(id); } catch (_) { return; }
-                    };
+                    } catch (_) { /* ignore */ }
 
                     // Helper to reveal typewriter text and freeze progress visuals
                     window.__applySeizureSafeDOMFreeze = function() {
@@ -475,13 +527,21 @@
                                     }
                                 } catch (_) { /* ignore per-element errors */ }
                             });
+
+                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
+                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
                         } catch (err) {
                             console.warn('Accessibility Widget: DOM freeze failed', err);
                         }
                     };
 
-                    // Apply immediately
+                    // Apply immediately and also on DOMContentLoaded as a second safety
                     window.__applySeizureSafeDOMFreeze();
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (document.body && document.body.classList.contains('seizure-safe')) {
+                            window.__applySeizureSafeDOMFreeze();
+                        }
+                    }, { once: true });
 
                     // Observe future DOM changes to keep things frozen while seizure-safe is active
                     try {
@@ -502,6 +562,66 @@
         }
     } catch (e) {
         console.warn('Accessibility Widget: Immediate seizure-safe check failed', e);
+    }
+})();
+
+// CRITICAL: Immediate Vision Impaired profile - apply on first paint if previously enabled
+(function() {
+    try {
+        const visionImpairedFromStorage = localStorage.getItem('accessibility-widget-vision-impaired');
+        if (visionImpairedFromStorage === 'true') {
+            try { document.documentElement.classList.add('vision-impaired'); } catch (_) {}
+            try { document.body.classList.add('vision-impaired'); } catch (_) {}
+            try { document.documentElement.setAttribute('data-vision-impaired', 'true'); } catch (_) {}
+
+            // Conservative readability styles that do not dramatically alter layout
+            if (!document.getElementById('accessibility-vision-impaired-immediate-early')) {
+                const viStyle = document.createElement('style');
+                viStyle.id = 'accessibility-vision-impaired-immediate-early';
+                viStyle.textContent = `
+                    html.vision-impaired, body.vision-impaired { }
+                    /* Increase text size only */
+                    body.vision-impaired :where(h1,h2,h3,h4,h5,h6,p,li,a,label,span,div,input,textarea,button,small) {
+                        font-size: 1.15em !important;
+                    }
+                `;
+                document.head.appendChild(viStyle);
+            }
+        }
+
+        // Wire checkbox if present and sync initial checked state
+        function syncVisionImpairedToggle() {
+            try {
+                const input = document.getElementById('vision-impaired');
+                if (!input) return;
+                const enabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                try { input.checked = enabled; } catch (_) {}
+                if (!input.__viBound) {
+                    input.addEventListener('change', function() {
+                        const on = !!this.checked;
+                        localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
+                        try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
+                        try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
+                        try {
+                            if (on) {
+                                document.documentElement.setAttribute('data-vision-impaired', 'true');
+                            } else {
+                                document.documentElement.removeAttribute('data-vision-impaired');
+                            }
+                        } catch (_) {}
+                    });
+                    input.__viBound = true;
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', syncVisionImpairedToggle, { once: true });
+        } else {
+            syncVisionImpairedToggle();
+        }
+    } catch (e) {
+        console.warn('Accessibility Widget: Immediate Vision Impaired setup failed', e);
     }
 })();
 
