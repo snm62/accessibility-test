@@ -79,6 +79,8 @@ class AccessibilityWidget {
                     document.body.classList.add('seizure-safe');
                     // Apply immediate minimal CSS to halt motion until full styles are added
                     this.applyImmediateSeizureCSS();
+                    // Force complete any text animations immediately
+                    this.forceCompleteTextAnimations();
                     // Proceed with full enable without delay
                     this.enableSeizureSafe(true /* immediate */);
                 } catch (e) {
@@ -103,6 +105,8 @@ class AccessibilityWidget {
                 if (!document.body.classList.contains('seizure-safe')) {
                     document.body.classList.add('seizure-safe');
                 }
+                // Force complete any text animations immediately
+                this.forceCompleteTextAnimations();
                 this.enableSeizureSafe(true /* immediate */);
             }
     
@@ -13458,6 +13462,12 @@ class AccessibilityWidget {
                 return;
     
             }
+            
+            // If vision-impaired mode is active, be more aggressive about preserving font sizes
+            const isVisionImpaired = document.body.classList.contains('vision-impaired');
+            if (isVisionImpaired) {
+                console.log('Accessibility Widget: Vision-impaired mode detected, applying enhanced font sizing');
+            }
     
             
     
@@ -13486,11 +13496,18 @@ class AccessibilityWidget {
             // Apply to body using original size
     
             const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
-    
-            document.body.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
+            const bodyFontSize = `${bodyOriginalSize * scale}px`;
+            
+            document.body.style.setProperty('font-size', bodyFontSize);
             
             // Also apply to html element to ensure it takes precedence
-            document.documentElement.style.setProperty('font-size', `${bodyOriginalSize * scale}px`);
+            document.documentElement.style.setProperty('font-size', bodyFontSize);
+            
+            // If vision-impaired mode is active, also set with !important to override any CSS
+            if (isVisionImpaired) {
+                document.body.style.setProperty('font-size', bodyFontSize, 'important');
+                document.documentElement.style.setProperty('font-size', bodyFontSize, 'important');
+            }
     
             
     
@@ -13511,8 +13528,13 @@ class AccessibilityWidget {
                     if (originalSize && !isNaN(originalSize)) {
     
                         // Apply the scale to the original size
-    
-                        element.style.setProperty('font-size', `${originalSize * scale}px`);
+                        const newFontSize = `${originalSize * scale}px`;
+                        element.style.setProperty('font-size', newFontSize);
+                        
+                        // If vision-impaired mode is active, also set it with !important to override any CSS
+                        if (isVisionImpaired) {
+                            element.style.setProperty('font-size', newFontSize, 'important');
+                        }
     
                     }
     
@@ -20773,6 +20795,9 @@ class AccessibilityWidget {
                 }
             }
             
+            // CRITICAL: Ensure letter-by-letter text animations show full text immediately
+            this.forceCompleteTextAnimations();
+            
             // Stop ScrollTrigger animations
             if (typeof ScrollTrigger !== 'undefined') {
                 ScrollTrigger.killAll();
@@ -20832,6 +20857,53 @@ class AccessibilityWidget {
             }
             
             console.log('Accessibility Widget: Portfolio animations stopped for seizure safety');
+        }
+        
+        // Force complete letter-by-letter text animations for seizure safety
+        forceCompleteTextAnimations() {
+            console.log('Accessibility Widget: Forcing completion of text animations for seizure safety');
+            
+            // Find all elements with letter-by-letter animations
+            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
+            
+            textElements.forEach(element => {
+                // Remove any animation classes and inline styles
+                element.style.animation = 'none';
+                element.style.transition = 'none';
+                element.style.opacity = '1';
+                element.style.visibility = 'visible';
+                element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
+                element.style.transform = 'none';
+                
+                // Remove animation-related classes
+                element.classList.remove('animate', 'fade', 'slide', 'bounce', 'pulse', 'shake', 'flash', 'blink', 'glow', 'spin', 'rotate', 'scale', 'zoom');
+                
+                // Ensure all child elements are also visible
+                const children = element.querySelectorAll('.char, .word, span, div');
+                children.forEach(child => {
+                    child.style.opacity = '1';
+                    child.style.visibility = 'visible';
+                    child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
+                    child.style.animation = 'none';
+                    child.style.transition = 'none';
+                    child.style.transform = 'none';
+                });
+            });
+            
+            // Also handle any text that might be using GSAP TextPlugin or similar
+            const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div');
+            allTextElements.forEach(element => {
+                // Check if element has any animation-related inline styles
+                if (element.style.animation || element.style.transition || element.style.opacity !== '') {
+                    element.style.opacity = '1';
+                    element.style.visibility = 'visible';
+                    element.style.animation = 'none';
+                    element.style.transition = 'none';
+                    element.style.transform = 'none';
+                }
+            });
+            
+            console.log('Accessibility Widget: Text animations forced to complete for seizure safety');
         }
     
         // Lock current button visual state to prevent hover color changes during seizure-safe
@@ -20996,6 +21068,29 @@ class AccessibilityWidget {
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
+                }
+                
+                /* CRITICAL: Ensure letter-by-letter text animations show full text immediately */
+                body.seizure-safe [data-splitting] .char,
+                body.seizure-safe [data-splitting] .word,
+                body.seizure-safe .split .char,
+                body.seizure-safe .split .word,
+                body.seizure-safe .char,
+                body.seizure-safe .word {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: inline !important;
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                }
+                
+                /* Ensure parent text containers are fully visible */
+                body.seizure-safe [data-splitting],
+                body.seizure-safe .split {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
                 }
                 
                 /* Allow initial page load animations to complete once, then stop */
@@ -22378,21 +22473,26 @@ class AccessibilityWidget {
                         padding: inherit !important;
                     }
                     
-                    /* Prevent any scaling on large text elements */
-                    body.vision-impaired [style*="font-size: 2"],
-                    body.vision-impaired [style*="font-size: 3"],
-                    body.vision-impaired [style*="font-size: 4"],
-                    body.vision-impaired [style*="font-size: 5"],
-                    body.vision-impaired [style*="font-size: 6"],
-                    body.vision-impaired [style*="font-size: 7"],
-                    body.vision-impaired [style*="font-size: 8"],
-                    body.vision-impaired [style*="font-size: 9"],
-                    body.vision-impaired [style*="font-size: 10"] {
+                    /* ENSURE ACCESSIBILITY WIDGET FONT SIZING TAKES PRECEDENCE */
+                    body.vision-impaired [style*="font-size"] {
+                        /* Preserve any inline font-size styles set by accessibility widget */
+                        font-size: inherit !important;
+                    }
+                    
+                    /* Override any vision-impaired CSS that might interfere with font sizing */
+                    body.vision-impaired [style*="font-size"] h1,
+                    body.vision-impaired [style*="font-size"] h2,
+                    body.vision-impaired [style*="font-size"] h3,
+                    body.vision-impaired [style*="font-size"] h4,
+                    body.vision-impaired [style*="font-size"] h5,
+                    body.vision-impaired [style*="font-size"] h6,
+                    body.vision-impaired [style*="font-size"] p,
+                    body.vision-impaired [style*="font-size"] span,
+                    body.vision-impaired [style*="font-size"] div,
+                    body.vision-impaired [style*="font-size"] a,
+                    body.vision-impaired [style*="font-size"] li {
                         font-size: inherit !important;
                         line-height: inherit !important;
-                        transform: none !important;
-                        scale: 1 !important;
-                        zoom: 1 !important;
                     }
                     
                     /* Ensure navigation stays in place */
