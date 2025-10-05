@@ -447,7 +447,7 @@ class AccessibilityWidget {
             
             // CRITICAL: Force all animations to final state immediately if seizure-safe or stop-animation is enabled
             this.forceAllAnimationsToFinalState();
-
+    
             this.init();
     
         }
@@ -521,10 +521,10 @@ class AccessibilityWidget {
                 const stopAnimationFromStorage = localStorage.getItem('accessibility-widget-stop-animation') === 'true';
                 
                 if (isSeizureSafe || isStopAnimation || seizureSafeFromStorage || stopAnimationFromStorage) {
-                    console.log('Accessibility Widget: Forcing all animations to final state immediately');
+                    console.log('Accessibility Widget: Forcing animations to final state (clean approach)');
                     
-                    // Force ALL possible animated elements to their final state
-                    const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"], *[class*="motion"], *[class*="move"], *[class*="float"], *[class*="drift"], *[class*="sway"], *[class*="rock"], *[class*="wave"], *[class*="flow"], *[class*="glide"], *[class*="sweep"], *[class*="swoop"], *[class*="dive"], *[class*="rise"], *[class*="fall"], *[class*="drop"], *[class*="lift"], *[class*="sink"], *[class*="hover"], *[class*="orbit"], *[class*="revolve"], *[class*="turn"], *[class*="twirl"], *[class*="whirl"], *[class*="spiral"], *[class*="helix"], *[class*="coil"], *[class*="curl"], *[class*="bend"], *[class*="flex"], *[class*="stretch"], *[class*="squash"], *[class*="squeeze"], *[class*="compress"], *[class*="expand"], *[class*="grow"], *[class*="shrink"], *[class*="inflate"], *[class*="deflate"], *[class*="morph"], *[class*="transform"], *[class*="transition"], *[class*="migrate"], *[class*="shift"]');
+                    // Stop seizure-triggering animations only
+                    const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
                     
                     animatedElements.forEach(element => {
                         element.style.animation = 'none';
@@ -532,298 +532,147 @@ class AccessibilityWidget {
                         element.style.opacity = '1';
                         element.style.visibility = 'visible';
                         element.style.transform = 'none';
-                        element.style.animationFillMode = 'forwards';
                     });
                     
-                    // Force GSAP and other library animations to final state
-                    const gsapElements = document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, [data-splitting], .split, .char, .word');
-                    
-                    gsapElements.forEach(element => {
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
+                    // Stop letter-by-letter text animations
+                    const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
+                    textElements.forEach(element => {
                         element.style.animation = 'none';
                         element.style.transition = 'none';
-                        
-                        // Force all child elements to be visible
-                        const children = element.querySelectorAll('.char, .word, span, div');
-                        children.forEach(child => {
-                            child.style.opacity = '1';
-                            child.style.visibility = 'visible';
-                            child.style.animation = 'none';
-                            child.style.transition = 'none';
-                            child.style.transform = 'none';
-                        });
-                    });
-                    
-                    // COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state
-                    const catchAllElements = document.querySelectorAll('*[style*="animation"], *[style*="transition"], *[style*="transform"], *[style*="opacity"], *[style*="visibility"], *[data-animation], *[data-transition], *[data-transform], *[data-opacity], *[data-visibility]');
-                    
-                    catchAllElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
                         element.style.opacity = '1';
                         element.style.visibility = 'visible';
                         element.style.transform = 'none';
                     });
                     
-                    // AUTOPLAY MEDIA: Stop all autoplay videos and media
-                    const mediaElements = document.querySelectorAll('video, audio, iframe, embed, object, [autoplay], [data-autoplay], [class*="autoplay"], [class*="video"], [class*="media"]');
-                    
+                    // Stop autoplay media
+                    const mediaElements = document.querySelectorAll('video, audio');
                     mediaElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                        
-                        // Stop autoplay
                         if (element.tagName === 'VIDEO' || element.tagName === 'AUDIO') {
                             element.pause();
                             element.autoplay = false;
-                            element.loop = false;
                         }
                     });
                     
-                    // HOVER ANIMATIONS: Disable all hover-triggered animations
-                    const hoverElements = document.querySelectorAll('*[class*="hover"], *[class*="focus"], *[class*="active"], *[data-hover], *[data-focus], *[data-active]');
-                    
-                    hoverElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                    });
-                    
-                    // LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state
-                    const textAnimationElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="split"], [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"], [class*="reveal"], [class*="unveil"], [class*="show-text"], [class*="text-effect"]');
-                    
-                    textAnimationElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                        
-                        // Force all child elements to be visible
-                        const children = element.querySelectorAll('.char, .word, span, div, p, h1, h2, h3, h4, h5, h6');
-                        children.forEach(child => {
-                            child.style.opacity = '1';
-                            child.style.visibility = 'visible';
-                            child.style.animation = 'none';
-                            child.style.transition = 'none';
-                            child.style.transform = 'none';
-                        });
-                    });
-                    
-                    // IMAGE HOVER EFFECTS: Disable all image hover animations
-                    const imageElements = document.querySelectorAll('img, [class*="image"], [class*="img"], [class*="photo"], [class*="picture"], [class*="gallery"], [class*="portfolio"], [class*="card"], [class*="item"]');
-                    
-                    imageElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                    });
-                    
-                    // SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations
-                    const scrollAnimationElements = document.querySelectorAll('*[class*="scroll"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="timeline"], *[class*="track"], *[class*="path"], *[class*="stroke"], *[class*="fill"], *[class*="gradient"], *[class*="wave"], *[class*="flow"], *[class*="stream"], *[class*="runner"], *[class*="mover"], *[class*="slider"], *[class*="indicator"], *[class*="stopper"], *[class*="marker"], *[class*="pointer"], *[class*="cursor"], *[class*="dot"], *[class*="circle"], *[class*="ring"], *[class*="orbit"]');
-                    
-                    scrollAnimationElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                    });
-                    
-                    // GENERIC ANIMATION CATCH-ALL: Stop all possible animations with generic selectors
-                    const genericAnimationElements = document.querySelectorAll('*[class*="item"], *[class*="content"], *[class*="count"], *[class*="counter"], *[class*="text"], *[class*="header"], *[class*="connector"], *[class*="dot"], *[class*="timeline"], *[class*="step"], *[class*="stage"], *[class*="phase"], *[class*="card"], *[class*="block"], *[class*="section"], *[class*="container"], *[class*="wrapper"], *[class*="element"], *[class*="component"]');
-                    
-                    genericAnimationElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                        element.style.translate = 'none';
-                        element.style.rotate = 'none';
-                        element.style.scale = 'none';
-                    });
-                    
-                    // SVG LINE ANIMATIONS: Stop all SVG stroke animations
-                    const svgElements = document.querySelectorAll('svg, svg path, svg line, svg polyline, svg polygon, svg circle, svg rect, svg ellipse, svg rect, svg g');
+                    // Stop SVG animations
+                    const svgElements = document.querySelectorAll('svg, svg path, svg line');
                     svgElements.forEach(element => {
                         element.style.animation = 'none';
                         element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
                         element.style.opacity = '1';
                         element.style.visibility = 'visible';
                         element.style.transform = 'none';
-                        
-                        // Force SVG stroke animations to complete
-                        if (element.tagName === 'path' || element.tagName === 'line' || element.tagName === 'polyline' || element.tagName === 'polygon') {
-                            const computedStyle = window.getComputedStyle(element);
-                            const pathLength = element.getTotalLength ? element.getTotalLength() : 0;
-                            if (pathLength > 0) {
-                                element.style.strokeDasharray = pathLength;
-                                element.style.strokeDashoffset = '0';
-                            }
-                        }
                     });
                     
-                    // TIMELINE ANIMATIONS: Stop all timeline-related animations
-                    const timelineElements = document.querySelectorAll('.timeline-item, .timeline-item-content, .timeline-count, .timeline-counter, .timeline-text, .timeline-header, .timeline-content, .connector-dots, .dot-1, .dot-2, .dot-3, .dot-4, .dot-5, *[class*="timeline"], *[class*="connector"], *[class*="dot"]');
-                    
-                    timelineElements.forEach(element => {
+                    // Stop scroll-triggered animations
+                    const scrollElements = document.querySelectorAll('*[class*="scroll"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="timeline"]');
+                    scrollElements.forEach(element => {
                         element.style.animation = 'none';
                         element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                        element.style.translate = 'none';
-                        element.style.rotate = 'none';
-                        element.style.scale = 'none';
-                    });
-                    
-                    // STOPPER AND MARKER ELEMENTS: Stop all stopper animations and reset positioning
-                    const stopperElements = document.querySelectorAll('*[class*="stopper"], *[class*="marker"], *[class*="pointer"], *[class*="cursor"], *[class*="dot"], *[class*="circle"], *[class*="ring"], *[class*="orbit"], *[class*="indicator"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="track"], *[class*="path"]');
-                    
-                    stopperElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
-                        
-                        // Reset positioning to prevent overlapping text
-                        element.style.position = 'static';
-                        element.style.top = 'auto';
-                        element.style.left = 'auto';
-                        element.style.right = 'auto';
-                        element.style.bottom = 'auto';
-                        element.style.zIndex = 'auto';
-                    });
-                    
-                    // PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations
-                    const progressElements = document.querySelectorAll('progress, [role="progressbar"], [class*="progress"], [class*="bar"], [class*="indicator"], [class*="track"], [class*="line"], [class*="path"], [class*="stroke"], [class*="fill"], [class*="gradient"], [class*="wave"], [class*="flow"], [class*="stream"], [class*="runner"], [class*="mover"], [class*="slider"], [class*="stopper"], [class*="marker"], [class*="pointer"], [class*="cursor"], [class*="dot"], [class*="circle"], [class*="ring"], [class*="orbit"]');
-                    
-                    progressElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.animationFillMode = 'forwards';
                         element.style.opacity = '1';
                         element.style.visibility = 'visible';
                         element.style.transform = 'none';
                     });
                     
-                    // Kill any running GSAP animations
-                    if (typeof gsap !== 'undefined') {
-                        try {
-                            gsap.killTweensOf('*');
-                            if (gsap.globalTimeline) {
-                                gsap.globalTimeline.clear();
-                            }
-                        } catch (e) {
-                            console.warn('Accessibility Widget: Failed to kill GSAP animations', e);
-                        }
-                    }
-                    
-                    // AGGRESSIVE AUTOPLAY STOPPING: Force stop all media
-                    const allMedia = document.querySelectorAll('video, audio, iframe, embed, object');
-                    allMedia.forEach(media => {
-                        if (media.tagName === 'VIDEO' || media.tagName === 'AUDIO') {
-                            media.pause();
-                            media.currentTime = 0;
-                            media.autoplay = false;
-                            media.loop = false;
-                            media.muted = true;
-                            media.controls = true;
-                        }
-                        if (media.tagName === 'IFRAME') {
-                            try {
-                                media.src = media.src; // Reload to stop any embedded animations
-                            } catch (e) {
-                                console.warn('Accessibility Widget: Could not reload iframe', e);
-                            }
+                    console.log('Accessibility Widget: Clean animation stopping completed');
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: forceAllAnimationsToFinalState failed', e);
+            }
+        }
+        
+        // Check and apply seizure-safe mode immediately before any animations start
+        checkAndApplyImmediateSeizureSafe() {
+            try {
+                // Check localStorage first for immediate application
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                if (seizureSafeFromStorage === 'true') {
+                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                    document.body.classList.add('seizure-safe');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
+            }
+        }
+        
+        // Set up aggressive monitoring for any text animations that might start
+        setupSeizureSafeMonitoring() {
+            try {
+                // Set up MutationObserver to watch for dynamically added text animation elements
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Check if the added node has text animation classes
+                                    const textAnimationClasses = ['fade-up', 'fade-left', 'fade-right', 'fade-in', 'fade-up-multi-text', 'fade-up-multi-text-fast', 'char', 'word', 'split', 'splitting'];
+                                    const hasAnimationClass = textAnimationClasses.some(className => node.classList.contains(className));
+                                    if (hasAnimationClass) {
+                                        // Force the animation to complete immediately
+                                        node.style.animation = 'none';
+                                        node.style.transition = 'none';
+                                        node.style.opacity = '1';
+                                        node.style.visibility = 'visible';
+                                    }
+                                }
+                            });
                         }
                     });
-                    
-                    // Force all text to be visible immediately
-                    const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label');
-                    allTextElements.forEach(element => {
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.transform = 'none';
-                    });
-                    
-                    // CONSERVATIVE: Only reset positioning for animated elements
-                    const positioningElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
-                    
-                    positioningElements.forEach(element => {
-                        // Reset positioning only for animated elements
-                        element.style.position = 'static';
-                        element.style.top = 'auto';
-                        element.style.left = 'auto';
-                        element.style.right = 'auto';
-                        element.style.bottom = 'auto';
-                        element.style.transform = 'none';
-                        element.style.translate = 'none';
-                        element.style.scale = '1';
-                        element.style.rotate = '0deg';
-                        element.style.width = 'auto';
-                        element.style.height = 'auto';
-                    });
-                    
-                    // Reset transform properties for all elements (conservative)
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(element => {
-                        element.style.transform = 'none';
-                        element.style.translate = 'none';
-                        element.style.scale = '1';
-                        element.style.rotate = '0deg';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                    });
-                    
-                    // Preserve original layout for media elements
-                    const layoutMediaElements = document.querySelectorAll('img, video, audio, iframe, embed, object');
-                    layoutMediaElements.forEach(element => {
-                        element.style.position = 'static';
-                        element.style.transform = 'none';
-                        element.style.width = 'auto';
-                        element.style.height = 'auto';
-                        element.style.maxWidth = '100%';
-                        element.style.maxHeight = '100%';
-                    });
-                    
-                    // Preserve original layout for text elements
-                    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label');
-                    textElements.forEach(element => {
-                        element.style.position = 'static';
-                        element.style.transform = 'none';
-                        element.style.width = 'auto';
-                        element.style.height = 'auto';
-                        element.style.top = 'auto';
-                        element.style.left = 'auto';
-                        element.style.right = 'auto';
-                        element.style.bottom = 'auto';
-                    });
-                    
-                    console.log('Accessibility Widget: All animations forced to final state');
+                });
+                
+                // Start observing
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            } catch (e) {
+                console.warn('Accessibility Widget: setupSeizureSafeMonitoring failed', e);
+            }
+        }
+        
+        // Check and apply seizure-safe mode immediately before any animations start
+        checkAndApplyImmediateSeizureSafe() {
+            try {
+                // Check localStorage first for immediate application
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                if (seizureSafeFromStorage === 'true') {
+                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                    document.body.classList.add('seizure-safe');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
+            }
+        }
+        
+        // Check and apply seizure-safe mode immediately before any animations start
+        checkAndApplyImmediateSeizureSafe() {
+            try {
+                // Check localStorage first for immediate application
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                if (seizureSafeFromStorage === 'true') {
+                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                    document.body.classList.add('seizure-safe');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
+            }
+        }
+        
+        // Check and apply seizure-safe mode immediately before any animations start
+        checkAndApplyImmediateSeizureSafe() {
+            try {
+                // Check localStorage first for immediate application
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                if (seizureSafeFromStorage === 'true') {
+                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                    document.body.classList.add('seizure-safe');
+                    this.applyImmediateSeizureCSS();
+                    this.forceCompleteTextAnimations();
                 }
             } catch (e) {
                 console.warn('Accessibility Widget: forceAllAnimationsToFinalState failed', e);
@@ -921,20 +770,17 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'accessibility-seizure-immediate';
                 style.textContent = `
+                    /* IMMEDIATE SEIZURE-SAFE CSS - Minimal approach */
                     body.seizure-safe * {
                         animation-play-state: paused !important;
                         transition: none !important;
                     }
                     
-                    /* CRITICAL: Immediately stop and complete letter-by-letter animations */
+                    /* Stop letter-by-letter animations immediately */
                     body.seizure-safe [data-splitting],
                     body.seizure-safe .split,
                     body.seizure-safe .char,
-                    body.seizure-safe .word,
-                    body.seizure-safe [data-splitting] .char,
-                    body.seizure-safe [data-splitting] .word,
-                    body.seizure-safe .split .char,
-                    body.seizure-safe .split .word {
+                    body.seizure-safe .word {
                         animation: none !important;
                         transition: none !important;
                         opacity: 1 !important;
@@ -943,34 +789,10 @@ class AccessibilityWidget {
                         transform: none !important;
                     }
                     
-                    /* Ensure parent containers are visible */
-                    body.seizure-safe [data-splitting],
-                    body.seizure-safe .split {
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        display: block !important;
-                    }
-                    
-                    /* Stop any GSAP or other library animations immediately */
-                    body.seizure-safe *[style*="animation"],
-                    body.seizure-safe *[style*="transition"],
-                    body.seizure-safe *[style*="opacity"] {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                    }
-                    
-                    /* SVG LINE ANIMATIONS: Stop all SVG stroke animations immediately */
+                    /* Stop SVG animations immediately */
                     body.seizure-safe svg,
                     body.seizure-safe svg path,
-                    body.seizure-safe svg line,
-                    body.seizure-safe svg polyline,
-                    body.seizure-safe svg polygon,
-                    body.seizure-safe svg circle,
-                    body.seizure-safe svg rect,
-                    body.seizure-safe svg ellipse,
-                    body.seizure-safe svg g {
+                    body.seizure-safe svg line {
                         animation: none !important;
                         transition: none !important;
                         opacity: 1 !important;
@@ -978,100 +800,17 @@ class AccessibilityWidget {
                         transform: none !important;
                     }
                     
-                    /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
+                    /* Stop scroll-triggered animations immediately */
                     body.seizure-safe *[class*="scroll"],
                     body.seizure-safe *[class*="progress"],
                     body.seizure-safe *[class*="bar"],
                     body.seizure-safe *[class*="line"],
-                    body.seizure-safe *[class*="timeline"],
-                    body.seizure-safe *[class*="track"],
-                    body.seizure-safe *[class*="path"],
-                    body.seizure-safe *[class*="stroke"],
-                    body.seizure-safe *[class*="fill"],
-                    body.seizure-safe *[class*="gradient"],
-                    body.seizure-safe *[class*="wave"],
-                    body.seizure-safe *[class*="flow"],
-                    body.seizure-safe *[class*="stream"],
-                    body.seizure-safe *[class*="runner"],
-                    body.seizure-safe *[class*="mover"] {
+                    body.seizure-safe *[class*="timeline"] {
                         animation: none !important;
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
                         transform: none !important;
-                    }
-                    
-                    /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
-                    body.seizure-safe *[class*="item"],
-                    body.seizure-safe *[class*="content"],
-                    body.seizure-safe *[class*="count"],
-                    body.seizure-safe *[class*="counter"],
-                    body.seizure-safe *[class*="text"],
-                    body.seizure-safe *[class*="header"],
-                    body.seizure-safe *[class*="connector"],
-                    body.seizure-safe *[class*="dot"],
-                    body.seizure-safe *[class*="timeline"],
-                    body.seizure-safe *[class*="step"],
-                    body.seizure-safe *[class*="stage"],
-                    body.seizure-safe *[class*="phase"],
-                    body.seizure-safe *[class*="card"],
-                    body.seizure-safe *[class*="block"],
-                    body.seizure-safe *[class*="section"],
-                    body.seizure-safe *[class*="container"],
-                    body.seizure-safe *[class*="wrapper"],
-                    body.seizure-safe *[class*="element"],
-                    body.seizure-safe *[class*="component"] {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                        translate: none !important;
-                        rotate: none !important;
-                        scale: none !important;
-                    }
-                    
-                    /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
-                    body.seizure-safe *[style*="animation"],
-                    body.seizure-safe *[style*="transition"],
-                    body.seizure-safe *[style*="transform"],
-                    body.seizure-safe *[style*="opacity"],
-                    body.seizure-safe *[style*="visibility"],
-                    body.seizure-safe *[data-animation],
-                    body.seizure-safe *[data-transition],
-                    body.seizure-safe *[data-transform] {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                        translate: none !important;
-                        rotate: none !important;
-                        scale: none !important;
-                    }
-                    
-                    /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
-                    body.seizure-safe *[class*="stopper"],
-                    body.seizure-safe *[class*="marker"],
-                    body.seizure-safe *[class*="pointer"],
-                    body.seizure-safe *[class*="cursor"],
-                    body.seizure-safe *[class*="dot"],
-                    body.seizure-safe *[class*="circle"],
-                    body.seizure-safe *[class*="ring"],
-                    body.seizure-safe *[class*="orbit"],
-                    body.seizure-safe *[class*="indicator"],
-                    body.seizure-safe *[class*="slider"] {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                        position: static !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
-                        z-index: auto !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -2025,18 +1764,18 @@ class AccessibilityWidget {
                             return;
     
                         case 'v': // Toggle vision impaired
-
+    
                             e.preventDefault();
-
+    
                             console.log('Accessibility Widget: Alt+V pressed, toggling vision impaired');
-
+    
                             // Ensure setting exists
                             if (typeof this.settings['vision-impaired'] !== 'boolean') {
                                 this.settings['vision-impaired'] = false;
                             }
-
+    
                             const viCurrent = this.settings['vision-impaired'];
-
+    
                             if (viCurrent) {
                                 this.disableVisionImpaired();
                             } else {
@@ -2045,7 +1784,7 @@ class AccessibilityWidget {
 
                             const viStatus = !viCurrent ? 'enabled' : 'disabled';
                             this.announceToScreenReader(`Vision impaired mode ${viStatus}`);
-
+    
                             return;
     
                         case 'h': // Toggle ADHD friendly
@@ -6636,7 +6375,31 @@ class AccessibilityWidget {
     
     
     
-                    <!-- Vision impaired feature removed -->
+                    <!-- Module 2: Vision Impaired Profile -->
+    
+                    <div class="profile-item">
+    
+                        <label class="toggle-switch">
+    
+                            <input type="checkbox" id="vision-impaired" tabindex="0" aria-label="Vision Impaired Profile - Enhances text readability and visual clarity" aria-describedby="vision-impaired-desc">
+    
+                            <span class="slider"></span>
+    
+                        </label>
+    
+                        <div class="profile-info">
+    
+                            <div>
+    
+                                <h4>Vision Impaired Profile</h4>
+    
+                                <p id="vision-impaired-desc">Enhances text readability and visual clarity</p>
+    
+                            </div>
+    
+                        </div>
+    
+                    </div>
     
     
     
@@ -14421,7 +14184,7 @@ class AccessibilityWidget {
     
             const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
             const bodyFontSize = `${bodyOriginalSize * scale}px`;
-            
+    
             document.body.style.setProperty('font-size', bodyFontSize);
             
             // Also apply to html element to ensure it takes precedence
@@ -14454,7 +14217,7 @@ class AccessibilityWidget {
                         // Apply the scale to the original size
                         const newFontSize = `${originalSize * scale}px`;
                         element.style.setProperty('font-size', newFontSize);
-                        
+    
                         // If vision-impaired mode is active, also set it with !important to override any CSS
                         if (isVisionImpaired) {
                             element.style.setProperty('font-size', newFontSize, 'important');
@@ -22227,7 +21990,7 @@ class AccessibilityWidget {
                 console.warn('Accessibility Widget: disableVisionImpaired failed', e);
             }
         }
-
+    
         // Stop autoplay videos to prevent seizures
         stopAutoplayVideos() {
             console.log('Accessibility Widget: Stopping autoplay videos for seizure safety');
@@ -22502,28 +22265,16 @@ class AccessibilityWidget {
     
     
         addSeizureSafeStyles() {
-    
             // Remove existing styles if they exist
-    
             this.removeSeizureSafeStyles();
     
-            
-    
             // Create style element for seizure-safe overlay
-    
             const style = document.createElement('style');
-    
             style.id = 'accessibility-seizure-safe-styles';
-    
             style.textContent = `
-    
-                /* Removed grey overlay - using color desaturation instead */
-    
+                /* CLEAN SEIZURE-SAFE STYLES - Non-aggressive approach */
                 
-    
-                /* Stop only seizure-triggering animations, preserve essential functionality */
-                
-                /* CRITICAL: Force all animations to their final state immediately */
+                /* Stop seizure-triggering animations only */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -22567,588 +22318,68 @@ class AccessibilityWidget {
                     transition: none !important;
                 }
                 
-                /* Target specific seizure-triggering elements */
-                body.seizure-safe [class*="animate"],
-                body.seizure-safe [class*="fade"],
-                body.seizure-safe [class*="slide"],
-                body.seizure-safe [class*="bounce"],
-                body.seizure-safe [class*="pulse"],
-                body.seizure-safe [class*="shake"],
-                body.seizure-safe [class*="flash"],
-                body.seizure-safe [class*="blink"],
-                body.seizure-safe [class*="glow"],
-                body.seizure-safe [class*="spin"],
-                body.seizure-safe [class*="rotate"],
-                body.seizure-safe [class*="scale"],
-                body.seizure-safe [class*="zoom"],
-                body.seizure-safe [class*="wiggle"],
-                body.seizure-safe [class*="jiggle"],
-                body.seizure-safe [class*="twist"],
-                body.seizure-safe [class*="flip"],
-                body.seizure-safe [class*="swing"],
-                body.seizure-safe [class*="wobble"],
-                body.seizure-safe [class*="tilt"],
-                body.seizure-safe [class*="shake"],
-                body.seizure-safe [class*="bounce"],
-                body.seizure-safe [class*="pulse"],
-                body.seizure-safe [class*="flash"],
-                body.seizure-safe [class*="blink"],
-                body.seizure-safe [class*="glow"],
-                body.seizure-safe [class*="spin"],
-                body.seizure-safe [class*="rotate"],
-                body.seizure-safe [class*="scale"],
-                body.seizure-safe [class*="zoom"],
-                body.seizure-safe [class*="wiggle"],
-                body.seizure-safe [class*="jiggle"],
-                body.seizure-safe [class*="twist"],
-                body.seizure-safe [class*="flip"],
-                body.seizure-safe [class*="swing"],
-                body.seizure-safe [class*="wobble"],
-                body.seizure-safe [class*="tilt"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-duration: 0s !important;
-                    animation-delay: 0s !important;
-                    animation-iteration-count: 0 !important;
-                    transition-duration: 0s !important;
-                    transition-delay: 0s !important;
-                }
-                
-                /* Stop common seizure-triggering animations but allow initial page load animations */
-                body.seizure-safe *[style*="animation"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]),
-                body.seizure-safe *[style*="transition"]:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]),
+                /* Stop letter-by-letter text animations */
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split, 
                 body.seizure-safe .char, 
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
-                }
-                
-                /* CRITICAL: Ensure letter-by-letter text animations show full text immediately */
-                body.seizure-safe [data-splitting] .char,
-                body.seizure-safe [data-splitting] .word,
-                body.seizure-safe .split .char,
-                body.seizure-safe .split .word,
-                body.seizure-safe .char,
-                body.seizure-safe .word {
                     opacity: 1 !important;
                     visibility: visible !important;
                     display: inline !important;
-                    animation: none !important;
-                    transition: none !important;
                     transform: none !important;
                 }
                 
-                /* Ensure parent text containers are fully visible */
-                body.seizure-safe [data-splitting],
-                body.seizure-safe .split {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: block !important;
-                }
-                
-                /* Allow initial page load animations to complete once, then stop */
-                body.seizure-safe *[class*="fade-in"],
-                body.seizure-safe *[class*="slide-in"],
-                body.seizure-safe *[class*="load"],
-                body.seizure-safe *[class*="initial"],
-                body.seizure-safe *[class*="page-load"],
-                body.seizure-safe *[class*="appear"],
-                body.seizure-safe *[class*="show"],
-                body.seizure-safe *[class*="visible"],
-                body.seizure-safe *[class*="opacity"],
-                body.seizure-safe *[class*="transform"] {
-                    /* Allow initial animation to complete once */
-                    animation-fill-mode: forwards !important;
-                    animation-iteration-count: 1 !important;
-                    animation-duration: 0.5s !important;
-                    transition-duration: 0.5s !important;
-                }
-                
-                /* Allow body and html initial animations to complete once */
-                body.seizure-safe body,
-                body.seizure-safe html {
-                    /* Allow initial page load animation to complete once */
-                    animation-fill-mode: forwards !important;
-                    animation-iteration-count: 1 !important;
-                    animation-duration: 0.5s !important;
-                    transition-duration: 0.5s !important;
-                }
-                
-                /* Allow initial page load animations to complete before stopping others */
-                body.seizure-safe *:not([class*="fade-in"]):not([class*="slide-in"]):not([class*="load"]):not([class*="initial"]):not([class*="page-load"]):not([class*="appear"]):not([class*="show"]):not([class*="visible"]):not([class*="opacity"]):not([class*="transform"]) {
-                    animation-play-state: paused !important;
-                }
-    
-                
-    
-                /* Preserve portfolio functionality while maintaining seizure safety */
-                body.seizure-safe .portfolio-card,
-                body.seizure-safe .hover-circle,
-                body.seizure-safe .bg-overlay,
-                body.seizure-safe .portfolio-hover-img,
-                body.seizure-safe .portfolio-desc-wrapper,
-                body.seizure-safe .portfolio-filters,
-                body.seizure-safe .curved-text-container,
-                body.seizure-safe .section-portfolios {
-                    /* Allow essential portfolio functionality but stop animations */
-                    transition: opacity 0.3s ease !important;
-                    animation: none !important;
-                    /* Ensure visibility is maintained */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: block !important;
-                }
-                
-                /* Ensure portfolio cards remain visible and functional */
-                body.seizure-safe .portfolio-card {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    pointer-events: auto !important;
-                }
-                
-                /* Stop hover circle animations but keep it functional */
-                body.seizure-safe .hover-circle {
-                    animation: none !important;
-                    transition: none !important;
-                    /* Keep basic functionality */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                
-                /* Ensure background images remain visible */
-                body.seizure-safe .portfolio-hover-img,
-                body.seizure-safe .bg-overlay {
-                    opacity: 1 !important;
-                    background-size: cover !important;
-                    background-position: center !important;
-                }
-                
-                /* Fix curtain page loader - prevent black screen */
-                body.seizure-safe .curtain-page-loader,
-                body.seizure-safe .curtain {
-                    display: none !important;
-                }
-                
-                /* Ensure page content is visible */
-                body.seizure-safe .page-wrapper,
-                body.seizure-safe .smooth-content,
-                body.seizure-safe .smooth-wrapper {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: block !important;
-                }
-                
-                /* Handle GSAP scroll animations - make content visible */
-                body.seizure-safe .fade-up,
-                body.seizure-safe .fade-left,
-                body.seizure-safe .fade-right,
-                body.seizure-safe .fade-in {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    animation: none !important;
-                    transition: none !important;
-                }
-                
-                /* Ensure hero content is visible */
-                body.seizure-safe .portfolio-hero,
-                body.seizure-safe .portfolio-hero-text,
-                body.seizure-safe .portfolio-hero-content-wrapper {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                }
-                
-                /* Handle video elements */
-                body.seizure-safe video {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                
-                /* Ensure slider content is visible */
-                body.seizure-safe .slider-draggable,
-                body.seizure-safe .slick-slide,
-                body.seizure-safe .slide-item {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                }
-                
-                /* Stop hover reveal animations for service items */
-                body.seizure-safe .single-service-animated,
-                body.seizure-safe .single-service-animated *,
-                body.seizure-safe [class*="service-animated"],
-                body.seizure-safe [class*="service-animated"] * {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
-                }
-                body.seizure-safe .single-service-animated .image-service-animated,
-                body.seizure-safe [class*="service-animated"] .image-service-animated {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                    transition: none !important;
-                }
-                body.seizure-safe .single-service-animated .big-text-service-animated,
-                body.seizure-safe .single-service-animated .wrap-text-service-animated,
-                body.seizure-safe .single-service-animated .number-service-animated,
-                body.seizure-safe [class*="service-animated"] .big-text-service-animated,
-                body.seizure-safe [class*="service-animated"] .wrap-text-service-animated,
-                body.seizure-safe [class*="service-animated"] .number-service-animated {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                    transition: none !important;
-                }
-                /* Also neutralize hover states so reveal cannot trigger */
-                body.seizure-safe .single-service-animated:hover .image-service-animated,
-                body.seizure-safe .single-service-animated:focus-within .image-service-animated,
-                body.seizure-safe [class*="service-animated"]:hover .image-service-animated,
-                body.seizure-safe [class*="service-animated"]:focus-within .image-service-animated {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                    transition: none !important;
-                }
-                body.seizure-safe .single-service-animated:hover .big-text-service-animated,
-                body.seizure-safe .single-service-animated:hover .wrap-text-service-animated,
-                body.seizure-safe .single-service-animated:hover .number-service-animated,
-                body.seizure-safe [class*="service-animated"]:hover .big-text-service-animated,
-                body.seizure-safe [class*="service-animated"]:hover .wrap-text-service-animated,
-                body.seizure-safe [class*="service-animated"]:hover .number-service-animated {
-                    opacity: 1 !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                    transition: none !important;
-                }
-                /* Catch-all for any hover-triggered transitions inside service blocks */
-                body.seizure-safe .single-service-animated:hover *,
-                body.seizure-safe [class*="service-animated"]:hover * {
-                    transition: none !important;
-                    animation: none !important;
-                }
-                
-                /* Preserve accessibility widget functionality */
-                body.seizure-safe .accessibility-icon,
-                body.seizure-safe .accessibility-panel,
-                body.seizure-safe .toggle-switch,
-                body.seizure-safe .slider,
-                body.seizure-safe .profile-item,
-                body.seizure-safe .action-btn,
-                body.seizure-safe .close-btn,
-                body.seizure-safe .language-selector {
-                    /* Allow essential UI animations */
-                    transition: opacity 0.2s ease, transform 0.2s ease !important;
-                    animation: none !important;
-                }
-    
-                /* Allow slider track to maintain its left positioning for navigation */
-    
-                body.seizure-safe .slider-track {
-    
-                    animation: none !important;
-    
-                    animation-name: none !important;
-    
-                    animation-duration: 0s !important;
-    
-                    animation-iteration-count: 0 !important;
-    
-                    transition: left 0.5s ease-in-out !important;
-    
-                    /* left positioning is controlled by JavaScript, don't override it */
-    
-                }
-    
-                
-    
-                /* Completely stop auto-slide animation */
-    
-                body.seizure-safe .slider-track,
-    
-                body.seizure-safe .slider-track * {
-    
-                    animation: none !important;
-    
-                    animation-name: none !important;
-    
-                    animation-duration: 0s !important;
-    
-                    animation-iteration-count: 0 !important;
-    
-                    animation-delay: 0s !important;
-    
-                }
-    
-                
-    
-                /* Ensure slider buttons and dots remain functional */
-    
-                body.seizure-safe .slider-btn,
-    
-                body.seizure-safe .dot {
-    
-                    transition: all 0.3s ease !important;
-    
-                    /* Allow hover effects and clicks to work */
-    
-                }
-    
-                
-    
-                /* Reduce color intensity (muted colors) for seizure safety - more targeted approach */
-    
-                body.seizure-safe img,
-                body.seizure-safe video,
-                body.seizure-safe canvas,
+                /* Stop SVG animations */
                 body.seizure-safe svg,
-                body.seizure-safe [class*="hero"],
-                body.seizure-safe [class*="banner"],
-                body.seizure-safe [class*="background"],
-                body.seizure-safe [class*="bg-"],
-                body.seizure-safe [style*="background"] {
-    
-                    filter: saturate(0.6) brightness(0.9) !important;
-    
-                    transition: filter 0.3s ease !important;
-    
-                }
-    
-                
-    
-                /* Big white cursor for seizure-safe mode */
-    
-                body.seizure-safe {
-    
-                    cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
-    
-                }
-    
-                
-    
-                body.seizure-safe * {
-    
-                    cursor: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjgwMHB4IiB3aWR0aD0iODAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkNhcGFfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDE2LjQ5OSAxNi40OTkiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxnPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7IiBkPSJNMTQuNTExLDQuMDM3Yy0wLjAxOC0wLjA0NS0wLjA0LTAuMDgyLTAuMDcyLTAuMTE1Yy0wLjA1LTAuMDQ3LTAuMTE1LTAuMDgtMC4xODgtMC4wODJMMC4zMzUsMC4wMDIgQzAuMjQzLTAuMDEsMC4xNTQsMC4wMjcsMC4wOSwwLjA5QzAuMDI0LDAuMTU2LTAuMDA3LDAuMjQsMC4wMDMsMC4zMzRsNC42MzQsMTQuMTdjMC4wMTMsMC4xMTksMC4wODksMC4yMTcsMC4yLDAuMjU4IHMwLjIzNSwwLjAxLDAuMzE4LTAuMDc2bDEuMTExLTUuNjExbDcuMzM0LDcuMzMyYzAuMTIxLDAuMTIzLDAuMzEyLDAuMTIzLDAuNDMxLDBsMi4zNzgtMi4zNzVjMC4xMTktMC4xMjEsMC4xMTktMC4zMTIsMC0wLjQzMiBMOS4wNzUsNi4yNjZsNS4zNjMtMS45MUMxNC41MjIsNC4yNzUsMTQuNTQ5LDQuMTUsMTQuNTExLDQuMDM3eiIvPjwvZz48L2c+PC9zdmc+'), auto !important;
-    
-                }
-    
-                
-    
-                /* Fix seizure safety - preserve website colors and backgrounds */
-                body.seizure-safe {
-                    /* Don't override body background - preserve website colors */
+                body.seizure-safe svg path,
+                body.seizure-safe svg line {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
                 }
                 
-                /* Remove all seizure safety overrides that break website colors */
+                /* Stop scroll-triggered animations */
+                body.seizure-safe *[class*="scroll"],
+                body.seizure-safe *[class*="progress"],
+                body.seizure-safe *[class*="bar"],
+                body.seizure-safe *[class*="line"],
+                body.seizure-safe *[class*="timeline"] {
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
                 
-                /* Only apply filters to specific media elements */
+                /* Stop autoplay media */
+                body.seizure-safe video,
+                body.seizure-safe audio {
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* Reduce color intensity for seizure safety */
                 body.seizure-safe img,
                 body.seizure-safe video,
                 body.seizure-safe canvas {
                     filter: saturate(0.6) brightness(0.9) !important;
                 }
                 
-                /* Fix stop animation - preserve website colors */
-                body.stop-animation {
-                    /* Don't override body background - preserve website colors */
-                }
-                
-                body.stop-animation * {
-                    /* Don't override element backgrounds - preserve website colors */
-                }
-    
-                /* Ensure accessibility widget stays above overlay */
-    
+                /* Preserve accessibility widget functionality */
                 body.seizure-safe .accessibility-widget,
-    
-                body.seizure-safe #accessibility-widget {
-    
+                body.seizure-safe .accessibility-panel,
+                body.seizure-safe .toggle-switch {
                     z-index: 99998 !important;
-    
+                    transition: opacity 0.2s ease !important;
                 }
-    
-                
-    
-                /
-    
-                
-    
-                /* ADHD Friendly Styles */
-    
-                .adhd-friendly #adhd-spotlight {
-    
-                    z-index: 99998 !important;
-    
-                    background: rgba(255, 255, 255, 0.1) !important;
-    
-                    backdrop-filter: brightness(2.0) contrast(1.2) !important;
-    
-                    box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4) !important;
-    
-                    filter: none !important;
-    
-                    position: fixed !important;
-    
-                    pointer-events: none !important;
-    
-                    border-radius: 8px !important;
-    
-                    transition: all 0.1s ease !important;
-    
-                }
-    
-                
-    
-                /* Ensure accessibility widget stays above ADHD spotlight */
-    
-                .adhd-friendly .accessibility-widget,
-    
-                .adhd-friendly #accessibility-widget {
-    
-                    z-index: 1000000 !important;
-    
-                }
-    
-                
-    
-                /* Enhanced content inside spotlight area with increased contrast */
-    
-                .adhd-friendly .adhd-focus {
-    
-                    outline: 1px solid var(--primary-color) !important;
-    
-                    outline-offset: 1px !important;
-    
-                    background: rgba(99, 102, 241, 0.03) !important;
-    
-                    filter: contrast(1.02) brightness(1.01) !important;
-    
-                }
-                
-                /* SVG LINE ANIMATIONS: Stop all SVG stroke animations */
-                body.seizure-safe svg,
-                body.seizure-safe svg path,
-                body.seizure-safe svg line,
-                body.seizure-safe svg polyline,
-                body.seizure-safe svg polygon,
-                body.seizure-safe svg circle,
-                body.seizure-safe svg rect,
-                body.seizure-safe svg ellipse,
-                body.seizure-safe svg g {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    transform: none !important;
-                }
-                
-                /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
-                body.seizure-safe *[class*="scroll"],
-                body.seizure-safe *[class*="progress"],
-                body.seizure-safe *[class*="bar"],
-                body.seizure-safe *[class*="line"],
-                body.seizure-safe *[class*="timeline"],
-                body.seizure-safe *[class*="track"],
-                body.seizure-safe *[class*="path"],
-                body.seizure-safe *[class*="stroke"],
-                body.seizure-safe *[class*="fill"],
-                body.seizure-safe *[class*="gradient"],
-                body.seizure-safe *[class*="wave"],
-                body.seizure-safe *[class*="flow"],
-                body.seizure-safe *[class*="stream"],
-                body.seizure-safe *[class*="runner"],
-                body.seizure-safe *[class*="mover"] {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    transform: none !important;
-                }
-                
-                /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
-                body.seizure-safe *[class*="item"],
-                body.seizure-safe *[class*="content"],
-                body.seizure-safe *[class*="count"],
-                body.seizure-safe *[class*="counter"],
-                body.seizure-safe *[class*="text"],
-                body.seizure-safe *[class*="header"],
-                body.seizure-safe *[class*="connector"],
-                body.seizure-safe *[class*="dot"],
-                body.seizure-safe *[class*="timeline"],
-                body.seizure-safe *[class*="step"],
-                body.seizure-safe *[class*="stage"],
-                body.seizure-safe *[class*="phase"],
-                body.seizure-safe *[class*="card"],
-                body.seizure-safe *[class*="block"],
-                body.seizure-safe *[class*="section"],
-                body.seizure-safe *[class*="container"],
-                body.seizure-safe *[class*="wrapper"],
-                body.seizure-safe *[class*="element"],
-                body.seizure-safe *[class*="component"] {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    transform: none !important;
-                    translate: none !important;
-                    rotate: none !important;
-                    scale: none !important;
-                }
-                
-                /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
-                body.seizure-safe *[style*="animation"],
-                body.seizure-safe *[style*="transition"],
-                body.seizure-safe *[style*="transform"],
-                body.seizure-safe *[style*="opacity"],
-                body.seizure-safe *[style*="visibility"],
-                body.seizure-safe *[data-animation],
-                body.seizure-safe *[data-transition],
-                body.seizure-safe *[data-transform] {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    transform: none !important;
-                    translate: none !important;
-                    rotate: none !important;
-                    scale: none !important;
-                }
-                
-                /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
-                body.seizure-safe *[class*="stopper"],
-                body.seizure-safe *[class*="marker"],
-                body.seizure-safe *[class*="pointer"],
-                body.seizure-safe *[class*="cursor"],
-                body.seizure-safe *[class*="dot"],
-                body.seizure-safe *[class*="circle"],
-                body.seizure-safe *[class*="ring"],
-                body.seizure-safe *[class*="orbit"],
-                body.seizure-safe *[class*="indicator"],
-                body.seizure-safe *[class*="slider"] {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    transform: none !important;
-                    position: static !important;
-                    top: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    bottom: auto !important;
-                    z-index: auto !important;
-                }
-    
             `;
     
-            
-    
             document.head.appendChild(style);
-    
-            console.log('Accessibility Widget: Seizure-safe overlay styles added');
-    
+            console.log('Accessibility Widget: Clean seizure-safe styles added');
         }
     
     
