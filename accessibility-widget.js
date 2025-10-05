@@ -485,6 +485,39 @@
                     document.head.appendChild(correction);
                 }
             } catch (_) {}
+
+            // Enforce no-scroll-animations for known libraries/selectors with high specificity
+            try {
+                if (!document.getElementById('accessibility-seizure-animation-enforcer')) {
+                    const enforce = document.createElement('style');
+                    enforce.id = 'accessibility-seizure-animation-enforcer';
+                    enforce.textContent = `
+                        /* Target common scroll animation libs without affecting layout of others */
+                        body.seizure-safe [data-aos],
+                        body.seizure-safe .aos-init,
+                        body.seizure-safe .aos-animate,
+                        body.seizure-safe [data-scroll],
+                        body.seizure-safe [data-animate],
+                        body.seizure-safe .wow,
+                        body.seizure-safe .animate__animated,
+                        body.seizure-safe .fade-up,
+                        body.seizure-safe .fade-in,
+                        body.seizure-safe .slide-in,
+                        body.seizure-safe .reveal,
+                        body.seizure-safe [class*="fade-"],
+                        body.seizure-safe [class*="slide-"],
+                        body.seizure-safe [class*="reveal"],
+                        body.seizure-safe [class*="animate"] {
+                            animation: none !important;
+                            transition: none !important;
+                            opacity: 1 !important;
+                            transform: none !important;
+                            will-change: auto !important;
+                        }
+                    `;
+                    document.head.appendChild(enforce);
+                }
+            } catch (_) {}
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
 
@@ -648,6 +681,33 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         if (document.body && document.body.classList.contains('seizure-safe')) {
                             window.__applySeizureSafeDOMFreeze();
+                            // Disable scroll-trigger libraries when seizure-safe is active
+                            try {
+                                // AOS
+                                if (window.AOS && typeof window.AOS.refreshHard === 'function') {
+                                    try { window.AOS.refreshHard(); } catch (_) {}
+                                    try { window.AOS.init && window.AOS.init({ disable: true }); } catch (_) {}
+                                }
+                            } catch (_) {}
+                            try {
+                                // GSAP ScrollTrigger
+                                if (window.ScrollTrigger && typeof window.ScrollTrigger.getAll === 'function') {
+                                    window.ScrollTrigger.getAll().forEach(tr => { try { tr.disable && tr.disable(true); } catch (_) {} });
+                                    try { window.ScrollTrigger.kill && window.ScrollTrigger.kill(); } catch (_) {}
+                                }
+                            } catch (_) {}
+                            try {
+                                // Lenis
+                                if (window.lenis && typeof window.lenis.stop === 'function') {
+                                    window.lenis.stop();
+                                }
+                            } catch (_) {}
+                            try {
+                                // Locomotive Scroll
+                                if (window.locomotive && typeof window.locomotive.stop === 'function') {
+                                    window.locomotive.stop();
+                                }
+                            } catch (_) {}
                         }
                     }, { once: true });
 
