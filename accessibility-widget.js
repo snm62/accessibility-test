@@ -16,6 +16,297 @@
                     transition: none !important;
                     animation-play-state: paused !important;
                 }
+                
+                /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
+                body.seizure-safe * {
+                    /* Only reset transform-related properties that cause positioning issues */
+                    transform: none !important;
+                    translate: none !important;
+                    scale: 1 !important;
+                    rotate: 0deg !important;
+                    
+                    /* Ensure visibility */
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    
+                    /* Reset animation properties */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* Only reset positioning for elements that are likely to be animated */
+                body.seizure-safe *[class*="animate"],
+                body.seizure-safe *[class*="fade"],
+                body.seizure-safe *[class*="slide"],
+                body.seizure-safe *[class*="bounce"],
+                body.seizure-safe *[class*="pulse"],
+                body.seizure-safe *[class*="shake"],
+                body.seizure-safe *[class*="flash"],
+                body.seizure-safe *[class*="blink"],
+                body.seizure-safe *[class*="glow"],
+                body.seizure-safe *[class*="spin"],
+                body.seizure-safe *[class*="rotate"],
+                body.seizure-safe *[class*="scale"],
+                body.seizure-safe *[class*="zoom"],
+                body.seizure-safe *[class*="wiggle"],
+                body.seizure-safe *[class*="jiggle"],
+                body.seizure-safe *[class*="twist"],
+                body.seizure-safe *[class*="flip"],
+                body.seizure-safe *[class*="swing"],
+                body.seizure-safe *[class*="wobble"],
+                body.seizure-safe *[class*="tilt"] {
+                    position: static !important;
+                    top: auto !important;
+                    left: auto !important;
+                    right: auto !important;
+                    bottom: auto !important;
+                    transform: none !important;
+                    translate: none !important;
+                    scale: 1 !important;
+                    rotate: 0deg !important;
+                    width: auto !important;
+                    height: auto !important;
+                }
+                
+                /* Preserve original layout for specific elements */
+                body.seizure-safe img,
+                body.seizure-safe video,
+                body.seizure-safe audio,
+                body.seizure-safe iframe,
+                body.seizure-safe embed,
+                body.seizure-safe object {
+                    position: static !important;
+                    transform: none !important;
+                    width: auto !important;
+                    height: auto !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                }
+                
+                /* Ensure text elements maintain original layout */
+                body.seizure-safe h1,
+                body.seizure-safe h2,
+                body.seizure-safe h3,
+                body.seizure-safe h4,
+                body.seizure-safe h5,
+                body.seizure-safe h6,
+                body.seizure-safe p,
+                body.seizure-safe span,
+                body.seizure-safe div,
+                body.seizure-safe a,
+                body.seizure-safe li,
+                body.seizure-safe td,
+                body.seizure-safe th,
+                body.seizure-safe label {
+                    position: static !important;
+                    transform: none !important;
+                    width: auto !important;
+                    height: auto !important;
+                    top: auto !important;
+                    left: auto !important;
+                    right: auto !important;
+                    bottom: auto !important;
+                }
+                
+                /* CRITICAL: Force ALL possible animations to their final state immediately */
+                body.seizure-safe *[class*="animate"],
+                body.seizure-safe *[class*="fade"],
+                body.seizure-safe *[class*="slide"],
+                body.seizure-safe *[class*="bounce"],
+                body.seizure-safe *[class*="pulse"],
+                body.seizure-safe *[class*="shake"],
+                body.seizure-safe *[class*="flash"],
+                body.seizure-safe *[class*="blink"],
+                body.seizure-safe *[class*="glow"],
+                body.seizure-safe *[class*="spin"],
+                body.seizure-safe *[class*="rotate"],
+                body.seizure-safe *[class*="scale"],
+                body.seizure-safe *[class*="zoom"],
+                body.seizure-safe *[class*="wiggle"],
+                body.seizure-safe *[class*="jiggle"],
+                body.seizure-safe *[class*="twist"],
+                body.seizure-safe *[class*="flip"],
+                body.seizure-safe *[class*="swing"],
+                body.seizure-safe *[class*="wobble"],
+                body.seizure-safe *[class*="tilt"],
+                /* Additional comprehensive animation coverage */
+                body.seizure-safe *[class*="motion"],
+                body.seizure-safe *[class*="move"],
+                body.seizure-safe *[class*="float"],
+                body.seizure-safe *[class*="drift"],
+                body.seizure-safe *[class*="sway"],
+                body.seizure-safe *[class*="rock"],
+                body.seizure-safe *[class*="wave"],
+                body.seizure-safe *[class*="flow"],
+                body.seizure-safe *[class*="glide"],
+                body.seizure-safe *[class*="sweep"],
+                body.seizure-safe *[class*="swoop"],
+                body.seizure-safe *[class*="dive"],
+                body.seizure-safe *[class*="rise"],
+                body.seizure-safe *[class*="fall"],
+                body.seizure-safe *[class*="drop"],
+                body.seizure-safe *[class*="lift"],
+                body.seizure-safe *[class*="sink"],
+                body.seizure-safe *[class*="hover"],
+                body.seizure-safe *[class*="orbit"],
+                body.seizure-safe *[class*="revolve"],
+                body.seizure-safe *[class*="turn"],
+                body.seizure-safe *[class*="twirl"],
+                body.seizure-safe *[class*="whirl"],
+                body.seizure-safe *[class*="spiral"],
+                body.seizure-safe *[class*="helix"],
+                body.seizure-safe *[class*="coil"],
+                body.seizure-safe *[class*="curl"],
+                body.seizure-safe *[class*="bend"],
+                body.seizure-safe *[class*="flex"],
+                body.seizure-safe *[class*="stretch"],
+                body.seizure-safe *[class*="squash"],
+                body.seizure-safe *[class*="squeeze"],
+                body.seizure-safe *[class*="compress"],
+                body.seizure-safe *[class*="expand"],
+                body.seizure-safe *[class*="grow"],
+                body.seizure-safe *[class*="shrink"],
+                body.seizure-safe *[class*="inflate"],
+                body.seizure-safe *[class*="deflate"],
+                body.seizure-safe *[class*="morph"],
+                body.seizure-safe *[class*="transform"],
+                body.seizure-safe *[class*="transition"],
+                body.seizure-safe *[class*="migrate"],
+                body.seizure-safe *[class*="shift"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* Force GSAP and other library animations to final state */
+                body.seizure-safe .fade-up,
+                body.seizure-safe .fade-left,
+                body.seizure-safe .fade-right,
+                body.seizure-safe .fade-in,
+                body.seizure-safe .slide-in,
+                body.seizure-safe .scale-in,
+                body.seizure-safe .zoom-in {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
+                body.seizure-safe *[style*="animation"],
+                body.seizure-safe *[style*="transition"],
+                body.seizure-safe *[style*="transform"],
+                body.seizure-safe *[style*="opacity"],
+                body.seizure-safe *[style*="visibility"],
+                body.seizure-safe *[data-animation],
+                body.seizure-safe *[data-transition],
+                body.seizure-safe *[data-transform],
+                body.seizure-safe *[data-opacity],
+                body.seizure-safe *[data-visibility] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                body.seizure-safe video,
+                body.seizure-safe audio,
+                body.seizure-safe iframe,
+                body.seizure-safe embed,
+                body.seizure-safe object,
+                body.seizure-safe [autoplay],
+                body.seizure-safe [data-autoplay],
+                body.seizure-safe [class*="autoplay"],
+                body.seizure-safe [class*="video"],
+                body.seizure-safe [class*="media"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* HOVER ANIMATIONS: Disable all hover-triggered animations */
+                body.seizure-safe *:hover,
+                body.seizure-safe *:focus,
+                body.seizure-safe *:active,
+                body.seizure-safe *[class*="hover"],
+                body.seizure-safe *[class*="focus"],
+                body.seizure-safe *[class*="active"],
+                body.seizure-safe *[data-hover],
+                body.seizure-safe *[data-focus],
+                body.seizure-safe *[data-active] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
+                body.seizure-safe [data-splitting],
+                body.seizure-safe .split,
+                body.seizure-safe .char,
+                body.seizure-safe .word,
+                body.seizure-safe [data-splitting] .char,
+                body.seizure-safe [data-splitting] .word,
+                body.seizure-safe [class*="split"],
+                body.seizure-safe [class*="char"],
+                body.seizure-safe [class*="word"],
+                body.seizure-safe [class*="letter"],
+                body.seizure-safe [class*="text-animation"],
+                body.seizure-safe [class*="typing"],
+                body.seizure-safe [class*="typewriter"],
+                body.seizure-safe [class*="reveal"],
+                body.seizure-safe [class*="unveil"],
+                body.seizure-safe [class*="show-text"],
+                body.seizure-safe [class*="text-effect"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* IMAGE HOVER EFFECTS: Disable all image hover animations */
+                body.seizure-safe img:hover,
+                body.seizure-safe [class*="image"]:hover,
+                body.seizure-safe [class*="img"]:hover,
+                body.seizure-safe [class*="photo"]:hover,
+                body.seizure-safe [class*="picture"]:hover,
+                body.seizure-safe [class*="gallery"]:hover,
+                body.seizure-safe [class*="portfolio"]:hover,
+                body.seizure-safe [class*="card"]:hover,
+                body.seizure-safe [class*="item"]:hover {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
                 body.seizure-safe .char,
@@ -85,9 +376,295 @@ class AccessibilityWidget {
             
             // Set up aggressive monitoring for any text animations that might start
             this.setupSeizureSafeMonitoring();
+            
+            // CRITICAL: Force all animations to final state immediately if seizure-safe or stop-animation is enabled
+            this.forceAllAnimationsToFinalState();
 
             this.init();
     
+        }
+        
+        // Store original element positions and sizes before applying seizure-safe mode
+        storeOriginalLayout() {
+            try {
+                if (!this.originalLayouts) {
+                    this.originalLayouts = new Map();
+                }
+                
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach((element, index) => {
+                    if (index < 1000) { // Limit to prevent memory issues
+                        const computedStyle = window.getComputedStyle(element);
+                        this.originalLayouts.set(element, {
+                            position: computedStyle.position,
+                            top: computedStyle.top,
+                            left: computedStyle.left,
+                            right: computedStyle.right,
+                            bottom: computedStyle.bottom,
+                            transform: computedStyle.transform,
+                            width: computedStyle.width,
+                            height: computedStyle.height,
+                            display: computedStyle.display,
+                            opacity: computedStyle.opacity,
+                            visibility: computedStyle.visibility
+                        });
+                    }
+                });
+                
+                console.log('Accessibility Widget: Original layouts stored for', this.originalLayouts.size, 'elements');
+            } catch (e) {
+                console.warn('Accessibility Widget: storeOriginalLayout failed', e);
+            }
+        }
+        
+        // Restore original element positions and sizes
+        restoreOriginalLayout() {
+            try {
+                if (this.originalLayouts) {
+                    this.originalLayouts.forEach((layout, element) => {
+                        if (element && element.style) {
+                            element.style.position = layout.position;
+                            element.style.top = layout.top;
+                            element.style.left = layout.left;
+                            element.style.right = layout.right;
+                            element.style.bottom = layout.bottom;
+                            element.style.transform = layout.transform;
+                            element.style.width = layout.width;
+                            element.style.height = layout.height;
+                            element.style.display = layout.display;
+                            element.style.opacity = layout.opacity;
+                            element.style.visibility = layout.visibility;
+                        }
+                    });
+                    console.log('Accessibility Widget: Original layouts restored');
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: restoreOriginalLayout failed', e);
+            }
+        }
+        
+        // Force all animations to their final state immediately if seizure-safe or stop-animation is enabled
+        forceAllAnimationsToFinalState() {
+            try {
+                // Check if seizure-safe or stop-animation is enabled
+                const isSeizureSafe = document.body.classList.contains('seizure-safe');
+                const isStopAnimation = document.body.classList.contains('stop-animation');
+                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+                const stopAnimationFromStorage = localStorage.getItem('accessibility-widget-stop-animation') === 'true';
+                
+                if (isSeizureSafe || isStopAnimation || seizureSafeFromStorage || stopAnimationFromStorage) {
+                    console.log('Accessibility Widget: Forcing all animations to final state immediately');
+                    
+                    // Force ALL possible animated elements to their final state
+                    const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"], *[class*="motion"], *[class*="move"], *[class*="float"], *[class*="drift"], *[class*="sway"], *[class*="rock"], *[class*="wave"], *[class*="flow"], *[class*="glide"], *[class*="sweep"], *[class*="swoop"], *[class*="dive"], *[class*="rise"], *[class*="fall"], *[class*="drop"], *[class*="lift"], *[class*="sink"], *[class*="hover"], *[class*="orbit"], *[class*="revolve"], *[class*="turn"], *[class*="twirl"], *[class*="whirl"], *[class*="spiral"], *[class*="helix"], *[class*="coil"], *[class*="curl"], *[class*="bend"], *[class*="flex"], *[class*="stretch"], *[class*="squash"], *[class*="squeeze"], *[class*="compress"], *[class*="expand"], *[class*="grow"], *[class*="shrink"], *[class*="inflate"], *[class*="deflate"], *[class*="morph"], *[class*="transform"], *[class*="transition"], *[class*="migrate"], *[class*="shift"]');
+                    
+                    animatedElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        element.style.animationFillMode = 'forwards';
+                    });
+                    
+                    // Force GSAP and other library animations to final state
+                    const gsapElements = document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, [data-splitting], .split, .char, .word');
+                    
+                    gsapElements.forEach(element => {
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        
+                        // Force all child elements to be visible
+                        const children = element.querySelectorAll('.char, .word, span, div');
+                        children.forEach(child => {
+                            child.style.opacity = '1';
+                            child.style.visibility = 'visible';
+                            child.style.animation = 'none';
+                            child.style.transition = 'none';
+                            child.style.transform = 'none';
+                        });
+                    });
+                    
+                    // COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state
+                    const catchAllElements = document.querySelectorAll('*[style*="animation"], *[style*="transition"], *[style*="transform"], *[style*="opacity"], *[style*="visibility"], *[data-animation], *[data-transition], *[data-transform], *[data-opacity], *[data-visibility]');
+                    
+                    catchAllElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // AUTOPLAY MEDIA: Stop all autoplay videos and media
+                    const mediaElements = document.querySelectorAll('video, audio, iframe, embed, object, [autoplay], [data-autoplay], [class*="autoplay"], [class*="video"], [class*="media"]');
+                    
+                    mediaElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        
+                        // Stop autoplay
+                        if (element.tagName === 'VIDEO' || element.tagName === 'AUDIO') {
+                            element.pause();
+                            element.autoplay = false;
+                            element.loop = false;
+                        }
+                    });
+                    
+                    // HOVER ANIMATIONS: Disable all hover-triggered animations
+                    const hoverElements = document.querySelectorAll('*[class*="hover"], *[class*="focus"], *[class*="active"], *[data-hover], *[data-focus], *[data-active]');
+                    
+                    hoverElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state
+                    const textAnimationElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="split"], [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"], [class*="reveal"], [class*="unveil"], [class*="show-text"], [class*="text-effect"]');
+                    
+                    textAnimationElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                        
+                        // Force all child elements to be visible
+                        const children = element.querySelectorAll('.char, .word, span, div, p, h1, h2, h3, h4, h5, h6');
+                        children.forEach(child => {
+                            child.style.opacity = '1';
+                            child.style.visibility = 'visible';
+                            child.style.animation = 'none';
+                            child.style.transition = 'none';
+                            child.style.transform = 'none';
+                        });
+                    });
+                    
+                    // IMAGE HOVER EFFECTS: Disable all image hover animations
+                    const imageElements = document.querySelectorAll('img, [class*="image"], [class*="img"], [class*="photo"], [class*="picture"], [class*="gallery"], [class*="portfolio"], [class*="card"], [class*="item"]');
+                    
+                    imageElements.forEach(element => {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.animationFillMode = 'forwards';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // Kill any running GSAP animations
+                    if (typeof gsap !== 'undefined') {
+                        try {
+                            gsap.killTweensOf('*');
+                            if (gsap.globalTimeline) {
+                                gsap.globalTimeline.clear();
+                            }
+                        } catch (e) {
+                            console.warn('Accessibility Widget: Failed to kill GSAP animations', e);
+                        }
+                    }
+                    
+                    // AGGRESSIVE AUTOPLAY STOPPING: Force stop all media
+                    const allMedia = document.querySelectorAll('video, audio, iframe, embed, object');
+                    allMedia.forEach(media => {
+                        if (media.tagName === 'VIDEO' || media.tagName === 'AUDIO') {
+                            media.pause();
+                            media.currentTime = 0;
+                            media.autoplay = false;
+                            media.loop = false;
+                            media.muted = true;
+                            media.controls = true;
+                        }
+                        if (media.tagName === 'IFRAME') {
+                            try {
+                                media.src = media.src; // Reload to stop any embedded animations
+                            } catch (e) {
+                                console.warn('Accessibility Widget: Could not reload iframe', e);
+                            }
+                        }
+                    });
+                    
+                    // Force all text to be visible immediately
+                    const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label');
+                    allTextElements.forEach(element => {
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.transform = 'none';
+                    });
+                    
+                    // CONSERVATIVE: Only reset positioning for animated elements
+                    const positioningElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
+                    
+                    positioningElements.forEach(element => {
+                        // Reset positioning only for animated elements
+                        element.style.position = 'static';
+                        element.style.top = 'auto';
+                        element.style.left = 'auto';
+                        element.style.right = 'auto';
+                        element.style.bottom = 'auto';
+                        element.style.transform = 'none';
+                        element.style.translate = 'none';
+                        element.style.scale = '1';
+                        element.style.rotate = '0deg';
+                        element.style.width = 'auto';
+                        element.style.height = 'auto';
+                    });
+                    
+                    // Reset transform properties for all elements (conservative)
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        element.style.transform = 'none';
+                        element.style.translate = 'none';
+                        element.style.scale = '1';
+                        element.style.rotate = '0deg';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                    });
+                    
+                    // Preserve original layout for media elements
+                    const layoutMediaElements = document.querySelectorAll('img, video, audio, iframe, embed, object');
+                    layoutMediaElements.forEach(element => {
+                        element.style.position = 'static';
+                        element.style.transform = 'none';
+                        element.style.width = 'auto';
+                        element.style.height = 'auto';
+                        element.style.maxWidth = '100%';
+                        element.style.maxHeight = '100%';
+                    });
+                    
+                    // Preserve original layout for text elements
+                    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label');
+                    textElements.forEach(element => {
+                        element.style.position = 'static';
+                        element.style.transform = 'none';
+                        element.style.width = 'auto';
+                        element.style.height = 'auto';
+                        element.style.top = 'auto';
+                        element.style.left = 'auto';
+                        element.style.right = 'auto';
+                        element.style.bottom = 'auto';
+                    });
+                    
+                    console.log('Accessibility Widget: All animations forced to final state');
+                }
+            } catch (e) {
+                console.warn('Accessibility Widget: forceAllAnimationsToFinalState failed', e);
+            }
         }
         
         // Check and apply seizure-safe mode immediately before any animations start
@@ -19920,6 +20497,301 @@ class AccessibilityWidget {
                         animation-play-state: paused !important;
     
                     }
+                    
+                    /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
+                    .stop-animation *,
+                    .stop-animation *::before,
+                    .stop-animation *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
+                    .stop-animation * {
+                        /* Only reset transform-related properties that cause positioning issues */
+                        transform: none !important;
+                        translate: none !important;
+                        scale: 1 !important;
+                        rotate: 0deg !important;
+                        
+                        /* Ensure visibility */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        
+                        /* Reset animation properties */
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* Only reset positioning for elements that are likely to be animated */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"] {
+                        position: static !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        transform: none !important;
+                        translate: none !important;
+                        scale: 1 !important;
+                        rotate: 0deg !important;
+                        width: auto !important;
+                        height: auto !important;
+                    }
+                    
+                    /* Preserve original layout for specific elements */
+                    .stop-animation img,
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object {
+                        position: static !important;
+                        transform: none !important;
+                        width: auto !important;
+                        height: auto !important;
+                        max-width: 100% !important;
+                        max-height: 100% !important;
+                    }
+                    
+                    /* Ensure text elements maintain original layout */
+                    .stop-animation h1,
+                    .stop-animation h2,
+                    .stop-animation h3,
+                    .stop-animation h4,
+                    .stop-animation h5,
+                    .stop-animation h6,
+                    .stop-animation p,
+                    .stop-animation span,
+                    .stop-animation div,
+                    .stop-animation a,
+                    .stop-animation li,
+                    .stop-animation td,
+                    .stop-animation th,
+                    .stop-animation label {
+                        position: static !important;
+                        transform: none !important;
+                        width: auto !important;
+                        height: auto !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                    }
+                    
+                    /* CRITICAL: Force ALL possible animations to their final state immediately */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"],
+                    /* Additional comprehensive animation coverage */
+                    .stop-animation *[class*="motion"],
+                    .stop-animation *[class*="move"],
+                    .stop-animation *[class*="float"],
+                    .stop-animation *[class*="drift"],
+                    .stop-animation *[class*="sway"],
+                    .stop-animation *[class*="rock"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="glide"],
+                    .stop-animation *[class*="sweep"],
+                    .stop-animation *[class*="swoop"],
+                    .stop-animation *[class*="dive"],
+                    .stop-animation *[class*="rise"],
+                    .stop-animation *[class*="fall"],
+                    .stop-animation *[class*="drop"],
+                    .stop-animation *[class*="lift"],
+                    .stop-animation *[class*="sink"],
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="revolve"],
+                    .stop-animation *[class*="turn"],
+                    .stop-animation *[class*="twirl"],
+                    .stop-animation *[class*="whirl"],
+                    .stop-animation *[class*="spiral"],
+                    .stop-animation *[class*="helix"],
+                    .stop-animation *[class*="coil"],
+                    .stop-animation *[class*="curl"],
+                    .stop-animation *[class*="bend"],
+                    .stop-animation *[class*="flex"],
+                    .stop-animation *[class*="stretch"],
+                    .stop-animation *[class*="squash"],
+                    .stop-animation *[class*="squeeze"],
+                    .stop-animation *[class*="compress"],
+                    .stop-animation *[class*="expand"],
+                    .stop-animation *[class*="grow"],
+                    .stop-animation *[class*="shrink"],
+                    .stop-animation *[class*="inflate"],
+                    .stop-animation *[class*="deflate"],
+                    .stop-animation *[class*="morph"],
+                    .stop-animation *[class*="transform"],
+                    .stop-animation *[class*="transition"],
+                    .stop-animation *[class*="migrate"],
+                    .stop-animation *[class*="shift"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* Force GSAP and library animations to final state */
+                    .stop-animation .fade-up,
+                    .stop-animation .fade-left,
+                    .stop-animation .fade-right,
+                    .stop-animation .fade-in,
+                    .stop-animation .slide-in,
+                    .stop-animation .scale-in,
+                    .stop-animation .zoom-in,
+                    .stop-animation [data-splitting],
+                    .stop-animation .split,
+                    .stop-animation .char,
+                    .stop-animation .word {
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                        animation: none !important;
+                        transition: none !important;
+                    }
+                    
+                    /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
+                    .stop-animation *[style*="animation"],
+                    .stop-animation *[style*="transition"],
+                    .stop-animation *[style*="transform"],
+                    .stop-animation *[style*="opacity"],
+                    .stop-animation *[style*="visibility"],
+                    .stop-animation *[data-animation],
+                    .stop-animation *[data-transition],
+                    .stop-animation *[data-transform],
+                    .stop-animation *[data-opacity],
+                    .stop-animation *[data-visibility] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object,
+                    .stop-animation [autoplay],
+                    .stop-animation [data-autoplay],
+                    .stop-animation [class*="autoplay"],
+                    .stop-animation [class*="video"],
+                    .stop-animation [class*="media"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* HOVER ANIMATIONS: Disable all hover-triggered animations */
+                    .stop-animation *:hover,
+                    .stop-animation *:focus,
+                    .stop-animation *:active,
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="focus"],
+                    .stop-animation *[class*="active"],
+                    .stop-animation *[data-hover],
+                    .stop-animation *[data-focus],
+                    .stop-animation *[data-active] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
+                    .stop-animation [data-splitting],
+                    .stop-animation .split,
+                    .stop-animation .char,
+                    .stop-animation .word,
+                    .stop-animation [data-splitting] .char,
+                    .stop-animation [data-splitting] .word,
+                    .stop-animation [class*="split"],
+                    .stop-animation [class*="char"],
+                    .stop-animation [class*="word"],
+                    .stop-animation [class*="letter"],
+                    .stop-animation [class*="text-animation"],
+                    .stop-animation [class*="typing"],
+                    .stop-animation [class*="typewriter"],
+                    .stop-animation [class*="reveal"],
+                    .stop-animation [class*="unveil"],
+                    .stop-animation [class*="show-text"],
+                    .stop-animation [class*="text-effect"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* IMAGE HOVER EFFECTS: Disable all image hover animations */
+                    .stop-animation img:hover,
+                    .stop-animation [class*="image"]:hover,
+                    .stop-animation [class*="img"]:hover,
+                    .stop-animation [class*="photo"]:hover,
+                    .stop-animation [class*="picture"]:hover,
+                    .stop-animation [class*="gallery"]:hover,
+                    .stop-animation [class*="portfolio"]:hover,
+                    .stop-animation [class*="card"]:hover,
+                    .stop-animation [class*="item"]:hover {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
     
                 `;
     
@@ -21187,6 +22059,50 @@ class AccessibilityWidget {
                 
     
                 /* Stop only seizure-triggering animations, preserve essential functionality */
+                
+                /* CRITICAL: Force all animations to their final state immediately */
+                body.seizure-safe *[class*="animate"],
+                body.seizure-safe *[class*="fade"],
+                body.seizure-safe *[class*="slide"],
+                body.seizure-safe *[class*="bounce"],
+                body.seizure-safe *[class*="pulse"],
+                body.seizure-safe *[class*="shake"],
+                body.seizure-safe *[class*="flash"],
+                body.seizure-safe *[class*="blink"],
+                body.seizure-safe *[class*="glow"],
+                body.seizure-safe *[class*="spin"],
+                body.seizure-safe *[class*="rotate"],
+                body.seizure-safe *[class*="scale"],
+                body.seizure-safe *[class*="zoom"],
+                body.seizure-safe *[class*="wiggle"],
+                body.seizure-safe *[class*="jiggle"],
+                body.seizure-safe *[class*="twist"],
+                body.seizure-safe *[class*="flip"],
+                body.seizure-safe *[class*="swing"],
+                body.seizure-safe *[class*="wobble"],
+                body.seizure-safe *[class*="tilt"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                }
+                
+                /* Force GSAP and library animations to final state */
+                body.seizure-safe .fade-up,
+                body.seizure-safe .fade-left,
+                body.seizure-safe .fade-right,
+                body.seizure-safe .fade-in,
+                body.seizure-safe .slide-in,
+                body.seizure-safe .scale-in,
+                body.seizure-safe .zoom-in {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
                 
                 /* Target specific seizure-triggering elements */
                 body.seizure-safe [class*="animate"],
@@ -22584,27 +23500,30 @@ class AccessibilityWidget {
                         zoom: 1;
                     }
                     
+                    /* CRITICAL: Protect all elements with large font sizes from being shrunk */
+                    body.vision-impaired * {
+                        /* Only apply vision enhancement if font size is small */
+                        /* This prevents large text from being affected */
+                    }
+                    
+                    /* Force protection for any element with font-size >= 18px */
+                    body.vision-impaired *[style*="font-size"] {
+                        /* Preserve any inline font-size styles - don't override them */
+                    }
+                    
                     /* ONLY ENHANCE SMALL TEXT - Target specific small text elements (only when no inline styles) */
-                    body.vision-impaired p:not([style*="font-size"]),
-                    body.vision-impaired span:not([style*="font-size"]),
-                    body.vision-impaired div:not([style*="font-size"]),
-                    body.vision-impaired a:not([style*="font-size"]),
-                    body.vision-impaired li:not([style*="font-size"]),
-                    body.vision-impaired td:not([style*="font-size"]),
-                    body.vision-impaired th:not([style*="font-size"]),
-                    body.vision-impaired label:not([style*="font-size"]),
                     body.vision-impaired small:not([style*="font-size"]),
                     body.vision-impaired .small:not([style*="font-size"]),
                     body.vision-impaired .text-sm:not([style*="font-size"]),
                     body.vision-impaired .caption:not([style*="font-size"]),
-                    body.vision-impaired .description:not([style*="font-size"]),
-                    body.vision-impaired .content:not([style*="font-size"]),
-                    body.vision-impaired .body-text:not([style*="font-size"]),
-                    body.vision-impaired .paragraph:not([style*="font-size"]) {
-                        /* Only enhance if font-size is small (less than 18px) and no inline styles are present */
+                    body.vision-impaired .description:not([style*="font-size"]) {
+                        /* Only enhance truly small text elements */
                         font-size: max(1.1em, 16px);
                         line-height: 1.4;
                     }
+                    
+                    /* REMOVED: Applied to p, span, div, a, li, td, th, label, content, body-text, paragraph */
+                    /* These were affecting larger text elements */
                     
                     /* Preserve button and form element sizes */
                     body.vision-impaired button,
@@ -22759,14 +23678,27 @@ class AccessibilityWidget {
                 element.style.setProperty('--vision-font-scale', '1', 'important');
             });
             
-            // Only enhance small text elements
-            const smallTextElements = document.querySelectorAll('p, span, div, a, li, td, th, label, small, .small, .text-sm, .caption, .description, .content, .body-text, .paragraph');
+            // PROTECT LARGE TEXT: Ensure headings and large text elements maintain their size
+            const protectedTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .nav, .navbar, .navigation, .header, .hero, .title, .headline, .logo, .brand, nav, header, [class*="nav"], [class*="header"], [class*="hero"], [class*="title"], [class*="headline"], [class*="logo"], [class*="brand"]');
+            protectedTextElements.forEach(element => {
+                const computedStyle = window.getComputedStyle(element);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                
+                // If the element has a large font size (18px or more), protect it from being changed
+                if (fontSize >= 18) {
+                    element.style.setProperty('font-size', fontSize + 'px', 'important');
+                    element.style.setProperty('line-height', 'inherit', 'important');
+                }
+            });
+            
+            // Only enhance truly small text elements - be more restrictive
+            const smallTextElements = document.querySelectorAll('small, .small, .text-sm, .caption, .description, .content, .body-text, .paragraph');
             smallTextElements.forEach(element => {
                 const computedStyle = window.getComputedStyle(element);
                 const fontSize = parseFloat(computedStyle.fontSize);
                 
-                // Only enhance if font size is small (less than 18px)
-                if (fontSize < 18) {
+                // Only enhance if font size is very small (less than 14px) to avoid affecting larger text
+                if (fontSize < 14) {
                     element.style.setProperty('font-size', 'max(1.1em, 16px)', 'important');
                     element.style.setProperty('line-height', '1.4', 'important');
                 }
@@ -22775,7 +23707,42 @@ class AccessibilityWidget {
             // Force override any external vision-impaired CSS
             this.overrideExternalVisionCSS();
             
+            // CRITICAL: Add additional protection for larger text elements
+            this.protectLargeTextElements();
+            
             console.log('[CK] applySmartVisionScaling() - Visual enhancement only mode completed');
+        }
+        
+        // Protect large text elements from being shrunk by vision-impaired mode
+        protectLargeTextElements() {
+            try {
+                console.log('Accessibility Widget: Protecting large text elements from vision-impaired mode');
+                
+                // Get all text elements
+                const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, button, input, textarea, select');
+                
+                allTextElements.forEach(element => {
+                    const computedStyle = window.getComputedStyle(element);
+                    const fontSize = parseFloat(computedStyle.fontSize);
+                    
+                    // If the element has a large font size (18px or more), protect it
+                    if (fontSize >= 18) {
+                        // Set the font size with !important to prevent it from being overridden
+                        element.style.setProperty('font-size', fontSize + 'px', 'important');
+                        element.style.setProperty('line-height', computedStyle.lineHeight, 'important');
+                        
+                        // Also protect against any vision-impaired CSS that might try to change it
+                        element.style.setProperty('--vision-font-scale', '1', 'important');
+                        element.style.setProperty('--vision-scale', '1', 'important');
+                        
+                        console.log('Accessibility Widget: Protected large text element:', element.tagName, 'font-size:', fontSize + 'px');
+                    }
+                });
+                
+                console.log('Accessibility Widget: Large text elements protection completed');
+            } catch (e) {
+                console.warn('Accessibility Widget: protectLargeTextElements failed', e);
+            }
         }
         
         // Override any external vision-impaired CSS that might be loaded
@@ -22945,10 +23912,46 @@ class AccessibilityWidget {
             // Remove smart scaling styles
             this.removeSmartVisionScaling();
             
+            // CRITICAL: Restore original font sizes by removing inline styles that were added by vision-impaired
+            this.restoreOriginalFontSizes();
+            
             console.log('Accessibility Widget: Vision impaired styles removed via CSS classes');
             
             // Ensure the Shadow DOM host gets updated
             this.updateWidgetAppearance();
+        }
+        
+        // Restore original font sizes when vision-impaired mode is disabled
+        restoreOriginalFontSizes() {
+            try {
+                console.log('Accessibility Widget: Restoring original font sizes after vision-impaired mode');
+                
+                // Find all elements that might have been affected by vision-impaired mode
+                const affectedElements = document.querySelectorAll('small, .small, .text-sm, .caption, .description, p, span, div, a, li, td, th, label');
+                
+                affectedElements.forEach(element => {
+                    // Check if the element has inline font-size styles that were added by vision-impaired
+                    const currentFontSize = element.style.fontSize;
+                    if (currentFontSize && (currentFontSize.includes('max(1.1em, 16px)') || currentFontSize.includes('16px'))) {
+                        // Remove the inline font-size style to restore original
+                        element.style.fontSize = '';
+                        console.log('Accessibility Widget: Restored font size for element:', element.tagName, element.className);
+                    }
+                });
+                
+                // Also restore any elements that might have had their font-size changed by vision-impaired CSS
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    // Check if element has vision-impaired related inline styles
+                    if (element.style.fontSize && element.style.fontSize.includes('max(1.1em, 16px)')) {
+                        element.style.fontSize = '';
+                    }
+                });
+                
+                console.log('Accessibility Widget: Original font sizes restored');
+            } catch (e) {
+                console.warn('Accessibility Widget: restoreOriginalFontSizes failed', e);
+            }
         }
     
     
