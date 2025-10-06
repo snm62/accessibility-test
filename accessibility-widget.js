@@ -1095,7 +1095,7 @@ function applyVisionImpaired(on) {
             /* 1. NO SCALING - Just enhance readability without breaking layout */
             html.vision-impaired {
                 /* Minimal scaling without layout break */
-                zoom: 1.05 !important;
+                zoom: 1.04 !important;
                 /* Prevent horizontal scrollbars from subpixel zoom rounding */
                 overflow-x: hidden !important;
                 /* Avoid extra vertical scrollbar from zoom rounding */
