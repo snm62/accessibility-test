@@ -23290,6 +23290,14 @@ class AccessibilityWidget {
                     this.addSeizureSafeStyles();
                 }, 100);
             }
+
+            // Ensure page remains scrollable with native scrolling
+            try {
+                this.enforceNativeScroll();
+                // Re-assert after initial render in case site JS flips it back
+                setTimeout(() => { this.enforceNativeScroll(); }, 150);
+                setTimeout(() => { this.enforceNativeScroll(); }, 500);
+            } catch (_) {}
     
             // Stop autoplay videos to prevent seizures
             this.stopAutoplayVideos();
@@ -23353,6 +23361,42 @@ class AccessibilityWidget {
     
     
     
+        // Ensure native scrolling is enabled (avoid sites locking scroll via overflow hidden or smooth-scroll libs)
+        enforceNativeScroll() {
+            try {
+                const html = document.documentElement;
+                const body = document.body;
+                if (!html || !body) return;
+
+                // Clear common scroll locks
+                html.style.overflow = 'auto';
+                body.style.overflow = 'auto';
+                body.style.overflowY = 'auto';
+                body.style.overflowX = 'auto';
+                body.style.position = body.style.position === 'fixed' ? '' : body.style.position;
+
+                // Remove common classes that lock scroll
+                const scrollLockClasses = ['no-scroll', 'overflow-hidden', 'modal-open', 'is-locked', 'scroll-lock'];
+                scrollLockClasses.forEach(cls => { try { body.classList.remove(cls); html.classList.remove(cls); } catch (_) {} });
+
+                // Reset touch/scroll behavior
+                html.style.scrollBehavior = 'auto';
+                body.style.scrollBehavior = 'auto';
+                html.style.touchAction = 'auto';
+                body.style.touchAction = 'auto';
+
+                // For frameworks that put overflow hidden on root containers
+                try {
+                    const locked = document.querySelectorAll('[style*="overflow: hidden"],[class*="overflow-hidden"]');
+                    for (const el of locked) {
+                        if (el === body || el === html) {
+                            el.style.overflow = 'auto';
+                        }
+                    }
+                } catch (_) {}
+            } catch (_) {}
+        }
+
         disableSeizureSafe() {
     
             this.settings['seizure-safe'] = false;
