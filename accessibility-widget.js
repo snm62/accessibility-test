@@ -732,9 +732,14 @@
                         if (!window.__animationBlockerInstalled) {
                             window.__animationBlockerInstalled = true;
                             const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
+                            // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
+                            const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], svg, i, [data-icon]';
 
                             const isExempt = (el) => {
-                                try { return !!el.closest(EXEMPT_SELECTOR); } catch (_) { return false; }
+                                try {
+                                    if (el.matches && el.matches(ICON_SELECTOR)) return true;
+                                    return !!el.closest(EXEMPT_SELECTOR);
+                                } catch (_) { return false; }
                             };
 
                             const neutralizeElement = (el) => {
@@ -744,8 +749,10 @@
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
-                                    // Only neutralize transform/opacity if not exempt
-                                    el.style.transform = 'none';
+                                    // Only neutralize transform/opacity if not exempt and not an icon/arrow
+                                    if (!(el.matches && el.matches(ICON_SELECTOR))) {
+                                        el.style.transform = 'none';
+                                    }
                                     el.style.opacity = '1';
                                 } catch (_) {}
                             };
@@ -791,21 +798,11 @@
                                 window.__seizureStyleObserver = styleObserver;
                             } catch (_) {}
 
-                            // Also force scroll-behavior and snap off for all scrollable containers
+                            // Ensure native scroll behavior on the main document only (avoid breaking custom scrollers)
                             try {
-                                const scrollables = document.querySelectorAll('*');
-                                let sCount = 0;
-                                for (const el of scrollables) {
-                                    try {
-                                        const cs = getComputedStyle(el);
-                                        if ((cs.overflowX !== 'visible' || cs.overflowY !== 'visible') && !isExempt(el)) {
-                                            el.style.scrollBehavior = 'auto';
-                                            el.style.scrollSnapType = 'none';
-                                        }
-                                    } catch (_) {}
-                                    sCount++;
-                                    if (sCount > 5000) break;
-                                }
+                                document.documentElement.style.scrollBehavior = 'auto';
+                                document.body && (document.body.style.scrollBehavior = 'auto');
+                                // Do not touch scrollSnapType on arbitrary containers to avoid locking scroll
                             } catch (_) {}
                         }
                     } catch (_) {}
@@ -1096,8 +1093,8 @@ function applyVisionImpaired(on) {
             }
             
             body.vision-impaired {
-                /* Slightly enhance text contrast without changing colors */
-                filter: contrast(1.1) brightness(1.05) !important;
+                /* No layout or color modifications */
+                filter: none !important;
             }
             
             /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
@@ -1121,9 +1118,10 @@ function applyVisionImpaired(on) {
             
             /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
             body.vision-impaired a {
-                /* Slightly improve link contrast */
+                /* Do not change link colors */
+                color: inherit !important;
+                text-decoration: inherit !important;
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                /* Increased font weight for better visibility */
                 font-weight: 600 !important;
             }
             
@@ -1160,13 +1158,13 @@ function applyVisionImpaired(on) {
             
             /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
             body.vision-impaired img {
-                /* Slightly improve image contrast */
-                filter: contrast(1.05) brightness(1.02) !important;
+                /* Do not change image colors */
+                filter: none !important;
             }
             
             /* 9. PRESERVE LAYOUT - No layout modifications */
             body.vision-impaired * {
-                box-sizing: border-box !important;
+                /* No layout modifications */
             }
             
             /* 10. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
@@ -23409,9 +23407,18 @@ class AccessibilityWidget {
             
     
             this.saveSettings();
-    
+
             console.log('Accessibility Widget: Seizure safe profile disabled');
-    
+
+            // Refresh the page after disabling seizure-safe to fully restore animations/media states
+            try {
+                setTimeout(() => {
+                    if (!this.settings['seizure-safe']) {
+                        window.location.reload();
+                    }
+                }, 100);
+            } catch (_) {}
+
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
