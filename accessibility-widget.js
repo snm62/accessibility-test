@@ -1105,8 +1105,8 @@ function applyVisionImpaired(on) {
                 overflow-x: hidden !important;
                 /* Allow natural vertical scrolling */
                 overflow-y: auto !important;
-                /* Ensure proper height */
-                height: 100% !important;
+                /* Let content define height to avoid bottom gaps after zoom */
+                height: auto !important;
             }
             
             /* 2. BODY STYLES - Minimal changes to preserve layout */
@@ -1188,6 +1188,11 @@ function applyVisionImpaired(on) {
             /* 10. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
             body.vision-impaired img {
                 filter: none !important;
+            }
+            
+            /* Remove trailing white gap from last section/footer when zoomed */
+            body.vision-impaired > :last-child {
+                margin-bottom: 0 !important;
             }
             
             /* 11. RESPONSIVE ADJUSTMENTS - Reduce scaling on mobile */
