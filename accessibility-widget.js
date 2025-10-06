@@ -1143,15 +1143,175 @@ function applyVisionImpaired(on) {
             try { document.body.classList.add('vision-impaired'); } catch (_) {}
             try { document.documentElement.setAttribute('data-vision-impaired', 'true'); } catch (_) {}
 
-            // Conservative readability styles that do not dramatically alter layout
+            // Apply comprehensive vision impaired styles immediately
             if (!document.getElementById('accessibility-vision-impaired-immediate-early')) {
                 const viStyle = document.createElement('style');
                 viStyle.id = 'accessibility-vision-impaired-immediate-early';
                 viStyle.textContent = `
-                    html.vision-impaired, body.vision-impaired { }
-                    /* Increase text size only */
-                    body.vision-impaired :where(h1,h2,h3,h4,h5,h6,p,li,a,label,span,div,input,textarea,button,small) {
-                        font-size: 1.15em !important;
+                    /* VISION IMPAIRED: Immediate Comprehensive Website Scaling and Contrast Enhancement */
+                    
+                    /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+                    html.vision-impaired {
+                        zoom: 1.25 !important;
+                        transform: scale(1.25) !important;
+                        transform-origin: top left !important;
+                        width: 80% !important;
+                        height: 80% !important;
+                    }
+                    
+                    body.vision-impaired {
+                        transform: scale(1.25) !important;
+                        transform-origin: top left !important;
+                        width: 80% !important;
+                        height: 80% !important;
+                    }
+                    
+                    /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
+                    body.vision-impaired * {
+                        color: #000000 !important;
+                        text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+                    }
+                    
+                    body.vision-impaired {
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                    }
+                    
+                    body.vision-impaired a {
+                        color: #0000ff !important;
+                        text-decoration: underline !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    body.vision-impaired a:visited {
+                        color: #800080 !important;
+                    }
+                    
+                    body.vision-impaired a:hover {
+                        color: #ff0000 !important;
+                        background-color: #ffff00 !important;
+                    }
+                    
+                    body.vision-impaired button,
+                    body.vision-impaired input[type="button"],
+                    body.vision-impaired input[type="submit"],
+                    body.vision-impaired input[type="reset"] {
+                        background-color: #0000ff !important;
+                        color: #ffffff !important;
+                        border: 2px solid #000000 !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    body.vision-impaired input,
+                    body.vision-impaired textarea,
+                    body.vision-impaired select {
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                        border: 2px solid #000000 !important;
+                    }
+                    
+                    body.vision-impaired * {
+                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-weight: bold !important;
+                        line-height: 1.6 !important;
+                        letter-spacing: 0.1em !important;
+                    }
+                    
+                    body.vision-impaired *:focus {
+                        outline: 3px solid #ff0000 !important;
+                        outline-offset: 2px !important;
+                        background-color: #ffff00 !important;
+                    }
+                    
+                    body.vision-impaired img {
+                        border: 2px solid #000000 !important;
+                        filter: contrast(1.2) brightness(1.1) !important;
+                    }
+                    
+                    body.vision-impaired nav,
+                    body.vision-impaired .navbar,
+                    body.vision-impaired [role="navigation"] {
+                        background-color: #000000 !important;
+                        color: #ffffff !important;
+                        border: 2px solid #ffffff !important;
+                    }
+                    
+                    body.vision-impaired nav a,
+                    body.vision-impaired .navbar a,
+                    body.vision-impaired [role="navigation"] a {
+                        color: #ffffff !important;
+                        background-color: #000000 !important;
+                        padding: 8px 12px !important;
+                        margin: 2px !important;
+                        border: 1px solid #ffffff !important;
+                    }
+                    
+                    body.vision-impaired h1,
+                    body.vision-impaired h2,
+                    body.vision-impaired h3,
+                    body.vision-impaired h4,
+                    body.vision-impaired h5,
+                    body.vision-impaired h6 {
+                        color: #000000 !important;
+                        background-color: #ffff00 !important;
+                        padding: 4px 8px !important;
+                        border: 2px solid #000000 !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    body.vision-impaired table {
+                        border: 2px solid #000000 !important;
+                        border-collapse: collapse !important;
+                    }
+                    
+                    body.vision-impaired th,
+                    body.vision-impaired td {
+                        border: 1px solid #000000 !important;
+                        padding: 8px !important;
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                    }
+                    
+                    body.vision-impaired th {
+                        background-color: #000000 !important;
+                        color: #ffffff !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    body.vision-impaired ::-webkit-scrollbar {
+                        width: 20px !important;
+                        height: 20px !important;
+                    }
+                    
+                    body.vision-impaired ::-webkit-scrollbar-track {
+                        background: #ffffff !important;
+                        border: 2px solid #000000 !important;
+                    }
+                    
+                    body.vision-impaired ::-webkit-scrollbar-thumb {
+                        background: #000000 !important;
+                        border: 2px solid #ffffff !important;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        html.vision-impaired {
+                            zoom: 1.15 !important;
+                            transform: scale(1.15) !important;
+                            width: 87% !important;
+                            height: 87% !important;
+                        }
+                    }
+                    
+                    body.vision-impaired * {
+                        box-sizing: border-box !important;
+                    }
+                    
+                    body.vision-impaired button:hover,
+                    body.vision-impaired a:hover,
+                    body.vision-impaired [role="button"]:hover {
+                        background-color: #ffff00 !important;
+                        color: #000000 !important;
+                        transform: scale(1.05) !important;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -23250,99 +23410,224 @@ class AccessibilityWidget {
     
         }
     
-        // Vision Impaired - lightweight, non-aggressive
+        // Vision Impaired - comprehensive scaling and contrast enhancement
         enableVisionImpaired() {
             try {
                 this.settings['vision-impaired'] = true;
                 document.body.classList.add('vision-impaired');
 
-                // Lock paddings for interactive elements to avoid layout shifts
-                this.__vi_locked = this.__vi_locked || new WeakMap();
-                const interactiveSelectors = 'a, button, [role="button"], input, select, textarea, [tabindex]';
-                document.querySelectorAll(interactiveSelectors).forEach(el => {
-                    if (!this.__vi_locked.has(el)) {
-                        const cs = getComputedStyle(el);
-                        this.__vi_locked.set(el, {
-                            paddingTop: cs.paddingTop,
-                            paddingRight: cs.paddingRight,
-                            paddingBottom: cs.paddingBottom,
-                            paddingLeft: cs.paddingLeft,
-                            lineHeight: cs.lineHeight
-                        });
-                    }
-                });
-
-                // Apply gentle small-text upscale without touching large text
-                // Threshold: keep >= 18px unchanged; bump < 14px up to 16px; 14-17px kept
-                this.__vi_scaled = this.__vi_scaled || new WeakSet();
-                // Expanded to include more small-text containers
-                const textSelector = 'p, span, div, a, li, td, th, label, small, em, strong, i, b, sup, sub, figcaption, caption, summary, input, textarea, select, button';
-                document.querySelectorAll(textSelector).forEach(el => {
-                    if (this.__vi_scaled.has(el)) return;
-                    const cs = getComputedStyle(el);
-                    const sizePx = parseFloat(cs.fontSize);
-                    if (Number.isFinite(sizePx)) {
-                        if (sizePx < 14) {
-                            // Promote to 16px for readability; add !important to overcome theme overrides
-                            el.style.setProperty('font-size', '16px', 'important');
-                            // Preserve line-height ratio to avoid crowding
-                            if (cs.lineHeight !== 'normal') {
-                                el.style.setProperty('line-height', cs.lineHeight);
-                            }
-                            this.__vi_scaled.add(el);
-                        }
-                        // 14-17px unchanged; >=18px unchanged by design
-                    }
-                });
-
-                // Observe dynamic DOM changes to scale newly inserted small text
-                try {
-                    if (this.__vi_observer) {
-                        this.__vi_observer.disconnect();
-                    }
-                    this.__vi_observer = new MutationObserver((mutations) => {
-                        mutations.forEach((m) => {
-                            // Handle added nodes
-                            m.addedNodes && m.addedNodes.forEach(node => {
-                                if (!(node instanceof Element)) return;
-                                // Check the node itself and its descendants
-                                const candidates = [node, ...node.querySelectorAll ? node.querySelectorAll(textSelector) : []];
-                                candidates.forEach(el => {
-                                    if (this.__vi_scaled.has(el)) return;
-                                    const cs = getComputedStyle(el);
-                                    const sizePx = parseFloat(cs.fontSize);
-                                    if (Number.isFinite(sizePx) && sizePx < 14) {
-                                        el.style.setProperty('font-size', '16px', 'important');
-                                        if (cs.lineHeight !== 'normal') {
-                                            el.style.setProperty('line-height', cs.lineHeight);
-                                        }
-                                        this.__vi_scaled.add(el);
-                                    }
-                                });
-                            });
-                        });
-                    });
-                    this.__vi_observer.observe(document.body, { childList: true, subtree: true });
-                } catch (_) { /* noop */ }
-
-                // Ensure interactive paddings preserved
-                document.querySelectorAll(interactiveSelectors).forEach(el => {
-                    const lock = this.__vi_locked.get(el);
-                    if (!lock) return;
-                    el.style.paddingTop = lock.paddingTop;
-                    el.style.paddingRight = lock.paddingRight;
-                    el.style.paddingBottom = lock.paddingBottom;
-                    el.style.paddingLeft = lock.paddingLeft;
-                    // Keep line-height stable to prevent height jumps
-                    el.style.lineHeight = lock.lineHeight;
-                });
+                // Apply comprehensive website scaling and contrast enhancement
+                this.applyVisionImpairedStyles();
 
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
-                console.log('Accessibility Widget: Vision impaired enabled (lightweight)');
+                console.log('Accessibility Widget: Vision impaired enabled (comprehensive scaling and contrast)');
             } catch (e) {
                 console.warn('Accessibility Widget: enableVisionImpaired failed', e);
+            }
+        }
+        
+        // Apply comprehensive vision impaired styles
+        applyVisionImpairedStyles() {
+            try {
+                // Remove existing vision impaired styles if any
+                const existingStyle = document.getElementById('vision-impaired-comprehensive');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+
+                const style = document.createElement('style');
+                style.id = 'vision-impaired-comprehensive';
+                style.textContent = `
+                    /* VISION IMPAIRED: Comprehensive Website Scaling and Contrast Enhancement */
+                    
+                    /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+                    html.vision-impaired {
+                        zoom: 1.25 !important;
+                        transform: scale(1.25) !important;
+                        transform-origin: top left !important;
+                        width: 80% !important; /* Compensate for scaling */
+                        height: 80% !important; /* Compensate for scaling */
+                    }
+                    
+                    /* Alternative scaling approach for better browser compatibility */
+                    body.vision-impaired {
+                        transform: scale(1.25) !important;
+                        transform-origin: top left !important;
+                        width: 80% !important;
+                        height: 80% !important;
+                    }
+                    
+                    /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
+                    body.vision-impaired * {
+                        /* Enhance text contrast */
+                        color: #000000 !important;
+                        text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+                    }
+                    
+                    /* Enhance background contrast */
+                    body.vision-impaired {
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                    }
+                    
+                    /* Enhance link contrast */
+                    body.vision-impaired a {
+                        color: #0000ff !important;
+                        text-decoration: underline !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    body.vision-impaired a:visited {
+                        color: #800080 !important;
+                    }
+                    
+                    body.vision-impaired a:hover {
+                        color: #ff0000 !important;
+                        background-color: #ffff00 !important;
+                    }
+                    
+                    /* Enhance button contrast */
+                    body.vision-impaired button,
+                    body.vision-impaired input[type="button"],
+                    body.vision-impaired input[type="submit"],
+                    body.vision-impaired input[type="reset"] {
+                        background-color: #0000ff !important;
+                        color: #ffffff !important;
+                        border: 2px solid #000000 !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    /* Enhance form elements contrast */
+                    body.vision-impaired input,
+                    body.vision-impaired textarea,
+                    body.vision-impaired select {
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                        border: 2px solid #000000 !important;
+                    }
+                    
+                    /* 3. FONT ENHANCEMENT - Improve readability */
+                    body.vision-impaired * {
+                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-weight: bold !important;
+                        line-height: 1.6 !important;
+                        letter-spacing: 0.1em !important;
+                    }
+                    
+                    /* 4. FOCUS ENHANCEMENT - Make focus indicators more visible */
+                    body.vision-impaired *:focus {
+                        outline: 3px solid #ff0000 !important;
+                        outline-offset: 2px !important;
+                        background-color: #ffff00 !important;
+                    }
+                    
+                    /* 5. IMAGE ENHANCEMENT - Add borders to images for better visibility */
+                    body.vision-impaired img {
+                        border: 2px solid #000000 !important;
+                        filter: contrast(1.2) brightness(1.1) !important;
+                    }
+                    
+                    /* 6. NAVIGATION ENHANCEMENT - Make navigation more visible */
+                    body.vision-impaired nav,
+                    body.vision-impaired .navbar,
+                    body.vision-impaired [role="navigation"] {
+                        background-color: #000000 !important;
+                        color: #ffffff !important;
+                        border: 2px solid #ffffff !important;
+                    }
+                    
+                    body.vision-impaired nav a,
+                    body.vision-impaired .navbar a,
+                    body.vision-impaired [role="navigation"] a {
+                        color: #ffffff !important;
+                        background-color: #000000 !important;
+                        padding: 8px 12px !important;
+                        margin: 2px !important;
+                        border: 1px solid #ffffff !important;
+                    }
+                    
+                    /* 7. HEADING ENHANCEMENT - Make headings more prominent */
+                    body.vision-impaired h1,
+                    body.vision-impaired h2,
+                    body.vision-impaired h3,
+                    body.vision-impaired h4,
+                    body.vision-impaired h5,
+                    body.vision-impaired h6 {
+                        color: #000000 !important;
+                        background-color: #ffff00 !important;
+                        padding: 4px 8px !important;
+                        border: 2px solid #000000 !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    /* 8. TABLE ENHANCEMENT - Make tables more readable */
+                    body.vision-impaired table {
+                        border: 2px solid #000000 !important;
+                        border-collapse: collapse !important;
+                    }
+                    
+                    body.vision-impaired th,
+                    body.vision-impaired td {
+                        border: 1px solid #000000 !important;
+                        padding: 8px !important;
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                    }
+                    
+                    body.vision-impaired th {
+                        background-color: #000000 !important;
+                        color: #ffffff !important;
+                        font-weight: bold !important;
+                    }
+                    
+                    /* 9. SCROLLBAR ENHANCEMENT - Make scrollbars more visible */
+                    body.vision-impaired ::-webkit-scrollbar {
+                        width: 20px !important;
+                        height: 20px !important;
+                    }
+                    
+                    body.vision-impaired ::-webkit-scrollbar-track {
+                        background: #ffffff !important;
+                        border: 2px solid #000000 !important;
+                    }
+                    
+                    body.vision-impaired ::-webkit-scrollbar-thumb {
+                        background: #000000 !important;
+                        border: 2px solid #ffffff !important;
+                    }
+                    
+                    /* 10. RESPONSIVE ADJUSTMENTS - Ensure mobile compatibility */
+                    @media (max-width: 768px) {
+                        html.vision-impaired {
+                            zoom: 1.15 !important;
+                            transform: scale(1.15) !important;
+                            width: 87% !important;
+                            height: 87% !important;
+                        }
+                    }
+                    
+                    /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
+                    body.vision-impaired * {
+                        box-sizing: border-box !important;
+                    }
+                    
+                    /* 12. ENHANCE INTERACTIVE ELEMENTS */
+                    body.vision-impaired button:hover,
+                    body.vision-impaired a:hover,
+                    body.vision-impaired [role="button"]:hover {
+                        background-color: #ffff00 !important;
+                        color: #000000 !important;
+                        transform: scale(1.05) !important;
+                    }
+                `;
+                
+                document.head.appendChild(style);
+                console.log('Accessibility Widget: Vision impaired comprehensive styles applied');
+                
+            } catch (error) {
+                console.warn('Accessibility Widget: Failed to apply vision impaired styles', error);
             }
         }
 
@@ -23351,38 +23636,11 @@ class AccessibilityWidget {
                 this.settings['vision-impaired'] = false;
                 document.body.classList.remove('vision-impaired');
 
-                // Restore any inline font-size/line-height we set
-                if (this.__vi_scaled) {
-                    const textSelector = 'p, span, a, li, td, th, label, small, em, strong, i, b, input, textarea, select, button';
-                    document.querySelectorAll(textSelector).forEach(el => {
-                        if (this.__vi_scaled.has(el)) {
-                            el.style.fontSize = '';
-                            el.style.lineHeight = '';
-                        }
-                    });
-                    this.__vi_scaled = new WeakSet();
-                }
-
-                // Disconnect observer if present
-                if (this.__vi_observer) {
-                    try { this.__vi_observer.disconnect(); } catch(_) {}
-                    this.__vi_observer = null;
-                }
-
-                // Restore paddings and line-height on interactive elements
-                if (this.__vi_locked) {
-                    const interactiveSelectors = 'a, button, [role="button"], input, select, textarea, [tabindex]';
-                    document.querySelectorAll(interactiveSelectors).forEach(el => {
-                        const lock = this.__vi_locked.get(el);
-                        if (lock) {
-                            el.style.paddingTop = '';
-                            el.style.paddingRight = '';
-                            el.style.paddingBottom = '';
-                            el.style.paddingLeft = '';
-                            el.style.lineHeight = '';
-                            this.__vi_locked.delete(el);
-                        }
-                    });
+                // Remove comprehensive vision impaired styles
+                const existingStyle = document.getElementById('vision-impaired-comprehensive');
+                if (existingStyle) {
+                    existingStyle.remove();
+                    console.log('Accessibility Widget: Vision impaired comprehensive styles removed');
                 }
 
                 // Persist and sync
