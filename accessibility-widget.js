@@ -24171,11 +24171,11 @@ class AccessibilityWidget {
     
                 height: 150px;
     
-                /* Transparent spotlight: no white cast inside */
-                background: transparent;
-                backdrop-filter: none;
-                /* Subtle edge only for visual guidance */
-                box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+                /* Subtle brightening effect for focus area */
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: brightness(1.1);
+                /* Visible border for guidance */
+                box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
                 filter: none;
     
                 pointer-events: none;
@@ -24308,11 +24308,67 @@ class AccessibilityWidget {
     
         addCognitiveBoxes() {
     
-            // Add boxes around buttons and links (excluding accessibility panel)
+            // Add boxes around headings, buttons and links (excluding accessibility panel)
+    
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
             const links = document.querySelectorAll('a');
+    
+            
+    
+            // Process headings
+    
+            headings.forEach(heading => {
+    
+                // Skip if heading is inside accessibility panel
+    
+                if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+    
+                    return;
+    
+                }
+    
+                
+    
+                // Create wrapper if not already done
+    
+                if (!heading.dataset.cognitiveBoxed) {
+    
+                    const wrapper = document.createElement('div');
+    
+                    wrapper.style.cssText = `
+    
+                        display: inline-block;
+    
+                        border: 2px solid #6366f1;
+    
+                        border-radius: 6px;
+    
+                        padding: 4px 8px;
+    
+                        margin: 2px;
+    
+                        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    
+                        background: transparent;
+    
+                    `;
+    
+                    
+    
+                    // Insert wrapper before heading and move heading inside
+    
+                    heading.parentNode.insertBefore(wrapper, heading);
+    
+                    wrapper.appendChild(heading);
+    
+                    heading.dataset.cognitiveBoxed = 'true';
+    
+                }
+    
+            });
     
             
     
@@ -24340,7 +24396,7 @@ class AccessibilityWidget {
     
                         display: inline-block;
     
-                        border: 2px solid #6366f1;
+                        border: 2px solid #f97316;
     
                         border-radius: 6px;
     
@@ -24348,7 +24404,7 @@ class AccessibilityWidget {
     
                         margin: 2px;
     
-                        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+                        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
@@ -24394,7 +24450,7 @@ class AccessibilityWidget {
     
                         display: inline-block;
     
-                        border: 2px solid #6366f1;
+                        border: 2px solid #f97316;
     
                         border-radius: 4px;
     
@@ -24402,7 +24458,7 @@ class AccessibilityWidget {
     
                         margin: 1px;
     
-                        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+                        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
@@ -24424,13 +24480,37 @@ class AccessibilityWidget {
     
             
     
-            console.log('Accessibility Widget: Cognitive boxes added to', buttons.length, 'buttons and', links.length, 'links');
+            console.log('Accessibility Widget: Cognitive boxes added to', headings.length, 'headings,', buttons.length, 'buttons and', links.length, 'links');
     
         }
     
     
     
         removeCognitiveBoxes() {
+    
+            // Remove boxes from headings
+    
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    
+            headings.forEach(heading => {
+    
+                if (heading.dataset.cognitiveBoxed && heading.parentNode && heading.parentNode.style.border) {
+    
+                    const wrapper = heading.parentNode;
+    
+                    const grandParent = wrapper.parentNode;
+    
+                    grandParent.insertBefore(heading, wrapper);
+    
+                    grandParent.removeChild(wrapper);
+    
+                    delete heading.dataset.cognitiveBoxed;
+    
+                }
+    
+            });
+    
+            
     
             // Remove boxes from buttons
     
