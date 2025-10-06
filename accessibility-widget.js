@@ -1092,28 +1092,30 @@ function applyVisionImpaired(on) {
         style.textContent = on ? `
             /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
             
-            /* 1. NO SCALING - Just enhance readability without breaking layout */
+            /* 1. LAYOUT CORRECTION: Use transform: scale() for safer, contained scaling. */
             html.vision-impaired {
-                /* Minimal scaling without layout break */
-                zoom: 1.04 !important;
-                /* Prevent horizontal scrollbars from subpixel zoom rounding */
-                overflow-x: hidden !important;
-                /* Avoid extra vertical scrollbar from zoom rounding */
+                /* Prevents visual shift by keeping html at 100% width/height */
+                overflow-x: hidden !important; 
                 overflow-y: auto !important;
-                height: auto !important;
-                min-height: 100% !important;
-                width: 100% !important;
+                height: 100% !important;
             }
             
             body.vision-impaired {
-                /* Subtle global contrast boost without color shift */
+                /* Apply subtle scaling with transform, which is less likely to break layout */
+                transform: scale(1.06) !important;
+                transform-origin: top left !important; /* Scale from the top-left corner */
+                width: calc(100% / 1.06) !important; /* Compensate for the scale to fit content */
+                height: calc(100% / 1.06) !important; 
+                
+                /* Subtle global contrast boost */
                 filter: contrast(1.06) brightness(1.02) !important;
-                /* Prevent horizontal scrollbars from subpixel zoom rounding */
+                
+                /* Ensure no unexpected scrollbars from the scaling */
                 overflow-x: hidden !important;
-                /* Ensure page fills viewport without extra gap */
-                overflow-y: auto !important;
                 min-height: 100vh !important;
             }
+            
+            /* ... (Rest of your rules remain below) ... */
             
             /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
             body.vision-impaired p,
@@ -1182,10 +1184,13 @@ function applyVisionImpaired(on) {
                 /* No layout modifications */
             }
             
-            /* 10. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
+            /* 10. RESPONSIVE ADJUSTMENTS - Disable scaling on mobile */
             @media (max-width: 768px) {
-                html.vision-impaired {
-                    /* No zoom - preserve original layout */
+                body.vision-impaired {
+                    /* Reset scaling on smaller screens to prevent layout breakage */
+                    transform: none !important;
+                    width: 100% !important;
+                    height: auto !important;
                 }
             }
         ` : '';
