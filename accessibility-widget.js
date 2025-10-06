@@ -921,65 +921,67 @@
             }
         }
         
-        // CRITICAL: Stop JavaScript animations immediately for seizure-safe mode
-        try {
-            // Override requestAnimationFrame immediately
-            if (!window.__originalRequestAnimationFrame) {
-                window.__originalRequestAnimationFrame = window.requestAnimationFrame;
-            }
-            window.requestAnimationFrame = function(callback) {
-                // Block all animations in seizure-safe mode
-                console.log('Accessibility Widget: Blocking requestAnimationFrame for immediate seizure-safe');
-                return 0;
-            };
-            
-            // Stop Lottie animations immediately
-            if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                const lottieAnimations = window.lottie.getRegisteredAnimations();
-                lottieAnimations.forEach(animation => {
-                    try {
-                        if (animation && typeof animation.stop === 'function') {
-                            animation.stop();
+        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
+        if (seizureSafeFromStorage === 'true') {
+            try {
+                // Override requestAnimationFrame immediately
+                if (!window.__originalRequestAnimationFrame) {
+                    window.__originalRequestAnimationFrame = window.requestAnimationFrame;
+                }
+                window.requestAnimationFrame = function(callback) {
+                    // Block all animations in seizure-safe mode
+                    console.log('Accessibility Widget: Blocking requestAnimationFrame for immediate seizure-safe');
+                    return 0;
+                };
+                
+                // Stop Lottie animations immediately
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const lottieAnimations = window.lottie.getRegisteredAnimations();
+                    lottieAnimations.forEach(animation => {
+                        try {
+                            if (animation && typeof animation.stop === 'function') {
+                                animation.stop();
+                            }
+                            if (animation && typeof animation.pause === 'function') {
+                                animation.pause();
+                            }
+                        } catch (error) {
+                            console.warn('Accessibility Widget: Failed to stop Lottie animation immediately', error);
                         }
-                        if (animation && typeof animation.pause === 'function') {
-                            animation.pause();
+                    });
+                }
+                
+                // Stop GSAP animations immediately
+                if (typeof window.gsap !== 'undefined') {
+                    try {
+                        if (window.gsap.globalTimeline) {
+                            window.gsap.globalTimeline.pause();
+                        }
+                        if (window.gsap.killTweensOf) {
+                            window.gsap.killTweensOf("*");
                         }
                     } catch (error) {
-                        console.warn('Accessibility Widget: Failed to stop Lottie animation immediately', error);
+                        console.warn('Accessibility Widget: Failed to stop GSAP animations immediately', error);
                     }
-                });
-            }
-            
-            // Stop GSAP animations immediately
-            if (typeof window.gsap !== 'undefined') {
-                try {
-                    if (window.gsap.globalTimeline) {
-                        window.gsap.globalTimeline.pause();
-                    }
-                    if (window.gsap.killTweensOf) {
-                        window.gsap.killTweensOf("*");
-                    }
-                } catch (error) {
-                    console.warn('Accessibility Widget: Failed to stop GSAP animations immediately', error);
                 }
-            }
-            
-            // Stop jQuery animations immediately
-            if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
-                try {
-                    const $ = window.jQuery || window.$;
-                    if ($ && $.fx) {
-                        $.fx.off = true;
+                
+                // Stop jQuery animations immediately
+                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                    try {
+                        const $ = window.jQuery || window.$;
+                        if ($ && $.fx) {
+                            $.fx.off = true;
+                        }
+                    } catch (error) {
+                        console.warn('Accessibility Widget: Failed to stop jQuery animations immediately', error);
                     }
-                } catch (error) {
-                    console.warn('Accessibility Widget: Failed to stop jQuery animations immediately', error);
                 }
+                
+                console.log('Accessibility Widget: Immediate JavaScript animation stopping applied');
+                
+            } catch (jsError) {
+                console.warn('Accessibility Widget: Immediate JavaScript animation stopping failed', jsError);
             }
-            
-            console.log('Accessibility Widget: Immediate JavaScript animation stopping applied');
-            
-        } catch (jsError) {
-            console.warn('Accessibility Widget: Immediate JavaScript animation stopping failed', jsError);
         }
         
     } catch (e) {
@@ -22155,32 +22157,47 @@ class AccessibilityWidget {
                     }
                 });
                 
-                // Replace animated GIFs with static placeholders
-                const images = document.querySelectorAll('img[src*=".gif"], img[src*=".apng"], img[src*=".webp"]');
-                images.forEach(img => {
+                // Replace animated GIFs with static placeholders (only for seizure-safe mode)
+                // Only target images that are likely to be animated based on class names or data attributes
+                const animatedImages = document.querySelectorAll('img[class*="animated"], img[class*="gif"], img[data-animated], img[data-gif], img[src*=".gif"][class*="animate"], img[src*=".apng"][class*="animate"], img[src*=".webp"][class*="animate"]');
+                animatedImages.forEach(img => {
                     try {
-                        // Check if the image is likely animated (GIF, APNG, or animated WebP)
-                        const src = img.src || img.getAttribute('src') || '';
-                        if (src.includes('.gif') || src.includes('.apng') || src.includes('.webp')) {
+                        // Only replace if the image has animation-related classes or attributes
+                        const hasAnimationClass = img.className && (
+                            img.className.includes('animated') || 
+                            img.className.includes('gif') || 
+                            img.className.includes('animate') ||
+                            img.className.includes('motion')
+                        );
+                        const hasAnimationData = img.dataset.animated || img.dataset.gif;
+                        
+                        if (hasAnimationClass || hasAnimationData) {
+                            const src = img.src || img.getAttribute('src') || '';
+                            
                             // Store original src for potential restoration
                             if (!img.dataset.originalSrc) {
                                 img.dataset.originalSrc = src;
                             }
                             
-                            // Create a static placeholder
-                            // For GIFs, try to use the first frame or a static version
+                            // Create a static placeholder only for confirmed animated images
                             if (src.includes('.gif')) {
                                 // Try to replace with a static version if available
                                 const staticSrc = src.replace('.gif', '.jpg').replace('.gif', '.png');
                                 img.src = staticSrc;
                                 img.dataset.animatedReplaced = 'true';
                                 console.log('Accessibility Widget: Replaced animated GIF with static image');
-                            } else if (src.includes('.apng') || src.includes('.webp')) {
-                                // For APNG and WebP, try to replace with static versions
-                                const staticSrc = src.replace('.apng', '.png').replace('.webp', '.jpg');
+                            } else if (src.includes('.apng')) {
+                                // For APNG, try to replace with static PNG
+                                const staticSrc = src.replace('.apng', '.png');
                                 img.src = staticSrc;
                                 img.dataset.animatedReplaced = 'true';
-                                console.log('Accessibility Widget: Replaced animated image with static version');
+                                console.log('Accessibility Widget: Replaced animated APNG with static PNG');
+                            } else if (src.includes('.webp')) {
+                                // For WebP, try to replace with static JPG
+                                const staticSrc = src.replace('.webp', '.jpg');
+                                img.src = staticSrc;
+                                img.dataset.animatedReplaced = 'true';
+                                console.log('Accessibility Widget: Replaced animated WebP with static JPG');
                             }
                         }
                     } catch (error) {
