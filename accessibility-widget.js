@@ -1,4 +1,4 @@
-// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+]// CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
     try {
         // Check localStorage immediately for seizure-safe mode
@@ -1088,170 +1088,93 @@ function applyVisionImpaired(on) {
             document.head.appendChild(style);
         }
         style.textContent = on ? `
-            /* VISION IMPAIRED: Comprehensive Website Scaling and Contrast Enhancement */
+            /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
             
-            /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+            /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
             html.vision-impaired {
-                zoom: 1.25 !important;
-                transform: scale(1.25) !important;
-                transform-origin: top left !important;
-                width: 80% !important;
-                height: 80% !important;
+                zoom: 1.1 !important;
             }
             
+            /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
             body.vision-impaired {
-                transform: scale(1.25) !important;
-                transform-origin: top left !important;
-                width: 80% !important;
-                height: 80% !important;
+                /* Slightly enhance text contrast without changing colors */
+                filter: contrast(1.1) brightness(1.05) !important;
             }
             
-            /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
-            body.vision-impaired * {
-                color: #000000 !important;
-                text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+            /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+            body.vision-impaired p,
+            body.vision-impaired span,
+            body.vision-impaired div,
+            body.vision-impaired li,
+            body.vision-impaired td,
+            body.vision-impaired th {
+                /* Slightly improve text contrast */
+                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                /* Slightly improve font weight for better readability */
+                font-weight: 500 !important;
             }
             
-            body.vision-impaired {
-                background-color: #ffffff !important;
-                color: #000000 !important;
+            /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+            body.vision-impaired *:focus {
+                outline: 2px solid #0066cc !important;
+                outline-offset: 1px !important;
             }
             
+            /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
             body.vision-impaired a {
-                color: #0000ff !important;
-                text-decoration: underline !important;
-                font-weight: bold !important;
+                /* Slightly improve link contrast */
+                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                /* Ensure links are slightly more visible */
+                font-weight: 500 !important;
             }
             
-            body.vision-impaired a:visited {
-                color: #800080 !important;
-            }
-            
-            body.vision-impaired a:hover {
-                color: #ff0000 !important;
-                background-color: #ffff00 !important;
-            }
-            
+            /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
             body.vision-impaired button,
             body.vision-impaired input[type="button"],
             body.vision-impaired input[type="submit"],
             body.vision-impaired input[type="reset"] {
-                background-color: #0000ff !important;
-                color: #ffffff !important;
-                border: 2px solid #000000 !important;
-                font-weight: bold !important;
+                /* Slightly improve button text contrast */
+                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                font-weight: 500 !important;
             }
             
+            /* 7. IMPROVE FORM ELEMENT READABILITY */
             body.vision-impaired input,
             body.vision-impaired textarea,
             body.vision-impaired select {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-                border: 2px solid #000000 !important;
+                /* Slightly improve form text contrast */
+                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                font-weight: 500 !important;
             }
             
-            body.vision-impaired * {
-                font-family: Arial, Helvetica, sans-serif !important;
-                font-weight: bold !important;
-                line-height: 1.6 !important;
-                letter-spacing: 0.1em !important;
-            }
-            
-            body.vision-impaired *:focus {
-                outline: 3px solid #ff0000 !important;
-                outline-offset: 2px !important;
-                background-color: #ffff00 !important;
-            }
-            
-            body.vision-impaired img {
-                border: 2px solid #000000 !important;
-                filter: contrast(1.2) brightness(1.1) !important;
-            }
-            
-            body.vision-impaired nav,
-            body.vision-impaired .navbar,
-            body.vision-impaired [role="navigation"] {
-                background-color: #000000 !important;
-                color: #ffffff !important;
-                border: 2px solid #ffffff !important;
-            }
-            
-            body.vision-impaired nav a,
-            body.vision-impaired .navbar a,
-            body.vision-impaired [role="navigation"] a {
-                color: #ffffff !important;
-                background-color: #000000 !important;
-                padding: 8px 12px !important;
-                margin: 2px !important;
-                border: 1px solid #ffffff !important;
-            }
-            
+            /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
             body.vision-impaired h1,
             body.vision-impaired h2,
             body.vision-impaired h3,
             body.vision-impaired h4,
             body.vision-impaired h5,
             body.vision-impaired h6 {
-                color: #000000 !important;
-                background-color: #ffff00 !important;
-                padding: 4px 8px !important;
-                border: 2px solid #000000 !important;
-                font-weight: bold !important;
+                /* Slightly improve heading contrast */
+                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                font-weight: 600 !important;
             }
             
-            body.vision-impaired table {
-                border: 2px solid #000000 !important;
-                border-collapse: collapse !important;
+            /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+            body.vision-impaired img {
+                /* Slightly improve image contrast */
+                filter: contrast(1.05) brightness(1.02) !important;
             }
             
-            body.vision-impaired th,
-            body.vision-impaired td {
-                border: 1px solid #000000 !important;
-                padding: 8px !important;
-                background-color: #ffffff !important;
-                color: #000000 !important;
-            }
-            
-            body.vision-impaired th {
-                background-color: #000000 !important;
-                color: #ffffff !important;
-                font-weight: bold !important;
-            }
-            
-            body.vision-impaired ::-webkit-scrollbar {
-                width: 20px !important;
-                height: 20px !important;
-            }
-            
-            body.vision-impaired ::-webkit-scrollbar-track {
-                background: #ffffff !important;
-                border: 2px solid #000000 !important;
-            }
-            
-            body.vision-impaired ::-webkit-scrollbar-thumb {
-                background: #000000 !important;
-                border: 2px solid #ffffff !important;
-            }
-            
+            /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
             @media (max-width: 768px) {
                 html.vision-impaired {
-                    zoom: 1.15 !important;
-                    transform: scale(1.15) !important;
-                    width: 87% !important;
-                    height: 87% !important;
+                    zoom: 1.05 !important;
                 }
             }
             
+            /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
             body.vision-impaired * {
                 box-sizing: border-box !important;
-            }
-            
-            body.vision-impaired button:hover,
-            body.vision-impaired a:hover,
-            body.vision-impaired [role="button"]:hover {
-                background-color: #ffff00 !important;
-                color: #000000 !important;
-                transform: scale(1.05) !important;
             }
         ` : '';
     } catch (_) {}
@@ -1302,170 +1225,93 @@ function applyVisionImpaired(on) {
                 const viStyle = document.createElement('style');
                 viStyle.id = 'accessibility-vision-impaired-immediate-early';
                 viStyle.textContent = `
-                    /* VISION IMPAIRED: Immediate Comprehensive Website Scaling and Contrast Enhancement */
+                    /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
-                    /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.25 !important;
-                        transform: scale(1.25) !important;
-                        transform-origin: top left !important;
-                        width: 80% !important;
-                        height: 80% !important;
+                        zoom: 1.1 !important;
                     }
                     
+                    /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
                     body.vision-impaired {
-                        transform: scale(1.25) !important;
-                        transform-origin: top left !important;
-                        width: 80% !important;
-                        height: 80% !important;
+                        /* Slightly enhance text contrast without changing colors */
+                        filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
-                    /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
-                    body.vision-impaired * {
-                        color: #000000 !important;
-                        text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+                    /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+                    body.vision-impaired p,
+                    body.vision-impaired span,
+                    body.vision-impaired div,
+                    body.vision-impaired li,
+                    body.vision-impaired td,
+                    body.vision-impaired th {
+                        /* Slightly improve text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                        /* Slightly improve font weight for better readability */
+                        font-weight: 500 !important;
                     }
                     
-                    body.vision-impaired {
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
+                    /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+                    body.vision-impaired *:focus {
+                        outline: 2px solid #0066cc !important;
+                        outline-offset: 1px !important;
                     }
                     
+                    /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
                     body.vision-impaired a {
-                        color: #0000ff !important;
-                        text-decoration: underline !important;
-                        font-weight: bold !important;
+                        /* Slightly improve link contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        /* Ensure links are slightly more visible */
+                        font-weight: 500 !important;
                     }
                     
-                    body.vision-impaired a:visited {
-                        color: #800080 !important;
-                    }
-                    
-                    body.vision-impaired a:hover {
-                        color: #ff0000 !important;
-                        background-color: #ffff00 !important;
-                    }
-                    
+                    /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
                     body.vision-impaired button,
                     body.vision-impaired input[type="button"],
                     body.vision-impaired input[type="submit"],
                     body.vision-impaired input[type="reset"] {
-                        background-color: #0000ff !important;
-                        color: #ffffff !important;
-                        border: 2px solid #000000 !important;
-                        font-weight: bold !important;
+                        /* Slightly improve button text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        font-weight: 500 !important;
                     }
                     
+                    /* 7. IMPROVE FORM ELEMENT READABILITY */
                     body.vision-impaired input,
                     body.vision-impaired textarea,
                     body.vision-impaired select {
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
-                        border: 2px solid #000000 !important;
+                        /* Slightly improve form text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        font-weight: 500 !important;
                     }
                     
-                    body.vision-impaired * {
-                        font-family: Arial, Helvetica, sans-serif !important;
-                        font-weight: bold !important;
-                        line-height: 1.6 !important;
-                        letter-spacing: 0.1em !important;
-                    }
-                    
-                    body.vision-impaired *:focus {
-                        outline: 3px solid #ff0000 !important;
-                        outline-offset: 2px !important;
-                        background-color: #ffff00 !important;
-                    }
-                    
-                    body.vision-impaired img {
-                        border: 2px solid #000000 !important;
-                        filter: contrast(1.2) brightness(1.1) !important;
-                    }
-                    
-                    body.vision-impaired nav,
-                    body.vision-impaired .navbar,
-                    body.vision-impaired [role="navigation"] {
-                        background-color: #000000 !important;
-                        color: #ffffff !important;
-                        border: 2px solid #ffffff !important;
-                    }
-                    
-                    body.vision-impaired nav a,
-                    body.vision-impaired .navbar a,
-                    body.vision-impaired [role="navigation"] a {
-                        color: #ffffff !important;
-                        background-color: #000000 !important;
-                        padding: 8px 12px !important;
-                        margin: 2px !important;
-                        border: 1px solid #ffffff !important;
-                    }
-                    
+                    /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
                     body.vision-impaired h1,
                     body.vision-impaired h2,
                     body.vision-impaired h3,
                     body.vision-impaired h4,
                     body.vision-impaired h5,
                     body.vision-impaired h6 {
-                        color: #000000 !important;
-                        background-color: #ffff00 !important;
-                        padding: 4px 8px !important;
-                        border: 2px solid #000000 !important;
-                        font-weight: bold !important;
+                        /* Slightly improve heading contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                        font-weight: 600 !important;
                     }
                     
-                    body.vision-impaired table {
-                        border: 2px solid #000000 !important;
-                        border-collapse: collapse !important;
+                    /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+                    body.vision-impaired img {
+                        /* Slightly improve image contrast */
+                        filter: contrast(1.05) brightness(1.02) !important;
                     }
                     
-                    body.vision-impaired th,
-                    body.vision-impaired td {
-                        border: 1px solid #000000 !important;
-                        padding: 8px !important;
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
-                    }
-                    
-                    body.vision-impaired th {
-                        background-color: #000000 !important;
-                        color: #ffffff !important;
-                        font-weight: bold !important;
-                    }
-                    
-                    body.vision-impaired ::-webkit-scrollbar {
-                        width: 20px !important;
-                        height: 20px !important;
-                    }
-                    
-                    body.vision-impaired ::-webkit-scrollbar-track {
-                        background: #ffffff !important;
-                        border: 2px solid #000000 !important;
-                    }
-                    
-                    body.vision-impaired ::-webkit-scrollbar-thumb {
-                        background: #000000 !important;
-                        border: 2px solid #ffffff !important;
-                    }
-                    
+                    /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.15 !important;
-                            transform: scale(1.15) !important;
-                            width: 87% !important;
-                            height: 87% !important;
+                            zoom: 1.05 !important;
                         }
                     }
                     
+                    /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
                     body.vision-impaired * {
                         box-sizing: border-box !important;
-                    }
-                    
-                    body.vision-impaired button:hover,
-                    body.vision-impaired a:hover,
-                    body.vision-impaired [role="button"]:hover {
-                        background-color: #ffff00 !important;
-                        color: #000000 !important;
-                        transform: scale(1.05) !important;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -23594,186 +23440,93 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'vision-impaired-comprehensive';
                 style.textContent = `
-                    /* VISION IMPAIRED: Comprehensive Website Scaling and Contrast Enhancement */
+                    /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
-                    /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.25 !important;
-                        transform: scale(1.25) !important;
-                        transform-origin: top left !important;
-                        width: 80% !important; /* Compensate for scaling */
-                        height: 80% !important; /* Compensate for scaling */
+                        zoom: 1.1 !important;
                     }
                     
-                    /* Alternative scaling approach for better browser compatibility */
+                    /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
                     body.vision-impaired {
-                        transform: scale(1.25) !important;
-                        transform-origin: top left !important;
-                        width: 80% !important;
-                        height: 80% !important;
+                        /* Slightly enhance text contrast without changing colors */
+                        filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
-                    /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
-                    body.vision-impaired * {
-                        /* Enhance text contrast */
-                        color: #000000 !important;
-                        text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+                    /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+                    body.vision-impaired p,
+                    body.vision-impaired span,
+                    body.vision-impaired div,
+                    body.vision-impaired li,
+                    body.vision-impaired td,
+                    body.vision-impaired th {
+                        /* Slightly improve text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                        /* Slightly improve font weight for better readability */
+                        font-weight: 500 !important;
                     }
                     
-                    /* Enhance background contrast */
-                    body.vision-impaired {
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
+                    /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+                    body.vision-impaired *:focus {
+                        outline: 2px solid #0066cc !important;
+                        outline-offset: 1px !important;
                     }
                     
-                    /* Enhance link contrast */
+                    /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
                     body.vision-impaired a {
-                        color: #0000ff !important;
-                        text-decoration: underline !important;
-                        font-weight: bold !important;
+                        /* Slightly improve link contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        /* Ensure links are slightly more visible */
+                        font-weight: 500 !important;
                     }
                     
-                    body.vision-impaired a:visited {
-                        color: #800080 !important;
-                    }
-                    
-                    body.vision-impaired a:hover {
-                        color: #ff0000 !important;
-                        background-color: #ffff00 !important;
-                    }
-                    
-                    /* Enhance button contrast */
+                    /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
                     body.vision-impaired button,
                     body.vision-impaired input[type="button"],
                     body.vision-impaired input[type="submit"],
                     body.vision-impaired input[type="reset"] {
-                        background-color: #0000ff !important;
-                        color: #ffffff !important;
-                        border: 2px solid #000000 !important;
-                        font-weight: bold !important;
+                        /* Slightly improve button text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        font-weight: 500 !important;
                     }
                     
-                    /* Enhance form elements contrast */
+                    /* 7. IMPROVE FORM ELEMENT READABILITY */
                     body.vision-impaired input,
                     body.vision-impaired textarea,
                     body.vision-impaired select {
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
-                        border: 2px solid #000000 !important;
+                        /* Slightly improve form text contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                        font-weight: 500 !important;
                     }
                     
-                    /* 3. FONT ENHANCEMENT - Improve readability */
-                    body.vision-impaired * {
-                        font-family: Arial, Helvetica, sans-serif !important;
-                        font-weight: bold !important;
-                        line-height: 1.6 !important;
-                        letter-spacing: 0.1em !important;
-                    }
-                    
-                    /* 4. FOCUS ENHANCEMENT - Make focus indicators more visible */
-                    body.vision-impaired *:focus {
-                        outline: 3px solid #ff0000 !important;
-                        outline-offset: 2px !important;
-                        background-color: #ffff00 !important;
-                    }
-                    
-                    /* 5. IMAGE ENHANCEMENT - Add borders to images for better visibility */
-                    body.vision-impaired img {
-                        border: 2px solid #000000 !important;
-                        filter: contrast(1.2) brightness(1.1) !important;
-                    }
-                    
-                    /* 6. NAVIGATION ENHANCEMENT - Make navigation more visible */
-                    body.vision-impaired nav,
-                    body.vision-impaired .navbar,
-                    body.vision-impaired [role="navigation"] {
-                        background-color: #000000 !important;
-                        color: #ffffff !important;
-                        border: 2px solid #ffffff !important;
-                    }
-                    
-                    body.vision-impaired nav a,
-                    body.vision-impaired .navbar a,
-                    body.vision-impaired [role="navigation"] a {
-                        color: #ffffff !important;
-                        background-color: #000000 !important;
-                        padding: 8px 12px !important;
-                        margin: 2px !important;
-                        border: 1px solid #ffffff !important;
-                    }
-                    
-                    /* 7. HEADING ENHANCEMENT - Make headings more prominent */
+                    /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
                     body.vision-impaired h1,
                     body.vision-impaired h2,
                     body.vision-impaired h3,
                     body.vision-impaired h4,
                     body.vision-impaired h5,
                     body.vision-impaired h6 {
-                        color: #000000 !important;
-                        background-color: #ffff00 !important;
-                        padding: 4px 8px !important;
-                        border: 2px solid #000000 !important;
-                        font-weight: bold !important;
+                        /* Slightly improve heading contrast */
+                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+                        font-weight: 600 !important;
                     }
                     
-                    /* 8. TABLE ENHANCEMENT - Make tables more readable */
-                    body.vision-impaired table {
-                        border: 2px solid #000000 !important;
-                        border-collapse: collapse !important;
+                    /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+                    body.vision-impaired img {
+                        /* Slightly improve image contrast */
+                        filter: contrast(1.05) brightness(1.02) !important;
                     }
                     
-                    body.vision-impaired th,
-                    body.vision-impaired td {
-                        border: 1px solid #000000 !important;
-                        padding: 8px !important;
-                        background-color: #ffffff !important;
-                        color: #000000 !important;
-                    }
-                    
-                    body.vision-impaired th {
-                        background-color: #000000 !important;
-                        color: #ffffff !important;
-                        font-weight: bold !important;
-                    }
-                    
-                    /* 9. SCROLLBAR ENHANCEMENT - Make scrollbars more visible */
-                    body.vision-impaired ::-webkit-scrollbar {
-                        width: 20px !important;
-                        height: 20px !important;
-                    }
-                    
-                    body.vision-impaired ::-webkit-scrollbar-track {
-                        background: #ffffff !important;
-                        border: 2px solid #000000 !important;
-                    }
-                    
-                    body.vision-impaired ::-webkit-scrollbar-thumb {
-                        background: #000000 !important;
-                        border: 2px solid #ffffff !important;
-                    }
-                    
-                    /* 10. RESPONSIVE ADJUSTMENTS - Ensure mobile compatibility */
+                    /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.15 !important;
-                            transform: scale(1.15) !important;
-                            width: 87% !important;
-                            height: 87% !important;
+                            zoom: 1.05 !important;
                         }
                     }
                     
                     /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
                     body.vision-impaired * {
                         box-sizing: border-box !important;
-                    }
-                    
-                    /* 12. ENHANCE INTERACTIVE ELEMENTS */
-                    body.vision-impaired button:hover,
-                    body.vision-impaired a:hover,
-                    body.vision-impaired [role="button"]:hover {
-                        background-color: #ffff00 !important;
-                        color: #000000 !important;
-                        transform: scale(1.05) !important;
                     }
                 `;
                 
