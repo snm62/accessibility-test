@@ -1076,7 +1076,7 @@ function applyUniversalStopMotion(enabled) {
     } catch (_) {}
 }
 
-// Vision Impaired helper: apply text-size-only adjustment
+// Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
 function applyVisionImpaired(on) {
     try {
         document.documentElement.classList.toggle('vision-impaired', !!on);
@@ -1088,16 +1088,170 @@ function applyVisionImpaired(on) {
             document.head.appendChild(style);
         }
         style.textContent = on ? `
-            html.vision-impaired, body.vision-impaired { }
-            /* Do NOT scale navigation/brand areas */
-            body.vision-impaired :where(nav, header, .navbar, [role="navigation"]) * { font-size: inherit !important; }
-            body.vision-impaired :where(.logo, [class*="logo"], [class*="icon"], i, svg) { font-size: inherit !important; }
-            /* Scale body content only */
-            body.vision-impaired :where(main, article, section, .content, .container, .rich-text, .prose) :where(p,li,span,a,label,div,input,textarea,button,small) {
-                font-size: 1.15em !important;
+            /* VISION IMPAIRED: Comprehensive Website Scaling and Contrast Enhancement */
+            
+            /* 1. WEBSITE SCALING - Scale entire website by 1.25x while preserving layout */
+            html.vision-impaired {
+                zoom: 1.25 !important;
+                transform: scale(1.25) !important;
+                transform-origin: top left !important;
+                width: 80% !important;
+                height: 80% !important;
             }
-            body.vision-impaired :where(main, article, section, .content, .container, .rich-text, .prose) :where(h1,h2,h3,h4,h5,h6) {
-                font-size: 1.08em !important;
+            
+            body.vision-impaired {
+                transform: scale(1.25) !important;
+                transform-origin: top left !important;
+                width: 80% !important;
+                height: 80% !important;
+            }
+            
+            /* 2. CONTRAST ENHANCEMENT - Increase contrast for better visibility */
+            body.vision-impaired * {
+                color: #000000 !important;
+                text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+            }
+            
+            body.vision-impaired {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            
+            body.vision-impaired a {
+                color: #0000ff !important;
+                text-decoration: underline !important;
+                font-weight: bold !important;
+            }
+            
+            body.vision-impaired a:visited {
+                color: #800080 !important;
+            }
+            
+            body.vision-impaired a:hover {
+                color: #ff0000 !important;
+                background-color: #ffff00 !important;
+            }
+            
+            body.vision-impaired button,
+            body.vision-impaired input[type="button"],
+            body.vision-impaired input[type="submit"],
+            body.vision-impaired input[type="reset"] {
+                background-color: #0000ff !important;
+                color: #ffffff !important;
+                border: 2px solid #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            body.vision-impaired input,
+            body.vision-impaired textarea,
+            body.vision-impaired select {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 2px solid #000000 !important;
+            }
+            
+            body.vision-impaired * {
+                font-family: Arial, Helvetica, sans-serif !important;
+                font-weight: bold !important;
+                line-height: 1.6 !important;
+                letter-spacing: 0.1em !important;
+            }
+            
+            body.vision-impaired *:focus {
+                outline: 3px solid #ff0000 !important;
+                outline-offset: 2px !important;
+                background-color: #ffff00 !important;
+            }
+            
+            body.vision-impaired img {
+                border: 2px solid #000000 !important;
+                filter: contrast(1.2) brightness(1.1) !important;
+            }
+            
+            body.vision-impaired nav,
+            body.vision-impaired .navbar,
+            body.vision-impaired [role="navigation"] {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                border: 2px solid #ffffff !important;
+            }
+            
+            body.vision-impaired nav a,
+            body.vision-impaired .navbar a,
+            body.vision-impaired [role="navigation"] a {
+                color: #ffffff !important;
+                background-color: #000000 !important;
+                padding: 8px 12px !important;
+                margin: 2px !important;
+                border: 1px solid #ffffff !important;
+            }
+            
+            body.vision-impaired h1,
+            body.vision-impaired h2,
+            body.vision-impaired h3,
+            body.vision-impaired h4,
+            body.vision-impaired h5,
+            body.vision-impaired h6 {
+                color: #000000 !important;
+                background-color: #ffff00 !important;
+                padding: 4px 8px !important;
+                border: 2px solid #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            body.vision-impaired table {
+                border: 2px solid #000000 !important;
+                border-collapse: collapse !important;
+            }
+            
+            body.vision-impaired th,
+            body.vision-impaired td {
+                border: 1px solid #000000 !important;
+                padding: 8px !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            
+            body.vision-impaired th {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                font-weight: bold !important;
+            }
+            
+            body.vision-impaired ::-webkit-scrollbar {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            
+            body.vision-impaired ::-webkit-scrollbar-track {
+                background: #ffffff !important;
+                border: 2px solid #000000 !important;
+            }
+            
+            body.vision-impaired ::-webkit-scrollbar-thumb {
+                background: #000000 !important;
+                border: 2px solid #ffffff !important;
+            }
+            
+            @media (max-width: 768px) {
+                html.vision-impaired {
+                    zoom: 1.15 !important;
+                    transform: scale(1.15) !important;
+                    width: 87% !important;
+                    height: 87% !important;
+                }
+            }
+            
+            body.vision-impaired * {
+                box-sizing: border-box !important;
+            }
+            
+            body.vision-impaired button:hover,
+            body.vision-impaired a:hover,
+            body.vision-impaired [role="button"]:hover {
+                background-color: #ffff00 !important;
+                color: #000000 !important;
+                transform: scale(1.05) !important;
             }
         ` : '';
     } catch (_) {}
