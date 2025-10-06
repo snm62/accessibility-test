@@ -757,7 +757,7 @@
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
                                     if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
-                                    el.style.transform = 'none';
+                                        el.style.transform = 'none';
                                     }
                                     el.style.opacity = '1';
                                 } catch (_) {}
@@ -1085,7 +1085,29 @@ function applyVisionImpaired(on) {
         document.documentElement.classList.toggle('vision-impaired', !!on);
         document.body.classList.toggle('vision-impaired', !!on);
         
-        // --- SIMPLIFIED APPROACH - No wrapper needed ---
+        // --- NEW WRAPPER LOGIC ---
+        let wrapper = document.getElementById('accessibility-scale-wrapper');
+        
+        if (on && !wrapper) {
+            // If turning ON and wrapper doesn't exist, create it.
+            wrapper = document.createElement('div');
+            wrapper.id = 'accessibility-scale-wrapper';
+            
+            // Move ALL current body children INTO the wrapper
+            while (document.body.firstChild) {
+                wrapper.appendChild(document.body.firstChild);
+            }
+            // Insert the wrapper into the empty body
+            document.body.appendChild(wrapper);
+        } else if (!on && wrapper) {
+            // If turning OFF and wrapper exists, unwrap the content.
+            while (wrapper.firstChild) {
+                document.body.appendChild(wrapper.firstChild);
+            }
+            // Remove the empty wrapper
+            document.body.removeChild(wrapper);
+        }
+        // --- END WRAPPER LOGIC ---
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
         if (!style) {
@@ -1096,43 +1118,31 @@ function applyVisionImpaired(on) {
         
         // ... (Update CSS below) ...
         style.textContent = on ? `
-            /* VISION IMPAIRED: Minimal Scaling with Sticky Nav Preservation */
+            /* VISION IMPAIRED: Wrapper-based Scaling for Clean Layout */
             
-            /* 1. MINIMAL ZOOM SCALING - Use zoom instead of transform to preserve sticky positioning */
-            html.vision-impaired {
-                zoom: 1.06 !important;
-                /* Prevent horizontal scrollbars */
-                overflow-x: hidden !important;
-                /* Allow natural vertical scrolling */
-                overflow-y: auto !important;
-                /* Ensure proper height */
-                height: 100% !important;
+            /* 1. WRAPPER-BASED SCALING - Scale only the content wrapper, not the body */
+            #accessibility-scale-wrapper {
+                transform: scale(1.06) !important;
+                transform-origin: top left !important;
+                width: calc(100% / 1.06) !important;
+                height: calc(100% / 1.06) !important;
             }
             
-            /* 2. BODY STYLES - Minimal changes to preserve layout */
+            /* 2. BODY STYLES - Keep body clean and prevent overflow */
             body.vision-impaired {
-                /* Subtle global contrast boost */
-                filter: contrast(1.06) brightness(1.02) !important;
-                /* Prevent horizontal overflow from zoom */
                 overflow-x: hidden !important;
-                /* Allow natural scrolling */
                 overflow-y: auto !important;
-                /* Reset margins to prevent extra space */
                 margin: 0 !important;
                 padding: 0 !important;
+                /* Subtle global contrast boost */
+                filter: contrast(1.06) brightness(1.02) !important;
             }
             
-            /* 3. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
-            body.vision-impaired [style*="position: sticky"],
-            body.vision-impaired [style*="position: -webkit-sticky"],
-            body.vision-impaired .sticky,
-            body.vision-impaired .fixed-nav,
-            body.vision-impaired nav[style*="position: sticky"],
-            body.vision-impaired nav[style*="position: -webkit-sticky"] {
-                position: sticky !important;
-                position: -webkit-sticky !important;
-                /* Ensure sticky elements maintain their behavior */
-                z-index: 9999 !important;
+            /* 3. HTML STYLES - Ensure proper viewport handling */
+            html.vision-impaired {
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                height: 100% !important;
             }
             
             /* 4. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
@@ -1190,10 +1200,12 @@ function applyVisionImpaired(on) {
                 filter: none !important;
             }
             
-            /* 11. RESPONSIVE ADJUSTMENTS - Reduce scaling on mobile */
+            /* 11. RESPONSIVE ADJUSTMENTS - Disable scaling on mobile */
             @media (max-width: 768px) {
-                html.vision-impaired {
-                    zoom: 1.02 !important; /* Minimal scaling on mobile */
+                #accessibility-scale-wrapper {
+                    transform: none !important;
+                    width: 100% !important;
+                    height: auto !important;
                 }
             }
         ` : '';
@@ -22145,7 +22157,7 @@ class AccessibilityWidget {
             }
     
         }
-    
+        
         // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
         overrideRequestAnimationFrame() {
             try {
@@ -23419,7 +23431,7 @@ class AccessibilityWidget {
                 } catch (_) {}
             } catch (_) {}
         }
-    
+
         disableSeizureSafe() {
     
             this.settings['seizure-safe'] = false;
@@ -23430,7 +23442,7 @@ class AccessibilityWidget {
             
             // Restore portfolio animations when seizure safety is disabled
             this.restorePortfolioAnimations();
-    
+            
             // CRITICAL: Restore original requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
@@ -23474,18 +23486,18 @@ class AccessibilityWidget {
             
     
             this.saveSettings();
-    
+
             console.log('Accessibility Widget: Seizure safe profile disabled');
-    
+
             // Refresh the page after disabling seizure-safe to fully restore animations/media states
             try {
                 setTimeout(() => {
                     if (!this.settings['seizure-safe']) {
                         window.location.reload();
-        }
+                    }
                 }, 100);
             } catch (_) {}
-    
+
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
@@ -24143,8 +24155,7 @@ class AccessibilityWidget {
     
                 z-index: 99997;
     
-                /* Slightly dim surroundings without tinting content */
-                background: rgba(0, 0, 0, 0.18);
+                background: rgba(0, 0, 0, 0.05);
     
             `;
     
@@ -24152,7 +24163,7 @@ class AccessibilityWidget {
     
             
     
-            // Create spotlight with transparent and clear area
+            // Create spotlight with transparent bright area
     
             const spotlight = document.createElement('div');
     
@@ -24166,11 +24177,12 @@ class AccessibilityWidget {
     
                 height: 150px;
     
-                /* Transparent spotlight: no white cast inside */
-                background: transparent;
-                backdrop-filter: none;
-                /* Subtle edge only for visual guidance */
-                box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+                background: rgba(255, 255, 255, 0.1);
+    
+                backdrop-filter: brightness(2.0) contrast(1.2);
+    
+                box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4);
+    
                 filter: none;
     
                 pointer-events: none;
@@ -28567,6 +28579,7 @@ class AccessibilityWidget {
     // Add global error handler for accessibilityWidget
     
     window.addEventListener('error', (e) => {
+        
     
         if (e.message.includes('accessibilityWidget')) {
     
