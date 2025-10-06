@@ -1089,7 +1089,8 @@ function applyVisionImpaired(on) {
             
             /* 1. NO SCALING - Just enhance readability without breaking layout */
             html.vision-impaired {
-                /* No zoom - preserve original layout */
+                /* Minimal scaling without layout break */
+                zoom: 1.02 !important;
             }
             
             body.vision-impaired {
@@ -1118,10 +1119,7 @@ function applyVisionImpaired(on) {
             
             /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
             body.vision-impaired a {
-                /* Do not change link colors */
-                color: inherit !important;
-                text-decoration: inherit !important;
-                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+                /* Do not alter link colors/styles */
                 font-weight: 600 !important;
             }
             
