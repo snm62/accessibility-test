@@ -1095,12 +1095,12 @@ function applyVisionImpaired(on) {
             /* 1. NO SCALING - Just enhance readability without breaking layout */
             html.vision-impaired {
                 /* Minimal scaling without layout break */
-                zoom: 1.04 !important;
+                zoom: 1.06 !important;
             }
             
             body.vision-impaired {
-                /* No layout or color modifications */
-                filter: none !important;
+                /* Subtle global contrast boost without color shift */
+                filter: contrast(1.06) brightness(1.02) !important;
             }
             
             /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
