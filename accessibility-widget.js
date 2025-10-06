@@ -1090,9 +1090,9 @@ function applyVisionImpaired(on) {
         style.textContent = on ? `
             /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
             
-            /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
+            /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
             html.vision-impaired {
-                zoom: 1.1 !important;
+                zoom: 1.05 !important;
                 /* Prevent extra whitespace and scrollbars */
                 overflow-x: hidden !important;
                 height: 100% !important;
@@ -1192,7 +1192,7 @@ function applyVisionImpaired(on) {
             /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
             @media (max-width: 768px) {
                 html.vision-impaired {
-                    zoom: 1.05 !important;
+                    zoom: 1.02 !important;
                 }
             }
         ` : '';
@@ -1248,7 +1248,7 @@ function applyVisionImpaired(on) {
                     
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.1 !important;
+                        zoom: 1.05 !important;
                         /* Prevent extra whitespace and scrollbars */
                         overflow-x: hidden !important;
                         height: 100% !important;
@@ -1348,7 +1348,7 @@ function applyVisionImpaired(on) {
                     /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.05 !important;
+                            zoom: 1.02 !important;
                         }
                     }
                 `;
@@ -23482,7 +23482,7 @@ class AccessibilityWidget {
                     
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.1 !important;
+                        zoom: 1.05 !important;
                         /* Prevent extra whitespace and scrollbars */
                         overflow-x: hidden !important;
                         height: 100% !important;
@@ -23582,7 +23582,7 @@ class AccessibilityWidget {
                     /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.05 !important;
+                            zoom: 1.02 !important;
                         }
                     }
                 `;
