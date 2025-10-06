@@ -1234,8 +1234,7 @@ function applyVisionImpaired(on) {
                     
                     body.vision-impaired {
                         /* No layout modifications */
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        /* No layout modifications */
                         /* Slightly enhance text contrast without changing colors */
                         filter: contrast(1.1) brightness(1.05) !important;
                     }
@@ -23455,8 +23454,7 @@ class AccessibilityWidget {
                     
                     body.vision-impaired {
                         /* No layout modifications */
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        /* No layout modifications */
                         /* Slightly enhance text contrast without changing colors */
                         filter: contrast(1.1) brightness(1.05) !important;
                     }
