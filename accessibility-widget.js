@@ -1093,15 +1093,22 @@ function applyVisionImpaired(on) {
             /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
             html.vision-impaired {
                 zoom: 1.1 !important;
+                /* Prevent extra whitespace and scrollbars */
+                overflow-x: hidden !important;
+                height: 100% !important;
             }
             
-            /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
             body.vision-impaired {
+                /* Prevent extra whitespace and scrollbars */
+                overflow-x: hidden !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 /* Slightly enhance text contrast without changing colors */
                 filter: contrast(1.1) brightness(1.05) !important;
             }
             
-            /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+            /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
             body.vision-impaired p,
             body.vision-impaired span,
             body.vision-impaired div,
@@ -1110,44 +1117,44 @@ function applyVisionImpaired(on) {
             body.vision-impaired th {
                 /* Slightly improve text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                /* Slightly improve font weight for better readability */
-                font-weight: 500 !important;
+                /* Increased font weight for better readability */
+                font-weight: 600 !important;
             }
             
-            /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+            /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
             body.vision-impaired *:focus {
                 outline: 2px solid #0066cc !important;
                 outline-offset: 1px !important;
             }
             
-            /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
+            /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
             body.vision-impaired a {
                 /* Slightly improve link contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                /* Ensure links are slightly more visible */
-                font-weight: 500 !important;
+                /* Increased font weight for better visibility */
+                font-weight: 600 !important;
             }
             
-            /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
+            /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
             body.vision-impaired button,
             body.vision-impaired input[type="button"],
             body.vision-impaired input[type="submit"],
             body.vision-impaired input[type="reset"] {
                 /* Slightly improve button text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 500 !important;
+                font-weight: 600 !important;
             }
             
-            /* 7. IMPROVE FORM ELEMENT READABILITY */
+            /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
             body.vision-impaired input,
             body.vision-impaired textarea,
             body.vision-impaired select {
                 /* Slightly improve form text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 500 !important;
+                font-weight: 600 !important;
             }
             
-            /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
+            /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
             body.vision-impaired h1,
             body.vision-impaired h2,
             body.vision-impaired h3,
@@ -1156,25 +1163,37 @@ function applyVisionImpaired(on) {
             body.vision-impaired h6 {
                 /* Slightly improve heading contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                font-weight: 600 !important;
+                font-weight: 700 !important;
             }
             
-            /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+            /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
             body.vision-impaired img {
                 /* Slightly improve image contrast */
                 filter: contrast(1.05) brightness(1.02) !important;
             }
             
-            /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+            /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
+            body.vision-impaired * {
+                box-sizing: border-box !important;
+                /* Prevent extra whitespace */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
+            body.vision-impaired footer,
+            body.vision-impaired .footer,
+            body.vision-impaired [class*="footer"] {
+                /* Prevent extra whitespace at bottom */
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+            
+            /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
             @media (max-width: 768px) {
                 html.vision-impaired {
                     zoom: 1.05 !important;
                 }
-            }
-            
-            /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
-            body.vision-impaired * {
-                box-sizing: border-box !important;
             }
         ` : '';
     } catch (_) {}
@@ -1230,15 +1249,22 @@ function applyVisionImpaired(on) {
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
                         zoom: 1.1 !important;
+                        /* Prevent extra whitespace and scrollbars */
+                        overflow-x: hidden !important;
+                        height: 100% !important;
                     }
                     
-                    /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
                     body.vision-impaired {
+                        /* Prevent extra whitespace and scrollbars */
+                        overflow-x: hidden !important;
+                        height: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                         /* Slightly enhance text contrast without changing colors */
                         filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
-                    /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+                    /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
                     body.vision-impaired p,
                     body.vision-impaired span,
                     body.vision-impaired div,
@@ -1247,44 +1273,44 @@ function applyVisionImpaired(on) {
                     body.vision-impaired th {
                         /* Slightly improve text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        /* Slightly improve font weight for better readability */
-                        font-weight: 500 !important;
+                        /* Increased font weight for better readability */
+                        font-weight: 600 !important;
                     }
                     
-                    /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+                    /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
                     body.vision-impaired *:focus {
                         outline: 2px solid #0066cc !important;
                         outline-offset: 1px !important;
                     }
                     
-                    /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
+                    /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
                     body.vision-impaired a {
                         /* Slightly improve link contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        /* Ensure links are slightly more visible */
-                        font-weight: 500 !important;
+                        /* Increased font weight for better visibility */
+                        font-weight: 600 !important;
                     }
                     
-                    /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
+                    /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
                     body.vision-impaired button,
                     body.vision-impaired input[type="button"],
                     body.vision-impaired input[type="submit"],
                     body.vision-impaired input[type="reset"] {
                         /* Slightly improve button text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 500 !important;
+                        font-weight: 600 !important;
                     }
                     
-                    /* 7. IMPROVE FORM ELEMENT READABILITY */
+                    /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
                     body.vision-impaired input,
                     body.vision-impaired textarea,
                     body.vision-impaired select {
                         /* Slightly improve form text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 500 !important;
+                        font-weight: 600 !important;
                     }
                     
-                    /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
+                    /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
                     body.vision-impaired h1,
                     body.vision-impaired h2,
                     body.vision-impaired h3,
@@ -1293,25 +1319,37 @@ function applyVisionImpaired(on) {
                     body.vision-impaired h6 {
                         /* Slightly improve heading contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        font-weight: 600 !important;
+                        font-weight: 700 !important;
                     }
                     
-                    /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+                    /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
                     body.vision-impaired img {
                         /* Slightly improve image contrast */
                         filter: contrast(1.05) brightness(1.02) !important;
                     }
                     
-                    /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+                    /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
+                    body.vision-impaired * {
+                        box-sizing: border-box !important;
+                        /* Prevent extra whitespace */
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    
+                    /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
+                    body.vision-impaired footer,
+                    body.vision-impaired .footer,
+                    body.vision-impaired [class*="footer"] {
+                        /* Prevent extra whitespace at bottom */
+                        margin-bottom: 0 !important;
+                        padding-bottom: 0 !important;
+                    }
+                    
+                    /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
                             zoom: 1.05 !important;
                         }
-                    }
-                    
-                    /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
-                    body.vision-impaired * {
-                        box-sizing: border-box !important;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -23445,15 +23483,22 @@ class AccessibilityWidget {
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
                         zoom: 1.1 !important;
+                        /* Prevent extra whitespace and scrollbars */
+                        overflow-x: hidden !important;
+                        height: 100% !important;
                     }
                     
-                    /* 2. MINIMAL CONTRAST ENHANCEMENT - Only enhance text contrast without breaking design */
                     body.vision-impaired {
+                        /* Prevent extra whitespace and scrollbars */
+                        overflow-x: hidden !important;
+                        height: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                         /* Slightly enhance text contrast without changing colors */
                         filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
-                    /* 3. IMPROVE TEXT READABILITY - Only enhance text without changing colors */
+                    /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
                     body.vision-impaired p,
                     body.vision-impaired span,
                     body.vision-impaired div,
@@ -23462,44 +23507,44 @@ class AccessibilityWidget {
                     body.vision-impaired th {
                         /* Slightly improve text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        /* Slightly improve font weight for better readability */
-                        font-weight: 500 !important;
+                        /* Increased font weight for better readability */
+                        font-weight: 600 !important;
                     }
                     
-                    /* 4. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+                    /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
                     body.vision-impaired *:focus {
                         outline: 2px solid #0066cc !important;
                         outline-offset: 1px !important;
                     }
                     
-                    /* 5. IMPROVE LINK VISIBILITY - Only enhance links without changing colors */
+                    /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
                     body.vision-impaired a {
                         /* Slightly improve link contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        /* Ensure links are slightly more visible */
-                        font-weight: 500 !important;
+                        /* Increased font weight for better visibility */
+                        font-weight: 600 !important;
                     }
                     
-                    /* 6. ENHANCE BUTTON READABILITY - Only improve button text without changing colors */
+                    /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
                     body.vision-impaired button,
                     body.vision-impaired input[type="button"],
                     body.vision-impaired input[type="submit"],
                     body.vision-impaired input[type="reset"] {
                         /* Slightly improve button text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 500 !important;
+                        font-weight: 600 !important;
                     }
                     
-                    /* 7. IMPROVE FORM ELEMENT READABILITY */
+                    /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
                     body.vision-impaired input,
                     body.vision-impaired textarea,
                     body.vision-impaired select {
                         /* Slightly improve form text contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 500 !important;
+                        font-weight: 600 !important;
                     }
                     
-                    /* 8. ENHANCE HEADING READABILITY - Only improve headings without changing colors */
+                    /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
                     body.vision-impaired h1,
                     body.vision-impaired h2,
                     body.vision-impaired h3,
@@ -23508,25 +23553,37 @@ class AccessibilityWidget {
                     body.vision-impaired h6 {
                         /* Slightly improve heading contrast */
                         text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        font-weight: 600 !important;
+                        font-weight: 700 !important;
                     }
                     
-                    /* 9. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+                    /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
                     body.vision-impaired img {
                         /* Slightly improve image contrast */
                         filter: contrast(1.05) brightness(1.02) !important;
                     }
                     
-                    /* 10. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+                    /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
+                    body.vision-impaired * {
+                        box-sizing: border-box !important;
+                        /* Prevent extra whitespace */
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    
+                    /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
+                    body.vision-impaired footer,
+                    body.vision-impaired .footer,
+                    body.vision-impaired [class*="footer"] {
+                        /* Prevent extra whitespace at bottom */
+                        margin-bottom: 0 !important;
+                        padding-bottom: 0 !important;
+                    }
+                    
+                    /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
                             zoom: 1.05 !important;
                         }
-                    }
-                    
-                    /* 11. PRESERVE LAYOUT - Ensure no layout breaking */
-                    body.vision-impaired * {
-                        box-sizing: border-box !important;
                     }
                 `;
                 
