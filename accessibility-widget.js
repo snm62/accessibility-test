@@ -1090,20 +1090,12 @@ function applyVisionImpaired(on) {
         style.textContent = on ? `
             /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
             
-            /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
+            /* 1. NO SCALING - Just enhance readability without breaking layout */
             html.vision-impaired {
-                zoom: 1.05 !important;
-                /* Prevent extra whitespace and scrollbars */
-                overflow-x: hidden !important;
-                height: 100% !important;
+                /* No zoom - preserve original layout */
             }
             
             body.vision-impaired {
-                /* Prevent extra whitespace and scrollbars */
-                overflow-x: hidden !important;
-                height: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
                 /* Slightly enhance text contrast without changing colors */
                 filter: contrast(1.1) brightness(1.05) !important;
             }
@@ -1172,27 +1164,15 @@ function applyVisionImpaired(on) {
                 filter: contrast(1.05) brightness(1.02) !important;
             }
             
-            /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
+            /* 9. PRESERVE LAYOUT - No layout modifications */
             body.vision-impaired * {
                 box-sizing: border-box !important;
-                /* Prevent extra whitespace */
-                margin: 0 !important;
-                padding: 0 !important;
             }
             
-            /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
-            body.vision-impaired footer,
-            body.vision-impaired .footer,
-            body.vision-impaired [class*="footer"] {
-                /* Prevent extra whitespace at bottom */
-                margin-bottom: 0 !important;
-                padding-bottom: 0 !important;
-            }
-            
-            /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+            /* 10. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
             @media (max-width: 768px) {
                 html.vision-impaired {
-                    zoom: 1.02 !important;
+                    /* No zoom - preserve original layout */
                 }
             }
         ` : '';
@@ -1248,16 +1228,12 @@ function applyVisionImpaired(on) {
                     
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.05 !important;
-                        /* Prevent extra whitespace and scrollbars */
-                        overflow-x: hidden !important;
-                        height: 100% !important;
+                        /* No zoom - preserve original layout */
+                        /* No layout modifications */
                     }
                     
                     body.vision-impaired {
-                        /* Prevent extra whitespace and scrollbars */
-                        overflow-x: hidden !important;
-                        height: 100% !important;
+                        /* No layout modifications */
                         margin: 0 !important;
                         padding: 0 !important;
                         /* Slightly enhance text contrast without changing colors */
@@ -1331,24 +1307,15 @@ function applyVisionImpaired(on) {
                     /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
                     body.vision-impaired * {
                         box-sizing: border-box !important;
-                        /* Prevent extra whitespace */
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        /* No layout modifications */
                     }
                     
-                    /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
-                    body.vision-impaired footer,
-                    body.vision-impaired .footer,
-                    body.vision-impaired [class*="footer"] {
-                        /* Prevent extra whitespace at bottom */
-                        margin-bottom: 0 !important;
-                        padding-bottom: 0 !important;
-                    }
+                    /* 10. PRESERVE LAYOUT - No footer modifications */
                     
-                    /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+                    /* 11. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.02 !important;
+                            /* No zoom - preserve original layout */
                         }
                     }
                 `;
@@ -23482,16 +23449,12 @@ class AccessibilityWidget {
                     
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
                     html.vision-impaired {
-                        zoom: 1.05 !important;
-                        /* Prevent extra whitespace and scrollbars */
-                        overflow-x: hidden !important;
-                        height: 100% !important;
+                        /* No zoom - preserve original layout */
+                        /* No layout modifications */
                     }
                     
                     body.vision-impaired {
-                        /* Prevent extra whitespace and scrollbars */
-                        overflow-x: hidden !important;
-                        height: 100% !important;
+                        /* No layout modifications */
                         margin: 0 !important;
                         padding: 0 !important;
                         /* Slightly enhance text contrast without changing colors */
@@ -23565,24 +23528,15 @@ class AccessibilityWidget {
                     /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
                     body.vision-impaired * {
                         box-sizing: border-box !important;
-                        /* Prevent extra whitespace */
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        /* No layout modifications */
                     }
                     
-                    /* 10. FIX FOOTER AND BOTTOM SPACING ISSUES */
-                    body.vision-impaired footer,
-                    body.vision-impaired .footer,
-                    body.vision-impaired [class*="footer"] {
-                        /* Prevent extra whitespace at bottom */
-                        margin-bottom: 0 !important;
-                        padding-bottom: 0 !important;
-                    }
+                    /* 10. PRESERVE LAYOUT - No footer modifications */
                     
-                    /* 11. RESPONSIVE ADJUSTMENTS - Smaller scaling on mobile */
+                    /* 11. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
-                            zoom: 1.02 !important;
+                            /* No zoom - preserve original layout */
                         }
                     }
                 `;
