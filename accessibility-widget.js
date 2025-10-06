@@ -920,6 +920,68 @@
                 console.warn('Accessibility Widget: runtime seizure-safe guards failed', guardErr);
             }
         }
+        
+        // CRITICAL: Stop JavaScript animations immediately for seizure-safe mode
+        try {
+            // Override requestAnimationFrame immediately
+            if (!window.__originalRequestAnimationFrame) {
+                window.__originalRequestAnimationFrame = window.requestAnimationFrame;
+            }
+            window.requestAnimationFrame = function(callback) {
+                // Block all animations in seizure-safe mode
+                console.log('Accessibility Widget: Blocking requestAnimationFrame for immediate seizure-safe');
+                return 0;
+            };
+            
+            // Stop Lottie animations immediately
+            if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                const lottieAnimations = window.lottie.getRegisteredAnimations();
+                lottieAnimations.forEach(animation => {
+                    try {
+                        if (animation && typeof animation.stop === 'function') {
+                            animation.stop();
+                        }
+                        if (animation && typeof animation.pause === 'function') {
+                            animation.pause();
+                        }
+                    } catch (error) {
+                        console.warn('Accessibility Widget: Failed to stop Lottie animation immediately', error);
+                    }
+                });
+            }
+            
+            // Stop GSAP animations immediately
+            if (typeof window.gsap !== 'undefined') {
+                try {
+                    if (window.gsap.globalTimeline) {
+                        window.gsap.globalTimeline.pause();
+                    }
+                    if (window.gsap.killTweensOf) {
+                        window.gsap.killTweensOf("*");
+                    }
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to stop GSAP animations immediately', error);
+                }
+            }
+            
+            // Stop jQuery animations immediately
+            if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                try {
+                    const $ = window.jQuery || window.$;
+                    if ($ && $.fx) {
+                        $.fx.off = true;
+                    }
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to stop jQuery animations immediately', error);
+                }
+            }
+            
+            console.log('Accessibility Widget: Immediate JavaScript animation stopping applied');
+            
+        } catch (jsError) {
+            console.warn('Accessibility Widget: Immediate JavaScript animation stopping failed', jsError);
+        }
+        
     } catch (e) {
         console.warn('Accessibility Widget: Immediate seizure-safe check failed', e);
     }
@@ -22158,6 +22220,74 @@ class AccessibilityWidget {
                 console.warn('Accessibility Widget: Failed to replace animated media', error);
             }
         }
+        
+        // Restore original requestAnimationFrame when seizure-safe is disabled
+        restoreRequestAnimationFrame() {
+            try {
+                // Restore original requestAnimationFrame if it was stored
+                if (window.__originalRequestAnimationFrame) {
+                    window.requestAnimationFrame = window.__originalRequestAnimationFrame;
+                    console.log('Accessibility Widget: Restored original requestAnimationFrame');
+                }
+                
+                // Restore original cancelAnimationFrame if it was stored
+                if (window.__originalCancelAnimationFrame) {
+                    window.cancelAnimationFrame = window.__originalCancelAnimationFrame;
+                    console.log('Accessibility Widget: Restored original cancelAnimationFrame');
+                }
+                
+            } catch (error) {
+                console.warn('Accessibility Widget: Failed to restore requestAnimationFrame', error);
+            }
+        }
+        
+        // Restore animation libraries when seizure-safe is disabled
+        restoreAnimationLibraries() {
+            try {
+                // Lottie: Resume animations if they were paused
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const lottieAnimations = window.lottie.getRegisteredAnimations();
+                    lottieAnimations.forEach(animation => {
+                        try {
+                            if (animation && typeof animation.play === 'function') {
+                                animation.play();
+                                console.log('Accessibility Widget: Resumed Lottie animation');
+                            }
+                        } catch (error) {
+                            console.warn('Accessibility Widget: Failed to resume Lottie animation', error);
+                        }
+                    });
+                }
+                
+                // GSAP: Resume global timeline
+                if (typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
+                    try {
+                        window.gsap.globalTimeline.resume();
+                        console.log('Accessibility Widget: Resumed GSAP global timeline');
+                    } catch (error) {
+                        console.warn('Accessibility Widget: Failed to resume GSAP timeline', error);
+                    }
+                }
+                
+                // jQuery: Re-enable animations
+                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                    try {
+                        const $ = window.jQuery || window.$;
+                        if ($ && $.fx) {
+                            $.fx.off = false; // Re-enable jQuery animations
+                            console.log('Accessibility Widget: Re-enabled jQuery animations');
+                        }
+                    } catch (error) {
+                        console.warn('Accessibility Widget: Failed to re-enable jQuery animations', error);
+                    }
+                }
+                
+                console.log('Accessibility Widget: Animation libraries restored');
+                
+            } catch (error) {
+                console.warn('Accessibility Widget: Failed to restore animation libraries', error);
+            }
+        }
     
     
     
@@ -22990,6 +23120,15 @@ class AccessibilityWidget {
     
             // Lock button styles to prevent hover color changes
             this.lockButtonHoverStyles();
+            
+            // CRITICAL: Stop all animation libraries (Lottie, GSAP, etc.)
+            this.stopAnimationLibraries();
+            
+            // CRITICAL: Override requestAnimationFrame to freeze JS animations
+            this.overrideRequestAnimationFrame();
+            
+            // CRITICAL: Replace animated media (GIFs, videos)
+            this.replaceAnimatedMedia();
     
             // Stop any JavaScript-based animations (like the slider auto-slide)
     
@@ -23045,8 +23184,12 @@ class AccessibilityWidget {
             
             // Restore portfolio animations when seizure safety is disabled
             this.restorePortfolioAnimations();
-    
             
+            // CRITICAL: Restore original requestAnimationFrame
+            this.restoreRequestAnimationFrame();
+            
+            // CRITICAL: Restore animation libraries
+            this.restoreAnimationLibraries();
     
             // Resume JavaScript-based animations (like the slider auto-slide)
     
