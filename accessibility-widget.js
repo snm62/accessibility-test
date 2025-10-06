@@ -757,7 +757,7 @@
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
                                     if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
-                                        el.style.transform = 'none';
+                                    el.style.transform = 'none';
                                     }
                                     el.style.opacity = '1';
                                 } catch (_) {}
@@ -3265,7 +3265,7 @@ class AccessibilityWidget {
     
                 link.rel = 'stylesheet';
     
-                link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
+                //link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
                 // External CSS removed to prevent conflicts with internal styles
                 link.onload = () => {
                     
@@ -22145,7 +22145,7 @@ class AccessibilityWidget {
             }
     
         }
-        
+    
         // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
         overrideRequestAnimationFrame() {
             try {
@@ -23301,16 +23301,6 @@ class AccessibilityWidget {
     
         enableSeizureSafe(immediate = false) {
     
-            // Ensure exclusivity: disable other profiles first without reload side-effects
-            try { this.__suppressReload = true; } catch (_) {}
-            try {
-                try { this.disableVisionImpaired(); } catch (_) {}
-                try { this.disableADHDFriendly(); } catch (_) {}
-                try { this.disableCognitiveDisability(); } catch (_) {}
-            } finally {
-                try { this.__suppressReload = false; } catch (_) {}
-            }
-
             this.settings['seizure-safe'] = true;
     
             document.body.classList.add('seizure-safe');
@@ -23429,7 +23419,7 @@ class AccessibilityWidget {
                 } catch (_) {}
             } catch (_) {}
         }
-
+    
         disableSeizureSafe() {
     
             this.settings['seizure-safe'] = false;
@@ -23440,7 +23430,7 @@ class AccessibilityWidget {
             
             // Restore portfolio animations when seizure safety is disabled
             this.restorePortfolioAnimations();
-            
+    
             // CRITICAL: Restore original requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
@@ -23484,30 +23474,23 @@ class AccessibilityWidget {
             
     
             this.saveSettings();
-
+    
             console.log('Accessibility Widget: Seizure safe profile disabled');
-
+    
             // Refresh the page after disabling seizure-safe to fully restore animations/media states
             try {
-                if (!this.__suppressReload) {
-                    setTimeout(() => {
-                        if (!this.settings['seizure-safe']) {
-                            window.location.reload();
-                        }
-                    }, 100);
-                }
+                setTimeout(() => {
+                    if (!this.settings['seizure-safe']) {
+                        window.location.reload();
+        }
+                }, 100);
             } catch (_) {}
-
+    
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
         enableVisionImpaired() {
             try {
-                // Ensure exclusivity: disable other profiles first
-                try { this.disableSeizureSafe(); } catch (_) {}
-                try { this.disableADHDFriendly(); } catch (_) {}
-                try { this.disableCognitiveDisability(); } catch (_) {}
-
                 this.settings['vision-impaired'] = true;
                 document.body.classList.add('vision-impaired');
 
@@ -24100,11 +24083,6 @@ class AccessibilityWidget {
     
         enableADHDFriendly() {
     
-            // Ensure exclusivity: disable other profiles first
-            try { this.disableSeizureSafe(); } catch (_) {}
-            try { this.disableVisionImpaired(); } catch (_) {}
-            try { this.disableCognitiveDisability(); } catch (_) {}
-
             this.settings['adhd-friendly'] = true;
     
             document.body.classList.add('adhd-friendly');
@@ -24301,11 +24279,6 @@ class AccessibilityWidget {
     
         enableCognitiveDisability() {
     
-            // Ensure exclusivity: disable other profiles first
-            try { this.disableSeizureSafe(); } catch (_) {}
-            try { this.disableVisionImpaired(); } catch (_) {}
-            try { this.disableADHDFriendly(); } catch (_) {}
-
             document.body.classList.add('cognitive-disability');
     
             this.addCognitiveBoxes();
