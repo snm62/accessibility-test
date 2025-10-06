@@ -1096,11 +1096,23 @@ function applyVisionImpaired(on) {
             html.vision-impaired {
                 /* Minimal scaling without layout break */
                 zoom: 1.05 !important;
+                /* Prevent horizontal scrollbars from subpixel zoom rounding */
+                overflow-x: hidden !important;
+                /* Avoid extra vertical scrollbar from zoom rounding */
+                overflow-y: auto !important;
+                height: auto !important;
+                min-height: 100% !important;
+                width: 100% !important;
             }
             
             body.vision-impaired {
                 /* Subtle global contrast boost without color shift */
                 filter: contrast(1.06) brightness(1.02) !important;
+                /* Prevent horizontal scrollbars from subpixel zoom rounding */
+                overflow-x: hidden !important;
+                /* Ensure page fills viewport without extra gap */
+                overflow-y: auto !important;
+                min-height: 100vh !important;
             }
             
             /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
