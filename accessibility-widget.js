@@ -1,4 +1,4 @@
-]// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+// CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
     try {
         // Check localStorage immediately for seizure-safe mode
