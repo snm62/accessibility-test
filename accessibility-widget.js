@@ -1081,113 +1081,128 @@ function applyUniversalStopMotion(enabled) {
 // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
 function applyVisionImpaired(on) {
     try {
+        // ... (Keep existing class toggles) ...
         document.documentElement.classList.toggle('vision-impaired', !!on);
         document.body.classList.toggle('vision-impaired', !!on);
+        
+        // --- NEW WRAPPER LOGIC ---
+        let wrapper = document.getElementById('accessibility-scale-wrapper');
+        
+        if (on && !wrapper) {
+            // If turning ON and wrapper doesn't exist, create it.
+            wrapper = document.createElement('div');
+            wrapper.id = 'accessibility-scale-wrapper';
+            
+            // Move ALL current body children INTO the wrapper
+            while (document.body.firstChild) {
+                wrapper.appendChild(document.body.firstChild);
+            }
+            // Insert the wrapper into the empty body
+            document.body.appendChild(wrapper);
+        } else if (!on && wrapper) {
+            // If turning OFF and wrapper exists, unwrap the content.
+            while (wrapper.firstChild) {
+                document.body.appendChild(wrapper.firstChild);
+            }
+            // Remove the empty wrapper
+            document.body.removeChild(wrapper);
+        }
+        // --- END WRAPPER LOGIC ---
+        
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
         if (!style) {
             style = document.createElement('style');
             style.id = 'accessibility-vision-impaired-immediate-early';
             document.head.appendChild(style);
         }
+        
+        // ... (Update CSS below) ...
         style.textContent = on ? `
-            /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
+            /* VISION IMPAIRED: Wrapper-based Scaling for Clean Layout */
             
-            /* 1. LAYOUT CORRECTION: Use transform: scale() for safer, contained scaling. */
+            /* 1. WRAPPER-BASED SCALING - Scale only the content wrapper, not the body */
+            #accessibility-scale-wrapper {
+                transform: scale(1.06) !important;
+                transform-origin: top left !important;
+                width: calc(100% / 1.06) !important;
+                height: calc(100% / 1.06) !important;
+            }
+            
+            /* 2. BODY STYLES - Keep body clean and prevent overflow */
+            body.vision-impaired {
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                /* Subtle global contrast boost */
+                filter: contrast(1.06) brightness(1.02) !important;
+            }
+            
+            /* 3. HTML STYLES - Ensure proper viewport handling */
             html.vision-impaired {
-                /* Prevents visual shift by keeping html at 100% width/height */
-                overflow-x: hidden !important; 
+                overflow-x: hidden !important;
                 overflow-y: auto !important;
                 height: 100% !important;
             }
             
-            body.vision-impaired {
-                /* Apply subtle scaling with transform, which is less likely to break layout */
-                transform: scale(1.06) !important;
-                transform-origin: top left !important; /* Scale from the top-left corner */
-                width: calc(100% / 1.06) !important; /* Compensate for the scale to fit content */
-                height: calc(100% / 1.06) !important; 
-                
-                /* Subtle global contrast boost */
-                filter: contrast(1.06) brightness(1.02) !important;
-                
-                /* Ensure no unexpected scrollbars from the scaling */
-                overflow-x: hidden !important;
-                min-height: 100vh !important;
-            }
-            
-            /* ... (Rest of your rules remain below) ... */
-            
-            /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
+            /* 4. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
             body.vision-impaired p,
             body.vision-impaired span,
             body.vision-impaired div,
             body.vision-impaired li,
             body.vision-impaired td,
             body.vision-impaired th {
-                /* Slightly improve text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                /* Increased font weight for better readability */
                 font-weight: 600 !important;
             }
             
-            /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+            /* 5. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
             body.vision-impaired *:focus {
                 outline: 2px solid #0066cc !important;
                 outline-offset: 1px !important;
             }
             
-            /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
+            /* 6. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
             body.vision-impaired a {
-                /* Do not alter link colors/styles */
                 font-weight: 600 !important;
             }
             
-            /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
+            /* 7. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
             body.vision-impaired button,
             body.vision-impaired input[type="button"],
             body.vision-impaired input[type="submit"],
             body.vision-impaired input[type="reset"] {
-                /* Slightly improve button text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
                 font-weight: 600 !important;
             }
             
-            /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
+            /* 8. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
             body.vision-impaired input,
             body.vision-impaired textarea,
             body.vision-impaired select {
-                /* Slightly improve form text contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
                 font-weight: 600 !important;
             }
             
-            /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
+            /* 9. ENHANCE HEADING READABILITY - Increased font weight for headings */
             body.vision-impaired h1,
             body.vision-impaired h2,
             body.vision-impaired h3,
             body.vision-impaired h4,
             body.vision-impaired h5,
             body.vision-impaired h6 {
-                /* Slightly improve heading contrast */
                 text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
                 font-weight: 700 !important;
             }
             
-            /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+            /* 10. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
             body.vision-impaired img {
-                /* Do not change image colors */
                 filter: none !important;
             }
             
-            /* 9. PRESERVE LAYOUT - No layout modifications */
-            body.vision-impaired * {
-                /* No layout modifications */
-            }
-            
-            /* 10. RESPONSIVE ADJUSTMENTS - Disable scaling on mobile */
+            /* 11. RESPONSIVE ADJUSTMENTS - Disable scaling on mobile */
             @media (max-width: 768px) {
-                body.vision-impaired {
-                    /* Reset scaling on smaller screens to prevent layout breakage */
+                #accessibility-scale-wrapper {
                     transform: none !important;
                     width: 100% !important;
                     height: auto !important;
