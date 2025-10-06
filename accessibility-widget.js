@@ -733,7 +733,9 @@
                             window.__animationBlockerInstalled = true;
                             const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
                             // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
-                            const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], svg, i, [data-icon]';
+                            const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
+                            // Also respect common accordion/FAQ toggle contexts that rotate arrows
+                            const ROTATION_CONTEXT_SELECTOR = '[aria-expanded], [data-accordion], .accordion, [data-toggle], [data-collapse]';
 
                             const isExempt = (el) => {
                                 try {
@@ -749,8 +751,12 @@
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
-                                    // Only neutralize transform/opacity if not exempt and not an icon/arrow
-                                    if (!(el.matches && el.matches(ICON_SELECTOR))) {
+                                    // Only neutralize transform if the element is not an icon/arrow
+                                    // and not inside a rotation context such as accordion/FAQ toggles
+                                    const inRotationContext = (() => {
+                                        try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
+                                    })();
+                                    if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
                                         el.style.transform = 'none';
                                     }
                                     el.style.opacity = '1';
