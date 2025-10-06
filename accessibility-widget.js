@@ -874,8 +874,8 @@
                                         window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
                                         CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
                                             const n = String(name).toLowerCase();
-                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'transform' || n === 'opacity' || n === 'filter') {
-                                                // Block writes in seizure-safe
+                                            // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
+                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
                                                 return undefined;
                                             }
                                             return window.__origSetProperty.call(this, name, value, priority);
@@ -891,7 +891,6 @@
                                                 let cleaned = val
                                                     .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
-                                                    .replace(/(?:^|;\s*)transform\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
                                                 return window.__origStyleAttrSetter.call(this, attr, cleaned);
@@ -1096,7 +1095,7 @@ function applyVisionImpaired(on) {
             /* 1. NO SCALING - Just enhance readability without breaking layout */
             html.vision-impaired {
                 /* Minimal scaling without layout break */
-                zoom: 1.02 !important;
+                zoom: 1.04 !important;
             }
             
             body.vision-impaired {
