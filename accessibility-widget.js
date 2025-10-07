@@ -3312,7 +3312,7 @@ class AccessibilityWidget {
     
                 link.rel = 'stylesheet';
     
-                //link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
+                link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
                 // External CSS removed to prevent conflicts with internal styles
                 link.onload = () => {
                     
@@ -7792,17 +7792,17 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-    
-                                            <i class="fas fa-chevron-down"></i> -10%
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+
+                                            <i class="fas fa-chevron-down"></i> -5%
     
                                         </button>
     
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-    
-                                            <i class="fas fa-chevron-up"></i> +10%
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+
+                                            <i class="fas fa-chevron-up"></i> +5%
     
                                         </button>
     
@@ -15020,14 +15020,7 @@ class AccessibilityWidget {
     
             
     
-            // Apply to body
-    
-            document.body.style.letterSpacing = letterSpacingValue;
-    
-            
-    
-            // Apply to all text elements except accessibility panel
-    
+            // Apply to all text elements except accessibility panel and icon/symbol elements
             const textElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select');
     
             
@@ -15037,9 +15030,12 @@ class AccessibilityWidget {
                 // Skip if element is inside accessibility panel
     
                 if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-    
+                    // Exclude icon fonts and ligature-based icons (prevents turning symbols into text)
+                    const isIcon = element.matches('svg, i, .icon, [class*="icon"], [class*="fa-"], [class*="material-icons"], [data-icon], [class*="glyph"], [class*="chevron"], [class*="arrow"], [class*="ion-"], [class*="feather"], [class*="lucide"], [class*="heroicon"]');
+                    if (isIcon) {
+                        return;
+                    }
                     element.style.letterSpacing = letterSpacingValue;
-    
                 }
     
             });
