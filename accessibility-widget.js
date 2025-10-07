@@ -1081,29 +1081,29 @@ function applyUniversalStopMotion(enabled) {
 // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
 function applyVisionImpaired(on) {
     try {
+        // Toggle root classes
         document.documentElement.classList.toggle('vision-impaired', !!on);
         document.body.classList.toggle('vision-impaired', !!on);
-        
-        // --- CONTENT WRAPPER APPROACH ---
+
+        // CONTENT WRAPPER (persistent)
         let wrapper = document.getElementById('accessibility-content-wrapper');
-        
-        if (on && !wrapper) {
-            // Create content wrapper and move all body children into it
+        if (!wrapper) {
             wrapper = document.createElement('div');
             wrapper.id = 'accessibility-content-wrapper';
-            
-            // Move all current body children into the wrapper
+            // Move all current body children into the wrapper once
             while (document.body.firstChild) {
                 wrapper.appendChild(document.body.firstChild);
             }
-            // Insert the wrapper into the empty body
             document.body.appendChild(wrapper);
-        } else if (!on && wrapper) {
-            // Remove wrapper and restore original structure
-            while (wrapper.firstChild) {
-                document.body.appendChild(wrapper.firstChild);
-            }
-            document.body.removeChild(wrapper);
+        }
+
+        // Smooth scaling via CSS variable; do not touch font-size anywhere
+        // Set desired scale as CSS var on html element so transitions are smooth
+        const scaleValue = '1.05';
+        if (on) {
+            document.documentElement.style.setProperty('--vision-scale', scaleValue);
+        } else {
+            document.documentElement.style.setProperty('--vision-scale', '1');
         }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
@@ -1114,9 +1114,9 @@ function applyVisionImpaired(on) {
         }
         
         // ... (Update CSS below) ...
-        style.textContent = on ? `
-            /* VISION IMPAIRED: Safe Content Scaling with Transform */
-            
+        style.textContent = `
+            /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
+
             /* 1. VIEWPORT LOCK - Prevent extra scrollbars and whitespace */
             html.vision-impaired,
             body.vision-impaired {
@@ -1125,31 +1125,34 @@ function applyVisionImpaired(on) {
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            
-            /* 2. CONTENT WRAPPER SCALING - Safe transform-based scaling */
+
+            /* 2. CONTENT WRAPPER SCALING - Safe transform-based scaling using CSS var */
             #accessibility-content-wrapper {
-                transform: scale(1.05) !important;
+                --vision-scale: var(--vision-scale, 1);
+                transform: translateZ(0) scale(var(--vision-scale)) !important;
                 transform-origin: top left !important;
-                width: calc(100% / 1.05) !important;
-                height: calc(100% / 1.05) !important;
+                width: calc(100% / var(--vision-scale)) !important;
+                height: calc(100% / var(--vision-scale)) !important;
+                min-height: 100% !important;
                 overflow: auto !important;
-                transition: transform 0.3s ease-in-out !important;
+                transition: transform 240ms ease, width 240ms ease, height 240ms ease !important;
+                will-change: transform;
+                display: block !important;
             }
             
-            /* 3. ACCESSIBILITY PANEL SCALING - Scale the widget panel */
+            /* 3. ACCESSIBILITY PANEL SCALING - Scale the widget panel (no font-size changes) */
             .accessibility-widget.vision-impaired,
             #accessibility-widget.vision-impaired,
             .accessibility-panel.vision-impaired {
-                transform: scale(1.05) !important;
+                transform: scale(var(--vision-scale, 1)) !important;
                 transform-origin: top right !important;
-                transition: transform 0.3s ease-in-out !important;
+                transition: transform 240ms ease !important;
             }
-            
-            /* 4. CONTENT ENHANCEMENT - Subtle contrast and readability improvements */
+
+            /* 4. CONTENT ENHANCEMENT - No font-size changes, optional subtle contrast only */
             #accessibility-content-wrapper {
-                /* Subtle global contrast boost with smooth transition */
                 filter: contrast(1.04) brightness(1.01) !important;
-                transition: filter 0.3s ease-in-out !important;
+                transition: filter 240ms ease !important;
             }
             
             /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
@@ -1229,18 +1232,18 @@ function applyVisionImpaired(on) {
             /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
             @media (max-width: 768px) {
                 #accessibility-content-wrapper {
-                    transform: scale(1.03) !important;
-                    width: calc(100% / 1.03) !important;
-                    height: calc(100% / 1.03) !important;
+                    transform: translateZ(0) scale(var(--vision-scale, 1)) !important;
+                    width: calc(100% / var(--vision-scale)) !important;
+                    height: calc(100% / var(--vision-scale)) !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
                 #accessibility-widget.vision-impaired,
                 .accessibility-panel.vision-impaired {
-                    transform: scale(1.03) !important;
+                    transform: scale(var(--vision-scale, 1)) !important;
                 }
             }
-        ` : '';
+        `;
     } catch (_) {}
 }
 
@@ -15529,87 +15532,62 @@ class AccessibilityWidget {
         // Highlight Methods
     
         highlightTitles() {
-    
-            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
+
+            // Include semantic headings and common non-semantic title patterns (e.g., in footers)
+            const headings = document.querySelectorAll(
+                'h1, h2, h3, h4, h5, h6, [role="heading"], [aria-level], [class*="heading"], [class*="title"]'
+            );
+
             headings.forEach(heading => {
-    
+
                 // Skip if heading is inside accessibility panel
-    
                 if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-    
                     return;
-    
                 }
-    
-                
-    
-                // Create a wrapper div around the heading
-    
+
+                // Avoid double-highlighting if cognitive boxes already wrap it
+                if (heading.dataset.cognitiveBoxed) {
+                    return;
+                }
+
+                // Basic guards to avoid false positives
+                const text = (heading.textContent || '').trim();
+                if (!text) return; // skip empty nodes
+                if (heading.offsetParent === null) return; // skip hidden
+
+                // Apply non-intrusive highlight directly on the heading (no wrapper)
                 if (!heading.dataset.highlighted) {
-    
-                    const wrapper = document.createElement('div');
-    
-                    wrapper.style.cssText = `
-    
-                        display: inline-block;
-    
-                        border: 2px solid #6366f1;
-    
-                        border-radius: 6px;
-    
-                        padding: 4px 8px;
-    
-                        margin: 2px;
-    
-                        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-    
-                        background: transparent;
-    
-                    `;
-    
-                    
-    
-                    // Insert wrapper before heading and move heading inside
-    
-                    heading.parentNode.insertBefore(wrapper, heading);
-    
-                    wrapper.appendChild(heading);
-    
+                    heading.classList.add('aw-highlight-title');
+                    heading.style.outline = '2px solid #6366f1';
+                    heading.style.outlineOffset = '2px';
+                    heading.style.borderRadius = '6px';
+                    heading.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.3)';
+                    // Do NOT change display or alignment; preserve layout
                     heading.dataset.highlighted = 'true';
-    
                 }
-    
+
             });
-    
+
         }
     
     
     
         removeTitleHighlights() {
-    
+
             const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
+
             headings.forEach(heading => {
-    
-                // Remove wrapper if it exists
-    
-                if (heading.dataset.highlighted && heading.parentNode && heading.parentNode.style.border) {
-    
-                    const wrapper = heading.parentNode;
-    
-                    const grandParent = wrapper.parentNode;
-    
-                    grandParent.insertBefore(heading, wrapper);
-    
-                    grandParent.removeChild(wrapper);
-    
+                if (heading.dataset.highlighted) {
+                    heading.classList.remove('aw-highlight-title');
+                    // Clear only the styles we added
+                    heading.style.outline = '';
+                    heading.style.outlineOffset = '';
+                    heading.style.borderRadius = '';
+                    heading.style.boxShadow = '';
                     delete heading.dataset.highlighted;
-    
                 }
-    
             });
-    
+
         }
     
     
