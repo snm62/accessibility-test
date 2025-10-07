@@ -1081,11 +1081,30 @@ function applyUniversalStopMotion(enabled) {
 // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
 function applyVisionImpaired(on) {
     try {
-        // ... (Keep existing class toggles) ...
         document.documentElement.classList.toggle('vision-impaired', !!on);
         document.body.classList.toggle('vision-impaired', !!on);
         
-        // --- SIMPLIFIED APPROACH - No wrapper needed ---
+        // --- CONTENT WRAPPER APPROACH ---
+        let wrapper = document.getElementById('accessibility-content-wrapper');
+        
+        if (on && !wrapper) {
+            // Create content wrapper and move all body children into it
+            wrapper = document.createElement('div');
+            wrapper.id = 'accessibility-content-wrapper';
+            
+            // Move all current body children into the wrapper
+            while (document.body.firstChild) {
+                wrapper.appendChild(document.body.firstChild);
+            }
+            // Insert the wrapper into the empty body
+            document.body.appendChild(wrapper);
+        } else if (!on && wrapper) {
+            // Remove wrapper and restore original structure
+            while (wrapper.firstChild) {
+                document.body.appendChild(wrapper.firstChild);
+            }
+            document.body.removeChild(wrapper);
+        }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
         if (!style) {
@@ -1096,134 +1115,129 @@ function applyVisionImpaired(on) {
         
         // ... (Update CSS below) ...
         style.textContent = on ? `
-            /* VISION IMPAIRED: Smooth Scaling with Transitions */
+            /* VISION IMPAIRED: Safe Content Scaling with Transform */
             
-            /* 1. SMOOTH ZOOM SCALING - Use zoom with smooth transitions */
-            html.vision-impaired {
-                zoom: 1.05 !important;
-                transition: zoom 0.3s ease-in-out !important;
-                /* Prevent horizontal scrollbars */
-                overflow-x: hidden !important;
-                /* Allow natural vertical scrolling */
-                overflow-y: auto !important;
-                /* Let content define height to avoid bottom gaps after zoom */
-                height: auto !important;
-            }
-            
-            /* 2. ACCESSIBILITY PANEL SMOOTH SCALING - Apply same scaling to the widget */
-            .accessibility-widget.vision-impaired,
-            #accessibility-widget.vision-impaired,
-            .accessibility-panel.vision-impaired {
-                zoom: 1.05 !important;
-                transition: zoom 0.3s ease-in-out !important;
-                transform-origin: top right !important;
-            }
-            
-            /* 3. BODY STYLES - Smooth transitions with minimal changes */
+            /* 1. VIEWPORT LOCK - Prevent extra scrollbars and whitespace */
+            html.vision-impaired,
             body.vision-impaired {
-                /* Subtle global contrast boost with smooth transition */
-                filter: contrast(1.04) brightness(1.01) !important;
-                transition: filter 0.3s ease-in-out !important;
-                /* Prevent horizontal overflow from zoom */
-                overflow-x: hidden !important;
-                /* Allow natural scrolling */
-                overflow-y: auto !important;
-                /* Reset margins to prevent extra space */
+                height: 100% !important;
+                overflow: hidden !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
-            /* 3. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
-            body.vision-impaired [style*="position: sticky"],
-            body.vision-impaired [style*="position: -webkit-sticky"],
-            body.vision-impaired .sticky,
-            body.vision-impaired .fixed-nav,
-            body.vision-impaired nav[style*="position: sticky"],
-            body.vision-impaired nav[style*="position: -webkit-sticky"] {
+            /* 2. CONTENT WRAPPER SCALING - Safe transform-based scaling */
+            #accessibility-content-wrapper {
+                transform: scale(1.05) !important;
+                transform-origin: top left !important;
+                width: calc(100% / 1.05) !important;
+                height: calc(100% / 1.05) !important;
+                overflow: auto !important;
+                transition: transform 0.3s ease-in-out !important;
+            }
+            
+            /* 3. ACCESSIBILITY PANEL SCALING - Scale the widget panel */
+            .accessibility-widget.vision-impaired,
+            #accessibility-widget.vision-impaired,
+            .accessibility-panel.vision-impaired {
+                transform: scale(1.05) !important;
+                transform-origin: top right !important;
+                transition: transform 0.3s ease-in-out !important;
+            }
+            
+            /* 4. CONTENT ENHANCEMENT - Subtle contrast and readability improvements */
+            #accessibility-content-wrapper {
+                /* Subtle global contrast boost with smooth transition */
+                filter: contrast(1.04) brightness(1.01) !important;
+                transition: filter 0.3s ease-in-out !important;
+            }
+            
+            /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
+            #accessibility-content-wrapper [style*="position: sticky"],
+            #accessibility-content-wrapper [style*="position: -webkit-sticky"],
+            #accessibility-content-wrapper .sticky,
+            #accessibility-content-wrapper .fixed-nav,
+            #accessibility-content-wrapper nav[style*="position: sticky"],
+            #accessibility-content-wrapper nav[style*="position: -webkit-sticky"] {
                 position: sticky !important;
                 position: -webkit-sticky !important;
                 /* Ensure sticky elements maintain their behavior */
                 z-index: 9999 !important;
             }
             
-            /* 4. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
-            body.vision-impaired p,
-            body.vision-impaired span,
-            body.vision-impaired div,
-            body.vision-impaired li,
-            body.vision-impaired td,
-            body.vision-impaired th {
+            /* 6. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
+            #accessibility-content-wrapper p,
+            #accessibility-content-wrapper span,
+            #accessibility-content-wrapper div,
+            #accessibility-content-wrapper li,
+            #accessibility-content-wrapper td,
+            #accessibility-content-wrapper th {
                 text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.2) !important;
                 font-weight: 500 !important;
                 transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 5. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
-            body.vision-impaired *:focus {
+            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
+            #accessibility-content-wrapper *:focus {
                 outline: 2px solid #0066cc !important;
                 outline-offset: 1px !important;
                 transition: outline 0.2s ease-in-out !important;
             }
             
-            /* 6. IMPROVE LINK VISIBILITY - Smooth link transitions */
-            body.vision-impaired a {
+            /* 8. IMPROVE LINK VISIBILITY - Smooth link transitions */
+            #accessibility-content-wrapper a {
                 font-weight: 500 !important;
                 transition: font-weight 0.3s ease-in-out !important;
             }
             
-            /* 7. ENHANCE BUTTON READABILITY - Smooth button transitions */
-            body.vision-impaired button,
-            body.vision-impaired input[type="button"],
-            body.vision-impaired input[type="submit"],
-            body.vision-impaired input[type="reset"] {
+            /* 9. ENHANCE BUTTON READABILITY - Smooth button transitions */
+            #accessibility-content-wrapper button,
+            #accessibility-content-wrapper input[type="button"],
+            #accessibility-content-wrapper input[type="submit"],
+            #accessibility-content-wrapper input[type="reset"] {
                 text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
                 font-weight: 500 !important;
                 transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 8. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
-            body.vision-impaired input,
-            body.vision-impaired textarea,
-            body.vision-impaired select {
+            /* 10. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
+            #accessibility-content-wrapper input,
+            #accessibility-content-wrapper textarea,
+            #accessibility-content-wrapper select {
                 text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
                 font-weight: 500 !important;
                 transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 9. ENHANCE HEADING READABILITY - Smooth heading transitions */
-            body.vision-impaired h1,
-            body.vision-impaired h2,
-            body.vision-impaired h3,
-            body.vision-impaired h4,
-            body.vision-impaired h5,
-            body.vision-impaired h6 {
+            /* 11. ENHANCE HEADING READABILITY - Smooth heading transitions */
+            #accessibility-content-wrapper h1,
+            #accessibility-content-wrapper h2,
+            #accessibility-content-wrapper h3,
+            #accessibility-content-wrapper h4,
+            #accessibility-content-wrapper h5,
+            #accessibility-content-wrapper h6 {
                 text-shadow: 0 0 0.4px rgba(0, 0, 0, 0.25) !important;
                 font-weight: 600 !important;
                 transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 10. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
-            body.vision-impaired img {
+            /* 12. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+            #accessibility-content-wrapper img {
                 filter: none !important;
             }
             
-            /* Remove trailing white gap from last section/footer when zoomed */
-            body.vision-impaired > :last-child {
-                margin-bottom: 0 !important;
-            }
-            
-            /* 11. RESPONSIVE ADJUSTMENTS - Smooth mobile scaling */
+            /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
             @media (max-width: 768px) {
-                html.vision-impaired {
-                    zoom: 1.03 !important; /* Slightly more scaling on mobile */
-                    transition: zoom 0.3s ease-in-out !important;
+                #accessibility-content-wrapper {
+                    transform: scale(1.03) !important;
+                    width: calc(100% / 1.03) !important;
+                    height: calc(100% / 1.03) !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
                 #accessibility-widget.vision-impaired,
                 .accessibility-panel.vision-impaired {
-                    zoom: 1.03 !important;
-                    transition: zoom 0.3s ease-in-out !important;
+                    transform: scale(1.03) !important;
                 }
             }
         ` : '';
