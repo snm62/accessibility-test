@@ -17313,6 +17313,12 @@ class AccessibilityWidget {
                 setTimeout(() => { try { this.updateLineHeightDisplay(); } catch (_) {} }, 50);
             } catch (_) {}
 
+            // Apply line height CSS if it's not the default value
+            if (this.lineHeight !== 100) {
+                console.log('Accessibility Widget: Applying saved line height on page load:', this.lineHeight + '%');
+                this.updateLineHeight();
+            }
+
             
             
             // Load letter spacing from settings
@@ -18596,49 +18602,402 @@ class AccessibilityWidget {
     
     
         // Dark Contrast Methods
-    
+
         enableDarkContrast() {
-    
+
             console.log('Accessibility Widget: enableDarkContrast called');
-    
+
+            // Remove light contrast if active
+            document.body.classList.remove('light-contrast');
+
+            // Add dark contrast class
             document.body.classList.add('dark-contrast');
-    
+
+            // Inject dark contrast CSS
+            this.injectDarkContrastCSS();
+
             console.log('Accessibility Widget: Dark contrast enabled');
-    
+
         }
     
     
     
         disableDarkContrast() {
-    
+
             document.body.classList.remove('dark-contrast');
-    
+
+            // Remove dark contrast CSS
+            this.removeDarkContrastCSS();
+
             console.log('Accessibility Widget: Dark contrast disabled');
-    
+
         }
     
     
     
         // Light Contrast Methods
-    
+
         enableLightContrast() {
-    
+
             console.log('Accessibility Widget: enableLightContrast called');
-    
+
+            // Remove dark contrast if active
+            document.body.classList.remove('dark-contrast');
+
+            // Add light contrast class
             document.body.classList.add('light-contrast');
-    
+
+            // Inject light contrast CSS
+            this.injectLightContrastCSS();
+
             console.log('Accessibility Widget: Light contrast enabled');
-    
+
         }
     
     
     
         disableLightContrast() {
-    
+
             document.body.classList.remove('light-contrast');
-    
+
+            // Remove light contrast CSS
+            this.removeLightContrastCSS();
+
             console.log('Accessibility Widget: Light contrast disabled');
-    
+
+        }
+
+        // Dark Contrast CSS Injection
+        injectDarkContrastCSS() {
+            // Remove any existing dark contrast CSS first
+            this.removeDarkContrastCSS();
+
+            const style = document.createElement('style');
+            style.id = 'accessibility-dark-contrast-css';
+            style.textContent = `
+                /* Contrast Modes */
+                body.dark-contrast {
+                    background: var(--black) !important;
+                    color: var(--white) !important;
+                }
+
+                /* Apply dark contrast to all text elements - text color only, no borders */
+                body.dark-contrast p,
+                body.dark-contrast h1,
+                body.dark-contrast h2,
+                body.dark-contrast h3,
+                body.dark-contrast h4,
+                body.dark-contrast h5,
+                body.dark-contrast h6,
+                body.dark-contrast span,
+                body.dark-contrast div,
+                body.dark-contrast li,
+                body.dark-contrast td,
+                body.dark-contrast th,
+                body.dark-contrast label,
+                body.dark-contrast small,
+                body.dark-contrast em,
+                body.dark-contrast strong,
+                body.dark-contrast i,
+                body.dark-contrast b,
+                body.dark-contrast a {
+                    color: var(--white) !important;
+                }
+
+                /* Apply dark background to main content areas only */
+                body.dark-contrast main,
+                body.dark-contrast section,
+                body.dark-contrast article,
+                body.dark-contrast .content,
+                body.dark-contrast .container,
+                body.dark-contrast .wrapper {
+                    background: var(--black) !important;
+                }
+
+                /* Style ONLY actual service cards and specific content boxes in dark contrast */
+                body.dark-contrast .service-card,
+                body.dark-contrast .color-box,
+                body.dark-contrast .test-block {
+                    background: var(--black) !important;
+                    border: 2px solid var(--white) !important;
+                    color: var(--white) !important;
+                }
+
+                /* Ensure text inside specific cards is white */
+                body.dark-contrast .service-card *,
+                body.dark-contrast .color-box *,
+                body.dark-contrast .test-block * {
+                    color: var(--white) !important;
+                }
+
+                /* Style form elements for dark contrast */
+                body.dark-contrast input,
+                body.dark-contrast textarea,
+                body.dark-contrast select,
+                body.dark-contrast button,
+                body.dark-contrast .btn,
+                body.dark-contrast .button,
+                body.dark-contrast .form-control {
+                    background: var(--black) !important;
+                    color: var(--white) !important;
+                    border: 1px solid var(--white) !important;
+                }
+
+                /* Style form placeholders for dark contrast */
+                body.dark-contrast input::placeholder,
+                body.dark-contrast textarea::placeholder {
+                    color: #cccccc !important;
+                }
+
+                /* Style form groups and containers for dark contrast */
+                body.dark-contrast .form-group,
+                body.dark-contrast .contact-form,
+                body.dark-contrast .test-form {
+                    background: var(--black) !important;
+                    color: var(--white) !important;
+                }
+
+                /* Exclude UI elements from dark contrast text changes */
+                body.dark-contrast header,
+                body.dark-contrast nav,
+                body.dark-contrast .header,
+                body.dark-contrast .navbar,
+                body.dark-contrast .navigation,
+                body.dark-contrast .logo,
+                body.dark-contrast .menu,
+                body.dark-contrast .nav-menu,
+                body.dark-contrast .card,
+                body.dark-contrast .modal,
+                body.dark-contrast .dropdown,
+                body.dark-contrast .tooltip,
+                body.dark-contrast .badge,
+                body.dark-contrast .alert {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+
+                /* Style accessibility widget for dark contrast */
+                .dark-contrast .accessibility-panel,
+                .dark-contrast .accessibility-icon,
+                .dark-contrast #accessibility-panel,
+                .dark-contrast #accessibility-icon {
+                    background: #1a1a1a !important;
+                    color: #ffffff !important;
+                    border: 2px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessibility-panel *,
+                .dark-contrast .accessibility-icon *,
+                .dark-contrast #accessibility-panel *,
+                .dark-contrast #accessibility-icon * {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+
+                /* Override text color for accessibility widget elements */
+                .dark-contrast .accessibility-panel p,
+                .dark-contrast .accessibility-panel h1,
+                .dark-contrast .accessibility-panel h2,
+                .dark-contrast .accessibility-panel h3,
+                .dark-contrast .accessibility-panel h4,
+                .dark-contrast .accessibility-panel h5,
+                .dark-contrast .accessibility-panel h6,
+                .dark-contrast .accessibility-panel span,
+                .dark-contrast .accessibility-panel div,
+                .dark-contrast .accessibility-panel li,
+                .dark-contrast .accessibility-panel td,
+                .dark-contrast .accessibility-panel th,
+                .dark-contrast .accessibility-panel label,
+                .dark-contrast .accessibility-panel small,
+                .dark-contrast .accessibility-panel em,
+                .dark-contrast .accessibility-panel strong,
+                .dark-contrast .accessibility-panel i,
+                .dark-contrast .accessibility-panel b,
+                .dark-contrast .accessibility-panel a {
+                    color: #ffffff !important;
+                }
+
+                /* Style accessibility panel header for dark contrast */
+                .dark-contrast .accessibility-panel .panel-header {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border-bottom: 1px solid #ffffff !important;
+                }
+
+                /* Style accessibility panel buttons for dark contrast */
+                .dark-contrast .accessibility-panel .action-btn {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessibility-panel .action-btn:hover {
+                    background: #3a3a3a !important;
+                    color: #ffffff !important;
+                }
+
+                /* Style accessibility panel footer for dark contrast */
+                .dark-contrast .accessibility-panel .panel-footer {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border-top: 1px solid #ffffff !important;
+                }
+
+                /* Style toggle switches for dark contrast */
+                .dark-contrast .accessibility-panel .toggle-switch {
+                    background: #2a2a2a !important;
+                    border: 1px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessibility-panel .toggle-switch .slider {
+                    background: #ffffff !important;
+                }
+
+                .dark-contrast .accessibility-panel .toggle-switch input:checked + .slider {
+                    background: #6366f1 !important;
+                }
+
+                /* Style profile items for dark contrast */
+                .dark-contrast .accessibility-panel .profile-item {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                    margin: 5px 0 !important;
+                }
+
+                .dark-contrast .accessibility-panel .profile-item:hover {
+                    background: #3a3a3a !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        removeDarkContrastCSS() {
+            const existingStyle = document.getElementById('accessibility-dark-contrast-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        }
+
+        // Light Contrast CSS Injection
+        injectLightContrastCSS() {
+            // Remove any existing light contrast CSS first
+            this.removeLightContrastCSS();
+
+            const style = document.createElement('style');
+            style.id = 'accessibility-light-contrast-css';
+            style.textContent = `
+                body.light-contrast {
+                    background: var(--white) !important;
+                    color: var(--black) !important;
+                }
+
+                /* Apply light contrast to all text elements - text color only, no borders */
+                body.light-contrast p,
+                body.light-contrast h1,
+                body.light-contrast h2,
+                body.light-contrast h3,
+                body.light-contrast h4,
+                body.light-contrast h5,
+                body.light-contrast h6,
+                body.light-contrast span,
+                body.light-contrast div,
+                body.light-contrast li,
+                body.light-contrast td,
+                body.light-contrast th,
+                body.light-contrast label,
+                body.light-contrast small,
+                body.light-contrast em,
+                body.light-contrast strong,
+                body.light-contrast i,
+                body.light-contrast b,
+                body.light-contrast a {
+                    color: var(--black) !important;
+                }
+
+                /* Apply light background to main content areas only */
+                body.light-contrast main,
+                body.light-contrast section,
+                body.light-contrast article,
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper {
+                    background: var(--white) !important;
+                }
+
+                /* Style ONLY actual service cards and specific content boxes in light contrast */
+                body.light-contrast .service-card,
+                body.light-contrast .color-box,
+                body.light-contrast .test-block {
+                    background: var(--white) !important;
+                    border: 2px solid var(--black) !important;
+                    color: var(--black) !important;
+                }
+
+                /* Ensure text inside specific cards is black */
+                body.light-contrast .service-card *,
+                body.light-contrast .color-box *,
+                body.light-contrast .test-block * {
+                    color: var(--black) !important;
+                }
+
+                /* Exclude UI elements and accessibility widget from light contrast text changes */
+                body.light-contrast header,
+                body.light-contrast nav,
+                body.light-contrast .header,
+                body.light-contrast .navbar,
+                body.light-contrast .navigation,
+                body.light-contrast .logo,
+                body.light-contrast .menu,
+                body.light-contrast .nav-menu,
+                body.light-contrast button,
+                body.light-contrast .button,
+                body.light-contrast .btn,
+                body.light-contrast input,
+                body.light-contrast textarea,
+                body.light-contrast select,
+                body.light-contrast .form-control,
+                body.light-contrast .card,
+                body.light-contrast .modal,
+                body.light-contrast .dropdown,
+                body.light-contrast .tooltip,
+                body.light-contrast .badge,
+                body.light-contrast .alert,
+                body.light-contrast .accessibility-panel,
+                body.light-contrast .accessibility-icon,
+                body.light-contrast #accessibility-panel,
+                body.light-contrast #accessibility-icon,
+                body.light-contrast #accessibility-widget-container,
+                body.light-contrast .accessibility-widget-container {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+
+                /* Completely exclude accessibility widget from light contrast effects */
+                .light-contrast .accessibility-panel,
+                .light-contrast .accessibility-icon,
+                .light-contrast #accessibility-panel,
+                .light-contrast #accessibility-icon,
+                .light-contrast .accessibility-panel *,
+                .light-contrast .accessibility-icon *,
+                .light-contrast #accessibility-panel *,
+                .light-contrast #accessibility-icon * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    background: inherit !important;
+                    color: inherit !important;
+                    border: inherit !important;
+                    box-shadow: inherit !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        removeLightContrastCSS() {
+            const existingStyle = document.getElementById('accessibility-light-contrast-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
         }
     
     
@@ -25448,97 +25807,67 @@ class AccessibilityWidget {
     
     
         enableAlignRight() {
-    
+
             console.log('Accessibility Widget: Enabling right alignment');
-    
+
             // Disable other alignment options first
             this.disableAlignLeft();
             this.disableAlignCenter();
-    
-            // Apply right alignment to body first, then to specific content elements
-    
-            document.body.style.textAlign = 'right';
-    
-            
-    
-            // Apply to all text elements except accessibility panel
-    
-            const textElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
-    
-            
-    
+
+            // Apply right alignment only to specific text and icon elements, not the entire body
+            const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, label, small, em, strong, b, td, th, i, svg, [class*="icon"], [data-icon]');
+
             textElements.forEach(element => {
-    
-                // Skip if element is inside accessibility panel
-    
+
+                // Skip if element is inside accessibility panel or widget
                 if (!element.closest('#accessibility-widget-container') && 
-    
                     !element.closest('.accessibility-panel') && 
-    
                     !element.closest('#accessibility-icon') && 
-    
                     !element.closest('.text-alignment-panel') &&
-    
+                    !element.closest('#accessibility-widget') &&
+                    !element.closest('[data-ck-widget]') &&
                     element.id !== 'accessibility-icon' && 
-    
                     element.id !== 'accessibility-panel' &&
-    
-                    element.id !== 'text-alignment-panel') {
-    
+                    element.id !== 'text-alignment-panel' &&
+                    element.id !== 'accessibility-widget') {
+
                     element.style.textAlign = 'right';
-    
+
                 }
-    
+
             });
-    
-            
-    
+
             console.log('Accessibility Widget: Right alignment enabled');
-    
+
         }
     
     
     
         disableAlignRight() {
-    
+
             console.log('Accessibility Widget: Disabling right alignment');
-    
-            
-    
-            // Reset body alignment
-    
-            document.body.style.textAlign = '';
-    
-            
-    
-            // Remove right alignment from all text elements except accessibility panel
-    
-            const textElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
-    
-            
-    
+
+            // Remove right alignment from specific text and icon elements only
+            const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, label, small, em, strong, b, td, th, i, svg, [class*="icon"], [data-icon]');
+
             textElements.forEach(element => {
-    
-                // Skip if element is inside accessibility panel
-    
+
+                // Skip if element is inside accessibility panel or widget
                 if (!element.closest('#accessibility-widget-container') && 
-    
                     !element.closest('.accessibility-panel') && 
-    
                     !element.closest('#accessibility-icon') && 
-    
                     !element.closest('.text-alignment-panel') &&
-    
+                    !element.closest('#accessibility-widget') &&
+                    !element.closest('[data-ck-widget]') &&
                     element.id !== 'accessibility-icon' && 
-    
                     element.id !== 'accessibility-panel' &&
-    
-                    element.id !== 'text-alignment-panel') {
-    
+                    element.id !== 'text-alignment-panel' &&
+                    element.id !== 'accessibility-widget') {
+
                     element.style.textAlign = '';
-    
+
                 }
-    
+
             });
     
             
