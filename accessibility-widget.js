@@ -4503,6 +4503,10 @@ class AccessibilityWidget {
     body.align-center p,
     body.align-center span,
     body.align-center a,
+    body.align-center i,
+    body.align-center svg,
+    body.align-center [class*="icon"],
+    body.align-center [data-icon],
     body.align-center li,
     body.align-center label,
     body.align-center small,
@@ -4518,7 +4522,6 @@ class AccessibilityWidget {
     body.align-center img,
     body.align-center video,
     body.align-center canvas,
-    body.align-center svg,
     body.align-center picture,
     body.align-center figure,
     body.align-center .container,
@@ -15607,7 +15610,7 @@ class AccessibilityWidget {
                     link.classList.add('aw-highlight-link');
                     link.style.outline = '2px solid #6366f1';
                     link.style.outlineOffset = '2px';
-                    link.style.borderRadius = '4px';
+                    // Preserve original button/link shape; no borderRadius override
                     link.style.boxShadow = '0 2px 6px rgba(99, 102, 241, 0.3)';
                     link.dataset.highlighted = 'true';
                 }
@@ -15659,6 +15662,13 @@ class AccessibilityWidget {
                 try { this.highlightLinksObserver.disconnect(); } catch (_) {}
                 this.highlightLinksObserver = null;
             }
+
+            // Force a quick refresh to fully restore original styles/layout after un-highlighting
+            try {
+                setTimeout(() => {
+                    try { window.location.reload(); } catch (_) {}
+                }, 50);
+            } catch (_) {}
 
         }
     
@@ -17281,7 +17291,7 @@ class AccessibilityWidget {
     
             // Set line height toggle state based on whether line height is not 100%
     
-            if (this.lineHeight !== 100) {
+            if (this.lineHeight !== 100 || localStorage.getItem('line-height-used') === 'true') {
     
                 this.settings['adjust-line-height'] = true;
     
@@ -17297,6 +17307,14 @@ class AccessibilityWidget {
     
             
     
+            // Always update the line-height display to reflect the saved value across pages
+            try {
+                this.updateLineHeightDisplay();
+                setTimeout(() => { try { this.updateLineHeightDisplay(); } catch (_) {} }, 50);
+            } catch (_) {}
+
+            
+            
             // Load letter spacing from settings
     
             if (this.settings['letter-spacing'] !== undefined) {
@@ -17733,10 +17751,8 @@ class AccessibilityWidget {
     
                     }
                 } else {
-                    console.log('[CK] Line height was saved but never used, resetting to 100%');
-                    this.lineHeight = 100;
-                    this.settings['line-height'] = 100;
-                    this.saveSettings();
+                    // Persist the previously used custom line-height across pages
+                    localStorage.setItem('line-height-used', 'true');
                 }
     
                 
@@ -24658,7 +24674,7 @@ class AccessibilityWidget {
                 if (!button.dataset.cognitiveBoxed) {
                     button.style.outline = '2px solid #f97316';
                     button.style.outlineOffset = '2px';
-                    button.style.borderRadius = '6px';
+                    // Do not change border radius to preserve original button shape
                     button.style.boxShadow = '0 2px 8px rgba(249, 115, 22, 0.3)';
                     button.dataset.cognitiveBoxed = 'true';
                 }
@@ -24674,7 +24690,7 @@ class AccessibilityWidget {
                 if (!link.dataset.cognitiveBoxed) {
                     link.style.outline = '2px solid #f97316';
                     link.style.outlineOffset = '2px';
-                    link.style.borderRadius = '4px';
+                    // Do not change border radius to preserve original link/button shape
                     link.style.boxShadow = '0 2px 6px rgba(249, 115, 22, 0.3)';
                     link.dataset.cognitiveBoxed = 'true';
                 }
