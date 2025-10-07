@@ -3312,7 +3312,7 @@ class AccessibilityWidget {
     
                 link.rel = 'stylesheet';
     
-                link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
+                //link.href = 'https://cdn.jsdelivr.net/gh/snm62/accessibility-test@2422563/accessibility-widget.css';
                 // External CSS removed to prevent conflicts with internal styles
                 link.onload = () => {
                     
