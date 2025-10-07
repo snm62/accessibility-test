@@ -24192,14 +24192,14 @@ class AccessibilityWidget {
     
                 const x = e.clientX;
                 const y = e.clientY;
-                const size = 200; // Spotlight size
+                const height = 200; // Spotlight height
     
                 // Position the spotlight cutout using box-shadow technique
-                spotlight.style.left = (x - size/2) + 'px';
-                spotlight.style.top = (y - size/2) + 'px';
-                spotlight.style.width = size + 'px';
-                spotlight.style.height = size + 'px';
-                spotlight.style.borderRadius = '50%';
+                spotlight.style.left = '0px';
+                spotlight.style.top = (y - height/2) + 'px';
+                spotlight.style.width = '100vw';
+                spotlight.style.height = height + 'px';
+                spotlight.style.borderRadius = '0px';
                 spotlight.style.background = 'transparent';
                 spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.7)`;
     
@@ -24350,6 +24350,11 @@ class AccessibilityWidget {
     
                     
     
+                    // Ensure parent has relative positioning for absolute child
+                    if (heading.parentNode.style.position !== 'relative') {
+                        heading.parentNode.style.position = 'relative';
+                    }
+    
                     // Insert wrapper before heading and move heading inside
     
                     heading.parentNode.insertBefore(wrapper, heading);
@@ -24408,6 +24413,11 @@ class AccessibilityWidget {
     
                     
     
+                    // Ensure parent has relative positioning for absolute child
+                    if (button.parentNode.style.position !== 'relative') {
+                        button.parentNode.style.position = 'relative';
+                    }
+    
                     // Insert wrapper before button and move button inside
     
                     button.parentNode.insertBefore(wrapper, button);
@@ -24465,6 +24475,11 @@ class AccessibilityWidget {
                     `;
     
                     
+    
+                    // Ensure parent has relative positioning for absolute child
+                    if (link.parentNode.style.position !== 'relative') {
+                        link.parentNode.style.position = 'relative';
+                    }
     
                     // Insert wrapper before link and move link inside
     
@@ -24541,6 +24556,11 @@ class AccessibilityWidget {
                                             z-index: 1;
                                         `;
                                         
+                                        // Ensure parent has relative positioning for absolute child
+                                        if (link.parentNode.style.position !== 'relative') {
+                                            link.parentNode.style.position = 'relative';
+                                        }
+                                        
                                         link.parentNode.insertBefore(wrapper, link);
                                         wrapper.appendChild(link);
                                         link.dataset.cognitiveBoxed = 'true';
@@ -24585,6 +24605,11 @@ class AccessibilityWidget {
     
                     grandParent.removeChild(wrapper);
     
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
+    
                     delete heading.dataset.cognitiveBoxed;
     
                 }
@@ -24609,6 +24634,11 @@ class AccessibilityWidget {
     
                     grandParent.removeChild(wrapper);
     
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
+    
                     delete button.dataset.cognitiveBoxed;
     
                 }
@@ -24632,6 +24662,11 @@ class AccessibilityWidget {
                     grandParent.insertBefore(link, wrapper);
     
                     grandParent.removeChild(wrapper);
+    
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
     
                     delete link.dataset.cognitiveBoxed;
     
