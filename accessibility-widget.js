@@ -12985,72 +12985,34 @@ class AccessibilityWidget {
     
                     if (magnifier) {
     
-                        // Get the full text content, including nested elements
-    
+                        // Strict text extraction to avoid phantom text on empty spaces
+                        const tag = element.tagName;
                         let fullText = '';
-    
-                        
-    
-                        // Handle different types of elements with comprehensive text extraction
-    
-                        if (element.tagName === 'IMG') {
-    
-                            // For images, use alt text, title, or aria-label
-    
-                            fullText = element.alt || element.title || element.getAttribute('aria-label') || 'Image';
-    
+                        if (tag === 'IMG') {
+                            fullText = element.alt || element.title || element.getAttribute('aria-label') || '';
                         } else if (element.hasAttribute('aria-label')) {
-    
-                            // For elements with aria-label (highest priority for accessibility)
-    
-                            fullText = element.getAttribute('aria-label');
-    
+                            fullText = element.getAttribute('aria-label') || '';
                         } else if (element.hasAttribute('aria-labelledby')) {
-    
-                            // For elements with aria-labelledby, get text from referenced element
-    
                             const labelledBy = element.getAttribute('aria-labelledby');
-    
-                            const labelElement = document.getElementById(labelledBy);
-    
-                            if (labelElement) {
-    
-                                fullText = labelElement.textContent || labelElement.innerText;
-    
-                            }
-    
+                            const labelElement = labelledBy ? document.getElementById(labelledBy) : null;
+                            fullText = labelElement ? (labelElement.textContent || labelElement.innerText || '') : '';
                         } else if (element.hasAttribute('title')) {
-    
-                            // For elements with title attribute
-    
-                            fullText = element.getAttribute('title');
-    
+                            fullText = element.getAttribute('title') || '';
                         } else if (element.hasAttribute('placeholder')) {
-    
-                            // For input elements with placeholder
-    
-                            fullText = element.getAttribute('placeholder');
-    
+                            fullText = element.getAttribute('placeholder') || '';
                         } else if (element.hasAttribute('value') && (element.tagName === 'INPUT' || element.tagName === 'BUTTON')) {
-    
-                            // For input/button elements with value
-    
-                            fullText = element.getAttribute('value');
-    
-                        } else if (element.children.length > 0) {
-    
-                            // If element has children, get text from all child elements
-    
-                            // Use innerText for better formatting, fallback to textContent
-    
-                            fullText = element.innerText || element.textContent;
-    
+                            fullText = element.getAttribute('value') || '';
                         } else {
-    
-                            // If it's a simple text element
-    
-                            fullText = element.textContent || element.innerText;
-    
+                            // Only consider direct text nodes; avoid pulling nested container text
+                            const directText = Array.from(element.childNodes)
+                                .filter(n => n.nodeType === Node.TEXT_NODE)
+                                .map(n => n.nodeValue)
+                                .join(' ');
+                            fullText = directText || '';
+                            // Allow innerText fallback only for typical text elements
+                            if (!fullText && element.matches('h1,h2,h3,h4,h5,h6,p,span,a,button,label,li,td,th,em,strong,small,code,pre,blockquote')) {
+                                fullText = element.innerText || element.textContent || '';
+                            }
                         }
     
                         
@@ -13061,29 +13023,16 @@ class AccessibilityWidget {
     
                         
     
-                        // Show magnifier for any text content
-    
-                        if (!fullText) {
-    
+                        // Normalize and validate
+                        fullText = fullText ? fullText.replace(/\s+/g, ' ').trim() : '';
+                        if (!fullText || element.offsetWidth === 0 || element.offsetHeight === 0) {
+                            magnifier.style.display = 'none';
                             return;
-    
                         }
     
                         
     
-                        // Final fallback: try to get any visible text from the element
-    
-                        if (!fullText) {
-    
-                            const computedStyle = window.getComputedStyle(element);
-    
-                            if (computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden') {
-    
-                                fullText = element.textContent || element.innerText;
-    
-                            }
-    
-                        }
+                        // Avoid pulling container text via generic fallbacks
     
                         
     
@@ -15593,77 +15542,64 @@ class AccessibilityWidget {
     
     
         highlightLinks() {
-    
-            const links = document.querySelectorAll('a');
-    
+
+            const links = document.querySelectorAll(
+                [
+                    'a',
+                    'nav a', '.nav a', '.navbar a', '.nav-menu a',
+                    '.menu a', '.dropdown a', '.dropdown-menu a',
+                    '.breadcrumb a', '.pagination a',
+                    '.menu-item a', '.submenu a',
+                    '[role="link"]', '[role="menuitem"]', '[role="menuitemcheckbox"]', '[role="menuitemradio"]',
+                    'button[role="menuitem"]', 'button[aria-haspopup]', 'button[aria-expanded]',
+                    '[aria-haspopup="menu"]', '[aria-haspopup="true"]', '[aria-expanded]',
+                    '.dropdown-item', '.menu-item', '.submenu-item', '.nav-link', '.nav-item > a', '.nav-item > button'
+                ].join(', ')
+            );
+
             links.forEach(link => {
-    
-                // Create a wrapper div around the link
-    
-                if (!link.dataset.highlighted) {
-    
-                    const wrapper = document.createElement('div');
-    
-                    wrapper.style.cssText = `
-    
-                        display: inline-block;
-    
-                        border: 2px solid #6366f1;
-    
-                        border-radius: 4px;
-    
-                        padding: 2px 4px;
-    
-                        margin: 1px;
-    
-                        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
-    
-                        background: transparent;
-    
-                    `;
-    
-                    
-    
-                    // Insert wrapper before link and move link inside
-    
-                    link.parentNode.insertBefore(wrapper, link);
-    
-                    wrapper.appendChild(link);
-    
-                    link.dataset.highlighted = 'true';
-    
+                // Skip if link is inside accessibility panel
+                if (link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                    return;
                 }
-    
+
+                // Avoid double-highlighting if cognitive boxes already wrap it
+                if (link.dataset.cognitiveBoxed) {
+                    return;
+                }
+
+                // Non-intrusive highlight directly on the link (no wrapper, no alignment changes)
+                if (!link.dataset.highlighted) {
+                    link.classList.add('aw-highlight-link');
+                    link.style.outline = '2px solid #6366f1';
+                    link.style.outlineOffset = '2px';
+                    link.style.borderRadius = '4px';
+                    link.style.boxShadow = '0 2px 6px rgba(99, 102, 241, 0.3)';
+                    link.dataset.highlighted = 'true';
+                }
+
             });
-    
+
         }
     
     
     
         removeLinkHighlights() {
-    
+
             const links = document.querySelectorAll('a');
-    
+
             links.forEach(link => {
-    
-                // Remove wrapper if it exists
-    
-                if (link.dataset.highlighted && link.parentNode && link.parentNode.style.border) {
-    
-                    const wrapper = link.parentNode;
-    
-                    const grandParent = wrapper.parentNode;
-    
-                    grandParent.insertBefore(link, wrapper);
-    
-                    grandParent.removeChild(wrapper);
-    
+                if (link.dataset.highlighted) {
+                    link.classList.remove('aw-highlight-link');
+                    // Clear only the styles we added
+                    link.style.outline = '';
+                    link.style.outlineOffset = '';
+                    link.style.borderRadius = '';
+                    link.style.boxShadow = '';
                     delete link.dataset.highlighted;
-    
                 }
-    
             });
-    
+
         }
     
     
@@ -24613,8 +24549,21 @@ class AccessibilityWidget {
     
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
-            // Comprehensive link selectors to catch all menu items and navigation
-            const links = document.querySelectorAll('a, nav a, .nav a, .navbar a, .menu a, .dropdown a, .breadcrumb a, .pagination a, [role="menuitem"] a, [role="button"] a');
+            // Comprehensive selectors to catch links and dropdown menu items generically
+            const links = document.querySelectorAll(
+                [
+                    'a',
+                    'nav a', '.nav a', '.navbar a', '.nav-menu a',
+                    '.menu a', '.dropdown a', '.dropdown-menu a',
+                    '.breadcrumb a', '.pagination a',
+                    '.menu-item a', '.submenu a',
+                    // Elements that act like menu items or links without being <a>
+                    '[role="link"]', '[role="menuitem"]', '[role="menuitemcheckbox"]', '[role="menuitemradio"]',
+                    'button[role="menuitem"]', 'button[aria-haspopup]', 'button[aria-expanded]',
+                    '[aria-haspopup="menu"]', '[aria-haspopup="true"]', '[aria-expanded]',
+                    '.dropdown-item', '.menu-item', '.submenu-item', '.nav-link', '.nav-item > a', '.nav-item > button'
+                ].join(', ')
+            );
     
             
     
