@@ -24598,7 +24598,8 @@ class AccessibilityWidget {
     
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
-            const links = document.querySelectorAll('a');
+            // Comprehensive link selectors to catch all menu items and navigation
+            const links = document.querySelectorAll('a, nav a, .nav a, .navbar a, .menu a, .dropdown a, .breadcrumb a, .pagination a, [role="menuitem"] a, [role="button"] a');
     
             
     
@@ -24624,7 +24625,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #6366f1;
     
@@ -24632,13 +24633,22 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 2px;
+                        margin: 0;
     
                         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     
                         background: transparent;
     
+                        pointer-events: none;
+    
+                        z-index: 1;
+    
                     `;
+                    
+                    // Ensure parent has relative positioning
+                    if (heading.parentNode.style.position !== 'relative' && heading.parentNode.style.position !== 'absolute' && heading.parentNode.style.position !== 'fixed') {
+                        heading.parentNode.style.position = 'relative';
+                    }
     
                     
     
@@ -24678,7 +24688,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #f97316;
     
@@ -24686,13 +24696,22 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 2px;
+                        margin: 0;
     
                         box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
+                        pointer-events: none;
+    
+                        z-index: 1;
+    
                     `;
+                    
+                    // Ensure parent has relative positioning
+                    if (button.parentNode.style.position !== 'relative' && button.parentNode.style.position !== 'absolute' && button.parentNode.style.position !== 'fixed') {
+                        button.parentNode.style.position = 'relative';
+                    }
     
                     
     
@@ -24732,7 +24751,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #f97316;
     
@@ -24740,13 +24759,22 @@ class AccessibilityWidget {
     
                         padding: 2px 4px;
     
-                        margin: 1px;
+                        margin: 0;
     
                         box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
+                        pointer-events: none;
+    
+                        z-index: 1;
+    
                     `;
+                    
+                    // Ensure parent has relative positioning
+                    if (link.parentNode.style.position !== 'relative' && link.parentNode.style.position !== 'absolute' && link.parentNode.style.position !== 'fixed') {
+                        link.parentNode.style.position = 'relative';
+                    }
     
                     
     
@@ -24765,6 +24793,39 @@ class AccessibilityWidget {
             
     
             console.log('Accessibility Widget: Cognitive boxes added to', headings.length, 'headings,', buttons.length, 'buttons and', links.length, 'links');
+            
+            // Add MutationObserver to handle dynamically added menu items
+            if (!this.cognitiveObserver) {
+                this.cognitiveObserver = new MutationObserver((mutations) => {
+                    let shouldReapply = false;
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Check if new links, buttons, or headings were added
+                                    if (node.matches && (node.matches('a, button, h1, h2, h3, h4, h5, h6') || 
+                                        node.querySelector && node.querySelector('a, button, h1, h2, h3, h4, h5, h6'))) {
+                                        shouldReapply = true;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    if (shouldReapply) {
+                        // Reapply cognitive boxes to new elements
+                        setTimeout(() => {
+                            this.addCognitiveBoxes();
+                        }, 100);
+                    }
+                });
+                
+                // Start observing
+                this.cognitiveObserver.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
     
         }
     
@@ -24772,77 +24833,71 @@ class AccessibilityWidget {
     
         removeCognitiveBoxes() {
     
-            // Remove boxes from headings
+            // Clean up MutationObserver
+            if (this.cognitiveObserver) {
+                this.cognitiveObserver.disconnect();
+                this.cognitiveObserver = null;
+            }
     
+            // Remove boxes from headings
             const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     
             headings.forEach(heading => {
-    
                 if (heading.dataset.cognitiveBoxed && heading.parentNode && heading.parentNode.style.border) {
-    
                     const wrapper = heading.parentNode;
-    
                     const grandParent = wrapper.parentNode;
-    
+                    
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
+                    
                     grandParent.insertBefore(heading, wrapper);
-    
                     grandParent.removeChild(wrapper);
-    
-    
                     delete heading.dataset.cognitiveBoxed;
-    
                 }
-    
             });
     
             
     
             // Remove boxes from buttons
-    
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
             buttons.forEach(button => {
-    
                 if (button.dataset.cognitiveBoxed && button.parentNode && button.parentNode.style.border) {
-    
                     const wrapper = button.parentNode;
-    
                     const grandParent = wrapper.parentNode;
-    
+                    
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
+                    
                     grandParent.insertBefore(button, wrapper);
-    
                     grandParent.removeChild(wrapper);
-    
-    
                     delete button.dataset.cognitiveBoxed;
-    
                 }
-    
             });
     
             
     
             // Remove boxes from links
-    
-            const links = document.querySelectorAll('a');
+            const links = document.querySelectorAll('a, nav a, .nav a, .navbar a, .menu a, .dropdown a, .breadcrumb a, .pagination a, [role="menuitem"] a, [role="button"] a');
     
             links.forEach(link => {
-    
                 if (link.dataset.cognitiveBoxed && link.parentNode && link.parentNode.style.border) {
-    
                     const wrapper = link.parentNode;
-    
                     const grandParent = wrapper.parentNode;
-    
+                    
+                    // Restore original positioning
+                    if (grandParent.style.position === 'relative') {
+                        grandParent.style.position = '';
+                    }
+                    
                     grandParent.insertBefore(link, wrapper);
-    
                     grandParent.removeChild(wrapper);
-    
-    
                     delete link.dataset.cognitiveBoxed;
-    
                 }
-    
             });
     
             
