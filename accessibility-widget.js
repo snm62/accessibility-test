@@ -14537,27 +14537,33 @@ class AccessibilityWidget {
         // Line Height Methods
     
         updateLineHeight() {
-    
+
             console.log('📏 [UPDATE LINE HEIGHT] Starting updateLineHeight()');
             console.log('📏 [UPDATE LINE HEIGHT] Current lineHeight:', this.lineHeight);
-    
+
             // Store original line-height if not already stored
-    
+            // Use a more reliable method to get the original line height
             if (this.originalLineHeight === null) {
-    
+                // First, temporarily remove any existing line height CSS to get the true original
+                const existingStyle = document.getElementById('line-height-css');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+                
+                // Force a reflow to ensure we get the original value
+                document.body.offsetHeight;
+                
                 const computedStyle = window.getComputedStyle(document.body);
-    
-                this.originalLineHeight = parseFloat(computedStyle.lineHeight);
-    
+                this.originalLineHeight = parseFloat(computedStyle.lineHeight) || 1.4; // Fallback to 1.4 if parsing fails
+
                 console.log('📏 [UPDATE LINE HEIGHT] Stored original line-height:', this.originalLineHeight);
-    
             }
     
             
     
             // Subtle mapping: keep visual steps at 10% but apply gentle real change
-            // Base comfortable line-height around 1.4 at 100%
-            const base = 1.4;
+            // Use the actual original line height as the base
+            const base = this.originalLineHeight || 1.4;
             const intensity = 0.3; // total swing ±0.3 across 100% range
             const delta = ((this.lineHeight - 100) / 100) * intensity;
             const lineHeightValue = (base + delta).toFixed(3);
@@ -17316,6 +17322,8 @@ class AccessibilityWidget {
             // Apply line height CSS if it's not the default value
             if (this.lineHeight !== 100) {
                 console.log('Accessibility Widget: Applying saved line height on page load:', this.lineHeight + '%');
+                // Reset original line height to ensure clean calculation
+                this.originalLineHeight = null;
                 this.updateLineHeight();
             }
 
@@ -18677,8 +18685,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Contrast Modes */
                 body.dark-contrast {
-                    background: var(--black) !important;
-                    color: var(--white) !important;
+                    background: #000000 !important;
+                    color: #ffffff !important;
                 }
 
                 /* Apply dark contrast to all text elements - text color only, no borders */
@@ -18701,7 +18709,7 @@ class AccessibilityWidget {
                 body.dark-contrast i,
                 body.dark-contrast b,
                 body.dark-contrast a {
-                    color: var(--white) !important;
+                    color: #ffffff !important;
                 }
 
                 /* Apply dark background to main content areas only */
@@ -18711,23 +18719,23 @@ class AccessibilityWidget {
                 body.dark-contrast .content,
                 body.dark-contrast .container,
                 body.dark-contrast .wrapper {
-                    background: var(--black) !important;
+                    background: #000000 !important;
                 }
 
                 /* Style ONLY actual service cards and specific content boxes in dark contrast */
                 body.dark-contrast .service-card,
                 body.dark-contrast .color-box,
                 body.dark-contrast .test-block {
-                    background: var(--black) !important;
-                    border: 2px solid var(--white) !important;
-                    color: var(--white) !important;
+                    background: #000000 !important;
+                    border: 2px solid #ffffff !important;
+                    color: #ffffff !important;
                 }
 
                 /* Ensure text inside specific cards is white */
                 body.dark-contrast .service-card *,
                 body.dark-contrast .color-box *,
                 body.dark-contrast .test-block * {
-                    color: var(--white) !important;
+                    color: #ffffff !important;
                 }
 
                 /* Style form elements for dark contrast */
@@ -18738,9 +18746,9 @@ class AccessibilityWidget {
                 body.dark-contrast .btn,
                 body.dark-contrast .button,
                 body.dark-contrast .form-control {
-                    background: var(--black) !important;
-                    color: var(--white) !important;
-                    border: 1px solid var(--white) !important;
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
                 }
 
                 /* Style form placeholders for dark contrast */
@@ -18753,8 +18761,8 @@ class AccessibilityWidget {
                 body.dark-contrast .form-group,
                 body.dark-contrast .contact-form,
                 body.dark-contrast .test-form {
-                    background: var(--black) !important;
-                    color: var(--white) !important;
+                    background: #000000 !important;
+                    color: #ffffff !important;
                 }
 
                 /* Exclude UI elements from dark contrast text changes */
@@ -18888,8 +18896,8 @@ class AccessibilityWidget {
             style.id = 'accessibility-light-contrast-css';
             style.textContent = `
                 body.light-contrast {
-                    background: var(--white) !important;
-                    color: var(--black) !important;
+                    background: #ffffff !important;
+                    color: #000000 !important;
                 }
 
                 /* Apply light contrast to all text elements - text color only, no borders */
@@ -18912,7 +18920,7 @@ class AccessibilityWidget {
                 body.light-contrast i,
                 body.light-contrast b,
                 body.light-contrast a {
-                    color: var(--black) !important;
+                    color: #000000 !important;
                 }
 
                 /* Apply light background to main content areas only */
@@ -18922,23 +18930,23 @@ class AccessibilityWidget {
                 body.light-contrast .content,
                 body.light-contrast .container,
                 body.light-contrast .wrapper {
-                    background: var(--white) !important;
+                    background: #ffffff !important;
                 }
 
                 /* Style ONLY actual service cards and specific content boxes in light contrast */
                 body.light-contrast .service-card,
                 body.light-contrast .color-box,
                 body.light-contrast .test-block {
-                    background: var(--white) !important;
-                    border: 2px solid var(--black) !important;
-                    color: var(--black) !important;
+                    background: #ffffff !important;
+                    border: 2px solid #000000 !important;
+                    color: #000000 !important;
                 }
 
                 /* Ensure text inside specific cards is black */
                 body.light-contrast .service-card *,
                 body.light-contrast .color-box *,
                 body.light-contrast .test-block * {
-                    color: var(--black) !important;
+                    color: #000000 !important;
                 }
 
                 /* Exclude UI elements and accessibility widget from light contrast text changes */
