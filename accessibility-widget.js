@@ -1096,11 +1096,12 @@ function applyVisionImpaired(on) {
         
         // ... (Update CSS below) ...
         style.textContent = on ? `
-            /* VISION IMPAIRED: Minimal Scaling with Sticky Nav Preservation */
+            /* VISION IMPAIRED: Smooth Scaling with Transitions */
             
-            /* 1. MINIMAL ZOOM SCALING - Use zoom instead of transform to preserve sticky positioning */
+            /* 1. SMOOTH ZOOM SCALING - Use zoom with smooth transitions */
             html.vision-impaired {
-                zoom: 1.07 !important;
+                zoom: 1.05 !important;
+                transition: zoom 0.3s ease-in-out !important;
                 /* Prevent horizontal scrollbars */
                 overflow-x: hidden !important;
                 /* Allow natural vertical scrolling */
@@ -1109,10 +1110,20 @@ function applyVisionImpaired(on) {
                 height: auto !important;
             }
             
-            /* 2. BODY STYLES - Minimal changes to preserve layout */
+            /* 2. ACCESSIBILITY PANEL SMOOTH SCALING - Apply same scaling to the widget */
+            .accessibility-widget.vision-impaired,
+            #accessibility-widget.vision-impaired,
+            .accessibility-panel.vision-impaired {
+                zoom: 1.05 !important;
+                transition: zoom 0.3s ease-in-out !important;
+                transform-origin: top right !important;
+            }
+            
+            /* 3. BODY STYLES - Smooth transitions with minimal changes */
             body.vision-impaired {
-                /* Subtle global contrast boost */
-                filter: contrast(1.06) brightness(1.02) !important;
+                /* Subtle global contrast boost with smooth transition */
+                filter: contrast(1.04) brightness(1.01) !important;
+                transition: filter 0.3s ease-in-out !important;
                 /* Prevent horizontal overflow from zoom */
                 overflow-x: hidden !important;
                 /* Allow natural scrolling */
@@ -1135,54 +1146,60 @@ function applyVisionImpaired(on) {
                 z-index: 9999 !important;
             }
             
-            /* 4. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
+            /* 4. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
             body.vision-impaired p,
             body.vision-impaired span,
             body.vision-impaired div,
             body.vision-impaired li,
             body.vision-impaired td,
             body.vision-impaired th {
-                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                font-weight: 600 !important;
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.2) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 5. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
+            /* 5. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
             body.vision-impaired *:focus {
                 outline: 2px solid #0066cc !important;
                 outline-offset: 1px !important;
+                transition: outline 0.2s ease-in-out !important;
             }
             
-            /* 6. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
+            /* 6. IMPROVE LINK VISIBILITY - Smooth link transitions */
             body.vision-impaired a {
-                font-weight: 600 !important;
+                font-weight: 500 !important;
+                transition: font-weight 0.3s ease-in-out !important;
             }
             
-            /* 7. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
+            /* 7. ENHANCE BUTTON READABILITY - Smooth button transitions */
             body.vision-impaired button,
             body.vision-impaired input[type="button"],
             body.vision-impaired input[type="submit"],
             body.vision-impaired input[type="reset"] {
-                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 600 !important;
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 8. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
+            /* 8. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
             body.vision-impaired input,
             body.vision-impaired textarea,
             body.vision-impaired select {
-                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 600 !important;
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 9. ENHANCE HEADING READABILITY - Increased font weight for headings */
+            /* 9. ENHANCE HEADING READABILITY - Smooth heading transitions */
             body.vision-impaired h1,
             body.vision-impaired h2,
             body.vision-impaired h3,
             body.vision-impaired h4,
             body.vision-impaired h5,
             body.vision-impaired h6 {
-                text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                font-weight: 700 !important;
+                text-shadow: 0 0 0.4px rgba(0, 0, 0, 0.25) !important;
+                font-weight: 600 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
             /* 10. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
@@ -1195,10 +1212,18 @@ function applyVisionImpaired(on) {
                 margin-bottom: 0 !important;
             }
             
-            /* 11. RESPONSIVE ADJUSTMENTS - Reduce scaling on mobile */
+            /* 11. RESPONSIVE ADJUSTMENTS - Smooth mobile scaling */
             @media (max-width: 768px) {
                 html.vision-impaired {
-                    zoom: 1.02 !important; /* Minimal scaling on mobile */
+                    zoom: 1.03 !important; /* Slightly more scaling on mobile */
+                    transition: zoom 0.3s ease-in-out !important;
+                }
+                
+                .accessibility-widget.vision-impaired,
+                #accessibility-widget.vision-impaired,
+                .accessibility-panel.vision-impaired {
+                    zoom: 1.03 !important;
+                    transition: zoom 0.3s ease-in-out !important;
                 }
             }
         ` : '';
@@ -20688,12 +20713,9 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    .readable-font {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                    }
+                    /* READABLE FONT: Only apply to specific text content, not symbols */
                     
-                    /* Remove universal selector to prevent affecting symbols */
-                    
+                    /* 1. HEADINGS - Apply readable font to headings */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -20705,28 +20727,47 @@ class AccessibilityWidget {
                         letter-spacing: 0.8px !important;
                     }
                     
-                    .readable-font p:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font span:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font div:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font li:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font td:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font th:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font label:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font small:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font em:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font strong:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font b:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font a:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font button:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font input:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font textarea:not([class*="icon"]):not([class*="arrow"]),
-                    .readable-font select:not([class*="icon"]):not([class*="arrow"]) {
+                    /* 2. TEXT CONTENT - Apply readable font to text elements only */
+                    .readable-font p,
+                    .readable-font span,
+                    .readable-font div,
+                    .readable-font li,
+                    .readable-font td,
+                    .readable-font th,
+                    .readable-font label,
+                    .readable-font small,
+                    .readable-font em,
+                    .readable-font strong,
+                    .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
                         font-weight: 500 !important;
                         letter-spacing: 0.5px !important;
                     }
                     
-                    /* Preserve icon fonts and symbols */
+                    /* 3. LINKS - Apply readable font to links but preserve their styling */
+                    .readable-font a {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
+                    }
+                    
+                    /* 4. FORM ELEMENTS - Apply readable font to form text */
+                    .readable-font input,
+                    .readable-font textarea,
+                    .readable-font select {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
+                    }
+                    
+                    /* 5. BUTTON TEXT - Apply readable font to button text */
+                    .readable-font button {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
+                    }
+                    
+                    /* 6. PRESERVE ALL SYMBOLS AND ICONS - Comprehensive exclusions */
                     .readable-font i,
                     .readable-font .icon,
                     .readable-font [class*="icon"],
@@ -20742,13 +20783,19 @@ class AccessibilityWidget {
                     .readable-font [class*="icon-"],
                     .readable-font [class*="sprite"],
                     .readable-font [class*="emoji"],
-                    .readable-font [class*="unicode"] {
+                    .readable-font [class*="unicode"],
+                    .readable-font [class*="fontawesome"],
+                    .readable-font [class*="glyphicon"],
+                    .readable-font [class*="ion-"],
+                    .readable-font [class*="feather"],
+                    .readable-font [class*="lucide"],
+                    .readable-font [class*="heroicon"] {
                         font-family: inherit !important;
                         font-weight: inherit !important;
                         letter-spacing: inherit !important;
                     }
                     
-                    /* Preserve navigation and menu elements that often contain symbols */
+                    /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
                     .readable-font nav,
                     .readable-font .nav,
                     .readable-font .navbar,
@@ -20756,13 +20803,33 @@ class AccessibilityWidget {
                     .readable-font .breadcrumb,
                     .readable-font .pagination,
                     .readable-font .dropdown,
-                    .readable-font .btn,
-                    .readable-font button,
                     .readable-font [role="button"],
                     .readable-font [role="menuitem"],
                     .readable-font [aria-label*="arrow"],
                     .readable-font [aria-label*="chevron"],
                     .readable-font [aria-label*="caret"] {
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        letter-spacing: inherit !important;
+                    }
+                    
+                    /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
+                    .readable-font .btn i,
+                    .readable-font .btn [class*="icon"],
+                    .readable-font .btn [class*="arrow"],
+                    .readable-font button i,
+                    .readable-font button [class*="icon"],
+                    .readable-font button [class*="arrow"] {
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        letter-spacing: inherit !important;
+                    }
+                    
+                    /* 9. PRESERVE LINK ICONS - Don't affect link symbols */
+                    .readable-font a i,
+                    .readable-font a [class*="icon"],
+                    .readable-font a [class*="arrow"],
+                    .readable-font a svg {
                         font-family: inherit !important;
                         font-weight: inherit !important;
                         letter-spacing: inherit !important;
@@ -23535,6 +23602,18 @@ class AccessibilityWidget {
             try {
                 this.settings['vision-impaired'] = true;
                 document.body.classList.add('vision-impaired');
+                document.documentElement.classList.add('vision-impaired');
+
+                // Apply vision impaired class to the accessibility widget
+                if (this.shadowRoot && this.shadowRoot.host) {
+                    this.shadowRoot.host.classList.add('vision-impaired');
+                }
+                
+                // Also apply to the widget container if it exists
+                const widget = document.querySelector('.accessibility-widget');
+                if (widget) {
+                    widget.classList.add('vision-impaired');
+                }
 
                 // Apply comprehensive website scaling and contrast enhancement
                 this.applyVisionImpairedStyles();
@@ -23542,7 +23621,7 @@ class AccessibilityWidget {
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
-                console.log('Accessibility Widget: Vision impaired enabled (comprehensive scaling and contrast)');
+                console.log('Accessibility Widget: Vision impaired enabled (smooth scaling and contrast)');
             } catch (e) {
                 console.warn('Accessibility Widget: enableVisionImpaired failed', e);
             }
@@ -23667,6 +23746,18 @@ class AccessibilityWidget {
             try {
                 this.settings['vision-impaired'] = false;
                 document.body.classList.remove('vision-impaired');
+                document.documentElement.classList.remove('vision-impaired');
+
+                // Remove vision impaired class from the accessibility widget
+                if (this.shadowRoot && this.shadowRoot.host) {
+                    this.shadowRoot.host.classList.remove('vision-impaired');
+                }
+                
+                // Also remove from the widget container if it exists
+                const widget = document.querySelector('.accessibility-widget');
+                if (widget) {
+                    widget.classList.remove('vision-impaired');
+                }
 
                 // Remove comprehensive vision impaired styles
                 const existingStyle = document.getElementById('vision-impaired-comprehensive');
@@ -24128,12 +24219,14 @@ class AccessibilityWidget {
             this.settings['adhd-friendly'] = true;
     
             document.body.classList.add('adhd-friendly');
+            document.documentElement.classList.add('adhd-friendly');
     
             this.createADHDSpotlight();
+            this.applyADHDContrastEnhancement();
     
             this.saveSettings();
     
-            console.log('Accessibility Widget: ADHD friendly profile enabled');
+            console.log('Accessibility Widget: ADHD friendly profile enabled with contrast enhancement');
     
         }
     
@@ -24144,8 +24237,10 @@ class AccessibilityWidget {
             this.settings['adhd-friendly'] = false;
     
             document.body.classList.remove('adhd-friendly');
+            document.documentElement.classList.remove('adhd-friendly');
     
             this.removeADHDSpotlight();
+            this.removeADHDContrastEnhancement();
     
             this.saveSettings();
     
@@ -24292,6 +24387,165 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: ADHD spotlight removed');
     
+        }
+    
+        // Apply ADHD contrast enhancement
+        applyADHDContrastEnhancement() {
+            try {
+                // Remove existing ADHD contrast styles if any
+                const existingStyle = document.getElementById('adhd-contrast-enhancement');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+
+                const style = document.createElement('style');
+                style.id = 'adhd-contrast-enhancement';
+                style.textContent = `
+                    /* ADHD FRIENDLY: Enhanced Contrast for Better Focus */
+                    
+                    /* 1. GLOBAL CONTRAST ENHANCEMENT - Increase overall contrast */
+                    html.adhd-friendly {
+                        filter: contrast(1.15) brightness(1.08) saturate(1.1) !important;
+                        transition: filter 0.3s ease-in-out !important;
+                    }
+                    
+                    /* 2. TEXT CONTRAST ENHANCEMENT - Make text more readable */
+                    body.adhd-friendly p,
+                    body.adhd-friendly span,
+                    body.adhd-friendly div,
+                    body.adhd-friendly li,
+                    body.adhd-friendly td,
+                    body.adhd-friendly th {
+                        color: #1a1a1a !important;
+                        text-shadow: 0 0 1px rgba(0, 0, 0, 0.1) !important;
+                        font-weight: 500 !important;
+                        transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out !important;
+                    }
+                    
+                    /* 3. HEADING CONTRAST ENHANCEMENT - Stronger headings */
+                    body.adhd-friendly h1,
+                    body.adhd-friendly h2,
+                    body.adhd-friendly h3,
+                    body.adhd-friendly h4,
+                    body.adhd-friendly h5,
+                    body.adhd-friendly h6 {
+                        color: #000000 !important;
+                        text-shadow: 0 0 2px rgba(0, 0, 0, 0.2) !important;
+                        font-weight: 700 !important;
+                        transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out !important;
+                    }
+                    
+                    /* 4. LINK CONTRAST ENHANCEMENT - More visible links */
+                    body.adhd-friendly a {
+                        color: #0066cc !important;
+                        text-decoration: underline !important;
+                        font-weight: 600 !important;
+                        transition: color 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly a:hover {
+                        color: #004499 !important;
+                        text-decoration: underline !important;
+                    }
+                    
+                    /* 5. BUTTON CONTRAST ENHANCEMENT - More visible buttons */
+                    body.adhd-friendly button,
+                    body.adhd-friendly input[type="button"],
+                    body.adhd-friendly input[type="submit"],
+                    body.adhd-friendly input[type="reset"],
+                    body.adhd-friendly .btn {
+                        background-color: #0066cc !important;
+                        color: #ffffff !important;
+                        border: 2px solid #004499 !important;
+                        font-weight: 600 !important;
+                        text-shadow: none !important;
+                        transition: all 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly button:hover,
+                    body.adhd-friendly input[type="button"]:hover,
+                    body.adhd-friendly input[type="submit"]:hover,
+                    body.adhd-friendly input[type="reset"]:hover,
+                    body.adhd-friendly .btn:hover {
+                        background-color: #004499 !important;
+                        border-color: #003366 !important;
+                    }
+                    
+                    /* 6. FORM ELEMENT CONTRAST ENHANCEMENT - Better form visibility */
+                    body.adhd-friendly input,
+                    body.adhd-friendly textarea,
+                    body.adhd-friendly select {
+                        border: 2px solid #666666 !important;
+                        background-color: #ffffff !important;
+                        color: #1a1a1a !important;
+                        font-weight: 500 !important;
+                        transition: all 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly input:focus,
+                    body.adhd-friendly textarea:focus,
+                    body.adhd-friendly select:focus {
+                        border-color: #0066cc !important;
+                        box-shadow: 0 0 5px rgba(0, 102, 204, 0.3) !important;
+                    }
+                    
+                    /* 7. FOCUS INDICATORS - Enhanced focus visibility */
+                    body.adhd-friendly *:focus {
+                        outline: 3px solid #0066cc !important;
+                        outline-offset: 2px !important;
+                        transition: outline 0.2s ease-in-out !important;
+                    }
+                    
+                    /* 8. IMAGE CONTRAST ENHANCEMENT - Slightly enhance images */
+                    body.adhd-friendly img {
+                        filter: contrast(1.1) brightness(1.05) !important;
+                        transition: filter 0.3s ease-in-out !important;
+                    }
+                    
+                    /* 9. NAVIGATION CONTRAST ENHANCEMENT - Better nav visibility */
+                    body.adhd-friendly nav,
+                    body.adhd-friendly .nav,
+                    body.adhd-friendly .navbar {
+                        background-color: #f8f9fa !important;
+                        border-bottom: 2px solid #0066cc !important;
+                    }
+                    
+                    body.adhd-friendly nav a,
+                    body.adhd-friendly .nav a,
+                    body.adhd-friendly .navbar a {
+                        color: #0066cc !important;
+                        font-weight: 600 !important;
+                        padding: 8px 12px !important;
+                        transition: all 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly nav a:hover,
+                    body.adhd-friendly .nav a:hover,
+                    body.adhd-friendly .navbar a:hover {
+                        background-color: #e3f2fd !important;
+                        color: #004499 !important;
+                    }
+                `;
+                
+                document.head.appendChild(style);
+                console.log('Accessibility Widget: ADHD contrast enhancement applied');
+                
+            } catch (error) {
+                console.warn('Accessibility Widget: Failed to apply ADHD contrast enhancement', error);
+            }
+        }
+        
+        // Remove ADHD contrast enhancement
+        removeADHDContrastEnhancement() {
+            try {
+                const existingStyle = document.getElementById('adhd-contrast-enhancement');
+                if (existingStyle) {
+                    existingStyle.remove();
+                    console.log('Accessibility Widget: ADHD contrast enhancement removed');
+                }
+            } catch (error) {
+                console.warn('Accessibility Widget: Failed to remove ADHD contrast enhancement', error);
+            }
         }
     
     
