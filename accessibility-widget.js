@@ -4471,8 +4471,9 @@ class AccessibilityWidget {
         text-align: left !important;
     }
     
+    /* Center only text elements; avoid centering layout containers to prevent cut-off */
     body.align-center * {
-        text-align: center !important;
+        text-align: inherit !important;
     }
     
     body.align-right * {
@@ -4500,10 +4501,35 @@ class AccessibilityWidget {
     body.align-center h5,
     body.align-center h6,
     body.align-center p,
-    body.align-center div,
     body.align-center span,
-    body.align-center a {
+    body.align-center a,
+    body.align-center li,
+    body.align-center label,
+    body.align-center small,
+    body.align-center em,
+    body.align-center strong,
+    body.align-center b,
+    body.align-center td,
+    body.align-center th {
         text-align: center !important;
+    }
+
+    /* Never center images/media/containers globally */
+    body.align-center img,
+    body.align-center video,
+    body.align-center canvas,
+    body.align-center svg,
+    body.align-center picture,
+    body.align-center figure,
+    body.align-center .container,
+    body.align-center .wrapper,
+    body.align-center .row,
+    body.align-center .col,
+    body.align-center .grid,
+    body.align-center .flex,
+    body.align-center .accessibility-panel,
+    body.align-center #accessibility-widget {
+        text-align: initial !important;
     }
     
     body.align-right h1,
@@ -15190,6 +15216,32 @@ class AccessibilityWidget {
                 document.body.style.setProperty('font-size', bodyFontSize, 'important');
                 document.documentElement.style.setProperty('font-size', bodyFontSize, 'important');
             }
+
+            // Do NOT scale the accessibility widget itself (keep control labels/numbers stable)
+            try {
+                if (this.shadowRoot && this.shadowRoot.host) {
+                    const host = this.shadowRoot.host;
+                    const hostOriginal = this.originalFontSizes.get(host) || parseFloat(getComputedStyle(host).fontSize) || 14;
+                    host.style.setProperty('font-size', `${hostOriginal}px`, 'important');
+                    // Also explicitly keep the numeric display stable if present
+                    const valueEl = this.shadowRoot.getElementById('font-size-value');
+                    if (valueEl) {
+                        const valOriginal = this.originalFontSizes.get(valueEl) || parseFloat(getComputedStyle(valueEl).fontSize) || hostOriginal;
+                        valueEl.style.setProperty('font-size', `${valOriginal}px`, 'important');
+                    }
+                }
+                // Fallback: plain DOM panel containers
+                const panel = document.querySelector('.accessibility-panel, #accessibility-widget');
+                if (panel) {
+                    const panelOriginal = this.originalFontSizes.get(panel) || parseFloat(getComputedStyle(panel).fontSize) || 14;
+                    panel.style.setProperty('font-size', `${panelOriginal}px`, 'important');
+                    const display = panel.querySelector('#font-size-value');
+                    if (display) {
+                        const dispOriginal = this.originalFontSizes.get(display) || parseFloat(getComputedStyle(display).fontSize) || panelOriginal;
+                        display.style.setProperty('font-size', `${dispOriginal}px`, 'important');
+                    }
+                }
+            } catch (_) {}
     
             
     
@@ -15203,7 +15255,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, #accessibility-widget')) {
     
                     const originalSize = this.originalFontSizes.get(element);
     
@@ -15580,6 +15632,26 @@ class AccessibilityWidget {
 
             });
 
+            // Observe dynamically added menu items (e.g., dropdowns opening later)
+            if (!this.highlightLinksObserver) {
+                let scheduled = null;
+                const reapply = () => {
+                    scheduled = null;
+                    try { this.highlightLinks(); } catch (_) {}
+                };
+                this.highlightLinksObserver = new MutationObserver((mutations) => {
+                    for (const m of mutations) {
+                        if (m.type === 'childList' && (m.addedNodes && m.addedNodes.length)) {
+                            if (!scheduled) {
+                                scheduled = setTimeout(reapply, 100);
+                            }
+                            break;
+                        }
+                    }
+                });
+                this.highlightLinksObserver.observe(document.body, { childList: true, subtree: true });
+            }
+
         }
     
     
@@ -15599,6 +15671,12 @@ class AccessibilityWidget {
                     delete link.dataset.highlighted;
                 }
             });
+
+            // Disconnect observer if present
+            if (this.highlightLinksObserver) {
+                try { this.highlightLinksObserver.disconnect(); } catch (_) {}
+                this.highlightLinksObserver = null;
+            }
 
         }
     
@@ -24567,164 +24645,50 @@ class AccessibilityWidget {
     
             
     
-            // Process headings
-    
+            // Process headings (non-intrusive: apply outline to element itself)
             headings.forEach(heading => {
-    
-                // Skip if heading is inside accessibility panel
-    
                 if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-    
                     return;
-    
                 }
-    
-                
-    
-                // Create wrapper if not already done
-    
                 if (!heading.dataset.cognitiveBoxed) {
-    
-                    const wrapper = document.createElement('div');
-    
-                    wrapper.style.cssText = `
-    
-                        display: inline-block;
-    
-                        border: 2px solid #6366f1;
-    
-                        border-radius: 6px;
-    
-                        padding: 4px 8px;
-    
-                        margin: 2px;
-    
-                        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-    
-                        background: transparent;
-    
-                    `;
-    
-                    
-    
-                    // Insert wrapper before heading and move heading inside
-    
-                    heading.parentNode.insertBefore(wrapper, heading);
-    
-                    wrapper.appendChild(heading);
-    
+                    heading.style.outline = '2px solid #6366f1';
+                    heading.style.outlineOffset = '2px';
+                    heading.style.borderRadius = '6px';
+                    heading.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.3)';
                     heading.dataset.cognitiveBoxed = 'true';
-    
                 }
-    
             });
     
             
     
-            // Process buttons
-    
+            // Process buttons (apply outline only)
             buttons.forEach(button => {
-    
-                // Skip if button is inside accessibility panel
-    
                 if (button.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-    
                     return;
-    
                 }
-    
-                
-    
-                // Create wrapper if not already done
-    
                 if (!button.dataset.cognitiveBoxed) {
-    
-                    const wrapper = document.createElement('div');
-    
-                    wrapper.style.cssText = `
-    
-                        display: inline-block;
-    
-                        border: 2px solid #f97316;
-    
-                        border-radius: 6px;
-    
-                        padding: 4px 8px;
-    
-                        margin: 2px;
-    
-                        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-    
-                        background: transparent;
-    
-                    `;
-    
-                    
-    
-                    // Insert wrapper before button and move button inside
-    
-                    button.parentNode.insertBefore(wrapper, button);
-    
-                    wrapper.appendChild(button);
-    
+                    button.style.outline = '2px solid #f97316';
+                    button.style.outlineOffset = '2px';
+                    button.style.borderRadius = '6px';
+                    button.style.boxShadow = '0 2px 8px rgba(249, 115, 22, 0.3)';
                     button.dataset.cognitiveBoxed = 'true';
-    
                 }
-    
             });
     
             
     
-            // Process links
-    
+            // Process links (apply outline only)
             links.forEach(link => {
-    
-                // Skip if link is inside accessibility panel
-    
                 if (link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-    
                     return;
-    
                 }
-    
-                
-    
-                // Create wrapper if not already done
-    
                 if (!link.dataset.cognitiveBoxed) {
-    
-                    const wrapper = document.createElement('div');
-    
-                    wrapper.style.cssText = `
-    
-                        display: inline-block;
-    
-                        border: 2px solid #f97316;
-    
-                        border-radius: 4px;
-    
-                        padding: 2px 4px;
-    
-                        margin: 1px;
-    
-                        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
-    
-                        background: transparent;
-    
-                    `;
-    
-                    
-    
-                    // Insert wrapper before link and move link inside
-    
-                    link.parentNode.insertBefore(wrapper, link);
-    
-                    wrapper.appendChild(link);
-    
+                    link.style.outline = '2px solid #f97316';
+                    link.style.outlineOffset = '2px';
+                    link.style.borderRadius = '4px';
+                    link.style.boxShadow = '0 2px 6px rgba(249, 115, 22, 0.3)';
                     link.dataset.cognitiveBoxed = 'true';
-    
                 }
-    
             });
     
             
@@ -24776,48 +24740,42 @@ class AccessibilityWidget {
                 this.cognitiveObserver = null;
             }
     
-            // Remove boxes from headings
+            // Remove outlines from headings
             const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
             headings.forEach(heading => {
-                if (heading.dataset.cognitiveBoxed && heading.parentNode && heading.parentNode.style.border) {
-                    const wrapper = heading.parentNode;
-                    const grandParent = wrapper.parentNode;
-                    
-                    grandParent.insertBefore(heading, wrapper);
-                    grandParent.removeChild(wrapper);
+                if (heading.dataset.cognitiveBoxed) {
+                    heading.style.outline = '';
+                    heading.style.outlineOffset = '';
+                    heading.style.borderRadius = '';
+                    heading.style.boxShadow = '';
                     delete heading.dataset.cognitiveBoxed;
                 }
             });
     
             
     
-            // Remove boxes from buttons
+            // Remove outlines from buttons
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
-    
             buttons.forEach(button => {
-                if (button.dataset.cognitiveBoxed && button.parentNode && button.parentNode.style.border) {
-                    const wrapper = button.parentNode;
-                    const grandParent = wrapper.parentNode;
-                    
-                    grandParent.insertBefore(button, wrapper);
-                    grandParent.removeChild(wrapper);
+                if (button.dataset.cognitiveBoxed) {
+                    button.style.outline = '';
+                    button.style.outlineOffset = '';
+                    button.style.borderRadius = '';
+                    button.style.boxShadow = '';
                     delete button.dataset.cognitiveBoxed;
                 }
             });
     
             
     
-            // Remove boxes from links
+            // Remove outlines from links
             const links = document.querySelectorAll('a, nav a, .nav a, .navbar a, .menu a, .dropdown a, .breadcrumb a, .pagination a, [role="menuitem"] a, [role="button"] a');
-    
             links.forEach(link => {
-                if (link.dataset.cognitiveBoxed && link.parentNode && link.parentNode.style.border) {
-                    const wrapper = link.parentNode;
-                    const grandParent = wrapper.parentNode;
-                    
-                    grandParent.insertBefore(link, wrapper);
-                    grandParent.removeChild(wrapper);
+                if (link.dataset.cognitiveBoxed) {
+                    link.style.outline = '';
+                    link.style.outlineOffset = '';
+                    link.style.borderRadius = '';
+                    link.style.boxShadow = '';
                     delete link.dataset.cognitiveBoxed;
                 }
             });
