@@ -24567,25 +24567,69 @@ class AccessibilityWidget {
         // Cognitive Disability Profile Methods
     
         enableCognitiveDisability() {
-    
             document.body.classList.add('cognitive-disability');
-    
+            
+            // Add CSS to minimize layout impact
+            this.addCognitiveCSS();
             this.addCognitiveBoxes();
-    
+            
             console.log('Accessibility Widget: Cognitive disability profile enabled');
-    
+        }
+        
+        addCognitiveCSS() {
+            // Remove existing cognitive CSS if any
+            const existingStyle = document.getElementById('cognitive-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
+            const style = document.createElement('style');
+            style.id = 'cognitive-css';
+            style.textContent = `
+                /* Cognitive Disability: Minimize layout impact */
+                .cognitive-disability {
+                    /* Prevent layout breaking from cognitive boxes */
+                    box-sizing: border-box !important;
+                }
+                
+                .cognitive-disability * {
+                    box-sizing: border-box !important;
+                }
+                
+                /* Ensure cognitive boxes don't cause overflow */
+                .cognitive-disability body {
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                }
+                
+                /* Prevent extra whitespace */
+                .cognitive-disability html {
+                    height: auto !important;
+                }
+                
+                .cognitive-disability body {
+                    height: auto !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+            `;
+            document.head.appendChild(style);
         }
     
     
     
         disableCognitiveDisability() {
-    
             document.body.classList.remove('cognitive-disability');
-    
+            
+            // Remove cognitive CSS
+            const existingStyle = document.getElementById('cognitive-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
             this.removeCognitiveBoxes();
-    
+            
             console.log('Accessibility Widget: Cognitive disability profile disabled');
-    
         }
     
     
@@ -24625,7 +24669,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #6366f1;
     
@@ -24633,22 +24677,13 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 0;
+                        margin: 2px;
     
                         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
-                    
-                    // Ensure parent has relative positioning
-                    if (heading.parentNode.style.position !== 'relative' && heading.parentNode.style.position !== 'absolute' && heading.parentNode.style.position !== 'fixed') {
-                        heading.parentNode.style.position = 'relative';
-                    }
     
                     
     
@@ -24688,7 +24723,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #f97316;
     
@@ -24696,22 +24731,13 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 0;
+                        margin: 2px;
     
                         box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
-                    
-                    // Ensure parent has relative positioning
-                    if (button.parentNode.style.position !== 'relative' && button.parentNode.style.position !== 'absolute' && button.parentNode.style.position !== 'fixed') {
-                        button.parentNode.style.position = 'relative';
-                    }
     
                     
     
@@ -24751,7 +24777,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #f97316;
     
@@ -24759,22 +24785,13 @@ class AccessibilityWidget {
     
                         padding: 2px 4px;
     
-                        margin: 0;
+                        margin: 1px;
     
                         box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
-                    
-                    // Ensure parent has relative positioning
-                    if (link.parentNode.style.position !== 'relative' && link.parentNode.style.position !== 'absolute' && link.parentNode.style.position !== 'fixed') {
-                        link.parentNode.style.position = 'relative';
-                    }
     
                     
     
@@ -24847,11 +24864,6 @@ class AccessibilityWidget {
                     const wrapper = heading.parentNode;
                     const grandParent = wrapper.parentNode;
                     
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
-                    
                     grandParent.insertBefore(heading, wrapper);
                     grandParent.removeChild(wrapper);
                     delete heading.dataset.cognitiveBoxed;
@@ -24868,11 +24880,6 @@ class AccessibilityWidget {
                     const wrapper = button.parentNode;
                     const grandParent = wrapper.parentNode;
                     
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
-                    
                     grandParent.insertBefore(button, wrapper);
                     grandParent.removeChild(wrapper);
                     delete button.dataset.cognitiveBoxed;
@@ -24888,11 +24895,6 @@ class AccessibilityWidget {
                 if (link.dataset.cognitiveBoxed && link.parentNode && link.parentNode.style.border) {
                     const wrapper = link.parentNode;
                     const grandParent = wrapper.parentNode;
-                    
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
                     
                     grandParent.insertBefore(link, wrapper);
                     grandParent.removeChild(wrapper);
