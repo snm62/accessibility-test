@@ -20692,7 +20692,7 @@ class AccessibilityWidget {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
                     }
                     
-                    .readable-font * {
+                    .readable-font *:not(i):not(.icon):not([class*="icon"]):not([class*="arrow"]):not([class*="chevron"]):not([class*="caret"]):not(svg):not([data-icon]) {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
                         font-weight: 500 !important;
                         letter-spacing: 0.5px !important;
@@ -20709,26 +20709,39 @@ class AccessibilityWidget {
                         letter-spacing: 0.8px !important;
                     }
                     
-                    .readable-font p,
-                    .readable-font span,
-                    .readable-font div,
-                    .readable-font li,
-                    .readable-font td,
-                    .readable-font th,
-                    .readable-font label,
-                    .readable-font small,
-                    .readable-font em,
-                    .readable-font strong,
-                    .readable-font i,
-                    .readable-font b,
-                    .readable-font a,
-                    .readable-font button,
-                    .readable-font input,
-                    .readable-font textarea,
-                    .readable-font select {
+                    .readable-font p:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font span:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font div:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font li:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font td:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font th:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font label:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font small:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font em:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font strong:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font b:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font a:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font button:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font input:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font textarea:not([class*="icon"]):not([class*="arrow"]),
+                    .readable-font select:not([class*="icon"]):not([class*="arrow"]) {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
                         font-weight: 500 !important;
                         letter-spacing: 0.5px !important;
+                    }
+                    
+                    /* Preserve icon fonts and symbols */
+                    .readable-font i,
+                    .readable-font .icon,
+                    .readable-font [class*="icon"],
+                    .readable-font [class*="arrow"],
+                    .readable-font [class*="chevron"],
+                    .readable-font [class*="caret"],
+                    .readable-font svg,
+                    .readable-font [data-icon] {
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        letter-spacing: inherit !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -24152,7 +24165,7 @@ class AccessibilityWidget {
                 background: transparent;
     
                 /* Create spotlight hole using large box-shadow */
-                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
     
                 transition: all 0.1s ease;
     
@@ -24201,7 +24214,7 @@ class AccessibilityWidget {
                 spotlight.style.height = height + 'px';
                 spotlight.style.borderRadius = '0px';
                 spotlight.style.background = 'transparent';
-                spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.7)`;
+                spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.5)`;
     
             };
     
@@ -24328,7 +24341,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #6366f1;
     
@@ -24336,24 +24349,15 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 0;
+                        margin: 2px;
     
                         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
     
                     
-    
-                    // Ensure parent has relative positioning for absolute child
-                    if (heading.parentNode.style.position !== 'relative') {
-                        heading.parentNode.style.position = 'relative';
-                    }
     
                     // Insert wrapper before heading and move heading inside
     
@@ -24391,7 +24395,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #f97316;
     
@@ -24399,24 +24403,15 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 0;
+                        margin: 2px;
     
                         box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
     
                     
-    
-                    // Ensure parent has relative positioning for absolute child
-                    if (button.parentNode.style.position !== 'relative') {
-                        button.parentNode.style.position = 'relative';
-                    }
     
                     // Insert wrapper before button and move button inside
     
@@ -24454,7 +24449,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        position: absolute;
+                        display: inline-block;
     
                         border: 2px solid #f97316;
     
@@ -24462,24 +24457,15 @@ class AccessibilityWidget {
     
                         padding: 2px 4px;
     
-                        margin: 0;
+                        margin: 1px;
     
                         box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
     
-                        pointer-events: none;
-    
-                        z-index: 1;
-    
                     `;
     
                     
-    
-                    // Ensure parent has relative positioning for absolute child
-                    if (link.parentNode.style.position !== 'relative') {
-                        link.parentNode.style.position = 'relative';
-                    }
     
                     // Insert wrapper before link and move link inside
     
@@ -24545,21 +24531,14 @@ class AccessibilityWidget {
                                         
                                         const wrapper = document.createElement('div');
                                         wrapper.style.cssText = `
-                                            position: absolute;
+                                            display: inline-block;
                                             border: 2px solid #f97316;
                                             border-radius: 4px;
                                             padding: 2px 4px;
-                                            margin: 0;
+                                            margin: 1px;
                                             box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
                                             background: transparent;
-                                            pointer-events: none;
-                                            z-index: 1;
                                         `;
-                                        
-                                        // Ensure parent has relative positioning for absolute child
-                                        if (link.parentNode.style.position !== 'relative') {
-                                            link.parentNode.style.position = 'relative';
-                                        }
                                         
                                         link.parentNode.insertBefore(wrapper, link);
                                         wrapper.appendChild(link);
@@ -24605,10 +24584,6 @@ class AccessibilityWidget {
     
                     grandParent.removeChild(wrapper);
     
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
     
                     delete heading.dataset.cognitiveBoxed;
     
@@ -24634,10 +24609,6 @@ class AccessibilityWidget {
     
                     grandParent.removeChild(wrapper);
     
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
     
                     delete button.dataset.cognitiveBoxed;
     
@@ -24663,10 +24634,6 @@ class AccessibilityWidget {
     
                     grandParent.removeChild(wrapper);
     
-                    // Restore original positioning
-                    if (grandParent.style.position === 'relative') {
-                        grandParent.style.position = '';
-                    }
     
                     delete link.dataset.cognitiveBoxed;
     
