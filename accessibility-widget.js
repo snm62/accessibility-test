@@ -14552,23 +14552,12 @@ class AccessibilityWidget {
     
             
     
-            // Use a much simpler approach - map percentages directly to reasonable line-height values
-    
-            let lineHeightValue;
-    
-            if (this.lineHeight <= 100) {
-    
-                // For 50-100%, map to 1.0 to 1.6 (expanded range)
-    
-                lineHeightValue = 1.0 + (this.lineHeight - 50) * 0.012; // 50% = 1.0, 100% = 1.6
-    
-            } else {
-    
-                // For 100-200%, map to 1.6 to 2.4 (expanded range)
-    
-                lineHeightValue = 1.6 + (this.lineHeight - 100) * 0.008; // 100% = 1.6, 200% = 2.4
-    
-            }
+            // Subtle mapping: keep visual steps at 10% but apply gentle real change
+            // Base comfortable line-height around 1.4 at 100%
+            const base = 1.4;
+            const intensity = 0.3; // total swing ±0.3 across 100% range
+            const delta = ((this.lineHeight - 100) / 100) * intensity;
+            const lineHeightValue = (base + delta).toFixed(3);
     
             
     
@@ -14576,15 +14565,7 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: Calculation details - this.lineHeight:', this.lineHeight, '<= 100?', this.lineHeight <= 100);
     
-            if (this.lineHeight <= 100) {
-    
-                console.log('Accessibility Widget: Using formula: 1.0 + (' + this.lineHeight + ' - 50) * 0.012 =', 1.0 + (this.lineHeight - 50) * 0.012);
-    
-            } else {
-    
-                console.log('Accessibility Widget: Using formula: 1.6 + (' + this.lineHeight + ' - 100) * 0.008 =', 1.6 + (this.lineHeight - 100) * 0.008);
-    
-            }
+            console.log('Accessibility Widget: Using subtle mapping -> base:', base, 'intensity:', intensity, 'result:', lineHeightValue);
     
             
     
@@ -14630,7 +14611,7 @@ class AccessibilityWidget {
     
             const oldLineHeight = this.lineHeight;
     
-            this.lineHeight = Math.min(this.lineHeight + 10, 200); // Expanded range to 200%
+            this.lineHeight = Math.min(this.lineHeight + 10, 200); // Visual +10%; real mapping is subtle
     
             this.settings['line-height'] = this.lineHeight; // Save to settings
     
@@ -14661,7 +14642,7 @@ class AccessibilityWidget {
     
             const oldLineHeight = this.lineHeight;
     
-            this.lineHeight = Math.max(this.lineHeight - 10, 50); // Expanded range to 50%
+            this.lineHeight = Math.max(this.lineHeight - 10, 50); // Visual -10%; real mapping is subtle
     
             this.settings['line-height'] = this.lineHeight; // Save to settings
     
@@ -14869,7 +14850,8 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: increaseFontSize called');
     
-            this.fontSize = Math.min(this.fontSize + 10, 200);
+            // Increase visual percentage by 5, but actual applied change will be subtle
+            this.fontSize = Math.min(this.fontSize + 5, 200);
     
             this.settings['font-size'] = this.fontSize; // Save to settings
     
@@ -14892,7 +14874,8 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: decreaseFontSize called');
     
-            this.fontSize = Math.max(this.fontSize - 10, 50);
+            // Decrease visual percentage by 5, but actual applied change will be subtle
+            this.fontSize = Math.max(this.fontSize - 5, 50);
     
             this.settings['font-size'] = this.fontSize; // Save to settings
     
@@ -15145,7 +15128,10 @@ class AccessibilityWidget {
     
         updateFontSizeEnhanced() {
     
-            const scale = this.fontSize / 100;
+            // Apply a gentler scaling curve so visual 5% steps only slightly change real size
+            // Map [50..200]% to an effective factor around baseline using a mild intensity
+            const intensity = 0.35; // lower = subtler effect
+            const scale = 1 + ((this.fontSize - 100) / 100) * intensity;
     
             
     
@@ -15533,29 +15519,29 @@ class AccessibilityWidget {
         // Highlight Methods
     
         highlightTitles() {
-
+    
             // Include semantic headings and common non-semantic title patterns (e.g., in footers)
             const headings = document.querySelectorAll(
                 'h1, h2, h3, h4, h5, h6, [role="heading"], [aria-level], [class*="heading"], [class*="title"]'
             );
-
+    
             headings.forEach(heading => {
-
+    
                 // Skip if heading is inside accessibility panel
                 if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
                     return;
                 }
-
+    
                 // Avoid double-highlighting if cognitive boxes already wrap it
                 if (heading.dataset.cognitiveBoxed) {
                     return;
                 }
-
+    
                 // Basic guards to avoid false positives
                 const text = (heading.textContent || '').trim();
                 if (!text) return; // skip empty nodes
                 if (heading.offsetParent === null) return; // skip hidden
-
+                
                 // Apply non-intrusive highlight directly on the heading (no wrapper)
                 if (!heading.dataset.highlighted) {
                     heading.classList.add('aw-highlight-title');
@@ -15566,17 +15552,17 @@ class AccessibilityWidget {
                     // Do NOT change display or alignment; preserve layout
                     heading.dataset.highlighted = 'true';
                 }
-
+    
             });
-
+    
         }
     
     
     
         removeTitleHighlights() {
-
+    
             const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
+    
             headings.forEach(heading => {
                 if (heading.dataset.highlighted) {
                     heading.classList.remove('aw-highlight-title');
@@ -15588,13 +15574,13 @@ class AccessibilityWidget {
                     delete heading.dataset.highlighted;
                 }
             });
-
+    
         }
     
     
     
         highlightLinks() {
-
+    
             const links = document.querySelectorAll(
                 [
                     'a',
@@ -15608,18 +15594,18 @@ class AccessibilityWidget {
                     '.dropdown-item', '.menu-item', '.submenu-item', '.nav-link', '.nav-item > a', '.nav-item > button'
                 ].join(', ')
             );
-
+    
             links.forEach(link => {
                 // Skip if link is inside accessibility panel
                 if (link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
                     return;
                 }
-
+    
                 // Avoid double-highlighting if cognitive boxes already wrap it
                 if (link.dataset.cognitiveBoxed) {
                     return;
                 }
-
+    
                 // Non-intrusive highlight directly on the link (no wrapper, no alignment changes)
                 if (!link.dataset.highlighted) {
                     link.classList.add('aw-highlight-link');
@@ -15657,9 +15643,9 @@ class AccessibilityWidget {
     
     
         removeLinkHighlights() {
-
+    
             const links = document.querySelectorAll('a');
-
+    
             links.forEach(link => {
                 if (link.dataset.highlighted) {
                     link.classList.remove('aw-highlight-link');
@@ -24277,7 +24263,7 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 99997;
+                z-index: 1000002; /* Ensure spotlight stays above the widget panel */
     
                 /* Dark overlay with spotlight cutout using box-shadow technique */
                 background: transparent;
@@ -24615,6 +24601,13 @@ class AccessibilityWidget {
             this.removeCognitiveBoxes();
             
             console.log('Accessibility Widget: Cognitive disability profile disabled');
+
+            // Force a lightweight refresh to fully restore original layout/styles
+            try {
+                setTimeout(() => {
+                    try { window.location.reload(); } catch (_) {}
+                }, 50);
+            } catch (_) {}
         }
     
     
