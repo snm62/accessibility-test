@@ -1121,7 +1121,7 @@ function applyVisionImpaired(on) {
             html.vision-impaired,
             body.vision-impaired {
                 height: 100% !important;
-                overflow: hidden !important;
+                /* Removed overflow: hidden to preserve scrolling */
                 margin: 0 !important;
                 padding: 0 !important;
             }
@@ -18109,6 +18109,25 @@ class AccessibilityWidget {
                 /* High contrast visual enhancements without breaking positioning */
                 body.high-contrast {
                     /* Apply high contrast to the page content, not positioned elements */
+                    /* Removed global filter that breaks sticky positioning */
+                }
+
+                /* Apply high contrast to content elements only, preserving sticky positioning */
+                body.high-contrast main,
+                body.high-contrast section,
+                body.high-contrast article,
+                body.high-contrast .content,
+                body.high-contrast .container,
+                body.high-contrast .wrapper,
+                body.high-contrast p,
+                body.high-contrast h1,
+                body.high-contrast h2,
+                body.high-contrast h3,
+                body.high-contrast h4,
+                body.high-contrast h5,
+                body.high-contrast h6,
+                body.high-contrast span,
+                body.high-contrast div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar) {
                     filter: contrast(1.5) brightness(1.2) !important;
                     -webkit-filter: contrast(1.5) brightness(1.2) !important;
                 }
@@ -18500,21 +18519,94 @@ class AccessibilityWidget {
         // High Saturation Methods
     
         enableHighSaturation() {
-    
+
             document.body.classList.add('high-saturation');
-    
+
+            // Apply high saturation styles that preserve positioning
+            this.applyHighSaturationStyles();
+
             console.log('Accessibility Widget: High saturation enabled');
-    
+
         }
     
     
     
         disableHighSaturation() {
-    
+
             document.body.classList.remove('high-saturation');
-    
+
+            // Remove high saturation styles
+            this.removeHighSaturationStyles();
+
             console.log('Accessibility Widget: High saturation disabled');
-    
+
+        }
+
+        // High Saturation CSS Methods
+        applyHighSaturationStyles() {
+            // Remove any existing high saturation styles first
+            this.removeHighSaturationStyles();
+
+            const style = document.createElement('style');
+            style.id = 'accessibility-high-saturation-css';
+            style.textContent = `
+                /* High Saturation Mode - Preserve Positioning */
+                body.high-saturation {
+                    /* Ensure body maintains its positioning context */
+                    position: relative !important;
+                }
+
+                /* Preserve all fixed and sticky positioning in high saturation mode */
+                body.high-saturation [style*="position: fixed"],
+                body.high-saturation [style*="position:fixed"],
+                body.high-saturation [style*="position: sticky"],
+                body.high-saturation [style*="position:sticky"],
+                body.high-saturation .fixed,
+                body.high-saturation .sticky,
+                body.high-saturation [class*="fixed"],
+                body.high-saturation [class*="sticky"],
+                body.high-saturation nav,
+                body.high-saturation header,
+                body.high-saturation .navbar,
+                body.high-saturation .nav-bar,
+                body.high-saturation .navigation,
+                body.high-saturation .header,
+                body.high-saturation .top-bar,
+                body.high-saturation .menu-bar {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                }
+
+                /* Apply high saturation to content elements only, preserving sticky positioning */
+                body.high-saturation main,
+                body.high-saturation section,
+                body.high-saturation article,
+                body.high-saturation .content,
+                body.high-saturation .container,
+                body.high-saturation .wrapper,
+                body.high-saturation p,
+                body.high-saturation h1,
+                body.high-saturation h2,
+                body.high-saturation h3,
+                body.high-saturation h4,
+                body.high-saturation h5,
+                body.high-saturation h6,
+                body.high-saturation span,
+                body.high-saturation div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar) {
+                    filter: saturate(1.5) !important;
+                    -webkit-filter: saturate(1.5) !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        removeHighSaturationStyles() {
+            const existingStyle = document.getElementById('accessibility-high-saturation-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
         }
     
     
