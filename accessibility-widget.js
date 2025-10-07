@@ -20692,11 +20692,7 @@ class AccessibilityWidget {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
                     }
                     
-                    .readable-font *:not(i):not(.icon):not([class*="icon"]):not([class*="arrow"]):not([class*="chevron"]):not([class*="caret"]):not(svg):not([data-icon]) {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
-                    }
+                    /* Remove universal selector to prevent affecting symbols */
                     
                     .readable-font h1,
                     .readable-font h2,
@@ -20738,7 +20734,35 @@ class AccessibilityWidget {
                     .readable-font [class*="chevron"],
                     .readable-font [class*="caret"],
                     .readable-font svg,
-                    .readable-font [data-icon] {
+                    .readable-font [data-icon],
+                    .readable-font [class*="symbol"],
+                    .readable-font [class*="glyph"],
+                    .readable-font [class*="fa-"],
+                    .readable-font [class*="material-icons"],
+                    .readable-font [class*="icon-"],
+                    .readable-font [class*="sprite"],
+                    .readable-font [class*="emoji"],
+                    .readable-font [class*="unicode"] {
+                        font-family: inherit !important;
+                        font-weight: inherit !important;
+                        letter-spacing: inherit !important;
+                    }
+                    
+                    /* Preserve navigation and menu elements that often contain symbols */
+                    .readable-font nav,
+                    .readable-font .nav,
+                    .readable-font .navbar,
+                    .readable-font .menu,
+                    .readable-font .breadcrumb,
+                    .readable-font .pagination,
+                    .readable-font .dropdown,
+                    .readable-font .btn,
+                    .readable-font button,
+                    .readable-font [role="button"],
+                    .readable-font [role="menuitem"],
+                    .readable-font [aria-label*="arrow"],
+                    .readable-font [aria-label*="chevron"],
+                    .readable-font [aria-label*="caret"] {
                         font-family: inherit !important;
                         font-weight: inherit !important;
                         letter-spacing: inherit !important;
@@ -24280,9 +24304,6 @@ class AccessibilityWidget {
     
             this.addCognitiveBoxes();
     
-            // Ensure cognitive mode only adds boxes and doesn't change fonts
-            this.preserveFontSettings();
-    
             console.log('Accessibility Widget: Cognitive disability profile enabled');
     
         }
@@ -24294,12 +24315,6 @@ class AccessibilityWidget {
             document.body.classList.remove('cognitive-disability');
     
             this.removeCognitiveBoxes();
-    
-            // Remove font preservation styles
-            const fontStyle = document.getElementById('cognitive-font-preservation');
-            if (fontStyle) {
-                fontStyle.remove();
-            }
     
             console.log('Accessibility Widget: Cognitive disability profile disabled');
     
@@ -24315,7 +24330,7 @@ class AccessibilityWidget {
     
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
-            const links = document.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a');
+            const links = document.querySelectorAll('a');
     
             
     
@@ -24482,91 +24497,12 @@ class AccessibilityWidget {
             
     
             console.log('Accessibility Widget: Cognitive boxes added to', headings.length, 'headings,', buttons.length, 'buttons and', links.length, 'links');
-            
-            // Set up observer for dynamically added dropdown menu items
-            this.setupCognitiveObserver();
     
-        }
-    
-    
-    
-        preserveFontSettings() {
-            // Ensure cognitive mode doesn't override existing font settings
-            const style = document.createElement('style');
-            style.id = 'cognitive-font-preservation';
-            style.textContent = `
-                /* Preserve original font settings - cognitive mode only adds boxes */
-                body.cognitive-disability * {
-                    font-family: inherit !important;
-                    font-size: inherit !important;
-                    font-weight: inherit !important;
-                    line-height: inherit !important;
-                    letter-spacing: inherit !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    
-    
-    
-        setupCognitiveObserver() {
-            // Remove existing observer if any
-            if (this.cognitiveObserver) {
-                this.cognitiveObserver.disconnect();
-            }
-            
-            // Create observer for dynamically added menu items
-            this.cognitiveObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'childList') {
-                        mutation.addedNodes.forEach((node) => {
-                            if (node.nodeType === Node.ELEMENT_NODE) {
-                                // Check for new dropdown menu items
-                                const newLinks = node.querySelectorAll ? 
-                                    node.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a') : [];
-                                
-                                newLinks.forEach(link => {
-                                    if (!link.dataset.cognitiveBoxed && 
-                                        !link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
-                                        
-                                        const wrapper = document.createElement('div');
-                                        wrapper.style.cssText = `
-                                            display: inline-block;
-                                            border: 2px solid #f97316;
-                                            border-radius: 4px;
-                                            padding: 2px 4px;
-                                            margin: 1px;
-                                            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
-                                            background: transparent;
-                                        `;
-                                        
-                                        link.parentNode.insertBefore(wrapper, link);
-                                        wrapper.appendChild(link);
-                                        link.dataset.cognitiveBoxed = 'true';
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-            
-            // Start observing
-            this.cognitiveObserver.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
         }
     
     
     
         removeCognitiveBoxes() {
-    
-            // Disconnect observer
-            if (this.cognitiveObserver) {
-                this.cognitiveObserver.disconnect();
-                this.cognitiveObserver = null;
-            }
     
             // Remove boxes from headings
     
@@ -24620,7 +24556,7 @@ class AccessibilityWidget {
     
             // Remove boxes from links
     
-            const links = document.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a');
+            const links = document.querySelectorAll('a');
     
             links.forEach(link => {
     
