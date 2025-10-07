@@ -24126,13 +24126,13 @@ class AccessibilityWidget {
     
             
     
-            // Create dark overlay for the entire page
+            // Create full-screen dark overlay with spotlight cutout
     
-            const darkOverlay = document.createElement('div');
+            const spotlight = document.createElement('div');
     
-            darkOverlay.id = 'adhd-dark-overlay';
+            spotlight.id = 'adhd-spotlight';
     
-            darkOverlay.style.cssText = `
+            spotlight.style.cssText = `
     
                 position: fixed;
     
@@ -24148,45 +24148,13 @@ class AccessibilityWidget {
     
                 z-index: 99997;
     
-                /* Slightly dim surroundings without tinting content */
-                background: rgba(0, 0, 0, 0.18);
+                /* Dark overlay with spotlight cutout using box-shadow technique */
+                background: transparent;
     
-            `;
-    
-            document.body.appendChild(darkOverlay);
-    
-            
-    
-            // Create spotlight with transparent and clear area
-    
-            const spotlight = document.createElement('div');
-    
-            spotlight.id = 'adhd-spotlight';
-    
-            spotlight.style.cssText = `
-    
-                position: fixed;
-    
-                width: 100vw;
-    
-                height: 150px;
-    
-                /* Subtle brightening effect for focus area */
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: brightness(1.1);
-                /* Visible border for guidance */
-                box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-                filter: none;
-    
-                pointer-events: none;
-    
-                border-radius: 8px;
+                /* Create spotlight hole using large box-shadow */
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
     
                 transition: all 0.1s ease;
-    
-                z-index: 99998;
-    
-                top: 50vh;
     
             `;
     
@@ -24218,11 +24186,22 @@ class AccessibilityWidget {
     
             
     
-            // Add mouse move event listener
+            // Add mouse move event listener to position the spotlight cutout
     
             this.adhdMouseMoveHandler = (e) => {
     
-                spotlight.style.top = e.clientY + 'px';
+                const x = e.clientX;
+                const y = e.clientY;
+                const size = 200; // Spotlight size
+    
+                // Position the spotlight cutout using box-shadow technique
+                spotlight.style.left = (x - size/2) + 'px';
+                spotlight.style.top = (y - size/2) + 'px';
+                spotlight.style.width = size + 'px';
+                spotlight.style.height = size + 'px';
+                spotlight.style.borderRadius = '50%';
+                spotlight.style.background = 'transparent';
+                spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.7)`;
     
             };
     
@@ -24288,6 +24267,9 @@ class AccessibilityWidget {
     
             this.addCognitiveBoxes();
     
+            // Ensure cognitive mode only adds boxes and doesn't change fonts
+            this.preserveFontSettings();
+    
             console.log('Accessibility Widget: Cognitive disability profile enabled');
     
         }
@@ -24299,6 +24281,12 @@ class AccessibilityWidget {
             document.body.classList.remove('cognitive-disability');
     
             this.removeCognitiveBoxes();
+    
+            // Remove font preservation styles
+            const fontStyle = document.getElementById('cognitive-font-preservation');
+            if (fontStyle) {
+                fontStyle.remove();
+            }
     
             console.log('Accessibility Widget: Cognitive disability profile disabled');
     
@@ -24314,7 +24302,7 @@ class AccessibilityWidget {
     
             const buttons = document.querySelectorAll('button, .btn, input[type="button"], input[type="submit"]');
     
-            const links = document.querySelectorAll('a');
+            const links = document.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a');
     
             
     
@@ -24340,7 +24328,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #6366f1;
     
@@ -24348,11 +24336,15 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 2px;
+                        margin: 0;
     
                         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     
                         background: transparent;
+    
+                        pointer-events: none;
+    
+                        z-index: 1;
     
                     `;
     
@@ -24394,7 +24386,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #f97316;
     
@@ -24402,11 +24394,15 @@ class AccessibilityWidget {
     
                         padding: 4px 8px;
     
-                        margin: 2px;
+                        margin: 0;
     
                         box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
+    
+                        pointer-events: none;
+    
+                        z-index: 1;
     
                     `;
     
@@ -24448,7 +24444,7 @@ class AccessibilityWidget {
     
                     wrapper.style.cssText = `
     
-                        display: inline-block;
+                        position: absolute;
     
                         border: 2px solid #f97316;
     
@@ -24456,11 +24452,15 @@ class AccessibilityWidget {
     
                         padding: 2px 4px;
     
-                        margin: 1px;
+                        margin: 0;
     
                         box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
     
                         background: transparent;
+    
+                        pointer-events: none;
+    
+                        z-index: 1;
     
                     `;
     
@@ -24481,12 +24481,93 @@ class AccessibilityWidget {
             
     
             console.log('Accessibility Widget: Cognitive boxes added to', headings.length, 'headings,', buttons.length, 'buttons and', links.length, 'links');
+            
+            // Set up observer for dynamically added dropdown menu items
+            this.setupCognitiveObserver();
     
         }
     
     
     
+        preserveFontSettings() {
+            // Ensure cognitive mode doesn't override existing font settings
+            const style = document.createElement('style');
+            style.id = 'cognitive-font-preservation';
+            style.textContent = `
+                /* Preserve original font settings - cognitive mode only adds boxes */
+                body.cognitive-disability * {
+                    font-family: inherit !important;
+                    font-size: inherit !important;
+                    font-weight: inherit !important;
+                    line-height: inherit !important;
+                    letter-spacing: inherit !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    
+    
+    
+        setupCognitiveObserver() {
+            // Remove existing observer if any
+            if (this.cognitiveObserver) {
+                this.cognitiveObserver.disconnect();
+            }
+            
+            // Create observer for dynamically added menu items
+            this.cognitiveObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // Check for new dropdown menu items
+                                const newLinks = node.querySelectorAll ? 
+                                    node.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a') : [];
+                                
+                                newLinks.forEach(link => {
+                                    if (!link.dataset.cognitiveBoxed && 
+                                        !link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                                        
+                                        const wrapper = document.createElement('div');
+                                        wrapper.style.cssText = `
+                                            position: absolute;
+                                            border: 2px solid #f97316;
+                                            border-radius: 4px;
+                                            padding: 2px 4px;
+                                            margin: 0;
+                                            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+                                            background: transparent;
+                                            pointer-events: none;
+                                            z-index: 1;
+                                        `;
+                                        
+                                        link.parentNode.insertBefore(wrapper, link);
+                                        wrapper.appendChild(link);
+                                        link.dataset.cognitiveBoxed = 'true';
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Start observing
+            this.cognitiveObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    
+    
+    
         removeCognitiveBoxes() {
+    
+            // Disconnect observer
+            if (this.cognitiveObserver) {
+                this.cognitiveObserver.disconnect();
+                this.cognitiveObserver = null;
+            }
     
             // Remove boxes from headings
     
@@ -24538,7 +24619,7 @@ class AccessibilityWidget {
     
             // Remove boxes from links
     
-            const links = document.querySelectorAll('a');
+            const links = document.querySelectorAll('a, .nav-link, .menu-item, .dropdown-item, [role="menuitem"], .navbar-nav a, .nav a, .menu a, .dropdown a');
     
             links.forEach(link => {
     
