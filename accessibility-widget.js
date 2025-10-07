@@ -14542,28 +14542,22 @@ class AccessibilityWidget {
             console.log('📏 [UPDATE LINE HEIGHT] Current lineHeight:', this.lineHeight);
 
             // Store original line-height if not already stored
-            // Use a more reliable method to get the original line height
+
             if (this.originalLineHeight === null) {
-                // First, temporarily remove any existing line height CSS to get the true original
-                const existingStyle = document.getElementById('line-height-css');
-                if (existingStyle) {
-                    existingStyle.remove();
-                }
-                
-                // Force a reflow to ensure we get the original value
-                document.body.offsetHeight;
-                
+
                 const computedStyle = window.getComputedStyle(document.body);
-                this.originalLineHeight = parseFloat(computedStyle.lineHeight) || 1.4; // Fallback to 1.4 if parsing fails
+
+                this.originalLineHeight = parseFloat(computedStyle.lineHeight);
 
                 console.log('📏 [UPDATE LINE HEIGHT] Stored original line-height:', this.originalLineHeight);
+
             }
     
             
     
             // Subtle mapping: keep visual steps at 10% but apply gentle real change
-            // Use the actual original line height as the base
-            const base = this.originalLineHeight || 1.4;
+            // Base comfortable line-height around 1.4 at 100%
+            const base = 1.4;
             const intensity = 0.3; // total swing ±0.3 across 100% range
             const delta = ((this.lineHeight - 100) / 100) * intensity;
             const lineHeightValue = (base + delta).toFixed(3);
@@ -17322,8 +17316,6 @@ class AccessibilityWidget {
             // Apply line height CSS if it's not the default value
             if (this.lineHeight !== 100) {
                 console.log('Accessibility Widget: Applying saved line height on page load:', this.lineHeight + '%');
-                // Reset original line height to ensure clean calculation
-                this.originalLineHeight = null;
                 this.updateLineHeight();
             }
 
