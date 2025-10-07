@@ -20781,32 +20781,22 @@ class AccessibilityWidget {
                         letter-spacing: 0.5px !important;
                     }
                     
-                    /* 6. PRESERVE ALL SYMBOLS AND ICONS - Comprehensive exclusions */
+                    /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
+
+                    /* The MOST reliable way to exclude icon fonts and symbols */
                     .readable-font i,
-                    .readable-font .icon,
                     .readable-font [class*="icon"],
-                    .readable-font [class*="arrow"],
-                    .readable-font [class*="chevron"],
-                    .readable-font [class*="caret"],
-                    .readable-font svg,
-                    .readable-font [data-icon],
                     .readable-font [class*="symbol"],
-                    .readable-font [class*="glyph"],
+                    .readable-font [class*="arrow"],
                     .readable-font [class*="fa-"],
-                    .readable-font [class*="material-icons"],
-                    .readable-font [class*="icon-"],
-                    .readable-font [class*="sprite"],
-                    .readable-font [class*="emoji"],
-                    .readable-font [class*="unicode"],
-                    .readable-font [class*="fontawesome"],
                     .readable-font [class*="glyphicon"],
-                    .readable-font [class*="ion-"],
-                    .readable-font [class*="feather"],
-                    .readable-font [class*="lucide"],
-                    .readable-font [class*="heroicon"] {
-                        font-family: inherit !important;
-                        font-weight: inherit !important;
-                        letter-spacing: inherit !important;
+                    .readable-font [class*="material-icons"],
+                    .readable-font .w-icon-dropdown-toggle,
+                    .readable-font svg * {
+                        font-family: initial !important;
+                        font-weight: initial !important;
+                        letter-spacing: initial !important;
+                        text-transform: initial !important;
                     }
                     
                     /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
@@ -20822,9 +20812,10 @@ class AccessibilityWidget {
                     .readable-font [aria-label*="arrow"],
                     .readable-font [aria-label*="chevron"],
                     .readable-font [aria-label*="caret"] {
-                        font-family: inherit !important;
-                        font-weight: inherit !important;
-                        letter-spacing: inherit !important;
+                        font-family: initial !important;
+                        font-weight: initial !important;
+                        letter-spacing: initial !important;
+                        text-transform: initial !important;
                     }
                     
                     /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
@@ -20834,9 +20825,10 @@ class AccessibilityWidget {
                     .readable-font button i,
                     .readable-font button [class*="icon"],
                     .readable-font button [class*="arrow"] {
-                        font-family: inherit !important;
-                        font-weight: inherit !important;
-                        letter-spacing: inherit !important;
+                        font-family: initial !important;
+                        font-weight: initial !important;
+                        letter-spacing: initial !important;
+                        text-transform: initial !important;
                     }
                     
                     /* 9. PRESERVE LINK ICONS - Don't affect link symbols */
@@ -20844,9 +20836,10 @@ class AccessibilityWidget {
                     .readable-font a [class*="icon"],
                     .readable-font a [class*="arrow"],
                     .readable-font a svg {
-                        font-family: inherit !important;
-                        font-weight: inherit !important;
-                        letter-spacing: inherit !important;
+                        font-family: initial !important;
+                        font-weight: initial !important;
+                        letter-spacing: initial !important;
+                        text-transform: initial !important;
                     }
                 `;
                 document.head.appendChild(style);
