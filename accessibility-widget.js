@@ -1099,7 +1099,7 @@ function applyVisionImpaired(on) {
 
         // Smooth scaling via CSS variable; do not touch font-size anywhere
         // Set desired scale as CSS var on html element so transitions are smooth
-        const scaleValue = '1.05';
+        const scaleValue = '1.06';
         if (on) {
             document.documentElement.style.setProperty('--vision-scale', scaleValue);
         } else {
@@ -1117,26 +1117,26 @@ function applyVisionImpaired(on) {
         style.textContent = `
             /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
 
-            /* 1. VIEWPORT LOCK - Prevent extra scrollbars and whitespace */
-            html.vision-impaired,
-            body.vision-impaired {
-                height: 100% !important;
-                /* Removed overflow: hidden to preserve scrolling */
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            /* 2. CONTENT WRAPPER SCALING - Safe transform-based scaling using CSS var */
-            #accessibility-content-wrapper {
-                --vision-scale: var(--vision-scale, 1);
-                transform: translateZ(0) scale(var(--vision-scale)) !important;
+            /* 1. VISION IMPAIRED SCALING - Clean approach without layout breaking */
+            html.vision-impaired {
+                transform: scale(var(--vision-scale, 1)) !important;
                 transform-origin: top left !important;
                 width: calc(100% / var(--vision-scale)) !important;
                 height: calc(100% / var(--vision-scale)) !important;
-                min-height: 100% !important;
-                overflow: auto !important;
-                transition: transform 240ms ease, width 240ms ease, height 240ms ease !important;
-                will-change: transform;
+                transition: transform 240ms ease !important;
+            }
+
+            body.vision-impaired {
+                margin: 0 !important;
+                padding: 0 !important;
+                /* Preserve normal body behavior */
+            }
+
+            /* 2. CONTENT WRAPPER - Simplified approach */
+            #accessibility-content-wrapper {
+                width: 100% !important;
+                height: 100% !important;
+                overflow: visible !important;
                 display: block !important;
             }
             
@@ -1231,8 +1231,9 @@ function applyVisionImpaired(on) {
             
             /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
             @media (max-width: 768px) {
-                #accessibility-content-wrapper {
-                    transform: translateZ(0) scale(var(--vision-scale, 1)) !important;
+                html.vision-impaired {
+                    transform: scale(var(--vision-scale, 1)) !important;
+                    transform-origin: top left !important;
                     width: calc(100% / var(--vision-scale)) !important;
                     height: calc(100% / var(--vision-scale)) !important;
                 }
@@ -18050,19 +18051,11 @@ class AccessibilityWidget {
                 body.high-contrast [style*="position: fixed"],
                 body.high-contrast [style*="position:fixed"],
                 body.high-contrast .fixed,
-                body.high-contrast .sticky,
                 body.high-contrast [class*="fixed"],
-                body.high-contrast [class*="sticky"],
                 body.high-contrast nav[style*="position: fixed"],
                 body.high-contrast nav[style*="position:fixed"],
                 body.high-contrast header[style*="position: fixed"],
-                body.high-contrast header[style*="position:fixed"],
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
+                body.high-contrast header[style*="position:fixed"] {
                     position: fixed !important;
                     z-index: 9999 !important;
                     /* Ensure these elements stay on top */
@@ -18074,20 +18067,60 @@ class AccessibilityWidget {
                     backdrop-filter: none !important;
                     -webkit-backdrop-filter: none !important;
                 }
+
+                /* Preserve sticky positioning - don't force to fixed */
+                body.high-contrast [style*="position: sticky"],
+                body.high-contrast [style*="position:sticky"],
+                body.high-contrast .sticky,
+                body.high-contrast [class*="sticky"] {
+                    position: sticky !important;
+                    z-index: 9999 !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
+                }
+
+                /* Preserve navbar elements without forcing position */
+                body.high-contrast .navbar,
+                body.high-contrast .nav-bar,
+                body.high-contrast .navigation,
+                body.high-contrast .header,
+                body.high-contrast .top-bar,
+                body.high-contrast .menu-bar {
+                    z-index: 9999 !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
+                }
     
                 /* Specific fixes for common navbar classes and frameworks */
                 body.high-contrast .navbar-fixed-top,
                 body.high-contrast .navbar-fixed,
                 body.high-contrast .fixed-top,
-                body.high-contrast .sticky-top,
-                body.high-contrast .is-sticky,
                 body.high-contrast .is-fixed,
-                body.high-contrast [data-sticky],
                 body.high-contrast [data-fixed] {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
                     right: 0 !important;
+                    z-index: 9999 !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+
+                /* Preserve sticky classes - don't force to fixed */
+                body.high-contrast .sticky-top,
+                body.high-contrast .is-sticky,
+                body.high-contrast [data-sticky] {
+                    position: sticky !important;
                     z-index: 9999 !important;
                     transform: none !important;
                     will-change: auto !important;
@@ -18793,6 +18826,7 @@ class AccessibilityWidget {
                 body.dark-contrast i,
                 body.dark-contrast b,
                 body.dark-contrast a {
+                    background: #000000 !important;
                     color: #ffffff !important;
                 }
 
@@ -18819,6 +18853,7 @@ class AccessibilityWidget {
                 body.dark-contrast .service-card *,
                 body.dark-contrast .color-box *,
                 body.dark-contrast .test-block * {
+                    background: #000000 !important;
                     color: #ffffff !important;
                 }
 
@@ -22012,8 +22047,172 @@ class AccessibilityWidget {
                         /* Ensure visibility */
                         opacity: 1 !important;
                         visibility: visible !important;
-                        
-                        /* Reset animation properties */
+                    }
+                    
+                    /* Only reset positioning for elements that are likely to be animated */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"] {
+                        position: static !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        transform: none !important;
+                        translate: none !important;
+                        scale: 1 !important;
+                        rotate: 0deg !important;
+                        width: auto !important;
+                        height: auto !important;
+                    }
+
+                    /* Ensure interactive elements still show pointer cursor in stop-animation mode */
+                    .stop-animation a[href],
+                    .stop-animation button,
+                    .stop-animation [role="button"],
+                    .stop-animation [onclick],
+                    .stop-animation input[type="button"],
+                    .stop-animation input[type="submit"],
+                    .stop-animation input[type="reset"],
+                    .stop-animation .btn,
+                    .stop-animation .button,
+                    .stop-animation [class*="btn"],
+                    .stop-animation [class*="button"],
+                    .stop-animation [tabindex]:not([tabindex="-1"]) {
+                        cursor: pointer !important;
+                    }
+                    /* Keep text cursor for text-editable fields */
+                    .stop-animation input[type="text"],
+                    .stop-animation input[type="email"],
+                    .stop-animation input[type="search"],
+                    .stop-animation input[type="tel"],
+                    .stop-animation input[type="url"],
+                    .stop-animation input[type="password"],
+                    .stop-animation textarea,
+                    .stop-animation [contenteditable="true"] {
+                        cursor: text !important;
+                    }
+                    
+                    /* Preserve original layout for specific elements */
+                    .stop-animation img,
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object {
+                        position: static !important;
+                        transform: none !important;
+                        width: auto !important;
+                        height: auto !important;
+                        max-width: 100% !important;
+                        max-height: 100% !important;
+                    }
+                    
+                    /* Ensure text elements maintain original layout */
+                    .stop-animation h1,
+                    .stop-animation h2,
+                    .stop-animation h3,
+                    .stop-animation h4,
+                    .stop-animation h5,
+                    .stop-animation h6,
+                    .stop-animation p,
+                    .stop-animation span,
+                    .stop-animation div,
+                    .stop-animation a,
+                    .stop-animation li,
+                    .stop-animation td,
+                    .stop-animation th,
+                    .stop-animation label {
+                        position: static !important;
+                        transform: none !important;
+                        width: auto !important;
+                        height: auto !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                    }
+                    
+                    /* CRITICAL: Force ALL possible animations to their final state immediately */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"],
+                    /* Additional comprehensive animation coverage */
+                    .stop-animation *[class*="motion"],
+                    .stop-animation *[class*="move"],
+                    .stop-animation *[class*="float"],
+                    .stop-animation *[class*="drift"],
+                    .stop-animation *[class*="sway"],
+                    .stop-animation *[class*="rock"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="glide"],
+                    .stop-animation *[class*="sweep"],
+                    .stop-animation *[class*="swoop"],
+                    .stop-animation *[class*="dive"],
+                    .stop-animation *[class*="rise"],
+                    .stop-animation *[class*="fall"],
+                    .stop-animation *[class*="drop"],
+                    .stop-animation *[class*="lift"],
+                    .stop-animation *[class*="sink"],
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="revolve"],
+                    .stop-animation *[class*="turn"],
+                    .stop-animation *[class*="twirl"],
+                    .stop-animation *[class*="whirl"],
+                    .stop-animation *[class*="spiral"],
+                    .stop-animation *[class*="helix"],
+                    .stop-animation *[class*="coil"],
+                    .stop-animation *[class*="curl"],
+                    .stop-animation *[class*="bend"],
+                    .stop-animation *[class*="flex"],
+                    .stop-animation *[class*="stretch"] {
+                        position: static !important;
+                        top: auto !important;
+                        left: auto !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        transform: none !important;
+                        translate: none !important;
+                        scale: 1 !important;
+                        rotate: 0deg !important;
+                        width: auto !important;
+                        height: auto !important;
                         animation: none !important;
                         transition: none !important;
                         animation-fill-mode: forwards !important;
