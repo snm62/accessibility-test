@@ -1123,12 +1123,14 @@ function applyVisionImpaired(on) {
                 transform-origin: top left !important;
                 width: calc(100% / var(--vision-scale)) !important;
                 height: calc(100% / var(--vision-scale)) !important;
+                min-height: 100vh !important;
                 transition: transform 240ms ease !important;
             }
 
             body.vision-impaired {
                 margin: 0 !important;
                 padding: 0 !important;
+                min-height: 100vh !important;
                 /* Preserve normal body behavior */
             }
 
@@ -1136,11 +1138,28 @@ function applyVisionImpaired(on) {
             #accessibility-content-wrapper {
                 width: 100% !important;
                 height: 100% !important;
+                min-height: 100vh !important;
                 overflow: visible !important;
                 display: block !important;
             }
             
-            /* 3. ACCESSIBILITY PANEL SCALING - Scale the widget panel (no font-size changes) */
+            /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
+            html.vision-impaired,
+            body.vision-impaired {
+                overflow-x: hidden !important;
+            }
+            
+            /* 4. ENSURE FOOTER AND CONTENT FILL VIEWPORT */
+            body.vision-impaired main,
+            body.vision-impaired section,
+            body.vision-impaired article,
+            body.vision-impaired .content,
+            body.vision-impaired .container,
+            body.vision-impaired .wrapper {
+                min-height: 100vh !important;
+            }
+            
+            /* 5. ACCESSIBILITY PANEL SCALING - Scale the widget panel (no font-size changes) */
             .accessibility-widget.vision-impaired,
             #accessibility-widget.vision-impaired,
             .accessibility-panel.vision-impaired {
@@ -1236,6 +1255,11 @@ function applyVisionImpaired(on) {
                     transform-origin: top left !important;
                     width: calc(100% / var(--vision-scale)) !important;
                     height: calc(100% / var(--vision-scale)) !important;
+                    min-height: 100vh !important;
+                }
+                
+                body.vision-impaired {
+                    min-height: 100vh !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
@@ -12350,15 +12374,21 @@ class AccessibilityWidget {
                         break;
     
                     case 'high-saturation':
-    
+
                         this.enableHighSaturation();
-    
+
                         break;
-    
+
+                    case 'low-saturation':
+
+                        this.enableLowSaturation();
+
+                        break;
+
                     case 'monochrome':
-    
+
                         this.enableMonochrome();
-    
+
                         break;
     
                     case 'dark-contrast':
@@ -12522,15 +12552,21 @@ class AccessibilityWidget {
                         break;
     
                     case 'high-saturation':
-    
+
                         this.disableHighSaturation();
-    
+
                         break;
-    
+
+                    case 'low-saturation':
+
+                        this.disableLowSaturation();
+
+                        break;
+
                     case 'monochrome':
-    
+
                         this.disableMonochrome();
-    
+
                         break;
     
                     case 'dark-contrast':
@@ -14182,12 +14218,10 @@ class AccessibilityWidget {
                 // Bind the line height events when controls are enabled
                 this.bindLineHeightEvents();
                 
-                // Check if line height was actually used (not just toggled on)
-                const wasLineHeightUsed = localStorage.getItem('line-height-used') === 'true';
-                
-                if (!wasLineHeightUsed && this.lineHeight === 100) {
-                    // If toggled on but never used, don't save the state and return
-                    console.log('[CK] Line height toggled on but never used, not saving state');
+                // Only save the toggle state if line height is actually not 100%
+                // This prevents the toggle from staying on when user just toggles it without using it
+                if (this.lineHeight === 100) {
+                    console.log('[CK] Line height toggled on but value is still 100%, not saving toggle state');
                     return;
                 }
             }
@@ -14749,7 +14783,8 @@ class AccessibilityWidget {
     
             this.settings['line-height'] = 100; // Save to settings
     
-            
+            // Clear the line-height-used flag since we're resetting to default
+            localStorage.removeItem('line-height-used');
     
             // Force update the display
     
@@ -17291,19 +17326,13 @@ class AccessibilityWidget {
             
     
             // Set line height toggle state based on whether line height is not 100%
-    
-            if (this.lineHeight !== 100 || localStorage.getItem('line-height-used') === 'true') {
-    
+            // Only enable toggle if line height is actually changed from default (100%)
+            if (this.lineHeight !== 100) {
                 this.settings['adjust-line-height'] = true;
-    
                 console.log('Accessibility Widget: Line height toggle enabled due to non-default line height');
-    
             } else if (this.settings['adjust-line-height'] === undefined) {
-    
                 this.settings['adjust-line-height'] = false;
-    
                 console.log('Accessibility Widget: Line height toggle disabled by default');
-    
             }
     
             
@@ -18575,6 +18604,30 @@ class AccessibilityWidget {
 
         }
 
+        // Low Saturation Methods
+
+        enableLowSaturation() {
+
+            document.body.classList.add('low-saturation');
+
+            // Apply low saturation styles that preserve positioning
+            this.applyLowSaturationStyles();
+
+            console.log('Accessibility Widget: Low saturation enabled');
+
+        }
+
+        disableLowSaturation() {
+
+            document.body.classList.remove('low-saturation');
+
+            // Remove low saturation styles
+            this.removeLowSaturationStyles();
+
+            console.log('Accessibility Widget: Low saturation disabled');
+
+        }
+
         // High Saturation CSS Methods
         applyHighSaturationStyles() {
             // Remove any existing high saturation styles first
@@ -18637,6 +18690,72 @@ class AccessibilityWidget {
 
         removeHighSaturationStyles() {
             const existingStyle = document.getElementById('accessibility-high-saturation-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        }
+
+        // Low Saturation CSS Methods
+        applyLowSaturationStyles() {
+            // Remove any existing low saturation styles first
+            this.removeLowSaturationStyles();
+
+            const style = document.createElement('style');
+            style.id = 'accessibility-low-saturation-css';
+            style.textContent = `
+                /* Low Saturation Mode - Preserve Positioning */
+                body.low-saturation {
+                    position: relative !important;
+                }
+
+                /* Preserve all fixed and sticky positioning in low saturation mode */
+                body.low-saturation [style*="position: fixed"],
+                body.low-saturation [style*="position:fixed"],
+                body.low-saturation [style*="position: sticky"],
+                body.low-saturation [style*="position:sticky"],
+                body.low-saturation .fixed,
+                body.low-saturation .sticky,
+                body.low-saturation [class*="fixed"],
+                body.low-saturation [class*="sticky"],
+                body.low-saturation nav,
+                body.low-saturation header,
+                body.low-saturation .navbar,
+                body.low-saturation .nav-bar,
+                body.low-saturation .navigation,
+                body.low-saturation .header,
+                body.low-saturation .top-bar,
+                body.low-saturation .menu-bar {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                }
+
+                /* Apply low saturation to content elements only, preserving sticky positioning */
+                body.low-saturation main,
+                body.low-saturation section,
+                body.low-saturation article,
+                body.low-saturation .content,
+                body.low-saturation .container,
+                body.low-saturation .wrapper,
+                body.low-saturation p,
+                body.low-saturation h1,
+                body.low-saturation h2,
+                body.low-saturation h3,
+                body.low-saturation h4,
+                body.low-saturation h5,
+                body.low-saturation h6,
+                body.low-saturation span,
+                body.low-saturation div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar) {
+                    filter: saturate(0.3) !important;
+                    -webkit-filter: saturate(0.3) !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        removeLowSaturationStyles() {
+            const existingStyle = document.getElementById('accessibility-low-saturation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -22049,7 +22168,7 @@ class AccessibilityWidget {
                         visibility: visible !important;
                     }
                     
-                    /* Only reset positioning for elements that are likely to be animated */
+                    /* Only reset transform properties for animated elements - don't touch positioning */
                     .stop-animation *[class*="animate"],
                     .stop-animation *[class*="fade"],
                     .stop-animation *[class*="slide"],
@@ -22070,17 +22189,15 @@ class AccessibilityWidget {
                     .stop-animation *[class*="swing"],
                     .stop-animation *[class*="wobble"],
                     .stop-animation *[class*="tilt"] {
-                        position: static !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* Only reset transform properties, preserve positioning */
                         transform: none !important;
                         translate: none !important;
                         scale: 1 !important;
                         rotate: 0deg !important;
-                        width: auto !important;
-                        height: auto !important;
+                        animation: none !important;
+                        transition: none !important;
+                        animation-fill-mode: forwards !important;
+                        animation-play-state: paused !important;
                     }
 
                     /* Ensure interactive elements still show pointer cursor in stop-animation mode */
@@ -22117,10 +22234,10 @@ class AccessibilityWidget {
                     .stop-animation iframe,
                     .stop-animation embed,
                     .stop-animation object {
-                        position: static !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
-                        width: auto !important;
-                        height: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
                         max-width: 100% !important;
                         max-height: 100% !important;
                     }
@@ -22140,14 +22257,14 @@ class AccessibilityWidget {
                     .stop-animation td,
                     .stop-animation th,
                     .stop-animation label {
-                        position: static !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
-                        width: auto !important;
-                        height: auto !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* CRITICAL: Force ALL possible animations to their final state immediately */
@@ -22202,17 +22319,17 @@ class AccessibilityWidget {
                     .stop-animation *[class*="bend"],
                     .stop-animation *[class*="flex"],
                     .stop-animation *[class*="stretch"] {
-                        position: static !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
                         translate: none !important;
                         scale: 1 !important;
                         rotate: 0deg !important;
-                        width: auto !important;
-                        height: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
                         transition: none !important;
                         animation-fill-mode: forwards !important;
@@ -22240,17 +22357,17 @@ class AccessibilityWidget {
                     .stop-animation *[class*="swing"],
                     .stop-animation *[class*="wobble"],
                     .stop-animation *[class*="tilt"] {
-                        position: static !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
                         translate: none !important;
                         scale: 1 !important;
                         rotate: 0deg !important;
-                        width: auto !important;
-                        height: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Preserve original layout for specific elements */
@@ -22260,10 +22377,10 @@ class AccessibilityWidget {
                     .stop-animation iframe,
                     .stop-animation embed,
                     .stop-animation object {
-                        position: static !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
-                        width: auto !important;
-                        height: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
                         max-width: 100% !important;
                         max-height: 100% !important;
                     }
@@ -22283,14 +22400,14 @@ class AccessibilityWidget {
                     .stop-animation td,
                     .stop-animation th,
                     .stop-animation label {
-                        position: static !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
-                        width: auto !important;
-                        height: auto !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* CRITICAL: Force ALL possible animations to their final state immediately */
@@ -22757,11 +22874,11 @@ class AccessibilityWidget {
                         opacity: 1 !important;
                         visibility: visible !important;
                         transform: none !important;
-                        position: static !important;
-                        top: auto !important;
-                        left: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
                         z-index: auto !important;
                     }
                     
@@ -22786,7 +22903,7 @@ class AccessibilityWidget {
                         
                         /* Force text to remain visible and static */
                         display: inherit !important;
-                        position: static !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
                         transform: none !important;
                     }
                     
