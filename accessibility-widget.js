@@ -25449,8 +25449,15 @@ class AccessibilityWidget {
                 body.style.position = body.style.position === 'fixed' ? '' : body.style.position;
 
                 // Remove common classes that lock scroll
-                const scrollLockClasses = ['no-scroll', 'overflow-hidden', 'modal-open', 'is-locked', 'scroll-lock'];
-                scrollLockClasses.forEach(cls => { try { body.classList.remove(cls); html.classList.remove(cls); } catch (_) {} });
+                const scrollLockClasses = ['no-scroll', 'overflow-hidden', 'modal-open', 'is-locked', 'scroll-lock', 'scroll-disabled', 'no-scrollbar'];
+                scrollLockClasses.forEach(cls => { 
+                    try { 
+                        body.classList.remove(cls); 
+                        html.classList.remove(cls); 
+                        // Also remove from all elements
+                        document.querySelectorAll(`.${cls}`).forEach(el => el.classList.remove(cls));
+                    } catch (_) {} 
+                });
 
                 // Reset touch/scroll behavior
                 html.style.scrollBehavior = 'auto';
@@ -25467,6 +25474,23 @@ class AccessibilityWidget {
                         }
                     }
                 } catch (_) {}
+
+                // Force remove any fixed positioning that might block scroll
+                if (body.style.position === 'fixed') {
+                    body.style.position = 'static';
+                }
+                if (html.style.position === 'fixed') {
+                    html.style.position = 'static';
+                }
+
+                // Remove any height restrictions that might prevent scrolling
+                if (body.style.height === '100vh' || body.style.height === '100%') {
+                    body.style.height = 'auto';
+                }
+                if (html.style.height === '100vh' || html.style.height === '100%') {
+                    html.style.height = 'auto';
+                }
+
             } catch (_) {}
         }
     
@@ -25615,11 +25639,8 @@ class AccessibilityWidget {
                         transform-origin: unset !important;
                         position: fixed !important;
                         z-index: 999999 !important;
-                        /* Ensure panel maintains its viewport properties */
-                        top: auto !important;
-                        right: auto !important;
-                        bottom: auto !important;
-                        left: auto !important;
+                        /* CRITICAL: DO NOT override positioning - let JavaScript control viewport positioning */
+                        /* Removed problematic positioning overrides that break viewport scrolling */
                         /* Prevent any scaling or positioning interference */
                         scale: 1 !important;
                         rotate: 0deg !important;
@@ -26071,7 +26092,7 @@ class AccessibilityWidget {
                     animation-fill-mode: forwards !important;
                 }
                 
-                /* Stop library animations */
+                /* Stop library animations - FORCE TO FINAL POSITIONS */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -26081,26 +26102,29 @@ class AccessibilityWidget {
                 body.seizure-safe .zoom-in {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
-                /* Stop text animations */
+                /* Stop text animations - FORCE TO FINAL POSITIONS */
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split, 
                 body.seizure-safe .char, 
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
-                /* Stop SVG animations */
+                /* Stop SVG animations - FORCE TO FINAL POSITIONS */
                 body.seizure-safe svg,
                 body.seizure-safe svg path,
                 body.seizure-safe svg line {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
-                /* Stop scroll animations */
+                /* Stop scroll animations - FORCE TO FINAL POSITIONS */
                 body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
@@ -26108,18 +26132,37 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="timeline"] {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
-                /* Stop media animations */
+                /* Stop media animations - FORCE TO FINAL POSITIONS */
                 body.seizure-safe video,
                 body.seizure-safe audio {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
-                /* Add slight desaturation for seizure safety */
+                /* CRITICAL: Ensure scrolling works properly */
                 body.seizure-safe {
                     filter: saturate(0.7) !important;
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    scroll-behavior: auto !important;
+                    position: static !important;
+                }
+                
+                body.seizure-safe html {
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    scroll-behavior: auto !important;
+                }
+                
+                /* Force all containers to allow scrolling */
+                body.seizure-safe * {
+                    scroll-behavior: auto !important;
                 }
                 
                 /* Preserve accessibility widget */
