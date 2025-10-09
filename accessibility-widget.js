@@ -3285,7 +3285,7 @@ class AccessibilityWidget {
     /* Ensure panel always appears on top of icon */
     .accessibility-panel {
         z-index: 100001 !important;
-        position: fixed !important;
+        /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 overflow-y: auto !important;
                 scroll-behavior: smooth !important;
                 -webkit-overflow-scrolling: touch !important;
@@ -4061,7 +4061,7 @@ class AccessibilityWidget {
             padding: 16px !important;
             max-height: 80vh !important;
             overflow-y: auto !important;
-            position: fixed !important;
+            /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
             z-index: 100001 !important;
         }
         
@@ -4384,7 +4384,7 @@ class AccessibilityWidget {
     
     .accessibility-panel {
         display: none !important;
-        position: fixed !important;
+        /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
         z-index: 100001 !important;
     }
     
@@ -4935,7 +4935,7 @@ class AccessibilityWidget {
             
             /* Force panel positioning */
             .accessibility-panel {
-                position: fixed !important;
+                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 z-index: 100001 !important;
                 display: none !important; /* Hidden by default */
             }
@@ -5268,7 +5268,7 @@ class AccessibilityWidget {
     
                 .accessibility-panel {
     
-                    position: fixed;
+                    /* REMOVED: position: fixed; - This was preventing widget from scrolling with viewport */
     
                     width: 500px !important;
     
@@ -6435,7 +6435,7 @@ class AccessibilityWidget {
     
                 :host(.seizure-safe) .accessibility-panel {
     
-                    filter: grayscale(0.8) contrast(0.9) !important;
+                    filter: grayscale(0.4) contrast(0.3) !important;
     
                 }
     
