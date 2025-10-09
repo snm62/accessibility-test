@@ -20413,6 +20413,11 @@ class AccessibilityWidget {
             // Force mute all media immediately (including already playing)
             this.forceMuteAllMedia(audioElements, videoElements);
     
+            // Additional aggressive muting after a short delay to catch any delayed media
+            setTimeout(() => {
+                this.forceMuteAllMedia(audioElements, videoElements);
+            }, 100);
+    
             // Store original states and mute all media
     
             this.muteAllMediaElements(audioElements, videoElements);
@@ -20430,6 +20435,9 @@ class AccessibilityWidget {
             // Start monitoring for dynamically added media elements
     
             this.startMediaObserver();
+            
+            // Additional monitoring to catch any media that might start playing
+            this.startAggressiveMediaMonitoring();
     
             
     
@@ -20449,6 +20457,9 @@ class AccessibilityWidget {
             // Stop monitoring for media changes
     
             this.stopMediaObserver();
+            
+            // Stop aggressive media monitoring
+            this.stopAggressiveMediaMonitoring();
     
             
     
@@ -20461,6 +20472,50 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: Restored original audio/video volume states');
     
         }
+        
+        // Additional aggressive monitoring to catch any media that might start playing
+        startAggressiveMediaMonitoring() {
+            // Check every 500ms for any media that might have started playing
+            this.aggressiveMediaInterval = setInterval(() => {
+                if (this.settings['mute-sound']) {
+                    const allAudio = document.querySelectorAll('audio');
+                    const allVideo = document.querySelectorAll('video');
+                    
+                    allAudio.forEach(element => {
+                        if (!element.muted || element.volume > 0) {
+                            console.log('Accessibility Widget: Aggressive muting audio element');
+                            element.muted = true;
+                            element.volume = 0;
+                            if (!element.paused) {
+                                element.pause();
+                            }
+                        }
+                    });
+                    
+                    allVideo.forEach(element => {
+                        if (!element.muted || element.volume > 0) {
+                            console.log('Accessibility Widget: Aggressive muting video element');
+                            element.muted = true;
+                            element.volume = 0;
+                            if (!element.paused) {
+                                element.pause();
+                            }
+                        }
+                    });
+                }
+            }, 500);
+            
+            console.log('Accessibility Widget: Aggressive media monitoring started');
+        }
+        
+        // Stop aggressive media monitoring
+        stopAggressiveMediaMonitoring() {
+            if (this.aggressiveMediaInterval) {
+                clearInterval(this.aggressiveMediaInterval);
+                this.aggressiveMediaInterval = null;
+                console.log('Accessibility Widget: Aggressive media monitoring stopped');
+            }
+        }
     
         // Force mute all media immediately (including already playing)
         forceMuteAllMedia(audioElements, videoElements) {
@@ -20468,23 +20523,63 @@ class AccessibilityWidget {
             
             // Process all audio elements
             audioElements.forEach((element, index) => {
-                console.log(`Accessibility Widget: Force muting audio element ${index}`);
+                console.log(`Accessibility Widget: Force muting audio element ${index} - Playing: ${!element.paused}, Volume: ${element.volume}, Muted: ${element.muted}`);
+                
+                // Force mute immediately
                 element.muted = true;
                 element.volume = 0;
+                
+                // Pause if playing
                 if (!element.paused) {
+                    console.log(`Accessibility Widget: Pausing playing audio element ${index}`);
                     element.pause();
                 }
+                
+                // Add event listeners to prevent unmuting
+                element.addEventListener('volumechange', () => {
+                    if (this.settings['mute-sound']) {
+                        element.muted = true;
+                        element.volume = 0;
+                    }
+                });
+                
+                element.addEventListener('play', () => {
+                    if (this.settings['mute-sound']) {
+                        element.pause();
+                    }
+                });
             });
             
             // Process all video elements
             videoElements.forEach((element, index) => {
-                console.log(`Accessibility Widget: Force muting video element ${index}`);
+                console.log(`Accessibility Widget: Force muting video element ${index} - Playing: ${!element.paused}, Volume: ${element.volume}, Muted: ${element.muted}`);
+                
+                // Force mute immediately
                 element.muted = true;
                 element.volume = 0;
+                
+                // Pause if playing
                 if (!element.paused) {
+                    console.log(`Accessibility Widget: Pausing playing video element ${index}`);
                     element.pause();
                 }
+                
+                // Add event listeners to prevent unmuting
+                element.addEventListener('volumechange', () => {
+                    if (this.settings['mute-sound']) {
+                        element.muted = true;
+                        element.volume = 0;
+                    }
+                });
+                
+                element.addEventListener('play', () => {
+                    if (this.settings['mute-sound']) {
+                        element.pause();
+                    }
+                });
             });
+            
+            console.log(`Accessibility Widget: Force muted ${audioElements.length} audio and ${videoElements.length} video elements`);
         }
     
         // Comprehensive mute functionality for all media elements
@@ -22527,7 +22622,6 @@ class AccessibilityWidget {
                         /* Stop blinking and flashing text */
                         visibility: visible !important;
                         opacity: 1 !important;
-                        color: inherit !important;
                         text-decoration: none !important;
                         
                         /* Force final state */
