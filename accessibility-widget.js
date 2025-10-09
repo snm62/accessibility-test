@@ -67,16 +67,9 @@
                 body.seizure-safe *[class*="swing"],
                 body.seizure-safe *[class*="wobble"],
                 body.seizure-safe *[class*="tilt"] {
-                    position: static !important;
-                    top: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    bottom: auto !important;
-                    transform: none !important;
-                    translate: none !important;
-                    scale: 1 !important;
-                    rotate: 0deg !important;
-                    width: auto !important;
+                    /* Removed positioning rules to preserve scrolling */
+                    animation: none !important;
+                    transition: none !important;
                     height: auto !important;
                 }
 
@@ -114,10 +107,9 @@
                 body.seizure-safe iframe,
                 body.seizure-safe embed,
                 body.seizure-safe object {
-                    position: static !important;
-                    transform: none !important;
-                    width: auto !important;
-                    height: auto !important;
+                    /* Removed positioning rules to preserve scrolling */
+                    animation: none !important;
+                    transition: none !important;
                     max-width: 100% !important;
                     max-height: 100% !important;
                 }
@@ -137,14 +129,9 @@
                 body.seizure-safe td,
                 body.seizure-safe th,
                 body.seizure-safe label {
-                    position: static !important;
-                    transform: none !important;
-                    width: auto !important;
-                    height: auto !important;
-                    top: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    bottom: auto !important;
+                    /* Removed positioning rules to preserve scrolling */
+                    animation: none !important;
+                    transition: none !important;
                 }
                 
                 /* CRITICAL: Force ALL possible animations to their final state immediately */
