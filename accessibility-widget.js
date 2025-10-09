@@ -33,9 +33,7 @@
                     transition: none !important;
                     animation-play-state: paused !important;
                     
-                    /* Ensure visibility without changing position */
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                 }
                 
                 /* Only reset positioning for elements that are likely to be animated */
@@ -193,9 +191,8 @@
                 body.seizure-safe *[class*="shift"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -207,8 +204,7 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     animation: none !important;
                     transition: none !important;
@@ -240,9 +236,8 @@
                 body.seizure-safe *[data-visibility] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -259,9 +254,8 @@
                 body.seizure-safe [class*="media"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -277,9 +271,8 @@
                 body.seizure-safe *[data-active] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -303,9 +296,8 @@
                 body.seizure-safe [class*="text-effect"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -321,9 +313,8 @@
                 body.seizure-safe [class*="item"]:hover {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -355,9 +346,8 @@
                 body.seizure-safe *[class*="orbit"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -389,9 +379,8 @@
                 body.seizure-safe [class*="orbit"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
@@ -404,15 +393,13 @@
                 body.seizure-safe .split .word {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     display: inline !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split {
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     display: block !important;
                 }
             `;
@@ -1137,13 +1124,20 @@ function applyVisionImpaired(on) {
                 min-height: 100vh !important;
             }
             
-            /* 5. ACCESSIBILITY PANEL SCALING - Scale the widget panel (no font-size changes) */
+            /* 5. ACCESSIBILITY PANEL - Exclude from scaling to preserve viewport positioning */
             .accessibility-widget.vision-impaired,
             #accessibility-widget.vision-impaired,
-            .accessibility-panel.vision-impaired {
-                transform: scale(var(--vision-scale, 1)) !important;
-                transform-origin: top right !important;
-                transition: transform 240ms ease !important;
+            .accessibility-panel.vision-impaired,
+            .accessibility-widget,
+            #accessibility-widget,
+            .accessibility-panel,
+            .accessibility-icon,
+            #accessibility-icon {
+                transform: none !important;
+                transform-origin: unset !important;
+                transition: none !important;
+                position: fixed !important;
+                z-index: 999999 !important;
             }
 
             /* 4. CONTENT ENHANCEMENT - No font-size changes, optional subtle contrast only */
@@ -1242,8 +1236,15 @@ function applyVisionImpaired(on) {
                 
                 .accessibility-widget.vision-impaired,
                 #accessibility-widget.vision-impaired,
-                .accessibility-panel.vision-impaired {
-                    transform: scale(var(--vision-scale, 1)) !important;
+                .accessibility-panel.vision-impaired,
+                .accessibility-widget,
+                #accessibility-widget,
+                .accessibility-panel,
+                .accessibility-icon,
+                #accessibility-icon {
+                    transform: none !important;
+                    position: fixed !important;
+                    z-index: 999999 !important;
                 }
             }
         `;
@@ -18262,8 +18263,7 @@ class AccessibilityWidget {
                 body.high-contrast [class*="motion"] {
                     filter: none !important;
                     -webkit-filter: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                 }
     
                 body.high-contrast nav a:hover,
@@ -19184,8 +19184,7 @@ class AccessibilityWidget {
                 body.dark-contrast video,
                 body.dark-contrast canvas,
                 body.dark-contrast iframe {
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
                     display: inherit !important;
                     background: transparent !important;
                     filter: none !important;
@@ -23196,7 +23195,7 @@ class AccessibilityWidget {
                     .stop-animation *::after {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         animation-play-state: paused !important;
                     }
                     
@@ -23235,7 +23234,7 @@ class AccessibilityWidget {
                         /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         animation-play-state: paused !important;
                     }
 
@@ -23371,7 +23370,7 @@ class AccessibilityWidget {
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         animation-play-state: paused !important;
                     }
                     
@@ -23614,7 +23613,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="flipOutY"] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23652,7 +23651,7 @@ class AccessibilityWidget {
                     .stop-animation *[data-visibility] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23671,7 +23670,7 @@ class AccessibilityWidget {
                     .stop-animation [class*="media"] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23689,7 +23688,7 @@ class AccessibilityWidget {
                     .stop-animation *[data-active] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23715,7 +23714,7 @@ class AccessibilityWidget {
                     .stop-animation [class*="text-effect"] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23733,7 +23732,7 @@ class AccessibilityWidget {
                     .stop-animation [class*="item"]:hover {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23767,7 +23766,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="orbit"] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23801,7 +23800,7 @@ class AccessibilityWidget {
                     .stop-animation [class*="orbit"] {
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -25400,7 +25399,7 @@ class AccessibilityWidget {
                         filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
-                    /* Preserve accessibility widget from vision impaired filters */
+                    /* Preserve accessibility widget from vision impaired filters and scaling */
                     body.vision-impaired .accessibility-widget,
                     body.vision-impaired .accessibility-panel,
                     body.vision-impaired .accessibility-icon,
@@ -25408,17 +25407,27 @@ class AccessibilityWidget {
                     body.vision-impaired #accessibility-panel,
                     body.vision-impaired #accessibility-icon,
                     body.vision-impaired [data-ck-widget],
-                    body.vision-impaired [class*="accessibility"] {
+                    body.vision-impaired [class*="accessibility"],
+                    .accessibility-widget,
+                    #accessibility-widget,
+                    .accessibility-panel,
+                    .accessibility-icon,
+                    #accessibility-icon {
                         filter: none !important;
                         -webkit-filter: none !important;
-                        /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                        transform: none !important;
+                        transform-origin: unset !important;
                         position: fixed !important;
-                        z-index: 99999 !important;
+                        z-index: 999999 !important;
                         /* Ensure panel maintains its viewport properties */
                         top: auto !important;
                         right: auto !important;
                         bottom: auto !important;
                         left: auto !important;
+                        /* Prevent any scaling or positioning interference */
+                        scale: 1 !important;
+                        rotate: 0deg !important;
+                        translate: none !important;
                     }
                     
                     /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
@@ -25836,7 +25845,7 @@ class AccessibilityWidget {
                     scroll-behavior: auto !important;
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
                     animation-play-state: paused !important;
                 }
                 
