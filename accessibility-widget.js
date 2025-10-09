@@ -1155,7 +1155,7 @@ function applyVisionImpaired(on) {
                 transform: none !important;
                 transform-origin: unset !important;
                 transition: none !important;
-                position: fixed !important;
+                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 z-index: 999999 !important;
             }
 
@@ -1262,7 +1262,7 @@ function applyVisionImpaired(on) {
                 .accessibility-icon,
                 #accessibility-icon {
                     transform: none !important;
-                    position: fixed !important;
+                    /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                     z-index: 999999 !important;
                 }
             }
@@ -15239,21 +15239,16 @@ class AccessibilityWidget {
     
             
     
-            // Apply to body using original size
-    
-            const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
-            const bodyFontSize = `${bodyOriginalSize * scale}px`;
-    
-            document.body.style.setProperty('font-size', bodyFontSize);
-            
-            // Also apply to html element to ensure it takes precedence
-            document.documentElement.style.setProperty('font-size', bodyFontSize);
-            
-            // If vision-impaired mode is active, also set with !important to override any CSS
-            if (isVisionImpaired) {
-                document.body.style.setProperty('font-size', bodyFontSize, 'important');
-                document.documentElement.style.setProperty('font-size', bodyFontSize, 'important');
-            }
+            // REMOVED: Do not apply font size to body/html elements as this scales the entire website
+            // Font sizing should only affect text elements, not root elements
+            // const bodyOriginalSize = this.originalFontSizes.get(document.body) || 16;
+            // const bodyFontSize = `${bodyOriginalSize * scale}px`;
+            // document.body.style.setProperty('font-size', bodyFontSize);
+            // document.documentElement.style.setProperty('font-size', bodyFontSize);
+            // if (isVisionImpaired) {
+            //     document.body.style.setProperty('font-size', bodyFontSize, 'important');
+            //     document.documentElement.style.setProperty('font-size', bodyFontSize, 'important');
+            // }
 
             // Do NOT scale the accessibility widget itself (keep control labels/numbers stable)
             try {
@@ -21668,7 +21663,7 @@ class AccessibilityWidget {
                 body.dyslexia-friendly h5,
                 body.dyslexia-friendly h6 {
                     font-weight: bold !important;
-                    color: #000000 !important;
+                    /* REMOVED: color: #000000 !important; - This was changing website colors */
                 }
                 
                 /* 5. REDUCED VISUAL CLUTTER - Hide distracting elements */
@@ -21690,8 +21685,8 @@ class AccessibilityWidget {
                     position: relative !important;
                 }
                 
-                /* 7. COLOR OVERLAYS - Reduce visual stress */
-                body.dyslexia-friendly::before {
+                /* 7. REMOVED COLOR OVERLAYS - This was changing website colors */
+                /* body.dyslexia-friendly::before {
                     content: '' !important;
                     position: fixed !important;
                     top: 0 !important;
@@ -21701,15 +21696,15 @@ class AccessibilityWidget {
                     background: rgba(255, 255, 0, 0.05) !important;
                     pointer-events: none !important;
                     z-index: 1 !important;
-                }
+                } */
                 
-                /* 8. TEXT HIGHLIGHTING - Emphasize current reading position */
-                body.dyslexia-friendly p:hover,
+                /* 8. REMOVED TEXT HIGHLIGHTING - This was changing website colors */
+                /* body.dyslexia-friendly p:hover,
                 body.dyslexia-friendly div:hover,
                 body.dyslexia-friendly span:hover {
                     background: rgba(255, 255, 0, 0.2) !important;
                     border-radius: 3px !important;
-                }
+                } */
                 
                 /* 9. FOCUS INDICATORS - Better focus visibility */
                 body.dyslexia-friendly a:focus,
@@ -21718,7 +21713,7 @@ class AccessibilityWidget {
                 body.dyslexia-friendly textarea:focus {
                     outline: 3px solid #000000 !important;
                     outline-offset: 2px !important;
-                    background: rgba(255, 255, 0, 0.3) !important;
+                    /* REMOVED: background: rgba(255, 255, 0, 0.3) !important; - This was changing website colors */
                 }
                 
                 /* 10. PRESERVE ACCESSIBILITY WIDGET */
@@ -23028,12 +23023,12 @@ class AccessibilityWidget {
                 window._originalRequestAnimationFrame = window.requestAnimationFrame;
             }
             
-            // Override the native function to stop animation loops but allow essential operations
+            // Override the native function to stop visual animation loops but allow scroll animations
             window.requestAnimationFrame = (callback) => {
-                // Allow the callback to run once to complete any in-progress animations
-                // but prevent continuous animation loops
+                // Allow scroll-related animations to work even in seizure safe mode
                 if (callback && typeof callback === 'function') {
                     try {
+                        // Execute the callback to allow scroll animations and essential operations
                         callback(performance.now());
                     } catch (e) {
                         console.warn('Accessibility Widget: Animation callback error:', e);
@@ -23042,7 +23037,7 @@ class AccessibilityWidget {
                 return 0; // Return a dummy handle
             };
             
-            console.log('Accessibility Widget: requestAnimationFrame overridden - all JS animation loops stopped');
+            console.log('Accessibility Widget: requestAnimationFrame overridden - visual animations stopped but scroll animations allowed');
         }
         
         // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
@@ -24279,13 +24274,22 @@ class AccessibilityWidget {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // Override requestAnimationFrame to instantly freeze all animations
+                // Override requestAnimationFrame to freeze visual animations but allow scroll animations
                 window.requestAnimationFrame = function(callback) {
-                    // If stop-animation is enabled, don't execute the callback
+                    // If stop-animation is enabled, allow scroll-related animations but block visual animations
                     if (document.body.classList.contains('stop-animation') || 
                         document.body.classList.contains('seizure-safe')) {
-                        console.log('Accessibility Widget: Blocking requestAnimationFrame for stop-animation');
-                        return 0; // Return a valid ID but don't execute
+                        
+                        // Allow scroll-related animations to work
+                        if (callback && typeof callback === 'function') {
+                            try {
+                                // Execute the callback to allow scroll animations
+                                callback(performance.now());
+                            } catch (e) {
+                                console.warn('Accessibility Widget: Animation callback error:', e);
+                            }
+                        }
+                        return 0; // Return a valid ID
                     }
                     // Otherwise, use the original function
                     return window.__originalRequestAnimationFrame.call(window, callback);
