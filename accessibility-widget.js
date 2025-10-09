@@ -7821,7 +7821,7 @@ class AccessibilityWidget {
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
                                         <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-
+    
                                             <i class="fas fa-chevron-down"></i> -5%
     
                                         </button>
@@ -7829,7 +7829,7 @@ class AccessibilityWidget {
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
                                         <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-
+    
                                             <i class="fas fa-chevron-up"></i> +5%
     
                                         </button>
@@ -12374,11 +12374,11 @@ class AccessibilityWidget {
                         break;
     
                     case 'high-saturation':
-
+    
                         this.enableHighSaturation();
-
+    
                         break;
-
+    
                     case 'low-saturation':
 
                         this.enableLowSaturation();
@@ -12386,9 +12386,9 @@ class AccessibilityWidget {
                         break;
 
                     case 'monochrome':
-
+    
                         this.enableMonochrome();
-
+    
                         break;
     
                     case 'dark-contrast':
@@ -12552,11 +12552,11 @@ class AccessibilityWidget {
                         break;
     
                     case 'high-saturation':
-
+    
                         this.disableHighSaturation();
-
+    
                         break;
-
+    
                     case 'low-saturation':
 
                         this.disableLowSaturation();
@@ -12564,9 +12564,9 @@ class AccessibilityWidget {
                         break;
 
                     case 'monochrome':
-
+    
                         this.disableMonochrome();
-
+    
                         break;
     
                     case 'dark-contrast':
@@ -14572,20 +14572,20 @@ class AccessibilityWidget {
         // Line Height Methods
     
         updateLineHeight() {
-
+    
             console.log('📏 [UPDATE LINE HEIGHT] Starting updateLineHeight()');
             console.log('📏 [UPDATE LINE HEIGHT] Current lineHeight:', this.lineHeight);
-
+    
             // Store original line-height if not already stored
-
+    
             if (this.originalLineHeight === null) {
-
+    
                 const computedStyle = window.getComputedStyle(document.body);
-
+    
                 this.originalLineHeight = parseFloat(computedStyle.lineHeight);
-
+    
                 console.log('📏 [UPDATE LINE HEIGHT] Stored original line-height:', this.originalLineHeight);
-
+    
             }
     
             
@@ -15705,7 +15705,7 @@ class AccessibilityWidget {
                     try { window.location.reload(); } catch (_) {}
                 }, 50);
             } catch (_) {}
-
+    
         }
     
     
@@ -16179,15 +16179,15 @@ class AccessibilityWidget {
     
             
     
-            // Force remove any remaining reading-mask elements
+            // Force remove any remaining reading-mask elements (updated for new approach)
     
-            const spotlightContainer = document.getElementById('reading-mask-spotlight-container');
+            const spotlight = document.getElementById('reading-mask-spotlight');
     
-            if (spotlightContainer) {
+            if (spotlight) {
     
-                spotlightContainer.remove();
+                spotlight.remove();
     
-                console.log('Accessibility Widget: Spotlight container force removed');
+                console.log('Accessibility Widget: Reading mask spotlight force removed');
     
             }
     
@@ -16339,13 +16339,13 @@ class AccessibilityWidget {
     
             
     
-            // Create spotlight container
+            // Create full-screen dark overlay with circular spotlight cutout (same as ADHD)
     
-            const spotlightContainer = document.createElement('div');
+            const spotlight = document.createElement('div');
     
-            spotlightContainer.id = 'reading-mask-spotlight-container';
+            spotlight.id = 'reading-mask-spotlight';
     
-            spotlightContainer.style.cssText = `
+            spotlight.style.cssText = `
     
                 position: fixed;
     
@@ -16359,77 +16359,53 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 99998;
-    
-                overflow: hidden;
-    
-            `;
-    
-            document.body.appendChild(spotlightContainer);
-    
-            
-    
-            // Create spotlight overlay with enhanced brightness for reading
-    
-            const spotlight = document.createElement('div');
-    
-            spotlight.id = 'reading-mask-spotlight';
-    
-            spotlight.style.cssText = `
-    
-                position: absolute;
-    
-                width: 100%;
-    
-                height: 150px;
+                z-index: 1000002; /* Ensure spotlight stays above the widget panel */
+
+                /* Dark overlay with spotlight cutout using box-shadow technique */
     
                 background: transparent;
     
-                backdrop-filter: brightness(2.2) contrast(1.2);
+                /* Create spotlight hole using large box-shadow */
     
-                box-shadow: 
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
     
-                    inset 0 0 50px rgba(255, 255, 255, 0.2),
-    
-                    0 0 20px rgba(255, 255, 255, 0.1);
-    
-                border-top: 2px solid rgba(255, 255, 255, 0.4);
-    
-                border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    
-                transform: translateY(-50%);
-    
-                transition: none;
-    
-                border-radius: 8px;
-    
-                filter: none;
+                transition: all 0.1s ease;
     
             `;
     
-            spotlightContainer.appendChild(spotlight);
+            document.body.appendChild(spotlight);
+    
+    
+    
+            // Ensure accessibility widget stays above spotlight
+    
+            const widget = document.querySelector('.accessibility-widget');
+    
+            if (widget) {
+    
+                widget.style.zIndex = '1000000';
+    
+            }
     
             
     
-            // Add mouse move event listener
+            // Add mouse move event listener for circular spotlight
     
             this.readingMaskMouseMoveHandler = (e) => {
     
-                const y = e.clientY - 75; // Center the spotlight on cursor (half of 150px height)
+                const x = e.clientX;
     
+                const y = e.clientY;
                 
     
-                // Keep spotlight within viewport bounds
     
-                const maxY = window.innerHeight - 150;
+                // Update spotlight position to follow mouse
     
-                const clampedY = Math.max(0, Math.min(y, maxY));
+                spotlight.style.left = x + 'px';
     
+                spotlight.style.top = y + 'px';
                 
-    
-                spotlight.style.top = clampedY + 'px';
-    
-                spotlight.style.transition = 'top 0.1s ease-out';
+                spotlight.style.transform = 'translate(-50%, -50%)';
     
             };
     
@@ -16447,11 +16423,13 @@ class AccessibilityWidget {
     
         removeReadingMaskSpotlight() {
     
-            const spotlightContainer = document.getElementById('reading-mask-spotlight-container');
+            // Remove spotlight element (new approach - direct element removal)
     
-            if (spotlightContainer) {
+            const spotlight = document.getElementById('reading-mask-spotlight');
     
-                spotlightContainer.remove();
+            if (spotlight) {
+
+                spotlight.remove();
     
             }
     
@@ -17348,9 +17326,9 @@ class AccessibilityWidget {
                 console.log('Accessibility Widget: Applying saved line height on page load:', this.lineHeight + '%');
                 this.updateLineHeight();
             }
-
+    
             
-            
+    
             // Load letter spacing from settings
     
             if (this.settings['letter-spacing'] !== undefined) {
@@ -18581,29 +18559,29 @@ class AccessibilityWidget {
         // High Saturation Methods
     
         enableHighSaturation() {
-
+    
             document.body.classList.add('high-saturation');
 
             // Apply high saturation styles that preserve positioning
             this.applyHighSaturationStyles();
-
+    
             console.log('Accessibility Widget: High saturation enabled');
-
+    
         }
     
     
     
         disableHighSaturation() {
-
+    
             document.body.classList.remove('high-saturation');
 
             // Remove high saturation styles
             this.removeHighSaturationStyles();
-
+    
             console.log('Accessibility Widget: High saturation disabled');
-
+    
         }
-
+    
         // Low Saturation Methods
 
         enableLowSaturation() {
@@ -18846,11 +18824,11 @@ class AccessibilityWidget {
     
     
         // Dark Contrast Methods
-
+    
         enableDarkContrast() {
-
+    
             console.log('Accessibility Widget: enableDarkContrast called');
-
+    
             // Remove light contrast if active
             document.body.classList.remove('light-contrast');
 
@@ -18859,32 +18837,32 @@ class AccessibilityWidget {
 
             // Inject dark contrast CSS
             this.injectDarkContrastCSS();
-
+    
             console.log('Accessibility Widget: Dark contrast enabled');
-
+    
         }
     
     
     
         disableDarkContrast() {
-
+    
             document.body.classList.remove('dark-contrast');
 
             // Remove dark contrast CSS
             this.removeDarkContrastCSS();
-
+    
             console.log('Accessibility Widget: Dark contrast disabled');
-
+    
         }
     
     
     
         // Light Contrast Methods
-
+    
         enableLightContrast() {
-
+    
             console.log('Accessibility Widget: enableLightContrast called');
-
+    
             // Remove dark contrast if active
             document.body.classList.remove('dark-contrast');
 
@@ -18893,24 +18871,24 @@ class AccessibilityWidget {
 
             // Inject light contrast CSS
             this.injectLightContrastCSS();
-
+    
             console.log('Accessibility Widget: Light contrast enabled');
-
+    
         }
     
     
     
         disableLightContrast() {
-
+    
             document.body.classList.remove('light-contrast');
 
             // Remove light contrast CSS
             this.removeLightContrastCSS();
-
+    
             console.log('Accessibility Widget: Light contrast disabled');
-
+    
         }
-
+    
         // Dark Contrast CSS Injection
         injectDarkContrastCSS() {
             // Remove any existing dark contrast CSS first
@@ -19013,6 +18991,173 @@ class AccessibilityWidget {
                 body.dark-contrast .menu,
                 body.dark-contrast .nav-menu,
                 body.dark-contrast .card,
+                
+                /* CRITICAL: Exclude images, symbols, and gradient elements from background changes */
+                body.dark-contrast img,
+                body.dark-contrast svg,
+                body.dark-contrast .icon,
+                body.dark-contrast [class*="icon"],
+                body.dark-contrast [data-icon],
+                body.dark-contrast .symbol,
+                body.dark-contrast .arrow,
+                body.dark-contrast [class*="arrow"],
+                body.dark-contrast [class*="gradient"],
+                body.dark-contrast [style*="gradient"],
+                body.dark-contrast .logo,
+                body.dark-contrast [class*="logo"],
+                body.dark-contrast .brand,
+                body.dark-contrast [class*="brand"],
+                body.dark-contrast .emoji,
+                body.dark-contrast [class*="emoji"],
+                body.dark-contrast .symbol,
+                body.dark-contrast [class*="symbol"],
+                body.dark-contrast .glyph,
+                body.dark-contrast [class*="glyph"],
+                body.dark-contrast .pictogram,
+                body.dark-contrast [class*="pictogram"],
+                body.dark-contrast .decoration,
+                body.dark-contrast [class*="decoration"],
+                body.dark-contrast .ornament,
+                body.dark-contrast [class*="ornament"],
+                body.dark-contrast .pattern,
+                body.dark-contrast [class*="pattern"],
+                body.dark-contrast .texture,
+                body.dark-contrast [class*="texture"],
+                body.dark-contrast .overlay,
+                body.dark-contrast [class*="overlay"],
+                body.dark-contrast .background,
+                body.dark-contrast [class*="background"],
+                body.dark-contrast .hero,
+                body.dark-contrast [class*="hero"],
+                body.dark-contrast .banner,
+                body.dark-contrast [class*="banner"],
+                body.dark-contrast .visual,
+                body.dark-contrast [class*="visual"],
+                body.dark-contrast .graphic,
+                body.dark-contrast [class*="graphic"],
+                body.dark-contrast .illustration,
+                body.dark-contrast [class*="illustration"],
+                body.dark-contrast .photo,
+                body.dark-contrast [class*="photo"],
+                body.dark-contrast .picture,
+                body.dark-contrast [class*="picture"],
+                body.dark-contrast .media,
+                body.dark-contrast [class*="media"],
+                body.dark-contrast .asset,
+                body.dark-contrast [class*="asset"],
+                body.dark-contrast .element,
+                body.dark-contrast [class*="element"],
+                body.dark-contrast .component,
+                body.dark-contrast [class*="component"],
+                body.dark-contrast .widget,
+                body.dark-contrast [class*="widget"],
+                body.dark-contrast .module,
+                body.dark-contrast [class*="module"],
+                body.dark-contrast .block,
+                body.dark-contrast [class*="block"],
+                body.dark-contrast .section,
+                body.dark-contrast [class*="section"],
+                body.dark-contrast .area,
+                body.dark-contrast [class*="area"],
+                body.dark-contrast .zone,
+                body.dark-contrast [class*="zone"],
+                body.dark-contrast .region,
+                body.dark-contrast [class*="region"],
+                body.dark-contrast .space,
+                body.dark-contrast [class*="space"],
+                body.dark-contrast .container,
+                body.dark-contrast [class*="container"],
+                body.dark-contrast .wrapper,
+                body.dark-contrast [class*="wrapper"],
+                body.dark-contrast .holder,
+                body.dark-contrast [class*="holder"],
+                body.dark-contrast .box,
+                body.dark-contrast [class*="box"],
+                body.dark-contrast .panel,
+                body.dark-contrast [class*="panel"],
+                body.dark-contrast .frame,
+                body.dark-contrast [class*="frame"],
+                body.dark-contrast .border,
+                body.dark-contrast [class*="border"],
+                body.dark-contrast .outline,
+                body.dark-contrast [class*="outline"],
+                body.dark-contrast .stroke,
+                body.dark-contrast [class*="stroke"],
+                body.dark-contrast .line,
+                body.dark-contrast [class*="line"],
+                body.dark-contrast .divider,
+                body.dark-contrast [class*="divider"],
+                body.dark-contrast .separator,
+                body.dark-contrast [class*="separator"],
+                body.dark-contrast .spacer,
+                body.dark-contrast [class*="spacer"],
+                body.dark-contrast .gap,
+                body.dark-contrast [class*="gap"],
+                body.dark-contrast .margin,
+                body.dark-contrast [class*="margin"],
+                body.dark-contrast .padding,
+                body.dark-contrast [class*="padding"],
+                body.dark-contrast .spacing,
+                body.dark-contrast [class*="spacing"],
+                body.dark-contrast .layout,
+                body.dark-contrast [class*="layout"],
+                body.dark-contrast .grid,
+                body.dark-contrast [class*="grid"],
+                body.dark-contrast .flex,
+                body.dark-contrast [class*="flex"],
+                body.dark-contrast .row,
+                body.dark-contrast [class*="row"],
+                body.dark-contrast .col,
+                body.dark-contrast [class*="col"],
+                body.dark-contrast .column,
+                body.dark-contrast [class*="column"],
+                body.dark-contrast .cell,
+                body.dark-contrast [class*="cell"],
+                body.dark-contrast .item,
+                body.dark-contrast [class*="item"],
+                body.dark-contrast .entry,
+                body.dark-contrast [class*="entry"],
+                body.dark-contrast .node,
+                body.dark-contrast [class*="node"],
+                body.dark-contrast .leaf,
+                body.dark-contrast [class*="leaf"],
+                body.dark-contrast .branch,
+                body.dark-contrast [class*="branch"],
+                body.dark-contrast .root,
+                body.dark-contrast [class*="root"],
+                body.dark-contrast .parent,
+                body.dark-contrast [class*="parent"],
+                body.dark-contrast .child,
+                body.dark-contrast [class*="child"],
+                body.dark-contrast .sibling,
+                body.dark-contrast [class*="sibling"],
+                body.dark-contrast .ancestor,
+                body.dark-contrast [class*="ancestor"],
+                body.dark-contrast .descendant,
+                body.dark-contrast [class*="descendant"],
+                body.dark-contrast .relative,
+                body.dark-contrast [class*="relative"],
+                body.dark-contrast .absolute,
+                body.dark-contrast [class*="absolute"],
+                body.dark-contrast .fixed,
+                body.dark-contrast [class*="fixed"],
+                body.dark-contrast .sticky,
+                body.dark-contrast [class*="sticky"],
+                body.dark-contrast .static,
+                body.dark-contrast [class*="static"],
+                body.dark-contrast .relative,
+                body.dark-contrast [class*="relative"],
+                body.dark-contrast .absolute,
+                body.dark-contrast [class*="absolute"],
+                body.dark-contrast .fixed,
+                body.dark-contrast [class*="fixed"],
+                body.dark-contrast .sticky,
+                body.dark-contrast [class*="sticky"],
+                body.dark-contrast .static,
+                body.dark-contrast [class*="static"] {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
                 body.dark-contrast .modal,
                 body.dark-contrast .dropdown,
                 body.dark-contrast .tooltip,
@@ -26215,18 +26360,18 @@ class AccessibilityWidget {
     
     
         enableAlignRight() {
-
+    
             console.log('Accessibility Widget: Enabling right alignment');
-
+    
             // Disable other alignment options first
             this.disableAlignLeft();
             this.disableAlignCenter();
-
+    
             // Apply right alignment only to specific text and icon elements, not the entire body
             const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, label, small, em, strong, b, td, th, i, svg, [class*="icon"], [data-icon]');
-
+    
             textElements.forEach(element => {
-
+    
                 // Skip if element is inside accessibility panel or widget
                 if (!element.closest('#accessibility-widget-container') && 
                     !element.closest('.accessibility-panel') && 
@@ -26238,28 +26383,28 @@ class AccessibilityWidget {
                     element.id !== 'accessibility-panel' &&
                     element.id !== 'text-alignment-panel' &&
                     element.id !== 'accessibility-widget') {
-
+    
                     element.style.textAlign = 'right';
-
+    
                 }
-
+    
             });
-
+    
             console.log('Accessibility Widget: Right alignment enabled');
-
+    
         }
     
     
     
         disableAlignRight() {
-
+    
             console.log('Accessibility Widget: Disabling right alignment');
-
+    
             // Remove right alignment from specific text and icon elements only
             const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, li, label, small, em, strong, b, td, th, i, svg, [class*="icon"], [data-icon]');
-
+    
             textElements.forEach(element => {
-
+    
                 // Skip if element is inside accessibility panel or widget
                 if (!element.closest('#accessibility-widget-container') && 
                     !element.closest('.accessibility-panel') && 
@@ -26271,11 +26416,11 @@ class AccessibilityWidget {
                     element.id !== 'accessibility-panel' &&
                     element.id !== 'text-alignment-panel' &&
                     element.id !== 'accessibility-widget') {
-
+    
                     element.style.textAlign = '';
-
+    
                 }
-
+    
             });
     
             
