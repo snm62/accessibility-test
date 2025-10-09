@@ -18021,58 +18021,147 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'accessibility-high-contrast-fix';
             style.textContent = `
-                /* High Contrast Mode - Preserve Positioning */
+                /* Simple High Contrast Mode - Only increase contrast, preserve everything else */
                 body.high-contrast {
-                    /* Ensure body maintains its positioning context */
-                    position: relative !important;
+                    filter: contrast(1.1) brightness(1.05) !important;
+                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
                 }
+                
+                /* Preserve accessibility widget from contrast filters */
+                body.high-contrast .accessibility-widget,
+                body.high-contrast .accessibility-panel,
+                body.high-contrast .accessibility-icon,
+                body.high-contrast #accessibility-widget,
+                body.high-contrast #accessibility-panel,
+                body.high-contrast #accessibility-icon,
+                body.high-contrast [data-ck-widget],
+                body.high-contrast [class*="accessibility"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
     
-                /* Preserve all fixed and sticky positioning in high contrast mode */
-                body.high-contrast [style*="position: fixed"],
-                body.high-contrast [style*="position:fixed"],
-                body.high-contrast .fixed,
-                body.high-contrast [class*="fixed"],
-                body.high-contrast nav[style*="position: fixed"],
-                body.high-contrast nav[style*="position:fixed"],
-                body.high-contrast header[style*="position: fixed"],
-                body.high-contrast header[style*="position:fixed"] {
-                    position: fixed !important;
-                    z-index: 9999 !important;
-                    /* Ensure these elements stay on top */
-                    transform: none !important;
-                    will-change: auto !important;
-                    /* Prevent any filter effects from breaking positioning */
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
+            `;
+    
+            document.head.appendChild(style);
+            console.log('Accessibility Widget: Simple high contrast applied - subtle contrast increase, no layout breaking');
+        }
+    
+        // Fix existing navbar elements that might have lost their positioning
+        fixExistingNavbars() {
+            // Find all potential navbar elements
+            const navbarSelectors = [
+                'nav', 'header', '.navbar', '.nav-bar', '.navigation', 
+                '.header', '.top-bar', '.menu-bar', '.main-navigation',
+                '.site-header', '.site-navigation', '.primary-menu',
+                '.menu-primary', '.main-menu', '.mobile-nav', '.mobile-menu',
+                '.mobile-header', '.responsive-nav', '.sticky-header',
+                '.sticky-nav', '.sticky-top-bar'
+            ];
+    
+            navbarSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    // Check if element has fixed or sticky positioning
+                    const computedStyle = window.getComputedStyle(element);
+                    const position = computedStyle.position;
+                    
+                    if (position === 'fixed' || position === 'sticky') {
+                        // Ensure the element maintains its positioning
+                        element.style.setProperty('position', position, 'important');
+                        element.style.setProperty('z-index', '9999', 'important');
+                        element.style.setProperty('filter', 'none', 'important');
+                    }
+                });
+            });
+        }
+    
+        // Remove high contrast styles
+        removeHighContrastStyles() {
+            const existingStyle = document.getElementById('accessibility-high-contrast-fix');
+            if (existingStyle) {
+                existingStyle.remove();
+                console.log('Accessibility Widget: High contrast positioning fixes removed');
+            }
+        }
+    
+        // Monitor for dynamically added navbar elements
+        observeNavbarChanges() {
+            if (this.navbarObserver) {
+                this.navbarObserver.disconnect();
+            }
+    
+            this.navbarObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // Check if the added node or its children are navbar elements
+                                const navbarElements = node.querySelectorAll ? 
+                                    node.querySelectorAll('nav, header, .navbar, .nav-bar, .navigation, .header, .top-bar, .menu-bar') :
+                                    [];
+                                
+                                // Also check if the node itself is a navbar element
+                                const isNavbarElement = node.matches && node.matches('nav, header, .navbar, .nav-bar, .navigation, .header, .top-bar, .menu-bar');
+                                
+                                if (isNavbarElement || navbarElements.length > 0) {
+                                    // Apply fixes to newly added navbar elements
+                                    setTimeout(() => {
+                                        this.fixExistingNavbars();
+                                    }, 100);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+    
+            // Start observing
+            this.navbarObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('Accessibility Widget: Navbar monitoring started');
+        }
+    
+        stopObservingNavbarChanges() {
+            if (this.navbarObserver) {
+                this.navbarObserver.disconnect();
+                this.navbarObserver = null;
+                console.log('Accessibility Widget: Navbar monitoring stopped');
+            }
+        }
+    
+        // High Saturation Methods
+    
+        enableHighSaturation() {
+    
+            document.body.classList.add('high-saturation');
 
-                /* Preserve sticky positioning - don't force to fixed */
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"],
-                body.high-contrast .sticky,
-                body.high-contrast [class*="sticky"] {
-                    position: sticky !important;
-                    z-index: 9999 !important;
-                    transform: none !important;
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
+            // Apply high saturation styles that preserve positioning
+            this.applyHighSaturationStyles();
+    
+            console.log('Accessibility Widget: High saturation enabled');
+    
+        }
+    
+    
+    
+        disableHighSaturation() {
+    
+            document.body.classList.remove('high-saturation');
 
-                /* Preserve navbar elements without forcing position */
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
-                    z-index: 9999 !important;
-                    transform: none !important;
-                    will-change: auto !important;
+            // Remove high saturation styles
+            this.removeHighSaturationStyles();
+    
+            console.log('Accessibility Widget: High saturation disabled');
+
+        }
+
+        // Low Saturation Methods
+
+        enableLowSaturation() {
                     filter: none !important;
                     -webkit-filter: none !important;
                     backdrop-filter: none !important;
@@ -18602,74 +18691,10 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'accessibility-high-saturation-css';
             style.textContent = `
-                /* High Saturation Mode - Preserve Positioning */
+                /* Simple High Saturation Mode - Only increase saturation, preserve everything else */
                 body.high-saturation {
-                    /* Ensure body maintains its positioning context */
-                    position: relative !important;
-                }
-
-                /* Preserve all fixed and sticky positioning in high saturation mode */
-                body.high-saturation [style*="position: fixed"],
-                body.high-saturation [style*="position:fixed"],
-                body.high-saturation [style*="position: sticky"],
-                body.high-saturation [style*="position:sticky"],
-                body.high-saturation .fixed,
-                body.high-saturation .sticky,
-                body.high-saturation [class*="fixed"],
-                body.high-saturation [class*="sticky"],
-                body.high-saturation nav,
-                body.high-saturation header,
-                body.high-saturation .navbar,
-                body.high-saturation .nav-bar,
-                body.high-saturation .navigation,
-                body.high-saturation .header,
-                body.high-saturation .top-bar,
-                body.high-saturation .menu-bar {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    transform: none !important;
-                    will-change: auto !important;
-                }
-
-                /* Apply high saturation to content elements only, preserving sticky positioning and media */
-                body.high-saturation main,
-                body.high-saturation section,
-                body.high-saturation article,
-                body.high-saturation .content,
-                body.high-saturation .container,
-                body.high-saturation .wrapper,
-                body.high-saturation p,
-                body.high-saturation h1,
-                body.high-saturation h2,
-                body.high-saturation h3,
-                body.high-saturation h4,
-                body.high-saturation h5,
-                body.high-saturation h6,
-                body.high-saturation span,
-                body.high-saturation div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar):not(img):not(video):not(canvas):not(iframe):not([class*="animated"]):not([class*="animation"]):not([class*="motion"]) {
                     filter: saturate(1.2) !important;
                     -webkit-filter: saturate(1.2) !important;
-                }
-                
-                /* Preserve images, animations, and media elements from saturation filters */
-                body.high-saturation img,
-                body.high-saturation video,
-                body.high-saturation canvas,
-                body.high-saturation iframe,
-                body.high-saturation svg,
-                body.high-saturation [class*="animated"],
-                body.high-saturation [class*="animation"],
-                body.high-saturation [class*="motion"],
-                body.high-saturation [class*="gif"],
-                body.high-saturation [data-animated],
-                body.high-saturation [data-gif],
-                body.high-saturation img[src*=".gif"],
-                body.high-saturation img[src*=".apng"],
-                body.high-saturation img[src*=".webp"] {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
                 
                 /* Preserve accessibility widget from saturation filters */
@@ -18683,11 +18708,10 @@ class AccessibilityWidget {
                 body.high-saturation [class*="accessibility"] {
                     filter: none !important;
                     -webkit-filter: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
             `;
             document.head.appendChild(style);
+            console.log('Accessibility Widget: Simple high saturation applied - subtle saturation increase, no layout breaking');
         }
 
         removeHighSaturationStyles() {
@@ -25675,9 +25699,24 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'accessibility-seizure-safe-styles';
             style.textContent = `
-                /* CLEAN SEIZURE-SAFE STYLES - Non-aggressive approach */
+                /* SIMPLE SEIZURE-SAFE STYLES - Only stop animations, preserve layout */
                 
-                /* Stop seizure-triggering animations only */
+                /* Stop all animations and transitions globally */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    animation-duration: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-delay: 0s !important;
+                    transition-duration: 0s !important;
+                    scroll-behavior: auto !important;
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* Stop specific animation classes */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -25700,13 +25739,9 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="tilt"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
-                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
-                    /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
-                /* Force GSAP and library animations to final state */
+                /* Stop library animations */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -25714,24 +25749,17 @@ class AccessibilityWidget {
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
-                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
-                    /* transform: none !important; - REMOVED: This was breaking website layout */
                     animation: none !important;
                     transition: none !important;
                 }
                 
-                /* Stop letter-by-letter text animations */
+                /* Stop text animations */
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split, 
                 body.seizure-safe .char, 
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
-                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
-                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
-                    display: inline !important;
-                    /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
                 /* Stop SVG animations */
@@ -25740,12 +25768,9 @@ class AccessibilityWidget {
                 body.seizure-safe svg line {
                     animation: none !important;
                     transition: none !important;
-                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
-                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
-                    /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
-                /* Stop scroll-triggered animations */
+                /* Stop scroll animations */
                 body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
@@ -25753,58 +25778,30 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="timeline"] {
                     animation: none !important;
                     transition: none !important;
-                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
-                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
-                    /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
-                /* Stop autoplay media */
+                /* Stop media animations */
                 body.seizure-safe video,
                 body.seizure-safe audio {
                     animation: none !important;
                     transition: none !important;
                 }
                 
-                /* Prevent layout breaking and overflow issues */
+                /* Add slight desaturation for seizure safety */
                 body.seizure-safe {
-                    /* overflow-x: hidden !important; - REMOVED: This was preventing scrolling */
-                    max-width: 100vw !important;
-                    /* Ensure scrolling works properly */
-                    overflow-y: auto !important;
-                    overflow-x: auto !important;
+                    filter: saturate(0.7) !important;
                 }
                 
-                body.seizure-safe * {
-                    max-width: 100% !important;
-                    box-sizing: border-box !important;
-                }
-                
-                /* Preserve essential layout properties */
-                body.seizure-safe [style*="position: fixed"],
-                body.seizure-safe [style*="position: sticky"],
-                body.seizure-safe [style*="position: absolute"],
-                body.seizure-safe [style*="position: relative"] {
-                    position: inherit !important;
-                }
-                
-                /* Reduce color intensity for seizure safety */
-                body.seizure-safe img,
-                body.seizure-safe video,
-                body.seizure-safe canvas {
-                    filter: saturate(0.6) brightness(0.9) !important;
-                }
-                
-                /* Preserve accessibility widget functionality */
+                /* Preserve accessibility widget */
                 body.seizure-safe .accessibility-widget,
                 body.seizure-safe .accessibility-panel,
                 body.seizure-safe .toggle-switch {
-                    z-index: 99998 !important;
-                    transition: opacity 0.2s ease !important;
+                    filter: saturate(0.7) !important;
                 }
             `;
     
             document.head.appendChild(style);
-            console.log('Accessibility Widget: Clean seizure-safe styles added');
+            console.log('Accessibility Widget: Simple seizure-safe styles added - animations stopped, layout preserved');
         }
     
     
