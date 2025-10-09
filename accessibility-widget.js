@@ -43,7 +43,7 @@
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                     position: static !important;
                 }
                 
@@ -51,7 +51,7 @@
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                 }
                 
                 /* Only reset positioning for elements that are likely to be animated - FORCE TO FINAL POSITIONS */
@@ -26078,7 +26078,7 @@ class AccessibilityWidget {
                     animation-iteration-count: 1 !important;
                     animation-delay: 0s !important;
                     transition-duration: 0s !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
@@ -26168,7 +26168,7 @@ class AccessibilityWidget {
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                     position: static !important;
                 }
                 
@@ -26176,13 +26176,13 @@ class AccessibilityWidget {
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                 }
                 
-                /* Force all containers to allow scrolling */
-                body.seizure-safe * {
+                /* REMOVED: Force all containers to allow scrolling - This was blocking website scroll animations */
+                /* body.seizure-safe * {
                     scroll-behavior: auto !important;
-                }
+                } */
                 
                 /* Preserve accessibility widget */
                 body.seizure-safe .accessibility-widget,
