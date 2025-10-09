@@ -8401,6 +8401,14 @@ class AccessibilityWidget {
     
                     <div class="profile-item">
     
+                        <label class="toggle-switch">
+    
+                            <input type="checkbox" id="stop-animation" tabindex="0" aria-label="Stop Animation - Pauses all CSS animations">
+    
+                            <span class="slider"></span>
+    
+                        </label>
+    
                         <div class="profile-info">
     
                             <div>
@@ -20392,6 +20400,9 @@ class AccessibilityWidget {
     
             
     
+            // Force mute all media immediately (including already playing)
+            this.forceMuteAllMedia(audioElements, videoElements);
+    
             // Store original states and mute all media
     
             this.muteAllMediaElements(audioElements, videoElements);
@@ -20441,22 +20452,50 @@ class AccessibilityWidget {
     
         }
     
+        // Force mute all media immediately (including already playing)
+        forceMuteAllMedia(audioElements, videoElements) {
+            console.log('Accessibility Widget: Force muting all media elements immediately');
+            
+            // Process all audio elements
+            audioElements.forEach((element, index) => {
+                console.log(`Accessibility Widget: Force muting audio element ${index}`);
+                element.muted = true;
+                element.volume = 0;
+                if (!element.paused) {
+                    element.pause();
+                }
+            });
+            
+            // Process all video elements
+            videoElements.forEach((element, index) => {
+                console.log(`Accessibility Widget: Force muting video element ${index}`);
+                element.muted = true;
+                element.volume = 0;
+                if (!element.paused) {
+                    element.pause();
+                }
+            });
+        }
+    
         // Comprehensive mute functionality for all media elements
         muteAllMediaElements(audioElements, videoElements) {
             // Process audio elements
             audioElements.forEach((element, index) => {
                 const elementId = this.getElementId(element, 'audio', index);
                 
-                // Store original volume and playing state
+                // Store original volume and playing state BEFORE muting
                 this.originalVolumeStates.set(elementId, element.volume);
                 this.originalPlayingStates.set(elementId, !element.paused);
                 
-                // Mute the element
-                element.volume = 0;
+                console.log(`Accessibility Widget: Audio element ${index} - Original volume: ${element.volume}, Playing: ${!element.paused}`);
+                
+                // Mute the element immediately
                 element.muted = true;
+                element.volume = 0;
                 
                 // If currently playing, pause it
                 if (!element.paused) {
+                    console.log(`Accessibility Widget: Pausing currently playing audio element ${index}`);
                     element.pause();
                 }
                 
@@ -20470,16 +20509,19 @@ class AccessibilityWidget {
             videoElements.forEach((element, index) => {
                 const elementId = this.getElementId(element, 'video', index);
                 
-                // Store original volume and playing state
+                // Store original volume and playing state BEFORE muting
                 this.originalVolumeStates.set(elementId, element.volume);
                 this.originalPlayingStates.set(elementId, !element.paused);
                 
-                // Mute the element
-                element.volume = 0;
+                console.log(`Accessibility Widget: Video element ${index} - Original volume: ${element.volume}, Playing: ${!element.paused}`);
+                
+                // Mute the element immediately
                 element.muted = true;
+                element.volume = 0;
                 
                 // If currently playing, pause it
                 if (!element.paused) {
+                    console.log(`Accessibility Widget: Pausing currently playing video element ${index}`);
                     element.pause();
                 }
                 
@@ -20621,11 +20663,14 @@ class AccessibilityWidget {
         // Restore all media elements to their original states
         restoreAllMediaElements() {
             if (!this.originalVolumeStates || !this.originalPlayingStates) {
+                console.log('Accessibility Widget: No original states to restore');
                 return;
             }
     
             const audioElements = document.querySelectorAll('audio');
             const videoElements = document.querySelectorAll('video');
+    
+            console.log(`Accessibility Widget: Restoring ${audioElements.length} audio and ${videoElements.length} video elements`);
     
             // Restore audio elements
             audioElements.forEach((element, index) => {
@@ -20633,15 +20678,21 @@ class AccessibilityWidget {
                 const originalVolume = this.originalVolumeStates.get(elementId);
                 const wasPlaying = this.originalPlayingStates.get(elementId);
     
+                console.log(`Accessibility Widget: Audio element ${index} - Original volume: ${originalVolume}, Was playing: ${wasPlaying}`);
+    
                 if (originalVolume !== undefined) {
                     // Remove mute event listeners
                     this.removeMuteEventListeners(element);
                     
+                    // Restore original volume and unmute
                     element.volume = originalVolume;
                     element.muted = false;
                     
+                    console.log(`Accessibility Widget: Restored audio element ${index} - Volume: ${element.volume}, Muted: ${element.muted}`);
+                    
                     // Resume playing if it was playing before
                     if (wasPlaying && element.paused) {
+                        console.log(`Accessibility Widget: Resuming audio element ${index} playback`);
                         element.play().catch(e => {
                             console.log('Accessibility Widget: Could not resume audio playback:', e);
                         });
@@ -20655,15 +20706,21 @@ class AccessibilityWidget {
                 const originalVolume = this.originalVolumeStates.get(elementId);
                 const wasPlaying = this.originalPlayingStates.get(elementId);
     
+                console.log(`Accessibility Widget: Video element ${index} - Original volume: ${originalVolume}, Was playing: ${wasPlaying}`);
+    
                 if (originalVolume !== undefined) {
                     // Remove mute event listeners
                     this.removeMuteEventListeners(element);
                     
+                    // Restore original volume and unmute
                     element.volume = originalVolume;
                     element.muted = false;
                     
+                    console.log(`Accessibility Widget: Restored video element ${index} - Volume: ${element.volume}, Muted: ${element.muted}`);
+                    
                     // Resume playing if it was playing before
                     if (wasPlaying && element.paused) {
+                        console.log(`Accessibility Widget: Resuming video element ${index} playback`);
                         element.play().catch(e => {
                             console.log('Accessibility Widget: Could not resume video playback:', e);
                         });
@@ -20674,6 +20731,8 @@ class AccessibilityWidget {
             // Clear stored states
             this.originalVolumeStates.clear();
             this.originalPlayingStates.clear();
+            
+            console.log('Accessibility Widget: All media elements restored to original states');
         }
     
         // Additional method to handle Web Audio API and other audio contexts
