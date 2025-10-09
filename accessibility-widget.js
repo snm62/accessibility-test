@@ -560,7 +560,7 @@
                             animation: none !important;
                             transition: none !important;
                             opacity: 1 !important;
-                            transform: none !important;
+                            /* transform: none !important; - REMOVED: This was breaking website layout */
                             will-change: auto !important;
                         }
                     `;
@@ -1833,7 +1833,7 @@ class AccessibilityWidget {
                         opacity: 1 !important;
                         visibility: visible !important;
                         display: inline !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Stop SVG animations immediately */
@@ -1844,7 +1844,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Stop scroll-triggered animations immediately */
@@ -1857,7 +1857,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                 `;
                 document.head.appendChild(style);
@@ -6679,7 +6679,7 @@ class AccessibilityWidget {
     
                 :host(.high-saturation) .accessibility-panel {
     
-                    filter: saturate(1.5) !important;
+                    filter: saturate(1.2) !important;
     
                 }
     
@@ -18168,8 +18168,8 @@ class AccessibilityWidget {
                 body.high-contrast h6,
                 body.high-contrast span,
                 body.high-contrast div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar) {
-                    filter: contrast(1.5) brightness(1.2) !important;
-                    -webkit-filter: contrast(1.5) brightness(1.2) !important;
+                    filter: contrast(1.2) brightness(1.1) !important;
+                    -webkit-filter: contrast(1.2) brightness(1.1) !important;
                 }
     
                 /* But exclude fixed/sticky elements from the filter to preserve positioning */
@@ -18659,8 +18659,8 @@ class AccessibilityWidget {
                 body.high-saturation h6,
                 body.high-saturation span,
                 body.high-saturation div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar) {
-                    filter: saturate(1.5) !important;
-                    -webkit-filter: saturate(1.5) !important;
+                    filter: saturate(1.2) !important;
+                    -webkit-filter: saturate(1.2) !important;
                 }
             `;
             document.head.appendChild(style);
@@ -18871,6 +18871,9 @@ class AccessibilityWidget {
 
             // Inject light contrast CSS
             this.injectLightContrastCSS();
+            
+            // Start monitoring for dynamically added dark elements
+            this.startLightContrastMonitoring();
     
             console.log('Accessibility Widget: Light contrast enabled');
     
@@ -18884,6 +18887,9 @@ class AccessibilityWidget {
 
             // Remove light contrast CSS
             this.removeLightContrastCSS();
+            
+            // Stop monitoring for dynamically added elements
+            this.stopLightContrastMonitoring();
     
             console.log('Accessibility Widget: Light contrast disabled');
     
@@ -18992,7 +18998,7 @@ class AccessibilityWidget {
                 body.dark-contrast .nav-menu,
                 body.dark-contrast .card,
                 
-                /* CRITICAL: Exclude images, symbols, and gradient elements from background changes */
+                /* CRITICAL: Exclude images, symbols, gradient elements, and card flip animations from background changes */
                 body.dark-contrast img,
                 body.dark-contrast svg,
                 body.dark-contrast .icon,
@@ -19003,6 +19009,22 @@ class AccessibilityWidget {
                 body.dark-contrast [class*="arrow"],
                 body.dark-contrast [class*="gradient"],
                 body.dark-contrast [style*="gradient"],
+                /* Exclude card flip animations and their content */
+                body.dark-contrast [class*="flip"],
+                body.dark-contrast [class*="card-flip"],
+                body.dark-contrast [class*="flip-card"],
+                body.dark-contrast [class*="flip-container"],
+                body.dark-contrast [class*="flip-inner"],
+                body.dark-contrast [class*="flip-front"],
+                body.dark-contrast [class*="flip-back"],
+                body.dark-contrast [class*="flip-hover"],
+                body.dark-contrast [class*="card-hover"],
+                body.dark-contrast [class*="hover-flip"],
+                body.dark-contrast [class*="rotate"],
+                body.dark-contrast [class*="transform"],
+                body.dark-contrast [class*="perspective"],
+                body.dark-contrast [class*="3d"],
+                body.dark-contrast [class*="three-d"],
                 body.dark-contrast .logo,
                 body.dark-contrast [class*="logo"],
                 body.dark-contrast .brand,
@@ -19166,6 +19188,31 @@ class AccessibilityWidget {
                     color: inherit !important;
                     background: inherit !important;
                 }
+                
+                /* Special styling for card flip animations to ensure text visibility */
+                body.dark-contrast [class*="flip"] *,
+                body.dark-contrast [class*="card-flip"] *,
+                body.dark-contrast [class*="flip-card"] *,
+                body.dark-contrast [class*="flip-container"] *,
+                body.dark-contrast [class*="flip-inner"] *,
+                body.dark-contrast [class*="flip-front"] *,
+                body.dark-contrast [class*="flip-back"] *,
+                body.dark-contrast [class*="flip-hover"] *,
+                body.dark-contrast [class*="card-hover"] *,
+                body.dark-contrast [class*="hover-flip"] * {
+                    color: #ffffff !important;
+                    background: transparent !important;
+                }
+                
+                /* Ensure card flip containers maintain their original styling */
+                body.dark-contrast [class*="flip"],
+                body.dark-contrast [class*="card-flip"],
+                body.dark-contrast [class*="flip-card"],
+                body.dark-contrast [class*="flip-container"],
+                body.dark-contrast [class*="flip-inner"] {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
 
                 /* Style accessibility widget for dark contrast */
                 .dark-contrast .accessibility-panel,
@@ -19283,7 +19330,7 @@ class AccessibilityWidget {
                     color: #000000 !important;
                 }
 
-                /* Apply light contrast to all text elements - text color only, no borders */
+                /* Apply light contrast to all text elements - comprehensive coverage */
                 body.light-contrast p,
                 body.light-contrast h1,
                 body.light-contrast h2,
@@ -19304,6 +19351,52 @@ class AccessibilityWidget {
                 body.light-contrast b,
                 body.light-contrast a {
                     color: #000000 !important;
+                }
+                
+                /* Comprehensive coverage for dynamically loaded dark elements */
+                body.light-contrast *[style*="background-color: #000"],
+                body.light-contrast *[style*="background-color:#000"],
+                body.light-contrast *[style*="background-color: #000000"],
+                body.light-contrast *[style*="background-color:#000000"],
+                body.light-contrast *[style*="background: #000"],
+                body.light-contrast *[style*="background:#000"],
+                body.light-contrast *[style*="background: #000000"],
+                body.light-contrast *[style*="background:#000000"],
+                body.light-contrast *[style*="color: #000"],
+                body.light-contrast *[style*="color:#000"],
+                body.light-contrast *[style*="color: #000000"],
+                body.light-contrast *[style*="color:#000000"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+                
+                /* Target common dark theme classes that might be added dynamically */
+                body.light-contrast .dark,
+                body.light-contrast .dark-theme,
+                body.light-contrast .dark-mode,
+                body.light-contrast .night-mode,
+                body.light-contrast .black,
+                body.light-contrast .bg-dark,
+                body.light-contrast .bg-black,
+                body.light-contrast [class*="dark"],
+                body.light-contrast [class*="black"],
+                body.light-contrast [class*="night"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+                
+                /* Target dynamically loaded content containers */
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper,
+                body.light-contrast .section,
+                body.light-contrast .article,
+                body.light-contrast .main,
+                body.light-contrast .page,
+                body.light-contrast .body,
+                body.light-contrast .app,
+                body.light-contrast .root {
+                    background: #ffffff !important;
                 }
 
                 /* Apply light background to main content areas only */
@@ -19388,6 +19481,89 @@ class AccessibilityWidget {
             const existingStyle = document.getElementById('accessibility-light-contrast-css');
             if (existingStyle) {
                 existingStyle.remove();
+            }
+        }
+        
+        // Start monitoring for dynamically added dark elements
+        startLightContrastMonitoring() {
+            // Stop any existing observer
+            this.stopLightContrastMonitoring();
+            
+            this.lightContrastObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                this.processNewElementForLightContrast(node);
+                                
+                                // Also check for nested elements
+                                const nestedElements = node.querySelectorAll ? node.querySelectorAll('*') : [];
+                                nestedElements.forEach(element => {
+                                    this.processNewElementForLightContrast(element);
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Also handle attribute changes that might add dark styling
+                    if (mutation.type === 'attributes' && mutation.target.nodeType === Node.ELEMENT_NODE) {
+                        this.processNewElementForLightContrast(mutation.target);
+                    }
+                });
+            });
+            
+            // Start observing
+            this.lightContrastObserver.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+            
+            console.log('Accessibility Widget: Light contrast monitoring started');
+        }
+        
+        // Stop monitoring for dynamically added elements
+        stopLightContrastMonitoring() {
+            if (this.lightContrastObserver) {
+                this.lightContrastObserver.disconnect();
+                this.lightContrastObserver = null;
+                console.log('Accessibility Widget: Light contrast monitoring stopped');
+            }
+        }
+        
+        // Process new elements for light contrast
+        processNewElementForLightContrast(element) {
+            if (!element || !element.style) return;
+            
+            const computedStyle = window.getComputedStyle(element);
+            const backgroundColor = computedStyle.backgroundColor;
+            const color = computedStyle.color;
+            
+            // Check if element has dark background or dark text
+            const isDarkBackground = backgroundColor.includes('rgb(0, 0, 0)') || 
+                                   backgroundColor.includes('rgba(0, 0, 0') ||
+                                   backgroundColor.includes('#000') ||
+                                   backgroundColor.includes('#000000');
+            
+            const isDarkText = color.includes('rgb(0, 0, 0)') || 
+                             color.includes('rgba(0, 0, 0') ||
+                             color.includes('#000') ||
+                             color.includes('#000000');
+            
+            // Apply light contrast to dark elements
+            if (isDarkBackground || isDarkText) {
+                element.style.setProperty('background-color', '#ffffff', 'important');
+                element.style.setProperty('color', '#000000', 'important');
+                console.log('Accessibility Widget: Applied light contrast to dynamically added dark element');
+            }
+            
+            // Also check for dark theme classes
+            const classList = element.className || '';
+            if (classList.includes('dark') || classList.includes('black') || classList.includes('night')) {
+                element.style.setProperty('background-color', '#ffffff', 'important');
+                element.style.setProperty('color', '#000000', 'important');
+                console.log('Accessibility Widget: Applied light contrast to element with dark theme class');
             }
         }
     
@@ -22302,13 +22478,7 @@ class AccessibilityWidget {
                     
                     /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
                     .stop-animation * {
-                        /* Only reset transform-related properties that cause positioning issues */
-                        transform: none !important;
-                        translate: none !important;
-                        scale: 1 !important;
-                        rotate: 0deg !important;
-                        
-                        /* Ensure visibility */
+                        /* Only ensure visibility, don't reset transforms globally */
                         opacity: 1 !important;
                         visibility: visible !important;
                     }
@@ -22335,10 +22505,10 @@ class AccessibilityWidget {
                     .stop-animation *[class*="wobble"],
                     .stop-animation *[class*="tilt"] {
                         /* Only reset transform properties, preserve positioning */
-                        transform: none !important;
-                        translate: none !important;
-                        scale: 1 !important;
-                        rotate: 0deg !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
                         transition: none !important;
                         animation-fill-mode: forwards !important;
@@ -22380,7 +22550,7 @@ class AccessibilityWidget {
                     .stop-animation embed,
                     .stop-animation object {
                         /* position: static !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         max-width: 100% !important;
@@ -22403,7 +22573,7 @@ class AccessibilityWidget {
                     .stop-animation th,
                     .stop-animation label {
                         /* position: static !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         /* top: auto !important; - REMOVED: This was breaking website layout */
@@ -22469,10 +22639,10 @@ class AccessibilityWidget {
                         /* left: auto !important; - REMOVED: This was breaking website layout */
                         /* right: auto !important; - REMOVED: This was breaking website layout */
                         /* bottom: auto !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
-                        translate: none !important;
-                        scale: 1 !important;
-                        rotate: 0deg !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
@@ -22507,10 +22677,10 @@ class AccessibilityWidget {
                         /* left: auto !important; - REMOVED: This was breaking website layout */
                         /* right: auto !important; - REMOVED: This was breaking website layout */
                         /* bottom: auto !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
-                        translate: none !important;
-                        scale: 1 !important;
-                        rotate: 0deg !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                     }
@@ -22523,7 +22693,7 @@ class AccessibilityWidget {
                     .stop-animation embed,
                     .stop-animation object {
                         /* position: static !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         max-width: 100% !important;
@@ -22546,7 +22716,7 @@ class AccessibilityWidget {
                     .stop-animation th,
                     .stop-animation label {
                         /* position: static !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         /* width: auto !important; - REMOVED: This was breaking website layout */
                         /* height: auto !important; - REMOVED: This was breaking website layout */
                         /* top: auto !important; - REMOVED: This was breaking website layout */
@@ -22723,7 +22893,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Force GSAP and library animations to final state */
@@ -22740,7 +22910,7 @@ class AccessibilityWidget {
                     .stop-animation .word {
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         animation: none !important;
                         transition: none !important;
                     }
@@ -22761,7 +22931,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
@@ -22780,7 +22950,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* HOVER ANIMATIONS: Disable all hover-triggered animations */
@@ -22798,7 +22968,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
@@ -22824,7 +22994,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* IMAGE HOVER EFFECTS: Disable all image hover animations */
@@ -22842,7 +23012,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
@@ -22876,7 +23046,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
@@ -22910,7 +23080,7 @@ class AccessibilityWidget {
                         animation-fill-mode: forwards !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* SVG LINE ANIMATIONS: Stop all SVG stroke animations */
@@ -22927,7 +23097,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
@@ -22950,7 +23120,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
@@ -22977,8 +23147,8 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
-                        translate: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
                         rotate: none !important;
                         scale: none !important;
                     }
@@ -22996,8 +23166,8 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
-                        translate: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
                         rotate: none !important;
                         scale: none !important;
                     }
@@ -23018,7 +23188,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                         /* position: static !important; - REMOVED: This was breaking website layout */
                         /* top: auto !important; - REMOVED: This was breaking website layout */
                         /* left: auto !important; - REMOVED: This was breaking website layout */
@@ -23049,7 +23219,7 @@ class AccessibilityWidget {
                         /* Force text to remain visible and static */
                         display: inherit !important;
                         /* position: static !important; - REMOVED: This was breaking website layout */
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Specific targeting of blinking text elements */
