@@ -33,11 +33,28 @@
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                     
                     /* Removed opacity and visibility rules to prevent scroll interference */
                 }
                 
-                /* Only reset positioning for elements that are likely to be animated */
+                /* CRITICAL: Ensure scrolling works properly */
+                body.seizure-safe {
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    scroll-behavior: auto !important;
+                    position: static !important;
+                }
+                
+                body.seizure-safe html {
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    scroll-behavior: auto !important;
+                }
+                
+                /* Only reset positioning for elements that are likely to be animated - FORCE TO FINAL POSITIONS */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -61,6 +78,7 @@
                     /* Removed positioning rules to preserve scrolling */
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                     height: auto !important;
                 }
 
@@ -25637,7 +25655,8 @@ class AccessibilityWidget {
                         -webkit-filter: none !important;
                         transform: none !important;
                         transform-origin: unset !important;
-                        position: fixed !important;
+                        /* CRITICAL: DO NOT force fixed positioning - let JavaScript control positioning */
+                        /* Removed position: fixed !important to allow widget to scroll with page */
                         z-index: 999999 !important;
                         /* CRITICAL: DO NOT override positioning - let JavaScript control viewport positioning */
                         /* Removed problematic positioning overrides that break viewport scrolling */
