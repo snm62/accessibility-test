@@ -16305,40 +16305,50 @@ class AccessibilityWidget {
     
             
     
-            // Create full-screen dark overlay with circular spotlight cutout (same as ADHD)
+            // Create full-screen dark overlay with rectangular spotlight cutout
+            // Using two overlay elements: top and bottom
     
             const spotlight = document.createElement('div');
-    
             spotlight.id = 'reading-mask-spotlight';
-    
             spotlight.style.cssText = `
-    
                 position: fixed;
-    
                 top: 0;
-    
                 left: 0;
-    
                 width: 100vw;
-    
                 height: 100vh;
-    
                 pointer-events: none;
-    
-                z-index: 1000002; /* Ensure spotlight stays above the widget panel */
-
-                /* Dark overlay with spotlight cutout using box-shadow technique */
-    
+                z-index: 1000002;
                 background: transparent;
-    
-                /* Create spotlight hole using large box-shadow */
-    
-                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-    
-                transition: all 0.1s ease;
-    
             `;
     
+            // Create top overlay
+            const topOverlay = document.createElement('div');
+            topOverlay.id = 'reading-mask-top';
+            topOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 50%;
+                background: rgba(0, 0, 0, 0.5);
+                transition: all 0.1s ease;
+            `;
+    
+            // Create bottom overlay
+            const bottomOverlay = document.createElement('div');
+            bottomOverlay.id = 'reading-mask-bottom';
+            bottomOverlay.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 50%;
+                background: rgba(0, 0, 0, 0.5);
+                transition: all 0.1s ease;
+            `;
+    
+            spotlight.appendChild(topOverlay);
+            spotlight.appendChild(bottomOverlay);
             document.body.appendChild(spotlight);
     
     
@@ -16355,23 +16365,23 @@ class AccessibilityWidget {
     
             
     
-            // Add mouse move event listener for circular spotlight
+            // Add mouse move event listener for rectangular spotlight
     
             this.readingMaskMouseMoveHandler = (e) => {
     
-                const x = e.clientX;
-    
                 const y = e.clientY;
                 
+                // Calculate spotlight dimensions (full width, fixed height)
+                const spotlightHeight = 200; // Fixed height for the rectangle
+                const spotlightTop = y - spotlightHeight / 2;
+                const spotlightBottom = y + spotlightHeight / 2;
     
+                // Update top overlay (from top of screen to top of spotlight)
+                topOverlay.style.height = Math.max(0, spotlightTop) + 'px';
     
-                // Update spotlight position to follow mouse
-    
-                spotlight.style.left = x + 'px';
-    
-                spotlight.style.top = y + 'px';
-                
-                spotlight.style.transform = 'translate(-50%, -50%)';
+                // Update bottom overlay (from bottom of spotlight to bottom of screen)
+                bottomOverlay.style.top = Math.min(window.innerHeight, spotlightBottom) + 'px';
+                bottomOverlay.style.height = Math.max(0, window.innerHeight - spotlightBottom) + 'px';
     
             };
     
@@ -16381,7 +16391,7 @@ class AccessibilityWidget {
     
             
     
-            console.log('Accessibility Widget: Reading mask spotlight created');
+            console.log('Accessibility Widget: Reading mask rectangular spotlight created');
     
         }
     
@@ -22473,37 +22483,61 @@ class AccessibilityWidget {
             this.settings['stop-animation'] = true;
             this.saveSettings();
             
-            // Add CSS rules for stop animation if not already added
+            // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
+            this.injectStopAnimationCSS();
+            
+            // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
+            this.overrideRequestAnimationFrame();
+            
+            // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+            this.stopAnimationLibraries();
+            
+            // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
+            this.replaceAnimatedMedia();
+            
+            // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
+            this.stopDOMAnimationLoops();
+            
+            // 6. Stop autoplay videos and embedded media
+            this.stopAutoplayMedia();
+            
+            // 7. Stop any JavaScript-based animations (like the slider auto-slide)
+            this.stopJavaScriptAnimations();
+            
+            console.log('Accessibility Widget: All animation types stopped');
+        }
+        
+        // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
+        injectStopAnimationCSS() {
             if (!document.getElementById('stop-animation-css')) {
                 const style = document.createElement('style');
                 style.id = 'stop-animation-css';
                 style.textContent = `
-                    /* Stop Animation Mode - Stop all animations like seizure safe */
+                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types */
                     .stop-animation *,
                     .stop-animation *::before,
                     .stop-animation *::after {
-                        animation-duration: 0.01ms !important;
+                        /* Stop all CSS animations and transitions */
+                        animation-duration: 0s !important;
                         animation-iteration-count: 1 !important;
                         animation-delay: 0s !important;
-                        transition-duration: 0.01ms !important;
+                        transition-duration: 0s !important;
                         scroll-behavior: auto !important;
-                    }
-                    
-                    .stop-animation * {
-                        animation-play-state: paused !important;
-                    }
-                    
-                    /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
-                    .stop-animation *,
-                    .stop-animation *::before,
-                    .stop-animation *::after {
+                        
+                        /* Stop blinking and flashing text */
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        
+                        /* Force final state */
                         animation: none !important;
                         transition: none !important;
                         animation-fill-mode: forwards !important;
                         animation-play-state: paused !important;
                     }
                     
-                    /* Stop all animation classes */
+                    /* Stop all animation classes and libraries */
                     .stop-animation *[class*="animate"],
                     .stop-animation *[class*="fade"],
                     .stop-animation *[class*="slide"],
@@ -22523,53 +22557,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="flip"],
                     .stop-animation *[class*="swing"],
                     .stop-animation *[class*="wobble"],
-                    .stop-animation *[class*="tilt"] {
-                        animation: none !important;
-                        transition: none !important;
-                        animation-fill-mode: forwards !important;
-                        animation-play-state: paused !important;
-                    }
-                    
-                    /* Stop GSAP and library animations */
-                    .stop-animation .fade-up,
-                    .stop-animation .fade-left,
-                    .stop-animation .fade-right,
-                    .stop-animation .fade-in,
-                    .stop-animation .slide-in,
-                    .stop-animation .scale-in,
-                    .stop-animation .zoom-in {
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                        animation: none !important;
-                        transition: none !important;
-                    }
-                    
-                    /* Stop letter-by-letter text animations */
-                    .stop-animation [data-splitting],
-                    .stop-animation .split, 
-                    .stop-animation .char, 
-                    .stop-animation .word {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        display: inline !important;
-                        transform: none !important;
-                    }
-                    
-                    /* Stop SVG animations */
-                    .stop-animation svg,
-                    .stop-animation svg path,
-                    .stop-animation svg line {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                    }
-                    
-                    /* Stop scroll-triggered animations */
+                    .stop-animation *[class*="tilt"],
                     .stop-animation *[class*="scroll"],
                     .stop-animation *[class*="progress"],
                     .stop-animation *[class*="bar"],
@@ -22582,43 +22570,236 @@ class AccessibilityWidget {
                         transform: none !important;
                     }
                     
-                    /* Stop autoplay media */
-                    .stop-animation video,
-                    .stop-animation audio {
+                    /* Stop SVG and Canvas animations */
+                    .stop-animation svg,
+                    .stop-animation svg path,
+                    .stop-animation svg line,
+                    .stop-animation canvas {
                         animation: none !important;
                         transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: none !important;
+                    }
+                    
+                    /* Stop text splitting animations */
+                    .stop-animation [data-splitting],
+                    .stop-animation .split, 
+                    .stop-animation .char, 
+                    .stop-animation .word {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        display: inline !important;
+                        transform: none !important;
                     }
                 `;
                 document.head.appendChild(style);
             }
+        }
+        
+        // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
+        overrideRequestAnimationFrame() {
+            // Store the original function to allow restoration later
+            if (!window._originalRequestAnimationFrame) {
+                window._originalRequestAnimationFrame = window.requestAnimationFrame;
+            }
             
-            // Apply same seizure-safe runtime controls but without visual changes
-            this.stopAutoplayVideos();
-            this.stopPortfolioAnimations();
-            this.lockButtonHoverStyles();
+            // Override the native function to stop all animation loops
+            window.requestAnimationFrame = (callback) => {
+                // Intentionally do NOT call the callback, freezing all animation loops
+                return 0; // Return a dummy handle
+            };
             
-            // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-            this.overrideRequestAnimationFrame();
+            console.log('Accessibility Widget: requestAnimationFrame overridden - all JS animation loops stopped');
+        }
+        
+        // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+        stopAnimationLibraries() {
+            // Stop Lottie animations
+            if (typeof lottie !== 'undefined' && lottie.getRegisteredAnimations) {
+                try {
+                    lottie.getRegisteredAnimations().forEach(anim => {
+                        if (anim && typeof anim.stop === 'function') {
+                            anim.stop();
+                        }
+                    });
+                    console.log('Accessibility Widget: Lottie animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop Lottie animations:', e);
+                }
+            }
             
-            // API Controls: Execute .stop() or .pause() methods on known animation libraries
-            this.stopAnimationLibraries();
-            
-            // Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
-            this.replaceAnimatedMedia();
-            
-            // Stop any JavaScript-based animations (like the slider auto-slide)
-            if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-                console.log('Accessibility Widget: Calling slider.disableAutoSlide() for stop animation');
-                window.slider.disableAutoSlide();
-            } else {
-                console.log('Accessibility Widget: Slider not found or disableAutoSlide method not available for stop animation');
-                // Try again after a short delay in case slider is still initializing
-                setTimeout(() => {
-                    if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-                        console.log('Accessibility Widget: Retrying slider.disableAutoSlide() for stop animation');
-                        window.slider.disableAutoSlide();
+            // Stop GSAP animations
+            if (typeof gsap !== 'undefined') {
+                try {
+                    if (gsap.globalTimeline) {
+                        gsap.globalTimeline.pause();
                     }
-                }, 100);
+                    if (gsap.killTweensOf) {
+                        gsap.killTweensOf("*");
+                    }
+                    console.log('Accessibility Widget: GSAP animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop GSAP animations:', e);
+                }
+            }
+            
+            // Stop ScrollTrigger animations
+            if (typeof ScrollTrigger !== 'undefined') {
+                try {
+                    ScrollTrigger.killAll();
+                    console.log('Accessibility Widget: ScrollTrigger animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop ScrollTrigger animations:', e);
+                }
+            }
+            
+            // Stop Three.js animations
+            if (typeof THREE !== 'undefined') {
+                try {
+                    // Stop all render loops
+                    const renderers = document.querySelectorAll('canvas');
+                    renderers.forEach(canvas => {
+                        if (canvas._threeRenderer) {
+                            canvas._threeRenderer.setAnimationLoop(null);
+                        }
+                    });
+                    console.log('Accessibility Widget: Three.js animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop Three.js animations:', e);
+                }
+            }
+        }
+        
+        // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
+        replaceAnimatedMedia() {
+            // Stop autoplay videos
+            document.querySelectorAll('video[autoplay]').forEach(video => {
+                video.pause();
+                video.removeAttribute('autoplay');
+            });
+            
+            // Stop autoplay audio
+            document.querySelectorAll('audio[autoplay]').forEach(audio => {
+                audio.pause();
+                audio.removeAttribute('autoplay');
+            });
+            
+            // Replace animated GIFs with static placeholder
+            document.querySelectorAll('img[src$=".gif"]').forEach(img => {
+                if (!img.dataset.originalSrc) {
+                    img.dataset.originalSrc = img.src;
+                    // Use a tiny transparent pixel as placeholder
+                    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+                }
+            });
+            
+            // Replace APNGs with static placeholder
+            document.querySelectorAll('img[src$=".png"]').forEach(img => {
+                if (!img.dataset.originalSrc && img.src.includes('apng')) {
+                    img.dataset.originalSrc = img.src;
+                    img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                }
+            });
+            
+            console.log('Accessibility Widget: Animated media replaced with static placeholders');
+        }
+        
+        // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
+        stopDOMAnimationLoops() {
+            // Store original functions if not already stored
+            if (!window._originalSetTimeout) {
+                window._originalSetTimeout = window.setTimeout;
+                window._originalSetInterval = window.setInterval;
+            }
+            
+            // Override setTimeout and setInterval to prevent new animation loops
+            window.setTimeout = (callback, delay) => {
+                // Only allow non-animation timeouts (like form validation)
+                if (typeof callback === 'function' && callback.toString().includes('animation')) {
+                    return 0; // Block animation-related timeouts
+                }
+                return window._originalSetTimeout(callback, delay);
+            };
+            
+            window.setInterval = (callback, delay) => {
+                // Block all intervals as they're commonly used for animations
+                return 0;
+            };
+            
+            console.log('Accessibility Widget: DOM animation loops blocked');
+        }
+        
+        // 6. Stop autoplay videos and embedded media
+        stopAutoplayMedia() {
+            // Pause all currently playing videos
+            document.querySelectorAll('video').forEach(video => {
+                if (!video.paused) {
+                    video.pause();
+                }
+            });
+            
+            // Pause all currently playing audio
+            document.querySelectorAll('audio').forEach(audio => {
+                if (!audio.paused) {
+                    audio.pause();
+                }
+            });
+            
+            // Handle embedded media (YouTube, Vimeo, etc.)
+            document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"]').forEach(iframe => {
+                try {
+                    // Try to pause embedded videos by modifying src
+                    const src = iframe.src;
+                    if (src.includes('autoplay=1')) {
+                        iframe.src = src.replace('autoplay=1', 'autoplay=0');
+                    } else if (!src.includes('autoplay=')) {
+                        iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=0';
+                    }
+                } catch (e) {
+                    console.warn('Accessibility Widget: Could not modify iframe src:', e);
+                }
+            });
+            
+            console.log('Accessibility Widget: Autoplay media stopped');
+        }
+        
+        // 7. Stop any JavaScript-based animations (like the slider auto-slide)
+        stopJavaScriptAnimations() {
+            // Stop slider animations
+            if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
+                try {
+                    window.slider.disableAutoSlide();
+                    console.log('Accessibility Widget: Slider auto-slide disabled');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to disable slider:', e);
+                }
+            }
+            
+            // Stop Swiper animations
+            if (typeof Swiper !== 'undefined') {
+                try {
+                    document.querySelectorAll('.swiper').forEach(swiperEl => {
+                        if (swiperEl.swiper) {
+                            swiperEl.swiper.autoplay.stop();
+                        }
+                    });
+                    console.log('Accessibility Widget: Swiper animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop Swiper animations:', e);
+                }
+            }
+            
+            // Stop AOS (Animate On Scroll) animations
+            if (typeof AOS !== 'undefined') {
+                try {
+                    AOS.refreshHard();
+                    console.log('Accessibility Widget: AOS animations stopped');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to stop AOS animations:', e);
+                }
             }
         }
         
@@ -22628,29 +22809,93 @@ class AccessibilityWidget {
             this.settings['stop-animation'] = false;
             this.saveSettings();
             
-            // Remove CSS rules for stop animation
+            // 1. Remove CSS rules for stop animation
             const existingStyle = document.getElementById('stop-animation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // Restore button styles and portfolio animations
-            this.restoreButtonHoverStyles();
-            this.restorePortfolioAnimations();
+            // 2. Restore requestAnimationFrame
+            this.restoreRequestAnimationFrame();
             
-            // Resume JavaScript-based animations (like the slider auto-slide)
+            // 3. Restore setTimeout and setInterval
+            this.restoreDOMAnimationLoops();
+            
+            // 4. Restore animated media
+            this.restoreAnimatedMedia();
+            
+            // 5. Restore JavaScript animations
+            this.restoreJavaScriptAnimations();
+            
+            console.log('Accessibility Widget: All animation types restored');
+        }
+        
+        // Restore requestAnimationFrame
+        restoreRequestAnimationFrame() {
+            if (window._originalRequestAnimationFrame) {
+                window.requestAnimationFrame = window._originalRequestAnimationFrame;
+                console.log('Accessibility Widget: requestAnimationFrame restored');
+            }
+        }
+        
+        // Restore setTimeout and setInterval
+        restoreDOMAnimationLoops() {
+            if (window._originalSetTimeout) {
+                window.setTimeout = window._originalSetTimeout;
+            }
+            if (window._originalSetInterval) {
+                window.setInterval = window._originalSetInterval;
+            }
+            console.log('Accessibility Widget: DOM animation loops restored');
+        }
+        
+        // Restore animated media
+        restoreAnimatedMedia() {
+            // Restore animated GIFs
+            document.querySelectorAll('img[data-original-src]').forEach(img => {
+                if (img.dataset.originalSrc) {
+                    img.src = img.dataset.originalSrc;
+                    delete img.dataset.originalSrc;
+                }
+            });
+            
+            console.log('Accessibility Widget: Animated media restored');
+        }
+        
+        // Restore JavaScript animations
+        restoreJavaScriptAnimations() {
+            // Restore slider animations
             if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-                console.log('Accessibility Widget: Calling slider.enableAutoSlide() for stop animation');
-                window.slider.enableAutoSlide();
-            } else {
-                console.log('Accessibility Widget: Slider not found or enableAutoSlide method not available for stop animation');
-                // Try again after a short delay in case slider is still initializing
-                setTimeout(() => {
-                    if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-                        console.log('Accessibility Widget: Retrying slider.enableAutoSlide() for stop animation');
-                        window.slider.enableAutoSlide();
-                    }
-                }, 100);
+                try {
+                    window.slider.enableAutoSlide();
+                    console.log('Accessibility Widget: Slider auto-slide enabled');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to enable slider:', e);
+                }
+            }
+            
+            // Restore Swiper animations
+            if (typeof Swiper !== 'undefined') {
+                try {
+                    document.querySelectorAll('.swiper').forEach(swiperEl => {
+                        if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                            swiperEl.swiper.autoplay.start();
+                        }
+                    });
+                    console.log('Accessibility Widget: Swiper animations restored');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to restore Swiper animations:', e);
+                }
+            }
+            
+            // Restore AOS animations
+            if (typeof AOS !== 'undefined') {
+                try {
+                    AOS.refresh();
+                    console.log('Accessibility Widget: AOS animations restored');
+                } catch (e) {
+                    console.warn('Accessibility Widget: Failed to restore AOS animations:', e);
+                }
             }
         }
     
