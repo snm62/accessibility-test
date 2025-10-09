@@ -17,33 +17,25 @@
                     animation-play-state: paused !important;
                 }
                 
-                /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
+                /* ULTIMATE CATCH-ALL: Stop all animations without changing positions */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
                 }
                 
-                /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
+                /* CRITICAL: Only stop animations, preserve all positioning and layout */
                 body.seizure-safe * {
-                    /* Only reset transform-related properties that cause positioning issues */
-                    transform: none !important;
-                    translate: none !important;
-                    scale: 1 !important;
-                    rotate: 0deg !important;
-                    
-                    /* Ensure visibility */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    
-                    /* Reset animation properties */
+                    /* Only stop animations, don't change positioning */
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
+                    
+                    /* Ensure visibility without changing position */
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Only reset positioning for elements that are likely to be animated */
@@ -204,7 +196,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* Force GSAP and other library animations to final state */
@@ -217,7 +209,7 @@
                 body.seizure-safe .zoom-in {
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     animation: none !important;
                     transition: none !important;
                 }
@@ -230,7 +222,7 @@
                 body.seizure-safe [class*="header"] {
                     animation: initial !important;
                     transition: initial !important;
-                    transform: initial !important;
+                    /* transform: initial !important; - REMOVED: This was causing elements to snap to initial positions */
                     position: initial !important;
                     will-change: initial !important;
                 }
@@ -251,7 +243,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
@@ -270,7 +262,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* HOVER ANIMATIONS: Disable all hover-triggered animations */
@@ -288,7 +280,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
@@ -314,7 +306,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
@@ -332,7 +324,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
@@ -366,7 +358,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
@@ -400,7 +392,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
@@ -415,7 +407,7 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                     display: inline !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split {
@@ -492,7 +484,7 @@
                         body.seizure-safe *,
                         body.seizure-safe *::before,
                         body.seizure-safe *::after {
-                            transform: unset !important;
+                            /* transform: unset !important; - REMOVED: This was causing elements to snap to initial positions */
                             translate: unset !important;
                             scale: unset !important;
                             rotate: unset !important;
@@ -512,7 +504,7 @@
                         body.seizure-safe .navbar,
                         body.seizure-safe [role="navigation"],
                         body.seizure-safe [data-allow-transform] {
-                            transform: unset !important;
+                            /* transform: unset !important; - REMOVED: This was causing elements to snap to initial positions */
                             position: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
@@ -6255,7 +6247,7 @@ class AccessibilityWidget {
     
                     animation: dropdownSlideIn 0.2s ease-out !important;
     
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
     
                     clip: none !important;
     
@@ -18166,7 +18158,7 @@ class AccessibilityWidget {
                     left: 0 !important;
                     right: 0 !important;
                     z-index: 9999 !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     will-change: auto !important;
                     filter: none !important;
                     -webkit-filter: none !important;
@@ -18178,7 +18170,7 @@ class AccessibilityWidget {
                 body.high-contrast [data-sticky] {
                     position: sticky !important;
                     z-index: 9999 !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     will-change: auto !important;
                     filter: none !important;
                     -webkit-filter: none !important;
@@ -18189,7 +18181,7 @@ class AccessibilityWidget {
                 body.high-contrast [style*="position:sticky"] {
                     position: sticky !important;
                     /* Ensure sticky elements maintain their behavior */
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     will-change: auto !important;
                     filter: none !important;
                     -webkit-filter: none !important;
@@ -18382,7 +18374,7 @@ class AccessibilityWidget {
                 body.high-contrast [style*="position:fixed"],
                 body.high-contrast [style*="position: sticky"],
                 body.high-contrast [style*="position:sticky"] {
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     will-change: auto !important;
                     filter: none !important;
                     -webkit-filter: none !important;
@@ -18401,7 +18393,7 @@ class AccessibilityWidget {
                 body.high-contrast .navbar-collapse {
                     filter: none !important;
                     -webkit-filter: none !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
     
                 /* Fix for WordPress themes and common CMS navbars */
@@ -18420,7 +18412,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                     filter: none !important;
                     -webkit-filter: none !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
     
                 /* Ensure submenus and dropdowns work in fixed navbars */
@@ -18468,7 +18460,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                     filter: none !important;
                     -webkit-filter: none !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
     
                 /* Ensure mobile responsive navbars work */
@@ -18485,7 +18477,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                     filter: none !important;
                     -webkit-filter: none !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
     
                 /* Fix for sticky headers that might be affected */
@@ -18499,7 +18491,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                     filter: none !important;
                     -webkit-filter: none !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
             `;
     
@@ -20913,37 +20905,106 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'hide-images-css';
                 style.textContent = `
-                    .hide-images img {
+                    /* Hide all standard image elements */
+                    .hide-images img,
+                    .hide-images picture,
+                    .hide-images svg,
+                    .hide-images video,
+                    .hide-images canvas,
+                    .hide-images iframe[src*="image"],
+                    .hide-images iframe[src*="img"],
+                    .hide-images embed[type*="image"],
+                    .hide-images object[type*="image"] {
                         display: none !important;
                         visibility: hidden !important;
+                        opacity: 0 !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                        max-width: 0 !important;
+                        max-height: 0 !important;
                     }
                     
-                    .hide-images picture {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    .hide-images svg {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    .hide-images video {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    .hide-images canvas {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    .hide-images [style*="background-image"] {
+                    /* Hide background images */
+                    .hide-images [style*="background-image"],
+                    .hide-images [style*="background: url"],
+                    .hide-images [style*="background:url"] {
                         background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide CSS background images */
+                    .hide-images *[class*="bg-"],
+                    .hide-images *[class*="background"],
+                    .hide-images *[class*="image"],
+                    .hide-images *[class*="img"],
+                    .hide-images *[class*="photo"],
+                    .hide-images *[class*="picture"],
+                    .hide-images *[class*="banner"],
+                    .hide-images *[class*="hero"],
+                    .hide-images *[class*="cover"] {
+                        background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide image containers and wrappers */
+                    .hide-images .image-container,
+                    .hide-images .img-container,
+                    .hide-images .photo-container,
+                    .hide-images .picture-container,
+                    .hide-images .media-container,
+                    .hide-images .gallery,
+                    .hide-images .carousel,
+                    .hide-images .slider,
+                    .hide-images .banner,
+                    .hide-images .hero,
+                    .hide-images .cover {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide lazy-loaded images */
+                    .hide-images img[data-src],
+                    .hide-images img[data-lazy],
+                    .hide-images img[loading="lazy"],
+                    .hide-images picture[data-src],
+                    .hide-images picture[data-lazy] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide responsive images */
+                    .hide-images source,
+                    .hide-images img[srcset],
+                    .hide-images picture > img {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide icon fonts and icon images */
+                    .hide-images [class*="icon"],
+                    .hide-images [class*="fa-"],
+                    .hide-images [class*="fas"],
+                    .hide-images [class*="far"],
+                    .hide-images [class*="fab"],
+                    .hide-images [class*="material-icons"] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide decorative elements that might be images */
+                    .hide-images .decoration,
+                    .hide-images .ornament,
+                    .hide-images .pattern,
+                    .hide-images .texture {
+                        display: none !important;
+                        visibility: hidden !important;
                     }
                 `;
                 document.head.appendChild(style);
             }
+            
+            // Start monitoring for dynamically added images
+            this.startImageObserver();
             
             this.saveSettings();
             console.log('Accessibility Widget: Hide images enabled');
@@ -20952,6 +21013,9 @@ class AccessibilityWidget {
         disableHideImages() {
             this.settings['hide-images'] = false;
             document.body.classList.remove('hide-images');
+            
+            // Stop monitoring for dynamically added images
+            this.stopImageObserver();
             
             // Remove CSS rules for hiding images
             const existingStyle = document.getElementById('hide-images-css');
@@ -20962,7 +21026,64 @@ class AccessibilityWidget {
             this.saveSettings();
             console.log('Accessibility Widget: Hide images disabled');
         }
-    
+
+        // Image Observer Methods
+        startImageObserver() {
+            // Stop any existing observer
+            this.stopImageObserver();
+            
+            this.imageObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                this.hideImageElement(node);
+                                
+                                // Also check for nested images
+                                const nestedImages = node.querySelectorAll ? node.querySelectorAll('img, picture, svg, video, canvas, iframe[src*="image"], iframe[src*="img"]') : [];
+                                nestedImages.forEach(img => this.hideImageElement(img));
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Start observing
+            this.imageObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('Accessibility Widget: Image observer started');
+        }
+        
+        stopImageObserver() {
+            if (this.imageObserver) {
+                this.imageObserver.disconnect();
+                this.imageObserver = null;
+                console.log('Accessibility Widget: Image observer stopped');
+            }
+        }
+        
+        hideImageElement(element) {
+            if (!element || !element.style) return;
+            
+            // Apply hiding styles directly to the element
+            element.style.setProperty('display', 'none', 'important');
+            element.style.setProperty('visibility', 'hidden', 'important');
+            element.style.setProperty('opacity', '0', 'important');
+            element.style.setProperty('width', '0', 'important');
+            element.style.setProperty('height', '0', 'important');
+            element.style.setProperty('max-width', '0', 'important');
+            element.style.setProperty('max-height', '0', 'important');
+            
+            // Remove background images
+            element.style.setProperty('background-image', 'none', 'important');
+            element.style.setProperty('background', 'none', 'important');
+            
+            console.log('Accessibility Widget: Dynamically hidden image element');
+        }
+
         // Read Mode Methods
     
         enableReadMode() {
@@ -22624,22 +22745,12 @@ class AccessibilityWidget {
                     .stop-animation *::before,
                     .stop-animation *::after {
                         /* Stop all CSS animations and transitions */
-                        animation-duration: 0s !important;
-                        animation-iteration-count: 1 !important;
-                        animation-delay: 0s !important;
-                        transition-duration: 0s !important;
-                        scroll-behavior: auto !important;
-                        
-                        /* Stop blinking and flashing text */
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                        text-decoration: none !important;
-                        
-                        /* Force final state */
                         animation: none !important;
                         transition: none !important;
-                        animation-fill-mode: forwards !important;
                         animation-play-state: paused !important;
+                        
+                        /* Stop blinking and flashing text */
+                        text-decoration: none !important;
                     }
                     
                     /* Stop all animation classes and libraries */
@@ -22670,9 +22781,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="timeline"] {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
+                        /* Removed opacity and visibility rules to prevent extra text and positioning issues */
                     }
                     
                     /* Stop SVG and Canvas animations */
@@ -22682,9 +22791,7 @@ class AccessibilityWidget {
                     .stop-animation canvas {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
+                        /* Removed visibility and transform rules to prevent positioning issues */
                     }
                     
                     /* Stop text splitting animations */
@@ -22694,10 +22801,7 @@ class AccessibilityWidget {
                     .stop-animation .word {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        display: inline !important;
-                        transform: none !important;
+                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
                     }
                 `;
                 document.head.appendChild(style);
@@ -22711,9 +22815,17 @@ class AccessibilityWidget {
                 window._originalRequestAnimationFrame = window.requestAnimationFrame;
             }
             
-            // Override the native function to stop all animation loops
+            // Override the native function to stop animation loops but allow essential operations
             window.requestAnimationFrame = (callback) => {
-                // Intentionally do NOT call the callback, freezing all animation loops
+                // Allow the callback to run once to complete any in-progress animations
+                // but prevent continuous animation loops
+                if (callback && typeof callback === 'function') {
+                    try {
+                        callback(performance.now());
+                    } catch (e) {
+                        console.warn('Accessibility Widget: Animation callback error:', e);
+                    }
+                }
                 return 0; // Return a dummy handle
             };
             
@@ -22822,16 +22934,41 @@ class AccessibilityWidget {
             
             // Override setTimeout and setInterval to prevent new animation loops
             window.setTimeout = (callback, delay) => {
-                // Only allow non-animation timeouts (like form validation)
-                if (typeof callback === 'function' && callback.toString().includes('animation')) {
-                    return 0; // Block animation-related timeouts
+                // Allow essential timeouts but block obvious animation loops
+                if (typeof callback === 'function') {
+                    const callbackStr = callback.toString().toLowerCase();
+                    // Block obvious animation-related timeouts
+                    if (callbackStr.includes('animation') || 
+                        callbackStr.includes('animate') || 
+                        callbackStr.includes('transition') ||
+                        callbackStr.includes('transform') ||
+                        callbackStr.includes('opacity') ||
+                        callbackStr.includes('translate') ||
+                        callbackStr.includes('scale') ||
+                        callbackStr.includes('rotate')) {
+                        return 0; // Block animation-related timeouts
+                    }
                 }
                 return window._originalSetTimeout(callback, delay);
             };
             
             window.setInterval = (callback, delay) => {
-                // Block all intervals as they're commonly used for animations
-                return 0;
+                // Block obvious animation intervals but allow essential ones
+                if (typeof callback === 'function') {
+                    const callbackStr = callback.toString().toLowerCase();
+                    // Block obvious animation-related intervals
+                    if (callbackStr.includes('animation') || 
+                        callbackStr.includes('animate') || 
+                        callbackStr.includes('transition') ||
+                        callbackStr.includes('transform') ||
+                        callbackStr.includes('opacity') ||
+                        callbackStr.includes('translate') ||
+                        callbackStr.includes('scale') ||
+                        callbackStr.includes('rotate')) {
+                        return 0; // Block animation-related intervals
+                    }
+                }
+                return window._originalSetInterval(callback, delay);
             };
             
             console.log('Accessibility Widget: DOM animation loops blocked');
@@ -25274,7 +25411,7 @@ class AccessibilityWidget {
                     body.vision-impaired [class*="accessibility"] {
                         filter: none !important;
                         -webkit-filter: none !important;
-                        transform: none !important;
+                        /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                         position: fixed !important;
                         z-index: 99999 !important;
                         /* Ensure panel maintains its viewport properties */
