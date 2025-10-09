@@ -1675,82 +1675,6 @@ class AccessibilityWidget {
             }
         }
         
-        // Check and apply seizure-safe mode immediately before any animations start
-        checkAndApplyImmediateSeizureSafe() {
-            try {
-                // Check localStorage first for immediate application
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-                if (seizureSafeFromStorage === 'true') {
-                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
-                    document.body.classList.add('seizure-safe');
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
-                }
-            } catch (e) {
-                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
-            }
-        }
-        
-        // Check and apply seizure-safe mode immediately before any animations start
-        checkAndApplyImmediateSeizureSafe() {
-            try {
-                // Check localStorage first for immediate application
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-                if (seizureSafeFromStorage === 'true') {
-                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
-                    document.body.classList.add('seizure-safe');
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
-                }
-            } catch (e) {
-                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
-            }
-        }
-        
-        // Check and apply seizure-safe mode immediately before any animations start
-        checkAndApplyImmediateSeizureSafe() {
-            try {
-                // Check localStorage first for immediate application
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-                if (seizureSafeFromStorage === 'true') {
-                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
-                    document.body.classList.add('seizure-safe');
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
-                }
-            } catch (e) {
-                console.warn('Accessibility Widget: forceAllAnimationsToFinalState failed', e);
-            }
-        }
-        
-        // Check and apply seizure-safe mode immediately before any animations start
-        checkAndApplyImmediateSeizureSafe() {
-            try {
-                // Check localStorage first for immediate application
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-                if (seizureSafeFromStorage === 'true') {
-                    console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
-                    document.body.classList.add('seizure-safe');
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
-                    return true;
-                }
-                
-                // Also check if seizure-safe class is already present
-                if (document.body.classList.contains('seizure-safe')) {
-                    console.log('Accessibility Widget: Seizure-safe class already present, applying immediate CSS');
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
-                    return true;
-                }
-                
-                return false;
-            } catch (e) {
-                console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
-                return false;
-            }
-        }
-        
         // Set up aggressive monitoring for text animations when seizure-safe mode is active
         setupSeizureSafeMonitoring() {
             try {
@@ -4470,21 +4394,9 @@ class AccessibilityWidget {
         visibility: visible !important;
     }
     
-    /* Text Alignment CSS Rules */
-    body.align-left * {
-        text-align: left !important;
-    }
+    /* Text Alignment CSS Rules - Safe approach for text content only */
     
-    /* Center only text elements; avoid centering layout containers to prevent cut-off */
-    body.align-center * {
-        text-align: inherit !important;
-    }
-    
-    body.align-right * {
-        text-align: right !important;
-    }
-    
-    /* More specific alignment rules for better coverage */
+    /* Left alignment - only for text elements */
     body.align-left h1,
     body.align-left h2,
     body.align-left h3,
@@ -4492,12 +4404,21 @@ class AccessibilityWidget {
     body.align-left h5,
     body.align-left h6,
     body.align-left p,
-    body.align-left div,
     body.align-left span,
-    body.align-left a {
+    body.align-left a,
+    body.align-left li,
+    body.align-left td,
+    body.align-left th,
+    body.align-left label,
+    body.align-left small,
+    body.align-left em,
+    body.align-left strong,
+    body.align-left i,
+    body.align-left b {
         text-align: left !important;
     }
     
+    /* Center alignment - only for text elements */
     body.align-center h1,
     body.align-center h2,
     body.align-center h3,
@@ -4507,38 +4428,19 @@ class AccessibilityWidget {
     body.align-center p,
     body.align-center span,
     body.align-center a,
-    body.align-center i,
-    body.align-center svg,
-    body.align-center [class*="icon"],
-    body.align-center [data-icon],
     body.align-center li,
+    body.align-center td,
+    body.align-center th,
     body.align-center label,
     body.align-center small,
     body.align-center em,
     body.align-center strong,
-    body.align-center b,
-    body.align-center td,
-    body.align-center th {
+    body.align-center i,
+    body.align-center b {
         text-align: center !important;
     }
-
-    /* Never center images/media/containers globally */
-    body.align-center img,
-    body.align-center video,
-    body.align-center canvas,
-    body.align-center picture,
-    body.align-center figure,
-    body.align-center .container,
-    body.align-center .wrapper,
-    body.align-center .row,
-    body.align-center .col,
-    body.align-center .grid,
-    body.align-center .flex,
-    body.align-center .accessibility-panel,
-    body.align-center #accessibility-widget {
-        text-align: initial !important;
-    }
     
+    /* Right alignment - only for text elements */
     body.align-right h1,
     body.align-right h2,
     body.align-right h3,
@@ -4546,10 +4448,104 @@ class AccessibilityWidget {
     body.align-right h5,
     body.align-right h6,
     body.align-right p,
-    body.align-right div,
     body.align-right span,
-    body.align-right a {
+    body.align-right a,
+    body.align-right li,
+    body.align-right td,
+    body.align-right th,
+    body.align-right label,
+    body.align-right small,
+    body.align-right em,
+    body.align-right strong,
+    body.align-right i,
+    body.align-right b {
         text-align: right !important;
+    }
+    
+    /* Exclude images, animations, and layout elements from text alignment */
+    body.align-left img,
+    body.align-left video,
+    body.align-left canvas,
+    body.align-left iframe,
+    body.align-left svg,
+    body.align-left [class*="animated"],
+    body.align-left [class*="animation"],
+    body.align-left [class*="motion"],
+    body.align-left .container,
+    body.align-left .wrapper,
+    body.align-left .row,
+    body.align-left .col,
+    body.align-left .grid,
+    body.align-left .flex,
+    body.align-left [class*="container"],
+    body.align-left [class*="grid"],
+    body.align-left [class*="row"],
+    body.align-left [class*="col"],
+    body.align-center img,
+    body.align-center video,
+    body.align-center canvas,
+    body.align-center iframe,
+    body.align-center svg,
+    body.align-center [class*="animated"],
+    body.align-center [class*="animation"],
+    body.align-center [class*="motion"],
+    body.align-center .container,
+    body.align-center .wrapper,
+    body.align-center .row,
+    body.align-center .col,
+    body.align-center .grid,
+    body.align-center .flex,
+    body.align-center [class*="container"],
+    body.align-center [class*="grid"],
+    body.align-center [class*="row"],
+    body.align-center [class*="col"],
+    body.align-right img,
+    body.align-right video,
+    body.align-right canvas,
+    body.align-right iframe,
+    body.align-right svg,
+    body.align-right [class*="animated"],
+    body.align-right [class*="animation"],
+    body.align-right [class*="motion"],
+    body.align-right .container,
+    body.align-right .wrapper,
+    body.align-right .row,
+    body.align-right .col,
+    body.align-right .grid,
+    body.align-right .flex,
+    body.align-right [class*="container"],
+    body.align-right [class*="grid"],
+    body.align-right [class*="row"],
+    body.align-right [class*="col"] {
+        text-align: inherit !important;
+    }
+    
+    /* Exclude accessibility widget from text alignment */
+    body.align-left .accessibility-widget,
+    body.align-left .accessibility-panel,
+    body.align-left .accessibility-icon,
+    body.align-left #accessibility-widget,
+    body.align-left #accessibility-panel,
+    body.align-left #accessibility-icon,
+    body.align-left [data-ck-widget],
+    body.align-left [class*="accessibility"],
+    body.align-center .accessibility-widget,
+    body.align-center .accessibility-panel,
+    body.align-center .accessibility-icon,
+    body.align-center #accessibility-widget,
+    body.align-center #accessibility-panel,
+    body.align-center #accessibility-icon,
+    body.align-center [data-ck-widget],
+    body.align-center [class*="accessibility"],
+    body.align-right .accessibility-widget,
+    body.align-right .accessibility-panel,
+    body.align-right .accessibility-icon,
+    body.align-right #accessibility-widget,
+    body.align-right #accessibility-panel,
+    body.align-right #accessibility-icon,
+    body.align-right [data-ck-widget],
+    body.align-right [class*="accessibility"] {
+        text-align: inherit !important;
     }
     `;
     
@@ -12369,6 +12365,12 @@ class AccessibilityWidget {
     
                         break;
     
+                    case 'stop-animation':
+    
+                        this.enableStopAnimation();
+    
+                        break;
+    
                     case 'vision-impaired':
     
                         console.log('Accessibility Widget: Vision impaired feature removed');
@@ -12539,6 +12541,12 @@ class AccessibilityWidget {
                     case 'seizure-safe':
     
                         this.disableSeizureSafe();
+    
+                        break;
+    
+                    case 'stop-animation':
+    
+                        this.disableStopAnimation();
     
                         break;
     
@@ -18679,73 +18687,10 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'accessibility-low-saturation-css';
             style.textContent = `
-                /* Low Saturation Mode - Preserve Positioning */
+                /* Low Saturation Mode - Simple filter overlay approach */
                 body.low-saturation {
-                    position: relative !important;
-                }
-
-                /* Preserve all fixed and sticky positioning in low saturation mode */
-                body.low-saturation [style*="position: fixed"],
-                body.low-saturation [style*="position:fixed"],
-                body.low-saturation [style*="position: sticky"],
-                body.low-saturation [style*="position:sticky"],
-                body.low-saturation .fixed,
-                body.low-saturation .sticky,
-                body.low-saturation [class*="fixed"],
-                body.low-saturation [class*="sticky"],
-                body.low-saturation nav,
-                body.low-saturation header,
-                body.low-saturation .navbar,
-                body.low-saturation .nav-bar,
-                body.low-saturation .navigation,
-                body.low-saturation .header,
-                body.low-saturation .top-bar,
-                body.low-saturation .menu-bar {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    transform: none !important;
-                    will-change: auto !important;
-                }
-
-                /* Apply low saturation to content elements only, preserving sticky positioning */
-                body.low-saturation main,
-                body.low-saturation section,
-                body.low-saturation article,
-                body.low-saturation .content,
-                body.low-saturation .container,
-                body.low-saturation .wrapper,
-                body.low-saturation p,
-                body.low-saturation h1,
-                body.low-saturation h2,
-                body.low-saturation h3,
-                body.low-saturation h4,
-                body.low-saturation h5,
-                body.low-saturation h6,
-                body.low-saturation span,
-                body.low-saturation div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar):not(img):not(video):not(canvas):not(iframe):not(svg):not([class*="animated"]):not([class*="animation"]):not([class*="motion"]) {
                     filter: saturate(0.6) !important;
                     -webkit-filter: saturate(0.6) !important;
-                }
-                
-                /* Preserve images, animations, and media elements from low saturation filters */
-                body.low-saturation img,
-                body.low-saturation video,
-                body.low-saturation canvas,
-                body.low-saturation iframe,
-                body.low-saturation svg,
-                body.low-saturation [class*="animated"],
-                body.low-saturation [class*="animation"],
-                body.low-saturation [class*="motion"],
-                body.low-saturation [class*="gif"],
-                body.low-saturation [data-animated],
-                body.low-saturation [data-gif],
-                body.low-saturation img[src*=".gif"],
-                body.low-saturation img[src*=".apng"],
-                body.low-saturation img[src*=".webp"] {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
                 
                 /* Preserve accessibility widget from low saturation filters */
@@ -18759,8 +18704,6 @@ class AccessibilityWidget {
                 body.low-saturation [class*="accessibility"] {
                     filter: none !important;
                     -webkit-filter: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
             `;
             document.head.appendChild(style);
@@ -18792,29 +18735,24 @@ class AccessibilityWidget {
             style.id = 'accessibility-monochrome-styles';
     
             style.textContent = `
-    
-                /* Monochrome effect for all page content */
-    
-                body.monochrome *:not(.accessibility-icon):not(.accessibility-panel):not(#accessibility-icon):not(#accessibility-panel) {
-    
+                /* Monochrome effect - Simple filter overlay approach */
+                body.monochrome {
                     filter: grayscale(100%) !important;
-    
-                    transition: filter 0.3s ease !important;
-    
+                    -webkit-filter: grayscale(100%) !important;
                 }
-    
                 
-    
-                /* Ensure accessibility widget stays above overlay */
-    
+                /* Preserve accessibility widget from monochrome filters */
                 body.monochrome .accessibility-widget,
-    
-                body.monochrome #accessibility-widget {
-    
-                    z-index: 99998 !important;
-    
+                body.monochrome .accessibility-panel,
+                body.monochrome .accessibility-icon,
+                body.monochrome #accessibility-widget,
+                body.monochrome #accessibility-panel,
+                body.monochrome #accessibility-icon,
+                body.monochrome [data-ck-widget],
+                body.monochrome [class*="accessibility"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
-    
             `;
     
             document.head.appendChild(style);
@@ -18926,6 +18864,11 @@ class AccessibilityWidget {
             this.stopLightContrastMonitoring();
     
             console.log('Accessibility Widget: Light contrast disabled');
+            
+            // Refresh the page to ensure all elements return to their original state
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
     
         }
     
@@ -19031,39 +18974,11 @@ class AccessibilityWidget {
                 body.dark-contrast .menu,
                 body.dark-contrast .nav-menu,
                 body.dark-contrast .card,
-                
-                /* CRITICAL: Preserve images, symbols, and animated elements - don't change their styling */
-                body.dark-contrast img,
-                body.dark-contrast svg,
-                body.dark-contrast .icon,
-                body.dark-contrast [class*="icon"],
-                body.dark-contrast [data-icon],
-                body.dark-contrast .symbol,
-                body.dark-contrast .arrow,
-                body.dark-contrast [class*="arrow"],
-                body.dark-contrast [class*="gradient"],
-                body.dark-contrast [style*="gradient"],
-                /* Preserve animated images and GIFs */
-                body.dark-contrast img[src*=".gif"],
-                body.dark-contrast img[src*=".apng"],
-                body.dark-contrast img[src*=".webp"],
-                body.dark-contrast img[class*="animated"],
-                body.dark-contrast img[class*="gif"],
-                body.dark-contrast img[data-animated],
-                body.dark-contrast img[data-gif],
-                body.dark-contrast [class*="animated"],
-                body.dark-contrast [class*="animation"],
-                body.dark-contrast [class*="motion"] {
-                    color: inherit !important;
-                    background: inherit !important;
-                    opacity: inherit !important;
-                    visibility: inherit !important;
-                    display: inherit !important;
-                    position: inherit !important;
-                    transform: inherit !important;
-                    filter: inherit !important;
-                    -webkit-filter: inherit !important;
-                }
+                body.dark-contrast .modal,
+                body.dark-contrast .dropdown,
+                body.dark-contrast .tooltip,
+                body.dark-contrast .badge,
+                body.dark-contrast .alert { color: inherit !important; background: inherit !important; }
                 
                 /* Exclude card flip animations and their content */
                 body.dark-contrast [class*="flip"],
@@ -20450,8 +20365,9 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: Mute sound enabled');
     
+            this.settings['mute-sound'] = true;
+            this.saveSettings();
             
-    
             // Initialize storage for original states if not exists
     
             if (!this.originalVolumeStates) {
@@ -20506,8 +20422,9 @@ class AccessibilityWidget {
     
             console.log('Accessibility Widget: Mute sound disabled');
     
+            this.settings['mute-sound'] = false;
+            this.saveSettings();
             
-    
             // Stop monitoring for media changes
     
             this.stopMediaObserver();
@@ -23942,63 +23859,6 @@ class AccessibilityWidget {
     
     
     
-        disableStopAnimation() {
-    
-            console.log('Accessibility Widget: Stop animation disabled');
-    
-            document.body.classList.remove('stop-animation');
-    
-            this.settings['stop-animation'] = false;
-    
-            this.saveSettings();
-    
-            
-    
-            // Remove CSS rules for stop animation
-    
-            const existingStyle = document.getElementById('stop-animation-css');
-    
-            if (existingStyle) {
-    
-                existingStyle.remove();
-    
-            }
-    
-            // Restore button styles and portfolio animations
-            this.restoreButtonHoverStyles();
-            this.restorePortfolioAnimations();
-    
-            // Resume JavaScript-based animations (like the slider auto-slide)
-    
-            if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-    
-                console.log('Accessibility Widget: Calling slider.enableAutoSlide() for stop animation');
-    
-                window.slider.enableAutoSlide();
-    
-            } else {
-    
-                console.log('Accessibility Widget: Slider not found or enableAutoSlide method not available for stop animation');
-    
-                // Try again after a short delay in case slider is still initializing
-    
-                setTimeout(() => {
-    
-                    if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-    
-                        console.log('Accessibility Widget: Retrying slider.enableAutoSlide() for stop animation');
-    
-                        window.slider.enableAutoSlide();
-    
-                    }
-    
-                }, 100);
-    
-            }
-    
-        }
-    
-    
     
         // Text Color Adjustment Methods
     
@@ -25443,8 +25303,8 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
+                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
                     /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
@@ -25456,8 +25316,8 @@ class AccessibilityWidget {
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
+                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
                     /* transform: none !important; - REMOVED: This was breaking website layout */
                     animation: none !important;
                     transition: none !important;
@@ -25470,8 +25330,8 @@ class AccessibilityWidget {
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
+                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
                     display: inline !important;
                     /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
@@ -25482,8 +25342,8 @@ class AccessibilityWidget {
                 body.seizure-safe svg line {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
+                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
                     /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
@@ -25495,8 +25355,8 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="timeline"] {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* opacity: 1 !important; - REMOVED: This was making elements disappear */
+                    /* visibility: visible !important; - REMOVED: This was making elements disappear */
                     /* transform: none !important; - REMOVED: This was breaking website layout */
                 }
                 
@@ -25509,8 +25369,11 @@ class AccessibilityWidget {
                 
                 /* Prevent layout breaking and overflow issues */
                 body.seizure-safe {
-                    overflow-x: hidden !important;
+                    /* overflow-x: hidden !important; - REMOVED: This was preventing scrolling */
                     max-width: 100vw !important;
+                    /* Ensure scrolling works properly */
+                    overflow-y: auto !important;
+                    overflow-x: auto !important;
                 }
                 
                 body.seizure-safe * {
