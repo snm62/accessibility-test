@@ -13825,123 +13825,56 @@ class AccessibilityWidget {
         updateContentScale() {
     
             // If content scale is 100%, reset to normal and don't apply any scaling
-    
             if (this.contentScale === 100) {
-    
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
-    
+                
                 const body = document.body;
-    
                 const html = document.documentElement;
-    
                 
-    
-                // Reset all scaling styles
-    
+                // Reset all scaling styles - simple reset
                 body.style.transform = '';
-    
                 body.style.transformOrigin = '';
-    
                 body.style.width = '';
-    
                 body.style.height = '';
-    
                 body.style.position = '';
-    
                 body.style.left = '';
-    
                 body.style.top = '';
-    
                 
-    
                 html.style.overflow = '';
-    
                 html.style.maxWidth = '';
-    
                 html.style.maxHeight = '';
-    
                 
-    
                 // Reset accessibility widget container
-    
                 const widgetContainer = document.getElementById('accessibility-widget-container');
-    
                 if (widgetContainer) {
-    
                     widgetContainer.style.transform = '';
-    
                     widgetContainer.style.transformOrigin = '';
-    
                 }
-    
                 
-    
                 return;
-    
             }
-    
             
-    
             const scale = this.contentScale / 100;
-    
             
-    
-            // Apply scaling to the entire website body
-    
+            // Apply simple scaling to the entire website body - NO COMPLEX CALCULATIONS
             const body = document.body;
-    
             const html = document.documentElement;
-    
             
-    
             // Skip accessibility widget container from scaling
-    
             const widgetContainer = document.getElementById('accessibility-widget-container');
-    
             if (widgetContainer) {
-    
                 widgetContainer.style.transform = 'scale(1)'; // Keep accessibility widget at normal size
-    
                 widgetContainer.style.transformOrigin = 'center center';
-    
             }
-    
             
-    
-            // Scale the entire body
-    
+            // SIMPLE SCALING - Just scale the body, no complex positioning or overflow changes
             body.style.transform = `scale(${scale})`;
-    
             body.style.transformOrigin = 'top left';
-    
-            /* REMOVED: body.style.width = `${100 / scale}%`; - This was creating extra space at bottom */
-    
-            /* REMOVED: body.style.height = `${100 / scale}%`; - This was creating extra space at bottom */
-    
             
-    
-            // Allow scrolling but adjust viewport to accommodate scaling
-    
-            html.style.overflow = 'auto'; // Allow scrolling instead of hidden
-    
-            html.style.maxWidth = 'none'; // Remove width restriction
-    
-            html.style.maxHeight = 'none'; // Remove height restriction
-    
+            // REMOVED ALL COMPLEX CALCULATIONS that were causing extra scrollbars and space
+            // No width/height calculations, no position changes, no overflow changes
             
-    
-            // Adjust body positioning to account for scaling
-    
-            body.style.position = 'relative';
-    
-            body.style.left = '0';
-    
-            body.style.top = '0';
-    
-            
-    
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-    
         }
     
     
