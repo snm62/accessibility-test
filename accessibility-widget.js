@@ -935,17 +935,17 @@
                     });
                 }
                 
-                // Stop GSAP animations immediately
+                // GSAP detected - preserve ScrollTrigger and scroll behavior (do not pause globalTimeline or kill tweens)
                 if (typeof window.gsap !== 'undefined') {
                     try {
                         if (window.gsap.globalTimeline) {
-                            window.gsap.globalTimeline.pause();
+                            console.log('Accessibility Widget: GSAP detected - not pausing globalTimeline (preserving ScrollTrigger)');
                         }
                         if (window.gsap.killTweensOf) {
-                            window.gsap.killTweensOf("*");
+                            console.log('Accessibility Widget: GSAP detected - not killing tweens');
                         }
                     } catch (error) {
-                        console.warn('Accessibility Widget: Failed to stop GSAP animations immediately', error);
+                        console.warn('Accessibility Widget: GSAP presence handling failed', error);
                     }
                 }
                 
@@ -1006,10 +1006,10 @@ function applyUniversalStopMotion(enabled) {
             }
         } catch (_) {}
 
-        // GSAP: pause global timeline
+        // GSAP detected - do not pause global timeline to preserve ScrollTrigger
         try {
             if (enabled && typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
-                window.gsap.globalTimeline.pause();
+                console.log('Accessibility Widget: Not pausing gsap.globalTimeline to preserve ScrollTrigger');
             }
         } catch (_) {}
 
@@ -13831,7 +13831,18 @@ class AccessibilityWidget {
                 const body = document.body;
                 const html = document.documentElement;
                 
-                // Reset all scaling styles - simple reset
+                // If a scaling wrapper exists, unwrap it safely
+                const existingWrapper = document.getElementById('ck-scale-wrapper');
+                if (existingWrapper) {
+                    try {
+                        // Move children out of the wrapper back to body (preserving order)
+                        const nodes = Array.from(existingWrapper.childNodes);
+                        nodes.forEach(node => body.insertBefore(node, existingWrapper));
+                        existingWrapper.remove();
+                    } catch (_) {}
+                }
+                
+                // Reset all scaling styles on body (in case previous versions set them)
                 body.style.transform = '';
                 body.style.transformOrigin = '';
                 body.style.width = '';
@@ -13856,9 +13867,41 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             
-            // Apply simple scaling like vision-impaired: only transform on body
+            // Apply scaling via a dedicated wrapper to avoid affecting body/html sizing
             const body = document.body;
             const html = document.documentElement;
+            
+            // Ensure a single wrapper exists and excludes the accessibility widget
+            let wrapper = document.getElementById('ck-scale-wrapper');
+            if (!wrapper) {
+                wrapper = document.createElement('div');
+                wrapper.id = 'ck-scale-wrapper';
+                wrapper.style.width = '100%';
+                wrapper.style.minHeight = '100%';
+                wrapper.style.transformOrigin = 'top left';
+                // Move all body children into wrapper except our widget containers
+                const children = Array.from(body.childNodes);
+                const shouldExclude = (el) => {
+                    if (!(el instanceof HTMLElement)) return false;
+                    return (
+                        el.id === 'accessibility-widget' ||
+                        el.id === 'accessibility-panel' ||
+                        el.id === 'accessibility-widget-container' ||
+                        el.classList.contains('accessibility-widget') ||
+                        el.classList.contains('accessibility-panel') ||
+                        el.hasAttribute('data-ck-widget')
+                    );
+                };
+                body.appendChild(wrapper);
+                children.forEach(node => {
+                    if (node === wrapper) return;
+                    if (node.nodeType === 1 && shouldExclude(node)) {
+                        // Leave widget elements at body level
+                        return;
+                    }
+                    wrapper.appendChild(node);
+                });
+            }
             
             // Skip accessibility widget container from scaling
             const widgetContainer = document.getElementById('accessibility-widget-container');
@@ -13867,10 +13910,10 @@ class AccessibilityWidget {
                 widgetContainer.style.transformOrigin = 'center center';
             }
             
-            // SIMPLE SCALING - just scale, don't alter layout sizing
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
-            // Do not touch width/height/overflow to avoid extra scrollbars and gaps
+            // Apply transform only on the wrapper; do not modify body/html layout sizing
+            wrapper.style.transform = `scale(${scale})`;
+            wrapper.style.transformOrigin = 'top left';
+            // Do not touch width/height/overflow
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -25624,20 +25667,16 @@ class AccessibilityWidget {
             
             // Stop GSAP animations if available
             if (typeof gsap !== 'undefined') {
-                // Kill letter-by-letter text effects (TextPlugin) and any timelines
-                try { gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .fade-up-multi-text, .fade-up-multi-text-fast'); } catch(_){}
-                try { gsap.killTweensOf('*'); } catch(_){}
-                if (gsap.globalTimeline) {
-                    try { gsap.globalTimeline.clear(); } catch(_){}
-                }
+                // Preserve GSAP/ScrollTrigger; do not kill tweens or clear timelines
+                console.log('[CK] GSAP detected - preserving animations related to scroll; not killing tweens');
             }
             
             // CRITICAL: Ensure letter-by-letter text animations show full text immediately
             this.forceCompleteTextAnimations();
             
-            // Stop ScrollTrigger animations
+            // ScrollTrigger detected - do not killAll; preserve scroll behavior
             if (typeof ScrollTrigger !== 'undefined') {
-                ScrollTrigger.killAll();
+                console.log('Accessibility Widget: ScrollTrigger detected - preserving scroll behavior');
             }
             
             // Ensure portfolio elements remain visible
@@ -26983,8 +27022,7 @@ class AccessibilityWidget {
             // Disable GSAP ScrollTrigger
             if (window.ScrollTrigger) {
                 try {
-                    ScrollTrigger.killAll();
-                    console.log('[CK] GSAP ScrollTrigger disabled');
+                    console.log('[CK] ScrollTrigger detected - not disabling to preserve scroll');
                 } catch (e) {
                     console.log('[CK] ScrollTrigger not found or already disabled');
                 }
