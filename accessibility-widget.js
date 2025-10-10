@@ -25791,7 +25791,7 @@ class AccessibilityWidget {
                 
                 /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
-                    filter: saturate(0.7) !important;
+                    filter: saturate(0.9) !important;
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
@@ -25824,7 +25824,7 @@ class AccessibilityWidget {
                 body.seizure-safe .accessibility-widget,
                 body.seizure-safe .accessibility-panel,
                 body.seizure-safe .toggle-switch {
-                    filter: saturate(0.7) !important;
+                    filter: saturate(0.9) !important;
                 }
             `;
     
