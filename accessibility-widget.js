@@ -17,14 +17,14 @@
                     animation-play-state: paused !important;
                 }
                 
-                /* ULTIMATE CATCH-ALL: Stop all animations and force to final positions */
+                /* ULTIMATE CATCH-ALL: Stop all animations and preserve scroll animations */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
-                    animation-fill-mode: forwards !important;
+                   
                 }
                 
                 /* CRITICAL: Only stop animations, preserve all positioning and layout */
@@ -33,7 +33,7 @@
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
-                    animation-fill-mode: forwards !important;
+                    
                     
                     /* Removed opacity and visibility rules to prevent scroll interference */
                 }
@@ -78,7 +78,7 @@
                     /* Removed positioning rules to preserve scrolling */
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
                     height: auto !important;
                 }
 
@@ -1103,12 +1103,11 @@ function applyVisionImpaired(on) {
 
             /* 1. VISION IMPAIRED SCALING - Clean approach without layout breaking */
             html.vision-impaired {
-                transform: scale(var(--vision-scale, 1)) !important;
-                transform-origin: top left !important;
-                width: calc(100% / var(--vision-scale)) !important;
-                height: calc(100% / var(--vision-scale)) !important;
+                /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
+                /* REMOVED: transform-origin - This was interfering with panel positioning */
+                /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
                 min-height: 100vh !important;
-                transition: transform 240ms ease !important;
+                /* REMOVED: transition - This was interfering with panel positioning */
             }
 
             body.vision-impaired {
@@ -1242,10 +1241,9 @@ function applyVisionImpaired(on) {
             /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
             @media (max-width: 768px) {
                 html.vision-impaired {
-                    transform: scale(var(--vision-scale, 1)) !important;
-                    transform-origin: top left !important;
-                    width: calc(100% / var(--vision-scale)) !important;
-                    height: calc(100% / var(--vision-scale)) !important;
+                    /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
+                    /* REMOVED: transform-origin - This was interfering with panel positioning */
+                    /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
                     min-height: 100vh !important;
                 }
                 
@@ -22957,16 +22955,18 @@ class AccessibilityWidget {
                 // Allow essential timeouts but block obvious animation loops
                 if (typeof callback === 'function') {
                     const callbackStr = callback.toString().toLowerCase();
-                    // Block obvious animation-related timeouts
+                    // Block obvious animation-related timeouts but allow scroll animations
                     if (callbackStr.includes('animation') || 
                         callbackStr.includes('animate') || 
                         callbackStr.includes('transition') ||
-                        callbackStr.includes('transform') ||
-                        callbackStr.includes('opacity') ||
-                        callbackStr.includes('translate') ||
-                        callbackStr.includes('scale') ||
-                        callbackStr.includes('rotate')) {
-                        return 0; // Block animation-related timeouts
+                        callbackStr.includes('opacity')) {
+                        // Only block non-scroll animations
+                        if (!callbackStr.includes('scroll') && 
+                            !callbackStr.includes('wheel') && 
+                            !callbackStr.includes('touch') &&
+                            !callbackStr.includes('mouse')) {
+                            return 0; // Block animation-related timeouts
+                        }
                     }
                 }
                 return window._originalSetTimeout(callback, delay);
@@ -22976,16 +22976,18 @@ class AccessibilityWidget {
                 // Block obvious animation intervals but allow essential ones
                 if (typeof callback === 'function') {
                     const callbackStr = callback.toString().toLowerCase();
-                    // Block obvious animation-related intervals
+                    // Block obvious animation-related intervals but allow scroll animations
                     if (callbackStr.includes('animation') || 
                         callbackStr.includes('animate') || 
                         callbackStr.includes('transition') ||
-                        callbackStr.includes('transform') ||
-                        callbackStr.includes('opacity') ||
-                        callbackStr.includes('translate') ||
-                        callbackStr.includes('scale') ||
-                        callbackStr.includes('rotate')) {
-                        return 0; // Block animation-related intervals
+                        callbackStr.includes('opacity')) {
+                        // Only block non-scroll animations
+                        if (!callbackStr.includes('scroll') && 
+                            !callbackStr.includes('wheel') && 
+                            !callbackStr.includes('touch') &&
+                            !callbackStr.includes('mouse')) {
+                            return 0; // Block animation-related intervals
+                        }
                     }
                 }
                 return window._originalSetInterval(callback, delay);
@@ -23787,7 +23789,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="orbit"] {
                         animation: none !important;
                         transition: none !important;
-                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                       
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -23821,7 +23823,7 @@ class AccessibilityWidget {
                     .stop-animation [class*="orbit"] {
                         animation: none !important;
                         transition: none !important;
-                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        
                         opacity: 1 !important;
                         visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
@@ -25288,8 +25290,16 @@ class AccessibilityWidget {
                     try { 
                         body.classList.remove(cls); 
                         html.classList.remove(cls); 
-                        // Also remove from all elements
-                        document.querySelectorAll(`.${cls}`).forEach(el => el.classList.remove(cls));
+                        // Also remove from all elements EXCEPT accessibility panel
+                        document.querySelectorAll(`.${cls}`).forEach(el => {
+                            // Don't remove scroll lock classes from accessibility panel
+                            if (!el.closest('.accessibility-panel') && 
+                                !el.closest('.accessibility-widget') && 
+                                !el.closest('#accessibility-panel') && 
+                                !el.closest('#accessibility-widget')) {
+                                el.classList.remove(cls);
+                            }
+                        });
                     } catch (_) {} 
                 });
 
@@ -25886,7 +25896,7 @@ class AccessibilityWidget {
             style.textContent = `
                 /* SIMPLE SEIZURE-SAFE STYLES - Only stop animations, preserve layout */
                 
-                /* Stop all animations and transitions globally - FORCE TO FINAL POSITIONS */
+                /* Stop all animations and transitions globally - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
@@ -25897,11 +25907,11 @@ class AccessibilityWidget {
                     /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                   
                     animation-play-state: paused !important;
                 }
                 
-                /* Stop specific animation classes - FORCE TO FINAL POSITIONS */
+                /* Stop specific animation classes - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -25924,10 +25934,10 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="tilt"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    
                 }
                 
-                /* Stop library animations - FORCE TO FINAL POSITIONS */
+                /* Stop library animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -25937,29 +25947,28 @@ class AccessibilityWidget {
                 body.seizure-safe .zoom-in {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                }
+                    
                 
-                /* Stop text animations - FORCE TO FINAL POSITIONS */
+                /* Stop text animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split, 
                 body.seizure-safe .char, 
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    
                 }
                 
-                /* Stop SVG animations - FORCE TO FINAL POSITIONS */
+                /* Stop SVG animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe svg,
                 body.seizure-safe svg path,
                 body.seizure-safe svg line {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
                 }
                 
-                /* Stop scroll animations - FORCE TO FINAL POSITIONS */
+                /* Stop scroll animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
@@ -25967,15 +25976,15 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="timeline"] {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                   
                 }
                 
-                /* Stop media animations - FORCE TO FINAL POSITIONS */
+                /* Stop media animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe video,
                 body.seizure-safe audio {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
+                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
                 }
                 
                 /* CRITICAL: Ensure scrolling works properly */
