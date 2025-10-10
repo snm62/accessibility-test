@@ -6435,7 +6435,7 @@ class AccessibilityWidget {
     
                 :host(.seizure-safe) .accessibility-panel {
     
-                    filter: grayscale(0.4) contrast(0.3) !important;
+                    filter: grayscale(0.9) contrast(1.0) !important;
     
                 }
     
@@ -8368,31 +8368,6 @@ class AccessibilityWidget {
     
     
     
-                    <!-- Module 31: Dyslexia Friendly -->
-    
-                    <div class="profile-item">
-    
-                        <div class="profile-info">
-    
-                            <div>
-    
-                                <h4>Dyslexia Friendly</h4>
-    
-                                <p id="dyslexia-friendly-desc">Font, spacing & reading assistance</p>
-    
-                            </div>
-    
-                        </div>
-    
-                        <label class="toggle-switch">
-    
-                            <input type="checkbox" id="dyslexia-friendly" tabindex="0" aria-label="Dyslexia Friendly - Font, spacing & reading assistance" aria-describedby="dyslexia-friendly-desc">
-    
-                            <span class="slider"></span>
-    
-                        </label>
-    
-                    </div>
     
     
     
@@ -8854,9 +8829,6 @@ class AccessibilityWidget {
     
                     readingGuideDesc: "Movable highlight bar",
     
-                    dyslexiaFriendly: "Dyslexia Friendly",
-    
-                    dyslexiaFriendlyDesc: "Font, spacing & reading assistance",
     
                     usefulLinks: "Useful Links",
     
@@ -10896,7 +10868,7 @@ class AccessibilityWidget {
     
                 'low-saturation', 'adjust-bg-colors', 'mute-sound', 'hide-images',
     
-                'read-mode', 'reading-guide', 'dyslexia-friendly', 'useful-links',
+                'read-mode', 'reading-guide', 'useful-links',
     
                 'reading-mask', 'highlight-hover', 'highlight-focus', 'big-black-cursor',
     
@@ -11206,13 +11178,6 @@ class AccessibilityWidget {
     
                         break;
     
-                    case 'dyslexia-friendly':
-    
-                        if (title) title.textContent = translations.dyslexiaFriendly || 'Dyslexia Friendly';
-    
-                        if (desc) desc.textContent = translations.dyslexiaFriendlyDesc || 'Font, spacing & reading assistance';
-    
-                        break;
     
                     case 'useful-links':
     
@@ -12334,11 +12299,6 @@ class AccessibilityWidget {
     
                         break;
     
-                    case 'dyslexia-friendly':
-    
-                        this.enableDyslexiaFriendly();
-    
-                        break;
     
                     case 'reading-mask':
     
@@ -12700,11 +12660,6 @@ class AccessibilityWidget {
     
                         break;
     
-                    case 'dyslexia-friendly':
-    
-                        this.disableDyslexiaFriendly();
-    
-                        break;
     
                     case 'reading-mask':
     
@@ -21597,150 +21552,7 @@ class AccessibilityWidget {
     
         }
 
-        // Dyslexia Friendly Methods
 
-        enableDyslexiaFriendly() {
-            console.log('Accessibility Widget: Dyslexia friendly enabled');
-            this.settings['dyslexia-friendly'] = true;
-            document.body.classList.add('dyslexia-friendly');
-            
-            // Apply dyslexia-friendly styles
-            this.applyDyslexiaFriendlyStyles();
-            
-            this.saveSettings();
-            console.log('Accessibility Widget: Dyslexia friendly styles applied');
-        }
-
-        disableDyslexiaFriendly() {
-            console.log('Accessibility Widget: Dyslexia friendly disabled');
-            this.settings['dyslexia-friendly'] = false;
-            document.body.classList.remove('dyslexia-friendly');
-            
-            // Remove dyslexia-friendly styles
-            this.removeDyslexiaFriendlyStyles();
-            
-            this.saveSettings();
-            console.log('Accessibility Widget: Dyslexia friendly styles removed');
-        }
-
-        applyDyslexiaFriendlyStyles() {
-            // Remove existing styles if they exist
-            this.removeDyslexiaFriendlyStyles();
-            
-            const style = document.createElement('style');
-            style.id = 'dyslexia-friendly-styles';
-            style.textContent = `
-                /* DYSLEXIA FRIENDLY STYLES - Comprehensive reading assistance */
-                
-                /* 1. DYSLEXIA-FRIENDLY FONT - OpenDyslexic or similar */
-                body.dyslexia-friendly {
-                    font-family: 'OpenDyslexic', 'Comic Sans MS', 'Arial', sans-serif !important;
-                }
-                
-                /* 2. ENHANCED LETTER SPACING - Makes letters easier to distinguish */
-                body.dyslexia-friendly * {
-                    letter-spacing: 0.1em !important;
-                    word-spacing: 0.2em !important;
-                }
-                
-                /* 3. IMPROVED LINE HEIGHT - Reduces visual crowding */
-                body.dyslexia-friendly p,
-                body.dyslexia-friendly div,
-                body.dyslexia-friendly span,
-                body.dyslexia-friendly li,
-                body.dyslexia-friendly td,
-                body.dyslexia-friendly th {
-                    line-height: 1.8 !important;
-                }
-                
-                /* 4. TEXT EMPHASIS - Bold important words */
-                body.dyslexia-friendly strong,
-                body.dyslexia-friendly b,
-                body.dyslexia-friendly h1,
-                body.dyslexia-friendly h2,
-                body.dyslexia-friendly h3,
-                body.dyslexia-friendly h4,
-                body.dyslexia-friendly h5,
-                body.dyslexia-friendly h6 {
-                    font-weight: bold !important;
-                    /* REMOVED: color: #000000 !important; - This was changing website colors */
-                }
-                
-                /* 5. REDUCED VISUAL CLUTTER - Hide distracting elements */
-                body.dyslexia-friendly img:not([alt]),
-                body.dyslexia-friendly video:not([aria-label]),
-                body.dyslexia-friendly iframe:not([title]),
-                body.dyslexia-friendly [class*="ad"],
-                body.dyslexia-friendly [class*="banner"],
-                body.dyslexia-friendly [class*="popup"],
-                body.dyslexia-friendly [class*="modal"] {
-                    opacity: 0.3 !important;
-                    filter: blur(1px) !important;
-                }
-                
-                /* 6. READING ASSISTANCE - Line-by-line highlighting */
-                body.dyslexia-friendly p,
-                body.dyslexia-friendly div,
-                body.dyslexia-friendly span {
-                    position: relative !important;
-                }
-                
-                /* 7. REMOVED COLOR OVERLAYS - This was changing website colors */
-                /* body.dyslexia-friendly::before {
-                    content: '' !important;
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    background: rgba(255, 255, 0, 0.05) !important;
-                    pointer-events: none !important;
-                    z-index: 1 !important;
-                } */
-                
-                /* 8. REMOVED TEXT HIGHLIGHTING - This was changing website colors */
-                /* body.dyslexia-friendly p:hover,
-                body.dyslexia-friendly div:hover,
-                body.dyslexia-friendly span:hover {
-                    background: rgba(255, 255, 0, 0.2) !important;
-                    border-radius: 3px !important;
-                } */
-                
-                /* 9. FOCUS INDICATORS - Better focus visibility */
-                body.dyslexia-friendly a:focus,
-                body.dyslexia-friendly button:focus,
-                body.dyslexia-friendly input:focus,
-                body.dyslexia-friendly textarea:focus {
-                    outline: 3px solid #000000 !important;
-                    outline-offset: 2px !important;
-                    /* REMOVED: background: rgba(255, 255, 0, 0.3) !important; - This was changing website colors */
-                }
-                
-                /* 10. PRESERVE ACCESSIBILITY WIDGET */
-                body.dyslexia-friendly .accessibility-widget,
-                body.dyslexia-friendly .accessibility-panel,
-                body.dyslexia-friendly .accessibility-icon,
-                body.dyslexia-friendly #accessibility-widget,
-                body.dyslexia-friendly #accessibility-panel,
-                body.dyslexia-friendly #accessibility-icon {
-                    font-family: inherit !important;
-                    letter-spacing: normal !important;
-                    word-spacing: normal !important;
-                    line-height: normal !important;
-                    background: none !important;
-                    filter: none !important;
-                }
-            `;
-            
-            document.head.appendChild(style);
-        }
-
-        removeDyslexiaFriendlyStyles() {
-            const style = document.getElementById('dyslexia-friendly-styles');
-            if (style) {
-                style.remove();
-            }
-        }
 
         // Highlight Focus Methods
     
