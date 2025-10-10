@@ -13678,16 +13678,20 @@ class AccessibilityWidget {
         // Content Scaling Methods
     
         increaseContentScale() {
+            console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
             this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
             this.settings['content-scale'] = this.contentScale;
+            console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
             this.updateContentScaleDisplay();
             this.saveSettings();
         }
         
         decreaseContentScale() {
+            console.log('Accessibility Widget: Decreasing content scale from', this.contentScale + '%');
             this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
             this.settings['content-scale'] = this.contentScale;
+            console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
             this.updateContentScaleDisplay();
             this.saveSettings();
@@ -13696,22 +13700,14 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             const html = document.documentElement;
-            const widgetContainer = document.getElementById('accessibility-widget-container');
-            let scaleWrapper = document.getElementById('ck-content-scale-wrapper');
-
+            
+            console.log('Accessibility Widget: updateContentScale called with scale:', this.contentScale + '%');
+            
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                if (scaleWrapper) {
-                    // Unwrap content: move children back to body
-                    while (scaleWrapper.firstChild) {
-                        body.insertBefore(scaleWrapper.firstChild, widgetContainer);
-                    }
-                    scaleWrapper.remove();
-                }
-                
-                // Reset any lingering styles on body/html
+                // Reset any scaling styles
                 body.style.transform = '';
                 body.style.transformOrigin = '';
                 body.style.width = '';
@@ -13723,34 +13719,18 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
+            console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Create wrapper if it doesn't exist
-            if (!scaleWrapper) {
-                scaleWrapper = document.createElement('div');
-                scaleWrapper.id = 'ck-content-scale-wrapper';
-                
-                // Move all body children into the wrapper, except the widget
-                while (body.firstChild) {
-                    if (body.firstChild === widgetContainer) {
-                        body.appendChild(body.firstChild); // Move widget to end temporarily
-                    } else {
-                        scaleWrapper.appendChild(body.firstChild);
-                    }
-                }
-                body.insertBefore(scaleWrapper, widgetContainer); // Insert wrapper before widget
-            }
+            // Apply simple CSS transform scaling directly to body
+            body.style.transform = `scale(${scale})`;
+            body.style.transformOrigin = 'top left';
             
-            // Apply scaling to the wrapper
-            scaleWrapper.style.transform = `scale(${scale})`;
-            scaleWrapper.style.transformOrigin = 'top left';
-            
-            // Keep widget at normal size
-            if (widgetContainer) {
-                widgetContainer.style.transform = 'scale(1)';
-                widgetContainer.style.transformOrigin = 'center center';
-            }
+            // Ensure body takes full viewport to prevent gaps
+            body.style.width = '100vw';
+            body.style.height = '100vh';
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
+            console.log('Accessibility Widget: Body transform applied:', body.style.transform);
         }
         
         updateContentScaleDisplay() {
@@ -15170,8 +15150,16 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Use updateContentScale to handle wrapper cleanup
-            this.updateContentScale();
+            // Reset scaling styles directly
+            const body = document.body;
+            const html = document.documentElement;
+            
+            body.style.transform = '';
+            body.style.transformOrigin = '';
+            body.style.width = '';
+            body.style.height = '';
+            html.style.transform = '';
+            html.style.transformOrigin = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -22554,7 +22542,7 @@ class AccessibilityWidget {
         
         // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
         stopAnimationLibraries() {
-            // AGGRESSIVE: Stop Lottie animations
+            // Stop Lottie animations (but don't destroy them)
             if (typeof lottie !== 'undefined' && lottie.getRegisteredAnimations) {
                 try {
                     lottie.getRegisteredAnimations().forEach(anim => {
@@ -22564,11 +22552,9 @@ class AccessibilityWidget {
                         if (anim && typeof anim.pause === 'function') {
                             anim.pause();
                         }
-                        if (anim && typeof anim.destroy === 'function') {
-                            anim.destroy();
-                        }
+                        // REMOVED: anim.destroy() - Don't destroy, just stop
                     });
-                    console.log('Accessibility Widget: Lottie animations stopped aggressively');
+                    console.log('Accessibility Widget: Lottie animations stopped (not destroyed)');
                 } catch (e) {
                     console.warn('Accessibility Widget: Failed to stop Lottie animations:', e);
                 }
@@ -23954,7 +23940,7 @@ class AccessibilityWidget {
         // API Controls: Execute .stop() or .pause() methods on known animation libraries
         stopAnimationLibraries() {
             try {
-                // AGGRESSIVE: Stop Lottie animations
+                // Stop Lottie animations (but don't destroy them)
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const lottieAnimations = window.lottie.getRegisteredAnimations();
                     lottieAnimations.forEach(animation => {
@@ -23965,14 +23951,12 @@ class AccessibilityWidget {
                             if (animation && typeof animation.pause === 'function') {
                                 animation.pause();
                             }
-                            if (animation && typeof animation.destroy === 'function') {
-                                animation.destroy();
-                            }
+                            // REMOVED: animation.destroy() - Don't destroy, just stop
                         } catch (error) {
                             console.warn('Accessibility Widget: Failed to stop Lottie animation', error);
                         }
                     });
-                    console.log('Accessibility Widget: Lottie animations stopped aggressively');
+                    console.log('Accessibility Widget: Lottie animations stopped (not destroyed)');
                 }
                 
                 // AGGRESSIVE: Stop GSAP visual animations
@@ -25682,6 +25666,25 @@ class AccessibilityWidget {
                     transition-delay: 0s !important;
                 }
                 
+                /* PREVENT ZOOMING AND SCALING - No transform effects */
+                body.seizure-safe * {
+                    transform: none !important;
+                    transform-origin: unset !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                /* PREVENT HOVER EFFECTS AND INTERACTIONS */
+                body.seizure-safe *:hover,
+                body.seizure-safe *:focus,
+                body.seizure-safe *:active {
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
                 /* Stop ALL CSS animations by name */
                 body.seizure-safe * {
                     animation-name: none !important;
@@ -25750,14 +25753,14 @@ class AccessibilityWidget {
                     animation-play-state: paused !important;
                 }
                 
-                /* Stop Lottie animations specifically */
+                /* Stop Lottie animations specifically - DON'T HIDE THEM */
                 body.seizure-safe [data-lottie],
                 body.seizure-safe .lottie,
                 body.seizure-safe canvas[data-lottie] {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
-                    display: none !important;
+                    /* REMOVED: display: none !important; - Don't hide, just stop animations */
                 }
                 
                 /* Stop GSAP animations */
@@ -25786,7 +25789,7 @@ class AccessibilityWidget {
                     /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
                 }
                 
-                /* CRITICAL: Ensure scrolling works properly */
+                /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
                     filter: saturate(0.7) !important;
                     overflow: auto !important;
@@ -25794,6 +25797,15 @@ class AccessibilityWidget {
                     overflow-y: auto !important;
                     /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                     position: static !important;
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                body.seizure-safe html {
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
                 }
                 
                 body.seizure-safe html {
