@@ -465,7 +465,7 @@
                             transition: none !important;
                             transition-property: none !important;
                             transition-duration: 0s !important;
-                            scroll-behavior: auto !important;
+                            /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                         }
                         /* Do not affect cursor appearance */
                         body.seizure-safe * { cursor: inherit; }
@@ -990,7 +990,7 @@ function applyUniversalStopMotion(enabled) {
                     animation-duration: 0s !important;
                     transition-duration: 0s !important;
                     animation-iteration-count: 1 !important;
-                    scroll-behavior: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                 }
             `;
         } else if (css) {
@@ -1111,12 +1111,9 @@ function applyVisionImpaired(on) {
                 margin: 0 !important;
                 padding: 0 !important;
                 min-height: 100vh !important;
-                /* Apply scaling to body instead of html to avoid panel viewport issues */
-                transform: scale(var(--vision-scale, 1.1)) !important;
+                /* Simple scaling to enhance vision - no calculations */
+                transform: scale(1.1) !important;
                 transform-origin: top left !important;
-                width: calc(100% / var(--vision-scale, 1.1)) !important;
-                height: calc(100% / var(--vision-scale, 1.1)) !important;
-                transition: transform 240ms ease !important;
             }
 
             /* 2. CONTENT WRAPPER - Simplified approach */
@@ -1251,11 +1248,9 @@ function applyVisionImpaired(on) {
                 
                 body.vision-impaired {
                     min-height: 100vh !important;
-                    /* Apply scaling to body instead of html to avoid panel viewport issues */
-                    transform: scale(var(--vision-scale, 1.1)) !important;
+                    /* Simple scaling to enhance vision - no calculations */
+                    transform: scale(1.1) !important;
                     transform-origin: top left !important;
-                    width: calc(100% / var(--vision-scale, 1.1)) !important;
-                    height: calc(100% / var(--vision-scale, 1.1)) !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
@@ -23207,7 +23202,7 @@ class AccessibilityWidget {
     
                         transition-duration: 0.01ms !important;
     
-                        scroll-behavior: auto !important;
+                        /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
     
                     }
     
