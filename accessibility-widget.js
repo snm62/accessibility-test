@@ -13696,10 +13696,20 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             const html = document.documentElement;
+            const widgetContainer = document.getElementById('accessibility-widget-container');
+            let scaleWrapper = document.getElementById('ck-content-scale-wrapper');
             
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
+                
+                if (scaleWrapper) {
+                    // Unwrap content: move children back to body
+                    while (scaleWrapper.firstChild) {
+                        body.insertBefore(scaleWrapper.firstChild, widgetContainer);
+                    }
+                    scaleWrapper.remove();
+                }
                 
                 // Reset any scaling styles
                 body.style.transform = '';
@@ -13714,13 +13724,48 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             
-            // Apply simple CSS transform scaling - no complex calculations
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
+            // Create wrapper if it doesn't exist
+            if (!scaleWrapper) {
+                scaleWrapper = document.createElement('div');
+                scaleWrapper.id = 'ck-content-scale-wrapper';
+                scaleWrapper.style.width = '100%';
+                scaleWrapper.style.minHeight = '100%';
+                scaleWrapper.style.transformOrigin = 'top left';
+                
+                // Move all body children into the wrapper, except the accessibility widget
+                const children = Array.from(body.childNodes);
+                const shouldExclude = (el) => {
+                    if (!(el instanceof HTMLElement)) return false;
+                    return (
+                        el.id === 'accessibility-widget' ||
+                        el.id === 'accessibility-panel' ||
+                        el.id === 'accessibility-widget-container' ||
+                        el.classList.contains('accessibility-widget') ||
+                        el.classList.contains('accessibility-panel') ||
+                        el.hasAttribute('data-ck-widget')
+                    );
+                };
+                
+                body.appendChild(scaleWrapper);
+                children.forEach(node => {
+                    if (node === scaleWrapper) return;
+                    if (node.nodeType === 1 && shouldExclude(node)) {
+                        // Leave widget elements at body level
+                        return;
+                    }
+                    scaleWrapper.appendChild(node);
+                });
+            }
             
-            // Ensure the body takes up the full viewport
-            body.style.width = '100vw';
-            body.style.height = '100vh';
+            // Apply scaling to the wrapper only
+            scaleWrapper.style.transform = `scale(${scale})`;
+            scaleWrapper.style.transformOrigin = 'top left';
+            
+            // Keep accessibility widget at normal size
+            if (widgetContainer) {
+                widgetContainer.style.transform = 'scale(1)';
+                widgetContainer.style.transformOrigin = 'center center';
+            }
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -15139,81 +15184,16 @@ class AccessibilityWidget {
         // Reset Methods
     
         resetContentScale() {
-    
             this.contentScale = 100; // Reset to 100% (normal size)
-    
             this.settings['content-scale'] = 100; // Save to settings
-    
             
-    
-            // Reset body scaling
-    
-            const body = document.body;
-    
-            const html = document.documentElement;
-    
+            // Use the updateContentScale method to handle wrapper cleanup
+            this.updateContentScale();
             
-    
-            body.style.transform = '';
-    
-            body.style.transformOrigin = '';
-    
-            body.style.width = '';
-    
-            body.style.height = '';
-    
-            body.style.position = '';
-    
-            body.style.left = '';
-    
-            body.style.top = '';
-    
-            
-    
-            // Reset accessibility widget container
-    
-            const widgetContainer = document.getElementById('accessibility-widget-container');
-    
-            if (widgetContainer) {
-    
-                widgetContainer.style.transform = '';
-    
-                widgetContainer.style.transformOrigin = '';
-    
-            }
-    
-            
-    
-            // Reset accessibility widget elements
-    
-            const accessibilityElements = document.querySelectorAll('.accessibility-panel, #accessibility-icon, .accessibility-icon');
-    
-            accessibilityElements.forEach(element => {
-    
-                element.style.transform = '';
-    
-                element.style.transformOrigin = '';
-    
-            });
-    
-            
-    
-            // Reset container overflow restrictions
-    
-            html.style.overflow = '';
-    
-            html.style.maxWidth = '';
-    
-            html.style.maxHeight = '';
-    
-            
-    
             this.updateContentScaleDisplay();
-    
             this.saveSettings(); // Persist the reset
-    
+            
             console.log('Accessibility Widget: Content scale reset to 100%');
-    
         }
     
     
