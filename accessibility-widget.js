@@ -204,7 +204,7 @@
                 body.seizure-safe *[class*="inflate"],
                 body.seizure-safe *[class*="deflate"],
                 body.seizure-safe *[class*="morph"],
-                body.seizure-safe *[class*="transform"],
+                /* REMOVED: body.seizure-safe *[class*="transform"], - This was interfering with scroll libraries */
                 body.seizure-safe *[class*="transition"],
                 body.seizure-safe *[class*="migrate"],
                 body.seizure-safe *[class*="shift"] {
@@ -245,12 +245,12 @@
                 /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
                 body.seizure-safe *[style*="animation"],
                 body.seizure-safe *[style*="transition"],
-                body.seizure-safe *[style*="transform"],
+                /* REMOVED: body.seizure-safe *[style*="transform"], - This was interfering with scroll libraries */
                 body.seizure-safe *[style*="opacity"],
                 body.seizure-safe *[style*="visibility"],
                 body.seizure-safe *[data-animation],
                 body.seizure-safe *[data-transition],
-                body.seizure-safe *[data-transform],
+                /* REMOVED: body.seizure-safe *[data-transform], - This was interfering with scroll libraries */
                 body.seizure-safe *[data-opacity],
                 body.seizure-safe *[data-visibility] {
                     animation: none !important;
@@ -23534,7 +23534,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="inflate"],
                     .stop-animation *[class*="deflate"],
                     .stop-animation *[class*="morph"],
-                    .stop-animation *[class*="transform"],
+                    /* REMOVED: .stop-animation *[class*="transform"], - This was interfering with scroll libraries */
                     .stop-animation *[class*="transition"],
                     .stop-animation *[class*="migrate"],
                     .stop-animation *[class*="shift"],
@@ -23666,12 +23666,12 @@ class AccessibilityWidget {
                     /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
                     .stop-animation *[style*="animation"],
                     .stop-animation *[style*="transition"],
-                    .stop-animation *[style*="transform"],
+                    /* REMOVED: .stop-animation *[style*="transform"], - This was interfering with scroll libraries */
                     .stop-animation *[style*="opacity"],
                     .stop-animation *[style*="visibility"],
                     .stop-animation *[data-animation],
                     .stop-animation *[data-transition],
-                    .stop-animation *[data-transform],
+                    /* REMOVED: .stop-animation *[data-transform], - This was interfering with scroll libraries */
                     .stop-animation *[data-opacity],
                     .stop-animation *[data-visibility] {
                         animation: none !important;
@@ -23901,12 +23901,14 @@ class AccessibilityWidget {
                     /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
                     .stop-animation *[style*="animation"],
                     .stop-animation *[style*="transition"],
-                    .stop-animation *[style*="transform"],
+                    /* REMOVED: .stop-animation *[style*="transform"], - This was interfering with scroll libraries */
                     .stop-animation *[style*="opacity"],
                     .stop-animation *[style*="visibility"],
                     .stop-animation *[data-animation],
                     .stop-animation *[data-transition],
-                    .stop-animation *[data-transform] {
+                    /* REMOVED: .stop-animation *[data-transform], - This was interfering with scroll libraries */
+                    .stop-animation *[data-opacity],
+                    .stop-animation *[data-visibility] {
                         animation: none !important;
                         transition: none !important;
                         opacity: 1 !important;
@@ -24093,10 +24095,10 @@ class AccessibilityWidget {
                     if (document.body.classList.contains('stop-animation') || 
                         document.body.classList.contains('seizure-safe')) {
                         
-                        // Allow scroll-related animations to work
+                        // Allow scroll-related animations to work - be more permissive
                         if (callback && typeof callback === 'function') {
                             try {
-                                // Execute the callback to allow scroll animations
+                                // Always execute the callback to allow scroll libraries to work
                                 callback(performance.now());
                             } catch (e) {
                                 console.warn('Accessibility Widget: Animation callback error:', e);
@@ -24146,24 +24148,25 @@ class AccessibilityWidget {
                     });
                 }
                 
-                // GSAP: Pause global timeline
+                // GSAP: Only pause visual animations, preserve scroll-related animations
                 if (typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
                     try {
-                        window.gsap.globalTimeline.pause();
-                        console.log('Accessibility Widget: Paused GSAP global timeline');
+                        // Don't pause global timeline - this would break ScrollTrigger
+                        // Instead, let the requestAnimationFrame override handle it
+                        console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
                     } catch (error) {
-                        console.warn('Accessibility Widget: Failed to pause GSAP timeline', error);
+                        console.warn('Accessibility Widget: Failed to handle GSAP timeline', error);
                     }
                 }
                 
-                // GSAP: Stop all GSAP animations
+                // GSAP: Only kill visual animations, preserve scroll-related animations
                 if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
                     try {
-                        // Kill all tweens
-                        window.gsap.killTweensOf("*");
-                        console.log('Accessibility Widget: Killed all GSAP tweens');
+                        // Don't kill all tweens - this would break ScrollTrigger
+                        // Instead, let the requestAnimationFrame override handle it
+                        console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
                     } catch (error) {
-                        console.warn('Accessibility Widget: Failed to kill GSAP tweens', error);
+                        console.warn('Accessibility Widget: Failed to handle GSAP tweens', error);
                     }
                 }
                 
@@ -27013,15 +27016,25 @@ class AccessibilityWidget {
         
         // Disable smooth scrolling libraries that interfere with panel scrolling
         disableSmoothScrollingLibraries() {
-            console.log('[CK] disableSmoothScrollingLibraries() - Disabling GSAP/Lenis smooth scrolling');
+            console.log('[CK] disableSmoothScrollingLibraries() - Temporarily pausing GSAP/Lenis smooth scrolling');
             
-            // Disable Lenis smooth scrolling
+            // Don't destroy Lenis - just pause it temporarily
             if (window.lenis) {
                 try {
-                    window.lenis.destroy();
-                    console.log('[CK] Lenis smooth scrolling disabled');
+                    // Store original state
+                    if (!window._originalLenisState) {
+                        window._originalLenisState = {
+                            isActive: window.lenis.isActive,
+                            isStopped: window.lenis.isStopped
+                        };
+                    }
+                    // Pause instead of destroy to preserve scroll functionality
+                    if (window.lenis.pause) {
+                        window.lenis.pause();
+                        console.log('[CK] Lenis smooth scrolling paused');
+                    }
                 } catch (e) {
-                    console.log('[CK] Lenis not found or already disabled');
+                    console.log('[CK] Lenis not found or already paused');
                 }
             }
             
@@ -27048,21 +27061,16 @@ class AccessibilityWidget {
         enableSmoothScrollingLibraries() {
             console.log('[CK] enableSmoothScrollingLibraries() - Re-enabling smooth scrolling libraries');
             
-            // Re-enable Lenis if it was active
-            if (window.innerWidth > 1280) {
-                // Only re-enable on desktop
+            // Re-enable Lenis if it was paused
+            if (window.lenis) {
                 try {
-                    if (typeof Lenis !== 'undefined') {
-                        window.lenis = new Lenis({
-                            duration: 1.2,
-                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                            smooth: true,
-                            smoothTouch: true,
-                        });
-                        console.log('[CK] Lenis smooth scrolling re-enabled');
+                    // Resume instead of recreating
+                    if (window.lenis.resume) {
+                        window.lenis.resume();
+                        console.log('[CK] Lenis smooth scrolling resumed');
                     }
                 } catch (e) {
-                    console.log('[CK] Could not re-enable Lenis');
+                    console.log('[CK] Could not resume Lenis');
                 }
             }
         }
