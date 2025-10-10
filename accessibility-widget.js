@@ -337,8 +337,8 @@
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
-                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
-                body.seizure-safe *[class*="scroll"],
+                /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
+                /* body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
                 body.seizure-safe *[class*="line"],
@@ -365,10 +365,7 @@
                 body.seizure-safe *[class*="orbit"] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
+                } */
                 
                 /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
                 body.seizure-safe progress,
@@ -1114,7 +1111,12 @@ function applyVisionImpaired(on) {
                 margin: 0 !important;
                 padding: 0 !important;
                 min-height: 100vh !important;
-                /* Preserve normal body behavior */
+                /* Apply scaling to body instead of html to avoid panel viewport issues */
+                transform: scale(var(--vision-scale, 1.1)) !important;
+                transform-origin: top left !important;
+                width: calc(100% / var(--vision-scale, 1.1)) !important;
+                height: calc(100% / var(--vision-scale, 1.1)) !important;
+                transition: transform 240ms ease !important;
             }
 
             /* 2. CONTENT WRAPPER - Simplified approach */
@@ -1249,6 +1251,11 @@ function applyVisionImpaired(on) {
                 
                 body.vision-impaired {
                     min-height: 100vh !important;
+                    /* Apply scaling to body instead of html to avoid panel viewport issues */
+                    transform: scale(var(--vision-scale, 1.1)) !important;
+                    transform-origin: top left !important;
+                    width: calc(100% / var(--vision-scale, 1.1)) !important;
+                    height: calc(100% / var(--vision-scale, 1.1)) !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
@@ -23761,8 +23768,8 @@ class AccessibilityWidget {
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
-                    /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
-                    .stop-animation *[class*="scroll"],
+                    /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
+                    /* .stop-animation *[class*="scroll"],
                     .stop-animation *[class*="progress"],
                     .stop-animation *[class*="bar"],
                     .stop-animation *[class*="line"],
@@ -23789,11 +23796,9 @@ class AccessibilityWidget {
                     .stop-animation *[class*="orbit"] {
                         animation: none !important;
                         transition: none !important;
-                       
                         opacity: 1 !important;
                         visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
-                    }
+                    } */
                     
                     /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
                     .stop-animation progress,
@@ -23846,8 +23851,8 @@ class AccessibilityWidget {
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
-                    /* SCROLL-TRIGGERED LINE ANIMATIONS: Stop all scroll-based line animations */
-                    .stop-animation *[class*="scroll"],
+                    /* REMOVED: SCROLL-TRIGGERED LINE ANIMATIONS - This was interfering with scroll animated websites */
+                    /* .stop-animation *[class*="scroll"],
                     .stop-animation *[class*="progress"],
                     .stop-animation *[class*="bar"],
                     .stop-animation *[class*="line"],
@@ -23866,8 +23871,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
-                    }
+                    } */
                     
                     /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
                     .stop-animation *[class*="item"],
@@ -25968,16 +25972,15 @@ class AccessibilityWidget {
                     /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
                 }
                 
-                /* Stop scroll animations - PRESERVE SCROLL ANIMATIONS */
-                body.seizure-safe *[class*="scroll"],
+                /* REMOVED: Stop scroll animations - This was interfering with scroll animated websites */
+                /* body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
                 body.seizure-safe *[class*="line"],
                 body.seizure-safe *[class*="timeline"] {
                     animation: none !important;
                     transition: none !important;
-                   
-                }
+                } */
                 
                 /* Stop media animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe video,
