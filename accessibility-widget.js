@@ -13696,12 +13696,22 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             const html = document.documentElement;
-            
+            const widgetContainer = document.getElementById('accessibility-widget-container');
+            let scaleWrapper = document.getElementById('ck-content-scale-wrapper');
+
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                // Reset any scaling styles
+                if (scaleWrapper) {
+                    // Unwrap content: move children back to body
+                    while (scaleWrapper.firstChild) {
+                        body.insertBefore(scaleWrapper.firstChild, widgetContainer);
+                    }
+                    scaleWrapper.remove();
+                }
+                
+                // Reset any lingering styles on body/html
                 body.style.transform = '';
                 body.style.transformOrigin = '';
                 body.style.width = '';
@@ -13714,13 +13724,31 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             
-            // Apply simple CSS transform scaling directly to body - no wrapper needed
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
+            // Create wrapper if it doesn't exist
+            if (!scaleWrapper) {
+                scaleWrapper = document.createElement('div');
+                scaleWrapper.id = 'ck-content-scale-wrapper';
+                
+                // Move all body children into the wrapper, except the widget
+                while (body.firstChild) {
+                    if (body.firstChild === widgetContainer) {
+                        body.appendChild(body.firstChild); // Move widget to end temporarily
+                    } else {
+                        scaleWrapper.appendChild(body.firstChild);
+                    }
+                }
+                body.insertBefore(scaleWrapper, widgetContainer); // Insert wrapper before widget
+            }
             
-            // Ensure body takes full viewport to prevent gaps
-            body.style.width = '100vw';
-            body.style.height = '100vh';
+            // Apply scaling to the wrapper
+            scaleWrapper.style.transform = `scale(${scale})`;
+            scaleWrapper.style.transformOrigin = 'top left';
+            
+            // Keep widget at normal size
+            if (widgetContainer) {
+                widgetContainer.style.transform = 'scale(1)';
+                widgetContainer.style.transformOrigin = 'center center';
+            }
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -15142,16 +15170,8 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Reset scaling styles directly
-            const body = document.body;
-            const html = document.documentElement;
-            
-            body.style.transform = '';
-            body.style.transformOrigin = '';
-            body.style.width = '';
-            body.style.height = '';
-            html.style.transform = '';
-            html.style.transformOrigin = '';
+            // Use updateContentScale to handle wrapper cleanup
+            this.updateContentScale();
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -22534,50 +22554,81 @@ class AccessibilityWidget {
         
         // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
         stopAnimationLibraries() {
-            // Stop Lottie animations
+            // AGGRESSIVE: Stop Lottie animations
             if (typeof lottie !== 'undefined' && lottie.getRegisteredAnimations) {
                 try {
                     lottie.getRegisteredAnimations().forEach(anim => {
                         if (anim && typeof anim.stop === 'function') {
                             anim.stop();
                         }
+                        if (anim && typeof anim.pause === 'function') {
+                            anim.pause();
+                        }
+                        if (anim && typeof anim.destroy === 'function') {
+                            anim.destroy();
+                        }
                     });
-                    console.log('Accessibility Widget: Lottie animations stopped');
+                    console.log('Accessibility Widget: Lottie animations stopped aggressively');
                 } catch (e) {
                     console.warn('Accessibility Widget: Failed to stop Lottie animations:', e);
                 }
             }
             
-            // GSAP: Only pause visual animations, preserve scroll-related animations
-            if (typeof gsap !== 'undefined' && window.gsap.globalTimeline) {
+            // AGGRESSIVE: Stop GSAP visual animations (but preserve scroll)
+            if (typeof gsap !== 'undefined') {
                 try {
-                    // Don't pause global timeline - this would break ScrollTrigger
-                    // Instead, let the requestAnimationFrame override handle it
-                    console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
+                    // Kill visual animations but preserve scroll-related ones
+                    if (gsap.killTweensOf) {
+                        gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, .bounce, .pulse, .shake, .flash, .blink, .glow, .spin, .rotate, .scale, .zoom, .wiggle, .jiggle, .twist, .flip, .swing, .wobble, .tilt');
+                    }
+                    console.log('Accessibility Widget: GSAP visual animations stopped');
                 } catch (error) {
-                    console.warn('Accessibility Widget: Failed to handle GSAP timeline', error);
+                    console.warn('Accessibility Widget: Failed to stop GSAP animations', error);
                 }
             }
 
-            // GSAP: Only kill visual animations, preserve scroll-related animations
-            if (typeof gsap !== 'undefined' && window.gsap.killTweensOf) {
+            // AGGRESSIVE: Stop Three.js animations
+            if (typeof THREE !== 'undefined') {
                 try {
-                    // Don't kill all tweens - this would break ScrollTrigger
-                    // Instead, let the requestAnimationFrame override handle it
-                    console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
+                    // Stop all THREE.js animations
+                    if (window.scene && window.scene.children) {
+                        window.scene.children.forEach(child => {
+                            if (child.animations && child.animations.length > 0) {
+                                child.animations.forEach(anim => {
+                                    if (anim.stop) anim.stop();
+                                    if (anim.pause) anim.pause();
+                                });
+                            }
+                        });
+                    }
+                    console.log('Accessibility Widget: Three.js animations stopped');
                 } catch (error) {
-                    console.warn('Accessibility Widget: Failed to handle GSAP tweens', error);
+                    console.warn('Accessibility Widget: Failed to stop Three.js animations', error);
                 }
             }
-            
-            // ScrollTrigger: Don't kill all - this would break scroll functionality
-            if (typeof ScrollTrigger !== 'undefined') {
+
+            // AGGRESSIVE: Stop Swiper animations
+            if (typeof Swiper !== 'undefined') {
                 try {
-                    // Don't kill all ScrollTrigger - this would break scroll functionality
-                    // Instead, let the requestAnimationFrame override handle it
-                    console.log('Accessibility Widget: ScrollTrigger detected - using requestAnimationFrame override for seizure safety');
-                } catch (e) {
-                    console.warn('Accessibility Widget: Failed to handle ScrollTrigger', e);
+                    // Find and stop all Swiper instances
+                    document.querySelectorAll('.swiper').forEach(swiperEl => {
+                        if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                            swiperEl.swiper.autoplay.stop();
+                        }
+                    });
+                    console.log('Accessibility Widget: Swiper animations stopped');
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to stop Swiper animations', error);
+                }
+            }
+
+            // AGGRESSIVE: Stop AOS animations
+            if (typeof AOS !== 'undefined') {
+                try {
+                    AOS.refresh();
+                    console.log('Accessibility Widget: AOS animations stopped');
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to stop AOS animations', error);
                 }
             }
             
@@ -23903,33 +23954,37 @@ class AccessibilityWidget {
         // API Controls: Execute .stop() or .pause() methods on known animation libraries
         stopAnimationLibraries() {
             try {
-                // Lottie: Stop all registered animations
+                // AGGRESSIVE: Stop Lottie animations
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const lottieAnimations = window.lottie.getRegisteredAnimations();
                     lottieAnimations.forEach(animation => {
                         try {
                             if (animation && typeof animation.stop === 'function') {
                                 animation.stop();
-                                console.log('Accessibility Widget: Stopped Lottie animation');
                             }
                             if (animation && typeof animation.pause === 'function') {
                                 animation.pause();
-                                console.log('Accessibility Widget: Paused Lottie animation');
+                            }
+                            if (animation && typeof animation.destroy === 'function') {
+                                animation.destroy();
                             }
                         } catch (error) {
                             console.warn('Accessibility Widget: Failed to stop Lottie animation', error);
                         }
                     });
+                    console.log('Accessibility Widget: Lottie animations stopped aggressively');
                 }
                 
-                // GSAP: Only pause visual animations, preserve scroll-related animations
-                if (typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
+                // AGGRESSIVE: Stop GSAP visual animations
+                if (typeof window.gsap !== 'undefined') {
                     try {
-                        // Don't pause global timeline - this would break ScrollTrigger
-                        // Instead, let the requestAnimationFrame override handle it
-                        console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
+                        // Kill visual animations but preserve scroll-related ones
+                        if (window.gsap.killTweensOf) {
+                            window.gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, .bounce, .pulse, .shake, .flash, .blink, .glow, .spin, .rotate, .scale, .zoom, .wiggle, .jiggle, .twist, .flip, .swing, .wobble, .tilt');
+                        }
+                        console.log('Accessibility Widget: GSAP visual animations stopped');
                     } catch (error) {
-                        console.warn('Accessibility Widget: Failed to handle GSAP timeline', error);
+                        console.warn('Accessibility Widget: Failed to stop GSAP animations', error);
                     }
                 }
                 
@@ -25596,19 +25651,42 @@ class AccessibilityWidget {
             style.textContent = `
                 /* SIMPLE SEIZURE-SAFE STYLES - Only stop animations, preserve layout */
                 
-                /* Stop all animations and transitions globally - PRESERVE SCROLL ANIMATIONS */
+                /* AGGRESSIVE ANIMATION STOPPING - Stop ALL animations and transitions */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
+                    animation: none !important;
+                    transition: none !important;
                     animation-duration: 0s !important;
                     animation-iteration-count: 1 !important;
                     animation-delay: 0s !important;
                     transition-duration: 0s !important;
-                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
-                    animation: none !important;
-                    transition: none !important;
-                   
                     animation-play-state: paused !important;
+                    transform: none !important;
+                    filter: none !important;
+                }
+                
+                /* ULTIMATE ANIMATION KILLER - Stop everything */
+                body.seizure-safe * {
+                    animation-name: none !important;
+                    animation-duration: 0s !important;
+                    animation-timing-function: linear !important;
+                    animation-delay: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-direction: normal !important;
+                    animation-fill-mode: none !important;
+                    animation-play-state: paused !important;
+                    transition-property: none !important;
+                    transition-duration: 0s !important;
+                    transition-timing-function: linear !important;
+                    transition-delay: 0s !important;
+                }
+                
+                /* Stop ALL CSS animations by name */
+                body.seizure-safe * {
+                    animation-name: none !important;
+                    animation-timing-function: linear !important;
+                    animation-fill-mode: none !important;
                 }
                 
                 /* Stop specific animation classes - PRESERVE SCROLL ANIMATIONS */
@@ -25647,7 +25725,8 @@ class AccessibilityWidget {
                 body.seizure-safe .zoom-in {
                     animation: none !important;
                     transition: none !important;
-                    
+                    animation-play-state: paused !important;
+                }
                 
                 /* Stop text animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe [data-splitting],
@@ -25662,10 +25741,31 @@ class AccessibilityWidget {
                 /* Stop SVG animations - PRESERVE SCROLL ANIMATIONS */
                 body.seizure-safe svg,
                 body.seizure-safe svg path,
-                body.seizure-safe svg line {
+                body.seizure-safe svg line,
+                body.seizure-safe svg circle,
+                body.seizure-safe svg rect,
+                body.seizure-safe svg polygon {
                     animation: none !important;
                     transition: none !important;
-                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
+                    animation-play-state: paused !important;
+                }
+                
+                /* Stop Lottie animations specifically */
+                body.seizure-safe [data-lottie],
+                body.seizure-safe .lottie,
+                body.seizure-safe canvas[data-lottie] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    display: none !important;
+                }
+                
+                /* Stop GSAP animations */
+                body.seizure-safe .gsap-animated,
+                body.seizure-safe [data-gsap] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
                 }
                 
                 /* REMOVED: Stop scroll animations - This was interfering with scroll animated websites */
