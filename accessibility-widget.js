@@ -18,6 +18,7 @@
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* MINIMAL: Only ensure basic scrolling works */
@@ -108,7 +109,7 @@
                 body.seizure-safe *[class*="shift"] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
@@ -125,6 +126,7 @@
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                 }
 
                 /* Do NOT interfere with navbars/headers sticky/transform behavior */
@@ -153,7 +155,7 @@
                 body.seizure-safe *[data-visibility] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
@@ -171,7 +173,7 @@
                 body.seizure-safe [class*="media"] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
@@ -188,7 +190,7 @@
                 body.seizure-safe *[data-active] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
@@ -213,7 +215,7 @@
                 body.seizure-safe [class*="text-effect"] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
@@ -307,6 +309,7 @@
                 body.seizure-safe .split .word {
                     animation: none !important;
                     transition: none !important;
+                    animation-fill-mode: forwards !important;
                     /* Removed opacity and visibility rules to prevent scroll interference */
                     display: inline !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
@@ -25738,7 +25741,7 @@ class AccessibilityWidget {
                 body.seizure-safe .word {
                     animation: none !important;
                     transition: none !important;
-                    
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* Stop SVG animations - PRESERVE SCROLL ANIMATIONS */
@@ -25751,6 +25754,7 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -25760,6 +25764,7 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                     /* REMOVED: display: none !important; - Don't hide, just stop animations */
                 }
                 
@@ -25769,6 +25774,7 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* REMOVED: Stop scroll animations - This was interfering with scroll animated websites */
