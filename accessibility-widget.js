@@ -13914,9 +13914,9 @@ class AccessibilityWidget {
     
             body.style.transformOrigin = 'top left';
     
-            body.style.width = `${100 / scale}%`;
+            /* REMOVED: body.style.width = `${100 / scale}%`; - This was creating extra space at bottom */
     
-            body.style.height = `${100 / scale}%`;
+            /* REMOVED: body.style.height = `${100 / scale}%`; - This was creating extra space at bottom */
     
             
     
@@ -15563,7 +15563,10 @@ class AccessibilityWidget {
     
         removeTitleHighlights() {
     
-            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            // Use the same selector as highlightTitles to ensure all highlighted elements are found
+            const headings = document.querySelectorAll(
+                'h1, h2, h3, h4, h5, h6, [role="heading"], [aria-level], [class*="heading"], [class*="title"]'
+            );
     
             headings.forEach(heading => {
                 if (heading.dataset.highlighted) {
@@ -22952,44 +22955,40 @@ class AccessibilityWidget {
                 window._originalSetInterval = window.setInterval;
             }
             
-            // Override setTimeout and setInterval to prevent new animation loops
+            // Override setTimeout and setInterval to be much less aggressive
             window.setTimeout = (callback, delay) => {
-                // Allow essential timeouts but block obvious animation loops
+                // Allow ALL timeouts to execute - be much less aggressive
                 if (typeof callback === 'function') {
+                    // Only block very obvious animation loops, allow everything else
                     const callbackStr = callback.toString().toLowerCase();
-                    // Block obvious animation-related timeouts but allow scroll animations
-                    if (callbackStr.includes('animation') || 
-                        callbackStr.includes('animate') || 
-                        callbackStr.includes('transition') ||
-                        callbackStr.includes('opacity')) {
-                        // Only block non-scroll animations
-                        if (!callbackStr.includes('scroll') && 
-                            !callbackStr.includes('wheel') && 
-                            !callbackStr.includes('touch') &&
-                            !callbackStr.includes('mouse')) {
-                            return 0; // Block animation-related timeouts
-                        }
+                    // Only block if it's clearly a visual animation loop AND not scroll-related
+                    if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
+                        !callbackStr.includes('scroll') && 
+                        !callbackStr.includes('wheel') && 
+                        !callbackStr.includes('touch') &&
+                        !callbackStr.includes('mouse') &&
+                        !callbackStr.includes('lenis') &&
+                        !callbackStr.includes('gsap')) {
+                        return 0; // Block only obvious visual animation loops
                     }
                 }
                 return window._originalSetTimeout(callback, delay);
             };
             
             window.setInterval = (callback, delay) => {
-                // Block obvious animation intervals but allow essential ones
+                // Allow ALL intervals to execute - be much less aggressive
                 if (typeof callback === 'function') {
+                    // Only block very obvious animation loops, allow everything else
                     const callbackStr = callback.toString().toLowerCase();
-                    // Block obvious animation-related intervals but allow scroll animations
-                    if (callbackStr.includes('animation') || 
-                        callbackStr.includes('animate') || 
-                        callbackStr.includes('transition') ||
-                        callbackStr.includes('opacity')) {
-                        // Only block non-scroll animations
-                        if (!callbackStr.includes('scroll') && 
-                            !callbackStr.includes('wheel') && 
-                            !callbackStr.includes('touch') &&
-                            !callbackStr.includes('mouse')) {
-                            return 0; // Block animation-related intervals
-                        }
+                    // Only block if it's clearly a visual animation loop AND not scroll-related
+                    if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
+                        !callbackStr.includes('scroll') && 
+                        !callbackStr.includes('wheel') && 
+                        !callbackStr.includes('touch') &&
+                        !callbackStr.includes('mouse') &&
+                        !callbackStr.includes('lenis') &&
+                        !callbackStr.includes('gsap')) {
+                        return 0; // Block only obvious visual animation loops
                     }
                 }
                 return window._originalSetInterval(callback, delay);
@@ -24089,16 +24088,16 @@ class AccessibilityWidget {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // Override requestAnimationFrame to freeze visual animations but allow scroll animations
+                // Override requestAnimationFrame to be much less aggressive - only block obvious visual animations
                 window.requestAnimationFrame = function(callback) {
-                    // If stop-animation is enabled, allow scroll-related animations but block visual animations
+                    // If stop-animation or seizure-safe is enabled, be very selective about what to block
                     if (document.body.classList.contains('stop-animation') || 
                         document.body.classList.contains('seizure-safe')) {
                         
-                        // Allow scroll-related animations to work - be more permissive
+                        // Allow ALL callbacks to execute - be much less aggressive
                         if (callback && typeof callback === 'function') {
                             try {
-                                // Always execute the callback to allow scroll libraries to work
+                                // Always execute the callback to allow all animations including scroll
                                 callback(performance.now());
                             } catch (e) {
                                 console.warn('Accessibility Widget: Animation callback error:', e);
