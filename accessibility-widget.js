@@ -7,140 +7,38 @@
             console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
             document.body.classList.add('seizure-safe');
             
-            // Apply immediate CSS to stop all animations
+            // Apply minimal CSS to stop animations without interfering with scroll
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
-                body.seizure-safe * {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                }
-                
-                /* ULTIMATE CATCH-ALL: Stop all animations and preserve scroll animations */
+                /* MINIMAL SEIZURE-SAFE: Only stop animations, preserve scroll */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
-                   
                 }
                 
-                /* CRITICAL: Only stop animations, preserve all positioning and layout */
-                body.seizure-safe * {
-                    /* Only stop animations, don't change positioning */
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    
-                    
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                }
-                
-                /* CRITICAL: Ensure scrolling works properly */
+                /* MINIMAL: Only ensure basic scrolling works */
                 body.seizure-safe {
                     overflow: auto !important;
-                    overflow-x: auto !important;
-                    overflow-y: auto !important;
-                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
-                    position: static !important;
                 }
                 
                 body.seizure-safe html {
                     overflow: auto !important;
-                    overflow-x: auto !important;
-                    overflow-y: auto !important;
-                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
-                }
-                
-                /* Only reset positioning for elements that are likely to be animated - FORCE TO FINAL POSITIONS */
-                body.seizure-safe *[class*="animate"],
-                body.seizure-safe *[class*="fade"],
-                body.seizure-safe *[class*="slide"],
-                body.seizure-safe *[class*="bounce"],
-                body.seizure-safe *[class*="pulse"],
-                body.seizure-safe *[class*="shake"],
-                body.seizure-safe *[class*="flash"],
-                body.seizure-safe *[class*="blink"],
-                body.seizure-safe *[class*="glow"],
-                body.seizure-safe *[class*="spin"],
-                body.seizure-safe *[class*="rotate"],
-                body.seizure-safe *[class*="scale"],
-                body.seizure-safe *[class*="zoom"],
-                body.seizure-safe *[class*="wiggle"],
-                body.seizure-safe *[class*="jiggle"],
-                body.seizure-safe *[class*="twist"],
-                body.seizure-safe *[class*="flip"],
-                body.seizure-safe *[class*="swing"],
-                body.seizure-safe *[class*="wobble"],
-                body.seizure-safe *[class*="tilt"] {
-                    /* Removed positioning rules to preserve scrolling */
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
-                    height: auto !important;
                 }
 
-                /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
+                /* MINIMAL: Only preserve basic cursor behavior */
                 body.seizure-safe a[href],
                 body.seizure-safe button,
-                body.seizure-safe [role="button"],
-                body.seizure-safe [onclick],
-                body.seizure-safe input[type="button"],
-                body.seizure-safe input[type="submit"],
-                body.seizure-safe input[type="reset"],
-                body.seizure-safe .btn,
-                body.seizure-safe .button,
-                body.seizure-safe [class*="btn"],
-                body.seizure-safe [class*="button"],
-                body.seizure-safe [tabindex]:not([tabindex="-1"]) {
+                body.seizure-safe [role="button"] {
                     cursor: pointer !important;
                 }
-                /* Keep text cursor for text-editable fields */
+                
                 body.seizure-safe input[type="text"],
-                body.seizure-safe input[type="email"],
-                body.seizure-safe input[type="search"],
-                body.seizure-safe input[type="tel"],
-                body.seizure-safe input[type="url"],
-                body.seizure-safe input[type="password"],
-                body.seizure-safe textarea,
-                body.seizure-safe [contenteditable="true"] {
+                body.seizure-safe textarea {
                     cursor: text !important;
-                }
-                
-                /* Preserve original layout for specific elements */
-                body.seizure-safe img,
-                body.seizure-safe video,
-                body.seizure-safe audio,
-                body.seizure-safe iframe,
-                body.seizure-safe embed,
-                body.seizure-safe object {
-                    /* Removed positioning rules to preserve scrolling */
-                    animation: none !important;
-                    transition: none !important;
-                    max-width: 100% !important;
-                    max-height: 100% !important;
-                }
-                
-                /* Ensure text elements maintain original layout */
-                body.seizure-safe h1,
-                body.seizure-safe h2,
-                body.seizure-safe h3,
-                body.seizure-safe h4,
-                body.seizure-safe h5,
-                body.seizure-safe h6,
-                body.seizure-safe p,
-                body.seizure-safe span,
-                body.seizure-safe div,
-                body.seizure-safe a,
-                body.seizure-safe li,
-                body.seizure-safe td,
-                body.seizure-safe th,
-                body.seizure-safe label {
-                    /* Removed positioning rules to preserve scrolling */
-                    animation: none !important;
-                    transition: none !important;
                 }
                 
                 /* CRITICAL: Force ALL possible animations to their final state immediately */
@@ -2439,18 +2337,15 @@ class AccessibilityWidget {
             
     
             // Content scaling control buttons - using Shadow DOM
-    
             const decreaseContentScaleBtn = this.shadowRoot.getElementById('decrease-content-scale-btn');
-    
             if (decreaseContentScaleBtn) {
-    
                 decreaseContentScaleBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Accessibility Widget: Decrease content scale clicked');
                     this.decreaseContentScale();
                 });
-    
+                
                 // Add keyboard support
                 decreaseContentScaleBtn.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -2460,22 +2355,17 @@ class AccessibilityWidget {
                         this.decreaseContentScale();
                     }
                 });
-    
             }
-    
-    
-    
+            
             const increaseContentScaleBtn = this.shadowRoot.getElementById('increase-content-scale-btn');
-    
             if (increaseContentScaleBtn) {
-    
                 increaseContentScaleBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Accessibility Widget: Increase content scale clicked');
                     this.increaseContentScale();
                 });
-    
+                
                 // Add keyboard support
                 increaseContentScaleBtn.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -2485,7 +2375,6 @@ class AccessibilityWidget {
                         this.increaseContentScale();
                     }
                 });
-    
             }
     
     
@@ -12219,6 +12108,10 @@ class AccessibilityWidget {
                             return;
                         }
                         this.toggleContentScalingControls(true);
+                        // Apply the saved content scale
+                        if (this.contentScale !== 100) {
+                            this.updateContentScale();
+                        }
                         break;
     
                     case 'adjust-line-height':
@@ -13785,246 +13678,79 @@ class AccessibilityWidget {
         // Content Scaling Methods
     
         increaseContentScale() {
-    
             this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
-    
-            this.settings['content-scale'] = this.contentScale; // Save to settings
-    
-            // Mark that content scaling was actually used
-            localStorage.setItem('content-scaling-used', 'true');
-    
+            this.settings['content-scale'] = this.contentScale;
             this.updateContentScale();
-    
             this.updateContentScaleDisplay();
-    
-            this.saveSettings(); // Persist to localStorage
-    
+            this.saveSettings();
         }
-    
-    
-    
+        
         decreaseContentScale() {
-    
             this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
-    
-            this.settings['content-scale'] = this.contentScale; // Save to settings
-    
-            // Mark that content scaling was actually used
-            localStorage.setItem('content-scaling-used', 'true');
-    
+            this.settings['content-scale'] = this.contentScale;
             this.updateContentScale();
-    
             this.updateContentScaleDisplay();
-    
-            this.saveSettings(); // Persist to localStorage
-    
+            this.saveSettings();
         }
-    
-    
-    
+        
         updateContentScale() {
-    
-            // If content scale is 100%, reset to normal and don't apply any scaling
+            const body = document.body;
+            const html = document.documentElement;
+            
+            // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                const body = document.body;
-                const html = document.documentElement;
-                
-                // If a scaling wrapper exists, unwrap it safely
-                const existingWrapper = document.getElementById('ck-scale-wrapper');
-                if (existingWrapper) {
-                    try {
-                        // Move children out of the wrapper back to body (preserving order)
-                        const nodes = Array.from(existingWrapper.childNodes);
-                        nodes.forEach(node => body.insertBefore(node, existingWrapper));
-                        existingWrapper.remove();
-                    } catch (_) {}
-                }
-                
-                // Reset all scaling styles on body (in case previous versions set them)
+                // Reset any scaling styles
                 body.style.transform = '';
                 body.style.transformOrigin = '';
                 body.style.width = '';
                 body.style.height = '';
-                body.style.position = '';
-                body.style.left = '';
-                body.style.top = '';
-                
-                html.style.overflow = '';
-                html.style.maxWidth = '';
-                html.style.maxHeight = '';
-                
-                // Reset accessibility widget container
-                const widgetContainer = document.getElementById('accessibility-widget-container');
-                if (widgetContainer) {
-                    widgetContainer.style.transform = '';
-                    widgetContainer.style.transformOrigin = '';
-                }
+                html.style.transform = '';
+                html.style.transformOrigin = '';
                 
                 return;
             }
             
             const scale = this.contentScale / 100;
             
-            // Apply scaling via a dedicated wrapper to avoid affecting body/html sizing
-            const body = document.body;
-            const html = document.documentElement;
+            // Apply simple CSS transform scaling - no complex calculations
+            body.style.transform = `scale(${scale})`;
+            body.style.transformOrigin = 'top left';
             
-            // Ensure a single wrapper exists and excludes the accessibility widget
-            let wrapper = document.getElementById('ck-scale-wrapper');
-            if (!wrapper) {
-                wrapper = document.createElement('div');
-                wrapper.id = 'ck-scale-wrapper';
-                wrapper.style.width = '100%';
-                wrapper.style.minHeight = '100%';
-                wrapper.style.transformOrigin = 'top left';
-                // Move all body children into wrapper except our widget containers
-                const children = Array.from(body.childNodes);
-                const shouldExclude = (el) => {
-                    if (!(el instanceof HTMLElement)) return false;
-                    return (
-                        el.id === 'accessibility-widget' ||
-                        el.id === 'accessibility-panel' ||
-                        el.id === 'accessibility-widget-container' ||
-                        el.classList.contains('accessibility-widget') ||
-                        el.classList.contains('accessibility-panel') ||
-                        el.hasAttribute('data-ck-widget')
-                    );
-                };
-                body.appendChild(wrapper);
-                children.forEach(node => {
-                    if (node === wrapper) return;
-                    if (node.nodeType === 1 && shouldExclude(node)) {
-                        // Leave widget elements at body level
-                        return;
-                    }
-                    wrapper.appendChild(node);
-                });
-            }
-            
-            // Skip accessibility widget container from scaling
-            const widgetContainer = document.getElementById('accessibility-widget-container');
-            if (widgetContainer) {
-                widgetContainer.style.transform = 'scale(1)'; // Keep accessibility widget at normal size
-                widgetContainer.style.transformOrigin = 'center center';
-            }
-            
-            // Apply transform only on the wrapper; do not modify body/html layout sizing
-            wrapper.style.transform = `scale(${scale})`;
-            wrapper.style.transformOrigin = 'top left';
-            // Do not touch width/height/overflow
+            // Ensure the body takes up the full viewport
+            body.style.width = '100vw';
+            body.style.height = '100vh';
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
-    
-    
-    
+        
         updateContentScaleDisplay() {
-    
             const display = this.shadowRoot.getElementById('content-scale-value');
-    
             if (display) {
-    
                 display.textContent = this.contentScale + '%';
-    
                 console.log('Accessibility Widget: Updated content scale display to', this.contentScale + '%');
-    
-            } else {
-    
-                console.log('Accessibility Widget: Content scale display element not found');
-    
             }
-    
         }
-    
-    
-    
+        
         toggleContentScalingControls(enabled) {
-    
-            console.log('🎛️ [CONTENT SCALING] toggleContentScalingControls called with enabled:', enabled);
-    
             const controls = this.shadowRoot.getElementById('content-scaling-controls');
-    
-            console.log('🎛️ [CONTENT SCALING] Controls element found:', !!controls);
-            console.log('🎛️ [CONTENT SCALING] Shadow root exists:', !!this.shadowRoot);
-            console.log('🎛️ [CONTENT SCALING] Controls element:', controls);
-    
             if (controls) {
-    
                 controls.style.display = enabled ? 'block' : 'none';
-    
-                console.log('🎛️ [CONTENT SCALING] Controls display set to:', enabled ? 'block' : 'none');
-    
-                // Force the display with !important
-                if (enabled) {
-                    controls.style.setProperty('display', 'block', 'important');
-                    console.log('🎛️ [CONTENT SCALING] Forced display: block with !important');
-                } else {
-                    controls.style.setProperty('display', 'none', 'important');
-                    console.log('🎛️ [CONTENT SCALING] Forced display: none with !important');
-                }
-    
             }
-    
             
-    
             if (enabled) {
-                // Check if content scaling was actually used (not just toggled on)
-                const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
-                
-                if (!wasContentScalingUsed && this.contentScale === 100) {
-                    // If toggled on but never used, don't save the state and return
-                    console.log('[CK] Content scaling toggled on but never used, not saving state');
-                    return;
-                }
-            }
-    
-            // Save the toggle state
-    
-            this.settings['content-scaling'] = enabled;
-    
-            this.saveSettings();
-    
-            
-    
-            if (enabled) {
-    
-                // Always show the current percentage, even if it's 100%
                 this.updateContentScaleDisplay();
-    
-                // Show the current percentage in the display
-                const scaleDisplay = this.shadowRoot.getElementById('content-scale-display');
-                if (scaleDisplay) {
-                    scaleDisplay.textContent = `${this.contentScale}%`;
-                }
-                
-                // Only apply scaling if the current scale is not 100%
                 if (this.contentScale !== 100) {
                     this.updateContentScale();
                 }
             } else {
-    
-                        // Reset content scale when disabled
-    
-            this.contentScale = 100;
-    
+                // Reset content scale when disabled
+                this.contentScale = 100;
                 this.settings['content-scale'] = 100;
-    
-            this.updateContentScale();
-    
+                this.updateContentScale();
                 this.saveSettings();
-    
-            
-    
-            // Reset line height when disabled
-    
-            this.lineHeight = 100;
-    
-            this.resetLineHeight();
-    
             }
-    
         }
     
     
@@ -25257,70 +24983,34 @@ class AccessibilityWidget {
     
     
     
-        // Ensure native scrolling is enabled (avoid sites locking scroll via overflow hidden or smooth-scroll libs)
+        // Ensure native scrolling is enabled (MINIMAL approach to avoid interfering with scroll libraries)
         enforceNativeScroll() {
             try {
                 const html = document.documentElement;
                 const body = document.body;
                 if (!html || !body) return;
 
-                // Clear common scroll locks
-                html.style.overflow = 'auto';
-                body.style.overflow = 'auto';
-                body.style.overflowY = 'auto';
-                body.style.overflowX = 'auto';
-                body.style.position = body.style.position === 'fixed' ? '' : body.style.position;
+                // MINIMAL: Only clear obvious scroll locks, don't interfere with scroll libraries
+                // Only remove overflow hidden if it's clearly blocking scroll
+                if (html.style.overflow === 'hidden') {
+                    html.style.overflow = 'auto';
+                }
+                if (body.style.overflow === 'hidden') {
+                    body.style.overflow = 'auto';
+                }
 
-                // Remove common classes that lock scroll
-                const scrollLockClasses = ['no-scroll', 'overflow-hidden', 'modal-open', 'is-locked', 'scroll-lock', 'scroll-disabled', 'no-scrollbar'];
-                scrollLockClasses.forEach(cls => { 
+                // MINIMAL: Only remove obvious scroll lock classes, don't interfere with scroll libraries
+                const obviousScrollLockClasses = ['no-scroll', 'modal-open', 'is-locked'];
+                obviousScrollLockClasses.forEach(cls => { 
                     try { 
                         body.classList.remove(cls); 
                         html.classList.remove(cls); 
-                        // Also remove from all elements EXCEPT accessibility panel
-                        document.querySelectorAll(`.${cls}`).forEach(el => {
-                            // Don't remove scroll lock classes from accessibility panel
-                            if (!el.closest('.accessibility-panel') && 
-                                !el.closest('.accessibility-widget') && 
-                                !el.closest('#accessibility-panel') && 
-                                !el.closest('#accessibility-widget')) {
-                                el.classList.remove(cls);
-                            }
-                        });
                     } catch (_) {} 
                 });
 
-                // Reset touch/scroll behavior
-                html.style.scrollBehavior = 'auto';
-                body.style.scrollBehavior = 'auto';
-                html.style.touchAction = 'auto';
-                body.style.touchAction = 'auto';
-
-                // For frameworks that put overflow hidden on root containers
-                try {
-                    const locked = document.querySelectorAll('[style*="overflow: hidden"],[class*="overflow-hidden"]');
-                    for (const el of locked) {
-                        if (el === body || el === html) {
-                            el.style.overflow = 'auto';
-                        }
-                    }
-                } catch (_) {}
-
-                // Force remove any fixed positioning that might block scroll
-                if (body.style.position === 'fixed') {
-                    body.style.position = 'static';
-                }
-                if (html.style.position === 'fixed') {
-                    html.style.position = 'static';
-                }
-
-                // Remove any height restrictions that might prevent scrolling
-                if (body.style.height === '100vh' || body.style.height === '100%') {
-                    body.style.height = 'auto';
-                }
-                if (html.style.height === '100vh' || html.style.height === '100%') {
-                    html.style.height = 'auto';
-                }
+                // MINIMAL: Don't reset scroll-behavior or touch-action as this interferes with scroll libraries
+                // Don't remove height restrictions as this can break layout
+                // Don't force position changes as this can break scroll libraries
 
             } catch (_) {}
         }
