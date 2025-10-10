@@ -110,7 +110,8 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -122,11 +123,12 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
 
                 /* Do NOT interfere with navbars/headers sticky/transform behavior */
@@ -216,7 +218,8 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -232,8 +235,9 @@
                 body.seizure-safe [class*="item"]:hover {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
@@ -295,8 +299,9 @@
                 body.seizure-safe [class*="orbit"] {
                     animation: none !important;
                     transition: none !important;
-                    /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
@@ -310,13 +315,15 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     display: inline !important;
                     /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split {
-                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     display: block !important;
                 }
             `;
@@ -25718,7 +25725,9 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="tilt"] {
                     animation: none !important;
                     transition: none !important;
-                    
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Stop library animations - PRESERVE SCROLL ANIMATIONS */
@@ -25732,6 +25741,9 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Stop text animations - PRESERVE SCROLL ANIMATIONS */
@@ -25742,6 +25754,8 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Stop SVG animations - PRESERVE SCROLL ANIMATIONS */
@@ -25755,6 +25769,8 @@ class AccessibilityWidget {
                     transition: none !important;
                     animation-play-state: paused !important;
                     animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -25765,6 +25781,8 @@ class AccessibilityWidget {
                     transition: none !important;
                     animation-play-state: paused !important;
                     animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                     /* REMOVED: display: none !important; - Don't hide, just stop animations */
                 }
                 
@@ -25775,6 +25793,8 @@ class AccessibilityWidget {
                     transition: none !important;
                     animation-play-state: paused !important;
                     animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* REMOVED: Stop scroll animations - This was interfering with scroll animated websites */
@@ -25797,7 +25817,7 @@ class AccessibilityWidget {
                 
                 /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
-                    filter: saturate(0.9) !important;
+                    filter: saturate(0.95) !important;
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
@@ -25830,7 +25850,7 @@ class AccessibilityWidget {
                 body.seizure-safe .accessibility-widget,
                 body.seizure-safe .accessibility-panel,
                 body.seizure-safe .toggle-switch {
-                    filter: saturate(0.9) !important;
+                    filter: saturate(0.95) !important;
                 }
             `;
     
