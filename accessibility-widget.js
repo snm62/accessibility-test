@@ -13696,20 +13696,10 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             const html = document.documentElement;
-            const widgetContainer = document.getElementById('accessibility-widget-container');
-            let scaleWrapper = document.getElementById('ck-content-scale-wrapper');
             
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
-                
-                if (scaleWrapper) {
-                    // Unwrap content: move children back to body
-                    while (scaleWrapper.firstChild) {
-                        body.insertBefore(scaleWrapper.firstChild, widgetContainer);
-                    }
-                    scaleWrapper.remove();
-                }
                 
                 // Reset any scaling styles
                 body.style.transform = '';
@@ -13724,48 +13714,13 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             
-            // Create wrapper if it doesn't exist
-            if (!scaleWrapper) {
-                scaleWrapper = document.createElement('div');
-                scaleWrapper.id = 'ck-content-scale-wrapper';
-                scaleWrapper.style.width = '100%';
-                scaleWrapper.style.minHeight = '100%';
-                scaleWrapper.style.transformOrigin = 'top left';
-                
-                // Move all body children into the wrapper, except the accessibility widget
-                const children = Array.from(body.childNodes);
-                const shouldExclude = (el) => {
-                    if (!(el instanceof HTMLElement)) return false;
-                    return (
-                        el.id === 'accessibility-widget' ||
-                        el.id === 'accessibility-panel' ||
-                        el.id === 'accessibility-widget-container' ||
-                        el.classList.contains('accessibility-widget') ||
-                        el.classList.contains('accessibility-panel') ||
-                        el.hasAttribute('data-ck-widget')
-                    );
-                };
-                
-                body.appendChild(scaleWrapper);
-                children.forEach(node => {
-                    if (node === scaleWrapper) return;
-                    if (node.nodeType === 1 && shouldExclude(node)) {
-                        // Leave widget elements at body level
-                        return;
-                    }
-                    scaleWrapper.appendChild(node);
-                });
-            }
+            // Apply simple CSS transform scaling directly to body - no wrapper needed
+            body.style.transform = `scale(${scale})`;
+            body.style.transformOrigin = 'top left';
             
-            // Apply scaling to the wrapper only
-            scaleWrapper.style.transform = `scale(${scale})`;
-            scaleWrapper.style.transformOrigin = 'top left';
-            
-            // Keep accessibility widget at normal size
-            if (widgetContainer) {
-                widgetContainer.style.transform = 'scale(1)';
-                widgetContainer.style.transformOrigin = 'center center';
-            }
+            // Ensure body takes full viewport to prevent gaps
+            body.style.width = '100vw';
+            body.style.height = '100vh';
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -15187,8 +15142,16 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Use the updateContentScale method to handle wrapper cleanup
-            this.updateContentScale();
+            // Reset scaling styles directly
+            const body = document.body;
+            const html = document.documentElement;
+            
+            body.style.transform = '';
+            body.style.transformOrigin = '';
+            body.style.width = '';
+            body.style.height = '';
+            html.style.transform = '';
+            html.style.transformOrigin = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -22416,8 +22379,7 @@ class AccessibilityWidget {
             // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
             this.injectStopAnimationCSS();
             
-            // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-            this.overrideRequestAnimationFrame();
+            // REMOVED: overrideRequestAnimationFrame call that was blocking scroll
             
             // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
             this.stopAnimationLibraries();
@@ -22425,8 +22387,7 @@ class AccessibilityWidget {
             // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
             this.replaceAnimatedMedia();
             
-            // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
-            this.stopDOMAnimationLoops();
+            // REMOVED: stopDOMAnimationLoops call that was blocking scroll
             
             // 6. Stop autoplay videos and embedded media
             this.stopAutoplayMedia();
@@ -22477,15 +22438,7 @@ class AccessibilityWidget {
                     .stop-animation *[class*="swing"],
                     .stop-animation *[class*="wobble"],
                     .stop-animation *[class*="tilt"],
-                    .stop-animation *[class*="scroll"],
-                    .stop-animation *[class*="progress"],
-                    .stop-animation *[class*="bar"],
-                    .stop-animation *[class*="line"],
-                    .stop-animation *[class*="timeline"] {
-                        animation: none !important;
-                        transition: none !important;
-                        /* Removed opacity and visibility rules to prevent extra text and positioning issues */
-                    }
+                    /* REMOVED: Scroll-related classes to preserve scroll animations */
                     
                     /* Stop SVG and Canvas animations */
                     .stop-animation svg,
@@ -22518,18 +22471,18 @@ class AccessibilityWidget {
                 window._originalRequestAnimationFrame = window.requestAnimationFrame;
             }
             
-            // Override the native function to be MUCH LESS AGGRESSIVE - allow all scroll libraries
+            // COMPLETELY NON-BLOCKING: Allow all animations including scroll
             window.requestAnimationFrame = (callback) => {
-                // Allow ALL callbacks to execute - be much less aggressive
+                // Execute ALL callbacks normally - no blocking
                 if (callback && typeof callback === 'function') {
                     try {
-                        // Always execute the callback to allow all animations including scroll
-                        callback(performance.now());
+                        return window._originalRequestAnimationFrame(callback);
                     } catch (e) {
                         console.warn('Accessibility Widget: Animation callback error:', e);
+                        return 0;
                     }
                 }
-                return 0; // Return a dummy handle
+                return 0;
             };
             
             console.log('Accessibility Widget: requestAnimationFrame overridden - allowing all animations including scroll');
@@ -22643,46 +22596,14 @@ class AccessibilityWidget {
                 window._originalSetInterval = window.setInterval;
             }
             
-            // Override setTimeout and setInterval to be MUCH LESS AGGRESSIVE - allow all scroll libraries
+            // COMPLETELY NON-BLOCKING: Allow all timeouts and intervals including scroll
             window.setTimeout = (callback, delay) => {
-                // Allow ALL timeouts to execute - be much less aggressive
-                if (typeof callback === 'function') {
-                    // Only block very obvious animation loops, allow everything else including scroll
-                    const callbackStr = callback.toString().toLowerCase();
-                    // Only block if it's clearly a visual animation loop AND not scroll-related
-                    if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
-                        !callbackStr.includes('scroll') && 
-                        !callbackStr.includes('wheel') && 
-                        !callbackStr.includes('touch') &&
-                        !callbackStr.includes('mouse') &&
-                        !callbackStr.includes('lenis') &&
-                        !callbackStr.includes('gsap') &&
-                        !callbackStr.includes('scrolltrigger') &&
-                        !callbackStr.includes('locomotive')) {
-                        return 0; // Block only obvious visual animation loops
-                    }
-                }
+                // Execute ALL timeouts normally - no blocking
                 return window._originalSetTimeout(callback, delay);
             };
             
             window.setInterval = (callback, delay) => {
-                // Allow ALL intervals to execute - be much less aggressive
-                if (typeof callback === 'function') {
-                    // Only block very obvious animation loops, allow everything else including scroll
-                    const callbackStr = callback.toString().toLowerCase();
-                    // Only block if it's clearly a visual animation loop AND not scroll-related
-                    if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
-                        !callbackStr.includes('scroll') && 
-                        !callbackStr.includes('wheel') && 
-                        !callbackStr.includes('touch') &&
-                        !callbackStr.includes('mouse') &&
-                        !callbackStr.includes('lenis') &&
-                        !callbackStr.includes('gsap') &&
-                        !callbackStr.includes('scrolltrigger') &&
-                        !callbackStr.includes('locomotive')) {
-                        return 0; // Block only obvious visual animation loops
-                    }
-                }
+                // Execute ALL intervals normally - no blocking
                 return window._originalSetInterval(callback, delay);
             };
             
@@ -23733,8 +23654,7 @@ class AccessibilityWidget {
             this.stopPortfolioAnimations();
             this.lockButtonHoverStyles();
             
-            // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-            this.overrideRequestAnimationFrame();
+            // REMOVED: overrideRequestAnimationFrame call that was blocking scroll
             
             // API Controls: Execute .stop() or .pause() methods on known animation libraries
             this.stopAnimationLibraries();
@@ -23780,25 +23700,18 @@ class AccessibilityWidget {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // Override requestAnimationFrame to be much less aggressive - only block obvious visual animations
+                // COMPLETELY NON-BLOCKING: Allow all animations including scroll
                 window.requestAnimationFrame = function(callback) {
-                    // If stop-animation or seizure-safe is enabled, be very selective about what to block
-                    if (document.body.classList.contains('stop-animation') || 
-                        document.body.classList.contains('seizure-safe')) {
-                        
-                        // Allow ALL callbacks to execute - be much less aggressive
-                        if (callback && typeof callback === 'function') {
-                            try {
-                                // Always execute the callback to allow all animations including scroll
-                                callback(performance.now());
-                            } catch (e) {
-                                console.warn('Accessibility Widget: Animation callback error:', e);
-                            }
+                    // Execute ALL callbacks normally - no blocking
+                    if (callback && typeof callback === 'function') {
+                        try {
+                            return window.__originalRequestAnimationFrame.call(window, callback);
+                        } catch (e) {
+                            console.warn('Accessibility Widget: Animation callback error:', e);
+                            return 0;
                         }
-                        return 0; // Return a valid ID
                     }
-                    // Otherwise, use the original function
-                    return window.__originalRequestAnimationFrame.call(window, callback);
+                    return 0;
                 };
                 
                 // Also override cancelAnimationFrame to be safe
@@ -24893,13 +24806,7 @@ class AccessibilityWidget {
                 }, 100);
             }
 
-            // Ensure page remains scrollable with native scrolling
-            try {
-                this.enforceNativeScroll();
-                // Re-assert after initial render in case site JS flips it back
-                setTimeout(() => { this.enforceNativeScroll(); }, 150);
-                setTimeout(() => { this.enforceNativeScroll(); }, 500);
-            } catch (_) {}
+            // REMOVED: enforceNativeScroll calls that were blocking scroll
     
             // Stop autoplay videos to prevent seizures
             this.stopAutoplayVideos();
@@ -24913,8 +24820,7 @@ class AccessibilityWidget {
             // CRITICAL: Stop all animation libraries (Lottie, GSAP, etc.)
             this.stopAnimationLibraries();
             
-            // CRITICAL: Override requestAnimationFrame to freeze JS animations
-            this.overrideRequestAnimationFrame();
+            // REMOVED: overrideRequestAnimationFrame call that was blocking scroll
             
             // CRITICAL: Replace animated media (GIFs, videos)
             this.replaceAnimatedMedia();
@@ -24963,37 +24869,7 @@ class AccessibilityWidget {
     
     
     
-        // Ensure native scrolling is enabled (MINIMAL approach to avoid interfering with scroll libraries)
-        enforceNativeScroll() {
-            try {
-                const html = document.documentElement;
-                const body = document.body;
-                if (!html || !body) return;
-
-                // MINIMAL: Only clear obvious scroll locks, don't interfere with scroll libraries
-                // Only remove overflow hidden if it's clearly blocking scroll
-                if (html.style.overflow === 'hidden') {
-                    html.style.overflow = 'auto';
-                }
-                if (body.style.overflow === 'hidden') {
-                    body.style.overflow = 'auto';
-                }
-
-                // MINIMAL: Only remove obvious scroll lock classes, don't interfere with scroll libraries
-                const obviousScrollLockClasses = ['no-scroll', 'modal-open', 'is-locked'];
-                obviousScrollLockClasses.forEach(cls => { 
-                    try { 
-                        body.classList.remove(cls); 
-                        html.classList.remove(cls); 
-                    } catch (_) {} 
-                });
-
-                // MINIMAL: Don't reset scroll-behavior or touch-action as this interferes with scroll libraries
-                // Don't remove height restrictions as this can break layout
-                // Don't force position changes as this can break scroll libraries
-
-            } catch (_) {}
-        }
+        // REMOVED: enforceNativeScroll function that was blocking scroll
     
         disableSeizureSafe() {
     
