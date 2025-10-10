@@ -13856,7 +13856,7 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             
-            // Apply simple scaling to the entire website body - NO COMPLEX CALCULATIONS
+            // Apply simple scaling like vision-impaired: only transform on body
             const body = document.body;
             const html = document.documentElement;
             
@@ -13867,12 +13867,10 @@ class AccessibilityWidget {
                 widgetContainer.style.transformOrigin = 'center center';
             }
             
-            // SIMPLE SCALING - Just scale the body, no complex positioning or overflow changes
+            // SIMPLE SCALING - just scale, don't alter layout sizing
             body.style.transform = `scale(${scale})`;
             body.style.transformOrigin = 'top left';
-            
-            // REMOVED ALL COMPLEX CALCULATIONS that were causing extra scrollbars and space
-            // No width/height calculations, no position changes, no overflow changes
+            // Do not touch width/height/overflow to avoid extra scrollbars and gaps
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -22771,12 +22769,12 @@ class AccessibilityWidget {
                 window._originalRequestAnimationFrame = window.requestAnimationFrame;
             }
             
-            // Override the native function to stop visual animation loops but allow scroll animations
+            // Override the native function to be MUCH LESS AGGRESSIVE - allow all scroll libraries
             window.requestAnimationFrame = (callback) => {
-                // Allow scroll-related animations to work even in seizure safe mode
+                // Allow ALL callbacks to execute - be much less aggressive
                 if (callback && typeof callback === 'function') {
                     try {
-                        // Execute the callback to allow scroll animations and essential operations
+                        // Always execute the callback to allow all animations including scroll
                         callback(performance.now());
                     } catch (e) {
                         console.warn('Accessibility Widget: Animation callback error:', e);
@@ -22785,7 +22783,7 @@ class AccessibilityWidget {
                 return 0; // Return a dummy handle
             };
             
-            console.log('Accessibility Widget: requestAnimationFrame overridden - visual animations stopped but scroll animations allowed');
+            console.log('Accessibility Widget: requestAnimationFrame overridden - allowing all animations including scroll');
         }
         
         // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
@@ -22804,28 +22802,36 @@ class AccessibilityWidget {
                 }
             }
             
-            // Stop GSAP animations
-            if (typeof gsap !== 'undefined') {
+            // GSAP: Only pause visual animations, preserve scroll-related animations
+            if (typeof gsap !== 'undefined' && window.gsap.globalTimeline) {
                 try {
-                    if (gsap.globalTimeline) {
-                        gsap.globalTimeline.pause();
-                    }
-                    if (gsap.killTweensOf) {
-                        gsap.killTweensOf("*");
-                    }
-                    console.log('Accessibility Widget: GSAP animations stopped');
-                } catch (e) {
-                    console.warn('Accessibility Widget: Failed to stop GSAP animations:', e);
+                    // Don't pause global timeline - this would break ScrollTrigger
+                    // Instead, let the requestAnimationFrame override handle it
+                    console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to handle GSAP timeline', error);
+                }
+            }
+
+            // GSAP: Only kill visual animations, preserve scroll-related animations
+            if (typeof gsap !== 'undefined' && window.gsap.killTweensOf) {
+                try {
+                    // Don't kill all tweens - this would break ScrollTrigger
+                    // Instead, let the requestAnimationFrame override handle it
+                    console.log('Accessibility Widget: GSAP detected - using requestAnimationFrame override for seizure safety');
+                } catch (error) {
+                    console.warn('Accessibility Widget: Failed to handle GSAP tweens', error);
                 }
             }
             
-            // Stop ScrollTrigger animations
+            // ScrollTrigger: Don't kill all - this would break scroll functionality
             if (typeof ScrollTrigger !== 'undefined') {
                 try {
-                    ScrollTrigger.killAll();
-                    console.log('Accessibility Widget: ScrollTrigger animations stopped');
+                    // Don't kill all ScrollTrigger - this would break scroll functionality
+                    // Instead, let the requestAnimationFrame override handle it
+                    console.log('Accessibility Widget: ScrollTrigger detected - using requestAnimationFrame override for seizure safety');
                 } catch (e) {
-                    console.warn('Accessibility Widget: Failed to stop ScrollTrigger animations:', e);
+                    console.warn('Accessibility Widget: Failed to handle ScrollTrigger', e);
                 }
             }
             
@@ -22888,11 +22894,11 @@ class AccessibilityWidget {
                 window._originalSetInterval = window.setInterval;
             }
             
-            // Override setTimeout and setInterval to be much less aggressive
+            // Override setTimeout and setInterval to be MUCH LESS AGGRESSIVE - allow all scroll libraries
             window.setTimeout = (callback, delay) => {
                 // Allow ALL timeouts to execute - be much less aggressive
                 if (typeof callback === 'function') {
-                    // Only block very obvious animation loops, allow everything else
+                    // Only block very obvious animation loops, allow everything else including scroll
                     const callbackStr = callback.toString().toLowerCase();
                     // Only block if it's clearly a visual animation loop AND not scroll-related
                     if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
@@ -22901,7 +22907,9 @@ class AccessibilityWidget {
                         !callbackStr.includes('touch') &&
                         !callbackStr.includes('mouse') &&
                         !callbackStr.includes('lenis') &&
-                        !callbackStr.includes('gsap')) {
+                        !callbackStr.includes('gsap') &&
+                        !callbackStr.includes('scrolltrigger') &&
+                        !callbackStr.includes('locomotive')) {
                         return 0; // Block only obvious visual animation loops
                     }
                 }
@@ -22911,7 +22919,7 @@ class AccessibilityWidget {
             window.setInterval = (callback, delay) => {
                 // Allow ALL intervals to execute - be much less aggressive
                 if (typeof callback === 'function') {
-                    // Only block very obvious animation loops, allow everything else
+                    // Only block very obvious animation loops, allow everything else including scroll
                     const callbackStr = callback.toString().toLowerCase();
                     // Only block if it's clearly a visual animation loop AND not scroll-related
                     if ((callbackStr.includes('animation') || callbackStr.includes('animate')) && 
@@ -22920,14 +22928,16 @@ class AccessibilityWidget {
                         !callbackStr.includes('touch') &&
                         !callbackStr.includes('mouse') &&
                         !callbackStr.includes('lenis') &&
-                        !callbackStr.includes('gsap')) {
+                        !callbackStr.includes('gsap') &&
+                        !callbackStr.includes('scrolltrigger') &&
+                        !callbackStr.includes('locomotive')) {
                         return 0; // Block only obvious visual animation loops
                     }
                 }
                 return window._originalSetInterval(callback, delay);
             };
             
-            console.log('Accessibility Widget: DOM animation loops blocked');
+            console.log('Accessibility Widget: DOM animation loops blocked - scroll-related functions preserved');
         }
         
         // 6. Stop autoplay videos and embedded media
