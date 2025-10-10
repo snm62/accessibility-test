@@ -22379,7 +22379,8 @@ class AccessibilityWidget {
             // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
             this.injectStopAnimationCSS();
             
-            // REMOVED: overrideRequestAnimationFrame call that was blocking scroll
+            // Override requestAnimationFrame to block visual animations but preserve scroll
+            this.overrideRequestAnimationFrame();
             
             // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
             this.stopAnimationLibraries();
@@ -22387,7 +22388,8 @@ class AccessibilityWidget {
             // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
             this.replaceAnimatedMedia();
             
-            // REMOVED: stopDOMAnimationLoops call that was blocking scroll
+            // Stop DOM manipulation animations (setTimeout/setInterval loops)
+            this.stopDOMAnimationLoops();
             
             // 6. Stop autoplay videos and embedded media
             this.stopAutoplayMedia();
@@ -22471,11 +22473,53 @@ class AccessibilityWidget {
                 window._originalRequestAnimationFrame = window.requestAnimationFrame;
             }
             
-            // COMPLETELY NON-BLOCKING: Allow all animations including scroll
+            // Block visual animations but preserve scroll-related animations
             window.requestAnimationFrame = (callback) => {
-                // Execute ALL callbacks normally - no blocking
                 if (callback && typeof callback === 'function') {
                     try {
+                        const callbackStr = callback.toString().toLowerCase();
+                        
+                        // Allow scroll-related animations
+                        if (callbackStr.includes('scroll') || 
+                            callbackStr.includes('wheel') || 
+                            callbackStr.includes('touch') ||
+                            callbackStr.includes('mouse') ||
+                            callbackStr.includes('lenis') ||
+                            callbackStr.includes('gsap') ||
+                            callbackStr.includes('scrolltrigger') ||
+                            callbackStr.includes('locomotive') ||
+                            callbackStr.includes('smooth') ||
+                            callbackStr.includes('parallax')) {
+                            return window._originalRequestAnimationFrame(callback);
+                        }
+                        
+                        // Block visual animations (Lottie, CSS animations, etc.)
+                        if (callbackStr.includes('animation') || 
+                            callbackStr.includes('animate') ||
+                            callbackStr.includes('lottie') ||
+                            callbackStr.includes('fade') ||
+                            callbackStr.includes('slide') ||
+                            callbackStr.includes('bounce') ||
+                            callbackStr.includes('pulse') ||
+                            callbackStr.includes('shake') ||
+                            callbackStr.includes('flash') ||
+                            callbackStr.includes('blink') ||
+                            callbackStr.includes('glow') ||
+                            callbackStr.includes('spin') ||
+                            callbackStr.includes('rotate') ||
+                            callbackStr.includes('scale') ||
+                            callbackStr.includes('zoom') ||
+                            callbackStr.includes('wiggle') ||
+                            callbackStr.includes('jiggle') ||
+                            callbackStr.includes('twist') ||
+                            callbackStr.includes('flip') ||
+                            callbackStr.includes('swing') ||
+                            callbackStr.includes('wobble') ||
+                            callbackStr.includes('tilt')) {
+                            return 0; // Block visual animations
+                        }
+                        
+                        // Allow other callbacks (scroll, etc.)
                         return window._originalRequestAnimationFrame(callback);
                     } catch (e) {
                         console.warn('Accessibility Widget: Animation callback error:', e);
@@ -22596,14 +22640,98 @@ class AccessibilityWidget {
                 window._originalSetInterval = window.setInterval;
             }
             
-            // COMPLETELY NON-BLOCKING: Allow all timeouts and intervals including scroll
+            // Block visual animation loops but preserve scroll-related functions
             window.setTimeout = (callback, delay) => {
-                // Execute ALL timeouts normally - no blocking
+                if (typeof callback === 'function') {
+                    const callbackStr = callback.toString().toLowerCase();
+                    
+                    // Allow scroll-related functions
+                    if (callbackStr.includes('scroll') || 
+                        callbackStr.includes('wheel') || 
+                        callbackStr.includes('touch') ||
+                        callbackStr.includes('mouse') ||
+                        callbackStr.includes('lenis') ||
+                        callbackStr.includes('gsap') ||
+                        callbackStr.includes('scrolltrigger') ||
+                        callbackStr.includes('locomotive') ||
+                        callbackStr.includes('smooth') ||
+                        callbackStr.includes('parallax')) {
+                        return window._originalSetTimeout(callback, delay);
+                    }
+                    
+                    // Block visual animation loops
+                    if (callbackStr.includes('animation') || 
+                        callbackStr.includes('animate') ||
+                        callbackStr.includes('lottie') ||
+                        callbackStr.includes('fade') ||
+                        callbackStr.includes('slide') ||
+                        callbackStr.includes('bounce') ||
+                        callbackStr.includes('pulse') ||
+                        callbackStr.includes('shake') ||
+                        callbackStr.includes('flash') ||
+                        callbackStr.includes('blink') ||
+                        callbackStr.includes('glow') ||
+                        callbackStr.includes('spin') ||
+                        callbackStr.includes('rotate') ||
+                        callbackStr.includes('scale') ||
+                        callbackStr.includes('zoom') ||
+                        callbackStr.includes('wiggle') ||
+                        callbackStr.includes('jiggle') ||
+                        callbackStr.includes('twist') ||
+                        callbackStr.includes('flip') ||
+                        callbackStr.includes('swing') ||
+                        callbackStr.includes('wobble') ||
+                        callbackStr.includes('tilt')) {
+                        return 0; // Block visual animation loops
+                    }
+                }
                 return window._originalSetTimeout(callback, delay);
             };
             
             window.setInterval = (callback, delay) => {
-                // Execute ALL intervals normally - no blocking
+                if (typeof callback === 'function') {
+                    const callbackStr = callback.toString().toLowerCase();
+                    
+                    // Allow scroll-related functions
+                    if (callbackStr.includes('scroll') || 
+                        callbackStr.includes('wheel') || 
+                        callbackStr.includes('touch') ||
+                        callbackStr.includes('mouse') ||
+                        callbackStr.includes('lenis') ||
+                        callbackStr.includes('gsap') ||
+                        callbackStr.includes('scrolltrigger') ||
+                        callbackStr.includes('locomotive') ||
+                        callbackStr.includes('smooth') ||
+                        callbackStr.includes('parallax')) {
+                        return window._originalSetInterval(callback, delay);
+                    }
+                    
+                    // Block visual animation loops
+                    if (callbackStr.includes('animation') || 
+                        callbackStr.includes('animate') ||
+                        callbackStr.includes('lottie') ||
+                        callbackStr.includes('fade') ||
+                        callbackStr.includes('slide') ||
+                        callbackStr.includes('bounce') ||
+                        callbackStr.includes('pulse') ||
+                        callbackStr.includes('shake') ||
+                        callbackStr.includes('flash') ||
+                        callbackStr.includes('blink') ||
+                        callbackStr.includes('glow') ||
+                        callbackStr.includes('spin') ||
+                        callbackStr.includes('rotate') ||
+                        callbackStr.includes('scale') ||
+                        callbackStr.includes('zoom') ||
+                        callbackStr.includes('wiggle') ||
+                        callbackStr.includes('jiggle') ||
+                        callbackStr.includes('twist') ||
+                        callbackStr.includes('flip') ||
+                        callbackStr.includes('swing') ||
+                        callbackStr.includes('wobble') ||
+                        callbackStr.includes('tilt')) {
+                        return 0; // Block visual animation loops
+                    }
+                }
                 return window._originalSetInterval(callback, delay);
             };
             
@@ -23700,11 +23828,53 @@ class AccessibilityWidget {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // COMPLETELY NON-BLOCKING: Allow all animations including scroll
+                // Block visual animations but preserve scroll-related animations
                 window.requestAnimationFrame = function(callback) {
-                    // Execute ALL callbacks normally - no blocking
                     if (callback && typeof callback === 'function') {
                         try {
+                            const callbackStr = callback.toString().toLowerCase();
+                            
+                            // Allow scroll-related animations
+                            if (callbackStr.includes('scroll') || 
+                                callbackStr.includes('wheel') || 
+                                callbackStr.includes('touch') ||
+                                callbackStr.includes('mouse') ||
+                                callbackStr.includes('lenis') ||
+                                callbackStr.includes('gsap') ||
+                                callbackStr.includes('scrolltrigger') ||
+                                callbackStr.includes('locomotive') ||
+                                callbackStr.includes('smooth') ||
+                                callbackStr.includes('parallax')) {
+                                return window.__originalRequestAnimationFrame.call(window, callback);
+                            }
+                            
+                            // Block visual animations (Lottie, CSS animations, etc.)
+                            if (callbackStr.includes('animation') || 
+                                callbackStr.includes('animate') ||
+                                callbackStr.includes('lottie') ||
+                                callbackStr.includes('fade') ||
+                                callbackStr.includes('slide') ||
+                                callbackStr.includes('bounce') ||
+                                callbackStr.includes('pulse') ||
+                                callbackStr.includes('shake') ||
+                                callbackStr.includes('flash') ||
+                                callbackStr.includes('blink') ||
+                                callbackStr.includes('glow') ||
+                                callbackStr.includes('spin') ||
+                                callbackStr.includes('rotate') ||
+                                callbackStr.includes('scale') ||
+                                callbackStr.includes('zoom') ||
+                                callbackStr.includes('wiggle') ||
+                                callbackStr.includes('jiggle') ||
+                                callbackStr.includes('twist') ||
+                                callbackStr.includes('flip') ||
+                                callbackStr.includes('swing') ||
+                                callbackStr.includes('wobble') ||
+                                callbackStr.includes('tilt')) {
+                                return 0; // Block visual animations
+                            }
+                            
+                            // Allow other callbacks (scroll, etc.)
                             return window.__originalRequestAnimationFrame.call(window, callback);
                         } catch (e) {
                             console.warn('Accessibility Widget: Animation callback error:', e);
@@ -24820,7 +24990,8 @@ class AccessibilityWidget {
             // CRITICAL: Stop all animation libraries (Lottie, GSAP, etc.)
             this.stopAnimationLibraries();
             
-            // REMOVED: overrideRequestAnimationFrame call that was blocking scroll
+            // Override requestAnimationFrame to block visual animations but preserve scroll
+            this.overrideRequestAnimationFrame();
             
             // CRITICAL: Replace animated media (GIFs, videos)
             this.replaceAnimatedMedia();
