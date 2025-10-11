@@ -11,51 +11,35 @@
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
-                body.seizure-safe * {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                }
-                /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
+                /* ULTRA-MINIMAL SEIZURE-SAFE: Only stop animations, preserve everything else */
                 body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                 }
-                /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
+                /* CRITICAL: Only stop animations - do NOT touch ANY layout properties */
                 body.seizure-safe * {
-                    /* Only reset animation properties, preserve layout transforms */
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* translate: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* scale: 1 !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* rotate: 0deg !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* Ensure visibility only - no height modifications */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
-                    /* Reset animation properties */
+                    /* ONLY animation properties - do NOT touch anything else */
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    /* DO NOT touch: transform, position, width, height, opacity, visibility, display */
                 }
-                /* Only reset positioning for elements that are likely to be animated */
-                body.seizure-safe *[class*="animate"], body.seizure-safe *[class*="fade"], body.seizure-safe *[class*="slide"], body.seizure-safe *[class*="bounce"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="shake"], body.seizure-safe *[class*="flash"], body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="glow"], body.seizure-safe *[class*="spin"], body.seizure-safe *[class*="rotate"], body.seizure-safe *[class*="scale"], body.seizure-safe *[class*="zoom"], body.seizure-safe *[class*="wiggle"], body.seizure-safe *[class*="jiggle"], body.seizure-safe *[class*="twist"], body.seizure-safe *[class*="flip"], body.seizure-safe *[class*="swing"], body.seizure-safe *[class*="wobble"], body.seizure-safe *[class*="tilt"] {
-                    /* Only reset positioning for animated elements, preserve layout transforms */
-                    /* position: static !important; - REMOVED: This was breaking layout */
-                    /* top: auto !important; - REMOVED: This was breaking layout */
-                    /* left: auto !important; - REMOVED: This was breaking layout */
-                    /* right: auto !important; - REMOVED: This was breaking layout */
-                    /* bottom: auto !important; - REMOVED: This was breaking layout */
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* translate: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* scale: 1 !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* rotate: 0deg !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* width: auto !important; - REMOVED: This was breaking layout */
-                    /* height: auto !important; - REMOVED: This was breaking layout */
+                /* SAFE: Preserve SVG visibility - do NOT hide SVGs */
+                body.seizure-safe svg, body.seizure-safe svg * {
+                    animation: none !important;
+                    transition: none !important;
+                    /* DO NOT touch: opacity, visibility, display, transform */
+                }
+                /* SAFE: Preserve text animations without breaking layout */
+                body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [class*="split"], body.seizure-safe [class*="char"], body.seizure-safe [class*="word"], body.seizure-safe [class*="letter"], body.seizure-safe [class*="text-animation"], body.seizure-safe [class*="typing"], body.seizure-safe [class*="typewriter"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="unveil"], body.seizure-safe [class*="show-text"], body.seizure-safe [class*="text-effect"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-delay: 0s !important;
+                    transition-delay: 0s !important;
+                    /* DO NOT touch: opacity, visibility, display, transform, height */
                 }
                 /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
                 body.seizure-safe a[href], body.seizure-safe button, body.seizure-safe [role="button"], body.seizure-safe [onclick], body.seizure-safe input[type="button"], body.seizure-safe input[type="submit"], body.seizure-safe input[type="reset"], body.seizure-safe .btn, body.seizure-safe .button, body.seizure-safe [class*="btn"], body.seizure-safe [class*="button"], body.seizure-safe [tabindex]:not([tabindex="-1"]) {
@@ -65,150 +49,7 @@
                 body.seizure-safe input[type="text"], body.seizure-safe input[type="email"], body.seizure-safe input[type="search"], body.seizure-safe input[type="tel"], body.seizure-safe input[type="url"], body.seizure-safe input[type="password"], body.seizure-safe textarea, body.seizure-safe [contenteditable="true"] {
                     cursor: text !important;
                 }
-                /* Preserve original layout for specific elements */
-                body.seizure-safe img, body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object {
-                    /* Preserve layout positioning */
-                    /* position: static !important; - REMOVED: This was breaking layout */
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* width: auto !important; - REMOVED: This was breaking layout */
-                    /* height: auto !important; - REMOVED: This was breaking layout */
-                    max-width: 100% !important;
-                    max-height: 100% !important;
-                }
-                /* Ensure text elements maintain original layout */
-                body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6, body.seizure-safe p, body.seizure-safe span, body.seizure-safe div, body.seizure-safe a, body.seizure-safe li, body.seizure-safe td, body.seizure-safe th, body.seizure-safe label {
-                    /* Preserve layout positioning */
-                    /* position: static !important; - REMOVED: This was breaking layout */
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    /* width: auto !important; - REMOVED: This was breaking layout */
-                    /* height: auto !important; - REMOVED: This was breaking layout */
-                    /* top: auto !important; - REMOVED: This was breaking layout */
-                    /* left: auto !important; - REMOVED: This was breaking layout */
-                    /* right: auto !important; - REMOVED: This was breaking layout */
-                    /* bottom: auto !important; - REMOVED: This was breaking layout */
-                }
-                /* CRITICAL: Force ALL possible animations to their final state immediately */
-                body.seizure-safe *[class*="animate"], body.seizure-safe *[class*="fade"], body.seizure-safe *[class*="slide"], body.seizure-safe *[class*="bounce"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="shake"], body.seizure-safe *[class*="flash"], body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="glow"], body.seizure-safe *[class*="spin"], body.seizure-safe *[class*="rotate"], body.seizure-safe *[class*="scale"], body.seizure-safe *[class*="zoom"], body.seizure-safe *[class*="wiggle"], body.seizure-safe *[class*="jiggle"], body.seizure-safe *[class*="twist"], body.seizure-safe *[class*="flip"], body.seizure-safe *[class*="swing"], body.seizure-safe *[class*="wobble"], body.seizure-safe *[class*="tilt"],
-                /* Additional comprehensive animation coverage */
-                body.seizure-safe *[class*="motion"], body.seizure-safe *[class*="move"], body.seizure-safe *[class*="float"], body.seizure-safe *[class*="drift"], body.seizure-safe *[class*="sway"], body.seizure-safe *[class*="rock"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="glide"], body.seizure-safe *[class*="sweep"], body.seizure-safe *[class*="swoop"], body.seizure-safe *[class*="dive"], body.seizure-safe *[class*="rise"], body.seizure-safe *[class*="fall"], body.seizure-safe *[class*="drop"], body.seizure-safe *[class*="lift"], body.seizure-safe *[class*="sink"], body.seizure-safe *[class*="hover"], body.seizure-safe *[class*="orbit"], body.seizure-safe *[class*="revolve"], body.seizure-safe *[class*="turn"], body.seizure-safe *[class*="twirl"], body.seizure-safe *[class*="whirl"], body.seizure-safe *[class*="spiral"], body.seizure-safe *[class*="helix"], body.seizure-safe *[class*="coil"], body.seizure-safe *[class*="curl"], body.seizure-safe *[class*="bend"], body.seizure-safe *[class*="flex"], body.seizure-safe *[class*="stretch"], body.seizure-safe *[class*="squash"], body.seizure-safe *[class*="squeeze"], body.seizure-safe *[class*="compress"], body.seizure-safe *[class*="expand"], body.seizure-safe *[class*="grow"], body.seizure-safe *[class*="shrink"], body.seizure-safe *[class*="inflate"], body.seizure-safe *[class*="deflate"], body.seizure-safe *[class*="morph"], body.seizure-safe *[class*="transform"], body.seizure-safe *[class*="transition"], body.seizure-safe *[class*="migrate"], body.seizure-safe *[class*="shift"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* Force GSAP and other library animations to final state */
-                body.seizure-safe .fade-up, body.seizure-safe .fade-left, body.seizure-safe .fade-right, body.seizure-safe .fade-in, body.seizure-safe .slide-in, body.seizure-safe .scale-in, body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                    animation: none !important;
-                    transition: none !important;
-                }
-                /* Do NOT interfere with navbars/headers sticky/transform behavior */
-                body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar, body.seizure-safe [class*="nav"], body.seizure-safe [class*="header"] {
-                    animation: initial !important;
-                    transition: initial !important;
-                    transform: initial !important;
-                    position: initial !important;
-                    will-change: initial !important;
-                }
-                /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
-                body.seizure-safe *[style*="animation"], body.seizure-safe *[style*="transition"], body.seizure-safe *[style*="transform"], body.seizure-safe *[style*="opacity"], body.seizure-safe *[style*="visibility"], body.seizure-safe *[data-animation], body.seizure-safe *[data-transition], body.seizure-safe *[data-transform], body.seizure-safe *[data-opacity], body.seizure-safe *[data-visibility] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
-                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* HOVER ANIMATIONS: Disable all hover-triggered animations */
-                body.seizure-safe *:hover, body.seizure-safe *:focus, body.seizure-safe *:active, body.seizure-safe *[class*="hover"], body.seizure-safe *[class*="focus"], body.seizure-safe *[class*="active"], body.seizure-safe *[data-hover], body.seizure-safe *[data-focus], body.seizure-safe *[data-active] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state immediately */
-                body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [data-splitting] .char, body.seizure-safe [data-splitting] .word, body.seizure-safe [class*="split"], body.seizure-safe [class*="char"], body.seizure-safe [class*="word"], body.seizure-safe [class*="letter"], body.seizure-safe [class*="text-animation"], body.seizure-safe [class*="typing"], body.seizure-safe [class*="typewriter"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="unveil"], body.seizure-safe [class*="show-text"], body.seizure-safe [class*="text-effect"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: inline !important;
-                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
-                    /* Force immediate final state - no delays */
-                    animation-delay: 0s !important;
-                    transition-delay: 0s !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* IMAGE HOVER EFFECTS: Disable all image hover animations */
-                body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
-                body.seizure-safe *[class*="scroll"], body.seizure-safe *[class*="progress"], body.seizure-safe *[class*="bar"], body.seizure-safe *[class*="line"], body.seizure-safe *[class*="timeline"], body.seizure-safe *[class*="track"], body.seizure-safe *[class*="path"], body.seizure-safe *[class*="stroke"], body.seizure-safe *[class*="fill"], body.seizure-safe *[class*="gradient"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="stream"], body.seizure-safe *[class*="runner"], body.seizure-safe *[class*="mover"], body.seizure-safe *[class*="slider"], body.seizure-safe *[class*="indicator"], body.seizure-safe *[class*="stopper"], body.seizure-safe *[class*="marker"], body.seizure-safe *[class*="pointer"], body.seizure-safe *[class*="cursor"], body.seizure-safe *[class*="dot"], body.seizure-safe *[class*="circle"], body.seizure-safe *[class*="ring"], body.seizure-safe *[class*="orbit"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
-                body.seizure-safe progress, body.seizure-safe [role="progressbar"], body.seizure-safe [class*="progress"], body.seizure-safe [class*="bar"], body.seizure-safe [class*="indicator"], body.seizure-safe [class*="track"], body.seizure-safe [class*="line"], body.seizure-safe [class*="path"], body.seizure-safe [class*="stroke"], body.seizure-safe [class*="fill"], body.seizure-safe [class*="gradient"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="stream"], body.seizure-safe *[class*="runner"], body.seizure-safe *[class*="mover"], body.seizure-safe *[class*="slider"], body.seizure-safe *[class*="stopper"], body.seizure-safe *[class*="marker"], body.seizure-safe *[class*="pointer"], body.seizure-safe *[class*="cursor"], body.seizure-safe *[class*="dot"], body.seizure-safe *[class*="circle"], body.seizure-safe *[class*="ring"], body.seizure-safe *[class*="orbit"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [data-splitting] .char, body.seizure-safe [data-splitting] .word, body.seizure-safe .split .char, body.seizure-safe .split .word {
-                    animation: none !important;
-                    transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: inline !important;
-                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
-                    /* Force immediate final state - no delays */
-                    animation-delay: 0s !important;
-                    transition-delay: 0s !important;
-                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
-                }
-                body.seizure-safe [data-splitting], body.seizure-safe .split {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: block !important;
-                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
-                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
-                    /* Force immediate final state - no delays */
-                    animation-delay: 0s !important;
-                    transition-delay: 0s !important;
-                }
+                /* END OF MINIMAL SEIZURE-SAFE CSS - No more aggressive rules */
             `;
             document.head.appendChild(immediateStyle);
             
@@ -227,14 +68,6 @@
                             transition: none !important;
                             transition-property: none !important;
                         }
-                        /* Keep cursors intact */
-                        html.seizure-safe a[href], html.seizure-safe button, html.seizure-safe [role="button"], html.seizure-safe [onclick],
-                        html.seizure-safe input[type="button"], html.seizure-safe input[type="submit"], html.seizure-safe input[type="reset"],
-                        html.seizure-safe .btn, html.seizure-safe .button, html.seizure-safe [class*="btn"], html.seizure-safe [class*="button"],
-                        html.seizure-safe [tabindex]:not([tabindex="-1"]) { cursor: pointer !important; }
-                        html.seizure-safe input[type="text"], html.seizure-safe input[type="email"], html.seizure-safe input[type="search"],
-                        html.seizure-safe input[type="tel"], html.seizure-safe input[type="url"], html.seizure-safe input[type="password"],
-                        html.seizure-safe textarea, html.seizure-safe [contenteditable="true"] { cursor: text !important; }
                     `;
                     document.head.appendChild(reinforce);
                 }
@@ -259,12 +92,16 @@
                             scroll-behavior: auto !important;
                         }
                         /* Do not affect cursor appearance */
-                        body.seizure-safe * { cursor: inherit; }
+                        body.seizure-safe * {
+                            cursor: inherit;
+                        }
                     `;
                     document.head.appendChild(master);
                 }
-                
-                // Correction layer: preserve site layout styles while keeping animations disabled
+            } catch (_) {}
+            
+            // Correction layer: preserve site layout styles while keeping animations disabled
+            try {
                 if (!document.getElementById('accessibility-seizure-correction')) {
                     const correction = document.createElement('style');
                     correction.id = 'accessibility-seizure-correction';
@@ -276,25 +113,24 @@
                         }
                         /* Restore layout-affecting properties to stylesheet values */
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
-                            /* transform: unset !important; - REMOVED: This was breaking 3D shapes and layout */
-                            /* translate: unset !important; - REMOVED: This was breaking 3D shapes and layout */
-                            /* scale: unset !important; - REMOVED: This was breaking 3D shapes and layout */
-                            /* rotate: unset !important; - REMOVED: This was breaking 3D shapes and layout */
+                            transform: unset !important;
+                            translate: unset !important;
+                            scale: unset !important;
+                            rotate: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
-                            /* position: unset !important; - REMOVED: This was breaking layout */
-                            /* top: unset !important; - REMOVED: This was breaking layout */
-                            /* left: unset !important; - REMOVED: This was breaking layout */
-                            /* right: unset !important; - REMOVED: This was breaking layout */
-                            /* bottom: unset !important; - REMOVED: This was breaking layout */
-                            /* width: unset !important; - REMOVED: This was breaking layout */
-                            /* height: unset !important; - REMOVED: This was breaking layout */
+                            position: unset !important;
+                            top: unset !important;
+                            left: unset !important;
+                            right: unset !important;
+                            bottom: unset !important;
+                            width: unset !important;
+                            height: unset !important;
                         }
                         /* Preserve only genuine navigation/header and explicit opt-outs */
-                        body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
-                        body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
-                            /* transform: unset !important; - REMOVED: This was breaking 3D shapes and layout */
-                            /* position: unset !important; - REMOVED: This was breaking layout */
+                        body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar, body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
+                            transform: unset !important;
+                            position: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
                         }
@@ -310,15 +146,10 @@
                     enforce.id = 'accessibility-seizure-animation-enforcer';
                     enforce.textContent = `
                         /* Target common scroll animation libs without affecting layout of others */
-                        body.seizure-safe [data-aos], body.seizure-safe .aos-init, body.seizure-safe .aos-animate,
-                        body.seizure-safe [data-scroll], body.seizure-safe [data-animate], body.seizure-safe .wow,
-                        body.seizure-safe .animate__animated, body.seizure-safe .fade-up, body.seizure-safe .fade-in,
-                        body.seizure-safe .slide-in, body.seizure-safe .reveal, body.seizure-safe [class*="fade-"],
-                        body.seizure-safe [class*="slide-"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="animate"] {
+                        body.seizure-safe [data-aos], body.seizure-safe .aos-init, body.seizure-safe .aos-animate, body.seizure-safe [data-scroll], body.seizure-safe [data-animate], body.seizure-safe .wow, body.seizure-safe .animate__animated, body.seizure-safe .fade-up, body.seizure-safe .fade-in, body.seizure-safe .slide-in, body.seizure-safe .reveal, body.seizure-safe [class*="fade-"], body.seizure-safe [class*="slide-"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="animate"] {
                             animation: none !important;
                             transition: none !important;
                             opacity: 1 !important;
-                            /* transform: none !important; - REMOVED: This was breaking website layout */
                             will-change: auto !important;
                         }
                     `;
@@ -372,8 +203,8 @@
                             // Reveal typewriter/typing effects by consolidating text immediately
                             const typeSelectors = [
                                 '[class*="typewriter"]', '[class*="typing"]', '[data-typing]', '[data-typewriter]',
-                                '[data-splitting]', '.split', '.char', '.word', '[class*="split"]', '[class*="char"]', 
-                                '[class*="word"]', '[class*="letter"]', '[class*="text-animation"]', '[class*="reveal"]', 
+                                '[data-splitting]', '.split', '.char', '.word', '[class*="split"]', '[class*="char"]',
+                                '[class*="word"]', '[class*="letter"]', '[class*="text-animation"]', '[class*="reveal"]',
                                 '[class*="unveil"]', '[class*="show-text"]', '[class*="text-effect"]'
                             ];
                             document.querySelectorAll(typeSelectors.join(',')).forEach(el => {
@@ -384,9 +215,6 @@
                                     el.style.opacity = '1';
                                     el.style.visibility = 'visible';
                                     el.style.display = 'inline';
-                                    /* el.style.height = 'auto'; - REMOVED: This was causing extra space at bottom */
-                                    /* el.style.minHeight = 'auto'; - REMOVED: This was causing extra space at bottom */
-                                    /* el.style.maxHeight = 'none'; - REMOVED: This was causing extra space at bottom */
                                     el.style.animationDelay = '0s';
                                     el.style.transitionDelay = '0s';
                                     
@@ -401,89 +229,6 @@
                                     }
                                 } catch (_) { /* ignore per-element errors */ }
                             });
-                            
-                            // Freeze progress bars and indicators (keep current visual state)
-                            const progressSelectors = [
-                                'progress', '[role="progressbar"]', '[class*="progress"]', '[class*="indicator"]', '[class*="bar"]'
-                            ];
-                            document.querySelectorAll(progressSelectors.join(',')).forEach(el => {
-                                try {
-                                    const cs = window.getComputedStyle(el);
-                                    // Lock width/transform/transition to current
-                                    el.style.transition = 'none';
-                                    el.style.animation = 'none';
-                                    if (cs.width && cs.width !== 'auto') el.style.width = cs.width;
-                                    if (cs.transform && cs.transform !== 'none') el.style.transform = 'none';
-                                    // For ARIA progressbar, keep the current value and stop changing
-                                    if (el.getAttribute && el.getAttribute('role') === 'progressbar') {
-                                        const now = el.getAttribute('aria-valuenow');
-                                        if (now) el.setAttribute('aria-valuenow', now);
-                                    }
-                                } catch (_) { /* ignore per-element errors */ }
-                            });
-                            
-                            // Preserve manual slider navigation controls: arrows and dots must remain functional
-                            const sliderControlSelectors = [
-                                '.swiper-button-next', '.swiper-button-prev', '.swiper-pagination-bullet', '.swiper-pagination-clickable',
-                                '.slick-next', '.slick-prev', '.slick-dots li', '.slick-dots button',
-                                '.glide__arrow', '.glide__bullet', '.splide__arrow', '.splide__pagination__page',
-                                '.carousel-control-next', '.carousel-control-prev', '.carousel-indicators li', '.carousel-indicators button',
-                                '[data-slide]', '[data-bs-slide]', '[data-glide-dir]'
-                            ];
-                            document.querySelectorAll(sliderControlSelectors.join(',')).forEach(ctrl => {
-                                try {
-                                    ctrl.style.pointerEvents = 'auto';
-                                    ctrl.style.cursor = 'pointer';
-                                    // Ensure visibility and opacity aren't suppressed
-                                    ctrl.style.visibility = '';
-                                    ctrl.style.opacity = '';
-                                } catch (_) {}
-                            });
-                            
-                            // Pause autoplay for common slider libraries while keeping navigation enabled
-                            try {
-                                // Swiper
-                                const swipers = document.querySelectorAll('.swiper, .swiper-container');
-                                swipers.forEach(el => {
-                                    const inst = el.swiper || el.__swiper || (el._swiper || null);
-                                    if (inst && inst.autoplay && typeof inst.autoplay.stop === 'function') {
-                                        inst.autoplay.stop();
-                                    }
-                                });
-                            } catch (_) {}
-                            try {
-                                // Slick (requires jQuery)
-                                const jq = window.jQuery || window.$;
-                                if (jq) {
-                                    jq('.slick-slider').each(function() {
-                                        try { jq(this).slick && jq(this).slick('slickPause'); } catch (e) {}
-                                    });
-                                }
-                            } catch (_) {}
-                            try {
-                                // Splide
-                                document.querySelectorAll('.splide').forEach(el => {
-                                    const inst = el.splide || el._splide || null;
-                                    if (inst && typeof inst.options === 'object') {
-                                        try { inst.options = Object.assign({}, inst.options, { autoplay: false }); } catch (e) {}
-                                        if (inst.Components && inst.Components.Autoplay && typeof inst.Components.Autoplay.pause === 'function') {
-                                            inst.Components.Autoplay.pause();
-                                        }
-                                    }
-                                });
-                            } catch (_) {}
-                            try {
-                                // Glide.js
-                                document.querySelectorAll('.glide').forEach(el => {
-                                    const inst = el._glide || null;
-                                    if (inst && typeof inst.pause === 'function') {
-                                        inst.pause();
-                                    }
-                                });
-                            } catch (_) {}
-                            
-                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
-                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
                         } catch (err) {
                             console.warn('Accessibility Widget: DOM freeze failed', err);
                         }
@@ -491,182 +236,416 @@
                     
                     // Apply immediately and also on DOMContentLoaded as a second safety
                     window.__applySeizureSafeDOMFreeze();
-                    
-                    // Install aggressive animation blocker to neutralize JS-driven animations
-                    try {
-                        if (!window.__animationBlockerInstalled) {
-                            window.__animationBlockerInstalled = true;
-                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
-                            // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
-                            const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
-                            // Also respect common accordion/FAQ toggle contexts that rotate arrows
-                            const ROTATION_CONTEXT_SELECTOR = '[aria-expanded], [data-accordion], .accordion, [data-toggle], [data-collapse]';
-                            
-                            const isExempt = (el) => {
-                                try {
-                                    if (el.matches && el.matches(ICON_SELECTOR)) return true;
-                                    return !!el.closest(EXEMPT_SELECTOR);
-                                } catch (_) { return false; }
-                            };
-                            
-                            const neutralizeElement = (el) => {
-                                if (!el || isExempt(el)) return;
-                                try {
-                                    el.style.animation = 'none';
-                                    el.style.transition = 'none';
-                                    el.style.willChange = 'auto';
-                                    el.style.filter = 'none';
-                                    // Only neutralize transform if the element is not an icon/arrow
-                                    // and not inside a rotation context such as accordion/FAQ toggles
-                                    const inRotationContext = (() => {
-                                        try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
-                                    })();
-                                    if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
-                                        el.style.transform = 'none';
-                                    }
-                                    el.style.opacity = '1';
-                                } catch (_) {}
-                            };
-                            
-                            // Initial sweep - limit to first 5000 elements for safety
-                            try {
-                                const all = document.querySelectorAll('*');
-                                let count = 0;
-                                for (const el of all) {
-                                    neutralizeElement(el);
-                                    count++;
-                                    if (count > 5000) break;
-                                }
-                            } catch (_) {}
-                            
-                            // Observe future changes to styles/classes and neutralize
-                            try {
-                                const styleObserver = new MutationObserver((mutations) => {
-                                    if (!(document.body && document.body.classList.contains('seizure-safe'))) return;
-                                    for (const m of mutations) {
-                                        const target = m.target;
-                                        if (!(target instanceof Element)) continue;
-                                        if (isExempt(target)) continue;
-                                        try {
-                                            const inline = (target.getAttribute && target.getAttribute('style')) || '';
-                                            if (/animation|transition|transform|opacity|filter/i.test(inline)) {
-                                                neutralizeElement(target);
-                                            }
-                                            // Common animation class keywords
-                                            const cls = target.className ? String(target.className) : '';
-                                            if (/(animate|fade|slide|zoom|parallax|reveal|scroll|marquee)/i.test(cls)) {
-                                                neutralizeElement(target);
-                                            }
-                                        } catch (_) {}
-                                    }
-                                });
-                                styleObserver.observe(document.documentElement, {
-                                    subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
-                                });
-                                window.__seizureStyleObserver = styleObserver;
-                            } catch (_) {}
-                            
-                            // Ensure native scroll behavior on the main document only (avoid breaking custom scrollers)
-                            try {
-                                document.documentElement.style.scrollBehavior = 'auto';
-                                document.body && (document.body.style.scrollBehavior = 'auto');
-                                // Do not touch scrollSnapType on arbitrary containers to avoid locking scroll
-                            } catch (_) {}
-                        }
-                    } catch (_) {}
-                    
-                    document.addEventListener('DOMContentLoaded', function() {
-                        if (document.body && document.body.classList.contains('seizure-safe')) {
-                            window.__applySeizureSafeDOMFreeze();
-                            // Disable scroll-trigger libraries when seizure-safe is active
-                            try {
-                                // AOS
-                                if (window.AOS && typeof window.AOS.refreshHard === 'function') {
-                                    try { window.AOS.refreshHard(); } catch (_) {}
-                                    try { window.AOS.init && window.AOS.init({ disable: true }); } catch (_) {}
-                                }
-                            } catch (_) {}
-                        }
-                    }, { once: true });
-                    
-                    // Watch for seizure-safe class being toggled later and (re)install hard blockers
-                    try {
-                        if (!window.__seizureClassWatcher) {
-                            const classWatcher = new MutationObserver(() => {
-                                const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
-                                if (active) {
-                                    try { window.__applySeizureSafeDOMFreeze(); } catch (_) {}
-                                    try { window.__installStyleHardBlockers && window.__installStyleHardBlockers(); } catch (_) {}
-                                    try { applyUniversalStopMotion(true); } catch (_) {}
-                                } else {
-                                    try { applyUniversalStopMotion(false); } catch (_) {}
-                                }
-                            });
-                            classWatcher.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-                            window.__seizureClassWatcher = classWatcher;
-                        }
-                    } catch (_) {}
-                    
-                    // Install hard blockers at the API level for inline styles when seizure-safe is active
-                    try {
-                        if (!window.__installStyleHardBlockers) {
-                            window.__installStyleHardBlockers = function() {
-                                if (!document.body.classList.contains('seizure-safe')) return;
-                                try {
-                                    if (!window.__origSetProperty) {
-                                        window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
-                                        CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
-                                            const n = String(name).toLowerCase();
-                                            // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
-                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
-                                                return undefined;
-                                            }
-                                            return window.__origSetProperty.call(this, name, value, priority);
-                                        };
-                                    }
-                                } catch (_) {}
-                                try {
-                                    if (!window.__origStyleAttrSetter) {
-                                        window.__origStyleAttrSetter = Element.prototype.setAttribute;
-                                        Element.prototype.setAttribute = function(attr, val) {
-                                            if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
-                                                // Strip blacklisted properties from inline style strings
-                                                let cleaned = val
-                                                    .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
-                                                    .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
-                                                    .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
-                                                    .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
-                                                return window.__origStyleAttrSetter.call(this, attr, cleaned);
-                                            }
-                                            return window.__origStyleAttrSetter.call(this, attr, val);
-                                        };
-                                    }
-                                } catch (_) {}
-                            };
-                        }
-                        // Apply immediately if already in seizure-safe
-                        window.__installStyleHardBlockers();
-                    } catch (_) {}
-                    
-                    // Observe future DOM changes to keep things frozen while seizure-safe is active
-                    try {
-                        const observer = new MutationObserver(() => {
-                            if (document.body && document.body.classList.contains('seizure-safe')) {
-                                window.__applySeizureSafeDOMFreeze();
-                            }
-                        });
-                        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-                        window.__seizureObserver = observer;
-                    } catch (obsErr) {
-                        console.warn('Accessibility Widget: MutationObserver setup failed', obsErr);
-                    }
                 }
             } catch (guardErr) {
                 console.warn('Accessibility Widget: runtime seizure-safe guards failed', guardErr);
             }
         }
+    } catch (e) {
+        console.warn('Accessibility Widget: Immediate seizure-safe check failed', e);
+    }
+})();
+
+// Ensure the seizure-safe toggle actually applies classes and storage immediately
+(function() {
+    try {
+        function bindSeizureSafeToggle() {
+            const input = document.getElementById('seizure-safe');
+            if (!input) return;
+            const enabled = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+            try { input.checked = enabled; } catch (_) {}
+            if (!input.__seizureBound) {
+                input.addEventListener('change', function() {
+                    const on = !!this.checked;
+                    localStorage.setItem('accessibility-widget-seizure-safe', on ? 'true' : 'false');
+                    try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
+                    try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
+                    if (on) {
+                        try { window.__applySeizureSafeDOMFreeze && window.__applySeizureSafeDOMFreeze(); } catch (_) {}
+                    }
+                });
+                input.__seizureBound = true;
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindSeizureSafeToggle, { once: true });
+        } else {
+            bindSeizureSafeToggle();
+        }
+    } catch (e) {
+        console.warn('Accessibility Widget: Seizure-safe toggle binding failed', e);
+    }
+})();
+
+// Universal Stop Motion helper: CSS + Lottie + GSAP + GIF/APNG handling
+function applyUniversalStopMotion(enabled) {
+    try {
+        // CSS injection to force-stop CSS animations/transitions and smooth scroll
+        let css = document.getElementById('a11y-universal-motion-block');
+        if (enabled) {
+            if (!css) {
+                css = document.createElement('style');
+                css.id = 'a11y-universal-motion-block';
+                document.head.appendChild(css);
+            }
+            css.textContent = `
+                html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
+                body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after,
+                body.stop-animation *, body.stop-animation *::before, body.stop-animation *::after {
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    scroll-behavior: auto !important;
+                }
+            `;
+        } else if (css) {
+            css.remove();
+        }
         
-        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
+        // Lottie: stop all registered animations
+        try {
+            if (enabled && typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                const all = window.lottie.getRegisteredAnimations();
+                all && all.forEach(anim => { try { anim.stop && anim.stop(); } catch (_) {} });
+                try { window.lottie.freeze && window.lottie.freeze(); } catch (_) {}
+            }
+        } catch (_) {}
+        
+        // GSAP: pause global timeline
+        try {
+            if (enabled && typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
+                window.gsap.globalTimeline.pause();
+            }
+        } catch (_) {}
+        
+        // GIF/APNG replacement
+        const STATIC_FALLBACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+        if (enabled) {
+            document.querySelectorAll('img[src$=".gif"], img[src$=".apng"]').forEach(img => {
+                try {
+                    if (!img.dataset.originalSrc) img.dataset.originalSrc = img.src;
+                    img.src = STATIC_FALLBACK;
+                } catch (_) {}
+            });
+        } else {
+            document.querySelectorAll('img[data-original-src]').forEach(img => {
+                try { img.src = img.dataset.originalSrc; delete img.dataset.originalSrc; } catch (_) {}
+            });
+        }
+        
+        // Observe for future Lottie/GIF inserts
+        if (enabled) {
+            if (!window.__universalMotionObserver) {
+                const obs = new MutationObserver(mutations => {
+                    const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
+                    if (!active) return;
+                    try {
+                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                            const all = window.lottie.getRegisteredAnimations();
+                            all && all.forEach(anim => { try { anim.stop && anim.stop(); } catch (_) {} });
+                        }
+                    } catch (_) {}
+                    try {
+                        mutations.forEach(m => m.addedNodes && m.addedNodes.forEach(node => {
+                            if (node && node.tagName === 'IMG') {
+                                if (!node.dataset.originalSrc) node.dataset.originalSrc = node.src;
+                                node.src = STATIC_FALLBACK;
+                            }
+                        }));
+                    } catch (_) {}
+                });
+                obs.observe(document.documentElement, { subtree: true, childList: true });
+                window.__universalMotionObserver = obs;
+            }
+        } else if (window.__universalMotionObserver) {
+            try { window.__universalMotionObserver.disconnect(); } catch (_) {}
+            window.__universalMotionObserver = null;
+        }
+    } catch (_) {}
+}
+
+// Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
+function applyVisionImpaired(on) {
+    try {
+        // Toggle root classes
+        document.documentElement.classList.toggle('vision-impaired', !!on);
+        document.body.classList.toggle('vision-impaired', !!on);
+        
+        // Set vision scale CSS variable
+        const scaleValue = '1.05';
+        if (on) {
+            document.documentElement.style.setProperty('--vision-scale', scaleValue);
+        } else {
+            document.documentElement.style.setProperty('--vision-scale', '1');
+        }
+    } catch (_) {}
+}
+
+// AccessibilityWidget class
+class AccessibilityWidget {
+    constructor() {
+        this.settings = {};
+        this.contentScale = 100; // Start at 100% (normal size)
+        this.fontSize = 100;
+        this.lineHeight = 100;
+        this.letterSpacing = 100;
+        this.textMagnifierHandlers = new Map();
+        this.originalLineHeight = null;
+        this.originalFontSizes = new Map();
+        this.currentlyFocusedElement = null;
+        this.isKeyboardNavigation = false;
+        this.lastInteractionMethod = null;
+        this.currentLanguage = this.getCurrentLanguage();
+        this.translations = this.getTranslations();
+        this.isOpeningDropdown = false;
+        this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev';
+        console.log('Accessibility Widget: kvApiUrl set to:', this.kvApiUrl);
+        console.log('Accessibility Widget: Initializing...');
+        this.checkAndApplyImmediateSeizureSafe();
+        this.setupSeizureSafeMonitoring();
+        this.forceAllAnimationsToFinalState();
+        this.init();
+    }
+    
+    // Store original element positions and sizes before applying seizure-safe mode
+    storeOriginalLayout() {
+        try {
+            if (!this.originalLayouts) {
+                this.originalLayouts = new Map();
+            }
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach((element, index) => {
+                if (index < 1000) {
+                    const computedStyle = window.getComputedStyle(element);
+                    this.originalLayouts.set(element, {
+                        position: computedStyle.position,
+                        top: computedStyle.top,
+                        left: computedStyle.left,
+                        right: computedStyle.right,
+                        bottom: computedStyle.bottom,
+                        transform: computedStyle.transform,
+                        width: computedStyle.width,
+                        height: computedStyle.height,
+                        display: computedStyle.display,
+                        opacity: computedStyle.opacity,
+                        visibility: computedStyle.visibility
+                    });
+                }
+            });
+            console.log('Accessibility Widget: Original layouts stored for', this.originalLayouts.size, 'elements');
+        } catch (e) {
+            console.warn('Accessibility Widget: storeOriginalLayout failed', e);
+        }
+    }
+    
+    // Check and apply seizure-safe mode immediately before any animations start
+    checkAndApplyImmediateSeizureSafe() {
+        try {
+            // Check localStorage first for immediate application
+            const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+            if (seizureSafeFromStorage === 'true') {
+                console.log('Accessibility Widget: Seizure-safe mode detected in localStorage, applying immediately');
+                document.body.classList.add('seizure-safe');
+                document.documentElement.classList.add('seizure-safe');
+                this.applyImmediateSeizureCSS();
+                this.forceCompleteTextAnimations();
+            }
+        } catch (e) {
+            console.warn('Accessibility Widget: checkAndApplyImmediateSeizureSafe failed', e);
+        }
+    }
+    
+    // Set up aggressive monitoring for any text animations that might start
+    setupSeizureSafeMonitoring() {
+        try {
+            // Only set up monitoring if seizure-safe mode is active
+            if (!document.body.classList.contains('seizure-safe')) {
+                return;
+            }
+            
+            console.log('Accessibility Widget: Setting up aggressive seizure-safe monitoring');
+            
+            // Use MutationObserver to catch any text animations that start
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                        // Check for any new text animation elements
+                        const addedNodes = Array.from(mutation.addedNodes || []);
+                        const target = mutation.target;
+                        
+                        // Check added nodes and target for text animation classes
+                        [...addedNodes, target].forEach(node => {
+                            if (node && node.nodeType === Node.ELEMENT_NODE) {
+                                const element = node;
+                                const classList = element.className || '';
+                                
+                                // Check for text animation patterns
+                                if (classList.includes('char') || classList.includes('word') || 
+                                    classList.includes('split') || classList.includes('typewriter') ||
+                                    classList.includes('typing') || classList.includes('reveal')) {
+                                    
+                                    console.log('Accessibility Widget: Detected text animation element, forcing to final state');
+                                    
+                                    // Force immediate final state
+                                    element.style.animation = 'none';
+                                    element.style.transition = 'none';
+                                    element.style.opacity = '1';
+                                    element.style.visibility = 'visible';
+                                    element.style.display = 'inline';
+                                    
+                                    // If it's a text animation container, reveal all text immediately
+                                    const textSpans = element.querySelectorAll('.char, .word, [class*="char"], [class*="word"]');
+                                    if (textSpans.length > 0) {
+                                        let fullText = '';
+                                        textSpans.forEach(span => {
+                                            fullText += span.textContent || '';
+                                        });
+                                        element.textContent = fullText;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Start observing
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style']
+            });
+            
+            console.log('Accessibility Widget: Seizure-safe monitoring active');
+        } catch (e) {
+            console.warn('Accessibility Widget: setupSeizureSafeMonitoring failed', e);
+        }
+    }
+    
+    // Force all animations to their final state immediately
+    forceAllAnimationsToFinalState() {
+        try {
+            // Check if seizure-safe is enabled
+            const isSeizureSafe = document.body.classList.contains('seizure-safe');
+            const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+            
+            if (isSeizureSafe || seizureSafeFromStorage) {
+                console.log('Accessibility Widget: Forcing animations to final state (clean approach)');
+                
+                // Stop seizure-triggering animations only
+                const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
+                
+                animatedElements.forEach(element => {
+                    element.style.animation = 'none';
+                    element.style.transition = 'none';
+                    element.style.animationPlayState = 'paused';
+                });
+                
+                console.log('Accessibility Widget: Stopped animations on', animatedElements.length, 'elements');
+            }
+        } catch (e) {
+            console.warn('Accessibility Widget: forceAllAnimationsToFinalState failed', e);
+        }
+    }
+    
+    // Initialize the accessibility widget
+    async init() {
+        this.addFontAwesome();
+        this.addCSS(); // Load CSS from hosted URL
+        
+        // Check if interface should be hidden
+        if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
+            console.log('[CK] Accessibility interface is hidden, not creating widget');
+            return;
+        }
+        
+        this.createWidget();
+    }
+    
+    // Add Font Awesome icons
+    addFontAwesome() {
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const fontAwesome = document.createElement('link');
+            fontAwesome.rel = 'stylesheet';
+            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            document.head.appendChild(fontAwesome);
+            console.log('Accessibility Widget: Font Awesome added');
+        }
+    }
+    
+    // Add CSS styles
+    addCSS() {
+        // Check if CSS is already loaded
+        if (!document.querySelector('link[href*="accessibility-widget.css"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.onload = () => {
+                console.log('Accessibility Widget: CSS loaded successfully');
+            };
+            link.onerror = () => {
+                console.warn('Accessibility Widget: CSS failed to load, using fallback');
+            };
+            link.href = 'https://accessibility-widget.web-8fb.workers.dev/accessibility-widget.css';
+            document.head.appendChild(link);
+        }
+    }
+    
+    // Create the accessibility widget
+    createWidget() {
+        // Create widget container that will host the Shadow DOM
+        const widgetContainer = document.createElement('div');
+        widgetContainer.id = 'accessibility-widget-container';
+        widgetContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 999999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(widgetContainer);
+        
+        // Create shadow root
+        this.shadowRoot = widgetContainer.attachShadow({ mode: 'open' });
+        
+        // Add widget HTML
+        this.shadowRoot.innerHTML = this.getWidgetHTML();
+        
+        // Add event listeners
+        this.addEventListeners();
+        
+        console.log('Accessibility Widget: Widget created successfully');
+    }
+    
+    // Load settings from localStorage
+    loadSettings() {
+        const saved = localStorage.getItem('accessibility-settings');
+        if (saved) {
+            this.settings = JSON.parse(saved);
+        }
+        
+        // Set default settings for keyboard navigation if not already set
+        if (!this.settings.hasOwnProperty('keyboard-navigation')) {
+            this.settings['keyboard-navigation'] = false;
+        }
+        
+        console.log('Accessibility Widget: Settings loaded', this.settings);
+    }
+    
+    // Save settings to localStorage
+    saveSettings() {
+        // Save to localStorage (existing functionality)
+        localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
+        
+        // Also save to KV storage for persistence across devices
+        this.saveSettingsToKV();
+    }
+}
+
+// CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
+(function() {
+    try {
+        const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
         if (seizureSafeFromStorage === 'true') {
             try {
                 // Override requestAnimationFrame immediately
@@ -13563,6 +13542,7 @@ class AccessibilityWidget {
                 body.style.height = '';
                 html.style.transform = '';
                 html.style.transformOrigin = '';
+                html.style.zoom = '';
                 
                 return;
             }
@@ -13570,16 +13550,12 @@ class AccessibilityWidget {
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply simple CSS transform scaling directly to body
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
-            
-            // Remove width/height constraints to allow proper scrolling
-            // body.style.width = '100vw'; - REMOVED: This was preventing scrolling
-            // body.style.height = '100vh'; - REMOVED: This was preventing scrolling
+            // Use zoom instead of transform to avoid extra white space
+            // Zoom scales the content while maintaining viewport size
+            html.style.zoom = scale;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: Body transform applied:', body.style.transform);
+            console.log('Accessibility Widget: HTML zoom applied:', html.style.zoom);
         }
         
         updateContentScaleDisplay() {
@@ -15009,6 +14985,7 @@ class AccessibilityWidget {
             body.style.height = '';
             html.style.transform = '';
             html.style.transformOrigin = '';
+            html.style.zoom = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
