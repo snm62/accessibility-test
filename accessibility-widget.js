@@ -7,18 +7,18 @@
             console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
             document.body.classList.add('seizure-safe');
             
-            // Apply minimal CSS to stop animations without interfering with scroll
+            // Apply minimal CSS to reduce animations without breaking functionality
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
-                /* MINIMAL SEIZURE-SAFE: Only stop animations, preserve scroll */
+                /* GENTLE SEIZURE-SAFE: Reduce animations but preserve functionality */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    animation-fill-mode: forwards !important;
+                    animation-duration: 0.01s !important;
+                    transition-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-timing-function: linear !important;
                 }
                 
                 /* MINIMAL: Only ensure basic scrolling works */
@@ -336,12 +336,10 @@
                     reinforce.textContent = `
                         html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
-                            animation: none !important;
-                            animation-name: none !important;
-                            animation-duration: 0.0001s !important;
-                            animation-play-state: paused !important;
-                            transition: none !important;
-                            transition-property: none !important;
+                            animation-duration: 0.01s !important;
+                            animation-timing-function: linear !important;
+                            transition-duration: 0.01s !important;
+                            transition-timing-function: linear !important;
                         }
                         /* Keep cursors intact */
                         html.seizure-safe a[href], html.seizure-safe button, html.seizure-safe [role="button"], html.seizure-safe [onclick],
@@ -365,14 +363,10 @@
                         body.seizure-safe *,
                         body.seizure-safe *::before,
                         body.seizure-safe *::after {
-                            animation: none !important;
-                            animation-name: none !important;
-                            animation-duration: 0.0001s !important;
-                            animation-iteration-count: 1 !important;
-                            animation-play-state: paused !important;
-                            transition: none !important;
-                            transition-property: none !important;
-                            transition-duration: 0s !important;
+                            animation-duration: 0.01s !important;
+                            animation-timing-function: linear !important;
+                            transition-duration: 0.01s !important;
+                            transition-timing-function: linear !important;
                             /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                         }
                         /* Do not affect cursor appearance */
@@ -386,10 +380,12 @@
                     const correction = document.createElement('style');
                     correction.id = 'accessibility-seizure-correction';
                     correction.textContent = `
-                        /* Keep animations disabled */
+                        /* Reduce animations but preserve functionality */
                         body.seizure-safe * {
-                            animation: none !important;
-                            transition: none !important;
+                            animation-duration: 0.01s !important;
+                            animation-timing-function: linear !important;
+                            transition-duration: 0.01s !important;
+                            transition-timing-function: linear !important;
                         }
                         /* Restore layout-affecting properties to stylesheet values */
                         body.seizure-safe *,
@@ -447,8 +443,10 @@
                         body.seizure-safe [class*="slide-"],
                         body.seizure-safe [class*="reveal"],
                         body.seizure-safe [class*="animate"] {
-                            animation: none !important;
-                            transition: none !important;
+                            animation-duration: 0.01s !important;
+                            animation-timing-function: linear !important;
+                            transition-duration: 0.01s !important;
+                            transition-timing-function: linear !important;
                             opacity: 1 !important;
                             /* transform: none !important; - REMOVED: This was breaking website layout */
                             will-change: auto !important;
@@ -13722,8 +13720,12 @@ class AccessibilityWidget {
                 body.style.transformOrigin = '';
                 body.style.width = '';
                 body.style.height = '';
+                body.style.minHeight = '';
                 html.style.transform = '';
                 html.style.transformOrigin = '';
+                html.style.width = '';
+                html.style.height = '';
+                html.style.minHeight = '';
                 
                 return;
             }
@@ -13731,16 +13733,27 @@ class AccessibilityWidget {
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply simple CSS transform scaling directly to body
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
+            // Apply scaling to html element to scale entire page content
+            html.style.transform = `scale(${scale})`;
+            html.style.transformOrigin = 'top left';
             
-            // Ensure body takes full viewport to prevent gaps
-            body.style.width = '100vw';
-            body.style.height = '100vh';
+            // Calculate proper dimensions to maintain scrollability
+            const scaledWidth = 100 / scale;
+            const scaledHeight = 100 / scale;
+            
+            // Set dimensions to allow proper scrolling
+            html.style.width = `${scaledWidth}vw`;
+            html.style.height = `${scaledHeight}vh`;
+            html.style.minHeight = `${scaledHeight}vh`;
+            
+            // Ensure body maintains proper dimensions
+            body.style.width = `${scaledWidth}vw`;
+            body.style.height = `${scaledHeight}vh`;
+            body.style.minHeight = `${scaledHeight}vh`;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: Body transform applied:', body.style.transform);
+            console.log('Accessibility Widget: HTML transform applied:', html.style.transform);
+            console.log('Accessibility Widget: Dimensions set to:', `${scaledWidth}vw x ${scaledHeight}vh`);
         }
         
         updateContentScaleDisplay() {
@@ -15168,8 +15181,12 @@ class AccessibilityWidget {
             body.style.transformOrigin = '';
             body.style.width = '';
             body.style.height = '';
+            body.style.minHeight = '';
             html.style.transform = '';
             html.style.transformOrigin = '';
+            html.style.width = '';
+            html.style.height = '';
+            html.style.minHeight = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
