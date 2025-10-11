@@ -178,11 +178,11 @@
                 body.seizure-safe [class*="autoplay"],
                 body.seizure-safe [class*="video"],
                 body.seizure-safe [class*="media"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset animations to maintain visual effects */
                 }
                 
                 /* HOVER ANIMATIONS: Disable all hover-triggered animations */
@@ -195,11 +195,11 @@
                 body.seizure-safe *[data-hover],
                 body.seizure-safe *[data-focus],
                 body.seizure-safe *[data-active] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset animations to maintain visual effects */
                 }
                 
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
@@ -220,12 +220,11 @@
                 body.seizure-safe [class*="unveil"],
                 body.seizure-safe [class*="show-text"],
                 body.seizure-safe [class*="text-effect"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset animations to maintain visual effects */
                 }
                 
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
@@ -301,12 +300,11 @@
                 body.seizure-safe [class*="circle"],
                 body.seizure-safe [class*="ring"],
                 body.seizure-safe [class*="orbit"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset animations to maintain visual effects */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
@@ -316,13 +314,11 @@
                 body.seizure-safe [data-splitting] .word,
                 body.seizure-safe .split .char,
                 body.seizure-safe .split .word {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    display: inline !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset animations to maintain visual effects */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split {
@@ -537,8 +533,8 @@
                                 try {
                                     const cs = window.getComputedStyle(el);
                                     // Lock width/transform/transition to current
-                                    el.style.transition = 'none';
-                                    el.style.animation = 'none';
+                                    el.style.transitionDuration = '0.01s';
+                                    el.style.animationDuration = '0.01s';
                                     if (cs.width && cs.width !== 'auto') el.style.width = cs.width;
                                     if (cs.transform && cs.transform !== 'none') el.style.transform = 'none';
                                     // For ARIA progressbar, keep the current value and stop changing
@@ -1485,21 +1481,21 @@ class AccessibilityWidget {
                     const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
                     
                     animatedElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
+                        element.style.animationDuration = '0.01s';
+                        element.style.transitionDuration = '0.01s';
+                        element.style.animationTimingFunction = 'linear';
+                        element.style.transitionTimingFunction = 'linear';
+                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
                     });
                     
                     // Stop letter-by-letter text animations
                     const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
                     textElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
+                        element.style.animationDuration = '0.01s';
+                        element.style.transitionDuration = '0.01s';
+                        element.style.animationTimingFunction = 'linear';
+                        element.style.transitionTimingFunction = 'linear';
+                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
                     });
                     
                     // Stop autoplay media
@@ -1514,21 +1510,21 @@ class AccessibilityWidget {
                     // Stop SVG animations
                     const svgElements = document.querySelectorAll('svg, svg path, svg line');
                     svgElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
+                        element.style.animationDuration = '0.01s';
+                        element.style.transitionDuration = '0.01s';
+                        element.style.animationTimingFunction = 'linear';
+                        element.style.transitionTimingFunction = 'linear';
+                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
                     });
                     
                     // Stop scroll-triggered animations
                     const scrollElements = document.querySelectorAll('*[class*="scroll"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="timeline"]');
                     scrollElements.forEach(element => {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                        element.style.transform = 'none';
+                        element.style.animationDuration = '0.01s';
+                        element.style.transitionDuration = '0.01s';
+                        element.style.animationTimingFunction = 'linear';
+                        element.style.transitionTimingFunction = 'linear';
+                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
                     });
                     
                     console.log('Accessibility Widget: Clean animation stopping completed');
@@ -1608,8 +1604,8 @@ class AccessibilityWidget {
                             textElements.forEach(element => {
                                 if (element.style.animation || element.style.transition || element.style.opacity !== '1') {
                                     // Force complete the animation immediately
-                                    element.style.animation = 'none';
-                                    element.style.transition = 'none';
+                                    element.style.animationDuration = '0.01s';
+                                    element.style.transitionDuration = '0.01s';
                                     element.style.opacity = '1';
                                     element.style.visibility = 'visible';
                                     element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
@@ -13696,7 +13692,7 @@ class AccessibilityWidget {
     
         increaseContentScale() {
             console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.min(this.contentScale + 3, 200); // 1% increment for subtle scaling
+            this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
             this.settings['content-scale'] = this.contentScale;
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
@@ -13706,7 +13702,7 @@ class AccessibilityWidget {
         
         decreaseContentScale() {
             console.log('Accessibility Widget: Decreasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.max(this.contentScale - 3, 50); // 1% decrement for subtle scaling, minimum 50%
+            this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
             this.settings['content-scale'] = this.contentScale;
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
@@ -13715,42 +13711,97 @@ class AccessibilityWidget {
         }
         
         updateContentScale() {
-            const body = document.body;
-            const html = document.documentElement;
-            
             console.log('Accessibility Widget: updateContentScale called with scale:', this.contentScale + '%');
             
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                // Reset any scaling styles
-                body.style.transform = '';
-                body.style.transformOrigin = '';
-                html.style.transform = '';
-                html.style.transformOrigin = '';
-                
+                // Reset all content scaling styles
+                this.resetContentScaling();
                 return;
             }
             
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply CSS zoom to html element - this scales only the content inside the website
-            // without affecting the website structure, layout, or scrollability
-            html.style.zoom = scale;
+            // Apply scaling only to specific content elements
+            this.scaleContentElements(scale);
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: HTML zoom applied:', html.style.zoom);
+        }
+        
+        resetContentScaling() {
+            // Reset all content elements to normal size
+            const elementsToReset = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, img, button, input, textarea, select, a, li, td, th, label, small, strong, em, b, i, u, mark, del, ins, sub, sup, code, pre, blockquote, cite, q, abbr, acronym, address, dfn, kbd, samp, var, time, data, output, progress, meter, details, summary, figcaption, caption, legend, fieldset, optgroup, option, dt, dd, dl, ol, ul, nav, main, section, article, aside, header, footer, figure, figcaption, table, thead, tbody, tfoot, tr, td, th, form, fieldset, legend, label, input, button, select, textarea, optgroup, option');
+            
+            elementsToReset.forEach(element => {
+                element.style.transform = '';
+                element.style.fontSize = '';
+                element.style.width = '';
+                element.style.height = '';
+            });
+        }
+        
+        scaleContentElements(scale) {
+            // Target only content elements: text, images, buttons, and content inside divs
+            const contentSelectors = [
+                'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'img', 'button', 
+                'input', 'textarea', 'select', 'a', 'li', 'td', 'th', 'label', 'small', 
+                'strong', 'em', 'b', 'i', 'u', 'mark', 'del', 'ins', 'sub', 'sup', 'code', 
+                'pre', 'blockquote', 'cite', 'q', 'abbr', 'acronym', 'address', 'dfn', 
+                'kbd', 'samp', 'var', 'time', 'data', 'output', 'progress', 'meter', 
+                'details', 'summary', 'figcaption', 'caption', 'legend', 'fieldset', 
+                'optgroup', 'option', 'dt', 'dd', 'dl', 'ol', 'ul', 'nav', 'main', 
+                'section', 'article', 'aside', 'header', 'footer', 'figure', 'figcaption', 
+                'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 
+                'legend', 'label', 'input', 'button', 'select', 'textarea', 'optgroup', 'option'
+            ];
+            
+            contentSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    // Skip if element is part of navigation or structural elements
+                    if (element.closest('nav, header, footer, .navbar, .header, .footer, .navigation')) {
+                        return;
+                    }
+                    
+                    // Apply scaling to content elements
+                    element.style.transform = `scale(${scale})`;
+                    element.style.transformOrigin = 'center';
+                    
+                    // For text elements, also adjust font size
+                    if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'a', 'li', 'td', 'th', 'label', 'small', 'strong', 'em', 'b', 'i', 'u', 'mark', 'del', 'ins', 'sub', 'sup', 'code', 'pre', 'blockquote', 'cite', 'q', 'abbr', 'acronym', 'address', 'dfn', 'kbd', 'samp', 'var', 'time', 'data', 'output', 'progress', 'meter', 'details', 'summary', 'figcaption', 'caption', 'legend', 'fieldset', 'optgroup', 'option', 'dt', 'dd', 'dl', 'ol', 'ul', 'nav', 'main', 'section', 'article', 'aside', 'header', 'footer', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 'legend', 'label', 'input', 'button', 'select', 'textarea', 'optgroup', 'option'].includes(element.tagName.toLowerCase())) {
+                        const currentFontSize = window.getComputedStyle(element).fontSize;
+                        if (currentFontSize && currentFontSize !== '0px') {
+                            const fontSize = parseFloat(currentFontSize);
+                            element.style.fontSize = `${fontSize * scale}px`;
+                        }
+                    }
+                    
+                    // For images, adjust width and height
+                    if (element.tagName.toLowerCase() === 'img') {
+                        const currentWidth = window.getComputedStyle(element).width;
+                        const currentHeight = window.getComputedStyle(element).height;
+                        if (currentWidth && currentWidth !== 'auto') {
+                            const width = parseFloat(currentWidth);
+                            element.style.width = `${width * scale}px`;
+                        }
+                        if (currentHeight && currentHeight !== 'auto') {
+                            const height = parseFloat(currentHeight);
+                            element.style.height = `${height * scale}px`;
+                        }
+                    }
+                });
+            });
         }
         
         updateContentScaleDisplay() {
             const display = this.shadowRoot.getElementById('content-scale-value');
             if (display) {
-                // Show 5% increments in display while actual scaling uses 1% increments
-                const displayValue = Math.round(this.contentScale / 5) * 5;
-                display.textContent = displayValue + '%';
-                console.log('Accessibility Widget: Updated content scale display to', displayValue + '% (actual scale:', this.contentScale + '%)');
+                // Show the actual content scale percentage
+                display.textContent = this.contentScale + '%';
+                console.log('Accessibility Widget: Updated content scale display to', this.contentScale + '%');
             }
         }
         
@@ -15163,15 +15214,8 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Reset scaling styles directly
-            const body = document.body;
-            const html = document.documentElement;
-            
-            body.style.transform = '';
-            body.style.transformOrigin = '';
-            html.style.transform = '';
-            html.style.transformOrigin = '';
-            html.style.zoom = '';
+            // Reset all content scaling styles
+            this.resetContentScaling();
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -25512,8 +25556,8 @@ class AccessibilityWidget {
             
             textElements.forEach(element => {
                 // Remove any animation classes and inline styles
-                element.style.animation = 'none';
-                element.style.transition = 'none';
+                element.style.animationDuration = '0.01s';
+                element.style.transitionDuration = '0.01s';
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
                 element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
@@ -25541,8 +25585,8 @@ class AccessibilityWidget {
                 if (element.style.animation || element.style.transition || element.style.opacity !== '') {
                     element.style.opacity = '1';
                     element.style.visibility = 'visible';
-                    element.style.animation = 'none';
-                    element.style.transition = 'none';
+                    element.style.animationDuration = '0.01s';
+                    element.style.transitionDuration = '0.01s';
                     element.style.transform = 'none';
                 }
             });
