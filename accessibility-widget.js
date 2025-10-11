@@ -734,14 +734,11 @@ function applyVisionImpaired(on) {
             document.body.appendChild(wrapper);
         }
 
-        // Apply vision scaling directly to html element for better compatibility
+        // Apply vision scaling to body element as requested
         if (on) {
-            document.documentElement.classList.add('vision-impaired');
-            // Also apply zoom for better browser support
-            document.documentElement.style.zoom = '1.05';
+            document.body.classList.add('vision-impaired');
         } else {
-            document.documentElement.classList.remove('vision-impaired');
-            document.documentElement.style.zoom = '1';
+            document.body.classList.remove('vision-impaired');
         }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
@@ -764,21 +761,24 @@ function applyVisionImpaired(on) {
                 /* REMOVED: transition - This was interfering with panel positioning */
             }
 
-            html.vision-impaired {
-                /* Scale the entire document while preserving scrollability */
-                zoom: 1.05 !important;
-                -moz-transform: scale(1.05) !important;
-                -moz-transform-origin: top left !important;
-                -webkit-transform: scale(1.05) !important;
-                -webkit-transform-origin: top left !important;
-            }
-            
             body.vision-impaired {
                 margin: 0 !important;
                 padding: 0 !important;
-                min-height: 100vh !important;
-                /* Ensure content scales properly */
-                width: 100% !important;
+                /* Scale the body element while preserving scrollability */
+                transform: scale(1.05) !important;
+                transform-origin: top left !important;
+            }
+
+            /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            body.vision-impaired .accessibility-panel {
+                position: fixed !important;
+                z-index: 999999 !important;
+                transform: none !important;
+                zoom: 1 !important;
+                -moz-transform: none !important;
+                -webkit-transform: none !important;
             }
 
             /* 2. CONTENT WRAPPER - Simplified approach */
@@ -791,8 +791,7 @@ function applyVisionImpaired(on) {
             }
             
             /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
-            html.vision-impaired,
-            body.vision-impaired {
+            html.vision-impaired {
                 overflow-x: hidden !important;
             }
             
@@ -911,19 +910,22 @@ function applyVisionImpaired(on) {
                     min-height: 100vh !important;
                 }
                 
-                html.vision-impaired {
-                    /* Scale the entire document while preserving scrollability */
-                    zoom: 1.05 !important;
-                    -moz-transform: scale(1.05) !important;
-                    -moz-transform-origin: top left !important;
-                    -webkit-transform: scale(1.05) !important;
-                    -webkit-transform-origin: top left !important;
+                body.vision-impaired {
+                    /* Scale the body element while preserving scrollability */
+                    transform: scale(1.05) !important;
+                    transform-origin: top left !important;
                 }
                 
-                body.vision-impaired {
-                    min-height: 100vh !important;
-                    /* Ensure content scales properly */
-                    width: 100% !important;
+                /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
+                body.vision-impaired .accessibility-widget,
+                body.vision-impaired #accessibility-widget,
+                body.vision-impaired .accessibility-panel {
+                    position: fixed !important;
+                    z-index: 999999 !important;
+                    transform: none !important;
+                    zoom: 1 !important;
+                    -moz-transform: none !important;
+                    -webkit-transform: none !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
