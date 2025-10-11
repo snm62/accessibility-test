@@ -1023,7 +1023,7 @@ function applyVisionImpaired(on) {
                 padding: 0 !important;
                 min-height: 100vh !important;
                 /* Simple scaling to enhance vision - no calculations */
-                transform: scale(1.1) !important;
+                transform: scale(1.05) !important;
                 transform-origin: top left !important;
             }
 
@@ -1160,7 +1160,7 @@ function applyVisionImpaired(on) {
                 body.vision-impaired {
                     min-height: 100vh !important;
                     /* Simple scaling to enhance vision - no calculations */
-                    transform: scale(1.1) !important;
+                    transform: scale(1.05) !important;
                     transform-origin: top left !important;
                 }
                 
@@ -1671,11 +1671,11 @@ class AccessibilityWidget {
                     body.seizure-safe svg,
                     body.seizure-safe svg path,
                     body.seizure-safe svg line {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        animation-duration: 0.01s !important;
+                        animation-timing-function: linear !important;
+                        transition-duration: 0.01s !important;
+                        transition-timing-function: linear !important;
+                        /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
                     }
                     
                     /* Stop scroll-triggered animations immediately */
@@ -13711,89 +13711,33 @@ class AccessibilityWidget {
         }
         
         updateContentScale() {
+            const body = document.body;
+            const html = document.documentElement;
+            
             console.log('Accessibility Widget: updateContentScale called with scale:', this.contentScale + '%');
             
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                // Reset all content scaling styles
-                this.resetContentScaling();
+                // Reset any scaling styles
+                body.style.transform = '';
+                body.style.transformOrigin = '';
+                html.style.transform = '';
+                html.style.transformOrigin = '';
+                html.style.zoom = '';
+                
                 return;
             }
             
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply scaling only to specific content elements
-            this.scaleContentElements(scale);
+            // Apply simple CSS zoom to html element - this preserves natural scrolling
+            html.style.zoom = scale;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-        }
-        
-        resetContentScaling() {
-            // Reset all content elements to normal size
-            const elementsToReset = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, img, button, input, textarea, select, a, li, td, th, label, small, strong, em, b, i, u, mark, del, ins, sub, sup, code, pre, blockquote, cite, q, abbr, acronym, address, dfn, kbd, samp, var, time, data, output, progress, meter, details, summary, figcaption, caption, legend, fieldset, optgroup, option, dt, dd, dl, ol, ul, nav, main, section, article, aside, header, footer, figure, figcaption, table, thead, tbody, tfoot, tr, td, th, form, fieldset, legend, label, input, button, select, textarea, optgroup, option');
-            
-            elementsToReset.forEach(element => {
-                element.style.transform = '';
-                element.style.fontSize = '';
-                element.style.width = '';
-                element.style.height = '';
-            });
-        }
-        
-        scaleContentElements(scale) {
-            // Target only content elements: text, images, buttons, and content inside divs
-            const contentSelectors = [
-                'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'img', 'button', 
-                'input', 'textarea', 'select', 'a', 'li', 'td', 'th', 'label', 'small', 
-                'strong', 'em', 'b', 'i', 'u', 'mark', 'del', 'ins', 'sub', 'sup', 'code', 
-                'pre', 'blockquote', 'cite', 'q', 'abbr', 'acronym', 'address', 'dfn', 
-                'kbd', 'samp', 'var', 'time', 'data', 'output', 'progress', 'meter', 
-                'details', 'summary', 'figcaption', 'caption', 'legend', 'fieldset', 
-                'optgroup', 'option', 'dt', 'dd', 'dl', 'ol', 'ul', 'nav', 'main', 
-                'section', 'article', 'aside', 'header', 'footer', 'figure', 'figcaption', 
-                'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 
-                'legend', 'label', 'input', 'button', 'select', 'textarea', 'optgroup', 'option'
-            ];
-            
-            contentSelectors.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    // Skip if element is part of navigation or structural elements
-                    if (element.closest('nav, header, footer, .navbar, .header, .footer, .navigation')) {
-                        return;
-                    }
-                    
-                    // Apply scaling to content elements
-                    element.style.transform = `scale(${scale})`;
-                    element.style.transformOrigin = 'center';
-                    
-                    // For text elements, also adjust font size
-                    if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'a', 'li', 'td', 'th', 'label', 'small', 'strong', 'em', 'b', 'i', 'u', 'mark', 'del', 'ins', 'sub', 'sup', 'code', 'pre', 'blockquote', 'cite', 'q', 'abbr', 'acronym', 'address', 'dfn', 'kbd', 'samp', 'var', 'time', 'data', 'output', 'progress', 'meter', 'details', 'summary', 'figcaption', 'caption', 'legend', 'fieldset', 'optgroup', 'option', 'dt', 'dd', 'dl', 'ol', 'ul', 'nav', 'main', 'section', 'article', 'aside', 'header', 'footer', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 'legend', 'label', 'input', 'button', 'select', 'textarea', 'optgroup', 'option'].includes(element.tagName.toLowerCase())) {
-                        const currentFontSize = window.getComputedStyle(element).fontSize;
-                        if (currentFontSize && currentFontSize !== '0px') {
-                            const fontSize = parseFloat(currentFontSize);
-                            element.style.fontSize = `${fontSize * scale}px`;
-                        }
-                    }
-                    
-                    // For images, adjust width and height
-                    if (element.tagName.toLowerCase() === 'img') {
-                        const currentWidth = window.getComputedStyle(element).width;
-                        const currentHeight = window.getComputedStyle(element).height;
-                        if (currentWidth && currentWidth !== 'auto') {
-                            const width = parseFloat(currentWidth);
-                            element.style.width = `${width * scale}px`;
-                        }
-                        if (currentHeight && currentHeight !== 'auto') {
-                            const height = parseFloat(currentHeight);
-                            element.style.height = `${height * scale}px`;
-                        }
-                    }
-                });
-            });
+            console.log('Accessibility Widget: HTML zoom applied:', html.style.zoom);
         }
         
         updateContentScaleDisplay() {
@@ -15214,8 +15158,15 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Reset all content scaling styles
-            this.resetContentScaling();
+            // Reset scaling styles directly
+            const body = document.body;
+            const html = document.documentElement;
+            
+            body.style.transform = '';
+            body.style.transformOrigin = '';
+            html.style.transform = '';
+            html.style.transformOrigin = '';
+            html.style.zoom = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -25811,12 +25762,11 @@ class AccessibilityWidget {
                 body.seizure-safe svg circle,
                 body.seizure-safe svg rect,
                 body.seizure-safe svg polygon {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -25863,7 +25813,7 @@ class AccessibilityWidget {
                 
                 /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
-                    filter: saturate(0.95) !important;
+                    /* REMOVED: filter: saturate(0.95) !important; - This was causing layout issues */
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
@@ -25896,7 +25846,7 @@ class AccessibilityWidget {
                 body.seizure-safe .accessibility-widget,
                 body.seizure-safe .accessibility-panel,
                 body.seizure-safe .toggle-switch {
-                    filter: saturate(0.95) !important;
+                    /* REMOVED: filter: saturate(0.95) !important; - This was causing layout issues */
                 }
             `;
     
