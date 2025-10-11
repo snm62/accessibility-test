@@ -734,13 +734,14 @@ function applyVisionImpaired(on) {
             document.body.appendChild(wrapper);
         }
 
-        // Smooth scaling via CSS variable; do not touch font-size anywhere
-        // Set desired scale as CSS var on html element so transitions are smooth
-        const scaleValue = '1.06';
+        // Apply vision scaling directly to html element for better compatibility
         if (on) {
-            document.documentElement.style.setProperty('--vision-scale', scaleValue);
+            document.documentElement.classList.add('vision-impaired');
+            // Also apply zoom for better browser support
+            document.documentElement.style.zoom = '1.05';
         } else {
-            document.documentElement.style.setProperty('--vision-scale', '1');
+            document.documentElement.classList.remove('vision-impaired');
+            document.documentElement.style.zoom = '1';
         }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
@@ -763,13 +764,21 @@ function applyVisionImpaired(on) {
                 /* REMOVED: transition - This was interfering with panel positioning */
             }
 
+            html.vision-impaired {
+                /* Scale the entire document while preserving scrollability */
+                zoom: 1.05 !important;
+                -moz-transform: scale(1.05) !important;
+                -moz-transform-origin: top left !important;
+                -webkit-transform: scale(1.05) !important;
+                -webkit-transform-origin: top left !important;
+            }
+            
             body.vision-impaired {
                 margin: 0 !important;
                 padding: 0 !important;
                 min-height: 100vh !important;
-                /* Simple scaling to enhance vision - no calculations */
-                transform: scale(1.1) !important;
-                transform-origin: top left !important;
+                /* Ensure content scales properly */
+                width: 100% !important;
             }
 
             /* 2. CONTENT WRAPPER - Simplified approach */
@@ -902,11 +911,19 @@ function applyVisionImpaired(on) {
                     min-height: 100vh !important;
                 }
                 
+                html.vision-impaired {
+                    /* Scale the entire document while preserving scrollability */
+                    zoom: 1.05 !important;
+                    -moz-transform: scale(1.05) !important;
+                    -moz-transform-origin: top left !important;
+                    -webkit-transform: scale(1.05) !important;
+                    -webkit-transform-origin: top left !important;
+                }
+                
                 body.vision-impaired {
                     min-height: 100vh !important;
-                    /* Simple scaling to enhance vision - no calculations */
-                    transform: scale(1.1) !important;
-                    transform-origin: top left !important;
+                    /* Ensure content scales properly */
+                    width: 100% !important;
                 }
                 
                 .accessibility-widget.vision-impaired,
@@ -973,7 +990,7 @@ function applyVisionImpaired(on) {
                 viStyle.textContent = `
                     /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
-                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
+                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
                     html.vision-impaired {
                         /* No zoom - preserve original layout */
                         /* No layout modifications */
@@ -4686,7 +4703,7 @@ class AccessibilityWidget {
     
                 .accessibility-icon:hover {
     
-                    transform: scale(1.1);
+                    transform: scale(1.05);
     
                     background: #4f46e5;
     
@@ -6630,7 +6647,7 @@ class AccessibilityWidget {
     
                 .color-option:hover {
     
-                    transform: scale(1.1);
+                    transform: scale(1.05);
     
                     border-color: #6366f1;
     
@@ -24094,7 +24111,7 @@ class AccessibilityWidget {
     
                     swatch.addEventListener('mouseenter', (e) => {
     
-                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.transform = 'scale(1.05)';
     
                     });
     
@@ -24310,7 +24327,7 @@ class AccessibilityWidget {
     
                     swatch.addEventListener('mouseenter', (e) => {
     
-                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.transform = 'scale(1.05)';
     
                     });
     
@@ -24526,7 +24543,7 @@ class AccessibilityWidget {
     
                     swatch.addEventListener('mouseenter', (e) => {
     
-                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.transform = 'scale(1.05)';
     
                     });
     
@@ -24959,7 +24976,7 @@ class AccessibilityWidget {
                 style.textContent = `
                     /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
-                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.1x (10% larger) */
+                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
                     html.vision-impaired {
                         /* No zoom - preserve original layout */
                         /* No layout modifications */
