@@ -238,12 +238,11 @@
                 body.seizure-safe [class*="portfolio"]:hover,
                 body.seizure-safe [class*="card"]:hover,
                 body.seizure-safe [class*="item"]:hover {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
+                    /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
                 }
                 
                 /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
@@ -454,7 +453,7 @@
                             transition-timing-function: linear !important;
                             opacity: 1 !important;
                             /* transform: none !important; - REMOVED: This was breaking website layout */
-                            will-change: auto !important;
+                            /* will-change: auto !important; - REMOVED: This was interfering with GPU acceleration */
                         }
                     `;
                     document.head.appendChild(enforce);
@@ -641,12 +640,11 @@
                                 if (!el || isExempt(el)) return;
                                 try {
                                     // PRESERVE FINAL STATE: Don't reset transforms to maintain final positions
-                                    el.style.animationDuration = '0.01s';
-                                    el.style.animationTimingFunction = 'linear';
-                                    el.style.transitionDuration = '0.01s';
-                                    el.style.transitionTimingFunction = 'linear';
-                                    el.style.willChange = 'auto';
-                                    el.style.filter = 'none';
+                            el.style.animationDuration = '0.01s';
+                            el.style.animationTimingFunction = 'linear';
+                            el.style.transitionDuration = '0.01s';
+                            el.style.transitionTimingFunction = 'linear';
+                            // PRESERVE: Don't reset will-change or filter to maintain visual effects
                                     // PRESERVE FINAL POSITION: Don't reset transform to prevent layout breaking
                                     // Only neutralize transform if the element is not an icon/arrow
                                     // and not inside a rotation context such as accordion/FAQ toggles
@@ -13698,7 +13696,7 @@ class AccessibilityWidget {
     
         increaseContentScale() {
             console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
+            this.contentScale = Math.min(this.contentScale + 3, 200); // 1% increment for subtle scaling
             this.settings['content-scale'] = this.contentScale;
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
@@ -13708,7 +13706,7 @@ class AccessibilityWidget {
         
         decreaseContentScale() {
             console.log('Accessibility Widget: Decreasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
+            this.contentScale = Math.max(this.contentScale - 3, 50); // 1% decrement for subtle scaling, minimum 50%
             this.settings['content-scale'] = this.contentScale;
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
@@ -13738,7 +13736,8 @@ class AccessibilityWidget {
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply simple CSS zoom to html element - this preserves natural scrolling
+            // Apply CSS zoom to html element - this scales only the content inside the website
+            // without affecting the website structure, layout, or scrollability
             html.style.zoom = scale;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
@@ -13748,8 +13747,10 @@ class AccessibilityWidget {
         updateContentScaleDisplay() {
             const display = this.shadowRoot.getElementById('content-scale-value');
             if (display) {
-                display.textContent = this.contentScale + '%';
-                console.log('Accessibility Widget: Updated content scale display to', this.contentScale + '%');
+                // Show 5% increments in display while actual scaling uses 1% increments
+                const displayValue = Math.round(this.contentScale / 5) * 5;
+                display.textContent = displayValue + '%';
+                console.log('Accessibility Widget: Updated content scale display to', displayValue + '% (actual scale:', this.contentScale + '%)');
             }
         }
         
@@ -23543,12 +23544,12 @@ class AccessibilityWidget {
                     .stop-animation [class*="portfolio"]:hover,
                     .stop-animation [class*="card"]:hover,
                     .stop-animation [class*="item"]:hover {
-                        animation: none !important;
-                        transition: none !important;
-                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
+
+                    animation-duration: 0.01s !important;
+                        animation-timing-function: linear !important;
+                        transition-duration: 0.01s !important;
+                        transition-timing-function: linear !important;
+                        /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
                     }
                     
                     /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
