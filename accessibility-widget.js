@@ -7,18 +7,18 @@
             console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
             document.body.classList.add('seizure-safe');
             
-            // Apply minimal CSS to reduce animations without breaking functionality
+            // Apply minimal CSS to stop animations without interfering with scroll
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
-                /* GENTLE SEIZURE-SAFE: Reduce animations but preserve functionality */
+                /* MINIMAL SEIZURE-SAFE: Only stop animations, preserve scroll */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
-                    animation-duration: 0.01s !important;
-                    transition-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-timing-function: linear !important;
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* MINIMAL: Only ensure basic scrolling works */
@@ -42,7 +42,7 @@
                     cursor: text !important;
                 }
                 
-                /* PRESERVE FINAL STATE: Keep animations in their final state without breaking layout */
+                /* CRITICAL: Force ALL possible animations to their final state immediately */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -107,17 +107,15 @@
                 body.seizure-safe *[class*="transition"],
                 body.seizure-safe *[class*="migrate"],
                 body.seizure-safe *[class*="shift"] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
+                    animation: none !important;
+                    transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* PRESERVE FINAL POSITION: Don't reset transforms to prevent layout breaking */
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
-                /* PRESERVE GSAP and library animation final states */
+                /* Force GSAP and other library animations to final state */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -125,14 +123,12 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
+                    animation: none !important;
+                    transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* PRESERVE FINAL TRANSFORM: Keep elements in their final animated position */
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
 
                 /* Do NOT interfere with navbars/headers sticky/transform behavior */
@@ -148,23 +144,22 @@
                     will-change: initial !important;
                 }
                 
-                /* PRESERVE FINAL STATE: Keep elements in their final animated position */
+                /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
                 body.seizure-safe *[style*="animation"],
                 body.seizure-safe *[style*="transition"],
-                /* PRESERVE: Keep transform styles to maintain final positions */
+                /* REMOVED: body.seizure-safe *[style*="transform"], - This was interfering with scroll libraries */
                 body.seizure-safe *[style*="opacity"],
                 body.seizure-safe *[style*="visibility"],
                 body.seizure-safe *[data-animation],
                 body.seizure-safe *[data-transition],
-                /* PRESERVE: Keep data-transform to maintain final positions */
+                /* REMOVED: body.seizure-safe *[data-transform], - This was interfering with scroll libraries */
                 body.seizure-safe *[data-opacity],
                 body.seizure-safe *[data-visibility] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
+                    animation: none !important;
+                    transition: none !important;
                     animation-fill-mode: forwards !important;
-                    /* PRESERVE FINAL POSITION: Don't reset transforms to prevent layout breaking */
+                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
@@ -178,11 +173,11 @@
                 body.seizure-safe [class*="autoplay"],
                 body.seizure-safe [class*="video"],
                 body.seizure-safe [class*="media"] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset animations to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* HOVER ANIMATIONS: Disable all hover-triggered animations */
@@ -195,11 +190,11 @@
                 body.seizure-safe *[data-hover],
                 body.seizure-safe *[data-focus],
                 body.seizure-safe *[data-active] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset animations to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    /* Removed opacity and visibility rules to prevent scroll interference */
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
@@ -220,11 +215,12 @@
                 body.seizure-safe [class*="unveil"],
                 body.seizure-safe [class*="show-text"],
                 body.seizure-safe [class*="text-effect"] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset animations to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
@@ -237,11 +233,12 @@
                 body.seizure-safe [class*="portfolio"]:hover,
                 body.seizure-safe [class*="card"]:hover,
                 body.seizure-safe [class*="item"]:hover {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 
                 /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
@@ -300,11 +297,12 @@
                 body.seizure-safe [class*="circle"],
                 body.seizure-safe [class*="ring"],
                 body.seizure-safe [class*="orbit"] {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset animations to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split,
@@ -314,11 +312,13 @@
                 body.seizure-safe [data-splitting] .word,
                 body.seizure-safe .split .char,
                 body.seizure-safe .split .word {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset animations to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: inline !important;
+                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
                 }
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split {
@@ -336,10 +336,12 @@
                     reinforce.textContent = `
                         html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
-                            animation-duration: 0.01s !important;
-                            animation-timing-function: linear !important;
-                            transition-duration: 0.01s !important;
-                            transition-timing-function: linear !important;
+                            animation: none !important;
+                            animation-name: none !important;
+                            animation-duration: 0.0001s !important;
+                            animation-play-state: paused !important;
+                            transition: none !important;
+                            transition-property: none !important;
                         }
                         /* Keep cursors intact */
                         html.seizure-safe a[href], html.seizure-safe button, html.seizure-safe [role="button"], html.seizure-safe [onclick],
@@ -363,10 +365,14 @@
                         body.seizure-safe *,
                         body.seizure-safe *::before,
                         body.seizure-safe *::after {
-                            animation-duration: 0.01s !important;
-                            animation-timing-function: linear !important;
-                            transition-duration: 0.01s !important;
-                            transition-timing-function: linear !important;
+                            animation: none !important;
+                            animation-name: none !important;
+                            animation-duration: 0.0001s !important;
+                            animation-iteration-count: 1 !important;
+                            animation-play-state: paused !important;
+                            transition: none !important;
+                            transition-property: none !important;
+                            transition-duration: 0s !important;
                             /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                         }
                         /* Do not affect cursor appearance */
@@ -380,12 +386,10 @@
                     const correction = document.createElement('style');
                     correction.id = 'accessibility-seizure-correction';
                     correction.textContent = `
-                        /* Reduce animations but preserve functionality */
+                        /* Keep animations disabled */
                         body.seizure-safe * {
-                            animation-duration: 0.01s !important;
-                            animation-timing-function: linear !important;
-                            transition-duration: 0.01s !important;
-                            transition-timing-function: linear !important;
+                            animation: none !important;
+                            transition: none !important;
                         }
                         /* Restore layout-affecting properties to stylesheet values */
                         body.seizure-safe *,
@@ -443,13 +447,11 @@
                         body.seizure-safe [class*="slide-"],
                         body.seizure-safe [class*="reveal"],
                         body.seizure-safe [class*="animate"] {
-                            animation-duration: 0.01s !important;
-                            animation-timing-function: linear !important;
-                            transition-duration: 0.01s !important;
-                            transition-timing-function: linear !important;
+                            animation: none !important;
+                            transition: none !important;
                             opacity: 1 !important;
                             /* transform: none !important; - REMOVED: This was breaking website layout */
-                            /* will-change: auto !important; - REMOVED: This was interfering with GPU acceleration */
+                            will-change: auto !important;
                         }
                     `;
                     document.head.appendChild(enforce);
@@ -533,8 +535,8 @@
                                 try {
                                     const cs = window.getComputedStyle(el);
                                     // Lock width/transform/transition to current
-                                    el.style.transitionDuration = '0.01s';
-                                    el.style.animationDuration = '0.01s';
+                                    el.style.transition = 'none';
+                                    el.style.animation = 'none';
                                     if (cs.width && cs.width !== 'auto') el.style.width = cs.width;
                                     if (cs.transform && cs.transform !== 'none') el.style.transform = 'none';
                                     // For ARIA progressbar, keep the current value and stop changing
@@ -635,21 +637,17 @@
                             const neutralizeElement = (el) => {
                                 if (!el || isExempt(el)) return;
                                 try {
-                                    // PRESERVE FINAL STATE: Don't reset transforms to maintain final positions
-                            el.style.animationDuration = '0.01s';
-                            el.style.animationTimingFunction = 'linear';
-                            el.style.transitionDuration = '0.01s';
-                            el.style.transitionTimingFunction = 'linear';
-                            // PRESERVE: Don't reset will-change or filter to maintain visual effects
-                                    // PRESERVE FINAL POSITION: Don't reset transform to prevent layout breaking
+                                    el.style.animation = 'none';
+                                    el.style.transition = 'none';
+                                    el.style.willChange = 'auto';
+                                    el.style.filter = 'none';
                                     // Only neutralize transform if the element is not an icon/arrow
                                     // and not inside a rotation context such as accordion/FAQ toggles
                                     const inRotationContext = (() => {
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
                                     if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
-                                        // PRESERVE: Don't reset transform to maintain final animated position
-                                        // el.style.transform = 'none'; // REMOVED: This was breaking final states
+                                    el.style.transform = 'none';
                                     }
                                     el.style.opacity = '1';
                                 } catch (_) {}
@@ -766,9 +764,8 @@
                                         window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
                                         CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
                                             const n = String(name).toLowerCase();
-                                            // PRESERVE FINAL STATE: Only block animation/transition properties, preserve transforms
-                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'filter') {
-                                                // PRESERVE: Don't block opacity to maintain final states
+                                            // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
+                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
                                                 return undefined;
                                             }
                                             return window.__origSetProperty.call(this, name, value, priority);
@@ -780,12 +777,12 @@
                                         window.__origStyleAttrSetter = Element.prototype.setAttribute;
                                         Element.prototype.setAttribute = function(attr, val) {
                                             if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
-                                                // PRESERVE FINAL STATE: Only strip animation/transition properties, preserve transforms and opacity
+                                                // Strip blacklisted properties from inline style strings
                                                 let cleaned = val
                                                     .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
-                                                // PRESERVE: Don't strip opacity and transform to maintain final states
                                                 return window.__origStyleAttrSetter.call(this, attr, cleaned);
                                             }
                                             return window.__origStyleAttrSetter.call(this, attr, val);
@@ -1023,7 +1020,7 @@ function applyVisionImpaired(on) {
                 padding: 0 !important;
                 min-height: 100vh !important;
                 /* Simple scaling to enhance vision - no calculations */
-                transform: scale(1.05) !important;
+                transform: scale(1.1) !important;
                 transform-origin: top left !important;
             }
 
@@ -1160,7 +1157,7 @@ function applyVisionImpaired(on) {
                 body.vision-impaired {
                     min-height: 100vh !important;
                     /* Simple scaling to enhance vision - no calculations */
-                    transform: scale(1.05) !important;
+                    transform: scale(1.1) !important;
                     transform-origin: top left !important;
                 }
                 
@@ -1481,21 +1478,21 @@ class AccessibilityWidget {
                     const animatedElements = document.querySelectorAll('*[class*="animate"], *[class*="fade"], *[class*="slide"], *[class*="bounce"], *[class*="pulse"], *[class*="shake"], *[class*="flash"], *[class*="blink"], *[class*="glow"], *[class*="spin"], *[class*="rotate"], *[class*="scale"], *[class*="zoom"], *[class*="wiggle"], *[class*="jiggle"], *[class*="twist"], *[class*="flip"], *[class*="swing"], *[class*="wobble"], *[class*="tilt"]');
                     
                     animatedElements.forEach(element => {
-                        element.style.animationDuration = '0.01s';
-                        element.style.transitionDuration = '0.01s';
-                        element.style.animationTimingFunction = 'linear';
-                        element.style.transitionTimingFunction = 'linear';
-                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
                     });
                     
                     // Stop letter-by-letter text animations
                     const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
                     textElements.forEach(element => {
-                        element.style.animationDuration = '0.01s';
-                        element.style.transitionDuration = '0.01s';
-                        element.style.animationTimingFunction = 'linear';
-                        element.style.transitionTimingFunction = 'linear';
-                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
                     });
                     
                     // Stop autoplay media
@@ -1510,21 +1507,21 @@ class AccessibilityWidget {
                     // Stop SVG animations
                     const svgElements = document.querySelectorAll('svg, svg path, svg line');
                     svgElements.forEach(element => {
-                        element.style.animationDuration = '0.01s';
-                        element.style.transitionDuration = '0.01s';
-                        element.style.animationTimingFunction = 'linear';
-                        element.style.transitionTimingFunction = 'linear';
-                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
                     });
                     
                     // Stop scroll-triggered animations
                     const scrollElements = document.querySelectorAll('*[class*="scroll"], *[class*="progress"], *[class*="bar"], *[class*="line"], *[class*="timeline"]');
                     scrollElements.forEach(element => {
-                        element.style.animationDuration = '0.01s';
-                        element.style.transitionDuration = '0.01s';
-                        element.style.animationTimingFunction = 'linear';
-                        element.style.transitionTimingFunction = 'linear';
-                        // PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                        element.style.transform = 'none';
                     });
                     
                     console.log('Accessibility Widget: Clean animation stopping completed');
@@ -1604,8 +1601,8 @@ class AccessibilityWidget {
                             textElements.forEach(element => {
                                 if (element.style.animation || element.style.transition || element.style.opacity !== '1') {
                                     // Force complete the animation immediately
-                                    element.style.animationDuration = '0.01s';
-                                    element.style.transitionDuration = '0.01s';
+                                    element.style.animation = 'none';
+                                    element.style.transition = 'none';
                                     element.style.opacity = '1';
                                     element.style.visibility = 'visible';
                                     element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
@@ -1671,11 +1668,11 @@ class AccessibilityWidget {
                     body.seizure-safe svg,
                     body.seizure-safe svg path,
                     body.seizure-safe svg line {
-                        animation-duration: 0.01s !important;
-                        animation-timing-function: linear !important;
-                        transition-duration: 0.01s !important;
-                        transition-timing-function: linear !important;
-                        /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Stop scroll-triggered animations immediately */
@@ -13723,9 +13720,10 @@ class AccessibilityWidget {
                 // Reset any scaling styles
                 body.style.transform = '';
                 body.style.transformOrigin = '';
+                body.style.width = '';
+                body.style.height = '';
                 html.style.transform = '';
                 html.style.transformOrigin = '';
-                html.style.zoom = '';
                 
                 return;
             }
@@ -13733,17 +13731,21 @@ class AccessibilityWidget {
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply simple CSS zoom to html element - this preserves natural scrolling
-            html.style.zoom = scale;
+            // Apply simple CSS transform scaling directly to body
+            body.style.transform = `scale(${scale})`;
+            body.style.transformOrigin = 'top left';
+            
+            // Ensure body takes full viewport to prevent gaps
+            body.style.width = '100vw';
+            body.style.height = '100vh';
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: HTML zoom applied:', html.style.zoom);
+            console.log('Accessibility Widget: Body transform applied:', body.style.transform);
         }
         
         updateContentScaleDisplay() {
             const display = this.shadowRoot.getElementById('content-scale-value');
             if (display) {
-                // Show the actual content scale percentage
                 display.textContent = this.contentScale + '%';
                 console.log('Accessibility Widget: Updated content scale display to', this.contentScale + '%');
             }
@@ -15164,9 +15166,10 @@ class AccessibilityWidget {
             
             body.style.transform = '';
             body.style.transformOrigin = '';
+            body.style.width = '';
+            body.style.height = '';
             html.style.transform = '';
             html.style.transformOrigin = '';
-            html.style.zoom = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
@@ -23539,12 +23542,12 @@ class AccessibilityWidget {
                     .stop-animation [class*="portfolio"]:hover,
                     .stop-animation [class*="card"]:hover,
                     .stop-animation [class*="item"]:hover {
-
-                    animation-duration: 0.01s !important;
-                        animation-timing-function: linear !important;
-                        transition-duration: 0.01s !important;
-                        transition-timing-function: linear !important;
-                        /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
@@ -25008,9 +25011,7 @@ class AccessibilityWidget {
         // Seizure Safe Profile Methods
     
         enableSeizureSafe(immediate = false) {
-    
             this.settings['seizure-safe'] = true;
-    
             document.body.classList.add('seizure-safe');
     
             if (immediate) {
@@ -25029,6 +25030,12 @@ class AccessibilityWidget {
             
             // Stop portfolio animation loops that could cause black screen
             this.stopPortfolioAnimations();
+            
+            // COMPREHENSIVE ANIMATION STOPPING - AccessiBe-style
+            this.stopAllJavaScriptAnimations();
+            this.stopAllGIFsAndVideos();
+            this.stopAllAnimationLibraries();
+            this.stopAllParallaxAndScrollEffects();
     
             // Lock button styles to prevent hover color changes
             this.lockButtonHoverStyles();
@@ -25089,9 +25096,7 @@ class AccessibilityWidget {
         // REMOVED: enforceNativeScroll function that was blocking scroll
     
         disableSeizureSafe() {
-    
             this.settings['seizure-safe'] = false;
-    
             document.body.classList.remove('seizure-safe');
     
             this.removeSeizureSafeStyles();
@@ -25102,8 +25107,14 @@ class AccessibilityWidget {
             // CRITICAL: Restore original requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
+            // Restore all media and animations
+            this.restoreAllMediaAndAnimations();
+            
             // CRITICAL: Restore animation libraries
             this.restoreAnimationLibraries();
+            
+            // Restore Lottie animations
+            this.restoreLottieAnimations();
     
             // Resume JavaScript-based animations (like the slider auto-slide)
     
@@ -25498,6 +25509,419 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: Portfolio animations stopped for seizure safety');
         }
         
+        // COMPREHENSIVE ANIMATION STOPPING - AccessiBe-style methods
+        
+        // Stop all JavaScript animations (requestAnimationFrame, setInterval, setTimeout)
+        stopAllJavaScriptAnimations() {
+            console.log('Accessibility Widget: Stopping all JavaScript animations for seizure safety');
+            
+            try {
+                // CRITICAL: Override requestAnimationFrame to stop all high-performance animations
+                if (!window.__originalRequestAnimationFrame) {
+                    window.__originalRequestAnimationFrame = window.requestAnimationFrame;
+                }
+                
+                // Override requestAnimationFrame to freeze all animation loops
+                window.requestAnimationFrame = function(callback) {
+                    // Intentionally do NOT call the callback, freezing the animation loop
+                    return 0; // Return dummy handle
+                };
+                
+                // Override cancelAnimationFrame to prevent cleanup
+                if (!window.__originalCancelAnimationFrame) {
+                    window.__originalCancelAnimationFrame = window.cancelAnimationFrame;
+                }
+                window.cancelAnimationFrame = function() { return; };
+                
+                // Stop all current requestAnimationFrame loops
+                const highestId = setTimeout(() => {}, 0);
+                for (let i = 0; i < highestId; i++) {
+                    try {
+                        clearTimeout(i);
+                        clearInterval(i);
+                    } catch (_) {}
+                }
+                
+                // Stop any custom animation loops
+                if (window.animationLoops) {
+                    window.animationLoops.forEach(loop => {
+                        try { clearInterval(loop); } catch (_) {}
+                        try { clearTimeout(loop); } catch (_) {}
+                    });
+                    window.animationLoops = [];
+                }
+                
+                console.log('Accessibility Widget: JavaScript animations stopped');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error stopping JavaScript animations', e);
+            }
+        }
+        
+        // Stop all GIFs, videos, and media (comprehensive media stopping)
+        stopAllGIFsAndVideos() {
+            console.log('Accessibility Widget: Stopping all GIFs, videos, and media for seizure safety');
+            
+            try {
+                // Stop all HTML5 videos and audio
+                const videos = document.querySelectorAll('video');
+                const audios = document.querySelectorAll('audio');
+                
+                videos.forEach(video => {
+                    video.pause();
+                    video.currentTime = 0;
+                    video.removeAttribute('autoplay');
+                    video.setAttribute('data-seizure-safe-paused', 'true');
+                });
+                
+                audios.forEach(audio => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.removeAttribute('autoplay');
+                    audio.setAttribute('data-seizure-safe-paused', 'true');
+                });
+                
+                // Stop embedded media (YouTube, Vimeo, etc.)
+                const iframes = document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"]');
+                iframes.forEach(iframe => {
+                    try {
+                        // Try to stop embedded videos by modifying src
+                        const src = iframe.src;
+                        if (src.includes('autoplay=1')) {
+                            iframe.src = src.replace('autoplay=1', 'autoplay=0');
+                        } else if (!src.includes('autoplay=0')) {
+                            iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=0';
+                        }
+                        iframe.setAttribute('data-seizure-safe-stopped', 'true');
+                    } catch (_) {}
+                });
+                
+                // Replace animated GIFs and APNGs with static frames
+                const images = document.querySelectorAll('img');
+                images.forEach(img => {
+                    if (img.src && (img.src.includes('.gif') || img.src.includes('gif') || img.src.includes('.png'))) {
+                        // Store original src
+                        if (!img.dataset.originalSrc) {
+                            img.dataset.originalSrc = img.src;
+                        }
+                        // Replace with static fallback (1x1 transparent pixel)
+                        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                        img.setAttribute('data-seizure-safe-replaced', 'true');
+                    }
+                });
+                
+                // Stop canvas animations and SVG animations
+                const canvases = document.querySelectorAll('canvas');
+                canvases.forEach(canvas => {
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                    canvas.setAttribute('data-seizure-safe-stopped', 'true');
+                });
+                
+                // Stop SVG animations
+                const svgs = document.querySelectorAll('svg');
+                svgs.forEach(svg => {
+                    const animatedElements = svg.querySelectorAll('animate, animateTransform, animateMotion');
+                    animatedElements.forEach(el => {
+                        el.remove();
+                    });
+                    svg.setAttribute('data-seizure-safe-stopped', 'true');
+                });
+                
+                console.log('Accessibility Widget: All media stopped');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error stopping media', e);
+            }
+        }
+        
+        // Stop all animation libraries (GSAP, Lottie, jQuery, etc.)
+        stopAllAnimationLibraries() {
+            console.log('Accessibility Widget: Stopping all animation libraries for seizure safety');
+            
+            try {
+                // Stop GSAP animations
+                if (typeof window.gsap !== 'undefined') {
+                    try {
+                        // Pause all GSAP timelines
+                        if (window.gsap.globalTimeline) {
+                            window.gsap.globalTimeline.pause();
+                        }
+                        // Stop all tweens
+                        window.gsap.killTweensOf('*');
+                    } catch (_) {}
+                }
+                
+                // Stop Lottie animations - Universal approach for all websites
+                this.stopAllLottieAnimations();
+                
+                // Stop jQuery animations
+                if (typeof window.jQuery !== 'undefined') {
+                    try {
+                        window.jQuery('*').stop(true, true);
+                        window.jQuery.fx.off = true;
+                    } catch (_) {}
+                }
+                
+                // Stop Three.js animations
+                if (typeof window.THREE !== 'undefined') {
+                    try {
+                        // Stop all render loops
+                        if (window.THREE.AnimationMixer) {
+                            const mixers = document.querySelectorAll('[data-three-mixer]');
+                            mixers.forEach(mixer => {
+                                try { mixer.stopAllAction(); } catch (_) {}
+                            });
+                        }
+                    } catch (_) {}
+                }
+                
+                console.log('Accessibility Widget: Animation libraries stopped');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error stopping animation libraries', e);
+            }
+        }
+        
+        // Stop all parallax and scroll effects
+        stopAllParallaxAndScrollEffects() {
+            console.log('Accessibility Widget: Stopping all parallax and scroll effects for seizure safety');
+            
+            try {
+                // Stop scroll-triggered animations
+                const scrollElements = document.querySelectorAll('[data-scroll], [data-aos], [data-animate]');
+                scrollElements.forEach(el => {
+                    el.style.transform = 'none';
+                    el.style.opacity = '1';
+                    el.style.visibility = 'visible';
+                    el.setAttribute('data-seizure-safe-stopped', 'true');
+                });
+                
+                // Stop parallax elements
+                const parallaxElements = document.querySelectorAll('.parallax, [data-parallax]');
+                parallaxElements.forEach(el => {
+                    el.style.transform = 'none';
+                    el.style.backgroundAttachment = 'scroll';
+                    el.setAttribute('data-seizure-safe-stopped', 'true');
+                });
+                
+                // Stop smooth scrolling
+                document.documentElement.style.scrollBehavior = 'auto';
+                document.body.style.scrollBehavior = 'auto';
+                
+                console.log('Accessibility Widget: Parallax and scroll effects stopped');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error stopping parallax and scroll effects', e);
+            }
+        }
+        
+        // Universal Lottie Animation Stopping - Works on ALL websites
+        stopAllLottieAnimations() {
+            console.log('Accessibility Widget: Stopping all Lottie animations for seizure safety');
+            
+            try {
+                // Method 1: Stop via lottie-web API (most reliable)
+                if (typeof window.lottie !== 'undefined') {
+                    try {
+                        // Get all registered animations
+                        const allAnimations = window.lottie.getRegisteredAnimations();
+                        if (allAnimations && allAnimations.length > 0) {
+                            allAnimations.forEach(anim => {
+                                try {
+                                    anim.stop();
+                                    anim.pause();
+                                    anim.destroy();
+                                } catch (_) {}
+                            });
+                        }
+                        
+                        // Freeze all future animations
+                        if (typeof window.lottie.freeze === 'function') {
+                            window.lottie.freeze();
+                        }
+                        
+                        console.log('Accessibility Widget: Lottie animations stopped via API');
+                    } catch (_) {}
+                }
+                
+                // Method 2: Stop via lottie-player web components
+                const lottiePlayers = document.querySelectorAll('lottie-player');
+                lottiePlayers.forEach(player => {
+                    try {
+                        player.stop();
+                        player.pause();
+                        player.setAttribute('data-seizure-safe-stopped', 'true');
+                    } catch (_) {}
+                });
+                
+                // Method 3: Stop via DOM elements with Lottie data attributes
+                const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
+                lottieElements.forEach(element => {
+                    try {
+                        // Try to find and stop any Lottie instance on this element
+                        if (element.lottie) {
+                            element.lottie.stop();
+                            element.lottie.pause();
+                        }
+                        
+                        // Mark as stopped
+                        element.setAttribute('data-seizure-safe-stopped', 'true');
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                    } catch (_) {}
+                });
+                
+                // Method 4: Stop via CSS - Force all Lottie containers to be static
+                const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"]');
+                lottieContainers.forEach(container => {
+                    try {
+                        container.style.animation = 'none';
+                        container.style.transition = 'none';
+                        container.style.transform = 'none';
+                        container.setAttribute('data-seizure-safe-stopped', 'true');
+                    } catch (_) {}
+                });
+                
+                // Method 5: Override Lottie loading globally
+                if (typeof window.lottie !== 'undefined' && window.lottie.loadAnimation) {
+                    const originalLoadAnimation = window.lottie.loadAnimation;
+                    window.lottie.loadAnimation = function(config) {
+                        const anim = originalLoadAnimation.call(this, config);
+                        // Immediately stop any new animations
+                        if (anim) {
+                            try {
+                                anim.stop();
+                                anim.pause();
+                            } catch (_) {}
+                        }
+                        return anim;
+                    };
+                }
+                
+                // Method 6: Check for prefers-reduced-motion and respect it
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (prefersReducedMotion) {
+                    console.log('Accessibility Widget: User prefers reduced motion - stopping all animations');
+                    // Force stop all animations regardless of implementation
+                    document.querySelectorAll('*').forEach(el => {
+                        el.style.animation = 'none';
+                        el.style.transition = 'none';
+                        el.style.transform = 'none';
+                    });
+                }
+                
+                console.log('Accessibility Widget: All Lottie animations stopped');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error stopping Lottie animations', e);
+            }
+        }
+        
+        // Restore Lottie animations when seizure safe is disabled
+        restoreLottieAnimations() {
+            console.log('Accessibility Widget: Restoring Lottie animations');
+            
+            try {
+                // Restore lottie-web API
+                if (typeof window.lottie !== 'undefined') {
+                    try {
+                        // Unfreeze animations
+                        if (typeof window.lottie.unfreeze === 'function') {
+                            window.lottie.unfreeze();
+                        }
+                        
+                        // Restore original loadAnimation function
+                        if (window.__originalLottieLoadAnimation) {
+                            window.lottie.loadAnimation = window.__originalLottieLoadAnimation;
+                        }
+                        
+                        console.log('Accessibility Widget: Lottie API restored');
+                    } catch (_) {}
+                }
+                
+                // Restore lottie-player web components
+                const lottiePlayers = document.querySelectorAll('lottie-player[data-seizure-safe-stopped]');
+                lottiePlayers.forEach(player => {
+                    try {
+                        player.play();
+                        player.removeAttribute('data-seizure-safe-stopped');
+                    } catch (_) {}
+                });
+                
+                // Restore DOM elements
+                const lottieElements = document.querySelectorAll('[data-seizure-safe-stopped]');
+                lottieElements.forEach(element => {
+                    try {
+                        element.removeAttribute('data-seizure-safe-stopped');
+                        element.style.animation = '';
+                        element.style.transition = '';
+                        element.style.transform = '';
+                    } catch (_) {}
+                });
+                
+                console.log('Accessibility Widget: Lottie animations restored');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error restoring Lottie animations', e);
+            }
+        }
+        
+        // Restore all media and animations when seizure safe is disabled
+        restoreAllMediaAndAnimations() {
+            console.log('Accessibility Widget: Restoring all media and animations');
+            
+            try {
+                // Restore requestAnimationFrame
+                if (window.__originalRequestAnimationFrame) {
+                    window.requestAnimationFrame = window.__originalRequestAnimationFrame;
+                }
+                if (window.__originalCancelAnimationFrame) {
+                    window.cancelAnimationFrame = window.__originalCancelAnimationFrame;
+                }
+                
+                // Restore videos and audio
+                const pausedVideos = document.querySelectorAll('video[data-seizure-safe-paused]');
+                pausedVideos.forEach(video => {
+                    video.removeAttribute('data-seizure-safe-paused');
+                    // Don't auto-play, just remove the seizure-safe attributes
+                });
+                
+                const pausedAudios = document.querySelectorAll('audio[data-seizure-safe-paused]');
+                pausedAudios.forEach(audio => {
+                    audio.removeAttribute('data-seizure-safe-paused');
+                });
+                
+                // Restore GIFs and images
+                const replacedImages = document.querySelectorAll('img[data-seizure-safe-replaced]');
+                replacedImages.forEach(img => {
+                    if (img.dataset.originalSrc) {
+                        img.src = img.dataset.originalSrc;
+                        img.removeAttribute('data-seizure-safe-replaced');
+                        delete img.dataset.originalSrc;
+                    }
+                });
+                
+                // Restore canvas elements
+                const stoppedCanvases = document.querySelectorAll('canvas[data-seizure-safe-stopped]');
+                stoppedCanvases.forEach(canvas => {
+                    canvas.removeAttribute('data-seizure-safe-stopped');
+                });
+                
+                // Restore SVG elements
+                const stoppedSvgs = document.querySelectorAll('svg[data-seizure-safe-stopped]');
+                stoppedSvgs.forEach(svg => {
+                    svg.removeAttribute('data-seizure-safe-stopped');
+                });
+                
+                // Restore embedded media
+                const stoppedIframes = document.querySelectorAll('iframe[data-seizure-safe-stopped]');
+                stoppedIframes.forEach(iframe => {
+                    iframe.removeAttribute('data-seizure-safe-stopped');
+                });
+                
+                console.log('Accessibility Widget: All media and animations restored');
+            } catch (e) {
+                console.warn('Accessibility Widget: Error restoring media and animations', e);
+            }
+        }
+        
         // Force complete letter-by-letter text animations for seizure safety
         forceCompleteTextAnimations() {
             console.log('Accessibility Widget: Forcing completion of text animations for seizure safety');
@@ -25507,8 +25931,8 @@ class AccessibilityWidget {
             
             textElements.forEach(element => {
                 // Remove any animation classes and inline styles
-                element.style.animationDuration = '0.01s';
-                element.style.transitionDuration = '0.01s';
+                element.style.animation = 'none';
+                element.style.transition = 'none';
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
                 element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
@@ -25536,8 +25960,8 @@ class AccessibilityWidget {
                 if (element.style.animation || element.style.transition || element.style.opacity !== '') {
                     element.style.opacity = '1';
                     element.style.visibility = 'visible';
-                    element.style.animationDuration = '0.01s';
-                    element.style.transitionDuration = '0.01s';
+                    element.style.animation = 'none';
+                    element.style.transition = 'none';
                     element.style.transform = 'none';
                 }
             });
@@ -25640,21 +26064,101 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'accessibility-seizure-safe-styles';
             style.textContent = `
-                /* SIMPLE SEIZURE-SAFE STYLES - Only stop animations, preserve layout */
+                /* COMPREHENSIVE SEIZURE-SAFE STYLES - AccessiBe-style animation stopping */
                 
-                /* AGGRESSIVE ANIMATION STOPPING - Stop ALL animations and transitions */
+                /* 1. HALT CSS ANIMATIONS - Stop all CSS animations immediately */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
                 body.seizure-safe *::after {
                     animation: none !important;
-                    transition: none !important;
+                    animation-name: none !important;
                     animation-duration: 0s !important;
-                    animation-iteration-count: 1 !important;
+                    animation-timing-function: linear !important;
                     animation-delay: 0s !important;
-                    transition-duration: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-direction: normal !important;
+                    animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
+                }
+                
+                /* 2. HALT CSS TRANSITIONS - Stop all smooth transitions */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    transition: none !important;
+                    transition-property: none !important;
+                    transition-duration: 0s !important;
+                    transition-timing-function: linear !important;
+                    transition-delay: 0s !important;
+                }
+                
+                /* 3. STOP MOTION EFFECTS - Prevent transform-based animations */
+                body.seizure-safe * {
                     transform: none !important;
-                    filter: none !important;
+                    transform-origin: unset !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    will-change: auto !important;
+                }
+                
+                /* 4. STOP LOTTIE ANIMATIONS - Universal Lottie stopping */
+                body.seizure-safe lottie-player,
+                body.seizure-safe [data-lottie],
+                body.seizure-safe [data-animation],
+                body.seizure-safe .lottie,
+                body.seizure-safe .lottie-animation,
+                body.seizure-safe div[id*="lottie"],
+                body.seizure-safe div[class*="lottie"],
+                body.seizure-safe svg[class*="lottie"] {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* 5. STOP BLINKING TEXT AND FLASHING ELEMENTS - WCAG 2.3.1 compliance */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    color: inherit !important;
+                    text-decoration: none !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* 6. STOP SMOOTH SCROLLING - Prevent vestibular-triggering motion */
+                body.seizure-safe html,
+                body.seizure-safe body {
+                    scroll-behavior: auto !important;
+                }
+                
+                /* 7. STOP VIDEO AND MEDIA AUTOPLAY */
+                body.seizure-safe video[autoplay],
+                body.seizure-safe audio[autoplay] {
+                    animation-play-state: paused !important;
+                }
+                
+                body.seizure-safe video,
+                body.seizure-safe audio {
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* 8. RESPECT PREFERS-REDUCED-MOTION - WCAG compliance */
+                @media (prefers-reduced-motion: reduce) {
+                    body.seizure-safe *,
+                    body.seizure-safe *::before,
+                    body.seizure-safe *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        transform: none !important;
+                        animation-duration: 0.01s !important;
+                        transition-duration: 0.01s !important;
+                    }
                 }
                 
                 /* ULTIMATE ANIMATION KILLER - Stop everything */
@@ -25762,11 +26266,12 @@ class AccessibilityWidget {
                 body.seizure-safe svg circle,
                 body.seizure-safe svg rect,
                 body.seizure-safe svg polygon {
-                    animation-duration: 0.01s !important;
-                    animation-timing-function: linear !important;
-                    transition-duration: 0.01s !important;
-                    transition-timing-function: linear !important;
-                    /* PRESERVE: Don't reset opacity, visibility, or transform to maintain visual effects */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -25813,7 +26318,7 @@ class AccessibilityWidget {
                 
                 /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
-                    /* REMOVED: filter: saturate(0.95) !important; - This was causing layout issues */
+                    filter: saturate(0.95) !important;
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
@@ -25846,7 +26351,7 @@ class AccessibilityWidget {
                 body.seizure-safe .accessibility-widget,
                 body.seizure-safe .accessibility-panel,
                 body.seizure-safe .toggle-switch {
-                    /* REMOVED: filter: saturate(0.95) !important; - This was causing layout issues */
+                    filter: saturate(0.95) !important;
                 }
             `;
     
