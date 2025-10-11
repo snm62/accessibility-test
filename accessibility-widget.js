@@ -25,14 +25,17 @@
                 }
                 /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
                 body.seizure-safe * {
-                    /* Only reset transform-related properties that cause positioning issues */
-                    transform: none !important;
-                    translate: none !important;
-                    scale: 1 !important;
-                    rotate: 0deg !important;
-                    /* Ensure visibility */
+                    /* Only reset animation properties, preserve layout transforms */
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* translate: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* scale: 1 !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* rotate: 0deg !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* Ensure visibility only - no height modifications */
                     opacity: 1 !important;
                     visibility: visible !important;
+                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
                     /* Reset animation properties */
                     animation: none !important;
                     transition: none !important;
@@ -41,17 +44,18 @@
                 }
                 /* Only reset positioning for elements that are likely to be animated */
                 body.seizure-safe *[class*="animate"], body.seizure-safe *[class*="fade"], body.seizure-safe *[class*="slide"], body.seizure-safe *[class*="bounce"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="shake"], body.seizure-safe *[class*="flash"], body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="glow"], body.seizure-safe *[class*="spin"], body.seizure-safe *[class*="rotate"], body.seizure-safe *[class*="scale"], body.seizure-safe *[class*="zoom"], body.seizure-safe *[class*="wiggle"], body.seizure-safe *[class*="jiggle"], body.seizure-safe *[class*="twist"], body.seizure-safe *[class*="flip"], body.seizure-safe *[class*="swing"], body.seizure-safe *[class*="wobble"], body.seizure-safe *[class*="tilt"] {
-                    position: static !important;
-                    top: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    bottom: auto !important;
-                    transform: none !important;
-                    translate: none !important;
-                    scale: 1 !important;
-                    rotate: 0deg !important;
-                    width: auto !important;
-                    height: auto !important;
+                    /* Only reset positioning for animated elements, preserve layout transforms */
+                    /* position: static !important; - REMOVED: This was breaking layout */
+                    /* top: auto !important; - REMOVED: This was breaking layout */
+                    /* left: auto !important; - REMOVED: This was breaking layout */
+                    /* right: auto !important; - REMOVED: This was breaking layout */
+                    /* bottom: auto !important; - REMOVED: This was breaking layout */
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* translate: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* scale: 1 !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* rotate: 0deg !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* width: auto !important; - REMOVED: This was breaking layout */
+                    /* height: auto !important; - REMOVED: This was breaking layout */
                 }
                 /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
                 body.seizure-safe a[href], body.seizure-safe button, body.seizure-safe [role="button"], body.seizure-safe [onclick], body.seizure-safe input[type="button"], body.seizure-safe input[type="submit"], body.seizure-safe input[type="reset"], body.seizure-safe .btn, body.seizure-safe .button, body.seizure-safe [class*="btn"], body.seizure-safe [class*="button"], body.seizure-safe [tabindex]:not([tabindex="-1"]) {
@@ -63,23 +67,25 @@
                 }
                 /* Preserve original layout for specific elements */
                 body.seizure-safe img, body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object {
-                    position: static !important;
-                    transform: none !important;
-                    width: auto !important;
-                    height: auto !important;
+                    /* Preserve layout positioning */
+                    /* position: static !important; - REMOVED: This was breaking layout */
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* width: auto !important; - REMOVED: This was breaking layout */
+                    /* height: auto !important; - REMOVED: This was breaking layout */
                     max-width: 100% !important;
                     max-height: 100% !important;
                 }
                 /* Ensure text elements maintain original layout */
                 body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6, body.seizure-safe p, body.seizure-safe span, body.seizure-safe div, body.seizure-safe a, body.seizure-safe li, body.seizure-safe td, body.seizure-safe th, body.seizure-safe label {
-                    position: static !important;
-                    transform: none !important;
-                    width: auto !important;
-                    height: auto !important;
-                    top: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    bottom: auto !important;
+                    /* Preserve layout positioning */
+                    /* position: static !important; - REMOVED: This was breaking layout */
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
+                    /* width: auto !important; - REMOVED: This was breaking layout */
+                    /* height: auto !important; - REMOVED: This was breaking layout */
+                    /* top: auto !important; - REMOVED: This was breaking layout */
+                    /* left: auto !important; - REMOVED: This was breaking layout */
+                    /* right: auto !important; - REMOVED: This was breaking layout */
+                    /* bottom: auto !important; - REMOVED: This was breaking layout */
                 }
                 /* CRITICAL: Force ALL possible animations to their final state immediately */
                 body.seizure-safe *[class*="animate"], body.seizure-safe *[class*="fade"], body.seizure-safe *[class*="slide"], body.seizure-safe *[class*="bounce"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="shake"], body.seizure-safe *[class*="flash"], body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="glow"], body.seizure-safe *[class*="spin"], body.seizure-safe *[class*="rotate"], body.seizure-safe *[class*="scale"], body.seizure-safe *[class*="zoom"], body.seizure-safe *[class*="wiggle"], body.seizure-safe *[class*="jiggle"], body.seizure-safe *[class*="twist"], body.seizure-safe *[class*="flip"], body.seizure-safe *[class*="swing"], body.seizure-safe *[class*="wobble"], body.seizure-safe *[class*="tilt"],
@@ -90,13 +96,13 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* Force GSAP and other library animations to final state */
                 body.seizure-safe .fade-up, body.seizure-safe .fade-left, body.seizure-safe .fade-right, body.seizure-safe .fade-in, body.seizure-safe .slide-in, body.seizure-safe .scale-in, body.seizure-safe .zoom-in {
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                     animation: none !important;
                     transition: none !important;
                 }
@@ -115,7 +121,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
                 body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
@@ -124,7 +130,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* HOVER ANIMATIONS: Disable all hover-triggered animations */
                 body.seizure-safe *:hover, body.seizure-safe *:focus, body.seizure-safe *:active, body.seizure-safe *[class*="hover"], body.seizure-safe *[class*="focus"], body.seizure-safe *[class*="active"], body.seizure-safe *[data-hover], body.seizure-safe *[data-focus], body.seizure-safe *[data-active] {
@@ -133,16 +139,23 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
-                /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
+                /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state immediately */
                 body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [data-splitting] .char, body.seizure-safe [data-splitting] .word, body.seizure-safe [class*="split"], body.seizure-safe [class*="char"], body.seizure-safe [class*="word"], body.seizure-safe [class*="letter"], body.seizure-safe [class*="text-animation"], body.seizure-safe [class*="typing"], body.seizure-safe [class*="typewriter"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="unveil"], body.seizure-safe [class*="show-text"], body.seizure-safe [class*="text-effect"] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    display: inline !important;
+                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
+                    /* Force immediate final state - no delays */
+                    animation-delay: 0s !important;
+                    transition-delay: 0s !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
                 body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
@@ -151,7 +164,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
                 body.seizure-safe *[class*="scroll"], body.seizure-safe *[class*="progress"], body.seizure-safe *[class*="bar"], body.seizure-safe *[class*="line"], body.seizure-safe *[class*="timeline"], body.seizure-safe *[class*="track"], body.seizure-safe *[class*="path"], body.seizure-safe *[class*="stroke"], body.seizure-safe *[class*="fill"], body.seizure-safe *[class*="gradient"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="stream"], body.seizure-safe *[class*="runner"], body.seizure-safe *[class*="mover"], body.seizure-safe *[class*="slider"], body.seizure-safe *[class*="indicator"], body.seizure-safe *[class*="stopper"], body.seizure-safe *[class*="marker"], body.seizure-safe *[class*="pointer"], body.seizure-safe *[class*="cursor"], body.seizure-safe *[class*="dot"], body.seizure-safe *[class*="circle"], body.seizure-safe *[class*="ring"], body.seizure-safe *[class*="orbit"] {
@@ -160,7 +173,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
                 body.seizure-safe progress, body.seizure-safe [role="progressbar"], body.seizure-safe [class*="progress"], body.seizure-safe [class*="bar"], body.seizure-safe [class*="indicator"], body.seizure-safe [class*="track"], body.seizure-safe [class*="line"], body.seizure-safe [class*="path"], body.seizure-safe [class*="stroke"], body.seizure-safe [class*="fill"], body.seizure-safe [class*="gradient"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="stream"], body.seizure-safe *[class*="runner"], body.seizure-safe *[class*="mover"], body.seizure-safe *[class*="slider"], body.seizure-safe *[class*="stopper"], body.seizure-safe *[class*="marker"], body.seizure-safe *[class*="pointer"], body.seizure-safe *[class*="cursor"], body.seizure-safe *[class*="dot"], body.seizure-safe *[class*="circle"], body.seizure-safe *[class*="ring"], body.seizure-safe *[class*="orbit"] {
@@ -169,7 +182,7 @@
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transform: none !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [data-splitting] .char, body.seizure-safe [data-splitting] .word, body.seizure-safe .split .char, body.seizure-safe .split .word {
                     animation: none !important;
@@ -177,12 +190,24 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                     display: inline !important;
-                    transform: none !important;
+                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
+                    /* Force immediate final state - no delays */
+                    animation-delay: 0s !important;
+                    transition-delay: 0s !important;
+                    /* transform: none !important; - REMOVED: This was breaking 3D shapes and layout */
                 }
                 body.seizure-safe [data-splitting], body.seizure-safe .split {
                     opacity: 1 !important;
                     visibility: visible !important;
                     display: block !important;
+                    /* height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* min-height: auto !important; - REMOVED: This was causing extra space at bottom */
+                    /* max-height: none !important; - REMOVED: This was causing extra space at bottom */
+                    /* Force immediate final state - no delays */
+                    animation-delay: 0s !important;
+                    transition-delay: 0s !important;
                 }
             `;
             document.head.appendChild(immediateStyle);
@@ -251,25 +276,25 @@
                         }
                         /* Restore layout-affecting properties to stylesheet values */
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
-                            transform: unset !important;
-                            translate: unset !important;
-                            scale: unset !important;
-                            rotate: unset !important;
+                            /* transform: unset !important; - REMOVED: This was breaking 3D shapes and layout */
+                            /* translate: unset !important; - REMOVED: This was breaking 3D shapes and layout */
+                            /* scale: unset !important; - REMOVED: This was breaking 3D shapes and layout */
+                            /* rotate: unset !important; - REMOVED: This was breaking 3D shapes and layout */
                             opacity: unset !important;
                             visibility: unset !important;
-                            position: unset !important;
-                            top: unset !important;
-                            left: unset !important;
-                            right: unset !important;
-                            bottom: unset !important;
-                            width: unset !important;
-                            height: unset !important;
+                            /* position: unset !important; - REMOVED: This was breaking layout */
+                            /* top: unset !important; - REMOVED: This was breaking layout */
+                            /* left: unset !important; - REMOVED: This was breaking layout */
+                            /* right: unset !important; - REMOVED: This was breaking layout */
+                            /* bottom: unset !important; - REMOVED: This was breaking layout */
+                            /* width: unset !important; - REMOVED: This was breaking layout */
+                            /* height: unset !important; - REMOVED: This was breaking layout */
                         }
                         /* Preserve only genuine navigation/header and explicit opt-outs */
                         body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
                         body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
-                            transform: unset !important;
-                            position: unset !important;
+                            /* transform: unset !important; - REMOVED: This was breaking 3D shapes and layout */
+                            /* position: unset !important; - REMOVED: This was breaking layout */
                             opacity: unset !important;
                             visibility: unset !important;
                         }
@@ -344,12 +369,27 @@
                     // Helper to reveal typewriter text and freeze progress visuals
                     window.__applySeizureSafeDOMFreeze = function() {
                         try {
-                            // Reveal typewriter/typing effects by consolidating text
+                            // Reveal typewriter/typing effects by consolidating text immediately
                             const typeSelectors = [
-                                '[class*="typewriter"]', '[class*="typing"]', '[data-typing]', '[data-typewriter]'
+                                '[class*="typewriter"]', '[class*="typing"]', '[data-typing]', '[data-typewriter]',
+                                '[data-splitting]', '.split', '.char', '.word', '[class*="split"]', '[class*="char"]', 
+                                '[class*="word"]', '[class*="letter"]', '[class*="text-animation"]', '[class*="reveal"]', 
+                                '[class*="unveil"]', '[class*="show-text"]', '[class*="text-effect"]'
                             ];
                             document.querySelectorAll(typeSelectors.join(',')).forEach(el => {
                                 try {
+                                    // Force immediate final state
+                                    el.style.animation = 'none';
+                                    el.style.transition = 'none';
+                                    el.style.opacity = '1';
+                                    el.style.visibility = 'visible';
+                                    el.style.display = 'inline';
+                                    /* el.style.height = 'auto'; - REMOVED: This was causing extra space at bottom */
+                                    /* el.style.minHeight = 'auto'; - REMOVED: This was causing extra space at bottom */
+                                    /* el.style.maxHeight = 'none'; - REMOVED: This was causing extra space at bottom */
+                                    el.style.animationDelay = '0s';
+                                    el.style.transitionDelay = '0s';
+                                    
                                     const datasetText = el.getAttribute('data-full-text') || el.getAttribute('data-text') || '';
                                     if (datasetText) { el.textContent = datasetText; return; }
                                     // If split into character spans, join them
@@ -819,7 +859,7 @@ function applyVisionImpaired(on) {
                 padding: 0 !important;
                 min-height: 100vh !important;
                 /* Simple scaling to enhance vision - no calculations */
-                transform: scale(1.1) !important;
+                transform: scale(1.05) !important;
                 transform-origin: top left !important;
             }
 
@@ -956,7 +996,7 @@ function applyVisionImpaired(on) {
                 body.vision-impaired {
                     min-height: 100vh !important;
                     /* Simple scaling to enhance vision - no calculations */
-                    transform: scale(1.1) !important;
+                    transform: scale(1.05) !important;
                     transform-origin: top left !important;
                 }
                 
@@ -13534,9 +13574,9 @@ class AccessibilityWidget {
             body.style.transform = `scale(${scale})`;
             body.style.transformOrigin = 'top left';
             
-            // Ensure body takes full viewport to prevent gaps
-            body.style.width = '100vw';
-            body.style.height = '100vh';
+            // Remove width/height constraints to allow proper scrolling
+            // body.style.width = '100vw'; - REMOVED: This was preventing scrolling
+            // body.style.height = '100vh'; - REMOVED: This was preventing scrolling
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
             console.log('Accessibility Widget: Body transform applied:', body.style.transform);
