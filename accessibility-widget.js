@@ -1026,7 +1026,7 @@ function applyVisionImpaired(on) {
 
             /* 2. CONTENT WRAPPER - Simplified approach */
             #accessibility-content-wrapper {
-                width: 100% !important;
+                
                 height: 100% !important;
                 min-height: 100vh !important;
                 overflow: visible !important;
