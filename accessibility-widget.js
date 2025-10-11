@@ -31,7 +31,10 @@
                 body.seizure-safe svg, body.seizure-safe svg * {
                     animation: none !important;
                     transition: none !important;
-                    /* DO NOT touch: opacity, visibility, display, transform */
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: inline !important;
+                    /* DO NOT touch: transform */
                 }
                 /* SAFE: Preserve text animations without breaking layout */
                 body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [class*="split"], body.seizure-safe [class*="char"], body.seizure-safe [class*="word"], body.seizure-safe [class*="letter"], body.seizure-safe [class*="text-animation"], body.seizure-safe [class*="typing"], body.seizure-safe [class*="typewriter"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="unveil"], body.seizure-safe [class*="show-text"], body.seizure-safe [class*="text-effect"] {
@@ -133,6 +136,12 @@
                             position: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
+                        }
+                        /* CRITICAL: Preserve SVG visibility - override general seizure-safe rules */
+                        body.seizure-safe svg, body.seizure-safe svg * {
+                            opacity: 1 !important;
+                            visibility: visible !important;
+                            display: inline !important;
                         }
                     `;
                     document.head.appendChild(correction);
@@ -1490,6 +1499,7 @@ class AccessibilityWidget {
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
+                        display: inline !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
@@ -26088,6 +26098,7 @@ class AccessibilityWidget {
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
+                    display: inline !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
