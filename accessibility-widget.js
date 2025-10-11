@@ -42,7 +42,7 @@
                     cursor: text !important;
                 }
                 
-                /* CRITICAL: Force ALL possible animations to their final state immediately */
+                /* PRESERVE FINAL STATE: Keep animations in their final state without breaking layout */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -107,15 +107,17 @@
                 body.seizure-safe *[class*="transition"],
                 body.seizure-safe *[class*="migrate"],
                 body.seizure-safe *[class*="shift"] {
-                    animation: none !important;
-                    transition: none !important;
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    /* PRESERVE FINAL POSITION: Don't reset transforms to prevent layout breaking */
                 }
                 
-                /* Force GSAP and other library animations to final state */
+                /* PRESERVE GSAP and library animation final states */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -123,12 +125,14 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    animation: none !important;
-                    transition: none !important;
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    /* PRESERVE FINAL TRANSFORM: Keep elements in their final animated position */
                 }
 
                 /* Do NOT interfere with navbars/headers sticky/transform behavior */
@@ -144,22 +148,23 @@
                     will-change: initial !important;
                 }
                 
-                /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
+                /* PRESERVE FINAL STATE: Keep elements in their final animated position */
                 body.seizure-safe *[style*="animation"],
                 body.seizure-safe *[style*="transition"],
-                /* REMOVED: body.seizure-safe *[style*="transform"], - This was interfering with scroll libraries */
+                /* PRESERVE: Keep transform styles to maintain final positions */
                 body.seizure-safe *[style*="opacity"],
                 body.seizure-safe *[style*="visibility"],
                 body.seizure-safe *[data-animation],
                 body.seizure-safe *[data-transition],
-                /* REMOVED: body.seizure-safe *[data-transform], - This was interfering with scroll libraries */
+                /* PRESERVE: Keep data-transform to maintain final positions */
                 body.seizure-safe *[data-opacity],
                 body.seizure-safe *[data-visibility] {
-                    animation: none !important;
-                    transition: none !important;
+                    animation-duration: 0.01s !important;
+                    animation-timing-function: linear !important;
+                    transition-duration: 0.01s !important;
+                    transition-timing-function: linear !important;
                     animation-fill-mode: forwards !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    /* PRESERVE FINAL POSITION: Don't reset transforms to prevent layout breaking */
                 }
                 
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
@@ -635,17 +640,22 @@
                             const neutralizeElement = (el) => {
                                 if (!el || isExempt(el)) return;
                                 try {
-                                    el.style.animation = 'none';
-                                    el.style.transition = 'none';
+                                    // PRESERVE FINAL STATE: Don't reset transforms to maintain final positions
+                                    el.style.animationDuration = '0.01s';
+                                    el.style.animationTimingFunction = 'linear';
+                                    el.style.transitionDuration = '0.01s';
+                                    el.style.transitionTimingFunction = 'linear';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
+                                    // PRESERVE FINAL POSITION: Don't reset transform to prevent layout breaking
                                     // Only neutralize transform if the element is not an icon/arrow
                                     // and not inside a rotation context such as accordion/FAQ toggles
                                     const inRotationContext = (() => {
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
                                     if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext) {
-                                    el.style.transform = 'none';
+                                        // PRESERVE: Don't reset transform to maintain final animated position
+                                        // el.style.transform = 'none'; // REMOVED: This was breaking final states
                                     }
                                     el.style.opacity = '1';
                                 } catch (_) {}
@@ -762,8 +772,9 @@
                                         window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
                                         CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
                                             const n = String(name).toLowerCase();
-                                            // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
-                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
+                                            // PRESERVE FINAL STATE: Only block animation/transition properties, preserve transforms
+                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'filter') {
+                                                // PRESERVE: Don't block opacity to maintain final states
                                                 return undefined;
                                             }
                                             return window.__origSetProperty.call(this, name, value, priority);
@@ -775,12 +786,12 @@
                                         window.__origStyleAttrSetter = Element.prototype.setAttribute;
                                         Element.prototype.setAttribute = function(attr, val) {
                                             if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
-                                                // Strip blacklisted properties from inline style strings
+                                                // PRESERVE FINAL STATE: Only strip animation/transition properties, preserve transforms and opacity
                                                 let cleaned = val
                                                     .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
-                                                    .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
                                                     .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
+                                                // PRESERVE: Don't strip opacity and transform to maintain final states
                                                 return window.__origStyleAttrSetter.call(this, attr, cleaned);
                                             }
                                             return window.__origStyleAttrSetter.call(this, attr, val);
@@ -13718,14 +13729,8 @@ class AccessibilityWidget {
                 // Reset any scaling styles
                 body.style.transform = '';
                 body.style.transformOrigin = '';
-                body.style.width = '';
-                body.style.height = '';
-                body.style.minHeight = '';
                 html.style.transform = '';
                 html.style.transformOrigin = '';
-                html.style.width = '';
-                html.style.height = '';
-                html.style.minHeight = '';
                 
                 return;
             }
@@ -13733,27 +13738,11 @@ class AccessibilityWidget {
             const scale = this.contentScale / 100;
             console.log('Accessibility Widget: Applying scale:', scale);
             
-            // Apply scaling to html element to scale entire page content
-            html.style.transform = `scale(${scale})`;
-            html.style.transformOrigin = 'top left';
-            
-            // Calculate proper dimensions to maintain scrollability
-            const scaledWidth = 100 / scale;
-            const scaledHeight = 100 / scale;
-            
-            // Set dimensions to allow proper scrolling
-            html.style.width = `${scaledWidth}vw`;
-            html.style.height = `${scaledHeight}vh`;
-            html.style.minHeight = `${scaledHeight}vh`;
-            
-            // Ensure body maintains proper dimensions
-            body.style.width = `${scaledWidth}vw`;
-            body.style.height = `${scaledHeight}vh`;
-            body.style.minHeight = `${scaledHeight}vh`;
+            // Apply simple CSS zoom to html element - this preserves natural scrolling
+            html.style.zoom = scale;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: HTML transform applied:', html.style.transform);
-            console.log('Accessibility Widget: Dimensions set to:', `${scaledWidth}vw x ${scaledHeight}vh`);
+            console.log('Accessibility Widget: HTML zoom applied:', html.style.zoom);
         }
         
         updateContentScaleDisplay() {
@@ -15179,14 +15168,9 @@ class AccessibilityWidget {
             
             body.style.transform = '';
             body.style.transformOrigin = '';
-            body.style.width = '';
-            body.style.height = '';
-            body.style.minHeight = '';
             html.style.transform = '';
             html.style.transformOrigin = '';
-            html.style.width = '';
-            html.style.height = '';
-            html.style.minHeight = '';
+            html.style.zoom = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
