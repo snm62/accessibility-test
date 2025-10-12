@@ -18911,55 +18911,6 @@ class AccessibilityWidget {
                     background: #ffffff !important;
                     color: #000000 !important;
                 }
-
-                /* Exclude UI elements and accessibility widget from light contrast text changes */
-                body.light-contrast header,
-                body.light-contrast nav,
-                body.light-contrast .header,
-                body.light-contrast .navbar,
-                body.light-contrast .navigation,
-                body.light-contrast .logo,
-                body.light-contrast .menu,
-                body.light-contrast .nav-menu,
-                body.light-contrast button,
-                body.light-contrast .button,
-                body.light-contrast .btn,
-                body.light-contrast input,
-                body.light-contrast textarea,
-                body.light-contrast select,
-                body.light-contrast .form-control,
-                body.light-contrast .card,
-                body.light-contrast .modal,
-                body.light-contrast .dropdown,
-                body.light-contrast .tooltip,
-                body.light-contrast .badge,
-                body.light-contrast .alert,
-                body.light-contrast .accessibility-panel,
-                body.light-contrast .accessibility-icon,
-                body.light-contrast #accessibility-panel,
-                body.light-contrast #accessibility-icon,
-                body.light-contrast #accessibility-widget-container,
-                body.light-contrast .accessibility-widget-container {
-                    color: inherit !important;
-                    background: inherit !important;
-                }
-
-                /* Completely exclude accessibility widget from light contrast effects */
-                .light-contrast .accessibility-panel,
-                .light-contrast .accessibility-icon,
-                .light-contrast #accessibility-panel,
-                .light-contrast #accessibility-icon,
-                .light-contrast .accessibility-panel *,
-                .light-contrast .accessibility-icon *,
-                .light-contrast #accessibility-panel *,
-                .light-contrast #accessibility-icon * {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    background: inherit !important;
-                    color: inherit !important;
-                    border: inherit !important;
-                    box-shadow: inherit !important;
-                }
             `;
             document.head.appendChild(style);
         }
@@ -20381,131 +20332,17 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'hide-images-css';
                 style.textContent = `
-                    /* Hide all image elements - optimized for performance */
                     .hide-images img,
                     .hide-images picture,
                     .hide-images svg,
                     .hide-images video,
                     .hide-images canvas,
-                    .hide-images iframe[src*="image"],
-                    .hide-images iframe[src*="img"],
-                    .hide-images embed[type*="image"],
-                    .hide-images object[type*="image"],
-                    .hide-images source,
-                    .hide-images img[data-src],
-                    .hide-images img[data-lazy],
-                    .hide-images img[loading="lazy"],
-                    .hide-images picture[data-src],
-                    .hide-images picture[data-lazy] {
+                    .hide-images iframe {
                         display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                        max-width: 0 !important;
-                        max-height: 0 !important;
-                        /* Preserve animations and transitions */
-                        animation: none !important;
-                        transition: none !important;
-                        transform: none !important;
                     }
                     
-                    /* Hide background images - comprehensive coverage */
-                    .hide-images [style*="background-image"],
-                    .hide-images [style*="background: url"],
-                    .hide-images [style*="background:url"],
-                    .hide-images [style*="background-image: url"],
-                    .hide-images [style*="background-image:url"] {
+                    .hide-images [style*="background-image"] {
                         background-image: none !important;
-                        background: none !important;
-                        background-size: none !important;
-                        background-position: none !important;
-                        background-repeat: none !important;
-                    }
-                    
-                    /* Hide CSS background images from classes */
-                    .hide-images *[class*="bg-"],
-                    .hide-images *[class*="background"],
-                    .hide-images *[class*="image"],
-                    .hide-images *[class*="img"],
-                    .hide-images *[class*="photo"],
-                    .hide-images *[class*="picture"],
-                    .hide-images *[class*="banner"],
-                    .hide-images *[class*="hero"],
-                    .hide-images *[class*="cover"],
-                    .hide-images *[class*="splash"],
-                    .hide-images *[class*="featured"] {
-                        background-image: none !important;
-                        background: none !important;
-                        background-size: none !important;
-                        background-position: none !important;
-                        background-repeat: none !important;
-                    }
-                    
-                    /* Hide image containers and media elements */
-                    .hide-images .image-container,
-                    .hide-images .img-container,
-                    .hide-images .photo-container,
-                    .hide-images .picture-container,
-                    .hide-images .media-container,
-                    .hide-images .gallery,
-                    .hide-images .carousel,
-                    .hide-images .slider,
-                    .hide-images .banner,
-                    .hide-images .hero,
-                    .hide-images .cover,
-                    .hide-images .splash,
-                    .hide-images .featured {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    /* Hide icon fonts and decorative images */
-                    .hide-images [class*="icon"],
-                    .hide-images [class*="fa-"],
-                    .hide-images [class*="fas"],
-                    .hide-images [class*="far"],
-                    .hide-images [class*="fab"],
-                    .hide-images [class*="material-icons"],
-                    .hide-images .decoration,
-                    .hide-images .ornament,
-                    .hide-images .pattern,
-                    .hide-images .texture {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    
-                    /* Preserve text content and ensure it remains visible */
-                    .hide-images p,
-                    .hide-images h1,
-                    .hide-images h2,
-                    .hide-images h3,
-                    .hide-images h4,
-                    .hide-images h5,
-                    .hide-images h6,
-                    .hide-images span,
-                    .hide-images div:not([class*="image"]):not([class*="img"]):not([class*="photo"]):not([class*="picture"]):not([class*="banner"]):not([class*="hero"]):not([class*="cover"]),
-                    .hide-images li,
-                    .hide-images td,
-                    .hide-images th,
-                    .hide-images label,
-                    .hide-images small,
-                    .hide-images em,
-                    .hide-images strong,
-                    .hide-images i,
-                    .hide-images b,
-                    .hide-images a {
-                        display: block !important;
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                    }
-                    
-                    /* Ensure animations and transitions are not affected */
-                    .hide-images * {
-                        animation-duration: inherit !important;
-                        transition-duration: inherit !important;
-                        animation-timing-function: inherit !important;
-                        transition-timing-function: inherit !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -26337,36 +26174,46 @@ class AccessibilityWidget {
     
             // Add mouse move event listener to position the spotlight cutout with smooth animation
             let animationFrameId = null;
+            let targetX = 0;
             let targetY = 0;
+            let currentX = 0;
             let currentY = 0;
-            const height = 200; // Spotlight height
+            const radius = 100; // Spotlight radius
     
             this.adhdMouseMoveHandler = (e) => {
-                targetY = e.clientY - height/2;
+                targetX = e.clientX;
+                targetY = e.clientY;
                 
                 if (animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
                 }
                 
                 const animate = () => {
-                    const diff = targetY - currentY;
-                    if (Math.abs(diff) > 0.5) {
-                        currentY += diff * 0.15; // Smooth interpolation factor
+                    const diffX = targetX - currentX;
+                    const diffY = targetY - currentY;
+                    
+                    if (Math.abs(diffX) > 0.5 || Math.abs(diffY) > 0.5) {
+                        currentX += diffX * 0.2; // Smooth interpolation factor
+                        currentY += diffY * 0.2;
                         
-                        // Position the spotlight cutout using box-shadow technique
-                        spotlight.style.left = '0px';
-                        spotlight.style.top = currentY + 'px';
-                        spotlight.style.width = '100vw';
-                        spotlight.style.height = height + 'px';
-                        spotlight.style.borderRadius = '0px';
-                        spotlight.style.background = 'transparent';
-                        spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.5)`;
+                        // Update mask position using CSS custom properties
+                        const maskX = (currentX / window.innerWidth) * 100;
+                        const maskY = (currentY / window.innerHeight) * 100;
+                        
+                        spotlight.style.setProperty('--mask-x', `${maskX}%`);
+                        spotlight.style.setProperty('--mask-y', `${maskY}%`);
+                        spotlight.style.mask = `radial-gradient(circle ${radius}px at var(--mask-x, 50%) var(--mask-y, 50%), transparent 0%, transparent ${radius}px, black ${radius}px)`;
+                        spotlight.style.webkitMask = `radial-gradient(circle ${radius}px at var(--mask-x, 50%) var(--mask-y, 50%), transparent 0%, transparent ${radius}px, black ${radius}px)`;
                         
                         animationFrameId = requestAnimationFrame(animate);
                     } else {
                         // Final position
+                        currentX = targetX;
                         currentY = targetY;
-                        spotlight.style.top = currentY + 'px';
+                        const finalMaskX = (currentX / window.innerWidth) * 100;
+                        const finalMaskY = (currentY / window.innerHeight) * 100;
+                        spotlight.style.setProperty('--mask-x', `${finalMaskX}%`);
+                        spotlight.style.setProperty('--mask-y', `${finalMaskY}%`);
                     }
                 };
                 
