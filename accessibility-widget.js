@@ -18945,6 +18945,67 @@ class AccessibilityWidget {
                 body.light-contrast div {
                     background: #ffffff !important;
                 }
+                
+                /* Exclude card flip animations from light contrast */
+                body.light-contrast [class*="flip"],
+                body.light-contrast [class*="card-flip"],
+                body.light-contrast [class*="flip-card"],
+                body.light-contrast [class*="flip-container"],
+                body.light-contrast [class*="flip-inner"],
+                body.light-contrast [class*="flip-front"],
+                body.light-contrast [class*="flip-back"],
+                body.light-contrast [class*="flip-hover"],
+                body.light-contrast [class*="card-hover"],
+                body.light-contrast [class*="hover-flip"],
+                body.light-contrast [class*="rotate"],
+                body.light-contrast [class*="transform"],
+                body.light-contrast [class*="perspective"],
+                body.light-contrast [class*="3d"],
+                body.light-contrast [class*="three-d"] {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+                
+                /* Ensure text inside card flip animations is visible */
+                body.light-contrast [class*="flip"] *,
+                body.light-contrast [class*="card-flip"] *,
+                body.light-contrast [class*="flip-card"] *,
+                body.light-contrast [class*="flip-container"] *,
+                body.light-contrast [class*="flip-inner"] *,
+                body.light-contrast [class*="flip-front"] *,
+                body.light-contrast [class*="flip-back"] *,
+                body.light-contrast [class*="flip-hover"] *,
+                body.light-contrast [class*="card-hover"] *,
+                body.light-contrast [class*="hover-flip"] * {
+                    color: #000000 !important;
+                    background: transparent !important;
+                }
+                
+                /* Exclude images and media from light contrast */
+                body.light-contrast img,
+                body.light-contrast video,
+                body.light-contrast canvas,
+                body.light-contrast iframe,
+                body.light-contrast svg,
+                body.light-contrast picture,
+                body.light-contrast source,
+                body.light-contrast embed,
+                body.light-contrast object {
+                    background: transparent !important;
+                    color: inherit !important;
+                }
+                
+                /* Preserve animated images and media */
+                body.light-contrast img[src*=".gif"],
+                body.light-contrast img[src*=".apng"],
+                body.light-contrast img[src*=".webp"],
+                body.light-contrast img[class*="animated"],
+                body.light-contrast img[class*="gif"],
+                body.light-contrast img[data-animated],
+                body.light-contrast img[data-gif] {
+                    background: transparent !important;
+                    color: inherit !important;
+                }
 
                 /* Style ONLY actual service cards and specific content boxes in light contrast */
                 body.light-contrast .service-card,
