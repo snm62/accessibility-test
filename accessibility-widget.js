@@ -18120,8 +18120,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Simple High Saturation Mode - Only increase saturation, preserve everything else */
                 body.high-saturation {
-                    filter: saturate(1.2) !important;
-                    -webkit-filter: saturate(1.2) !important;
+                    filter: saturate(1.5) !important;
+                    -webkit-filter: saturate(1.5) !important;
                 }
                 
                 /* Preserve accessibility widget from saturation filters */
@@ -18158,8 +18158,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Low Saturation Mode - Simple filter overlay approach */
                 body.low-saturation {
-                    filter: saturate(0.6) !important;
-                    -webkit-filter: saturate(0.6) !important;
+                    filter: saturate(0.4) !important;
+                    -webkit-filter: saturate(0.4) !important;
                 }
                 
                 /* Preserve accessibility widget from low saturation filters */
@@ -18861,7 +18861,6 @@ class AccessibilityWidget {
                     color: #000000 !important;
                 }
 
-                /* Apply light contrast to all text elements - comprehensive coverage */
                 body.light-contrast p,
                 body.light-contrast h1,
                 body.light-contrast h2,
@@ -18883,206 +18882,6 @@ class AccessibilityWidget {
                 body.light-contrast a {
                     background: #ffffff !important;
                     color: #000000 !important;
-                }
-                
-                /* Ensure all text elements get black color, including nested elements */
-                body.light-contrast * {
-                    color: #000000 !important;
-                }
-                
-                /* But exclude images and media from color changes */
-                body.light-contrast img,
-                body.light-contrast video,
-                body.light-contrast canvas,
-                body.light-contrast iframe,
-                body.light-contrast svg,
-                body.light-contrast picture,
-                body.light-contrast source,
-                body.light-contrast embed,
-                body.light-contrast object {
-                    color: inherit !important;
-                }
-                
-                /* Exclude navigation and layout elements from color changes */
-                body.light-contrast .nav_component,
-                body.light-contrast .nav_container,
-                body.light-contrast .nav_menu-wrapper,
-                body.light-contrast .nav_link-wrapper,
-                body.light-contrast .dropdown,
-                body.light-contrast .w-dropdown,
-                body.light-contrast .w-nav,
-                body.light-contrast .section-portfolios,
-                body.light-contrast .portfolio-container,
-                body.light-contrast .portfolio-card-wrapper,
-                body.light-contrast .portfolio-overlay,
-                body.light-contrast .bg-img-div,
-                body.light-contrast .portfolio-hover-img,
-                body.light-contrast .curved-text-container,
-                body.light-contrast .hover-circle,
-                body.light-contrast .footer,
-                body.light-contrast .header,
-                body.light-contrast .navbar,
-                body.light-contrast .navigation,
-                body.light-contrast .w-nav-overlay,
-                body.light-contrast .w-nav-button,
-                body.light-contrast .w-nav-brand,
-                body.light-contrast .w-nav-link,
-                body.light-contrast .w-button {
-                    color: inherit !important;
-                }
-                
-                /* Comprehensive coverage for dynamically loaded dark elements */
-                body.light-contrast *[style*="background-color: #000"],
-                body.light-contrast *[style*="background-color:#000"],
-                body.light-contrast *[style*="background-color: #000000"],
-                body.light-contrast *[style*="background-color:#000000"],
-                body.light-contrast *[style*="background: #000"],
-                body.light-contrast *[style*="background:#000"],
-                body.light-contrast *[style*="background: #000000"],
-                body.light-contrast *[style*="background:#000000"],
-                body.light-contrast *[style*="color: #000"],
-                body.light-contrast *[style*="color:#000"],
-                body.light-contrast *[style*="color: #000000"],
-                body.light-contrast *[style*="color:#000000"] {
-                    background: #ffffff !important;
-                    color: #000000 !important;
-                }
-                
-                /* Target common dark theme classes that might be added dynamically */
-                body.light-contrast .dark,
-                body.light-contrast .dark-theme,
-                body.light-contrast .dark-mode,
-                body.light-contrast .night-mode,
-                body.light-contrast .black,
-                body.light-contrast .bg-dark,
-                body.light-contrast .bg-black,
-                body.light-contrast [class*="dark"],
-                body.light-contrast [class*="black"],
-                body.light-contrast [class*="night"] {
-                    background: #ffffff !important;
-                    color: #000000 !important;
-                }
-                
-                /* Target dynamically loaded content containers */
-                body.light-contrast .content,
-                body.light-contrast .container,
-                body.light-contrast .wrapper,
-                body.light-contrast .section,
-                body.light-contrast .article,
-                body.light-contrast .main,
-                body.light-contrast .page,
-                body.light-contrast .body,
-                body.light-contrast .app,
-                body.light-contrast .root {
-                    background: #ffffff !important;
-                }
-
-                /* Apply light background to main content areas only */
-                body.light-contrast main,
-                body.light-contrast section,
-                body.light-contrast article,
-                body.light-contrast .content,
-                body.light-contrast .container,
-                body.light-contrast .wrapper {
-                    background: #ffffff !important;
-                }
-                
-                /* Only apply white backgrounds to specific content divs */
-                body.light-contrast div[class*="text"]:not([class*="nav"]):not([class*="menu"]):not([class*="dropdown"]),
-                body.light-contrast div[class*="content"]:not([class*="nav"]):not([class*="menu"]):not([class*="dropdown"]),
-                body.light-contrast div[class*="description"],
-                body.light-contrast div[class*="paragraph"],
-                body.light-contrast div[class*="heading"],
-                body.light-contrast div[class*="title"],
-                body.light-contrast div[class*="subtitle"],
-                body.light-contrast div[class*="caption"],
-                body.light-contrast div[class*="label"] {
-                    background: #ffffff !important;
-                }
-                
-                /* Exclude layout and navigation elements from white backgrounds */
-                body.light-contrast .nav_component,
-                body.light-contrast .nav_container,
-                body.light-contrast .nav_menu-wrapper,
-                body.light-contrast .nav_link-wrapper,
-                body.light-contrast .dropdown,
-                body.light-contrast .w-dropdown,
-                body.light-contrast .w-nav,
-                body.light-contrast .section-portfolios,
-                body.light-contrast .portfolio-container,
-                body.light-contrast .portfolio-card-wrapper,
-                body.light-contrast .portfolio-overlay,
-                body.light-contrast .bg-img-div,
-                body.light-contrast .portfolio-hover-img,
-                body.light-contrast .curved-text-container,
-                body.light-contrast .hover-circle,
-                body.light-contrast .footer,
-                body.light-contrast .header,
-                body.light-contrast .navbar,
-                body.light-contrast .navigation {
-                    background: inherit !important;
-                    color: inherit !important;
-                }
-                
-                /* Exclude card flip animations from light contrast */
-                body.light-contrast [class*="flip"],
-                body.light-contrast [class*="card-flip"],
-                body.light-contrast [class*="flip-card"],
-                body.light-contrast [class*="flip-container"],
-                body.light-contrast [class*="flip-inner"],
-                body.light-contrast [class*="flip-front"],
-                body.light-contrast [class*="flip-back"],
-                body.light-contrast [class*="flip-hover"],
-                body.light-contrast [class*="card-hover"],
-                body.light-contrast [class*="hover-flip"],
-                body.light-contrast [class*="rotate"],
-                body.light-contrast [class*="transform"],
-                body.light-contrast [class*="perspective"],
-                body.light-contrast [class*="3d"],
-                body.light-contrast [class*="three-d"] {
-                    background: inherit !important;
-                    color: inherit !important;
-                }
-                
-                /* Ensure text inside card flip animations is visible */
-                body.light-contrast [class*="flip"] *,
-                body.light-contrast [class*="card-flip"] *,
-                body.light-contrast [class*="flip-card"] *,
-                body.light-contrast [class*="flip-container"] *,
-                body.light-contrast [class*="flip-inner"] *,
-                body.light-contrast [class*="flip-front"] *,
-                body.light-contrast [class*="flip-back"] *,
-                body.light-contrast [class*="flip-hover"] *,
-                body.light-contrast [class*="card-hover"] *,
-                body.light-contrast [class*="hover-flip"] * {
-                    color: #000000 !important;
-                    background: transparent !important;
-                }
-                
-                /* Exclude images and media from light contrast */
-                body.light-contrast img,
-                body.light-contrast video,
-                body.light-contrast canvas,
-                body.light-contrast iframe,
-                body.light-contrast svg,
-                body.light-contrast picture,
-                body.light-contrast source,
-                body.light-contrast embed,
-                body.light-contrast object {
-                    background: transparent !important;
-                    color: inherit !important;
-                }
-                
-                /* Preserve animated images and media */
-                body.light-contrast img[src*=".gif"],
-                body.light-contrast img[src*=".apng"],
-                body.light-contrast img[src*=".webp"],
-                body.light-contrast img[class*="animated"],
-                body.light-contrast img[class*="gif"],
-                body.light-contrast img[data-animated],
-                body.light-contrast img[data-gif] {
-                    background: transparent !important;
-                    color: inherit !important;
                 }
 
                 /* Style ONLY actual service cards and specific content boxes in light contrast */
