@@ -7370,7 +7370,7 @@ class AccessibilityWidget {
     
                                 <h4>Highlight Titles</h4>
     
-                                <p>Add boxes around headings</p>
+                                <p>Add boxes around heading tags (h1-h6)</p>
     
                             </div>
     
@@ -8409,7 +8409,7 @@ class AccessibilityWidget {
     
                     highlightTitles: "Highlight Titles",
     
-                    highlightTitlesDesc: "Add boxes around headings",
+                    highlightTitlesDesc: "Add boxes around heading tags (h1-h6)",
     
                     highlightLinks: "Highlight Links",
     
@@ -13502,10 +13502,6 @@ class AccessibilityWidget {
             body.style.transform = `scale(${scale})`;
             body.style.transformOrigin = 'top left';
             
-            // Ensure body takes full viewport to prevent gaps
-            body.style.width = '100vw';
-            body.style.height = '100vh';
-            
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
             console.log('Accessibility Widget: Body transform applied:', body.style.transform);
         }
@@ -14950,9 +14946,9 @@ class AccessibilityWidget {
     
         highlightTitles() {
     
-            // Include semantic headings and common non-semantic title patterns (e.g., in footers)
+            // Only target actual heading tags
             const headings = document.querySelectorAll(
-                'h1, h2, h3, h4, h5, h6, [role="heading"], [aria-level], [class*="heading"], [class*="title"]'
+                'h1, h2, h3, h4, h5, h6'
             );
     
             headings.forEach(heading => {
@@ -14993,7 +14989,7 @@ class AccessibilityWidget {
     
             // Use the same selector as highlightTitles to ensure all highlighted elements are found
             const headings = document.querySelectorAll(
-                'h1, h2, h3, h4, h5, h6, [role="heading"], [aria-level], [class*="heading"], [class*="title"]'
+                'h1, h2, h3, h4, h5, h6'
             );
     
             headings.forEach(heading => {
@@ -18359,7 +18355,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                 }
 
-                /* Apply dark contrast to all text elements - text color only, no borders */
+                /* Apply dark contrast to text elements only - NO layout divs */
                 body.dark-contrast p,
                 body.dark-contrast h1,
                 body.dark-contrast h2,
@@ -18368,7 +18364,6 @@ class AccessibilityWidget {
                 body.dark-contrast h5,
                 body.dark-contrast h6,
                 body.dark-contrast span,
-                body.dark-contrast div,
                 body.dark-contrast li,
                 body.dark-contrast td,
                 body.dark-contrast th,
@@ -18379,6 +18374,41 @@ class AccessibilityWidget {
                 body.dark-contrast i,
                 body.dark-contrast b,
                 body.dark-contrast a {
+                    color: #ffffff !important;
+                }
+                
+                /* Only apply dark backgrounds to text content divs, not layout divs */
+                body.dark-contrast p,
+                body.dark-contrast h1,
+                body.dark-contrast h2,
+                body.dark-contrast h3,
+                body.dark-contrast h4,
+                body.dark-contrast h5,
+                body.dark-contrast h6,
+                body.dark-contrast span,
+                body.dark-contrast li,
+                body.dark-contrast td,
+                body.dark-contrast th,
+                body.dark-contrast label,
+                body.dark-contrast small,
+                body.dark-contrast em,
+                body.dark-contrast strong,
+                body.dark-contrast i,
+                body.dark-contrast b,
+                body.dark-contrast a {
+                    background: transparent !important;
+                }
+                
+                /* Target only text content divs, not layout divs */
+                body.dark-contrast div[class*="text"],
+                body.dark-contrast div[class*="content"],
+                body.dark-contrast div[class*="description"],
+                body.dark-contrast div[class*="paragraph"],
+                body.dark-contrast div[class*="heading"],
+                body.dark-contrast div[class*="title"],
+                body.dark-contrast div[class*="subtitle"],
+                body.dark-contrast div[class*="caption"],
+                body.dark-contrast div[class*="label"] {
                     background: #000000 !important;
                     color: #ffffff !important;
                 }
@@ -18386,11 +18416,50 @@ class AccessibilityWidget {
                 /* Apply dark background to main content areas only */
                 body.dark-contrast main,
                 body.dark-contrast section,
-                body.dark-contrast article,
-                body.dark-contrast .content,
-                body.dark-contrast .container,
-                body.dark-contrast .wrapper {
+                body.dark-contrast article {
                     background: #000000 !important;
+                }
+                
+                /* Exclude layout containers from dark backgrounds */
+                body.dark-contrast .container,
+                body.dark-contrast .wrapper,
+                body.dark-contrast .content,
+                body.dark-contrast .page-wrapper,
+                body.dark-contrast .smooth-content,
+                body.dark-contrast .smooth-wrapper,
+                body.dark-contrast .padding-global,
+                body.dark-contrast .container-large,
+                body.dark-contrast .section-hero,
+                body.dark-contrast .portfolio-hero,
+                body.dark-contrast .nav_component,
+                body.dark-contrast .nav_container,
+                body.dark-contrast .footer,
+                body.dark-contrast .header,
+                body.dark-contrast .navbar,
+                body.dark-contrast .navigation {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+                
+                /* Webflow-specific layout exceptions */
+                body.dark-contrast .w-nav,
+                body.dark-contrast .w-dropdown,
+                body.dark-contrast .w-button,
+                body.dark-contrast .w-embed,
+                body.dark-contrast .w-background-video,
+                body.dark-contrast .w-slider,
+                body.dark-contrast .w-tabs,
+                body.dark-contrast .w-accordion,
+                body.dark-contrast .w-lightbox,
+                body.dark-contrast .w-richtext,
+                body.dark-contrast .w-form,
+                body.dark-contrast .w-input,
+                body.dark-contrast .w-select,
+                body.dark-contrast .w-textarea,
+                body.dark-contrast .w-checkbox,
+                body.dark-contrast .w-radio {
+                    background: inherit !important;
+                    color: inherit !important;
                 }
 
                 /* Style ONLY actual service cards and specific content boxes in dark contrast */
