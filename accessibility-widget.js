@@ -18881,6 +18881,7 @@ class AccessibilityWidget {
                 body.light-contrast i,
                 body.light-contrast b,
                 body.light-contrast a {
+                    background: #ffffff !important;
                     color: #000000 !important;
                 }
                 
@@ -18937,6 +18938,11 @@ class AccessibilityWidget {
                 body.light-contrast .content,
                 body.light-contrast .container,
                 body.light-contrast .wrapper {
+                    background: #ffffff !important;
+                }
+                
+                /* Ensure ALL divs get white backgrounds in light contrast */
+                body.light-contrast div {
                     background: #ffffff !important;
                 }
 
