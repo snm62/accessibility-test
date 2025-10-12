@@ -6101,7 +6101,7 @@ class AccessibilityWidget {
     
                 :host(.seizure-safe) .accessibility-panel {
     
-                    filter: grayscale(0.9) contrast(1.0) !important;
+                    filter: grayscale(0.4) contrast(1.0) !important;
     
                 }
     
@@ -6890,6 +6890,34 @@ class AccessibilityWidget {
     body.big-white-cursor *,
     html body.big-white-cursor * {
         cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
+    }
+    
+    /* Big Black Cursor - Finger Pointer for Links */
+    body.big-black-cursor a,
+    body.big-black-cursor a *,
+    body.big-black-cursor [role="button"],
+    body.big-black-cursor [role="button"] *,
+    body.big-black-cursor button,
+    body.big-black-cursor button *,
+    body.big-black-cursor [onclick],
+    body.big-black-cursor [onclick] *,
+    body.big-black-cursor [href],
+    body.big-black-cursor [href] * {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M8 8 L8 32 L12 28 L16 32 L20 28 L24 32 L28 28 L32 32 L36 28 L40 32 L40 8 Z" fill="black" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="white"/></svg>') 12 12, pointer !important;
+    }
+    
+    /* Big White Cursor - Finger Pointer for Links */
+    body.big-white-cursor a,
+    body.big-white-cursor a *,
+    body.big-white-cursor [role="button"],
+    body.big-white-cursor [role="button"] *,
+    body.big-white-cursor button,
+    body.big-white-cursor button *,
+    body.big-white-cursor [onclick],
+    body.big-white-cursor [onclick] *,
+    body.big-white-cursor [href],
+    body.big-white-cursor [href] * {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M8 8 L8 32 L12 28 L16 32 L20 28 L24 32 L28 28 L32 32 L36 28 L40 32 L40 8 Z" fill="white" stroke="black" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="black"/></svg>') 12 12, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -17451,8 +17479,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Simple High Contrast Mode - Only increase contrast, preserve everything else */
                 body.high-contrast {
-                    filter: contrast(1.1) brightness(1.05) !important;
-                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
+                    filter: contrast(1.3) brightness(1.1) !important;
+                    -webkit-filter: contrast(1.3) brightness(1.1) !important;
                 }
                 
                 /* Preserve accessibility widget from contrast filters */
