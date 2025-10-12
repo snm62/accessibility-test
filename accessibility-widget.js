@@ -18885,6 +18885,52 @@ class AccessibilityWidget {
                     color: #000000 !important;
                 }
                 
+                /* Ensure all text elements get black color, including nested elements */
+                body.light-contrast * {
+                    color: #000000 !important;
+                }
+                
+                /* But exclude images and media from color changes */
+                body.light-contrast img,
+                body.light-contrast video,
+                body.light-contrast canvas,
+                body.light-contrast iframe,
+                body.light-contrast svg,
+                body.light-contrast picture,
+                body.light-contrast source,
+                body.light-contrast embed,
+                body.light-contrast object {
+                    color: inherit !important;
+                }
+                
+                /* Exclude navigation and layout elements from color changes */
+                body.light-contrast .nav_component,
+                body.light-contrast .nav_container,
+                body.light-contrast .nav_menu-wrapper,
+                body.light-contrast .nav_link-wrapper,
+                body.light-contrast .dropdown,
+                body.light-contrast .w-dropdown,
+                body.light-contrast .w-nav,
+                body.light-contrast .section-portfolios,
+                body.light-contrast .portfolio-container,
+                body.light-contrast .portfolio-card-wrapper,
+                body.light-contrast .portfolio-overlay,
+                body.light-contrast .bg-img-div,
+                body.light-contrast .portfolio-hover-img,
+                body.light-contrast .curved-text-container,
+                body.light-contrast .hover-circle,
+                body.light-contrast .footer,
+                body.light-contrast .header,
+                body.light-contrast .navbar,
+                body.light-contrast .navigation,
+                body.light-contrast .w-nav-overlay,
+                body.light-contrast .w-nav-button,
+                body.light-contrast .w-nav-brand,
+                body.light-contrast .w-nav-link,
+                body.light-contrast .w-button {
+                    color: inherit !important;
+                }
+                
                 /* Comprehensive coverage for dynamically loaded dark elements */
                 body.light-contrast *[style*="background-color: #000"],
                 body.light-contrast *[style*="background-color:#000"],
@@ -18941,9 +18987,41 @@ class AccessibilityWidget {
                     background: #ffffff !important;
                 }
                 
-                /* Ensure ALL divs get white backgrounds in light contrast */
-                body.light-contrast div {
+                /* Only apply white backgrounds to specific content divs */
+                body.light-contrast div[class*="text"]:not([class*="nav"]):not([class*="menu"]):not([class*="dropdown"]),
+                body.light-contrast div[class*="content"]:not([class*="nav"]):not([class*="menu"]):not([class*="dropdown"]),
+                body.light-contrast div[class*="description"],
+                body.light-contrast div[class*="paragraph"],
+                body.light-contrast div[class*="heading"],
+                body.light-contrast div[class*="title"],
+                body.light-contrast div[class*="subtitle"],
+                body.light-contrast div[class*="caption"],
+                body.light-contrast div[class*="label"] {
                     background: #ffffff !important;
+                }
+                
+                /* Exclude layout and navigation elements from white backgrounds */
+                body.light-contrast .nav_component,
+                body.light-contrast .nav_container,
+                body.light-contrast .nav_menu-wrapper,
+                body.light-contrast .nav_link-wrapper,
+                body.light-contrast .dropdown,
+                body.light-contrast .w-dropdown,
+                body.light-contrast .w-nav,
+                body.light-contrast .section-portfolios,
+                body.light-contrast .portfolio-container,
+                body.light-contrast .portfolio-card-wrapper,
+                body.light-contrast .portfolio-overlay,
+                body.light-contrast .bg-img-div,
+                body.light-contrast .portfolio-hover-img,
+                body.light-contrast .curved-text-container,
+                body.light-contrast .hover-circle,
+                body.light-contrast .footer,
+                body.light-contrast .header,
+                body.light-contrast .navbar,
+                body.light-contrast .navigation {
+                    background: inherit !important;
+                    color: inherit !important;
                 }
                 
                 /* Exclude card flip animations from light contrast */
