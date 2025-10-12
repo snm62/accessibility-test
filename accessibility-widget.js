@@ -6221,9 +6221,9 @@ class AccessibilityWidget {
     
                 :host(.high-contrast) .accessibility-panel * {
     
-                    filter: contrast(0.8) !important;
+                    filter: contrast(0.4) !important;
     
-                    -webkit-filter: contrast(0.8) !important;
+                    -webkit-filter: contrast(0.4) !important;
     
                 }
     
@@ -18912,22 +18912,6 @@ class AccessibilityWidget {
                     color: #000000 !important;
                 }
 
-                /* Style ONLY actual service cards and specific content boxes in light contrast */
-                body.light-contrast .service-card,
-                body.light-contrast .color-box,
-                body.light-contrast .test-block {
-                    background: #ffffff !important;
-                    border: 2px solid #000000 !important;
-                    color: #000000 !important;
-                }
-
-                /* Ensure text inside specific cards is black */
-                body.light-contrast .service-card *,
-                body.light-contrast .color-box *,
-                body.light-contrast .test-block * {
-                    color: #000000 !important;
-                }
-
                 /* Exclude UI elements and accessibility widget from light contrast text changes */
                 body.light-contrast header,
                 body.light-contrast nav,
@@ -25028,8 +25012,8 @@ class AccessibilityWidget {
                     body.vision-impaired {
                         /* No layout modifications */
                         /* No layout modifications */
-                        /* Slightly enhance text contrast without changing colors */
-                        filter: contrast(1.1) brightness(1.05) !important;
+                        /* Enhanced text contrast for better readability */
+                        filter: contrast(1.3) brightness(1.1) !important;
                     }
                     
                     /* Preserve accessibility widget from vision impaired filters and scaling */
