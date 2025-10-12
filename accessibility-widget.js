@@ -6101,7 +6101,7 @@ class AccessibilityWidget {
     
                 :host(.seizure-safe) .accessibility-panel {
     
-                    filter: grayscale(0.4) contrast(1.0) !important;
+                    filter: grayscale(0.9) contrast(1.0) !important;
     
                 }
     
@@ -6221,9 +6221,9 @@ class AccessibilityWidget {
     
                 :host(.high-contrast) .accessibility-panel * {
     
-                    filter: contrast(0.4) !important;
+                    filter: contrast(0.8) !important;
     
-                    -webkit-filter: contrast(0.4) !important;
+                    -webkit-filter: contrast(0.8) !important;
     
                 }
     
@@ -6890,34 +6890,6 @@ class AccessibilityWidget {
     body.big-white-cursor *,
     html body.big-white-cursor * {
         cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
-    }
-    
-    /* Big Black Cursor - Finger Pointer for Links */
-    body.big-black-cursor a,
-    body.big-black-cursor a *,
-    body.big-black-cursor [role="button"],
-    body.big-black-cursor [role="button"] *,
-    body.big-black-cursor button,
-    body.big-black-cursor button *,
-    body.big-black-cursor [onclick],
-    body.big-black-cursor [onclick] *,
-    body.big-black-cursor [href],
-    body.big-black-cursor [href] * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M8 8 L8 32 L12 28 L16 32 L20 28 L24 32 L28 28 L32 32 L36 28 L40 32 L40 8 Z" fill="black" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="white"/></svg>') 12 12, pointer !important;
-    }
-    
-    /* Big White Cursor - Finger Pointer for Links */
-    body.big-white-cursor a,
-    body.big-white-cursor a *,
-    body.big-white-cursor [role="button"],
-    body.big-white-cursor [role="button"] *,
-    body.big-white-cursor button,
-    body.big-white-cursor button *,
-    body.big-white-cursor [onclick],
-    body.big-white-cursor [onclick] *,
-    body.big-white-cursor [href],
-    body.big-white-cursor [href] * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M8 8 L8 32 L12 28 L16 32 L20 28 L24 32 L28 28 L32 32 L36 28 L40 32 L40 8 Z" fill="white" stroke="black" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="black"/></svg>') 12 12, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -10700,7 +10672,7 @@ class AccessibilityWidget {
     
                         if (title) title.textContent = this.getTranslation(langCode, 'highlightTitles', 'Highlight Titles');
     
-                        if (desc) desc.textContent = this.getTranslation(langCode, 'highlightTitlesDesc', 'Add boxes around headings');
+                        if (desc) desc.textContent = this.getTranslation(langCode, 'highlightTitlesDesc', 'Add boxes around heading tags (h1-h6)');
     
                         break;
     
@@ -13529,6 +13501,10 @@ class AccessibilityWidget {
             // Apply simple CSS transform scaling directly to body
             body.style.transform = `scale(${scale})`;
             body.style.transformOrigin = 'top left';
+            
+            // Ensure body takes full viewport to prevent gaps
+            body.style.width = '100vw';
+            body.style.height = '100vh';
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
             console.log('Accessibility Widget: Body transform applied:', body.style.transform);
@@ -17479,8 +17455,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Simple High Contrast Mode - Only increase contrast, preserve everything else */
                 body.high-contrast {
-                    filter: contrast(1.3) brightness(1.1) !important;
-                    -webkit-filter: contrast(1.3) brightness(1.1) !important;
+                    filter: contrast(1.1) brightness(1.05) !important;
+                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
                 }
                 
                 /* Preserve accessibility widget from contrast filters */
@@ -18148,8 +18124,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Simple High Saturation Mode - Only increase saturation, preserve everything else */
                 body.high-saturation {
-                    filter: saturate(1.5) !important;
-                    -webkit-filter: saturate(1.5) !important;
+                    filter: saturate(1.2) !important;
+                    -webkit-filter: saturate(1.2) !important;
                 }
                 
                 /* Preserve accessibility widget from saturation filters */
@@ -18186,8 +18162,8 @@ class AccessibilityWidget {
             style.textContent = `
                 /* Low Saturation Mode - Simple filter overlay approach */
                 body.low-saturation {
-                    filter: saturate(0.4) !important;
-                    -webkit-filter: saturate(0.4) !important;
+                    filter: saturate(0.6) !important;
+                    -webkit-filter: saturate(0.6) !important;
                 }
                 
                 /* Preserve accessibility widget from low saturation filters */
@@ -18383,7 +18359,7 @@ class AccessibilityWidget {
                     color: #ffffff !important;
                 }
 
-                /* Apply dark contrast to text elements only - NO layout divs */
+                /* Apply dark contrast to text elements only - no background changes */
                 body.dark-contrast p,
                 body.dark-contrast h1,
                 body.dark-contrast h2,
@@ -18402,42 +18378,6 @@ class AccessibilityWidget {
                 body.dark-contrast i,
                 body.dark-contrast b,
                 body.dark-contrast a {
-                    color: #ffffff !important;
-                }
-                
-                /* Only apply dark backgrounds to text content divs, not layout divs */
-                body.dark-contrast p,
-                body.dark-contrast h1,
-                body.dark-contrast h2,
-                body.dark-contrast h3,
-                body.dark-contrast h4,
-                body.dark-contrast h5,
-                body.dark-contrast h6,
-                body.dark-contrast span,
-                body.dark-contrast li,
-                body.dark-contrast td,
-                body.dark-contrast th,
-                body.dark-contrast label,
-                body.dark-contrast small,
-                body.dark-contrast em,
-                body.dark-contrast strong,
-                body.dark-contrast i,
-                body.dark-contrast b,
-                body.dark-contrast a {
-                    background: transparent !important;
-                }
-                
-                /* Target only text content divs, not layout divs */
-                body.dark-contrast div[class*="text"],
-                body.dark-contrast div[class*="content"],
-                body.dark-contrast div[class*="description"],
-                body.dark-contrast div[class*="paragraph"],
-                body.dark-contrast div[class*="heading"],
-                body.dark-contrast div[class*="title"],
-                body.dark-contrast div[class*="subtitle"],
-                body.dark-contrast div[class*="caption"],
-                body.dark-contrast div[class*="label"] {
-                    background: #000000 !important;
                     color: #ffffff !important;
                 }
 
@@ -18447,8 +18387,8 @@ class AccessibilityWidget {
                 body.dark-contrast article {
                     background: #000000 !important;
                 }
-                
-                /* Exclude layout containers from dark backgrounds */
+
+                /* Exclude layout containers and Webflow classes from dark backgrounds */
                 body.dark-contrast .container,
                 body.dark-contrast .wrapper,
                 body.dark-contrast .content,
@@ -18464,12 +18404,7 @@ class AccessibilityWidget {
                 body.dark-contrast .footer,
                 body.dark-contrast .header,
                 body.dark-contrast .navbar,
-                body.dark-contrast .navigation {
-                    background: inherit !important;
-                    color: inherit !important;
-                }
-                
-                /* Webflow-specific layout exceptions */
+                body.dark-contrast .navigation,
                 body.dark-contrast .w-nav,
                 body.dark-contrast .w-dropdown,
                 body.dark-contrast .w-button,
@@ -18488,6 +18423,25 @@ class AccessibilityWidget {
                 body.dark-contrast .w-radio {
                     background: inherit !important;
                     color: inherit !important;
+                }
+
+                /* Prevent all divs from getting black backgrounds by default */
+                body.dark-contrast div {
+                    background: transparent !important;
+                }
+
+                /* Only apply dark backgrounds to specific content divs */
+                body.dark-contrast div[class*="text"],
+                body.dark-contrast div[class*="content"],
+                body.dark-contrast div[class*="description"],
+                body.dark-contrast div[class*="paragraph"],
+                body.dark-contrast div[class*="heading"],
+                body.dark-contrast div[class*="title"],
+                body.dark-contrast div[class*="subtitle"],
+                body.dark-contrast div[class*="caption"],
+                body.dark-contrast div[class*="label"] {
+                    background: #000000 !important;
+                    color: #ffffff !important;
                 }
 
                 /* Style ONLY actual service cards and specific content boxes in dark contrast */
@@ -18889,6 +18843,7 @@ class AccessibilityWidget {
                     color: #000000 !important;
                 }
 
+                /* Apply light contrast to all text elements - comprehensive coverage */
                 body.light-contrast p,
                 body.light-contrast h1,
                 body.light-contrast h2,
@@ -18908,8 +18863,174 @@ class AccessibilityWidget {
                 body.light-contrast i,
                 body.light-contrast b,
                 body.light-contrast a {
+                    color: #000000 !important;
+                }
+                
+                /* Comprehensive coverage for dynamically loaded dark elements */
+                body.light-contrast *[style*="background-color: #000"],
+                body.light-contrast *[style*="background-color:#000"],
+                body.light-contrast *[style*="background-color: #000000"],
+                body.light-contrast *[style*="background-color:#000000"],
+                body.light-contrast *[style*="background: #000"],
+                body.light-contrast *[style*="background:#000"],
+                body.light-contrast *[style*="background: #000000"],
+                body.light-contrast *[style*="background:#000000"],
+                body.light-contrast *[style*="color: #000"],
+                body.light-contrast *[style*="color:#000"],
+                body.light-contrast *[style*="color: #000000"],
+                body.light-contrast *[style*="color:#000000"] {
                     background: #ffffff !important;
                     color: #000000 !important;
+                }
+                
+                /* Target common dark theme classes that might be added dynamically */
+                body.light-contrast .dark,
+                body.light-contrast .dark-theme,
+                body.light-contrast .dark-mode,
+                body.light-contrast .night-mode,
+                body.light-contrast .black,
+                body.light-contrast .bg-dark,
+                body.light-contrast .bg-black,
+                body.light-contrast [class*="dark"],
+                body.light-contrast [class*="black"],
+                body.light-contrast [class*="night"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+                
+                /* Target dynamically loaded content containers */
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper,
+                body.light-contrast .section,
+                body.light-contrast .article,
+                body.light-contrast .main,
+                body.light-contrast .page,
+                body.light-contrast .body,
+                body.light-contrast .app,
+                body.light-contrast .root {
+                    background: #ffffff !important;
+                }
+
+                /* Apply light background to main content areas only */
+                body.light-contrast main,
+                body.light-contrast section,
+                body.light-contrast article,
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper {
+                    background: #ffffff !important;
+                }
+
+                /* Style ONLY actual service cards and specific content boxes in light contrast */
+                body.light-contrast .service-card,
+                body.light-contrast .color-box,
+                body.light-contrast .test-block {
+                    background: #ffffff !important;
+                    border: 2px solid #000000 !important;
+                    color: #000000 !important;
+                }
+
+                /* Ensure text inside specific cards is black */
+                body.light-contrast .service-card *,
+                body.light-contrast .color-box *,
+                body.light-contrast .test-block * {
+                    color: #000000 !important;
+                }
+
+                /* Force all cards and elements with background colors to white */
+                body.light-contrast .card,
+                body.light-contrast .service-card,
+                body.light-contrast .color-box,
+                body.light-contrast .test-block,
+                body.light-contrast .bg-blue,
+                body.light-contrast .bg-red,
+                body.light-contrast .bg-green,
+                body.light-contrast .bg-yellow,
+                body.light-contrast .bg-purple,
+                body.light-contrast .bg-orange,
+                body.light-contrast .bg-pink,
+                body.light-contrast .bg-gray,
+                body.light-contrast .bg-dark,
+                body.light-contrast .bg-light,
+                body.light-contrast [class*="bg-"],
+                body.light-contrast [class*="background"],
+                body.light-contrast [class*="color-"],
+                body.light-contrast [style*="background-color"],
+                body.light-contrast [style*="background:"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+
+                /* Force all text inside cards to be black */
+                body.light-contrast .card *,
+                body.light-contrast .service-card *,
+                body.light-contrast .color-box *,
+                body.light-contrast .test-block *,
+                body.light-contrast .bg-blue *,
+                body.light-contrast .bg-red *,
+                body.light-contrast .bg-green *,
+                body.light-contrast .bg-yellow *,
+                body.light-contrast .bg-purple *,
+                body.light-contrast .bg-orange *,
+                body.light-contrast .bg-pink *,
+                body.light-contrast .bg-gray *,
+                body.light-contrast .bg-dark *,
+                body.light-contrast .bg-light *,
+                body.light-contrast [class*="bg-"] *,
+                body.light-contrast [class*="background"] *,
+                body.light-contrast [class*="color-"] *,
+                body.light-contrast [style*="background-color"] *,
+                body.light-contrast [style*="background:"] * {
+                    color: #000000 !important;
+                }
+
+                /* Exclude UI elements and accessibility widget from light contrast text changes */
+                body.light-contrast header,
+                body.light-contrast nav,
+                body.light-contrast .header,
+                body.light-contrast .navbar,
+                body.light-contrast .navigation,
+                body.light-contrast .logo,
+                body.light-contrast .menu,
+                body.light-contrast .nav-menu,
+                body.light-contrast button,
+                body.light-contrast .button,
+                body.light-contrast .btn,
+                body.light-contrast input,
+                body.light-contrast textarea,
+                body.light-contrast select,
+                body.light-contrast .form-control,
+                body.light-contrast .modal,
+                body.light-contrast .dropdown,
+                body.light-contrast .tooltip,
+                body.light-contrast .badge,
+                body.light-contrast .alert,
+                body.light-contrast .accessibility-panel,
+                body.light-contrast .accessibility-icon,
+                body.light-contrast #accessibility-panel,
+                body.light-contrast #accessibility-icon,
+                body.light-contrast #accessibility-widget-container,
+                body.light-contrast .accessibility-widget-container {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+
+                /* Completely exclude accessibility widget from light contrast effects */
+                .light-contrast .accessibility-panel,
+                .light-contrast .accessibility-icon,
+                .light-contrast #accessibility-panel,
+                .light-contrast #accessibility-icon,
+                .light-contrast .accessibility-panel *,
+                .light-contrast .accessibility-icon *,
+                .light-contrast #accessibility-panel *,
+                .light-contrast #accessibility-icon * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    background: inherit !important;
+                    color: inherit !important;
+                    border: inherit !important;
+                    box-shadow: inherit !important;
                 }
             `;
             document.head.appendChild(style);
@@ -20332,17 +20453,99 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'hide-images-css';
                 style.textContent = `
+                    /* Hide all standard image elements */
                     .hide-images img,
                     .hide-images picture,
                     .hide-images svg,
                     .hide-images video,
                     .hide-images canvas,
-                    .hide-images iframe {
+                    .hide-images iframe[src*="image"],
+                    .hide-images iframe[src*="img"],
+                    .hide-images embed[type*="image"],
+                    .hide-images object[type*="image"] {
                         display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                        max-width: 0 !important;
+                        max-height: 0 !important;
                     }
                     
-                    .hide-images [style*="background-image"] {
+                    /* Hide background images */
+                    .hide-images [style*="background-image"],
+                    .hide-images [style*="background: url"],
+                    .hide-images [style*="background:url"] {
                         background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide CSS background images */
+                    .hide-images *[class*="bg-"],
+                    .hide-images *[class*="background"],
+                    .hide-images *[class*="image"],
+                    .hide-images *[class*="img"],
+                    .hide-images *[class*="photo"],
+                    .hide-images *[class*="picture"],
+                    .hide-images *[class*="banner"],
+                    .hide-images *[class*="hero"],
+                    .hide-images *[class*="cover"] {
+                        background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide image containers and wrappers */
+                    .hide-images .image-container,
+                    .hide-images .img-container,
+                    .hide-images .photo-container,
+                    .hide-images .picture-container,
+                    .hide-images .media-container,
+                    .hide-images .gallery,
+                    .hide-images .carousel,
+                    .hide-images .slider,
+                    .hide-images .banner,
+                    .hide-images .hero,
+                    .hide-images .cover {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide lazy-loaded images */
+                    .hide-images img[data-src],
+                    .hide-images img[data-lazy],
+                    .hide-images img[loading="lazy"],
+                    .hide-images picture[data-src],
+                    .hide-images picture[data-lazy] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide responsive images */
+                    .hide-images source,
+                    .hide-images img[srcset],
+                    .hide-images picture > img {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide icon fonts and icon images */
+                    .hide-images [class*="icon"],
+                    .hide-images [class*="fa-"],
+                    .hide-images [class*="fas"],
+                    .hide-images [class*="far"],
+                    .hide-images [class*="fab"],
+                    .hide-images [class*="material-icons"] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide decorative elements that might be images */
+                    .hide-images .decoration,
+                    .hide-images .ornament,
+                    .hide-images .pattern,
+                    .hide-images .texture {
+                        display: none !important;
+                        visibility: hidden !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -24881,8 +25084,8 @@ class AccessibilityWidget {
                     body.vision-impaired {
                         /* No layout modifications */
                         /* No layout modifications */
-                        /* Enhanced text contrast for better readability */
-                        filter: contrast(1.3) brightness(1.1) !important;
+                        /* Slightly enhance text contrast without changing colors */
+                        filter: contrast(1.1) brightness(1.05) !important;
                     }
                     
                     /* Preserve accessibility widget from vision impaired filters and scaling */
@@ -26140,7 +26343,7 @@ class AccessibilityWidget {
                 /* Create spotlight hole using large box-shadow */
                 box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
     
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.1s ease;
     
             `;
     
@@ -26172,52 +26375,23 @@ class AccessibilityWidget {
     
             
     
-            // Add mouse move event listener to position the spotlight cutout with smooth animation
-            let animationFrameId = null;
-            let targetX = 0;
-            let targetY = 0;
-            let currentX = 0;
-            let currentY = 0;
-            const radius = 100; // Spotlight radius
+            // Add mouse move event listener to position the spotlight cutout
     
             this.adhdMouseMoveHandler = (e) => {
-                targetX = e.clientX;
-                targetY = e.clientY;
-                
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                }
-                
-                const animate = () => {
-                    const diffX = targetX - currentX;
-                    const diffY = targetY - currentY;
-                    
-                    if (Math.abs(diffX) > 0.5 || Math.abs(diffY) > 0.5) {
-                        currentX += diffX * 0.2; // Smooth interpolation factor
-                        currentY += diffY * 0.2;
-                        
-                        // Update mask position using CSS custom properties
-                        const maskX = (currentX / window.innerWidth) * 100;
-                        const maskY = (currentY / window.innerHeight) * 100;
-                        
-                        spotlight.style.setProperty('--mask-x', `${maskX}%`);
-                        spotlight.style.setProperty('--mask-y', `${maskY}%`);
-                        spotlight.style.mask = `radial-gradient(circle ${radius}px at var(--mask-x, 50%) var(--mask-y, 50%), transparent 0%, transparent ${radius}px, black ${radius}px)`;
-                        spotlight.style.webkitMask = `radial-gradient(circle ${radius}px at var(--mask-x, 50%) var(--mask-y, 50%), transparent 0%, transparent ${radius}px, black ${radius}px)`;
-                        
-                        animationFrameId = requestAnimationFrame(animate);
-                    } else {
-                        // Final position
-                        currentX = targetX;
-                        currentY = targetY;
-                        const finalMaskX = (currentX / window.innerWidth) * 100;
-                        const finalMaskY = (currentY / window.innerHeight) * 100;
-                        spotlight.style.setProperty('--mask-x', `${finalMaskX}%`);
-                        spotlight.style.setProperty('--mask-y', `${finalMaskY}%`);
-                    }
-                };
-                
-                animationFrameId = requestAnimationFrame(animate);
+    
+                const x = e.clientX;
+                const y = e.clientY;
+                const height = 200; // Spotlight height
+    
+                // Position the spotlight cutout using box-shadow technique
+                spotlight.style.left = '0px';
+                spotlight.style.top = (y - height/2) + 'px';
+                spotlight.style.width = '100vw';
+                spotlight.style.height = height + 'px';
+                spotlight.style.borderRadius = '0px';
+                spotlight.style.background = 'transparent';
+                spotlight.style.boxShadow = `0 0 0 9999px rgba(0, 0, 0, 0.5)`;
+    
             };
     
             
