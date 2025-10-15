@@ -1168,9 +1168,197 @@ class AccessibilityWidget {
             // CRITICAL: Force all animations to final state immediately if seizure-safe or stop-animation is enabled
             this.forceAllAnimationsToFinalState();
     
+            // Initialize payment validation before anything else
+            this.initializePaymentValidation();
+
             this.init();
-    
+
         }
+        
+        // ===== PAYMENT VALIDATION METHODS =====
+        
+        // Initialize payment validation
+        async initializePaymentValidation() {
+            console.log('[CK] initializePaymentValidation() - Starting...');
+            
+            try {
+                // Check if this is a new user (no existing data)
+                const hasExistingData = await this.checkExistingData();
+                
+                if (!hasExistingData) {
+                    // Create trial for new user
+                    const trialCreated = await this.createTrial();
+                    if (!trialCreated) {
+                        console.error('[CK] initializePaymentValidation() - Failed to create trial');
+                        this.disableWidget();
+                        return;
+                    }
+                }
+                
+                // Validate domain access
+                const domainValid = await this.validateDomainAccess();
+                if (!domainValid) {
+                    console.error('[CK] initializePaymentValidation() - Domain not authorized');
+                    this.disableWidget();
+                    return;
+                }
+                
+                // Check payment status
+                const paymentValid = await this.checkPaymentStatus();
+                if (!paymentValid) {
+                    console.error('[CK] initializePaymentValidation() - Payment required');
+                    this.disableWidget();
+                    return;
+                }
+                
+                console.log('[CK] initializePaymentValidation() - All validations passed');
+                
+            } catch (error) {
+                console.error('[CK] initializePaymentValidation() - Error:', error);
+                this.disableWidget();
+            }
+        }
+        
+        // Check if user has existing data
+        async checkExistingData() {
+            try {
+                const siteId = await this.getSiteId();
+                if (!siteId) return false;
+                
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-data?siteId=${siteId}`);
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        // Create trial for new users
+        async createTrial() {
+            console.log('[CK] createTrial() - Starting...');
+            
+            try {
+                const siteId = await this.getSiteId();
+                if (!siteId) {
+                    console.error('[CK] createTrial() - No siteId available');
+                    return false;
+                }
+                
+                const trialData = {
+                    siteId: siteId,
+                    email: this.getUserEmail(),
+                    domain: window.location.hostname,
+                    paymentStatus: 'trial',
+                    trialStartDate: new Date().toISOString(),
+                    trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                };
+                
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/create-trial`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(trialData)
+                });
+                
+                return response.ok;
+            } catch (error) {
+                console.error('[CK] createTrial() - Error:', error);
+                return false;
+            }
+        }
+        
+        // Check payment status
+        async checkPaymentStatus() {
+            console.log('[CK] checkPaymentStatus() - Starting...');
+            
+            try {
+                const siteId = await this.getSiteId();
+                if (!siteId) return false;
+                
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/payment-status?siteId=${siteId}`);
+                if (!response.ok) return false;
+                
+                const { paymentStatus, trialEndDate } = await response.json();
+                
+                // Check if trial expired
+                if (paymentStatus === 'trial' && new Date() > new Date(trialEndDate)) {
+                    console.log('[CK] checkPaymentStatus() - Trial expired');
+                    return false;
+                }
+                
+                return paymentStatus === 'active' || paymentStatus === 'trial';
+            } catch (error) {
+                console.error('[CK] checkPaymentStatus() - Error:', error);
+                return false;
+            }
+        }
+        
+        // Validate domain access
+        async validateDomainAccess() {
+            console.log('[CK] validateDomainAccess() - Starting...');
+            
+            try {
+                const siteId = await this.getSiteId();
+                const domain = window.location.hostname;
+                
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/validate-domain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain, siteId })
+                });
+                
+                if (!response.ok) return false;
+                
+                const { isValid } = await response.json();
+                return isValid;
+            } catch (error) {
+                console.error('[CK] validateDomainAccess() - Error:', error);
+                return false;
+            }
+        }
+        
+        // Disable widget when payment fails
+        disableWidget() {
+            console.log('[CK] disableWidget() - Disabling widget due to payment issues');
+            
+            // Hide the widget
+            const widget = document.getElementById('accessibility-widget');
+            if (widget) {
+                widget.style.display = 'none';
+            }
+            
+            // Show payment required message
+            this.showPaymentRequiredMessage();
+        }
+        
+        // Show payment required message
+        showPaymentRequiredMessage() {
+            const message = document.createElement('div');
+            message.id = 'payment-required-message';
+            message.innerHTML = `
+                <div style="position: fixed; top: 20px; right: 20px; background: #ff4444; color: white; padding: 15px; border-radius: 5px; z-index: 10000; font-family: Arial, sans-serif;">
+                    <strong>Accessibility Widget</strong><br>
+                    Your trial has expired. Please complete payment to continue using the widget.
+                    <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: white; color: #ff4444; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">×</button>
+                </div>
+            `;
+            document.body.appendChild(message);
+        }
+        
+        // Get user email (implement based on your auth system)
+        getUserEmail() {
+            // Try to get email from various sources
+            const sessionData = sessionStorage.getItem('wf_hybrid_user');
+            if (sessionData) {
+                try {
+                    const parsed = JSON.parse(sessionData);
+                    return parsed.email || parsed.userInfo?.email;
+                } catch (e) {}
+            }
+            
+            // Fallback to prompt or other methods
+            return prompt('Please enter your email for the accessibility widget:') || 'unknown@domain.com';
+        }
+        
+        // ===== END PAYMENT VALIDATION METHODS =====
         
         // Store original element positions and sizes before applying seizure-safe mode
         storeOriginalLayout() {
@@ -16892,6 +17080,14 @@ class AccessibilityWidget {
             console.log('[CK] loadSettingsFromKV() - Starting...');
             
             try {
+                // First check payment status before loading settings
+                const paymentValid = await this.checkPaymentStatus();
+                if (!paymentValid) {
+                    console.log('[CK] loadSettingsFromKV() - Payment validation failed, disabling widget');
+                    this.disableWidget();
+                    return;
+                }
+                
                 // Get siteId first
                 const siteId = await this.getSiteId();
                 if (!siteId) {
@@ -30923,3 +31119,117 @@ class AccessibilityWidget {
         }
         
     });
+
+    // Payment Status Check - Added functionality
+    (function() {
+        'use strict';
+        
+        console.log('ContrastKit Payment Status Check: Starting...');
+        
+        // Check payment status before loading widget
+        const checkPaymentStatus = async function() {
+            try {
+                // Get current domain
+                const currentDomain = window.location.hostname;
+                console.log('Payment Check: Current domain:', currentDomain);
+                
+                // Check if this is a staging domain (always allow)
+                const isStagingDomain = currentDomain.includes('.webflow.io') || 
+                                       currentDomain.includes('.webflow.com') || 
+                                       currentDomain.includes('localhost') ||
+                                       currentDomain.includes('127.0.0.1') ||
+                                       currentDomain.includes('staging');
+                
+                if (isStagingDomain) {
+                    console.log('Payment Check: Staging domain detected, allowing full access');
+                    return { hasAccess: true, isStaging: true };
+                }
+                
+                // For custom domains, check payment status
+                const siteId = sessionStorage.getItem('contrastkit') || 
+                              sessionStorage.getItem('webflow_site_id') || 
+                              sessionStorage.getItem('siteId');
+                
+                if (!siteId) {
+                    console.log('Payment Check: No siteId found, checking by domain only');
+                }
+                
+                // Check payment status via API
+                const response = await fetch(`https://accessibility-widget.web-8fb.workers.dev/api/accessibility/check-payment-status?domain=${encodeURIComponent(currentDomain)}${siteId ? `&siteId=${siteId}` : ''}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Payment check failed: ${response.status}`);
+                }
+                
+                const paymentData = await response.json();
+                console.log('Payment Check: Response:', paymentData);
+                
+                return paymentData;
+                
+            } catch (error) {
+                console.error('Payment Check: Error checking payment status:', error);
+                return { hasAccess: false, error: error.message };
+            }
+        };
+        
+        // Show payment required message
+        const showPaymentMessage = function(reason) {
+            const message = document.createElement('div');
+            message.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #f59e0b;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    max-width: 300px;
+                ">
+                    <strong>Accessibility Widget</strong><br>
+                    ${reason || 'Payment required to activate features.'}
+                    <a href="https://accessibility-widget.web-8fb.workers.dev" style="color: white; text-decoration: underline; margin-left: 4px;">
+                        Subscribe Now
+                    </a>
+                </div>
+            `;
+            document.body.appendChild(message);
+            
+            // Remove message after 10 seconds
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.parentNode.removeChild(message);
+                }
+            }, 10000);
+        };
+        
+        // Initialize payment check
+        const initPaymentCheck = async function() {
+            const paymentStatus = await checkPaymentStatus();
+            
+            if (paymentStatus.hasAccess) {
+                console.log('Payment Check: Access granted, widget will load normally');
+                // Widget will continue to load normally
+            } else {
+                console.log('Payment Check: Access denied, showing payment message');
+                showPaymentMessage(paymentStatus.reason || 'Payment required to activate features.');
+                
+                // Optionally disable widget functionality
+                if (window.accessibilityWidget) {
+                    window.accessibilityWidget.disable = true;
+                }
+            }
+        };
+        
+        // Run payment check when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPaymentCheck);
+        } else {
+            initPaymentCheck();
+        }
+        
+    })();
