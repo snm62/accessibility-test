@@ -1,5 +1,6 @@
 // CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
+    
     try {
         // Check localStorage immediately for seizure-safe mode
         const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
