@@ -1300,6 +1300,9 @@ class AccessibilityWidget {
                     
                     const paymentData = await retryResponse.json();
                     console.log('[CK] checkPaymentStatus() - Full payment response (retry):', paymentData);
+                    console.log('[CK] checkPaymentStatus() - Retry response keys:', Object.keys(paymentData));
+                    console.log('[CK] checkPaymentStatus() - Retry hasAccess value:', paymentData.hasAccess);
+                    console.log('[CK] checkPaymentStatus() - Retry reason value:', paymentData.reason);
                     return this.processPaymentResponse(paymentData);
                 }
                 
@@ -1310,6 +1313,9 @@ class AccessibilityWidget {
                 
                 const paymentData = await response.json();
                 console.log('[CK] checkPaymentStatus() - Full payment response:', paymentData);
+                console.log('[CK] checkPaymentStatus() - Response keys:', Object.keys(paymentData));
+                console.log('[CK] checkPaymentStatus() - hasAccess value:', paymentData.hasAccess);
+                console.log('[CK] checkPaymentStatus() - reason value:', paymentData.reason);
                 return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
