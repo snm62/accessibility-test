@@ -1299,6 +1299,7 @@ class AccessibilityWidget {
                     }
                     
                     const paymentData = await retryResponse.json();
+                    console.log('[CK] checkPaymentStatus() - Full payment response (retry):', paymentData);
                     return this.processPaymentResponse(paymentData);
                 }
                 
@@ -1308,6 +1309,7 @@ class AccessibilityWidget {
                 }
                 
                 const paymentData = await response.json();
+                console.log('[CK] checkPaymentStatus() - Full payment response:', paymentData);
                 return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
@@ -1317,6 +1319,10 @@ class AccessibilityWidget {
         }
         
         processPaymentResponse(paymentData) {
+            console.log('[CK] processPaymentResponse() - Processing payment data:', paymentData);
+            console.log('[CK] processPaymentResponse() - hasAccess:', paymentData.hasAccess);
+            console.log('[CK] processPaymentResponse() - reason:', paymentData.reason);
+            
             // Check if payment is active
             if (paymentData.hasAccess === false) {
                 console.log('[CK] checkPaymentStatus() - Payment not active:', paymentData.reason);
