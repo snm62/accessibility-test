@@ -1172,11 +1172,14 @@ class AccessibilityWidget {
             this.initializePaymentValidation().then(() => {
                 // Only initialize if payment validation passes
                 if (!this.paymentFailed) {
+                    console.log('[CK] Constructor - Payment validation passed, initializing widget');
                     this.init();
+                } else {
+                    console.log('[CK] Constructor - Payment validation failed, widget disabled');
                 }
-            }).catch(() => {
+            }).catch((error) => {
                 // Payment validation failed, widget is already disabled
-                console.log('[CK] Constructor - Payment validation failed, widget disabled');
+                console.log('[CK] Constructor - Payment validation failed, widget disabled:', error);
             });
 
         }
@@ -1325,6 +1328,9 @@ class AccessibilityWidget {
         disableWidget() {
             console.log('[CK] disableWidget() - Disabling widget due to payment issues');
             
+            // Set payment failed flag FIRST
+            this.paymentFailed = true;
+            
             // Hide the widget container
             const widgetContainer = document.getElementById('accessibility-widget-container');
             if (widgetContainer) {
@@ -1347,9 +1353,6 @@ class AccessibilityWidget {
                 panel.style.visibility = 'hidden';
                 panel.style.opacity = '0';
             }
-            
-            // Set a flag to prevent re-initialization
-            this.paymentFailed = true;
             
             // Show payment required message
             this.showPaymentRequiredMessage();
@@ -1678,6 +1681,11 @@ class AccessibilityWidget {
     
     
         async init() {
+            // Check if payment failed - if so, don't initialize
+            if (this.paymentFailed) {
+                console.log('[CK] init() - Payment failed, not initializing widget');
+                return;
+            }
     
             this.addFontAwesome();
     
@@ -28602,10 +28610,22 @@ class AccessibilityWidget {
                 console.warn('[CK] showIcon() - Icon not found in shadow DOM');
                 return;
             }
-    
+            
             // Check if payment failed - if so, don't show icon
             if (this.paymentFailed) {
                 console.log('[CK] showIcon() - Payment failed, not showing icon');
+                icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                icon.style.opacity = '0';
+                return;
+            }
+            
+            // Additional check: if widget container is hidden due to payment issues, don't show icon
+            const widgetContainer = document.getElementById('accessibility-widget-container');
+            if (widgetContainer && (widgetContainer.style.display === 'none' || 
+                widgetContainer.style.visibility === 'hidden' || 
+                widgetContainer.style.opacity === '0')) {
+                console.log('[CK] showIcon() - Widget container is hidden, not showing icon');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
