@@ -1169,9 +1169,15 @@ class AccessibilityWidget {
             this.forceAllAnimationsToFinalState();
     
             // Initialize payment validation before anything else
-            this.initializePaymentValidation();
-
-            this.init();
+            this.initializePaymentValidation().then(() => {
+                // Only initialize if payment validation passes
+                if (!this.paymentFailed) {
+                    this.init();
+                }
+            }).catch(() => {
+                // Payment validation failed, widget is already disabled
+                console.log('[CK] Constructor - Payment validation failed, widget disabled');
+            });
 
         }
         
@@ -1323,6 +1329,8 @@ class AccessibilityWidget {
             const widgetContainer = document.getElementById('accessibility-widget-container');
             if (widgetContainer) {
                 widgetContainer.style.display = 'none';
+                widgetContainer.style.visibility = 'hidden';
+                widgetContainer.style.opacity = '0';
             }
             
             // Hide the icon and panel inside shadow DOM
@@ -1331,10 +1339,17 @@ class AccessibilityWidget {
             
             if (icon) {
                 icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                icon.style.opacity = '0';
             }
             if (panel) {
                 panel.style.display = 'none';
+                panel.style.visibility = 'hidden';
+                panel.style.opacity = '0';
             }
+            
+            // Set a flag to prevent re-initialization
+            this.paymentFailed = true;
             
             // Show payment required message
             this.showPaymentRequiredMessage();
@@ -28588,6 +28603,15 @@ class AccessibilityWidget {
                 return;
             }
     
+            // Check if payment failed - if so, don't show icon
+            if (this.paymentFailed) {
+                console.log('[CK] showIcon() - Payment failed, not showing icon');
+                icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                icon.style.opacity = '0';
+                return;
+            }
+            
             // Check device type
             const isMobile = window.innerWidth <= 768;
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
