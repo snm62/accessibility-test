@@ -1280,24 +1280,51 @@ class AccessibilityWidget {
             
             try {
                 const siteId = await this.getSiteId();
-                if (!siteId) return false;
-                
-                const response = await fetch(`${this.kvApiUrl}/api/accessibility/check-payment-status?siteId=${siteId}&domain=${encodeURIComponent(window.location.hostname)}`);
-                if (!response.ok) return false;
-                
-                const paymentData = await response.json();
-                
-                // Check if payment is active
-                if (paymentData.hasAccess === false) {
-                    console.log('[CK] checkPaymentStatus() - Payment not active:', paymentData.reason);
+                if (!siteId) {
+                    console.log('[CK] checkPaymentStatus() - No siteId available');
                     return false;
                 }
                 
-                return paymentData.hasAccess === true;
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/check-payment-status?siteId=${siteId}&domain=${encodeURIComponent(window.location.hostname)}`);
+                
+                // Handle rate limit errors with retry
+                if (response.status === 429) {
+                    console.log('[CK] checkPaymentStatus() - Rate limit exceeded, retrying in 2 seconds...');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const retryResponse = await fetch(`${this.kvApiUrl}/api/accessibility/check-payment-status?siteId=${siteId}&domain=${encodeURIComponent(window.location.hostname)}`);
+                    if (!retryResponse.ok) {
+                        console.log('[CK] checkPaymentStatus() - Retry failed:', retryResponse.status);
+                        return false;
+                    }
+                    
+                    const paymentData = await retryResponse.json();
+                    return this.processPaymentResponse(paymentData);
+                }
+                
+                if (!response.ok) {
+                    console.log('[CK] checkPaymentStatus() - Response not ok:', response.status);
+                    return false;
+                }
+                
+                const paymentData = await response.json();
+                return this.processPaymentResponse(paymentData);
+                
             } catch (error) {
                 console.error('[CK] checkPaymentStatus() - Error:', error);
                 return false;
             }
+        }
+        
+        processPaymentResponse(paymentData) {
+            // Check if payment is active
+            if (paymentData.hasAccess === false) {
+                console.log('[CK] checkPaymentStatus() - Payment not active:', paymentData.reason);
+                return false;
+            }
+            
+            console.log('[CK] checkPaymentStatus() - Payment is active');
+            return paymentData.hasAccess === true;
         }
         
         // Validate domain access
@@ -28369,7 +28396,20 @@ class AccessibilityWidget {
             console.log('[CK] getSiteId() - Domain lookup response status:', response.status);
             console.log('[CK] getSiteId() - Domain lookup response ok:', response.ok);
             
-            if (response.ok) {
+            // Handle rate limit errors with retry
+            if (response.status === 429) {
+                console.log('[CK] getSiteId() - Rate limit exceeded, retrying in 2 seconds...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const retryResponse = await fetch(`${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${hostname}`);
+                if (retryResponse.ok) {
+                    const data = await retryResponse.json();
+                    console.log('[CK] getSiteId() - Retry successful, found siteId:', data.siteId);
+                    return data.siteId;
+                } else {
+                    console.log('[CK] getSiteId() - Retry failed:', retryResponse.status);
+                }
+            } else if (response.ok) {
                 const data = await response.json();
                 console.log('[CK] getSiteId() - Domain lookup response data:', data);
                 console.log('[CK] getSiteId() - Found siteId via domain lookup:', data.siteId);
@@ -28399,7 +28439,20 @@ class AccessibilityWidget {
                 console.log('[CK] getSiteId() - Domain lookup response status (no www):', response.status);
                 console.log('[CK] getSiteId() - Domain lookup response ok (no www):', response.ok);
                 
-                if (response.ok) {
+                // Handle rate limit errors with retry
+                if (response.status === 429) {
+                    console.log('[CK] getSiteId() - Rate limit exceeded (no www), retrying in 2 seconds...');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const retryResponse = await fetch(`${this.kvApiUrl}/api/accessibility/domain-lookup?domain=${domainWithoutWww}`);
+                    if (retryResponse.ok) {
+                        const data = await retryResponse.json();
+                        console.log('[CK] getSiteId() - Retry successful (no www), found siteId:', data.siteId);
+                        return data.siteId;
+                    } else {
+                        console.log('[CK] getSiteId() - Retry failed (no www):', retryResponse.status);
+                    }
+                } else if (response.ok) {
                     const data = await response.json();
                     console.log('[CK] getSiteId() - Domain lookup response data (no www):', data);
                     console.log('[CK] getSiteId() - Found siteId via domain lookup (no www):', data.siteId);
