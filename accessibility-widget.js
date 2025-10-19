@@ -1,11 +1,9 @@
 // CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
-    
     try {
         // Check localStorage immediately for seizure-safe mode
         const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
         if (seizureSafeFromStorage === 'true') {
-            
             console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
             document.body.classList.add('seizure-safe');
             
@@ -1275,18 +1273,18 @@ class AccessibilityWidget {
                 const siteId = await this.getSiteId();
                 if (!siteId) return false;
                 
-                const response = await fetch(`${this.kvApiUrl}/api/accessibility/payment-status?siteId=${siteId}`);
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/check-payment-status?siteId=${siteId}&domain=${encodeURIComponent(window.location.hostname)}`);
                 if (!response.ok) return false;
                 
-                const { paymentStatus, trialEndDate } = await response.json();
+                const paymentData = await response.json();
                 
-                // Check if trial expired
-                if (paymentStatus === 'trial' && new Date() > new Date(trialEndDate)) {
-                    console.log('[CK] checkPaymentStatus() - Trial expired');
+                // Check if payment is active
+                if (paymentData.hasAccess === false) {
+                    console.log('[CK] checkPaymentStatus() - Payment not active:', paymentData.reason);
                     return false;
                 }
                 
-                return paymentStatus === 'active' || paymentStatus === 'trial';
+                return paymentData.hasAccess === true;
             } catch (error) {
                 console.error('[CK] checkPaymentStatus() - Error:', error);
                 return false;
@@ -28149,6 +28147,14 @@ class AccessibilityWidget {
             console.log('[CK] fetchCustomizationData() - this.kvApiUrl:', this.kvApiUrl);
             
             try {
+                // First check payment status before loading customization data
+                const paymentValid = await this.checkPaymentStatus();
+                if (!paymentValid) {
+                    console.log('[CK] fetchCustomizationData() - Payment validation failed, disabling widget');
+                    this.disableWidget();
+                    return null;
+                }
+                
                 // Get siteId first
                 this.siteId = await this.getSiteId();
                 console.log('[CK] fetchCustomizationData() - Got siteId:', this.siteId);
@@ -28204,6 +28210,14 @@ class AccessibilityWidget {
             setInterval(async () => {
                 console.log('[CK] setupCustomizationRefresh() - Checking for customization updates...');
                 try {
+                    // Check payment status first
+                    const paymentValid = await this.checkPaymentStatus();
+                    if (!paymentValid) {
+                        console.log('[CK] setupCustomizationRefresh() - Payment validation failed, disabling widget');
+                        this.disableWidget();
+                        return;
+                    }
+                    
                     const customizationData = await this.fetchCustomizationData();
                     if (customizationData && customizationData.customization) {
                         console.log('[CK] setupCustomizationRefresh() - Found updated customization data:', customizationData.customization);
@@ -28219,6 +28233,14 @@ class AccessibilityWidget {
                 if (!document.hidden) {
                     console.log('[CK] setupCustomizationRefresh() - Page became visible, checking for updates...');
                     try {
+                        // Check payment status first
+                        const paymentValid = await this.checkPaymentStatus();
+                        if (!paymentValid) {
+                            console.log('[CK] setupCustomizationRefresh() - Payment validation failed on visibility change, disabling widget');
+                            this.disableWidget();
+                            return;
+                        }
+                        
                         const customizationData = await this.fetchCustomizationData();
                         if (customizationData && customizationData.customization) {
                             console.log('[CK] setupCustomizationRefresh() - Found updated customization data on visibility change:', customizationData.customization);
