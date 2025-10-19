@@ -1319,10 +1319,21 @@ class AccessibilityWidget {
         disableWidget() {
             console.log('[CK] disableWidget() - Disabling widget due to payment issues');
             
-            // Hide the widget
-            const widget = document.getElementById('accessibility-widget');
-            if (widget) {
-                widget.style.display = 'none';
+            // Hide the widget container
+            const widgetContainer = document.getElementById('accessibility-widget-container');
+            if (widgetContainer) {
+                widgetContainer.style.display = 'none';
+            }
+            
+            // Hide the icon and panel inside shadow DOM
+            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            
+            if (icon) {
+                icon.style.display = 'none';
+            }
+            if (panel) {
+                panel.style.display = 'none';
             }
             
             // Show payment required message
