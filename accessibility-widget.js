@@ -11,6 +11,7 @@
             
             // Apply immediate CSS to stop all animations
             const immediateStyle = document.createElement('style');
+            
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
                 /* REMOVED: Duplicate universal selector - already covered by main rule */
