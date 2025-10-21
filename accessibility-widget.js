@@ -13,6 +13,7 @@
             const immediateStyle = document.createElement('style');
             
             immediateStyle.id = 'accessibility-seizure-immediate-early';
+            
             immediateStyle.textContent = `
                 /* REMOVED: Duplicate universal selector - already covered by main rule */
                 /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
