@@ -3211,12 +3211,12 @@ class AccessibilityWidget {
     
     /* Ensure panel always appears on top of icon */
     .accessibility-panel {
+        position: fixed !important;
         z-index: 100001 !important;
-        /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
-                overflow-y: auto !important;
-                scroll-behavior: smooth !important;
-                -webkit-overflow-scrolling: touch !important;
-                overscroll-behavior: contain !important;
+        overflow-y: auto !important;
+        scroll-behavior: smooth !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
     }
     
     .accessibility-icon {
@@ -3988,7 +3988,7 @@ class AccessibilityWidget {
             padding: 16px !important;
             max-height: 80vh !important;
             overflow-y: auto !important;
-            /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+            position: fixed !important;
             z-index: 100001 !important;
         }
         
@@ -4311,7 +4311,7 @@ class AccessibilityWidget {
     
     .accessibility-panel {
         display: none !important;
-        /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+        position: fixed !important;
         z-index: 100001 !important;
     }
     
@@ -13717,7 +13717,7 @@ class AccessibilityWidget {
     
         increaseContentScale() {
             console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.min(this.contentScale + 2, 150); // 2% increment, max 150%
+            this.contentScale = Math.min(this.contentScale + 2, 120); // 2% increment, max 120%
             this.settings['content-scale'] = this.contentScale;
             
             // Mark content scaling as used
@@ -13771,13 +13771,18 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Content scaling - use transform scale for proportional scaling */
+                /* Conservative content scaling - use font-size for text only */
                 
-                /* Scale all text content proportionally */
+                /* Ensure body and html can scroll properly */
+                html, body {
+                    overflow-x: hidden !important;
+                    overflow-y: auto !important;
+                }
+                
+                /* Scale only text content with font-size (safer approach) */
                 body p, body span, body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    font-size: ${scale}em !important;
                 }
                 
                 /* Scale images and media with transform (preserves aspect ratio) */
@@ -13786,22 +13791,29 @@ class AccessibilityWidget {
                     transform-origin: center !important;
                 }
                 
-                /* Scale buttons and form elements */
+                /* Scale buttons and form elements with font-size */
                 body button, body input, body textarea, body select {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    font-size: ${scale}em !important;
                 }
                 
-                /* Scale content containers proportionally */
+                /* Scale content containers with font-size only */
                 body .container, body .wrapper, body .content, body .post, body .article,
                 body .card, body .section, body .block, body .text, body .description {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    font-size: ${scale}em !important;
                 }
                 
                 /* Exclude layout containers from scaling */
                 body .nav, body .navbar, body .menu, body .header, body .footer {
+                    font-size: 1em !important;
                     transform: none !important;
+                }
+                
+                /* Ensure containers can expand to accommodate larger text */
+                body .container, body .wrapper, body .content, body .post, body .article,
+                body .card, body .section, body .block, body .text, body .description {
+                    min-height: auto !important;
+                    word-wrap: break-word !important;
+                    overflow-wrap: break-word !important;
                 }
             `;
             
@@ -20247,10 +20259,16 @@ class AccessibilityWidget {
             // Also try to mute any existing audio contexts
             this.muteAllAudioContexts();
             
+            // Override global audio methods
+            this.overrideGlobalAudioMethods();
+            
             // Start aggressive monitoring
             this.startAggressiveMediaMonitoring();
             
-            console.log('Accessibility Widget: Mute sound enabled with direct approach');
+            // Add event listeners to catch new media
+            this.addMediaEventListeners();
+            
+            console.log('Accessibility Widget: Mute sound enabled with comprehensive approach');
         }
         
         // Mute all audio contexts (Web Audio API)
@@ -20375,15 +20393,76 @@ class AccessibilityWidget {
             // Stop aggressive media monitoring
             this.stopAggressiveMediaMonitoring();
             
+            // Remove event listeners
+            this.removeMediaEventListeners();
+            
             // Restore all media elements
             this.restoreAllMediaDirectly();
             
             console.log('Accessibility Widget: Restored original audio/video volume states');
         }
         
+        // Add event listeners to catch new media elements
+        addMediaEventListeners() {
+            console.log('Accessibility Widget: Adding media event listeners');
+            
+            // Listen for new audio/video elements being added to the DOM
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element node
+                            // Check if it's a media element
+                            if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
+                                console.log('Accessibility Widget: New media element detected:', node);
+                                this.muteElement(node);
+                            }
+                            
+                            // Check for media elements within the added node
+                            const mediaElements = node.querySelectorAll ? node.querySelectorAll('audio, video') : [];
+                            mediaElements.forEach(element => {
+                                console.log('Accessibility Widget: New media element in subtree:', element);
+                                this.muteElement(element);
+                            });
+                        }
+                    });
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            // Store observer for cleanup
+            this.mediaObserver = observer;
+        }
+        
+        // Remove media event listeners
+        removeMediaEventListeners() {
+            if (this.mediaObserver) {
+                this.mediaObserver.disconnect();
+                this.mediaObserver = null;
+                console.log('Accessibility Widget: Media event listeners removed');
+            }
+        }
+        
+        // Mute a specific element
+        muteElement(element) {
+            if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                element.muted = true;
+                element.volume = 0;
+                if (!element.paused) {
+                    element.pause();
+                }
+                console.log('Accessibility Widget: Muted element:', element);
+            }
+        }
+        
         // Comprehensive universal muting approach
         muteAllMediaDirectly() {
             console.log('Accessibility Widget: Universal muting - detecting ALL possible audio/video content');
+            console.log('Accessibility Widget: Document ready state:', document.readyState);
+            console.log('Accessibility Widget: Total elements on page:', document.querySelectorAll('*').length);
             
             let totalMuted = 0;
             
@@ -20392,7 +20471,37 @@ class AccessibilityWidget {
             const standardVideo = document.querySelectorAll('video');
             console.log(`Accessibility Widget: Found ${standardAudio.length} standard audio, ${standardVideo.length} standard video`);
             
+            // Log details about found elements
+            if (standardAudio.length > 0) {
+                console.log('Accessibility Widget: Audio elements found:', standardAudio);
+                standardAudio.forEach((audio, index) => {
+                    console.log(`Accessibility Widget: Audio ${index}:`, {
+                        src: audio.src,
+                        currentSrc: audio.currentSrc,
+                        muted: audio.muted,
+                        volume: audio.volume,
+                        paused: audio.paused,
+                        duration: audio.duration
+                    });
+                });
+            }
+            
+            if (standardVideo.length > 0) {
+                console.log('Accessibility Widget: Video elements found:', standardVideo);
+                standardVideo.forEach((video, index) => {
+                    console.log(`Accessibility Widget: Video ${index}:`, {
+                        src: video.src,
+                        currentSrc: video.currentSrc,
+                        muted: video.muted,
+                        volume: video.volume,
+                        paused: video.paused,
+                        duration: video.duration
+                    });
+                });
+            }
+            
             [...standardAudio, ...standardVideo].forEach((element, index) => {
+                console.log(`Accessibility Widget: Muting element ${index}:`, element);
                 element.muted = true;
                 element.volume = 0;
                 if (!element.paused) element.pause();
@@ -20402,6 +20511,7 @@ class AccessibilityWidget {
             // 2. Universal detection - find ANY element that might contain audio/video
             const allElements = document.querySelectorAll('*');
             const mediaElements = [];
+            console.log(`Accessibility Widget: Scanning ${allElements.length} total elements for media content`);
             
             allElements.forEach(element => {
                 const tagName = element.tagName.toLowerCase();
@@ -20433,6 +20543,13 @@ class AccessibilityWidget {
                      textContent.includes('audio') || textContent.includes('video') || textContent.includes('player'));
                 
                 if (hasAudioVideo) {
+                    console.log(`Accessibility Widget: Found potential media element:`, {
+                        tagName: tagName,
+                        className: className,
+                        id: id,
+                        textContent: textContent.substring(0, 100) + '...',
+                        element: element
+                    });
                     mediaElements.push(element);
                 }
             });
@@ -20479,6 +20596,10 @@ class AccessibilityWidget {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                     if (iframeDoc) {
+                        const iframeAudio = iframeDoc.querySelectorAll('audio');
+                        const iframeVideo = iframeDoc.querySelectorAll('video');
+                        console.log(`Accessibility Widget: Found ${iframeAudio.length} audio and ${iframeVideo.length} video in iframe ${index}`);
+                        
                         const iframeMedia = iframeDoc.querySelectorAll('audio, video, [class*="audio"], [class*="video"], [class*="player"]');
                         console.log(`Accessibility Widget: Found ${iframeMedia.length} media elements in iframe ${index}`);
                         iframeMedia.forEach(element => {
@@ -20496,6 +20617,28 @@ class AccessibilityWidget {
                     }
                 } catch (e) {
                     console.log(`Accessibility Widget: CORS error accessing iframe ${index}:`, e.message);
+                }
+            });
+            
+            // 5. Check for shadow DOM elements
+            console.log('Accessibility Widget: Checking for shadow DOM elements...');
+            const shadowHosts = document.querySelectorAll('*');
+            shadowHosts.forEach((host, index) => {
+                if (host.shadowRoot) {
+                    try {
+                        const shadowAudio = host.shadowRoot.querySelectorAll('audio');
+                        const shadowVideo = host.shadowRoot.querySelectorAll('video');
+                        console.log(`Accessibility Widget: Found ${shadowAudio.length} audio and ${shadowVideo.length} video in shadow DOM ${index}`);
+                        
+                        [...shadowAudio, ...shadowVideo].forEach(element => {
+                            element.muted = true;
+                            element.volume = 0;
+                            if (!element.paused) element.pause();
+                            totalMuted++;
+                        });
+                    } catch (e) {
+                        console.log(`Accessibility Widget: Error accessing shadow DOM ${index}:`, e.message);
+                    }
                 }
             });
             
@@ -20556,13 +20699,26 @@ class AccessibilityWidget {
         
         // Additional aggressive monitoring to catch any media that might start playing
         startAggressiveMediaMonitoring() {
-            // Check every 100ms for any media that might have started playing
+            // Check every 50ms for any media that might have started playing
             this.aggressiveMediaInterval = setInterval(() => {
                 if (this.settings['mute-sound']) {
                     // Use the direct muting approach
                     this.muteAllMediaDirectly();
+                    
+                    // Also check for any playing media and force mute
+                    const allAudio = document.querySelectorAll('audio');
+                    const allVideo = document.querySelectorAll('video');
+                    
+                    [...allAudio, ...allVideo].forEach(element => {
+                        if (!element.paused && !element.muted) {
+                            console.log('Accessibility Widget: Force muting playing media:', element);
+                            element.muted = true;
+                            element.volume = 0;
+                            element.pause();
+                        }
+                    });
                 }
-            }, 100);
+            }, 50);
             
             console.log('Accessibility Widget: Aggressive media monitoring started');
         }
