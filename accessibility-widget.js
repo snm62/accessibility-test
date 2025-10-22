@@ -13779,39 +13779,41 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Content scaling - use transform to scale without breaking layouts */
+                /* Content scaling - use CSS zoom on specific content containers only */
                 
-                /* Scale all text content using transform (preserves layout) */
-                body p, body span, body div, body a, body li, body td, body th, 
+                /* Target main content areas only, not layout containers */
+                body main, body .main, body .content, body .post, body .article,
+                body .text, body .description, body .body-text, body .copy,
+                body .hero, body .section, body .block, body .card,
+                body .blog, body .news, body .story, body .entry {
+                    zoom: ${scale} !important;
+                }
+                
+                /* Scale text content specifically */
+                body p, body span, body div:not(.container):not(.wrapper):not(.header):not(.footer):not(.nav):not(.sidebar), 
+                body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    zoom: ${scale} !important;
                 }
                 
-                /* Scale images and media proportionally */
-                body img, body video, body iframe, body canvas {
-                    transform: scale(${scale}) !important;
-                    transform-origin: center !important;
+                /* Scale images and media in content areas only */
+                body main img, body .content img, body .post img, body .article img,
+                body main video, body .content video, body .post video, body .article video,
+                body main iframe, body .content iframe, body .post iframe, body .article iframe {
+                    zoom: ${scale} !important;
                 }
                 
-                /* Scale buttons and form elements */
-                body button, body input, body textarea, body select {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                /* Scale buttons in content areas */
+                body main button, body .content button, body .post button, body .article button,
+                body main input, body .content input, body .post input, body .article input {
+                    zoom: ${scale} !important;
                 }
                 
-                /* Scale navigation and menu items */
-                body nav, body nav *, body .nav, body .nav *, 
-                body .menu, body .menu *, body .navbar, body .navbar * {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
-                }
-                
-                /* Scale cards and content blocks */
-                body .card, body .content, body .post, body .article,
-                body .section, body .container, body .wrapper {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                /* Exclude layout elements from scaling */
+                body .container, body .wrapper, body .header, body .footer, 
+                body .nav, body .navbar, body .sidebar, body .menu,
+                body .grid, body .row, body .col, body .column {
+                    zoom: 1 !important;
                 }
             `;
             
@@ -20997,7 +20999,7 @@ class AccessibilityWidget {
     
                     z-index: 99997 !important;
     
-                    overflow-y: auto !important;
+                    overflow: hidden !important;
     
                     padding: 20px !important;
     
@@ -21007,7 +21009,7 @@ class AccessibilityWidget {
     
                 ">
     
-                    <div style="max-width: 800px; margin: 0 auto; padding-top: 60px;">
+                    <div style="max-width: 800px; margin: 0 auto; padding-top: 60px; height: 100%; overflow-y: auto;">
     
                         ${finalContent}
     
