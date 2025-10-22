@@ -21706,15 +21706,14 @@ class AccessibilityWidget {
             let processedCount = 0;
     
             allElements.forEach(element => {
+                // Define variables at the beginning of the loop
+                const tagName = element.tagName.toLowerCase();
+                const text = element.innerText.trim();
     
                 // Skip accessibility widget elements
-    
                 if (element.closest('.accessibility-panel') || element.closest('#accessibility-icon')) {
-    
                     console.log('Read Mode: Skipping accessibility widget element:', element);
-    
                     return;
-    
                 }
     
                 // Skip navigation elements (but allow images and links from main content)
@@ -21748,7 +21747,6 @@ class AccessibilityWidget {
                 }
     
                 // Skip elements that contain CSS or JavaScript code
-                const text = element.innerText.trim();
                 if (text.includes('{') && text.includes('}') && (text.includes('color:') || text.includes('background:') || text.includes('function') || text.includes('var ') || text.includes('const ') || text.includes('let '))) {
                     console.log('Read Mode: Skipping code element:', text.substring(0, 50));
                     return;
@@ -21758,10 +21756,6 @@ class AccessibilityWidget {
                 if (text.length < 3) {
                     return;
                 }
-    
-                
-    
-                const tagName = element.tagName.toLowerCase();
     
                 console.log('Read Mode: Processing element:', tagName, 'text:', text.substring(0, 50));
     
