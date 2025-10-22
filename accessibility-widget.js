@@ -1405,18 +1405,10 @@ class AccessibilityWidget {
             this.showPaymentRequiredMessage();
         }
         
-        // Show payment required message
+        // Show payment required message - DISABLED
         showPaymentRequiredMessage() {
-            const message = document.createElement('div');
-            message.id = 'payment-required-message';
-            message.innerHTML = `
-                <div style="position: fixed; top: 20px; right: 20px; background: #ff4444; color: white; padding: 15px; border-radius: 5px; z-index: 10000; font-family: Arial, sans-serif;">
-                    <strong>Accessibility Widget</strong><br>
-                    Your trial has expired. Please complete payment to continue using the widget.
-                    <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: white; color: #ff4444; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">×</button>
-                </div>
-            `;
-            document.body.appendChild(message);
+            // Payment message disabled - no popup will be shown
+            console.log('Accessibility Widget: Payment required message disabled');
         }
         
         // Get user email (implement based on your auth system)
@@ -13779,40 +13771,33 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Content scaling - use CSS zoom on specific content containers only */
+                /* Content scaling - use transform scale for minimal layout impact */
                 
-                /* Target main content areas only, not layout containers */
-                body main, body .main, body .content, body .post, body .article,
-                body .text, body .description, body .body-text, body .copy,
-                body .hero, body .section, body .block, body .card,
-                body .blog, body .news, body .story, body .entry {
-                    zoom: ${scale} !important;
-                }
-                
-                /* Scale text content specifically */
-                body p, body span, body div:not(.container):not(.wrapper):not(.header):not(.footer):not(.nav):not(.sidebar), 
-                body a, body li, body td, body th, 
+                /* Scale only text elements with transform (preserves layout) */
+                body p, body span, body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    zoom: ${scale} !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
-                /* Scale images and media in content areas only */
-                body main img, body .content img, body .post img, body .article img,
-                body main video, body .content video, body .post video, body .article video,
-                body main iframe, body .content iframe, body .post iframe, body .article iframe {
-                    zoom: ${scale} !important;
+                /* Scale images and media with transform */
+                body img, body video, body iframe, body canvas {
+                    transform: scale(${scale}) !important;
+                    transform-origin: center !important;
                 }
                 
-                /* Scale buttons in content areas */
-                body main button, body .content button, body .post button, body .article button,
-                body main input, body .content input, body .post input, body .article input {
-                    zoom: ${scale} !important;
+                /* Scale buttons and form elements */
+                body button, body input, body textarea, body select {
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
-                /* Exclude layout elements from scaling */
+                /* Exclude layout containers from any scaling */
                 body .container, body .wrapper, body .header, body .footer, 
                 body .nav, body .navbar, body .sidebar, body .menu,
-                body .grid, body .row, body .col, body .column {
+                body .grid, body .row, body .col, body .column,
+                body main, body .main, body .content, body .post, body .article {
+                    transform: none !important;
                     zoom: 1 !important;
                 }
             `;
@@ -20248,130 +20233,95 @@ class AccessibilityWidget {
         // Mute Sound Methods
     
         enableMuteSound() {
-    
             console.log('Accessibility Widget: Mute sound enabled');
     
             this.settings['mute-sound'] = true;
             this.saveSettings();
             
-            // Initialize storage for original states if not exists
-    
-            if (!this.originalVolumeStates) {
-    
-                this.originalVolumeStates = new Map();
-    
-            }
-    
-            if (!this.originalPlayingStates) {
-    
-                this.originalPlayingStates = new Map();
-    
-            }
-    
+            // Simple and direct approach - mute everything immediately
+            this.muteAllMediaDirectly();
             
-    
-            // Find all audio and video elements
-    
-            const audioElements = document.querySelectorAll('audio');
-    
-            const videoElements = document.querySelectorAll('video');
-    
-            
-    
-            // Force mute all media immediately (including already playing)
-            this.forceMuteAllMedia(audioElements, videoElements);
-    
-            // Additional aggressive muting after a short delay to catch any delayed media
-            setTimeout(() => {
-                this.forceMuteAllMedia(audioElements, videoElements);
-            }, 100);
-    
-            // Store original states and mute all media
-    
-            this.muteAllMediaElements(audioElements, videoElements);
-    
-            
-    
-            // Handle additional audio sources
-    
-            this.muteWebAudioContexts();
-    
-            this.muteIframeMedia();
-    
-            
-    
-            // Start monitoring for dynamically added media elements
-    
-            this.startMediaObserver();
-            
-            // Additional monitoring to catch any media that might start playing
+            // Start aggressive monitoring
             this.startAggressiveMediaMonitoring();
-    
             
-    
-            console.log(`Accessibility Widget: Muted ${audioElements.length} audio and ${videoElements.length} video elements`);
-    
+            console.log('Accessibility Widget: Mute sound enabled with direct approach');
         }
     
     
     
         disableMuteSound() {
-    
             console.log('Accessibility Widget: Mute sound disabled');
     
             this.settings['mute-sound'] = false;
             this.saveSettings();
             
-            // Stop monitoring for media changes
-    
-            this.stopMediaObserver();
-            
             // Stop aggressive media monitoring
             this.stopAggressiveMediaMonitoring();
-    
             
-    
-            // Restore original states for all media elements
-    
-            this.restoreAllMediaElements();
-    
+            // Restore all media elements
+            this.restoreAllMediaDirectly();
             
-    
             console.log('Accessibility Widget: Restored original audio/video volume states');
-    
+        }
+        
+        // Simple direct muting approach
+        muteAllMediaDirectly() {
+            console.log('Accessibility Widget: Directly muting all media elements');
+            
+            // Find and mute all audio elements
+            const allAudio = document.querySelectorAll('audio');
+            allAudio.forEach((element, index) => {
+                console.log(`Accessibility Widget: Muting audio ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
+                element.muted = true;
+                element.volume = 0;
+                if (!element.paused) {
+                    element.pause();
+                }
+            });
+            
+            // Find and mute all video elements
+            const allVideo = document.querySelectorAll('video');
+            allVideo.forEach((element, index) => {
+                console.log(`Accessibility Widget: Muting video ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
+                element.muted = true;
+                element.volume = 0;
+                if (!element.paused) {
+                    element.pause();
+                }
+            });
+            
+            console.log(`Accessibility Widget: Directly muted ${allAudio.length} audio and ${allVideo.length} video elements`);
+        }
+        
+        // Simple direct restoration
+        restoreAllMediaDirectly() {
+            console.log('Accessibility Widget: Directly restoring all media elements');
+            
+            const allAudio = document.querySelectorAll('audio');
+            const allVideo = document.querySelectorAll('video');
+            
+            allAudio.forEach(element => {
+                element.muted = false;
+                element.volume = 1;
+            });
+            
+            allVideo.forEach(element => {
+                element.muted = false;
+                element.volume = 1;
+            });
+            
+            console.log(`Accessibility Widget: Restored ${allAudio.length} audio and ${allVideo.length} video elements`);
         }
         
         // Additional aggressive monitoring to catch any media that might start playing
         startAggressiveMediaMonitoring() {
-            // Check every 500ms for any media that might have started playing
+            // Check every 100ms for any media that might have started playing
             this.aggressiveMediaInterval = setInterval(() => {
                 if (this.settings['mute-sound']) {
-                    const allAudio = document.querySelectorAll('audio');
-                    const allVideo = document.querySelectorAll('video');
-                    
-                    allAudio.forEach(element => {
-                        if (!element.muted || element.volume > 0) {
-                            console.log('Accessibility Widget: Aggressive muting audio element');
-                            element.muted = true;
-                            element.volume = 0;
-                            if (!element.paused) {
-                                element.pause();
-                            }
-                        }
-                    });
-                    
-                    allVideo.forEach(element => {
-                        if (!element.muted || element.volume > 0) {
-                            console.log('Accessibility Widget: Aggressive muting video element');
-                            element.muted = true;
-                            element.volume = 0;
-                            if (!element.paused) {
-                                element.pause();
-                            }
-                        }
-                    });
+                    // Use the direct muting approach
+                    this.muteAllMediaDirectly();
                 }
-            }, 500);
+            }, 100);
             
             console.log('Accessibility Widget: Aggressive media monitoring started');
         }
@@ -21009,7 +20959,7 @@ class AccessibilityWidget {
     
                 ">
     
-                    <div style="max-width: 800px; margin: 0 auto; padding-top: 60px; height: 100%; overflow-y: auto;">
+                    <div style="max-width: 800px; margin: 0 auto; padding-top: 60px; max-height: calc(100vh - 100px); overflow-y: auto;">
     
                         ${finalContent}
     
@@ -31366,37 +31316,8 @@ class AccessibilityWidget {
         
         // Show payment required message
         const showPaymentMessage = function(reason) {
-            const message = document.createElement('div');
-            message.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #f59e0b;
-                    color: white;
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    font-size: 14px;
-                    z-index: 9999;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                    max-width: 300px;
-                ">
-                    <strong>Accessibility Widget</strong><br>
-                    ${reason || 'Payment required to activate features.'}
-                    <a href="https://accessibility-widget.web-8fb.workers.dev" style="color: white; text-decoration: underline; margin-left: 4px;">
-                        Subscribe Now
-                    </a>
-                </div>
-            `;
-            document.body.appendChild(message);
-            
-            // Remove message after 10 seconds
-            setTimeout(() => {
-                if (message.parentNode) {
-                    message.parentNode.removeChild(message);
-                }
-            }, 10000);
+            // Payment message disabled - no popup will be shown
+            console.log('Accessibility Widget: Payment message disabled');
         };
         
         // Initialize payment check
