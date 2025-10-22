@@ -13771,7 +13771,7 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Conservative content scaling - use font-size for text only */
+                /* Enhanced content scaling - use transform for proportional scaling */
                 
                 /* Ensure body and html can scroll properly */
                 html, body {
@@ -13779,10 +13779,11 @@ class AccessibilityWidget {
                     overflow-y: auto !important;
                 }
                 
-                /* Scale only text content with font-size (safer approach) */
+                /* Scale all text content with transform (preserves proportions) */
                 body p, body span, body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    font-size: ${scale}em !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
                 /* Scale images and media with transform (preserves aspect ratio) */
@@ -13791,29 +13792,37 @@ class AccessibilityWidget {
                     transform-origin: center !important;
                 }
                 
-                /* Scale buttons and form elements with font-size */
+                /* Scale buttons and form elements with transform */
                 body button, body input, body textarea, body select {
-                    font-size: ${scale}em !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
-                /* Scale content containers with font-size only */
+                /* Scale content containers with transform */
                 body .container, body .wrapper, body .content, body .post, body .article,
                 body .card, body .section, body .block, body .text, body .description {
-                    font-size: ${scale}em !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
                 /* Exclude layout containers from scaling */
                 body .nav, body .navbar, body .menu, body .header, body .footer {
-                    font-size: 1em !important;
                     transform: none !important;
                 }
                 
-                /* Ensure containers can expand to accommodate larger text */
+                /* Ensure containers can expand to accommodate scaled content */
                 body .container, body .wrapper, body .content, body .post, body .article,
                 body .card, body .section, body .block, body .text, body .description {
                     min-height: auto !important;
+                    overflow: visible !important;
                     word-wrap: break-word !important;
                     overflow-wrap: break-word !important;
+                }
+                
+                /* Ensure headings maintain their visual hierarchy */
+                body h1, body h2, body h3, body h4, body h5, body h6 {
+                    line-height: 1.2 !important;
+                    margin: 0.5em 0 !important;
                 }
             `;
             
@@ -20519,28 +20528,24 @@ class AccessibilityWidget {
                 const id = element.id || '';
                 const textContent = element.textContent || '';
                 
-                // Check for audio/video indicators in various attributes
+                // Check for audio/video indicators in various attributes - BE MORE SPECIFIC
                 const hasAudioVideo = 
-                    // Tag names
-                    tagName.includes('audio') || tagName.includes('video') || tagName.includes('player') ||
-                    // Class names
-                    className.includes('audio') || className.includes('video') || className.includes('player') || 
-                    className.includes('media') || className.includes('sound') || className.includes('music') ||
-                    className.includes('track') || className.includes('song') || className.includes('play') ||
-                    // IDs
-                    id.includes('audio') || id.includes('video') || id.includes('player') || 
-                    id.includes('media') || id.includes('sound') || id.includes('music') ||
-                    // Data attributes
+                    // Only check actual media elements
+                    (tagName === 'audio' || tagName === 'video') ||
+                    // Check for specific media-related data attributes
                     element.hasAttribute('data-audio') || element.hasAttribute('data-video') || 
                     element.hasAttribute('data-src') || element.hasAttribute('data-url') ||
                     element.hasAttribute('tmplayer-meta') || element.hasAttribute('data-player') ||
-                    // Custom attributes
                     element.hasAttribute('audio-url') || element.hasAttribute('video-url') ||
-                    element.hasAttribute('src') || element.hasAttribute('data-sound') ||
-                    // Text content with audio/video URLs
-                    (textContent.includes('.mp3') || textContent.includes('.wav') || textContent.includes('.ogg') || 
-                     textContent.includes('.mp4') || textContent.includes('.webm') || textContent.includes('.avi') ||
-                     textContent.includes('audio') || textContent.includes('video') || textContent.includes('player'));
+                    element.hasAttribute('data-sound') ||
+                    // Check for specific media file extensions in src attributes
+                    (element.src && (element.src.includes('.mp3') || element.src.includes('.wav') || element.src.includes('.ogg') || 
+                     element.src.includes('.mp4') || element.src.includes('.webm') || element.src.includes('.avi'))) ||
+                    // Check for specific media-related classes (be more specific)
+                    (className.includes('audio-player') || className.includes('video-player') || 
+                     className.includes('media-player') || className.includes('sound-player') ||
+                     className.includes('music-player') || className.includes('video-container') ||
+                     className.includes('audio-container'));
                 
                 if (hasAudioVideo) {
                     console.log(`Accessibility Widget: Found potential media element:`, {
@@ -20566,14 +20571,18 @@ class AccessibilityWidget {
                     element.volume = 0;
                     if (!element.paused) element.pause();
                 } else {
-                    // For custom elements, hide them completely
-                    element.style.display = 'none';
-                    element.style.visibility = 'hidden';
-                    element.style.opacity = '0';
-                    element.style.pointerEvents = 'none';
-                    element.style.position = 'absolute';
-                    element.style.left = '-9999px';
-                    element.style.top = '-9999px';
+                    // For custom elements, just mute them without hiding
+                    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                        element.muted = true;
+                        element.volume = 0;
+                        if (!element.paused) element.pause();
+                    } else {
+                        // Only hide if it's clearly a media player element
+                        if (className.includes('player') || className.includes('media') || 
+                            id.includes('player') || id.includes('media')) {
+                            element.style.display = 'none';
+                        }
+                    }
                 }
                 totalMuted++;
             });
@@ -20583,9 +20592,11 @@ class AccessibilityWidget {
             console.log(`Accessibility Widget: Found ${audioSources.length} audio sources`);
             audioSources.forEach((source, index) => {
                 console.log(`Accessibility Widget: Muting audio source ${index}:`, source.textContent);
-                source.style.display = 'none';
-                source.style.visibility = 'hidden';
-                source.style.opacity = '0';
+                // Only hide if it's clearly an audio source element
+                if (source.tagName === 'AUDIO' || source.tagName === 'VIDEO' || 
+                    source.hasAttribute('tmplayer-meta') || source.hasAttribute('data-audio')) {
+                    source.style.display = 'none';
+                }
                 totalMuted++;
             });
             
@@ -21408,7 +21419,7 @@ class AccessibilityWidget {
     
             // Get all content elements in document order - focus on actual content elements
     
-            const allElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, img, button');
+            const allElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, img, button, div, span, li, ul, ol, section, article, main, header, footer, nav, aside, blockquote, pre, code, strong, em, b, i, u, mark, small, sub, sup, del, ins, cite, q, abbr, time, address, details, summary, figure, figcaption, table, tr, td, th, thead, tbody, tfoot, form, input, textarea, select, label, fieldset, legend, dl, dt, dd');
     
             console.log('Read Mode: Found elements:', allElements.length);
     
@@ -21511,6 +21522,95 @@ class AccessibilityWidget {
                     content += `<div style="margin: 10px 0; font-size: 1em; color: #333; font-weight: 500;">[Button] ${text}</div>`;
     
                     processedCount++;
+    
+                } else if (tagName === 'li' && text) {
+    
+                    // List items
+    
+                    content += `<div style="margin: 8px 0; font-size: 1em; color: #444; padding-left: 20px;">• ${text}</div>`;
+    
+                    processedCount++;
+    
+                } else if (tagName === 'div' && text && text.length > 10) {
+    
+                    // Divs with substantial text content
+    
+                    content += `<div style="margin: 10px 0; font-size: 1em; color: #444; line-height: 1.5;">${text}</div>`;
+    
+                    processedCount++;
+    
+                } else if (tagName === 'span' && text && text.length > 5) {
+    
+                    // Spans with text content
+    
+                    content += `<span style="color: #444;">${text}</span>`;
+    
+                    processedCount++;
+    
+                } else if (tagName === 'strong' || tagName === 'b') {
+    
+                    // Bold text
+    
+                    if (text) {
+                        content += `<strong style="font-weight: bold; color: #333;">${text}</strong>`;
+                        processedCount++;
+                    }
+    
+                } else if (tagName === 'em' || tagName === 'i') {
+    
+                    // Italic text
+    
+                    if (text) {
+                        content += `<em style="font-style: italic; color: #444;">${text}</em>`;
+                        processedCount++;
+                    }
+    
+                } else if (tagName === 'blockquote' && text) {
+    
+                    // Blockquotes
+    
+                    content += `<div style="margin: 15px 0; padding-left: 20px; border-left: 3px solid #ccc; font-style: italic; color: #555;">${text}</div>`;
+    
+                    processedCount++;
+    
+                } else if (tagName === 'code' && text) {
+    
+                    // Code
+    
+                    content += `<code style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: monospace; color: #333;">${text}</code>`;
+    
+                    processedCount++;
+    
+                } else if (tagName === 'table') {
+    
+                    // Tables
+    
+                    const rows = element.querySelectorAll('tr');
+                    if (rows.length > 0) {
+                        content += `<div style="margin: 15px 0; overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">`;
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('td, th');
+                            if (cells.length > 0) {
+                                content += `<tr>`;
+                                cells.forEach(cell => {
+                                    const cellTag = cell.tagName.toLowerCase() === 'th' ? 'th' : 'td';
+                                    content += `<${cellTag} style="border: 1px solid #ddd; padding: 8px; text-align: left;">${cell.textContent.trim()}</${cellTag}>`;
+                                });
+                                content += `</tr>`;
+                            }
+                        });
+                        content += `</table></div>`;
+                        processedCount++;
+                    }
+    
+                } else if (tagName === 'section' || tagName === 'article' || tagName === 'main') {
+    
+                    // Sections, articles, main content
+    
+                    if (text && text.length > 20) {
+                        content += `<div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px;">${text}</div>`;
+                        processedCount++;
+                    }
     
                 }
     
