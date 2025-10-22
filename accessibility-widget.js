@@ -20578,10 +20578,7 @@ class AccessibilityWidget {
                 console.log('Accessibility Widget: Cannot send postMessage to iframe:', e.message);
             }
             
-            // Hide the iframe as last resort
-            iframe.style.display = 'none';
-            iframe.style.visibility = 'hidden';
-            iframe.style.opacity = '0';
+            // Keep iframe visible but muted
         }
         
         // Enhanced muting for embed/object players
@@ -20596,10 +20593,7 @@ class AccessibilityWidget {
                 embed.volume = 0;
             }
             
-            // Hide the embed
-            embed.style.display = 'none';
-            embed.style.visibility = 'hidden';
-            embed.style.opacity = '0';
+            // Keep embed visible but muted
         }
         
         // Enhanced muting for custom players
@@ -20628,10 +20622,7 @@ class AccessibilityWidget {
                 console.log('Accessibility Widget: Error muting Web Audio contexts:', e);
             }
             
-            // Hide the custom player
-            element.style.display = 'none';
-            element.style.visibility = 'hidden';
-            element.style.opacity = '0';
+            // Keep custom player visible but muted
         }
         
         // Get all AudioContext instances
