@@ -13760,15 +13760,60 @@ class AccessibilityWidget {
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                // Remove any existing content scaling styles
-                body.style.fontSize = '';
-                body.style.zoom = '';
+                // Remove any existing content scaling CSS
+                const existingStyle = document.getElementById('content-scaling-styles');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
                 
                 return;
             }
             
-            // Simple approach: Use zoom property for easy scaling without scrollbars
-            body.style.zoom = (this.contentScale / 100);
+            // Create or update CSS that scales content without breaking layouts
+            let style = document.getElementById('content-scaling-styles');
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'content-scaling-styles';
+                document.head.appendChild(style);
+            }
+            
+            const scale = this.contentScale / 100;
+            style.textContent = `
+                /* Content scaling - use transform to scale without breaking layouts */
+                
+                /* Scale all text content using transform (preserves layout) */
+                body p, body span, body div, body a, body li, body td, body th, 
+                body h1, body h2, body h3, body h4, body h5, body h6 {
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
+                }
+                
+                /* Scale images and media proportionally */
+                body img, body video, body iframe, body canvas {
+                    transform: scale(${scale}) !important;
+                    transform-origin: center !important;
+                }
+                
+                /* Scale buttons and form elements */
+                body button, body input, body textarea, body select {
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
+                }
+                
+                /* Scale navigation and menu items */
+                body nav, body nav *, body .nav, body .nav *, 
+                body .menu, body .menu *, body .navbar, body .navbar * {
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
+                }
+                
+                /* Scale cards and content blocks */
+                body .card, body .content, body .post, body .article,
+                body .section, body .container, body .wrapper {
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
+                }
+            `;
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
         }
@@ -15190,10 +15235,14 @@ class AccessibilityWidget {
             this.contentScale = 100; // Reset to 100% (normal size)
             this.settings['content-scale'] = 100; // Save to settings
             
-            // Reset scaling styles directly
-            const body = document.body;
+            // Remove content scaling CSS
+            const existingStyle = document.getElementById('content-scaling-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
             
-            body.style.zoom = '';
+            // Reset any body styles
+            const body = document.body;
             body.style.fontSize = '';
             
             this.updateContentScaleDisplay();
