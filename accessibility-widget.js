@@ -7559,17 +7559,17 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
     
-                                            <i class="fas fa-chevron-down"></i> -5%
+                                            <i class="fas fa-chevron-down"></i> -2%
     
                                         </button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
     
-                                            <i class="fas fa-chevron-up"></i> +5%
+                                            <i class="fas fa-chevron-up"></i> +2%
     
                                         </button>
     
@@ -13717,7 +13717,7 @@ class AccessibilityWidget {
     
         increaseContentScale() {
             console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
+            this.contentScale = Math.min(this.contentScale + 2, 150); // 2% increment, max 150%
             this.settings['content-scale'] = this.contentScale;
             
             // Mark content scaling as used
@@ -13731,7 +13731,7 @@ class AccessibilityWidget {
         
         decreaseContentScale() {
             console.log('Accessibility Widget: Decreasing content scale from', this.contentScale + '%');
-            this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
+            this.contentScale = Math.max(this.contentScale - 2, 50); // 2% decrement, minimum 50%
             this.settings['content-scale'] = this.contentScale;
             
             // Mark content scaling as used
@@ -20297,6 +20297,72 @@ class AccessibilityWidget {
                 }
             });
         }
+        
+        // Override global audio/video methods to prevent any new audio from playing
+        overrideGlobalAudioMethods() {
+            console.log('Accessibility Widget: Overriding global audio methods');
+            
+            // Override HTMLAudioElement and HTMLVideoElement methods
+            if (typeof HTMLAudioElement !== 'undefined') {
+                const originalPlay = HTMLAudioElement.prototype.play;
+                HTMLAudioElement.prototype.play = function() {
+                    console.log('Accessibility Widget: Blocked audio play attempt');
+                    this.muted = true;
+                    this.volume = 0;
+                    return Promise.resolve();
+                };
+            }
+            
+            if (typeof HTMLVideoElement !== 'undefined') {
+                const originalVideoPlay = HTMLVideoElement.prototype.play;
+                HTMLVideoElement.prototype.play = function() {
+                    console.log('Accessibility Widget: Blocked video play attempt');
+                    this.muted = true;
+                    this.volume = 0;
+                    return Promise.resolve();
+                };
+            }
+            
+            // Override Web Audio API methods
+            if (typeof AudioContext !== 'undefined') {
+                const originalCreateBufferSource = AudioContext.prototype.createBufferSource;
+                AudioContext.prototype.createBufferSource = function() {
+                    console.log('Accessibility Widget: Blocked AudioContext createBufferSource');
+                    return {
+                        connect: () => {},
+                        start: () => {},
+                        stop: () => {},
+                        disconnect: () => {}
+                    };
+                };
+            }
+            
+            // Override common audio library methods
+            if (typeof window !== 'undefined') {
+                // Override Howler.js if present
+                if (window.Howl) {
+                    const originalHowl = window.Howl;
+                    window.Howl = function() {
+                        console.log('Accessibility Widget: Blocked Howler.js audio');
+                        return {
+                            play: () => {},
+                            pause: () => {},
+                            stop: () => {},
+                            mute: () => {},
+                            volume: () => {}
+                        };
+                    };
+                }
+                
+                // Override SoundJS if present
+                if (window.createjs && window.createjs.Sound) {
+                    window.createjs.Sound.play = function() {
+                        console.log('Accessibility Widget: Blocked SoundJS audio');
+                        return null;
+                    };
+                }
+            }
+        }
     
     
     
@@ -20315,49 +20381,117 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: Restored original audio/video volume states');
         }
         
-        // Simple direct muting approach
+        // Comprehensive universal muting approach
         muteAllMediaDirectly() {
-            console.log('Accessibility Widget: Directly muting all media elements');
+            console.log('Accessibility Widget: Universal muting - detecting ALL possible audio/video content');
             
-            // Find and mute all audio elements
-            const allAudio = document.querySelectorAll('audio');
-            console.log(`Accessibility Widget: Found ${allAudio.length} audio elements`);
-            allAudio.forEach((element, index) => {
-                console.log(`Accessibility Widget: Muting audio ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
+            let totalMuted = 0;
+            
+            // 1. Standard HTML5 audio/video elements
+            const standardAudio = document.querySelectorAll('audio');
+            const standardVideo = document.querySelectorAll('video');
+            console.log(`Accessibility Widget: Found ${standardAudio.length} standard audio, ${standardVideo.length} standard video`);
+            
+            [...standardAudio, ...standardVideo].forEach((element, index) => {
                 element.muted = true;
                 element.volume = 0;
-                if (!element.paused) {
-                    element.pause();
+                if (!element.paused) element.pause();
+                totalMuted++;
+            });
+            
+            // 2. Universal detection - find ANY element that might contain audio/video
+            const allElements = document.querySelectorAll('*');
+            const mediaElements = [];
+            
+            allElements.forEach(element => {
+                const tagName = element.tagName.toLowerCase();
+                const className = element.className || '';
+                const id = element.id || '';
+                const textContent = element.textContent || '';
+                
+                // Check for audio/video indicators in various attributes
+                const hasAudioVideo = 
+                    // Tag names
+                    tagName.includes('audio') || tagName.includes('video') || tagName.includes('player') ||
+                    // Class names
+                    className.includes('audio') || className.includes('video') || className.includes('player') || 
+                    className.includes('media') || className.includes('sound') || className.includes('music') ||
+                    className.includes('track') || className.includes('song') || className.includes('play') ||
+                    // IDs
+                    id.includes('audio') || id.includes('video') || id.includes('player') || 
+                    id.includes('media') || id.includes('sound') || id.includes('music') ||
+                    // Data attributes
+                    element.hasAttribute('data-audio') || element.hasAttribute('data-video') || 
+                    element.hasAttribute('data-src') || element.hasAttribute('data-url') ||
+                    element.hasAttribute('tmplayer-meta') || element.hasAttribute('data-player') ||
+                    // Custom attributes
+                    element.hasAttribute('audio-url') || element.hasAttribute('video-url') ||
+                    element.hasAttribute('src') || element.hasAttribute('data-sound') ||
+                    // Text content with audio/video URLs
+                    (textContent.includes('.mp3') || textContent.includes('.wav') || textContent.includes('.ogg') || 
+                     textContent.includes('.mp4') || textContent.includes('.webm') || textContent.includes('.avi') ||
+                     textContent.includes('audio') || textContent.includes('video') || textContent.includes('player'));
+                
+                if (hasAudioVideo) {
+                    mediaElements.push(element);
                 }
             });
             
-            // Find and mute all video elements
-            const allVideo = document.querySelectorAll('video');
-            console.log(`Accessibility Widget: Found ${allVideo.length} video elements`);
-            allVideo.forEach((element, index) => {
-                console.log(`Accessibility Widget: Muting video ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
-                element.muted = true;
-                element.volume = 0;
-                if (!element.paused) {
-                    element.pause();
+            console.log(`Accessibility Widget: Found ${mediaElements.length} potential media elements through universal detection`);
+            
+            // Mute all detected media elements
+            mediaElements.forEach((element, index) => {
+                console.log(`Accessibility Widget: Muting universal media element ${index}:`, element);
+                
+                // Try to mute if it's a standard media element
+                if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                    element.muted = true;
+                    element.volume = 0;
+                    if (!element.paused) element.pause();
+                } else {
+                    // For custom elements, hide them completely
+                    element.style.display = 'none';
+                    element.style.visibility = 'hidden';
+                    element.style.opacity = '0';
+                    element.style.pointerEvents = 'none';
+                    element.style.position = 'absolute';
+                    element.style.left = '-9999px';
+                    element.style.top = '-9999px';
                 }
+                totalMuted++;
             });
             
-            // Also check for any media in iframes
+            // 3. Find and mute any audio sources in custom players
+            const audioSources = document.querySelectorAll('[tmplayer-meta="audio-url"], [data-audio], [data-src], [data-url]');
+            console.log(`Accessibility Widget: Found ${audioSources.length} audio sources`);
+            audioSources.forEach((source, index) => {
+                console.log(`Accessibility Widget: Muting audio source ${index}:`, source.textContent);
+                source.style.display = 'none';
+                source.style.visibility = 'hidden';
+                source.style.opacity = '0';
+                totalMuted++;
+            });
+            
+            // 4. Check iframes for media
             const iframes = document.querySelectorAll('iframe');
             console.log(`Accessibility Widget: Found ${iframes.length} iframes`);
             iframes.forEach((iframe, index) => {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                     if (iframeDoc) {
-                        const iframeAudio = iframeDoc.querySelectorAll('audio, video');
-                        console.log(`Accessibility Widget: Found ${iframeAudio.length} media elements in iframe ${index}`);
-                        iframeAudio.forEach(element => {
-                            element.volume = 0;
-                            element.muted = true;
-                            if (!element.paused) {
-                                element.pause();
+                        const iframeMedia = iframeDoc.querySelectorAll('audio, video, [class*="audio"], [class*="video"], [class*="player"]');
+                        console.log(`Accessibility Widget: Found ${iframeMedia.length} media elements in iframe ${index}`);
+                        iframeMedia.forEach(element => {
+                            if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                                element.volume = 0;
+                                element.muted = true;
+                                if (!element.paused) element.pause();
+                            } else {
+                                element.style.display = 'none';
+                                element.style.visibility = 'hidden';
+                                element.style.opacity = '0';
                             }
+                            totalMuted++;
                         });
                     }
                 } catch (e) {
@@ -20365,20 +20499,13 @@ class AccessibilityWidget {
                 }
             });
             
-            // Check for any Web Audio API contexts
-            if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-                try {
-                    const AudioContextClass = AudioContext || webkitAudioContext;
-                    if (window.audioContext) {
-                        window.audioContext.suspend();
-                        console.log('Accessibility Widget: Suspended Web Audio Context');
-                    }
-                } catch (e) {
-                    console.log('Accessibility Widget: Could not suspend Web Audio Context:', e);
-                }
-            }
+            // 5. Suspend all Web Audio API contexts
+            this.muteAllAudioContexts();
             
-            console.log(`Accessibility Widget: Directly muted ${allAudio.length} audio and ${allVideo.length} video elements`);
+            // 6. Override common audio/video methods globally
+            this.overrideGlobalAudioMethods();
+            
+            console.log(`Accessibility Widget: Universal muting complete - muted ${totalMuted} elements total`);
         }
         
         // Simple direct restoration
@@ -20398,7 +20525,33 @@ class AccessibilityWidget {
                 element.volume = 1;
             });
             
-            console.log(`Accessibility Widget: Restored ${allAudio.length} audio and ${allVideo.length} video elements`);
+            // Restore custom audio players
+            const customAudioPlayers = document.querySelectorAll('[tmplayer-meta="audio-url"], [data-audio], [class*="audio"], [class*="player"], [id*="audio"], [id*="player"]');
+            customAudioPlayers.forEach(element => {
+                element.style.display = '';
+                element.style.visibility = '';
+                element.style.opacity = '';
+                element.style.pointerEvents = '';
+            });
+            
+            // Restore audio sources
+            const audioSources = document.querySelectorAll('[tmplayer-meta="audio-url"]');
+            audioSources.forEach(source => {
+                source.style.display = '';
+                source.style.visibility = '';
+                source.style.opacity = '';
+            });
+            
+            // Restore media divs
+            const mediaDivs = document.querySelectorAll('div[class*="audio"], div[class*="video"], div[class*="player"], div[class*="media"]');
+            mediaDivs.forEach(div => {
+                div.style.display = '';
+                div.style.visibility = '';
+                div.style.opacity = '';
+                div.style.pointerEvents = '';
+            });
+            
+            console.log(`Accessibility Widget: Restored ${allAudio.length} audio, ${allVideo.length} video, ${customAudioPlayers.length} custom players, and ${audioSources.length} audio sources`);
         }
         
         // Additional aggressive monitoring to catch any media that might start playing
@@ -21043,7 +21196,7 @@ class AccessibilityWidget {
     
                 ">
     
-                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; min-height: 100vh;">
+                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">
     
                         ${finalContent}
     
