@@ -1,19 +1,15 @@
 // CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
-    
     try {
         // Check localStorage immediately for seizure-safe mode
         const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
         if (seizureSafeFromStorage === 'true') {
-            
             console.log('Accessibility Widget: IMMEDIATE seizure-safe mode detected, applying instantly');
             document.body.classList.add('seizure-safe');
             
             // Apply immediate CSS to stop all animations
             const immediateStyle = document.createElement('style');
-            
             immediateStyle.id = 'accessibility-seizure-immediate-early';
-            
             immediateStyle.textContent = `
                 /* REMOVED: Duplicate universal selector - already covered by main rule */
                 /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
@@ -1303,10 +1299,14 @@ class AccessibilityWidget {
                     }
                     
                     const paymentData = await retryResponse.json();
-                    console.log('[CK] checkPaymentStatus() - Full payment response (retry):', paymentData);
+                    console.log('[CK] checkPaymentStatus() - Full payment response (retry):', JSON.stringify(paymentData, null, 2));
                     console.log('[CK] checkPaymentStatus() - Retry response keys:', Object.keys(paymentData));
                     console.log('[CK] checkPaymentStatus() - Retry hasAccess value:', paymentData.hasAccess);
                     console.log('[CK] checkPaymentStatus() - Retry reason value:', paymentData.reason);
+                    console.log('[CK] checkPaymentStatus() - All retry payment data properties:');
+                    for (const [key, value] of Object.entries(paymentData)) {
+                        console.log(`  ${key}:`, value);
+                    }
                     return this.processPaymentResponse(paymentData);
                 }
                 
@@ -1316,10 +1316,14 @@ class AccessibilityWidget {
                 }
                 
                 const paymentData = await response.json();
-                console.log('[CK] checkPaymentStatus() - Full payment response:', paymentData);
+                console.log('[CK] checkPaymentStatus() - Full payment response:', JSON.stringify(paymentData, null, 2));
                 console.log('[CK] checkPaymentStatus() - Response keys:', Object.keys(paymentData));
                 console.log('[CK] checkPaymentStatus() - hasAccess value:', paymentData.hasAccess);
                 console.log('[CK] checkPaymentStatus() - reason value:', paymentData.reason);
+                console.log('[CK] checkPaymentStatus() - All payment data properties:');
+                for (const [key, value] of Object.entries(paymentData)) {
+                    console.log(`  ${key}:`, value);
+                }
                 return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
@@ -13723,6 +13727,10 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: Increasing content scale from', this.contentScale + '%');
             this.contentScale = Math.min(this.contentScale + 5, 200); // 5% increment
             this.settings['content-scale'] = this.contentScale;
+            
+            // Mark content scaling as used
+            localStorage.setItem('content-scaling-used', 'true');
+            
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
             this.updateContentScaleDisplay();
@@ -13733,6 +13741,10 @@ class AccessibilityWidget {
             console.log('Accessibility Widget: Decreasing content scale from', this.contentScale + '%');
             this.contentScale = Math.max(this.contentScale - 5, 50); // 5% decrement, minimum 50%
             this.settings['content-scale'] = this.contentScale;
+            
+            // Mark content scaling as used
+            localStorage.setItem('content-scaling-used', 'true');
+            
             console.log('Accessibility Widget: New content scale:', this.contentScale + '%');
             this.updateContentScale();
             this.updateContentScaleDisplay();
@@ -13741,7 +13753,6 @@ class AccessibilityWidget {
         
         updateContentScale() {
             const body = document.body;
-            const html = document.documentElement;
             
             console.log('Accessibility Widget: updateContentScale called with scale:', this.contentScale + '%');
             
@@ -13749,30 +13760,17 @@ class AccessibilityWidget {
             if (this.contentScale === 100) {
                 console.log('Accessibility Widget: Content scale is 100%, resetting to normal');
                 
-                // Reset any scaling styles
-                body.style.transform = '';
-                body.style.transformOrigin = '';
-                body.style.width = '';
-                body.style.height = '';
-                html.style.transform = '';
-                html.style.transformOrigin = '';
+                // Remove any existing content scaling styles
+                body.style.fontSize = '';
+                body.style.zoom = '';
                 
                 return;
             }
             
-            const scale = this.contentScale / 100;
-            console.log('Accessibility Widget: Applying scale:', scale);
-            
-            // Apply simple CSS transform scaling directly to body
-            body.style.transform = `scale(${scale})`;
-            body.style.transformOrigin = 'top left';
-            
-            // Ensure body takes full viewport to prevent gaps
-            body.style.width = '100vw';
-            body.style.height = '100vh';
+            // Simple approach: Use zoom property for easy scaling without scrollbars
+            body.style.zoom = (this.contentScale / 100);
             
             console.log('Accessibility Widget: Content scaled to', this.contentScale + '%');
-            console.log('Accessibility Widget: Body transform applied:', body.style.transform);
         }
         
         updateContentScaleDisplay() {
@@ -15194,14 +15192,9 @@ class AccessibilityWidget {
             
             // Reset scaling styles directly
             const body = document.body;
-            const html = document.documentElement;
             
-            body.style.transform = '';
-            body.style.transformOrigin = '';
-            body.style.width = '';
-            body.style.height = '';
-            html.style.transform = '';
-            html.style.transformOrigin = '';
+            body.style.zoom = '';
+            body.style.fontSize = '';
             
             this.updateContentScaleDisplay();
             this.saveSettings(); // Persist the reset
