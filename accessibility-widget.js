@@ -13771,34 +13771,42 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Content scaling - use transform scale for minimal layout impact */
+                /* Content scaling - use font-size scaling to prevent overflow */
                 
-                /* Scale only text elements with transform (preserves layout) */
+                /* Scale text elements using font-size (prevents overflow) */
                 body p, body span, body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    font-size: ${scale}em !important;
                 }
                 
-                /* Scale images and media with transform */
+                /* Scale images and media with transform (preserves aspect ratio) */
                 body img, body video, body iframe, body canvas {
                     transform: scale(${scale}) !important;
                     transform-origin: center !important;
                 }
                 
-                /* Scale buttons and form elements */
+                /* Scale buttons and form elements with font-size */
                 body button, body input, body textarea, body select {
-                    transform: scale(${scale}) !important;
-                    transform-origin: top left !important;
+                    font-size: ${scale}em !important;
+                    padding: ${scale}em !important;
                 }
                 
-                /* Exclude layout containers from any scaling */
-                body .container, body .wrapper, body .header, body .footer, 
-                body .nav, body .navbar, body .sidebar, body .menu,
-                body .grid, body .row, body .col, body .column,
-                body main, body .main, body .content, body .post, body .article {
-                    transform: none !important;
-                    zoom: 1 !important;
+                /* Ensure containers can expand to accommodate larger content */
+                body .container, body .wrapper, body .content, body .post, body .article,
+                body .card, body .section, body .block, body .text, body .description {
+                    min-height: auto !important;
+                    overflow: visible !important;
+                }
+                
+                /* Prevent text overflow in specific containers */
+                body .card, body .section, body .block {
+                    word-wrap: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                
+                /* Exclude layout containers from font scaling */
+                body .nav, body .navbar, body .menu, body .header, body .footer {
+                    font-size: 1em !important;
                 }
             `;
             
@@ -20941,25 +20949,19 @@ class AccessibilityWidget {
     
                     left: 0 !important;
     
-                    width: 100% !important;
+                    width: 100vw !important;
     
-                    height: 100% !important;
+                    height: 100vh !important;
     
                     background: #e8f4f8 !important;
     
                     z-index: 99997 !important;
     
-                    overflow: hidden !important;
-    
-                    padding: 20px !important;
-    
                     font-family: Arial, sans-serif !important;
-    
-                    display: block !important;
     
                 ">
     
-                    <div style="max-width: 800px; margin: 0 auto; padding-top: 60px; max-height: calc(100vh - 100px); overflow-y: auto;">
+                    <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
     
                         ${finalContent}
     
