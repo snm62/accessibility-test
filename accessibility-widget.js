@@ -21632,11 +21632,9 @@ class AccessibilityWidget {
     
             console.log('Read Mode: Starting content extraction...');
     
-            
-    
             let content = '';
-    
-            
+            const processedTexts = new Set(); // Track processed text to avoid duplicates
+            const processedElements = new Set(); // Track processed elements to avoid duplicates
     
             // First, try to find main content areas (article, main, section with content)
             const mainContentSelectors = [
@@ -21667,23 +21665,6 @@ class AccessibilityWidget {
                 contentContainer = document.body;
                 console.log('Read Mode: Using document body as content container');
             }
-            
-            // Also try to find content in common content areas that might have been missed
-            const additionalContentSelectors = [
-                '.post', '.entry', '.page-content', '.site-content', '.blog-content',
-                '.article-body', '.entry-content', '.post-body', '.content-body',
-                '[data-content]', '[data-post]', '[data-article]'
-            ];
-            
-            for (const selector of additionalContentSelectors) {
-                const element = document.querySelector(selector);
-                if (element && element.innerText.trim().length > 50) {
-                    console.log('Read Mode: Found additional content area:', selector);
-                    // Merge content from this area
-                    const additionalElements = element.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, img, button, div, span, li, ul, ol, section, article, main, blockquote, pre, code, strong, em, b, i, u, mark, small, sub, sup, del, ins, cite, q, abbr, time, address, details, summary, figure, figcaption, table, tr, td, th, thead, tbody, tfoot, dl, dt, dd');
-                    console.log('Read Mode: Found additional elements:', additionalElements.length);
-                }
-            }
     
             // Get content elements, focusing on main content areas
             const allElements = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, img, button, div, span, li, ul, ol, section, article, main, blockquote, pre, code, strong, em, b, i, u, mark, small, sub, sup, del, ins, cite, q, abbr, time, address, details, summary, figure, figcaption, table, tr, td, th, thead, tbody, tfoot, dl, dt, dd');
@@ -21693,13 +21674,17 @@ class AccessibilityWidget {
             
     
             // Process elements in the order they appear on the page
-    
             let processedCount = 0;
     
             allElements.forEach(element => {
                 // Define variables at the beginning of the loop
                 const tagName = element.tagName.toLowerCase();
                 const text = element.innerText.trim();
+    
+                // Skip if already processed
+                if (processedElements.has(element)) {
+                    return;
+                }
     
                 // Skip accessibility widget elements
                 if (element.closest('.accessibility-panel') || element.closest('#accessibility-icon')) {
@@ -21748,6 +21733,12 @@ class AccessibilityWidget {
                     return;
                 }
     
+                // Skip duplicate text content
+                if (processedTexts.has(text)) {
+                    console.log('Read Mode: Skipping duplicate text:', text.substring(0, 50));
+                    return;
+                }
+    
                 console.log('Read Mode: Processing element:', tagName, 'text:', text.substring(0, 50));
     
                 
@@ -21767,6 +21758,8 @@ class AccessibilityWidget {
                         content += `<div style="margin: 20px 0; font-size: ${size}; font-weight: bold; color: #333; line-height: 1.3;">${text}</div>`;
     
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
     
                     }
     
@@ -21779,6 +21772,8 @@ class AccessibilityWidget {
                         content += `<div style="margin: 15px 0; font-size: 1.1em; line-height: 1.6; color: #444;">${text}</div>`;
     
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
     
                     }
     
@@ -21794,6 +21789,8 @@ class AccessibilityWidget {
                         </div>`;
     
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
     
                     }
     
@@ -21818,6 +21815,8 @@ class AccessibilityWidget {
                     </div>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'button' && text) {
     
@@ -21826,6 +21825,8 @@ class AccessibilityWidget {
                     content += `<div style="margin: 10px 0; font-size: 1em; color: #333; font-weight: 500;">[Button] ${text}</div>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'li' && text) {
     
@@ -21834,6 +21835,8 @@ class AccessibilityWidget {
                     content += `<div style="margin: 8px 0; font-size: 1em; color: #444; padding-left: 20px;">• ${text}</div>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'div' && text && text.length > 20 && !text.includes('{') && !text.includes('}') && !text.includes('function') && !text.includes('var ') && !text.includes('const ') && !text.includes('let ')) {
     
@@ -21842,6 +21845,8 @@ class AccessibilityWidget {
                     content += `<div style="margin: 10px 0; font-size: 1em; color: #444; line-height: 1.5;">${text}</div>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'span' && text && text.length > 10 && !text.includes('{') && !text.includes('}') && !text.includes('function') && !text.includes('var ') && !text.includes('const ') && !text.includes('let ')) {
     
@@ -21850,6 +21855,8 @@ class AccessibilityWidget {
                     content += `<span style="color: #444;">${text}</span>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'strong' || tagName === 'b') {
     
@@ -21858,6 +21865,8 @@ class AccessibilityWidget {
                     if (text) {
                         content += `<strong style="font-weight: bold; color: #333;">${text}</strong>`;
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
                     }
     
                 } else if (tagName === 'em' || tagName === 'i') {
@@ -21867,6 +21876,8 @@ class AccessibilityWidget {
                     if (text) {
                         content += `<em style="font-style: italic; color: #444;">${text}</em>`;
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
                     }
     
                 } else if (tagName === 'blockquote' && text) {
@@ -21876,6 +21887,8 @@ class AccessibilityWidget {
                     content += `<div style="margin: 15px 0; padding-left: 20px; border-left: 3px solid #ccc; font-style: italic; color: #555;">${text}</div>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'code' && text) {
     
@@ -21884,6 +21897,8 @@ class AccessibilityWidget {
                     content += `<code style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: monospace; color: #333;">${text}</code>`;
     
                     processedCount++;
+                    processedTexts.add(text);
+                    processedElements.add(element);
     
                 } else if (tagName === 'table') {
     
@@ -21905,6 +21920,8 @@ class AccessibilityWidget {
                         });
                         content += `</table></div>`;
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
                     }
     
                 } else if (tagName === 'section' || tagName === 'article' || tagName === 'main') {
@@ -21914,6 +21931,8 @@ class AccessibilityWidget {
                     if (text && text.length > 20) {
                         content += `<div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px;">${text}</div>`;
                         processedCount++;
+                        processedTexts.add(text);
+                        processedElements.add(element);
                     }
     
                 }
@@ -21959,6 +21978,7 @@ class AccessibilityWidget {
             console.log('Read Mode: Starting alternative content extraction...');
             
             let content = '';
+            const processedTexts = new Set(); // Track processed text to avoid duplicates
             
             // Try to find the main content area more aggressively
             const contentSelectors = [
@@ -22052,6 +22072,11 @@ class AccessibilityWidget {
                 
                 if (text.length < 3) return;
                 
+                // Skip duplicate text content
+                if (processedTexts.has(text)) {
+                    return;
+                }
+                
                 // Format based on parent element type
                 if (tagName.match(/^h[1-6]$/)) {
                     const size = tagName === 'h1' ? '2.5em' : 
@@ -22059,31 +22084,40 @@ class AccessibilityWidget {
                                tagName === 'h3' ? '1.5em' : '1.2em';
                     content += `<div style="margin: 20px 0; font-size: ${size}; font-weight: bold; color: #333; line-height: 1.3;">${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'p') {
                     content += `<div style="margin: 15px 0; font-size: 1.1em; line-height: 1.6; color: #444;">${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'a' && parent.href) {
                     content += `<div style="margin: 10px 0; font-size: 1em; color: #0066cc; text-decoration: underline;">${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'li') {
                     content += `<div style="margin: 8px 0; font-size: 1em; color: #444; padding-left: 20px;">• ${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'strong' || tagName === 'b') {
                     content += `<strong style="font-weight: bold; color: #333;">${text}</strong>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'em' || tagName === 'i') {
                     content += `<em style="font-style: italic; color: #444;">${text}</em>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'blockquote') {
                     content += `<div style="margin: 15px 0; padding-left: 20px; border-left: 3px solid #ccc; font-style: italic; color: #555;">${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (tagName === 'code') {
                     content += `<code style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: monospace; color: #333;">${text}</code>`;
                     processedCount++;
+                    processedTexts.add(text);
                 } else if (text.length > 20) {
                     // Generic text content
                     content += `<div style="margin: 10px 0; font-size: 1em; color: #444; line-height: 1.5;">${text}</div>`;
                     processedCount++;
+                    processedTexts.add(text);
                 }
             });
             
