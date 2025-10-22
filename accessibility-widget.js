@@ -1422,8 +1422,8 @@ class AccessibilityWidget {
                 } catch (e) {}
             }
             
-            // Fallback to prompt or other methods
-            return prompt('Please enter your email for the accessibility widget:') || 'unknown@domain.com';
+            // Return default email without prompting
+            return 'user@example.com';
         }
         
         // ===== END PAYMENT VALIDATION METHODS =====
@@ -13771,12 +13771,13 @@ class AccessibilityWidget {
             
             const scale = this.contentScale / 100;
             style.textContent = `
-                /* Content scaling - use font-size scaling to prevent overflow */
+                /* Content scaling - use transform scale for proportional scaling */
                 
-                /* Scale text elements using font-size (prevents overflow) */
+                /* Scale all text content proportionally */
                 body p, body span, body a, body li, body td, body th, 
                 body h1, body h2, body h3, body h4, body h5, body h6 {
-                    font-size: ${scale}em !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
                 /* Scale images and media with transform (preserves aspect ratio) */
@@ -13785,28 +13786,22 @@ class AccessibilityWidget {
                     transform-origin: center !important;
                 }
                 
-                /* Scale buttons and form elements with font-size */
+                /* Scale buttons and form elements */
                 body button, body input, body textarea, body select {
-                    font-size: ${scale}em !important;
-                    padding: ${scale}em !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
-                /* Ensure containers can expand to accommodate larger content */
+                /* Scale content containers proportionally */
                 body .container, body .wrapper, body .content, body .post, body .article,
                 body .card, body .section, body .block, body .text, body .description {
-                    min-height: auto !important;
-                    overflow: visible !important;
+                    transform: scale(${scale}) !important;
+                    transform-origin: top left !important;
                 }
                 
-                /* Prevent text overflow in specific containers */
-                body .card, body .section, body .block {
-                    word-wrap: break-word !important;
-                    overflow-wrap: break-word !important;
-                }
-                
-                /* Exclude layout containers from font scaling */
+                /* Exclude layout containers from scaling */
                 body .nav, body .navbar, body .menu, body .header, body .footer {
-                    font-size: 1em !important;
+                    transform: none !important;
                 }
             `;
             
@@ -20246,13 +20241,61 @@ class AccessibilityWidget {
             this.settings['mute-sound'] = true;
             this.saveSettings();
             
-            // Simple and direct approach - mute everything immediately
+            // Mute everything immediately
             this.muteAllMediaDirectly();
+            
+            // Also try to mute any existing audio contexts
+            this.muteAllAudioContexts();
             
             // Start aggressive monitoring
             this.startAggressiveMediaMonitoring();
             
             console.log('Accessibility Widget: Mute sound enabled with direct approach');
+        }
+        
+        // Mute all audio contexts (Web Audio API)
+        muteAllAudioContexts() {
+            console.log('Accessibility Widget: Muting all audio contexts');
+            
+            // Suspend all existing audio contexts
+            if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                try {
+                    // Get all audio contexts from the window
+                    const contexts = [];
+                    for (let prop in window) {
+                        if (window[prop] instanceof AudioContext || window[prop] instanceof webkitAudioContext) {
+                            contexts.push(window[prop]);
+                        }
+                    }
+                    
+                    contexts.forEach((context, index) => {
+                        if (context.state !== 'closed') {
+                            context.suspend();
+                            console.log(`Accessibility Widget: Suspended audio context ${index}`);
+                        }
+                    });
+                } catch (e) {
+                    console.log('Accessibility Widget: Error suspending audio contexts:', e);
+                }
+            }
+            
+            // Also try to mute any audio elements that might be using Web Audio
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach((element, index) => {
+                try {
+                    // Force mute and pause
+                    element.muted = true;
+                    element.volume = 0;
+                    element.pause();
+                    
+                    // Also try to set the currentTime to 0 to stop playback
+                    element.currentTime = 0;
+                    
+                    console.log(`Accessibility Widget: Force muted audio element ${index}`);
+                } catch (e) {
+                    console.log(`Accessibility Widget: Error muting audio element ${index}:`, e);
+                }
+            });
         }
     
     
@@ -20278,6 +20321,7 @@ class AccessibilityWidget {
             
             // Find and mute all audio elements
             const allAudio = document.querySelectorAll('audio');
+            console.log(`Accessibility Widget: Found ${allAudio.length} audio elements`);
             allAudio.forEach((element, index) => {
                 console.log(`Accessibility Widget: Muting audio ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
                 element.muted = true;
@@ -20289,6 +20333,7 @@ class AccessibilityWidget {
             
             // Find and mute all video elements
             const allVideo = document.querySelectorAll('video');
+            console.log(`Accessibility Widget: Found ${allVideo.length} video elements`);
             allVideo.forEach((element, index) => {
                 console.log(`Accessibility Widget: Muting video ${index} - Volume: ${element.volume}, Muted: ${element.muted}, Playing: ${!element.paused}`);
                 element.muted = true;
@@ -20297,6 +20342,41 @@ class AccessibilityWidget {
                     element.pause();
                 }
             });
+            
+            // Also check for any media in iframes
+            const iframes = document.querySelectorAll('iframe');
+            console.log(`Accessibility Widget: Found ${iframes.length} iframes`);
+            iframes.forEach((iframe, index) => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc) {
+                        const iframeAudio = iframeDoc.querySelectorAll('audio, video');
+                        console.log(`Accessibility Widget: Found ${iframeAudio.length} media elements in iframe ${index}`);
+                        iframeAudio.forEach(element => {
+                            element.volume = 0;
+                            element.muted = true;
+                            if (!element.paused) {
+                                element.pause();
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log(`Accessibility Widget: CORS error accessing iframe ${index}:`, e.message);
+                }
+            });
+            
+            // Check for any Web Audio API contexts
+            if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                try {
+                    const AudioContextClass = AudioContext || webkitAudioContext;
+                    if (window.audioContext) {
+                        window.audioContext.suspend();
+                        console.log('Accessibility Widget: Suspended Web Audio Context');
+                    }
+                } catch (e) {
+                    console.log('Accessibility Widget: Could not suspend Web Audio Context:', e);
+                }
+            }
             
             console.log(`Accessibility Widget: Directly muted ${allAudio.length} audio and ${allVideo.length} video elements`);
         }
@@ -20959,9 +21039,11 @@ class AccessibilityWidget {
     
                     font-family: Arial, sans-serif !important;
     
+                    overflow-y: auto !important;
+    
                 ">
     
-                    <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; min-height: 100vh;">
     
                         ${finalContent}
     
