@@ -8653,7 +8653,9 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "Clear flashes & reduces color",
     
-                    // Vision impaired feature removed
+                    visionImpaired: "Vision Impaired Profile",
+    
+                    visionImpairedDesc: "Enhances text readability and visual clarity",
     
                     adhdFriendly: "ADHD Friendly Profile",
     
@@ -8832,8 +8834,8 @@ class AccessibilityWidget {
                     profilesTitle: "Elige el perfil de accesibilidad adecuado para ti",
         seizureSafe: "Perfil Anti-Convulsiones",
                     seizureSafeDesc: "Elimina destellos y reduce colores",
-        visionImpaired: "視障者設定檔",
-        visionImpairedDesc: "增強文字可讀性並提升整體視覺清晰度",
+        visionImpaired: "Perfil para Baja Visión",
+        visionImpairedDesc: "Mejora la legibilidad del texto y la claridad visual",
                     adhdFriendly: "Perfil Amigable para TDAH",
                     adhdFriendlyDesc: "Más enfoque y menos distracciones",
                     cognitiveDisability: "Perfil de Discapacidad Cognitiva",
@@ -8938,7 +8940,9 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "Entfernt Blitze und reduziert Farben",
     
-                    // Vision impaired feature removed
+                    visionImpaired: "Profil für Sehbehinderte",
+    
+                    visionImpairedDesc: "Verbessert die Textlesbarkeit und visuelle Klarheit",
     
                     adhdFriendly: "ADHS-freundliches Profil",
     
@@ -9119,8 +9123,8 @@ class AccessibilityWidget {
         profilesTitle: "Choisissez le bon profil d'accessibilité pour vous",
         seizureSafe: "Profil Anti-Épilepsie",
         seizureSafeDesc: "Élimine les flashs et réduit les couleurs",
-        visionImpaired: "Perfil para Baja Visión",
-        visionImpairedDesc: "Mejora la legibilidad del texto y la claridad visual",
+        visionImpaired: "Profil pour Malvoyants",
+        visionImpairedDesc: "Améliore la lisibilité du texte et la clarté visuelle",
         adhdFriendly: "Profil TDAH",
         adhdFriendlyDesc: "Plus de concentration et moins de distractions",
         cognitiveDisability: "Profil Déficience Cognitive",
@@ -9526,7 +9530,9 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "מסיר הבזקים ומפחית צבעים",
     
-                    // Vision impaired feature removed
+                    visionImpaired: "פרופיל לכבדי ראייה",
+    
+                    visionImpairedDesc: "משפר את קריאות הטקסט ואת הבהירות החזותית",
     
                     adhdFriendly: "פרופיל ידידותי ל-ADHD",
     
@@ -9707,7 +9713,8 @@ class AccessibilityWidget {
         profilesTitle: "Выберите подходящий профиль доступности",
         seizureSafe: "Профиль против эпилепсии",
         seizureSafeDesc: "Устраняет вспышки и снижает цвета",
-                    // Vision impaired feature removed
+        visionImpaired: "Профиль для слабовидящих",
+        visionImpairedDesc: "Улучшает читаемость текста и визуальную четкость",
                     adhdFriendly: "Профиль для СДВГ",
         adhdFriendlyDesc: "Больше концентрации и меньше отвлекающих факторов",
                     cognitiveDisability: "Профиль когнитивных нарушений",
@@ -9806,8 +9813,8 @@ class AccessibilityWidget {
         profilesTitle: "為您選擇合適的無障礙設定檔",
         seizureSafe: "防癲癇設定檔",
         seizureSafeDesc: "消除閃爍並減少顏色",
-        visionImpaired: "ملف لضعاف البصر",
-        visionImpairedDesc: "يعزز وضوح النص والعناصر المرئية",
+        visionImpaired: "視障者設定檔",
+        visionImpairedDesc: "增強文字可讀性並提升整體視覺清晰度",
         adhdFriendly: "ADHD友善設定檔",
         adhdFriendlyDesc: "更多專注，更少分心",
         cognitiveDisability: "認知障礙設定檔",
@@ -9911,7 +9918,9 @@ class AccessibilityWidget {
     
                     seizureSafeDesc: "يزيل الومضات ويقلل الألوان",
     
-                    // Vision impaired feature removed
+                    visionImpaired: "ملف لضعاف البصر",
+    
+                    visionImpairedDesc: "يعزز وضوح النص والعناصر المرئية",
     
                     adhdFriendly: "ملف صديق لاضطراب فرط الحركة",
     
@@ -20075,18 +20084,44 @@ class AccessibilityWidget {
             }
             
             // Override Web Audio API methods
-            if (typeof AudioContext !== 'undefined' && !this.originalMethods.createBufferSource) {
-                this.originalMethods.createBufferSource = AudioContext.prototype.createBufferSource;
-                AudioContext.prototype.createBufferSource = function() {
-                    // Return a dummy object that doesn't produce sound
-                    return {
-                        connect: () => {},
-                        start: () => {},
-                        stop: () => {},
-                        disconnect: () => {},
-                        pause: () => {}
+            if (typeof AudioContext !== 'undefined') {
+                // Override createBufferSource
+                if (!this.originalMethods.createBufferSource) {
+                    this.originalMethods.createBufferSource = AudioContext.prototype.createBufferSource;
+                    AudioContext.prototype.createBufferSource = function() {
+                        // Return a dummy object that doesn't produce sound
+                        return {
+                            connect: () => {},
+                            start: () => {},
+                            stop: () => {},
+                            disconnect: () => {},
+                            pause: () => {}
+                        };
                     };
-                };
+                }
+                
+                // Override AudioContext constructor to track all instances
+                if (!this.originalMethods.AudioContext) {
+                    const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (OriginalAudioContext) {
+                        this.originalMethods.AudioContext = OriginalAudioContext;
+                        const self = this;
+                        window.AudioContext = function(...args) {
+                            const context = new OriginalAudioContext(...args);
+                            // Immediately suspend if mute is active
+                            if (self.settings['mute-sound']) {
+                                context.suspend();
+                            }
+                            return context;
+                        };
+                        window.AudioContext.prototype = OriginalAudioContext.prototype;
+                        
+                        // Also override webkitAudioContext if it exists
+                        if (window.webkitAudioContext) {
+                            window.webkitAudioContext = window.AudioContext;
+                        }
+                    }
+                }
             }
             
             // Override common audio library methods
@@ -20179,7 +20214,6 @@ class AccessibilityWidget {
         
         // Restore global audio methods
         restoreGlobalAudioMethods() {
-            
             if (this.originalMethods) {
                 // Restore HTMLAudioElement methods
                 if (this.originalMethods.audioPlay && typeof HTMLAudioElement !== 'undefined') {
@@ -20195,13 +20229,19 @@ class AccessibilityWidget {
                 if (this.originalMethods.createBufferSource && typeof AudioContext !== 'undefined') {
                     AudioContext.prototype.createBufferSource = this.originalMethods.createBufferSource;
                 }
+                
+                // Restore AudioContext constructor
+                if (this.originalMethods.AudioContext) {
+                    window.AudioContext = this.originalMethods.AudioContext;
+                    if (window.webkitAudioContext) {
+                        window.webkitAudioContext = this.originalMethods.AudioContext;
+                    }
+                }
             }
         }
         
         // Add event listeners to catch new media elements
         addMediaEventListeners() {
-          
-            
             // Listen for new audio/video elements being added to the DOM
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -20209,15 +20249,29 @@ class AccessibilityWidget {
                         if (node.nodeType === 1) { // Element node
                             // Check if it's a media element
                             if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-                    
                                 this.muteElement(node);
+                            }
+                            
+                            // Check for iframes being added
+                            if (node.tagName === 'IFRAME') {
+                                // Mute iframe immediately
+                                setTimeout(() => {
+                                    this.muteIframePlayer(node);
+                                }, 100); // Small delay to allow iframe to load
                             }
                             
                             // Check for media elements within the added node
                             const mediaElements = node.querySelectorAll ? node.querySelectorAll('audio, video') : [];
                             mediaElements.forEach(element => {
-                         
                                 this.muteElement(element);
+                            });
+                            
+                            // Check for iframes within the added node
+                            const iframes = node.querySelectorAll ? node.querySelectorAll('iframe') : [];
+                            iframes.forEach(iframe => {
+                                setTimeout(() => {
+                                    this.muteIframePlayer(iframe);
+                                }, 100);
                             });
                         }
                     });
@@ -20231,6 +20285,38 @@ class AccessibilityWidget {
             
             // Store observer for cleanup
             this.mediaObserver = observer;
+            
+            // Add global event listeners to catch any media that tries to play
+            const handlePlayEvent = (e) => {
+                if (this.settings['mute-sound']) {
+                    const element = e.target;
+                    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                        element.muted = true;
+                        element.volume = 0;
+                        element.pause();
+                        element.currentTime = 0;
+                    }
+                }
+            };
+            
+            const handlePlayingEvent = (e) => {
+                if (this.settings['mute-sound']) {
+                    const element = e.target;
+                    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+                        element.muted = true;
+                        element.volume = 0;
+                        element.pause();
+                    }
+                }
+            };
+            
+            // Add event listeners to document for capturing phase
+            document.addEventListener('play', handlePlayEvent, true);
+            document.addEventListener('playing', handlePlayingEvent, true);
+            
+            // Store handlers for cleanup
+            this.globalPlayHandler = handlePlayEvent;
+            this.globalPlayingHandler = handlePlayingEvent;
         }
         
         // Remove media event listeners
@@ -20238,7 +20324,17 @@ class AccessibilityWidget {
             if (this.mediaObserver) {
                 this.mediaObserver.disconnect();
                 this.mediaObserver = null;
-               
+            }
+            
+            // Remove global event listeners
+            if (this.globalPlayHandler) {
+                document.removeEventListener('play', this.globalPlayHandler, true);
+                this.globalPlayHandler = null;
+            }
+            
+            if (this.globalPlayingHandler) {
+                document.removeEventListener('playing', this.globalPlayingHandler, true);
+                this.globalPlayingHandler = null;
             }
         }
         
@@ -20256,7 +20352,7 @@ class AccessibilityWidget {
         
         // Enhanced muting for iframe-based players (YouTube, Vimeo, etc.)
         muteIframePlayer(iframe) {
-           
+            if (!iframe || !iframe.contentWindow) return;
             
             try {
                 // Try to access iframe content (may fail due to CORS)
@@ -20273,46 +20369,157 @@ class AccessibilityWidget {
                     });
                 }
             } catch (e) {
-               
+                // CORS error expected for cross-origin iframes
             }
             
             // Try to mute via postMessage (for supported players)
             // Security: Use specific target origins instead of wildcard
             try {
-                const iframeSrc = iframe.src || '';
-                let targetOrigin = '*';
+                const iframeSrc = iframe.src || iframe.getAttribute('src') || '';
+                if (!iframeSrc) return;
+                
+                let targetOrigin = null;
+                let platform = null;
+                
                 // Extract origin from iframe src for security
                 try {
                     const iframeUrl = new URL(iframeSrc);
                     targetOrigin = iframeUrl.origin;
+                    
+                    // Detect platform for specific commands
+                    const hostname = iframeUrl.hostname.toLowerCase();
+                    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+                        platform = 'youtube';
+                        targetOrigin = 'https://www.youtube.com';
+                    } else if (hostname.includes('vimeo.com')) {
+                        platform = 'vimeo';
+                        targetOrigin = 'https://player.vimeo.com';
+                    } else if (hostname.includes('soundcloud.com')) {
+                        platform = 'soundcloud';
+                        targetOrigin = 'https://w.soundcloud.com';
+                    } else if (hostname.includes('spotify.com')) {
+                        platform = 'spotify';
+                        targetOrigin = 'https://open.spotify.com';
+                    } else if (hostname.includes('twitch.tv')) {
+                        platform = 'twitch';
+                        targetOrigin = 'https://player.twitch.tv';
+                    } else if (hostname.includes('dailymotion.com')) {
+                        platform = 'dailymotion';
+                        targetOrigin = 'https://www.dailymotion.com';
+                    } else if (hostname.includes('jwplayer.com') || hostname.includes('jwplatform.com')) {
+                        platform = 'jwplayer';
+                    } else if (hostname.includes('brightcove.com')) {
+                        platform = 'brightcove';
+                    } else if (hostname.includes('wistia.com')) {
+                        platform = 'wistia';
+                    }
                 } catch {
                     // If URL parsing fails, check for known video domains
                     if (iframeSrc.includes('youtube.com') || iframeSrc.includes('youtu.be')) {
+                        platform = 'youtube';
                         targetOrigin = 'https://www.youtube.com';
                     } else if (iframeSrc.includes('vimeo.com')) {
+                        platform = 'vimeo';
                         targetOrigin = 'https://player.vimeo.com';
+                    } else if (iframeSrc.includes('soundcloud.com')) {
+                        platform = 'soundcloud';
+                        targetOrigin = 'https://w.soundcloud.com';
+                    } else if (iframeSrc.includes('spotify.com')) {
+                        platform = 'spotify';
+                        targetOrigin = 'https://open.spotify.com';
+                    } else if (iframeSrc.includes('twitch.tv')) {
+                        platform = 'twitch';
+                        targetOrigin = 'https://player.twitch.tv';
                     }
                 }
                 
-                iframe.contentWindow?.postMessage(JSON.stringify({
-                    event: 'command',
-                    func: 'mute',
-                    args: ''
-                }), targetOrigin);
+                if (!targetOrigin) return;
                 
-                iframe.contentWindow?.postMessage(JSON.stringify({
-                    event: 'command',
-                    func: 'setVolume',
-                    args: '0'
-                }), targetOrigin);
-                
-                iframe.contentWindow?.postMessage(JSON.stringify({
-                    event: 'command',
-                    func: 'pauseVideo',
-                    args: ''
-                }), targetOrigin);
+                // Send platform-specific mute commands
+                if (platform === 'youtube') {
+                    // YouTube iframe API commands
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'mute',
+                        args: ''
+                    }), targetOrigin);
+                    
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'setVolume',
+                        args: '0'
+                    }), targetOrigin);
+                    
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'pauseVideo',
+                        args: ''
+                    }), targetOrigin);
+                } else if (platform === 'vimeo') {
+                    // Vimeo Player API commands
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                    
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'pause'
+                    }), targetOrigin);
+                } else if (platform === 'soundcloud') {
+                    // SoundCloud Widget API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                    
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'pause'
+                    }), targetOrigin);
+                } else if (platform === 'spotify') {
+                    // Spotify Embed API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        command: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                } else if (platform === 'twitch') {
+                    // Twitch Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        type: 'mute'
+                    }), targetOrigin);
+                } else if (platform === 'dailymotion') {
+                    // Dailymotion Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        command: 'mute'
+                    }), targetOrigin);
+                } else if (platform === 'jwplayer') {
+                    // JW Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        type: 'mute'
+                    }), targetOrigin);
+                } else {
+                    // Generic postMessage attempts for unknown players
+                    // Try common mute commands
+                    const muteCommands = [
+                        { method: 'mute' },
+                        { command: 'mute' },
+                        { type: 'mute' },
+                        { action: 'mute' },
+                        { method: 'setVolume', value: 0 },
+                        { command: 'setVolume', value: 0 },
+                        { method: 'pause' },
+                        { command: 'pause' }
+                    ];
+                    
+                    muteCommands.forEach(cmd => {
+                        try {
+                            iframe.contentWindow.postMessage(JSON.stringify(cmd), targetOrigin);
+                        } catch (e) {
+                            // Ignore errors
+                        }
+                    });
+                }
             } catch (e) {
-               
+                // Ignore errors
             }
             
             // Keep iframe visible but muted
@@ -20553,20 +20760,18 @@ class AccessibilityWidget {
                 }
             });
             
-            // 4. Check iframes for media
+            // 4. Check iframes for media - use enhanced muteIframePlayer function
             const iframes = document.querySelectorAll('iframe');
   
             iframes.forEach((iframe, index) => {
                 try {
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    // First try direct access (same-origin iframes)
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
                     if (iframeDoc) {
                         const iframeAudio = iframeDoc.querySelectorAll('audio');
                         const iframeVideo = iframeDoc.querySelectorAll('video');
 
-                        
-                        const iframeMedia = iframeDoc.querySelectorAll('audio, video, [class*="audio"], [class*="video"], [class*="player"]');
-
-                        iframeMedia.forEach(element => {
+                        [...iframeAudio, ...iframeVideo].forEach(element => {
                             // Only mute actual media elements - don't hide anything
                             if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
                                 try {
@@ -20581,8 +20786,19 @@ class AccessibilityWidget {
                             }
                         });
                     }
-                } catch (e) {
                     
+                    // Always try postMessage for cross-origin iframes (YouTube, Vimeo, etc.)
+                    // This works even when direct access fails due to CORS
+                    this.muteIframePlayer(iframe);
+                    totalMuted++;
+                } catch (e) {
+                    // If direct access fails, still try postMessage
+                    try {
+                        this.muteIframePlayer(iframe);
+                        totalMuted++;
+                    } catch (e2) {
+                        // Ignore errors
+                    }
                 }
             });
             
@@ -20659,13 +20875,11 @@ class AccessibilityWidget {
                         }
                     });
                     
-                    // Mute iframe players
+                    // Mute all iframe players (not just specific ones)
                     allIframes.forEach(iframe => {
-                        if (iframe.src && (iframe.src.includes('youtube') || iframe.src.includes('vimeo') || 
-                            iframe.src.includes('soundcloud') || iframe.src.includes('spotify') ||
-                            iframe.src.includes('player') || iframe.src.includes('embed'))) {
-                            this.muteIframePlayer(iframe);
-                        }
+                        // Try to mute all iframes, not just known ones
+                        // The muteIframePlayer function will handle unknown players with generic commands
+                        this.muteIframePlayer(iframe);
                     });
                     
                     // Mute embed/object players
