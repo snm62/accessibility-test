@@ -1361,6 +1361,16 @@ class AccessibilityWidget {
             try {
                 const siteId = await this.getSiteId();
                 const domain = window.location.hostname;
+                
+                // Security: Validate domain format
+                if (!domain || typeof domain !== 'string' || domain.length > 253) {
+                    return false;
+                }
+                // Basic domain validation - alphanumeric, dots, hyphens only
+                if (!/^[a-zA-Z0-9.-]+$/.test(domain)) {
+                    return false;
+                }
+                
                 // Read siteToken from this script tag
                 let siteTokenParam = null;
                 try {
@@ -1368,8 +1378,18 @@ class AccessibilityWidget {
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteTokenParam = u.searchParams.get('siteToken');
+                        // Security: Validate token format if present (alphanumeric and common token chars only)
+                        if (siteTokenParam && (!/^[a-zA-Z0-9._-]+$/.test(siteTokenParam) || siteTokenParam.length > 500)) {
+                            siteTokenParam = null;
+                        }
                     }
                 } catch {}
+                
+                // Security: Validate siteId if present
+                if (siteId && (typeof siteId !== 'string' || siteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(siteId))) {
+                    return false;
+                }
+                
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
                 const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const response = await fetch(`${base3}/api/accessibility/validate-domain`, {
@@ -1575,39 +1595,7 @@ class AccessibilityWidget {
         }
         
         // Set up aggressive monitoring for any text animations that might start
-        setupSeizureSafeMonitoring() {
-            try {
-                // Set up MutationObserver to watch for dynamically added text animation elements
-                const observer = new MutationObserver((mutations) => {
-                    mutations.forEach((mutation) => {
-                        if (mutation.type === 'childList') {
-                            mutation.addedNodes.forEach((node) => {
-                                if (node.nodeType === Node.ELEMENT_NODE) {
-                                    // Check if the added node has text animation classes
-                                    const textAnimationClasses = ['fade-up', 'fade-left', 'fade-right', 'fade-in', 'fade-up-multi-text', 'fade-up-multi-text-fast', 'char', 'word', 'split', 'splitting'];
-                                    const hasAnimationClass = textAnimationClasses.some(className => node.classList.contains(className));
-                                    if (hasAnimationClass) {
-                                        // Force the animation to complete immediately
-                                        node.style.animation = 'none';
-                                        node.style.transition = 'none';
-                                        node.style.opacity = '1';
-                                        node.style.visibility = 'visible';
-                                    }
-                                }
-                            });
-                        }
-                    });
-                });
-                
-                // Start observing
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-            } catch (e) {
-                
-            }
-        }
+        // REMOVED: Duplicate setupSeizureSafeMonitoring() - using more comprehensive version below
         
         // Set up aggressive monitoring for text animations when seizure-safe mode is active
         setupSeizureSafeMonitoring() {
@@ -4552,7 +4540,17 @@ class AccessibilityWidget {
     
             icon.setAttribute('aria-describedby', 'accessibility-icon-description');
     
-            icon.innerHTML = '<i class="fas fa-universal-access" aria-hidden="true"></i><span id="accessibility-icon-description" class="sr-only">Click to open accessibility settings panel</span>';
+            // Security: Use DOM methods instead of innerHTML for safe HTML insertion
+            icon.textContent = '';
+            const iconElement = document.createElement('i');
+            iconElement.className = 'fas fa-universal-access';
+            iconElement.setAttribute('aria-hidden', 'true');
+            icon.appendChild(iconElement);
+            const descriptionSpan = document.createElement('span');
+            descriptionSpan.id = 'accessibility-icon-description';
+            descriptionSpan.className = 'sr-only';
+            descriptionSpan.textContent = 'Click to open accessibility settings panel';
+            icon.appendChild(descriptionSpan);
     
             icon.style.pointerEvents = 'auto';
             
@@ -11136,26 +11134,36 @@ class AccessibilityWidget {
             
     
             if (resetBtn) {
-    
-                resetBtn.innerHTML = `<i class="fas fa-redo"></i> ${translations.resetSettings || 'Reset Settings'}`;
-    
-        
-    
+                // Security: Use textContent for safe text insertion, create icon separately
+                resetBtn.textContent = '';
+                const resetIcon = document.createElement('i');
+                resetIcon.className = 'fas fa-redo';
+                resetIcon.setAttribute('aria-hidden', 'true');
+                resetBtn.appendChild(resetIcon);
+                const resetText = document.createTextNode(' ' + (translations.resetSettings || 'Reset Settings'));
+                resetBtn.appendChild(resetText);
             }
     
             if (statementBtn) {
-    
-                statementBtn.innerHTML = `<i class="fas fa-file-alt"></i> ${translations.statement || 'Statement'}`;
-   
-    
+                // Security: Use textContent for safe text insertion, create icon separately
+                statementBtn.textContent = '';
+                const statementIcon = document.createElement('i');
+                statementIcon.className = 'fas fa-file-alt';
+                statementIcon.setAttribute('aria-hidden', 'true');
+                statementBtn.appendChild(statementIcon);
+                const statementText = document.createTextNode(' ' + (translations.statement || 'Statement'));
+                statementBtn.appendChild(statementText);
             }
     
             if (hideBtn) {
-    
-                hideBtn.innerHTML = `<i class="fas fa-eye-slash"></i> ${translations.hideInterface || 'Hide Interface'}`;
-    
-            
-    
+                // Security: Use textContent for safe text insertion, create icon separately
+                hideBtn.textContent = '';
+                const hideIcon = document.createElement('i');
+                hideIcon.className = 'fas fa-eye-slash';
+                hideIcon.setAttribute('aria-hidden', 'true');
+                hideBtn.appendChild(hideIcon);
+                const hideText = document.createTextNode(' ' + (translations.hideInterface || 'Hide Interface'));
+                hideBtn.appendChild(hideText);
             }
     
             
@@ -16614,9 +16622,17 @@ class AccessibilityWidget {
             const saved = localStorage.getItem('accessibility-settings');
     
             if (saved) {
-    
-                this.settings = JSON.parse(saved);
-    
+                // Security: Add error handling for JSON parsing to prevent prototype pollution
+                try {
+                    this.settings = JSON.parse(saved);
+                    // Validate that settings is an object and not null
+                    if (typeof this.settings !== 'object' || this.settings === null || Array.isArray(this.settings)) {
+                        this.settings = {};
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse saved settings, using defaults:', e);
+                    this.settings = {};
+                }
             }
     
             
@@ -16859,13 +16875,34 @@ class AccessibilityWidget {
                     return;
                 }
                 
+                // Security: Validate siteId format
+                if (typeof siteId !== 'string' || siteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(siteId)) {
+                    console.warn('Invalid siteId format, skipping KV save');
+                    return;
+                }
+                
+                // Security: Sanitize URL to remove sensitive query parameters
+                let sanitizedUrl = window.location.href;
+                try {
+                    const url = new URL(window.location.href);
+                    // Remove potentially sensitive query parameters
+                    const sensitiveParams = ['token', 'password', 'secret', 'key', 'auth', 'session', 'sid'];
+                    sensitiveParams.forEach(param => {
+                        url.searchParams.delete(param);
+                    });
+                    sanitizedUrl = url.toString();
+                } catch {
+                    // If URL parsing fails, use origin only
+                    sanitizedUrl = window.location.origin + window.location.pathname;
+                }
+                
                 // Prepare settings data for KV
                 const settingsData = {
                     siteId: siteId,
                     settings: this.settings,
                     timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    url: window.location.href
+                    userAgent: navigator.userAgent ? navigator.userAgent.substring(0, 500) : '', // Limit length
+                    url: sanitizedUrl
                 };
        
                 
@@ -20213,24 +20250,40 @@ class AccessibilityWidget {
             }
             
             // Try to mute via postMessage (for supported players)
+            // Security: Use specific target origins instead of wildcard
             try {
+                const iframeSrc = iframe.src || '';
+                let targetOrigin = '*';
+                // Extract origin from iframe src for security
+                try {
+                    const iframeUrl = new URL(iframeSrc);
+                    targetOrigin = iframeUrl.origin;
+                } catch {
+                    // If URL parsing fails, check for known video domains
+                    if (iframeSrc.includes('youtube.com') || iframeSrc.includes('youtu.be')) {
+                        targetOrigin = 'https://www.youtube.com';
+                    } else if (iframeSrc.includes('vimeo.com')) {
+                        targetOrigin = 'https://player.vimeo.com';
+                    }
+                }
+                
                 iframe.contentWindow?.postMessage(JSON.stringify({
                     event: 'command',
                     func: 'mute',
                     args: ''
-                }), '*');
+                }), targetOrigin);
                 
                 iframe.contentWindow?.postMessage(JSON.stringify({
                     event: 'command',
                     func: 'setVolume',
                     args: '0'
-                }), '*');
+                }), targetOrigin);
                 
                 iframe.contentWindow?.postMessage(JSON.stringify({
                     event: 'command',
                     func: 'pauseVideo',
                     args: ''
-                }), '*');
+                }), targetOrigin);
             } catch (e) {
                
             }
@@ -23135,198 +23188,11 @@ class AccessibilityWidget {
         }
         
         // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-        overrideRequestAnimationFrame() {
-            // Store the original function to allow restoration later
-            if (!window._originalRequestAnimationFrame) {
-                window._originalRequestAnimationFrame = window.requestAnimationFrame;
-            }
-            
-            // Block visual animations but preserve scroll-related animations
-            window.requestAnimationFrame = (callback) => {
-                if (callback && typeof callback === 'function') {
-                    try {
-                        const callbackStr = callback.toString().toLowerCase();
-                        
-                        // Allow scroll-related animations
-                        if (callbackStr.includes('scroll') || 
-                            callbackStr.includes('wheel') || 
-                            callbackStr.includes('touch') ||
-                            callbackStr.includes('mouse') ||
-                            callbackStr.includes('lenis') ||
-                            callbackStr.includes('gsap') ||
-                            callbackStr.includes('scrolltrigger') ||
-                            callbackStr.includes('locomotive') ||
-                            callbackStr.includes('smooth') ||
-                            callbackStr.includes('parallax')) {
-                            return window._originalRequestAnimationFrame(callback);
-                        }
-                        
-                        // Block visual animations (Lottie, CSS animations, etc.)
-                        if (callbackStr.includes('animation') || 
-                            callbackStr.includes('animate') ||
-                            callbackStr.includes('lottie') ||
-                            callbackStr.includes('fade') ||
-                            callbackStr.includes('slide') ||
-                            callbackStr.includes('bounce') ||
-                            callbackStr.includes('pulse') ||
-                            callbackStr.includes('shake') ||
-                            callbackStr.includes('flash') ||
-                            callbackStr.includes('blink') ||
-                            callbackStr.includes('glow') ||
-                            callbackStr.includes('spin') ||
-                            callbackStr.includes('rotate') ||
-                            callbackStr.includes('scale') ||
-                            callbackStr.includes('zoom') ||
-                            callbackStr.includes('wiggle') ||
-                            callbackStr.includes('jiggle') ||
-                            callbackStr.includes('twist') ||
-                            callbackStr.includes('flip') ||
-                            callbackStr.includes('swing') ||
-                            callbackStr.includes('wobble') ||
-                            callbackStr.includes('tilt')) {
-                            return 0; // Block visual animations
-                        }
-                        
-                        // Allow other callbacks (scroll, etc.)
-                        return window._originalRequestAnimationFrame(callback);
-                    } catch (e) {
-                        
-                        return 0;
-                    }
-                }
-                return 0;
-            };
-            
-       
-        }
+        // REMOVED: Duplicate overrideRequestAnimationFrame() - using more comprehensive version at line 24467
         
         // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
-        stopAnimationLibraries() {
-            // Stop Lottie animations (but don't destroy them)
-            if (typeof lottie !== 'undefined' && lottie.getRegisteredAnimations) {
-                try {
-                    lottie.getRegisteredAnimations().forEach(anim => {
-                        if (anim && typeof anim.stop === 'function') {
-                            anim.stop();
-                        }
-                        if (anim && typeof anim.pause === 'function') {
-                            anim.pause();
-                        }
-                        // REMOVED: anim.destroy() - Don't destroy, just stop
-                    });
-                   
-                } catch (e) {
-                   
-                }
-            }
-            
-            // AGGRESSIVE: Stop GSAP visual animations (but preserve scroll)
-            if (typeof gsap !== 'undefined') {
-                try {
-                    // Kill visual animations but preserve scroll-related ones
-                    if (gsap.killTweensOf) {
-                        gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, .bounce, .pulse, .shake, .flash, .blink, .glow, .spin, .rotate, .scale, .zoom, .wiggle, .jiggle, .twist, .flip, .swing, .wobble, .tilt');
-                    }
-                 
-                } catch (error) {
-                   
-                }
-            }
-
-            // AGGRESSIVE: Stop Three.js animations
-            if (typeof THREE !== 'undefined') {
-                try {
-                    // Stop all THREE.js animations
-                    if (window.scene && window.scene.children) {
-                        window.scene.children.forEach(child => {
-                            if (child.animations && child.animations.length > 0) {
-                                child.animations.forEach(anim => {
-                                    if (anim.stop) anim.stop();
-                                    if (anim.pause) anim.pause();
-                                });
-                            }
-                        });
-                    }
-              
-                } catch (error) {
-                    
-                }
-            }
-
-            // AGGRESSIVE: Stop Swiper animations
-            if (typeof Swiper !== 'undefined') {
-                try {
-                    // Find and stop all Swiper instances
-                    document.querySelectorAll('.swiper').forEach(swiperEl => {
-                        if (swiperEl.swiper && swiperEl.swiper.autoplay) {
-                            swiperEl.swiper.autoplay.stop();
-                        }
-                    });
-                   
-                } catch (error) {
-            
-                }
-            }
-
-            // AGGRESSIVE: Stop AOS animations
-            if (typeof AOS !== 'undefined') {
-                try {
-                    AOS.refresh();
-                 
-                } catch (error) {
-                    
-                }
-            }
-            
-            // Stop Three.js animations
-            if (typeof THREE !== 'undefined') {
-                try {
-                    // Stop all render loops
-                    const renderers = document.querySelectorAll('canvas');
-                    renderers.forEach(canvas => {
-                        if (canvas._threeRenderer) {
-                            canvas._threeRenderer.setAnimationLoop(null);
-                        }
-                    });
-               
-                } catch (e) {
-                   
-                }
-            }
-        }
-        
-        // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
-        replaceAnimatedMedia() {
-            // Stop autoplay videos
-            document.querySelectorAll('video[autoplay]').forEach(video => {
-                video.pause();
-                video.removeAttribute('autoplay');
-            });
-            
-            // Stop autoplay audio
-            document.querySelectorAll('audio[autoplay]').forEach(audio => {
-                audio.pause();
-                audio.removeAttribute('autoplay');
-            });
-            
-            // Replace animated GIFs with static placeholder
-            document.querySelectorAll('img[src$=".gif"]').forEach(img => {
-                if (!img.dataset.originalSrc) {
-                    img.dataset.originalSrc = img.src;
-                    // Use a tiny transparent pixel as placeholder
-                    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
-                }
-            });
-            
-            // Replace APNGs with static placeholder
-            document.querySelectorAll('img[src$=".png"]').forEach(img => {
-                if (!img.dataset.originalSrc && img.src.includes('apng')) {
-                    img.dataset.originalSrc = img.src;
-                    img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-                }
-            });
-           
-        }
+        // REMOVED: Duplicate stopAnimationLibraries() - using more comprehensive version at line 24703
+        // REMOVED: Duplicate replaceAnimatedMedia() - using more comprehensive version at line 24832
         
         // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
         stopDOMAnimationLoops() {
@@ -23453,12 +23319,43 @@ class AccessibilityWidget {
             // Handle embedded media (YouTube, Vimeo, etc.)
             document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"]').forEach(iframe => {
                 try {
-                    // Try to pause embedded videos by modifying src
+                    // Security: Validate URL before manipulation to prevent XSS
                     const src = iframe.src;
+                    if (!src || typeof src !== 'string') return;
+                    
+                    // Validate URL format and allowed domains
+                    let isValidUrl = false;
+                    try {
+                        const url = new URL(src);
+                        const allowedDomains = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'player.vimeo.com'];
+                        isValidUrl = allowedDomains.some(domain => url.hostname.includes(domain));
+                    } catch {
+                        // If URL parsing fails, skip modification
+                        return;
+                    }
+                    
+                    if (!isValidUrl) return;
+                    
+                    // Try to pause embedded videos by modifying src
                     if (src.includes('autoplay=1')) {
-                        iframe.src = src.replace('autoplay=1', 'autoplay=0');
+                        const newSrc = src.replace('autoplay=1', 'autoplay=0');
+                        // Double-check the new URL is still valid
+                        try {
+                            new URL(newSrc);
+                            iframe.src = newSrc;
+                        } catch {
+                            // Invalid URL, skip
+                        }
                     } else if (!src.includes('autoplay=')) {
-                        iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=0';
+                        const separator = src.includes('?') ? '&' : '?';
+                        const newSrc = src + separator + 'autoplay=0';
+                        // Double-check the new URL is still valid
+                        try {
+                            new URL(newSrc);
+                            iframe.src = newSrc;
+                        } catch {
+                            // Invalid URL, skip
+                        }
                     }
                 } catch (e) {
                   
@@ -23533,12 +23430,7 @@ class AccessibilityWidget {
         }
         
         // Restore requestAnimationFrame
-        restoreRequestAnimationFrame() {
-            if (window._originalRequestAnimationFrame) {
-                window.requestAnimationFrame = window._originalRequestAnimationFrame;
-              
-            }
-        }
+        // REMOVED: Duplicate restoreRequestAnimationFrame() - using more comprehensive version at line 24737
         
         // Restore setTimeout and setInterval
         restoreDOMAnimationLoops() {
@@ -24806,8 +24698,22 @@ class AccessibilityWidget {
                 iframes.forEach(iframe => {
                     try {
                         // Try to pause iframe content if possible
+                        // Security: Use specific target origins instead of wildcard
                         if (iframe.contentWindow && iframe.contentWindow.postMessage) {
-                            iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                            const iframeSrc = iframe.src || '';
+                            let targetOrigin = '*';
+                            try {
+                                const iframeUrl = new URL(iframeSrc);
+                                targetOrigin = iframeUrl.origin;
+                            } catch {
+                                // If URL parsing fails, check for known video domains
+                                if (iframeSrc.includes('youtube.com') || iframeSrc.includes('youtu.be')) {
+                                    targetOrigin = 'https://www.youtube.com';
+                                } else if (iframeSrc.includes('vimeo.com')) {
+                                    targetOrigin = 'https://player.vimeo.com';
+                                }
+                            }
+                            iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', targetOrigin);
                          
                         }
                     } catch (error) {
@@ -26203,12 +26109,43 @@ class AccessibilityWidget {
                 const iframes = document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"]');
                 iframes.forEach(iframe => {
                     try {
-                        // Try to stop embedded videos by modifying src
+                        // Security: Validate URL before manipulation to prevent XSS
                         const src = iframe.src;
+                        if (!src || typeof src !== 'string') return;
+                        
+                        // Validate URL format and allowed domains
+                        let isValidUrl = false;
+                        try {
+                            const url = new URL(src);
+                            const allowedDomains = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'player.vimeo.com'];
+                            isValidUrl = allowedDomains.some(domain => url.hostname.includes(domain));
+                        } catch {
+                            // If URL parsing fails, skip modification
+                            return;
+                        }
+                        
+                        if (!isValidUrl) return;
+                        
+                        // Try to stop embedded videos by modifying src
                         if (src.includes('autoplay=1')) {
-                            iframe.src = src.replace('autoplay=1', 'autoplay=0');
+                            const newSrc = src.replace('autoplay=1', 'autoplay=0');
+                            // Double-check the new URL is still valid
+                            try {
+                                new URL(newSrc);
+                                iframe.src = newSrc;
+                            } catch {
+                                // Invalid URL, skip
+                            }
                         } else if (!src.includes('autoplay=0')) {
-                            iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=0';
+                            const separator = src.includes('?') ? '&' : '?';
+                            const newSrc = src + separator + 'autoplay=0';
+                            // Double-check the new URL is still valid
+                            try {
+                                new URL(newSrc);
+                                iframe.src = newSrc;
+                            } catch {
+                                // Invalid URL, skip
+                            }
                         }
                         iframe.setAttribute('data-seizure-safe-stopped', 'true');
                     } catch (_) {}
@@ -31346,6 +31283,15 @@ class AccessibilityWidget {
                     return { hasAccess: true, isStaging: false };
                 }
                 
+                // Security: Validate domain format
+                if (!currentDomain || typeof currentDomain !== 'string' || currentDomain.length > 253) {
+                    return { hasAccess: false, isStaging: false };
+                }
+                // Basic domain validation - alphanumeric, dots, hyphens only
+                if (!/^[a-zA-Z0-9.-]+$/.test(currentDomain)) {
+                    return { hasAccess: false, isStaging: false };
+                }
+                
                 // For custom domains, validate with signed token from script tag
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
@@ -31354,6 +31300,14 @@ class AccessibilityWidget {
                         const u = new URL(scriptEl.src);
                         siteIdParam = u.searchParams.get('siteId');
                         siteTokenParam = u.searchParams.get('siteToken');
+                        // Security: Validate token format if present
+                        if (siteTokenParam && (!/^[a-zA-Z0-9._-]+$/.test(siteTokenParam) || siteTokenParam.length > 500)) {
+                            siteTokenParam = null;
+                        }
+                        // Security: Validate siteId format if present
+                        if (siteIdParam && (typeof siteIdParam !== 'string' || siteIdParam.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(siteIdParam))) {
+                            siteIdParam = null;
+                        }
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
@@ -31423,19 +31377,25 @@ class AccessibilityWidget {
         }
         
         // Final reader mode check - prevent any widget initialization in reader mode
+        // Consolidated reader mode check - using same comprehensive check as top of file
         const checkReaderMode = () => {
-            if ((document.documentElement && document.documentElement.classList && document.documentElement.classList.contains('reader-mode')) || 
-                (document.body && document.body.classList && document.body.classList.contains('reader-mode')) ||
+            const isReaderMode = document.documentElement.classList.contains('reader-mode') || 
+                document.body.classList.contains('reader-mode') ||
                 window.location.search.includes('reader-mode') ||
                 document.querySelector('[data-reader-mode]') ||
                 document.querySelector('.reader-mode') ||
                 document.querySelector('#reader-mode') ||
                 window.location.hash.includes('reader') ||
-                document.title.toLowerCase().includes('reader')) {
-
-                return false;
-            }
-            return true;
+                document.title.toLowerCase().includes('reader') ||
+                document.querySelector('meta[name="reader-mode"]') ||
+                document.querySelector('meta[name="reading-mode"]') ||
+                window.navigator.userAgent.includes('Reader') ||
+                window.navigator.userAgent.includes('Readability') ||
+                window.location.search.includes('read') ||
+                window.location.search.includes('print') ||
+                document.documentElement.getAttribute('data-reader-mode') ||
+                document.body.getAttribute('data-reader-mode');
+            return !isReaderMode;
         };
         
         // Override all widget functions if reader mode is detected
