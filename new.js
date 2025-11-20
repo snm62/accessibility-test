@@ -1391,7 +1391,10 @@ class AccessibilityWidget {
                 // Read siteToken from this script tag
                 let siteTokenParam = null;
                 try {
-                    const scriptEl = document.currentScript || document.querySelector('script[src*="test.js"]');
+                    const scriptEl = document.currentScript || 
+                                   document.querySelector('script[src*="test.js"]') ||
+                                   document.querySelector('script[src*="new.js"]') ||
+                                   document.querySelector('script[src*="accessibility"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteTokenParam = u.searchParams.get('siteToken');
@@ -28731,7 +28734,10 @@ class AccessibilityWidget {
         // Get site ID for API calls via script tag (no storage, no mapping)
         async getSiteId() {
           try {
-            const scriptEl = document.currentScript || document.querySelector('script[src*="test.js"]');
+            const scriptEl = document.currentScript || 
+                           document.querySelector('script[src*="test.js"]') ||
+                           document.querySelector('script[src*="new.js"]') ||
+                           document.querySelector('script[src*="accessibility"]');
             if (scriptEl && scriptEl.src) {
               const u = new URL(scriptEl.src);
               const sid = u.searchParams.get('siteId');
@@ -31354,7 +31360,11 @@ class AccessibilityWidget {
                 // For custom domains, validate with signed token from script tag
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
-                    const scriptEl = document.currentScript || document.querySelector('script[src*="test.js"]');
+                    // Try to find the script tag - check for both test.js and new.js
+                    const scriptEl = document.currentScript || 
+                                   document.querySelector('script[src*="test.js"]') ||
+                                   document.querySelector('script[src*="new.js"]') ||
+                                   document.querySelector('script[src*="accessibility"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteIdParam = u.searchParams.get('siteId');
