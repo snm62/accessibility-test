@@ -8832,7 +8832,8 @@ class AccessibilityWidget {
                     profilesTitle: "Elige el perfil de accesibilidad adecuado para ti",
         seizureSafe: "Perfil Anti-Convulsiones",
                     seizureSafeDesc: "Elimina destellos y reduce colores",
-        // Vision impaired feature removed
+        visionImpaired: "視障者設定檔",
+        visionImpairedDesc: "增強文字可讀性並提升整體視覺清晰度",
                     adhdFriendly: "Perfil Amigable para TDAH",
                     adhdFriendlyDesc: "Más enfoque y menos distracciones",
                     cognitiveDisability: "Perfil de Discapacidad Cognitiva",
@@ -9118,7 +9119,8 @@ class AccessibilityWidget {
         profilesTitle: "Choisissez le bon profil d'accessibilité pour vous",
         seizureSafe: "Profil Anti-Épilepsie",
         seizureSafeDesc: "Élimine les flashs et réduit les couleurs",
-        // Vision impaired feature removed
+        visionImpaired: "Perfil para Baja Visión",
+        visionImpairedDesc: "Mejora la legibilidad del texto y la claridad visual",
         adhdFriendly: "Profil TDAH",
         adhdFriendlyDesc: "Plus de concentration et moins de distractions",
         cognitiveDisability: "Profil Déficience Cognitive",
@@ -9216,7 +9218,8 @@ class AccessibilityWidget {
         profilesTitle: "Escolha o perfil de acessibilidade certo para você",
         seizureSafe: "Perfil Anti-Convulsões",
         seizureSafeDesc: "Elimina flashes e reduz cores",
-        // Vision impaired feature removed
+        visionImpaired: "Perfil para Baixa Visão",
+        visionImpairedDesc: "Melhora a legibilidade do texto e a clareza visual",
                     adhdFriendly: "Perfil Amigável para TDAH",
         adhdFriendlyDesc: "Mais foco e menos distrações",
                     cognitiveDisability: "Perfil de Deficiência Cognitiva",
@@ -9316,7 +9319,8 @@ class AccessibilityWidget {
                     profilesTitle: "Scegli il profilo di accessibilità giusto per te",
         seizureSafe: "Profilo Anti-Epilettico",
         seizureSafeDesc: "Elimina i flash e riduce i colori",
-        // Vision impaired feature removed
+        visionImpaired: "Profilo per Ipovedenti",
+        visionImpairedDesc: "Migliora la leggibilità del testo e la chiarezza visiva",
                     adhdFriendly: "Profilo Amichevole per ADHD",
         adhdFriendlyDesc: "Più concentrazione e meno distrazioni",
         cognitiveDisability: "Profilo per Disabilità Cognitive",
@@ -9416,7 +9420,8 @@ class AccessibilityWidget {
         profilesTitle: "בחרו את פרופיל הנגישות הנכון עבורכם",
         seizureSafe: "פרופיל בטוח מפני התקפים",
         seizureSafeDesc: "מבטל הבזקים ומפחית צבעים",
-        // Vision impaired feature removed
+        visionImpaired: "פרופיל לכבדי ראייה",
+        visionImpairedDesc: "משפר את קריאות הטקסט ואת הבהירות החזותית",
         adhdFriendly: "פרופיל ידידותי ל-ADHD",
         adhdFriendlyDesc: "יותר ריכוז ופחות הסחות דעת",
         cognitiveDisability: "פרופיל לקות קוגניטיבית",
@@ -9801,7 +9806,8 @@ class AccessibilityWidget {
         profilesTitle: "為您選擇合適的無障礙設定檔",
         seizureSafe: "防癲癇設定檔",
         seizureSafeDesc: "消除閃爍並減少顏色",
-        // Vision impaired feature removed
+        visionImpaired: "ملف لضعاف البصر",
+        visionImpairedDesc: "يعزز وضوح النص والعناصر المرئية",
         adhdFriendly: "ADHD友善設定檔",
         adhdFriendlyDesc: "更多專注，更少分心",
         cognitiveDisability: "認知障礙設定檔",
@@ -13717,13 +13723,12 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
+            
             style.textContent = `
-                /* Content scaling via root font-size to preserve layout flow */
+                /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
                 html {
-                    font-size: ${this.contentScale}% !important;
+                    zoom: ${scale} !important;
                 }
-                
-                /* Do not alter line-height; let site CSS control it */
                 
                 /* Ensure body and html can scroll properly */
                 html, body {
@@ -13731,20 +13736,9 @@ class AccessibilityWidget {
                     overflow-y: auto !important;
                 }
                 
-                /* Media scales with text */
-                img, video, canvas, iframe {
-                    max-width: 100% !important;
-                    height: auto !important;
-                }
-                
-                /* Form controls follow root scaling; avoid transforms */
-                button, input, textarea, select {
-                    font-size: inherit !important;
-                }
-                
-                /* Keep the accessibility UI unscaled */
+                /* Keep the accessibility UI unscaled - counter the zoom */
                 .accessibility-panel, #accessibility-icon, .accessibility-icon, accessibility-widget, ACCESSIBILITY-WIDGET {
-                    font-size: initial !important;
+                    zoom: ${1 / scale} !important;
                 }
             `;
             
