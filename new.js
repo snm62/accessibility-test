@@ -21,7 +21,7 @@
             window.location.search.includes('print') ||
             // Check for reader mode classes that might be added by browsers
             document.documentElement.getAttribute('data-reader-mode') ||
-            document.body.getAttribute('data-reader-mode');
+            (document.body && document.body.getAttribute('data-reader-mode'));
             
         if (isReaderMode) {
            
@@ -31453,7 +31453,7 @@ class AccessibilityWidget {
                 window.location.search.includes('read') ||
                 window.location.search.includes('print') ||
                 document.documentElement.getAttribute('data-reader-mode') ||
-                document.body.getAttribute('data-reader-mode');
+                (document.body && document.body.getAttribute('data-reader-mode'));
             return !isReaderMode;
         };
         
