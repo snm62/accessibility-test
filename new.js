@@ -1302,9 +1302,14 @@ class AccessibilityWidget {
             
             
             try {
-                // Staging sites are free
+                // Staging sites are free - check for all staging patterns
                 const host = window.location.hostname || '';
-                if (host.endsWith('.webflow.io')) {
+                const isStagingDomain = host.endsWith('.webflow.io') || 
+                                       host.endsWith('.webflow.com') || 
+                                       host.includes('localhost') ||
+                                       host.includes('127.0.0.1') ||
+                                       host.includes('staging');
+                if (isStagingDomain) {
                     return true;
                 }
                 const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
@@ -1361,6 +1366,18 @@ class AccessibilityWidget {
             try {
                 const siteId = await this.getSiteId();
                 const domain = window.location.hostname;
+                
+                // Check if this is a staging domain (always allow)
+                const isStagingDomain = domain && (
+                    domain.endsWith('.webflow.io') || 
+                    domain.endsWith('.webflow.com') || 
+                    domain.includes('localhost') ||
+                    domain.includes('127.0.0.1') ||
+                    domain.includes('staging')
+                );
+                if (isStagingDomain) {
+                    return true;
+                }
                 
                 // Security: Validate domain format
                 if (!domain || typeof domain !== 'string' || domain.length > 253) {
@@ -20025,39 +20042,52 @@ class AccessibilityWidget {
         
         // Override global audio/video methods to prevent any new audio from playing
         overrideGlobalAudioMethods() {
-
+            // Initialize originalMethods if not already initialized
+            if (!this.originalMethods) {
+                this.originalMethods = {};
+            }
             
-            // Override HTMLAudioElement and HTMLVideoElement methods
-            if (typeof HTMLAudioElement !== 'undefined') {
-                const originalPlay = HTMLAudioElement.prototype.play;
+            // Override HTMLAudioElement methods
+            if (typeof HTMLAudioElement !== 'undefined' && !this.originalMethods.audioPlay) {
+                this.originalMethods.audioPlay = HTMLAudioElement.prototype.play;
                 HTMLAudioElement.prototype.play = function() {
-               
+                    // Immediately mute and pause to prevent any sound
                     this.muted = true;
                     this.volume = 0;
+                    if (!this.paused) {
+                        this.pause();
+                    }
+                    // Return a resolved promise that doesn't actually play
                     return Promise.resolve();
                 };
             }
             
-            if (typeof HTMLVideoElement !== 'undefined') {
-                const originalVideoPlay = HTMLVideoElement.prototype.play;
+            // Override HTMLVideoElement methods
+            if (typeof HTMLVideoElement !== 'undefined' && !this.originalMethods.videoPlay) {
+                this.originalMethods.videoPlay = HTMLVideoElement.prototype.play;
                 HTMLVideoElement.prototype.play = function() {
-                   
+                    // Immediately mute and pause to prevent any sound
                     this.muted = true;
                     this.volume = 0;
+                    if (!this.paused) {
+                        this.pause();
+                    }
+                    // Return a resolved promise that doesn't actually play
                     return Promise.resolve();
                 };
             }
             
             // Override Web Audio API methods
-            if (typeof AudioContext !== 'undefined') {
-                const originalCreateBufferSource = AudioContext.prototype.createBufferSource;
+            if (typeof AudioContext !== 'undefined' && !this.originalMethods.createBufferSource) {
+                this.originalMethods.createBufferSource = AudioContext.prototype.createBufferSource;
                 AudioContext.prototype.createBufferSource = function() {
-               
+                    // Return a dummy object that doesn't produce sound
                     return {
                         connect: () => {},
                         start: () => {},
                         stop: () => {},
-                        disconnect: () => {}
+                        disconnect: () => {},
+                        pause: () => {}
                     };
                 };
             }
@@ -20065,24 +20095,24 @@ class AccessibilityWidget {
             // Override common audio library methods
             if (typeof window !== 'undefined') {
                 // Override Howler.js if present
-                if (window.Howl) {
-                    const originalHowl = window.Howl;
+                if (window.Howl && !this.originalMethods.howl) {
+                    this.originalMethods.howl = window.Howl;
                     window.Howl = function() {
-                 
                         return {
                             play: () => {},
                             pause: () => {},
                             stop: () => {},
                             mute: () => {},
-                            volume: () => {}
+                            volume: () => {},
+                            unload: () => {}
                         };
                     };
                 }
                 
                 // Override SoundJS if present
-                if (window.createjs && window.createjs.Sound) {
+                if (window.createjs && window.createjs.Sound && !this.originalMethods.soundJS) {
+                    this.originalMethods.soundJS = window.createjs.Sound.play;
                     window.createjs.Sound.play = function() {
-                
                         return null;
                     };
                 }
@@ -20420,13 +20450,18 @@ class AccessibilityWidget {
                 
                 // Handle different types of media elements
                 if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-                    // Standard HTML5 media
-                    element.muted = true;
-                    element.volume = 0;
-                    if (!element.paused) {
-                        element.pause();
+                    // Standard HTML5 media - force mute and pause immediately
+                    try {
+                        element.muted = true;
+                        element.volume = 0;
+                        element.pause(); // Always pause, even if already paused
+                        element.currentTime = 0; // Reset to beginning
+                        // Add event listeners to prevent unmuting or playing
+                        this.addMuteEventListeners(element);
+                        totalMuted++;
+                    } catch (e) {
+                        // Ignore errors for individual elements
                     }
-                    totalMuted++;
                 } else if (element.tagName === 'IFRAME') {
                     // Handle iframe-based players (YouTube, Vimeo, etc.)
                     this.muteIframePlayer(element);
@@ -20485,10 +20520,17 @@ class AccessibilityWidget {
                 
                 // Only mute actual media elements - DO NOT HIDE ANY CONTENT
                 if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-                    element.muted = true;
-                    element.volume = 0;
-                    if (!element.paused) element.pause();
-                    totalMuted++;
+                    try {
+                        element.muted = true;
+                        element.volume = 0;
+                        element.pause(); // Always pause, even if already paused
+                        element.currentTime = 0; // Reset to beginning
+                        // Add event listeners to prevent unmuting or playing
+                        this.addMuteEventListeners(element);
+                        totalMuted++;
+                    } catch (e) {
+                        // Ignore errors for individual elements
+                    }
                 }
                 // Don't hide any other elements - just mute actual media
             });
@@ -20500,10 +20542,17 @@ class AccessibilityWidget {
                 
                 // Only mute actual media elements - don't hide anything
                 if (source.tagName === 'AUDIO' || source.tagName === 'VIDEO') {
-                    source.muted = true;
-                    source.volume = 0;
-                    if (!source.paused) source.pause();
-                    totalMuted++;
+                    try {
+                        source.muted = true;
+                        source.volume = 0;
+                        source.pause(); // Always pause
+                        source.currentTime = 0; // Reset to beginning
+                        // Add event listeners to prevent unmuting or playing
+                        this.addMuteEventListeners(source);
+                        totalMuted++;
+                    } catch (e) {
+                        // Ignore errors for individual elements
+                    }
                 }
             });
             
@@ -20523,10 +20572,15 @@ class AccessibilityWidget {
                         iframeMedia.forEach(element => {
                             // Only mute actual media elements - don't hide anything
                             if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-                                element.volume = 0;
-                                element.muted = true;
-                                if (!element.paused) element.pause();
-                                totalMuted++;
+                                try {
+                                    element.volume = 0;
+                                    element.muted = true;
+                                    element.pause(); // Always pause
+                                    element.currentTime = 0; // Reset to beginning
+                                    totalMuted++;
+                                } catch (e) {
+                                    // Ignore errors for iframe content (CORS)
+                                }
                             }
                         });
                     }
@@ -20566,22 +20620,22 @@ class AccessibilityWidget {
         
         // Simple direct restoration
         restoreAllMediaDirectly() {
-          
-            
             const allAudio = document.querySelectorAll('audio');
             const allVideo = document.querySelectorAll('video');
             
-            allAudio.forEach(element => {
-                element.muted = false;
-                element.volume = 1;
+            // Remove mute event listeners and restore media
+            [...allAudio, ...allVideo].forEach(element => {
+                try {
+                    // Remove event listeners if they were added
+                    this.removeMuteEventListeners(element);
+                    // Restore media properties
+                    element.muted = false;
+                    // Restore volume to a reasonable default (1.0 = 100%)
+                    element.volume = 1;
+                } catch (e) {
+                    // Ignore errors for individual elements
+                }
             });
-            
-            allVideo.forEach(element => {
-                element.muted = false;
-                element.volume = 1;
-            });
-            
-      
         }
         
         // Enhanced aggressive monitoring to catch any media that might start playing
@@ -31277,10 +31331,15 @@ class AccessibilityWidget {
                 const currentDomain = window.location.hostname;
               
                 
-                // Only allow local development without validation
-                const isLocalDev = currentDomain.includes('localhost') || currentDomain.includes('127.0.0.1');
-                if (isLocalDev) {
-                    return { hasAccess: true, isStaging: false };
+                // Check if this is a staging domain (always allow without payment)
+                const isStagingDomain = currentDomain.includes('.webflow.io') || 
+                                       currentDomain.includes('.webflow.com') || 
+                                       currentDomain.includes('localhost') ||
+                                       currentDomain.includes('127.0.0.1') ||
+                                       currentDomain.includes('staging');
+                
+                if (isStagingDomain) {
+                    return { hasAccess: true, isStaging: true, reason: 'Staging domain - no payment required' };
                 }
                 
                 // Security: Validate domain format
@@ -31380,7 +31439,7 @@ class AccessibilityWidget {
         // Consolidated reader mode check - using same comprehensive check as top of file
         const checkReaderMode = () => {
             const isReaderMode = document.documentElement.classList.contains('reader-mode') || 
-                document.body.classList.contains('reader-mode') ||
+                (document.body && document.body.classList.contains('reader-mode')) ||
                 window.location.search.includes('reader-mode') ||
                 document.querySelector('[data-reader-mode]') ||
                 document.querySelector('.reader-mode') ||
