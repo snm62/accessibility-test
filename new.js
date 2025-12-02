@@ -1,5 +1,23 @@
-// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+// CRITICAL: Prevent widget from running in Webflow Designer context
 (function() {
+    // SECURITY: Exit immediately if running in Webflow Designer
+    // This prevents Designer DOM manipulation and security violations
+    const isWebflowDesigner = typeof window !== 'undefined' && (
+        window.location.hostname.includes('design.webflow.com') ||
+        window.location.hostname.includes('preview.webflow.com') ||
+        window.location.hostname.includes('webflow.io') && window.location.pathname.includes('/design/') ||
+        typeof window.webflow !== 'undefined' ||
+        document.querySelector('[data-wf-page]') !== null ||
+        document.querySelector('.w-editor') !== null ||
+        document.querySelector('[class*="w-editor"]') !== null
+    );
+    
+    if (isWebflowDesigner) {
+        // Silently exit - do not manipulate Designer DOM
+        return;
+    }
+    
+    // CRITICAL: Immediate seizure-safe check - runs before any animations can start
     try {
         // Skip accessibility widget if in reader mode or if page is being processed for reader mode
         const isReaderMode = document.documentElement.classList.contains('reader-mode') || 
@@ -1181,7 +1199,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev/';
+            this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev/';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -1284,13 +1302,28 @@ class AccessibilityWidget {
                     trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 };
                 
-                const response = await fetch(`${this.kvApiUrl}/api/accessibility/create-trial`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(trialData)
-                });
+                // SECURITY: Isolated API call with timeout and error handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
-                return response.ok;
+                try {
+                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/create-trial`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(trialData),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    return response.ok;
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        // Timeout - fail silently
+                        return false;
+                    }
+                    // Other errors - fail silently
+                    return false;
+                }
             } catch (error) {
                 
                 return false;
@@ -1312,33 +1345,56 @@ class AccessibilityWidget {
                 if (isStagingDomain) {
                     return true;
                 }
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`);
+                // SECURITY: Isolated API call with timeout and error handling
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const controller1 = new AbortController();
+                const timeoutId1 = setTimeout(() => controller1.abort(), 10000); // 10s timeout
                 
-                // Handle rate limit errors with retry
-                if (response.status === 429) {
+                try {
+                    const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                        signal: controller1.signal
+                    });
+                    clearTimeout(timeoutId1);
                     
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                    const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`);
-                    if (!retryResponse.ok) {
+                    // Handle rate limit errors with retry
+                    if (response.status === 429) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
                         
+                        const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                        const controller2 = new AbortController();
+                        const timeoutId2 = setTimeout(() => controller2.abort(), 10000);
+                        
+                        try {
+                            const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                                signal: controller2.signal
+                            });
+                            clearTimeout(timeoutId2);
+                            
+                            if (!retryResponse.ok) {
+                                return false;
+                            }
+                            
+                            const paymentData = await retryResponse.json();
+                            return this.processPaymentResponse(paymentData);
+                        } catch (retryError) {
+                            clearTimeout(timeoutId2);
+                            return false;
+                        }
+                    }
+                    
+                    if (!response.ok) {
                         return false;
                     }
                     
-                    const paymentData = await retryResponse.json();
+                    const paymentData = await response.json();
                     return this.processPaymentResponse(paymentData);
-                }
-                
-                if (!response.ok) {
-                    
+                } catch (error) {
+                    clearTimeout(timeoutId1);
+                    if (error.name === 'AbortError') {
+                        return false;
+                    }
                     return false;
                 }
-                
-                const paymentData = await response.json();
-                
-                return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
                 
@@ -1411,17 +1467,31 @@ class AccessibilityWidget {
                 }
                 
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const response = await fetch(`${base3}/api/accessibility/validate-domain`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId })
-                });
+                // SECURITY: Isolated API call with timeout and error handling
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
-                if (!response.ok) return false;
-                
-                const { isValid } = await response.json();
-                return isValid;
+                try {
+                    const response = await fetch(`${base3}/api/accessibility/validate-domain`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) return false;
+                    
+                    const { isValid } = await response.json();
+                    return isValid;
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        return false;
+                    }
+                    return false;
+                }
             } catch (error) {
                 
                 return false;
@@ -15317,33 +15387,32 @@ class AccessibilityWidget {
     
                 
     
-                // Create dropdown content
-    
-                dropdownContainer.innerHTML = `
-    
-                    <div class="useful-links-content">
-    
-                        <select id="useful-links-select">
-    
-                            <option value="">Select an option</option>
-    
-                            <option value="home">Home</option>
-    
-                            <option value="header">Header</option>
-    
-                            <option value="footer">Footer</option>
-    
-                            <option value="main-content">Main content</option>
-    
-                            <option value="about-us">About us</option>
-    
-                            <option value="portfolio">Portfolio</option>
-    
-                        </select>
-    
-                    </div>
-    
-                `;
+                // SECURITY: Create dropdown content using safe DOM methods instead of innerHTML
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'useful-links-content';
+                
+                const select = document.createElement('select');
+                select.id = 'useful-links-select';
+                
+                const options = [
+                    { value: '', text: 'Select an option' },
+                    { value: 'home', text: 'Home' },
+                    { value: 'header', text: 'Header' },
+                    { value: 'footer', text: 'Footer' },
+                    { value: 'main-content', text: 'Main content' },
+                    { value: 'about-us', text: 'About us' },
+                    { value: 'portfolio', text: 'Portfolio' }
+                ];
+                
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.text;
+                    select.appendChild(option);
+                });
+                
+                contentDiv.appendChild(select);
+                dropdownContainer.appendChild(contentDiv);
     
                 
     
@@ -16929,34 +16998,42 @@ class AccessibilityWidget {
                 };
        
                 
-                const response = await fetch(`${this.kvApiUrl}/api/accessibility/save-settings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(settingsData)
-                });
+                // SECURITY: Isolated API call with timeout and error handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
-            
+                try {
+                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/save-settings`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(settingsData),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        return;
+                    }
                 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                 
+                    // Attempt JSON parse only if response is JSON
+                    const ctSave = response.headers.get('content-type') || '';
+                    if (ctSave.includes('application/json')) {
+                        const result = await response.json();
+                    } else {
+                        const text = await response.text();
+                    }
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        // Timeout - fail silently
+                        return;
+                    }
+                    // Other errors - fail silently
                     return;
                 }
-                
-                // Attempt JSON parse only if response is JSON
-                const ctSave = response.headers.get('content-type') || '';
-                if (ctSave.includes('application/json')) {
-                    const result = await response.json();
-                 
-                } else {
-                    const text = await response.text();
-                
-                }
-                
-            } catch (error) {
-                         }
         }
         
         // Load user settings from KV storage
@@ -16984,39 +17061,41 @@ class AccessibilityWidget {
                     return;
                 }
 
+                // SECURITY: Isolated API call with timeout and error handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
-                const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-settings?siteId=${siteId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-              
-                
-                if (!response.ok) {
+                try {
+                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-settings?siteId=${siteId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
                     
-                    return;
-                }
-                
-                // Safely parse JSON only when Content-Type is JSON
-                const ct = response.headers.get('content-type') || '';
-                let data = null;
-                if (ct.includes('application/json')) {
-                    try {
-                        data = await response.json();
-                    } catch (parseErr) {
-                        const raw = await response.text();
-                  
+                    if (!response.ok) {
                         return;
                     }
-                } else {
-                    const raw = await response.text();
-                 
-                    return;
-                }
-     
                 
-                if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
+                    // Safely parse JSON only when Content-Type is JSON
+                    const ct = response.headers.get('content-type') || '';
+                    let data = null;
+                    if (ct.includes('application/json')) {
+                        try {
+                            data = await response.json();
+                        } catch (parseErr) {
+                            const raw = await response.text();
+                            return;
+                        }
+                    } else {
+                        const raw = await response.text();
+                        return;
+                    }
+         
+                    
+                    if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
                     // Merge KV settings with existing settings (KV takes precedence)
                     const kvSettings = data.settings;
                     
@@ -17026,16 +17105,20 @@ class AccessibilityWidget {
                         this.settings[key] = kvSettings[key];
                     });
                     
-                    // Save merged settings back to localStorage
-            localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
-    
-                } else {
-                 
+                        // Save merged settings back to localStorage
+                        localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
+                    } else {
+                        // No settings found
+                    }
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        // Timeout - fail silently
+                        return;
+                    }
+                    // Other errors - fail silently
+                    return;
                 }
-                
-            } catch (error) {
-             
-            }
         }
     
     
@@ -19224,37 +19307,47 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                colorPicker.innerHTML = `
-    
-                    <div class="color-picker-content">
-    
-                        <h4>Adjust Text Colors</h4>
-    
-                        <div class="color-options">
-    
-                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
-    
-                            <div class="color-option selected" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
-    
-                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
-    
-                            <div class="color-option" data-color="#f97316" style="background-color: #f97316;"></div>
-    
-                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
-    
-                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
-    
-                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
-    
-                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
-    
-                        </div>
-    
-                        <button class="cancel-btn">Cancel</button>
-    
-                    </div>
-    
-                `;
+                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'color-picker-content';
+                
+                const h4 = document.createElement('h4');
+                h4.textContent = 'Adjust Text Colors';
+                contentDiv.appendChild(h4);
+                
+                const colorOptionsDiv = document.createElement('div');
+                colorOptionsDiv.className = 'color-options';
+                
+                const colors = [
+                    { color: '#3b82f6', selected: false },
+                    { color: '#8b5cf6', selected: true },
+                    { color: '#ef4444', selected: false },
+                    { color: '#f97316', selected: false },
+                    { color: '#14b8a6', selected: false },
+                    { color: '#84cc16', selected: false },
+                    { color: '#ffffff', selected: false, border: true },
+                    { color: '#000000', selected: false }
+                ];
+                
+                colors.forEach(colorData => {
+                    const colorOption = document.createElement('div');
+                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
+                    colorOption.setAttribute('data-color', colorData.color);
+                    colorOption.style.backgroundColor = colorData.color;
+                    if (colorData.border) {
+                        colorOption.style.border = '1px solid #ccc';
+                    }
+                    colorOptionsDiv.appendChild(colorOption);
+                });
+                
+                contentDiv.appendChild(colorOptionsDiv);
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'cancel-btn';
+                cancelBtn.textContent = 'Cancel';
+                contentDiv.appendChild(cancelBtn);
+                
+                colorPicker.appendChild(contentDiv);
     
                 
     
@@ -19475,37 +19568,47 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                colorPicker.innerHTML = `
-    
-                    <div class="color-picker-content">
-    
-                        <h4>Adjust Title Colors</h4>
-    
-                        <div class="color-options">
-    
-                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
-    
-                            <div class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
-    
-                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
-    
-                            <div class="color-option selected" data-color="#f97316" style="background-color: #f97316;"></div>
-    
-                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
-    
-                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
-    
-                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
-    
-                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
-    
-                        </div>
-    
-                        <button class="cancel-btn">Cancel</button>
-    
-                    </div>
-    
-                `;
+                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'color-picker-content';
+                
+                const h4 = document.createElement('h4');
+                h4.textContent = 'Adjust Title Colors';
+                contentDiv.appendChild(h4);
+                
+                const colorOptionsDiv = document.createElement('div');
+                colorOptionsDiv.className = 'color-options';
+                
+                const colors = [
+                    { color: '#3b82f6', selected: false },
+                    { color: '#8b5cf6', selected: false },
+                    { color: '#ef4444', selected: false },
+                    { color: '#f97316', selected: true },
+                    { color: '#14b8a6', selected: false },
+                    { color: '#84cc16', selected: false },
+                    { color: '#ffffff', selected: false, border: true },
+                    { color: '#000000', selected: false }
+                ];
+                
+                colors.forEach(colorData => {
+                    const colorOption = document.createElement('div');
+                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
+                    colorOption.setAttribute('data-color', colorData.color);
+                    colorOption.style.backgroundColor = colorData.color;
+                    if (colorData.border) {
+                        colorOption.style.border = '1px solid #ccc';
+                    }
+                    colorOptionsDiv.appendChild(colorOption);
+                });
+                
+                contentDiv.appendChild(colorOptionsDiv);
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'cancel-btn';
+                cancelBtn.textContent = 'Cancel';
+                contentDiv.appendChild(cancelBtn);
+                
+                colorPicker.appendChild(contentDiv);
     
                 
     
@@ -19693,37 +19796,53 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                colorPicker.innerHTML = `
-    
-                    <div class="color-picker-content">
-    
-                        <h4>Adjust Background Colors</h4>
-    
-                        <div class="color-options">
-    
-                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
-    
-                            <div class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
-    
-                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
-    
-                            <div class="color-option selected" data-color="#f97316" style="background-color: #f97316;"></div>
-    
-                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
-    
-                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
-    
-                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
-    
-                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
-    
-                        </div>
-    
-                        <button class="cancel-btn" onclick="accessibilityWidget.hideBackgroundColorPicker()">Cancel</button>
-    
-                    </div>
-    
-                `;
+                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'color-picker-content';
+                
+                const h4 = document.createElement('h4');
+                h4.textContent = 'Adjust Background Colors';
+                contentDiv.appendChild(h4);
+                
+                const colorOptionsDiv = document.createElement('div');
+                colorOptionsDiv.className = 'color-options';
+                
+                const colors = [
+                    { color: '#3b82f6', selected: false },
+                    { color: '#8b5cf6', selected: false },
+                    { color: '#ef4444', selected: false },
+                    { color: '#f97316', selected: true },
+                    { color: '#14b8a6', selected: false },
+                    { color: '#84cc16', selected: false },
+                    { color: '#ffffff', selected: false, border: true },
+                    { color: '#000000', selected: false }
+                ];
+                
+                colors.forEach(colorData => {
+                    const colorOption = document.createElement('div');
+                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
+                    colorOption.setAttribute('data-color', colorData.color);
+                    colorOption.style.backgroundColor = colorData.color;
+                    if (colorData.border) {
+                        colorOption.style.border = '1px solid #ccc';
+                    }
+                    colorOptionsDiv.appendChild(colorOption);
+                });
+                
+                contentDiv.appendChild(colorOptionsDiv);
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'cancel-btn';
+                cancelBtn.textContent = 'Cancel';
+                // SECURITY: Use addEventListener instead of onclick attribute
+                cancelBtn.addEventListener('click', () => {
+                    if (this.hideBackgroundColorPicker) {
+                        this.hideBackgroundColorPicker();
+                    }
+                });
+                contentDiv.appendChild(cancelBtn);
+                
+                colorPicker.appendChild(contentDiv);
     
                 
     
@@ -20114,7 +20233,8 @@ class AccessibilityWidget {
                             }
                             return context;
                         };
-                        window.AudioContext.prototype = OriginalAudioContext.prototype;
+                        // SECURITY: Do not overwrite native API prototypes
+                        // This violates security policies - prototype overwriting removed
                         
                         // Also override webkitAudioContext if it exists
                         if (window.webkitAudioContext) {
@@ -21533,9 +21653,18 @@ class AccessibilityWidget {
     
             
     
-            // Insert the HTML directly into the body
-    
-            document.body.insertAdjacentHTML('beforeend', overlayHTML);
+            // SECURITY: Use safe DOM methods instead of insertAdjacentHTML
+            const overlay = document.createElement('div');
+            overlay.id = 'read-mode-overlay';
+            overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.style.cssText = 'padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;';
+            // SECURITY: Use textContent to safely insert content (prevents XSS)
+            contentDiv.textContent = finalContent || '';
+            overlay.appendChild(contentDiv);
+            
+            document.body.appendChild(overlay);
     
             
     
@@ -28858,7 +28987,7 @@ class AccessibilityWidget {
                 
                 // Add cache busting to ensure fresh data
                 const cacheBuster = `_t=${Date.now()}`;
-                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
+                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
                 const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${this.siteId}&${cacheBuster}`;
                 
                 
@@ -29250,7 +29379,12 @@ class AccessibilityWidget {
             // Update action buttons
             const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
             if (resetBtn) {
-                resetBtn.innerHTML = `<i class="fas fa-redo"></i> ${content.resetSettings}`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                resetBtn.textContent = '';
+                const icon1 = document.createElement('i');
+                icon1.className = 'fas fa-redo';
+                resetBtn.appendChild(icon1);
+                resetBtn.appendChild(document.createTextNode(' ' + (content.resetSettings || 'Reset Settings')));
 
             } else {
                
@@ -29258,7 +29392,12 @@ class AccessibilityWidget {
             
             const statementBtn = this.shadowRoot?.querySelector('#statement');
             if (statementBtn) {
-                statementBtn.innerHTML = `<i class="fas fa-file-alt"></i> ${content.statement}`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                statementBtn.textContent = '';
+                const icon2 = document.createElement('i');
+                icon2.className = 'fas fa-file-alt';
+                statementBtn.appendChild(icon2);
+                statementBtn.appendChild(document.createTextNode(' ' + (content.statement || 'Statement')));
 
             } else {
 
@@ -29266,7 +29405,12 @@ class AccessibilityWidget {
             
             const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
             if (hideBtn) {
-                hideBtn.innerHTML = `<i class="fas fa-eye-slash"></i> ${content.hideInterface}`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                hideBtn.textContent = '';
+                const icon3 = document.createElement('i');
+                icon3.className = 'fas fa-eye-slash';
+                hideBtn.appendChild(icon3);
+                hideBtn.appendChild(document.createTextNode(' ' + (content.hideInterface || 'Hide Interface')));
               
             } else {
 
@@ -29354,7 +29498,11 @@ class AccessibilityWidget {
             // Update keyboard navigation note
             const keyboardNavNote = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
             if (keyboardNavNote && content.keyboardNavNote) {
-                keyboardNavNote.innerHTML = `<strong></strong> ${content.keyboardNavNote.replace('Note: ', '')}`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                keyboardNavNote.textContent = '';
+                const strong1 = document.createElement('strong');
+                keyboardNavNote.appendChild(strong1);
+                keyboardNavNote.appendChild(document.createTextNode(' ' + (content.keyboardNavNote ? content.keyboardNavNote.replace('Note: ', '') : '')));
 
             }
             
@@ -29368,7 +29516,11 @@ class AccessibilityWidget {
             // Update screen reader note
             const screenReaderNote = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
             if (screenReaderNote && content.screenReaderNote) {
-                screenReaderNote.innerHTML = `<strong></strong> ${content.screenReaderNote.replace('Note: ', '')}`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                screenReaderNote.textContent = '';
+                const strong2 = document.createElement('strong');
+                screenReaderNote.appendChild(strong2);
+                screenReaderNote.appendChild(document.createTextNode(' ' + (content.screenReaderNote ? content.screenReaderNote.replace('Note: ', '') : '')));
               
             }
             
@@ -30894,7 +31046,11 @@ class AccessibilityWidget {
                 const iconClass = iconMap[icon] || 'fas fa-universal-access';
                 
                 // Clear existing content and add the new icon
-                iconElement.innerHTML = `<i class="${iconClass}"></i>`;
+                // SECURITY: Use safe DOM methods instead of innerHTML
+                iconElement.textContent = '';
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                iconElement.appendChild(icon);
                 
                 // Ensure proper styling
                 iconElement.style.display = 'flex';
@@ -31588,33 +31744,61 @@ class AccessibilityWidget {
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                let resp = await fetch(`${base}/api/accessibility/validate-domain`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId })
-                });
-                if (!resp.ok) {
-                    try {
-                        const err = await resp.json();
-                        if (resp.status === 401 && err && err.error) {
-                            await new Promise(r => setTimeout(r, 500));
-                            resp = await fetch(`${base}/api/accessibility/validate-domain`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId })
-                            });
-                        }
-                    } catch {}
-                }
-                if (!resp.ok) {
+                // SECURITY: Isolated API call with timeout and error handling
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                
+                try {
+                    let resp = await fetch(`${base}/api/accessibility/validate-domain`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId }),
+                        signal: controller.signal
+                    });
+                    
+                    if (!resp.ok) {
+                        try {
+                            const err = await resp.json();
+                            if (resp.status === 401 && err && err.error) {
+                                await new Promise(r => setTimeout(r, 500));
+                                clearTimeout(timeoutId);
+                                const controller2 = new AbortController();
+                                const timeoutId2 = setTimeout(() => controller2.abort(), 10000);
+                                
+                                try {
+                                    resp = await fetch(`${base}/api/accessibility/validate-domain`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId }),
+                                        signal: controller2.signal
+                                    });
+                                    clearTimeout(timeoutId2);
+                                } catch (retryError) {
+                                    clearTimeout(timeoutId2);
+                                    return { hasAccess: false };
+                                }
+                            }
+                        } catch {}
+                    }
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (!resp.ok) {
+                        return { hasAccess: false };
+                    }
+                    const v = await resp.json();
+                    if (v && v.isValid) {
+                        return { hasAccess: true };
+                    }
                     return { hasAccess: false };
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        return { hasAccess: false };
+                    }
+                    return { hasAccess: false, error: error.message };
                 }
-                const v = await resp.json();
-                if (v && v.isValid) {
-                    return { hasAccess: true };
-                }
-                return { hasAccess: false };
                 
             } catch (error) {
                 
