@@ -1293,7 +1293,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev/';
+            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev/';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -1440,7 +1440,7 @@ class AccessibilityWidget {
                     return true;
                 }
                 // SECURITY: Isolated API call with timeout and error handling
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const controller1 = new AbortController();
                 const timeoutId1 = setTimeout(() => controller1.abort(), 10000); // 10s timeout
                 
@@ -1454,7 +1454,7 @@ class AccessibilityWidget {
                     if (response.status === 429) {
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         
-                        const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                        const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                         const controller2 = new AbortController();
                         const timeoutId2 = setTimeout(() => controller2.abort(), 10000);
                         
@@ -1562,7 +1562,7 @@ class AccessibilityWidget {
                 
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
                 // SECURITY: Isolated API call with timeout and error handling
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
@@ -28958,7 +28958,7 @@ class AccessibilityWidget {
                 
                 // Add cache busting to ensure fresh data
                 const cacheBuster = `_t=${Date.now()}`;
-                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${this.siteId}&${cacheBuster}`;
                 
                 
@@ -31726,7 +31726,7 @@ class AccessibilityWidget {
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
                 // SECURITY: Isolated API call with timeout and error handling
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
