@@ -60,6 +60,15 @@
     
     AccessibilityWidgetNS.isDesignerContext = isDesignerContext;
     
+    // Make isDesignerContext accessible to class defined outside IIFE
+    // Use a closure-safe pattern instead of window.__
+    (function() {
+        // Store in a way that's accessible but not on window
+        if (typeof globalThis !== 'undefined') {
+            globalThis.__AccessibilityWidget_isDesignerContext = isDesignerContext;
+        }
+    })();
+    
     // CRITICAL: Immediate seizure-safe check - runs before any animations can start
     try {
         
@@ -1268,6 +1277,31 @@ function applyVisionImpaired(on) {
         
     }
 })();
+
+// Helper function to access isDesignerContext - uses existing window.__AccessibilityWidget pattern
+// This is safer than creating new window properties
+const getIsDesignerContext = function() {
+    // Use the existing window.__AccessibilityWidget that's already established in the codebase
+    if (typeof window !== 'undefined' && window.__AccessibilityWidget && typeof window.__AccessibilityWidget.isDesignerContext === 'function') {
+        return window.__AccessibilityWidget.isDesignerContext;
+    }
+    // Fallback: return a safe function that checks designer context
+    return function() {
+        try {
+            if (typeof window === 'undefined' || typeof document === 'undefined') return true;
+            const hostname = window.location.hostname;
+            if (hostname.includes('design.webflow.com') || hostname.includes('preview.webflow.com')) return true;
+            const body = document.body;
+            if (!body) return true;
+            if (body.classList.contains('w-editor') || body.hasAttribute('data-wf-page')) return true;
+            return false;
+        } catch (e) {
+            return true;
+        }
+    };
+};
+
+const isDesignerContextFn = getIsDesignerContext();
 
 class AccessibilityWidget {
     constructor() {
@@ -4646,7 +4680,7 @@ class AccessibilityWidget {
     }
     `;
     
-                if (!AccessibilityWidgetNS.isDesignerContext() && document.head) {
+                if (!isDesignerContextFn() && document.head) {
                     const style = document.createElement('style');
                     style.textContent = overrideCSS;
                     document.head.appendChild(style);
@@ -4660,7 +4694,7 @@ class AccessibilityWidget {
     
     
         createWidget() {
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
     
             const widgetContainer = document.createElement('div');
             widgetContainer.id = 'accessibility-widget-container';
@@ -4749,7 +4783,7 @@ class AccessibilityWidget {
     
             panel.setAttribute('aria-describedby', 'panel-description');
     
-            if (AccessibilityWidgetNS.isDesignerContext()) {
+            if (isDesignerContextFn()) {
                 return;
             }
             
@@ -4819,7 +4853,7 @@ class AccessibilityWidget {
     
             languageDropdown.style.display = 'none';
     
-            if (!AccessibilityWidgetNS.isDesignerContext()) {
+            if (!isDesignerContextFn()) {
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = this.getLanguageDropdownContent();
@@ -21654,7 +21688,7 @@ class AccessibilityWidget {
             contentDiv.textContent = finalContent || '';
             overlay.appendChild(contentDiv);
             
-            if (!AccessibilityWidgetNS.isDesignerContext() && document.body) {
+            if (!window.__AccessibilityWidget?.isDesignerContext() && document.body) {
                 document.body.appendChild(overlay);
             }
         }
@@ -24773,7 +24807,7 @@ class AccessibilityWidget {
     
         // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
         overrideRequestAnimationFrame() {
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
             try {
                 if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -25104,7 +25138,7 @@ class AccessibilityWidget {
         
         // Restore original requestAnimationFrame when seizure-safe is disabled
         restoreRequestAnimationFrame() {
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
             try {
                 if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
@@ -25227,7 +25261,7 @@ class AccessibilityWidget {
     
                 
                 
-                if (AccessibilityWidgetNS.isDesignerContext()) return;
+                if (isDesignerContextFn()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -25444,7 +25478,7 @@ class AccessibilityWidget {
     
                 
                 
-                if (AccessibilityWidgetNS.isDesignerContext()) return;
+                if (isDesignerContextFn()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -25663,7 +25697,7 @@ class AccessibilityWidget {
     
                 
                 
-                if (AccessibilityWidgetNS.isDesignerContext()) return;
+                if (isDesignerContextFn()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -26422,7 +26456,7 @@ class AccessibilityWidget {
         // Stop all JavaScript animations (requestAnimationFrame, setInterval, setTimeout)
         stopAllJavaScriptAnimations() {
   
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
             try {
                 if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -26800,7 +26834,7 @@ class AccessibilityWidget {
         restoreAllMediaAndAnimations() {
    
             
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
             try {
                 if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
@@ -28136,7 +28170,7 @@ class AccessibilityWidget {
     
             alignmentContainer.className = 'alignment-controls';
     
-            if (AccessibilityWidgetNS.isDesignerContext()) return;
+            if (isDesignerContextFn()) return;
             
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = `
