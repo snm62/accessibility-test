@@ -1986,7 +1986,17 @@ class AccessibilityWidget {
             }
     
             
-            await this.fetchCustomizationData();
+            const customizationData = await this.fetchCustomizationData();
+            
+            // Apply accessibility profiles from published settings
+            if (customizationData && customizationData.accessibilityProfiles) {
+                this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+            }
+            
+            // Apply customization data
+            if (customizationData && customizationData.customization) {
+                this.applyCustomizations(customizationData.customization);
+            }
             
             // Restore saved language
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
@@ -6676,7 +6686,7 @@ class AccessibilityWidget {
     
     
     
-                /* Reduce high contrast intensity for Shadow DOM content */
+                /* Preserve widget appearance when high contrast is enabled - no foggy filter */
     
                 :host(.high-contrast) .accessibility-icon,
     
@@ -6684,9 +6694,9 @@ class AccessibilityWidget {
     
                 :host(.high-contrast) .accessibility-panel * {
     
-                    filter: contrast(0.8) !important;
+                    filter: none !important;
     
-                    -webkit-filter: contrast(0.8) !important;
+                    -webkit-filter: none !important;
     
                 }
     
@@ -6736,7 +6746,7 @@ class AccessibilityWidget {
     
     
     
-                /* Readable Font - Apply to widget elements (must come after default rules) */
+                /* Readable Font - Apply to widget elements (only font-family, preserve size and weight) */
     
                 :host(.readable-font) .accessibility-icon,
     
@@ -6744,9 +6754,7 @@ class AccessibilityWidget {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
     
-                    font-weight: 500 !important;
-    
-                    letter-spacing: 0.5px !important;
+                    /* Do not change font-size or font-weight - preserve original */
     
                 }
     
@@ -6770,9 +6778,7 @@ class AccessibilityWidget {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
     
-                    font-weight: 500 !important;
-    
-                    letter-spacing: 0.5px !important;
+                    /* Do not change font-size or font-weight - preserve original */
     
                 }
     
@@ -13911,6 +13917,12 @@ class AccessibilityWidget {
                     existingStyle.remove();
                 }
                 
+                // Remove counter-scaling from widget
+                const widget = document.querySelector('accessibility-widget');
+                if (widget) {
+                    widget.style.zoom = '';
+                }
+                
                 return;
             }
             
@@ -13923,6 +13935,7 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
+            const counterScale = 1 / scale;
             
             style.textContent = `
                 /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
@@ -13936,12 +13949,36 @@ class AccessibilityWidget {
                     overflow-y: auto !important;
                 }
                 
-                /* Keep the accessibility UI unscaled - counter the zoom */
-                .accessibility-panel, #accessibility-icon, .accessibility-icon, accessibility-widget, ACCESSIBILITY-WIDGET {
-                    zoom: ${1 / scale} !important;
+                /* Keep the accessibility widget unscaled - counter the zoom to maintain fixed height */
+                accessibility-widget,
+                ACCESSIBILITY-WIDGET {
+                    zoom: ${counterScale} !important;
+                    height: auto !important;
+                    min-height: unset !important;
+                    max-height: unset !important;
+                }
+                
+                /* Keep accessibility panel and icon unscaled */
+                .accessibility-panel, 
+                #accessibility-icon, 
+                .accessibility-icon {
+                    zoom: ${counterScale} !important;
                 }
             `;
             
+            // Also apply counter-scaling directly to the widget element
+            const widget = document.querySelector('accessibility-widget');
+            if (widget) {
+                widget.style.zoom = counterScale;
+            }
+            
+            // Update panel CSS to ensure it maintains fixed height
+            if (this.shadowRoot) {
+                const panel = this.shadowRoot.getElementById('accessibility-panel');
+                if (panel) {
+                    this.ensureBasePanelCSS();
+                }
+            }
       
         }
         
@@ -21639,58 +21676,54 @@ class AccessibilityWidget {
     
             
     
-            // Create overlay with extracted content
-    
-            const overlayHTML = `
-    
-                <div id="read-mode-overlay" style="
-    
-                    position: fixed !important;
-    
-                    top: 0 !important;
-    
-                    left: 0 !important;
-    
-                    width: 100vw !important;
-    
-                    height: 100vh !important;
-    
-                    background: #e8f4f8 !important;
-    
-                    z-index: 99997 !important;
-    
-                    font-family: Arial, sans-serif !important;
-    
-                    overflow-y: auto !important;
-    
-                ">
-    
-                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">
-    
-                        ${finalContent}
-    
-                    </div>
-    
-                </div>
-    
-            `;
+            // SECURITY: Sanitize HTML content before inserting
+            const sanitizedContent = this.sanitizeHTML(finalContent);
     
             
     
-            // SECURITY: Use safe DOM methods instead of insertAdjacentHTML
+            // Create overlay with extracted content using safe DOM methods
             const overlay = document.createElement('div');
             overlay.id = 'read-mode-overlay';
             overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;';
             
             const contentDiv = document.createElement('div');
             contentDiv.style.cssText = 'padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;';
-            // SECURITY: Use textContent to safely insert content (prevents XSS)
-            contentDiv.textContent = finalContent || '';
+            // SECURITY: Use innerHTML with sanitized content (content is already from page, but we sanitize to be safe)
+            contentDiv.innerHTML = sanitizedContent;
             overlay.appendChild(contentDiv);
             
             if (!window.__AccessibilityWidget?.isDesignerContext() && document.body) {
                 document.body.appendChild(overlay);
             }
+        }
+    
+        // SECURITY: Sanitize HTML to prevent XSS attacks
+        sanitizeHTML(html) {
+            if (!html || typeof html !== 'string') {
+                return '';
+            }
+    
+            // Create a temporary container to parse and sanitize
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+    
+            // Remove script tags and event handlers
+            const scripts = temp.querySelectorAll('script, iframe, object, embed, form');
+            scripts.forEach(el => el.remove());
+    
+            // Remove event handlers from all elements
+            const allElements = temp.querySelectorAll('*');
+            allElements.forEach(el => {
+                // Remove all event handler attributes
+                Array.from(el.attributes).forEach(attr => {
+                    if (attr.name.startsWith('on') || attr.name.startsWith('javascript:')) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+    
+            // Return sanitized HTML
+            return temp.innerHTML;
         }
     
     
@@ -22745,9 +22778,9 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    /* READABLE FONT: Only apply to specific text content, not symbols */
+                    /* READABLE FONT: Only change font-family, preserve original font-size and weight */
                     
-                    /* 1. HEADINGS - Apply readable font to headings */
+                    /* 1. HEADINGS - Apply readable font to headings (preserve original size and weight) */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22755,11 +22788,10 @@ class AccessibilityWidget {
                     .readable-font h5,
                     .readable-font h6 {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 600 !important;
-                        letter-spacing: 0.8px !important;
+                        /* Do not change font-size or font-weight - preserve original */
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements only */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements only (preserve original size and weight) */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22772,31 +22804,27 @@ class AccessibilityWidget {
                     .readable-font strong,
                     .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* Do not change font-size or font-weight - preserve original */
                     }
                     
                     /* 3. LINKS - Apply readable font to links but preserve their styling */
                     .readable-font a {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* Do not change font-size or font-weight - preserve original */
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text (preserve original size and weight) */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* Do not change font-size or font-weight - preserve original */
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text */
+                    /* 5. BUTTON TEXT - Apply readable font to button text (preserve original size and weight) */
                     .readable-font button {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* Do not change font-size or font-weight - preserve original */
                     }
                     
                     /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
@@ -23523,68 +23551,112 @@ class AccessibilityWidget {
         
         // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
         injectStopAnimationCSS() {
-            if (!document.getElementById('stop-animation-css')) {
-                const style = document.createElement('style');
-                style.id = 'stop-animation-css';
-                style.textContent = `
-                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types */
-                    .stop-animation *,
-                    .stop-animation *::before,
-                    .stop-animation *::after {
-                        /* Stop all CSS animations and transitions */
-                        animation: none !important;
-                        transition: none !important;
-                        animation-play-state: paused !important;
-                        
-                        /* Stop blinking and flashing text */
-                        text-decoration: none !important;
-                    }
-                    
-                    /* Stop all animation classes and libraries */
-                    .stop-animation *[class*="animate"],
-                    .stop-animation *[class*="fade"],
-                    .stop-animation *[class*="slide"],
-                    .stop-animation *[class*="bounce"],
-                    .stop-animation *[class*="pulse"],
-                    .stop-animation *[class*="shake"],
-                    .stop-animation *[class*="flash"],
-                    .stop-animation *[class*="blink"],
-                    .stop-animation *[class*="glow"],
-                    .stop-animation *[class*="spin"],
-                    .stop-animation *[class*="rotate"],
-                    .stop-animation *[class*="scale"],
-                    .stop-animation *[class*="zoom"],
-                    .stop-animation *[class*="wiggle"],
-                    .stop-animation *[class*="jiggle"],
-                    .stop-animation *[class*="twist"],
-                    .stop-animation *[class*="flip"],
-                    .stop-animation *[class*="swing"],
-                    .stop-animation *[class*="wobble"],
-                    .stop-animation *[class*="tilt"],
-                    /* REMOVED: Scroll-related classes to preserve scroll animations */
-                    
-                    /* Stop SVG and Canvas animations */
-                    .stop-animation svg,
-                    .stop-animation svg path,
-                    .stop-animation svg line,
-                    .stop-animation canvas {
-                        animation: none !important;
-                        transition: none !important;
-                        /* Removed visibility and transform rules to prevent positioning issues */
-                    }
-                    
-                    /* Stop text splitting animations */
-                    .stop-animation [data-splitting],
-                    .stop-animation .split, 
-                    .stop-animation .char, 
-                    .stop-animation .word {
-                        animation: none !important;
-                        transition: none !important;
-                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
-                    }
-                `;
-                document.head.appendChild(style);
+            // Remove existing style if it exists to ensure fresh injection
+            const existingStyle = document.getElementById('stop-animation-css');
+            if (existingStyle) {
+                existingStyle.remove();
             }
+            
+            const style = document.createElement('style');
+            style.id = 'stop-animation-css';
+            style.textContent = `
+                /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types with higher specificity */
+                body.stop-animation *,
+                body.stop-animation *::before,
+                body.stop-animation *::after,
+                .stop-animation *,
+                .stop-animation *::before,
+                .stop-animation *::after {
+                    /* Stop all CSS animations and transitions */
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                    
+                    /* Stop blinking and flashing text */
+                    text-decoration: none !important;
+                }
+                
+                /* Stop all animation classes and libraries with higher specificity */
+                body.stop-animation *[class*="animate"],
+                body.stop-animation *[class*="fade"],
+                body.stop-animation *[class*="slide"],
+                body.stop-animation *[class*="bounce"],
+                body.stop-animation *[class*="pulse"],
+                body.stop-animation *[class*="shake"],
+                body.stop-animation *[class*="flash"],
+                body.stop-animation *[class*="blink"],
+                body.stop-animation *[class*="glow"],
+                body.stop-animation *[class*="spin"],
+                body.stop-animation *[class*="rotate"],
+                body.stop-animation *[class*="scale"],
+                body.stop-animation *[class*="zoom"],
+                body.stop-animation *[class*="wiggle"],
+                body.stop-animation *[class*="jiggle"],
+                body.stop-animation *[class*="twist"],
+                body.stop-animation *[class*="flip"],
+                body.stop-animation *[class*="swing"],
+                body.stop-animation *[class*="wobble"],
+                body.stop-animation *[class*="tilt"],
+                .stop-animation *[class*="animate"],
+                .stop-animation *[class*="fade"],
+                .stop-animation *[class*="slide"],
+                .stop-animation *[class*="bounce"],
+                .stop-animation *[class*="pulse"],
+                .stop-animation *[class*="shake"],
+                .stop-animation *[class*="flash"],
+                .stop-animation *[class*="blink"],
+                .stop-animation *[class*="glow"],
+                .stop-animation *[class*="spin"],
+                .stop-animation *[class*="rotate"],
+                .stop-animation *[class*="scale"],
+                .stop-animation *[class*="zoom"],
+                .stop-animation *[class*="wiggle"],
+                .stop-animation *[class*="jiggle"],
+                .stop-animation *[class*="twist"],
+                .stop-animation *[class*="flip"],
+                .stop-animation *[class*="swing"],
+                .stop-animation *[class*="wobble"],
+                .stop-animation *[class*="tilt"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                }
+                
+                /* Stop SVG and Canvas animations */
+                body.stop-animation svg,
+                body.stop-animation svg path,
+                body.stop-animation svg line,
+                body.stop-animation canvas,
+                .stop-animation svg,
+                .stop-animation svg path,
+                .stop-animation svg line,
+                .stop-animation canvas {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                }
+                
+                /* Stop text splitting animations */
+                body.stop-animation [data-splitting],
+                body.stop-animation .split, 
+                body.stop-animation .char, 
+                body.stop-animation .word,
+                .stop-animation [data-splitting],
+                .stop-animation .split, 
+                .stop-animation .char, 
+                .stop-animation .word {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                }
+            `;
+            document.head.appendChild(style);
         }
         
         // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
@@ -28986,119 +29058,7 @@ class AccessibilityWidget {
         }
     
         // Fetch customization data from the API
-        // Encryption utilities for customization data
-        // @ts-ignore
-        async encryptCustomizationData(data, siteId) {
-            try {
-                const ENCRYPTION_ALGORITHM = 'AES-GCM';
-                const KEY_LENGTH = 256;
-                const IV_LENGTH = 12;
-                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
-                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
-                // Generate with: openssl rand -base64 32
-                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
-                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
-                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
-                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
-                }
-                
-                const encoder = new TextEncoder();
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw',
-                    encoder.encode(`${siteId}:${secret}`),
-                    { name: 'PBKDF2' },
-                    false,
-                    ['deriveKey']
-                );
-
-                const key = await crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: encoder.encode('accessibility-widget-salt'),
-                        iterations: 100000,
-                        hash: 'SHA-256',
-                    },
-                    keyMaterial,
-                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
-                    false,
-                    ['encrypt', 'decrypt']
-                );
-                
-                const dataString = JSON.stringify(data);
-                const dataBytes = encoder.encode(dataString);
-                const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-                const encryptedData = await crypto.subtle.encrypt(
-                    { name: ENCRYPTION_ALGORITHM, iv },
-                    key,
-                    dataBytes
-                );
-                
-                const combined = new Uint8Array(iv.length + encryptedData.byteLength);
-                combined.set(iv, 0);
-                combined.set(new Uint8Array(encryptedData), iv.length);
-                
-                return btoa(String.fromCharCode(...combined));
-            } catch (error) {
-                console.error('Encryption error:', error);
-                throw new Error('Failed to encrypt customization data');
-            }
-        }
-        
-        // @ts-ignore
-        async decryptCustomizationData(encryptedData, siteId) {
-            try {
-                const ENCRYPTION_ALGORITHM = 'AES-GCM';
-                const KEY_LENGTH = 256;
-                const IV_LENGTH = 12;
-                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
-                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
-                // Generate with: openssl rand -base64 32
-                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
-                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
-                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
-                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
-                }
-                
-                const encoder = new TextEncoder();
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw',
-                    encoder.encode(`${siteId}:${secret}`),
-                    { name: 'PBKDF2' },
-                    false,
-                    ['deriveKey']
-                );
-
-                const key = await crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: encoder.encode('accessibility-widget-salt'),
-                        iterations: 100000,
-                        hash: 'SHA-256',
-                    },
-                    keyMaterial,
-                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
-                    false,
-                    ['encrypt', 'decrypt']
-                );
-                
-                const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-                const iv = combined.slice(0, IV_LENGTH);
-                const encrypted = combined.slice(IV_LENGTH);
-                
-                const decryptedData = await crypto.subtle.decrypt(
-                    { name: ENCRYPTION_ALGORITHM, iv },
-                    key,
-                    encrypted
-                );
-                
-                const decoder = new TextDecoder();
-                const dataString = decoder.decode(decryptedData);
-                return JSON.parse(dataString);
-            } catch (error) {
-                console.error('Decryption error:', error);
-                throw new Error('Failed to decrypt customization data');
-            }
-        }
+        // Customization data is stored and received as plaintext - Cloudflare KV provides security
         
         // @ts-ignore
         async fetchCustomizationData() {
@@ -29150,14 +29110,10 @@ class AccessibilityWidget {
                 
                 const data = await response.json();
 
-                // Decrypt customization data if it's encrypted
-                if (data.customization && typeof data.customization === 'string') {
-                    try {
-                        data.customization = await this.decryptCustomizationData(data.customization, this.siteId);
-                    } catch (error) {
-                        console.warn('Failed to decrypt customization data:', error);
-                        return null;
-                    }
+                // Customization is stored and received as plaintext object
+                if (data.customization && typeof data.customization !== 'object') {
+                    // If it's not an object, treat as empty
+                    data.customization = {};
                 }
 
                 return data;
@@ -29186,9 +29142,14 @@ class AccessibilityWidget {
                     }
                     
                     const customizationData = await this.fetchCustomizationData();
-                    if (customizationData && customizationData.customization) {
-      
-                        this.applyCustomizations(customizationData.customization);
+                    if (customizationData) {
+                        if (customizationData.customization) {
+                            this.applyCustomizations(customizationData.customization);
+                        }
+                        // Apply accessibility profiles
+                        if (customizationData.accessibilityProfiles) {
+                            this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+                        }
                     }
                 } catch (error) {
                     
@@ -29209,9 +29170,14 @@ class AccessibilityWidget {
                         }
                         
                         const customizationData = await this.fetchCustomizationData();
-                        if (customizationData && customizationData.customization) {
-   
-                            this.applyCustomizations(customizationData.customization);
+                        if (customizationData) {
+                            if (customizationData.customization) {
+                                this.applyCustomizations(customizationData.customization);
+                            }
+                            // Apply accessibility profiles
+                            if (customizationData.accessibilityProfiles) {
+                                this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+                            }
                         }
                     } catch (error) {
                         
@@ -29236,6 +29202,52 @@ class AccessibilityWidget {
           } catch {}
           return null;
         }
+    
+    applyAccessibilityProfiles(profiles) {
+        if (!profiles || typeof profiles !== 'object') {
+            return;
+        }
+        
+        // Apply vision impaired profile if enabled
+        if (profiles.visionImpaired === true) {
+            this.enableVisionImpaired();
+        } else if (profiles.visionImpaired === false) {
+            this.disableVisionImpaired();
+        }
+        
+        // Apply seizure safe profile if enabled
+        if (profiles.seizureSafe === true && !this.settings['seizure-safe']) {
+            this.enableSeizureSafe(true);
+        }
+        
+        // Apply ADHD friendly profile if enabled
+        if (profiles.adhdFriendly === true) {
+            this.enableADHDFriendly();
+        } else if (profiles.adhdFriendly === false) {
+            this.disableADHDFriendly();
+        }
+        
+        // Apply cognitive disability profile if enabled
+        if (profiles.cognitiveDisability === true) {
+            this.enableCognitiveDisability();
+        } else if (profiles.cognitiveDisability === false) {
+            this.disableCognitiveDisability();
+        }
+        
+        // Apply keyboard navigation profile if enabled
+        if (profiles.keyboardNavigation === true) {
+            this.applyFeature('keyboard-nav', true);
+        } else if (profiles.keyboardNavigation === false) {
+            this.applyFeature('keyboard-nav', false);
+        }
+        
+        // Apply blind users profile if enabled
+        if (profiles.blindUsers === true) {
+            this.enableBlindUsers();
+        } else if (profiles.blindUsers === false) {
+            this.disableBlindUsers();
+        }
+    }
     
     applyCustomizations(customizationData) {
         
@@ -30753,6 +30765,18 @@ class AccessibilityWidget {
                 panel.style.setProperty('overflow-wrap', 'break-word', 'important');
                 panel.style.setProperty('hyphens', 'auto', 'important');
                 
+                // Ensure panel maintains fixed height when content scaling is active
+                // Counter-scaling is handled in updateContentScale, but ensure height doesn't shrink
+                if (this.contentScale !== 100) {
+                    const currentHeight = panel.offsetHeight;
+                    if (currentHeight > 0) {
+                        // Maintain the current height to prevent shrinking
+                        panel.style.setProperty('min-height', currentHeight + 'px', 'important');
+                    }
+                } else {
+                    // Reset min-height when scaling is at 100%
+                    panel.style.removeProperty('min-height');
+                }
           
             }
         }
