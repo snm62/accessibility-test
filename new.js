@@ -486,7 +486,8 @@
                                 });
                             } catch (_) {}
                             
-                         
+                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
+                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
                         } catch (err) {
                             
                         }
@@ -517,7 +518,8 @@
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
-                                   
+                                    // Only neutralize transform if the element is not an icon/arrow
+                                    // and not inside a rotation context such as accordion/FAQ toggles
                                     const inRotationContext = (() => {
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
@@ -528,7 +530,7 @@
                                 } catch (_) {}
                             };
                             
-                            
+                            // Initial sweep - limit to first 5000 elements for safety
                             try {
                                 const all = document.querySelectorAll('*');
                                 let count = 0;
@@ -607,7 +609,7 @@
                         }
                     } catch (_) {}
                     
-                  
+                    // Install hard blockers at the API level for inline styles when seizure-safe is active
                     try {
                         if (!AccessibilityWidgetNS.installStyleHardBlockers) {
                             AccessibilityWidgetNS.installStyleHardBlockers = function() {
@@ -698,10 +700,14 @@
             }
         }
         
-       
+        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
+        // SECURITY: Use CSS-based approach instead of global API override
+        // The CSS class 'seizure-safe' on body already disables animations via CSS
+        // We use MutationObserver to intercept and block animation-related style changes
         if (seizureSafeFromStorage === 'true') {
             try {
-                
+                // Use MutationObserver to intercept style changes instead of overriding requestAnimationFrame
+                // This is safer and doesn't break other scripts
                 if (!AccessibilityWidgetNS.seizureStyleObserver) {
                     const styleObserver = new MutationObserver((mutations) => {
                         if (!document.body.classList.contains('seizure-safe')) return;
@@ -887,7 +893,7 @@ function applyVisionImpaired(on) {
             document.head.appendChild(style);
         }
         
-        
+        // ... (Update CSS below) ...
         style.textContent = `
             /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
 
@@ -1626,9 +1632,10 @@ class AccessibilityWidget {
             this.showPaymentRequiredMessage();
         }
         
-        
+        // Show payment required message - DISABLED
         showPaymentRequiredMessage() {
-           
+            // Payment message disabled - no popup will be shown
+            
         }
         
         
@@ -1777,7 +1784,10 @@ class AccessibilityWidget {
             }
         }
         
-      
+        // Set up aggressive monitoring for any text animations that might start
+        // REMOVED: Duplicate setupSeizureSafeMonitoring() - using more comprehensive version below
+        
+        // Set up aggressive monitoring for text animations when seizure-safe mode is active
         setupSeizureSafeMonitoring() {
             try {
                 // Only set up monitoring if seizure-safe mode is active
@@ -1970,6 +1980,7 @@ class AccessibilityWidget {
     
                 
     
+                // Fetch customization data from API
     
                 
     
@@ -2064,7 +2075,7 @@ class AccessibilityWidget {
                     }
     
                 });
-               
+                // Add this in your init function after the existing code
     // Add window resize listener for mobile responsiveness and screen scaling
     window.addEventListener('resize', () => {
         const screenWidth = window.innerWidth;
@@ -2526,6 +2537,13 @@ class AccessibilityWidget {
     
             }
     
+            
+    
+            // Language selector header event listener will be set up after panel creation
+    
+            
+    
+            
     
             // Content scaling control buttons - using Shadow DOM
             const decreaseContentScaleBtn = this.shadowRoot.getElementById('decrease-content-scale-btn');
@@ -2567,7 +2585,9 @@ class AccessibilityWidget {
                     }
                 });
             }
-     
+    
+    
+    
             // Font sizing control buttons - using Shadow DOM
     
             const decreaseFontSizeBtn = this.shadowRoot.getElementById('decrease-font-size-btn');
@@ -2593,7 +2613,8 @@ class AccessibilityWidget {
     
             }
     
- 
+    
+    
             const increaseFontSizeBtn = this.shadowRoot.getElementById('increase-font-size-btn');
     
             if (increaseFontSizeBtn) {
@@ -2616,6 +2637,11 @@ class AccessibilityWidget {
                 });
     
             }
+    
+    
+    
+    
+    
     
     
             // Letter spacing control buttons - using Shadow DOM
@@ -2668,7 +2694,9 @@ class AccessibilityWidget {
     
             }
     
-           
+    
+    
+            
     
         }
     
@@ -2676,7 +2704,9 @@ class AccessibilityWidget {
     
         initTextMagnifier() {
     
-            // Initialize text magnifier functionality          
+            // Initialize text magnifier functionality
+    
+            
     
         }
     
@@ -2684,7 +2714,10 @@ class AccessibilityWidget {
     
         initKeyboardShortcuts() {
     
-        
+            
+    
+            
+    
             // Remove existing shortcuts if any
     
             this.removeKeyboardShortcuts();
@@ -2976,7 +3009,10 @@ class AccessibilityWidget {
                         break;
     
                     default:
-        
+    
+                        // For any other key, just log it to see if the event listener is working
+    
+                        
     
                         break;
     
@@ -2991,6 +3027,10 @@ class AccessibilityWidget {
             document.addEventListener('keydown', this.keyboardShortcutHandler);
             document.addEventListener('mousedown', this.mouseHandler);
             document.addEventListener('click', this.mouseHandler);
+    
+            
+    
+            
     
             // Test if event listener is working
     
@@ -3031,7 +3071,9 @@ class AccessibilityWidget {
     
                 
     
-            }   
+            }
+    
+            
     
             // Remove all highlighted elements
     
@@ -3049,17 +3091,23 @@ class AccessibilityWidget {
     
         cycleThroughElements(selector, type) {
     
-        
+            
+    
+            
+    
             // Remove previous highlights
     
             this.removeAllHighlights();
     
-        
+            
+    
             // Get all matching elements
     
             const elements = Array.from(document.querySelectorAll(selector));
     
-         
+            
+    
+            
     
             if (elements.length === 0) {
     
@@ -3077,7 +3125,11 @@ class AccessibilityWidget {
     
             const element = elements[currentIndex];
     
-        
+            
+    
+            
+    
+            
     
             // Create highlight
     
@@ -3089,7 +3141,10 @@ class AccessibilityWidget {
     
             this.currentElementIndex[type] = (currentIndex + 1) % elements.length;
     
-        
+            
+    
+            
+    
         }
     
     
@@ -3102,6 +3157,9 @@ class AccessibilityWidget {
     
             const rect = element.getBoundingClientRect();
     
+            
+    
+            
     
             // Create highlight box
     
@@ -3182,6 +3240,10 @@ class AccessibilityWidget {
             document.body.appendChild(highlight);
     
             document.body.appendChild(label);
+    
+            
+    
+            
     
             
     
@@ -3291,7 +3353,9 @@ class AccessibilityWidget {
     
                 document.head.appendChild(link);
     
-            
+                // Add this after your existing CSS
+    
+                // Define overrideCSS first
                 const overrideCSS = `
     .accessibility-panel {
       left: auto !important;
@@ -4768,13 +4832,26 @@ class AccessibilityWidget {
     
             // Append dropdown INSIDE the panel, not to shadowRoot
             panel.appendChild(languageDropdown);
-   
+    
+            
+    
+            
+    
+            
+    
+            
+    
+            // Dropdown is ready for use
+    
             
     
             // Set up language dropdown event listeners after dropdown is created
     
             this.setupLanguageDropdownListeners();
-
+    
+            
+    
+    
     
             // Create screen reader announcements container
     
@@ -4800,14 +4877,29 @@ class AccessibilityWidget {
     
                 const panelCheck = shadowRoot.getElementById('accessibility-panel');
     
-
+                
+    
+                
+    
+                
+    
                 // Debug: Check panel visibility
     
                 if (panelCheck) {
     
                     const computedStyle = window.getComputedStyle(panelCheck);
     
-        
+                    
+    
+                    
+    
+                    
+    
+                    
+    
+                    
+    
+                    
     
                 }
     
@@ -13713,6 +13805,9 @@ class AccessibilityWidget {
             this.saveSettings(); // Persist the reset
     
     
+            
+    
+            // Additional safety: ensure no font-size styles remain
     
             setTimeout(() => {
     
@@ -15329,6 +15424,8 @@ class AccessibilityWidget {
     
             this.removeUsefulLinksDropdown();
     
+
+    
         }
     
     
@@ -15508,6 +15605,9 @@ class AccessibilityWidget {
         navigateToSection(section) {
     
       
+    
+            
+    
             switch(section) {
     
                 case 'home':
@@ -15794,6 +15894,8 @@ class AccessibilityWidget {
     
     
     
+        // Additional method to force remove reading mask overlay (can be called externally if needed)
+    
         forceRemoveReadingMaskOverlay() {
     
          
@@ -15848,7 +15950,10 @@ class AccessibilityWidget {
     
             this.removeReadingMaskSpotlight();
     
-        
+            
+    
+            // Create full-screen dark overlay with rectangular spotlight cutout
+            // Using two overlay elements: top and bottom
     
             const spotlight = document.createElement('div');
             spotlight.id = 'reading-mask-spotlight';
@@ -15894,6 +15999,8 @@ class AccessibilityWidget {
             document.body.appendChild(spotlight);
     
     
+    
+            // Ensure accessibility widget stays above spotlight
     
             const widget = document.querySelector('.accessibility-widget');
     
@@ -16457,7 +16564,13 @@ class AccessibilityWidget {
             // Reset line height
     
             this.resetLineHeight();
-  
+    
+            
+    
+    
+    
+            
+    
             // Reset letter spacing
     
             this.resetLetterSpacing();
@@ -20110,14 +20223,21 @@ class AccessibilityWidget {
             });
         }
         
-        
+        // SECURITY: Removed global prototype overrides for audio/video methods
+        // Instead, use event listeners on individual elements and MutationObserver for new elements
+        // This approach is safer and doesn't break other scripts
         overrideGlobalAudioMethods() {
             // Initialize originalMethods if not already initialized (for restoration)
             if (!this.originalMethods) {
                 this.originalMethods = {};
             }
             
-
+            // SECURITY: Instead of overriding prototypes, we intercept play() calls using event listeners
+            // This is done per-element via addMediaEventListeners() and muteElement()
+            // The aggressive monitoring (startAggressiveMediaMonitoring) handles existing and new elements
+            
+            // For Web Audio API, we track AudioContext instances and suspend them
+            // We use a Proxy or wrapper approach instead of overriding the constructor
             if (typeof AudioContext !== 'undefined' && !this.originalMethods.AudioContext) {
                 try {
                     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
@@ -20125,7 +20245,10 @@ class AccessibilityWidget {
                         this.originalMethods.AudioContext = OriginalAudioContext;
                         const self = this;
                         
-                      
+                        // SECURITY: Use a wrapper function instead of overriding the global constructor
+                        // This is safer but still allows us to track and suspend contexts
+                        // Note: This only affects contexts created after mute is enabled
+                        // Existing contexts are handled by muteAllAudioContexts()
                         if (!window.__AccessibilityWidgetAudioContextWrapper) {
                             window.__AccessibilityWidgetAudioContextWrapper = function(...args) {
                                 const context = new OriginalAudioContext(...args);
@@ -20142,6 +20265,9 @@ class AccessibilityWidget {
                 } catch(_) {}
             }
             
+            // SECURITY: Removed Howler.js and SoundJS overrides
+            // These libraries should be handled via their own APIs or element-level event listeners
+            // The aggressive monitoring will catch any audio they produce
         }
     
     
@@ -20204,7 +20330,9 @@ class AccessibilityWidget {
                 player.style.opacity = '';
             });
         }
-    
+        
+        // Restore global audio methods
+        // SECURITY: Updated to match the new scoped approach (no prototype overrides)
         restoreGlobalAudioMethods() {
             // Since we no longer override prototypes, we just need to clean up any wrappers
             // Event listeners are cleaned up by removeMediaEventListeners()
@@ -21399,16 +21527,19 @@ class AccessibilityWidget {
             // Stop any existing observer
             this.stopImageObserver();
             
+            const self = this;
             this.imageObserver = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach((node) => {
                             if (node.nodeType === Node.ELEMENT_NODE) {
-                                this.hideImageElement(node);
+                                self.hideImageElement(node);
                                 
                                 // Also check for nested images
                                 const nestedImages = node.querySelectorAll ? node.querySelectorAll('img, picture, svg, video, canvas, iframe[src*="image"], iframe[src*="img"]') : [];
-                                nestedImages.forEach(img => this.hideImageElement(img));
+                                nestedImages.forEach((img) => {
+                                    self.hideImageElement(img);
+                                });
                             }
                         });
                     }
@@ -21420,8 +21551,6 @@ class AccessibilityWidget {
                 childList: true,
                 subtree: true
             });
-            
-           
         }
         
         stopImageObserver() {
@@ -21528,15 +21657,6 @@ class AccessibilityWidget {
             if (!isDesignerContext() && document.body) {
                 document.body.appendChild(overlay);
             }
-    
-
-    
-            }
-    
-            
-    
-         
-    
         }
     
     
@@ -22180,10 +22300,14 @@ class AccessibilityWidget {
  
     
         }
-   
+    
+    
     
         disableReadingGuide() {
     
+          
+    
+            
     
             // Remove reading guide bar
     
@@ -22447,7 +22571,7 @@ class AccessibilityWidget {
     
     
     
-        disableHighlightFocus(); {
+        disableHighlightFocus() {
     
             // Update toggle state
     
@@ -22463,6 +22587,9 @@ class AccessibilityWidget {
     
             document.body.classList.remove('highlight-focus');
     
+    
+    
+            
     
             // Remove focus styles from the currently tracked focused element
     
@@ -22548,7 +22675,7 @@ class AccessibilityWidget {
     
     
     
-        showStatement(); {
+        showStatement() {
            
             // Check if we have a custom accessibility statement link
             if (this.customizationData && this.customizationData.accessibilityStatementLink) {
@@ -22708,7 +22835,7 @@ class AccessibilityWidget {
     
     
     
-        disableReadableFont(); {
+        disableReadableFont() {
             this.settings['readable-font'] = false;
             document.body.classList.remove('readable-font');
             
@@ -23426,6 +23553,14 @@ class AccessibilityWidget {
             }
         }
         
+        // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
+        // REMOVED: Duplicate overrideRequestAnimationFrame() - using more comprehensive version at line 24467
+        
+        // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+        // REMOVED: Duplicate stopAnimationLibraries() - using more comprehensive version at line 24703
+        // REMOVED: Duplicate replaceAnimatedMedia() - using more comprehensive version at line 24832
+        
+        // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
         stopDOMAnimationLoops() {
             // Store original functions if not already stored
             if (!window._originalSetTimeout) {
@@ -28875,6 +29010,7 @@ class AccessibilityWidget {
             }
         }
         
+        // @ts-ignore
         async decryptCustomizationData(encryptedData, siteId) {
             try {
                 const ENCRYPTION_ALGORITHM = 'AES-GCM';
@@ -28930,6 +29066,7 @@ class AccessibilityWidget {
             }
         }
         
+        // @ts-ignore
         async fetchCustomizationData() {
           
             
@@ -29050,6 +29187,7 @@ class AccessibilityWidget {
         }
     
         // Get site ID for API calls via script tag (no storage, no mapping)
+        // @ts-ignore
         async getSiteId() {
           try {
             const scriptEl = document.currentScript || 
@@ -31609,6 +31747,8 @@ class AccessibilityWidget {
     
     
     
+    }
+
     // Initialize the widget when DOM is loaded
     
     let accessibilityWidget;
