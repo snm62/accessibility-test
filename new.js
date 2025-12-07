@@ -1787,7 +1787,7 @@ class AccessibilityWidget {
     
             this.addFontAwesome();
     
-            this.addCSS(); // Load CSS from hosted URL
+            // CSS is loaded in createWidget() via getWidgetCSS() - no need for separate addCSS()
     
             // Check if interface should be hidden
             if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
@@ -28457,6 +28457,13 @@ class AccessibilityWidget {
                     panel.style.visibility = 'hidden';
                     panel.style.pointerEvents = 'none';
                     panel.classList.remove('active');
+                    
+                    // CRITICAL: Ensure icon stays visible when panel closes
+                    if (icon) {
+                        icon.style.display = '';
+                        icon.style.visibility = 'visible';
+                        icon.style.opacity = '1';
+                    }
                     panel.setAttribute('aria-hidden', 'true');
                     icon.setAttribute('aria-expanded', 'false');
                     this.isPanelOpen = false;
