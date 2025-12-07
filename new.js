@@ -791,9 +791,23 @@ function applyVisionImpaired(on) {
             body.vision-impaired {
                 margin: 0 !important;
                 padding: 0 !important;
-                /* Scale the body element while preserving scrollability */
-                transform: scale(1.05) !important;
-                transform-origin: top left !important;
+                /* Use zoom instead of transform to prevent content overflow */
+                zoom: 1.05 !important;
+                /* Fallback for browsers that don't support zoom */
+                -moz-transform: scale(1.05) !important;
+                -moz-transform-origin: top left !important;
+            }
+            
+            /* Fix overflow for Firefox and other browsers using transform */
+            html.vision-impaired {
+                overflow-x: auto !important;
+                width: 100% !important;
+            }
+            
+            /* Adjust container width to accommodate scale */
+            body.vision-impaired {
+                width: calc(100% / 1.05) !important;
+                min-width: 100vw !important;
             }
 
             /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
@@ -938,9 +952,13 @@ function applyVisionImpaired(on) {
                 }
                 
                 body.vision-impaired {
-                    /* Scale the body element while preserving scrollability */
-                    transform: scale(1.05) !important;
-                    transform-origin: top left !important;
+                    /* Use zoom instead of transform to prevent content overflow */
+                    zoom: 1.05 !important;
+                    /* Fallback for browsers that don't support zoom */
+                    -moz-transform: scale(1.05) !important;
+                    -moz-transform-origin: top left !important;
+                    width: calc(100% / 1.05) !important;
+                    min-width: 100vw !important;
                 }
                 
                 /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
@@ -1173,6 +1191,19 @@ class AccessibilityWidget {
             this.currentlyFocusedElement = null; // Track currently focused element for highlight focus
             this.isKeyboardNavigation = false; // Track if user is using keyboard navigation
             this.lastInteractionMethod = null; // Track last interaction method (keyboard/mouse)
+            
+            // Performance optimization: Cache DOM elements
+            this._cachedElements = {
+                icon: null,
+                panel: null,
+                closeBtn: null,
+                lastCacheTime: 0
+            };
+            
+            // Debounce/throttle timers
+            this._resizeTimer = null;
+            this._mutationTimer = null;
+            this._rafPending = false;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1905,127 +1936,19 @@ class AccessibilityWidget {
                     }
     
                 });
-                // Add this in your init function after the existing code
-    // Add window resize listener for mobile responsiveness and screen scaling
-    window.addEventListener('resize', () => {
-        const screenWidth = window.innerWidth;
-        const isMobile = screenWidth <= 768;
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        
-        // Update icon visibility based on device type and settings
-        this.handleWindowResize();
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        
-
-        if (icon && panel) {
-            // Add a small delay to ensure proper rendering after resize
-            setTimeout(() => {
-                // First, ensure base panel CSS is applied
-                this.ensureBasePanelCSS();
+                // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
+                this.setupOptimizedResizeHandlers();
                 
-                // Force re-render to ensure styles are applied
-                panel.style.display = 'none';
-                panel.offsetHeight; // Trigger reflow
-                panel.style.display = '';
+                // Apply mobile responsive styles on load if mobile
+                if (window.innerWidth <= 768) {
+                    this.applyMobileResponsiveStyles();
+                }
                 
-            if (isMobile) {
-                // Apply mobile settings - force small panel near icon
-                    
-                this.applyMobileResponsiveStyles();
+                // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
+                this.setupThrottledMutationObserver();
                 
-                // Reapply mobile positioning if it was set
-                if (this.customizationData) {
-                    if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
-                            
-                        this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
-                    }
-                }
-            } else {
-                // Apply desktop settings
-                   
-                this.removeMobileResponsiveStyles();
-            }
-            }, 100); // Small delay to ensure proper rendering
-        } else {
-
-        }
-    });
-    
-    // Apply mobile responsive styles on load if mobile
-    if (window.innerWidth <= 768) {
-        this.applyMobileResponsiveStyles();
-    }
-    
-    // Add listener for display scaling changes and device pixel ratio changes
-    window.addEventListener('resize', () => {
-        // Update icon visibility based on device type and settings
-        this.handleWindowResize();
-        
-        // Force re-application of base CSS after any resize to maintain styling
-        setTimeout(() => {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
-            if (panel) {
-
-                this.ensureBasePanelCSS();
-            }
-        }, 50);
-    });
-    
-    // Add listener for device pixel ratio changes (display scaling)
-    if (window.matchMedia) {
-        const mediaQuery = window.matchMedia('(min-resolution: 1.5dppx)');
-        const handlePixelRatioChange = () => {
-           
-            setTimeout(() => {
-                const panel = this.shadowRoot?.getElementById('accessibility-panel');
-                if (panel) {
-                    this.ensureBasePanelCSS();
-                }
-            }, 100);
-        };
-        
-        mediaQuery.addListener(handlePixelRatioChange);
-    }
-    
-    // Add MutationObserver to watch for style changes and reapply base CSS
-    if (this.shadowRoot) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    const panel = this.shadowRoot?.getElementById('accessibility-panel');
-                    if (panel && panel === mutation.target) {
-                        
-                        setTimeout(() => {
-                            this.ensureBasePanelCSS();
-                        }, 10);
-                    }
-                }
-            });
-        });
-        
-        // Start observing the panel for style changes
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        if (panel) {
-            observer.observe(panel, { attributes: true, attributeFilter: ['style'] });
-        }
-    }
-    
-    // Add periodic check to ensure panel maintains its CSS (every 2 seconds)
-    setInterval(() => {
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        if (panel && panel.style.display !== 'none') {
-            // Check if essential CSS properties are missing
-            const computedStyle = window.getComputedStyle(panel);
-            const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && computedStyle.backgroundColor !== 'transparent';
-            const hasBoxShadow = computedStyle.boxShadow !== 'none';
-            const hasBorderRadius = computedStyle.borderRadius !== '0px';
-            
-            if (!hasBackground || !hasBoxShadow || !hasBorderRadius) {
-              
-                this.ensureBasePanelCSS();
-            }
-        }
-    }, 2000);
+                // PERFORMANCE OPTIMIZATION: Periodic check with throttling
+                this.setupPeriodicStyleCheck();
                 
     
                 // Keyboard event for icon
@@ -2597,8 +2520,12 @@ class AccessibilityWidget {
                 
     
                 // Global shortcuts (only work when keyboard navigation is enabled)
+                // Check both settings and body class to ensure keyboard-nav is active
+                const isKeyboardNavEnabled = this.settings['keyboard-nav'] || 
+                                            document.body.classList.contains('keyboard-nav') ||
+                                            this.isKeyboardNavigation;
     
-                if (e.altKey && this.settings['keyboard-nav']) {
+                if (e.altKey && isKeyboardNavEnabled) {
     
                     switch(e.key.toLowerCase()) {
     
@@ -6487,16 +6414,12 @@ class AccessibilityWidget {
     
                 /* Reduce high contrast intensity for Shadow DOM content */
     
+                /* High contrast should NOT affect widget - remove any filters */
                 :host(.high-contrast) .accessibility-icon,
-    
                 :host(.high-contrast) .accessibility-panel,
-    
                 :host(.high-contrast) .accessibility-panel * {
-    
-                    filter: contrast(0.8) !important;
-    
-                    -webkit-filter: contrast(0.8) !important;
-    
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
     
     
@@ -12099,11 +12022,9 @@ class AccessibilityWidget {
                 switch(feature) {
     
                     case 'keyboard-nav':
-    
+                        // Ensure setting is stored so keyboard shortcuts work
+                        this.settings['keyboard-nav'] = true;
                         this.initKeyboardShortcuts();
-    
-                       
-    
                         break;
     
                     case 'text-magnifier':
@@ -12367,10 +12288,9 @@ class AccessibilityWidget {
                 switch(feature) {
     
                     case 'keyboard-nav':
-    
+                        // Remove setting when disabled
+                        this.settings['keyboard-nav'] = false;
                         this.removeKeyboardShortcuts();
-    
-                      
                         break;
     
                     case 'text-magnifier':
@@ -13708,17 +13628,16 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             
-           
-            
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
-               
-                
                 // Remove any existing content scaling CSS
                 const existingStyle = document.getElementById('content-scaling-styles');
                 if (existingStyle) {
                     existingStyle.remove();
                 }
+                
+                // Reset widget elements to normal size
+                this.resetWidgetScale();
                 
                 return;
             }
@@ -13732,6 +13651,7 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
+            const inverseScale = 1 / scale;
             
             style.textContent = `
                 /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
@@ -13744,14 +13664,49 @@ class AccessibilityWidget {
                     overflow-x: hidden !important;
                     overflow-y: auto !important;
                 }
-                
-                /* Keep the accessibility UI unscaled - counter the zoom */
-                .accessibility-panel, #accessibility-icon, .accessibility-icon, accessibility-widget, ACCESSIBILITY-WIDGET {
-                    zoom: ${1 / scale} !important;
-                }
             `;
             
-      
+            // Counter-scale widget elements directly via JavaScript (Shadow DOM can't be targeted by CSS)
+            this.applyWidgetCounterScale(inverseScale);
+        }
+        
+        // Apply counter-scaling to widget elements to maintain fixed size
+        applyWidgetCounterScale(inverseScale) {
+            if (!this.shadowRoot) return;
+            
+            // Inject counter-scaling styles into Shadow DOM
+            let counterStyle = this.shadowRoot.getElementById('content-scaling-counter');
+            if (!counterStyle) {
+                counterStyle = document.createElement('style');
+                counterStyle.id = 'content-scaling-counter';
+                this.shadowRoot.appendChild(counterStyle);
+            }
+            
+            // Use zoom to counter the html zoom - maintains original visual size
+            counterStyle.textContent = `
+                /* Counter-scale widget elements to maintain fixed size */
+                #accessibility-panel,
+                #accessibility-icon {
+                    zoom: ${inverseScale} !important;
+                }
+                
+                /* Ensure panel maintains its height regardless of zoom */
+                #accessibility-panel {
+                    min-height: auto !important;
+                    height: auto !important;
+                }
+            `;
+        }
+        
+        // Reset widget scale when content scaling is disabled
+        resetWidgetScale() {
+            if (!this.shadowRoot) return;
+            
+            // Remove counter-scaling styles
+            const counterStyle = this.shadowRoot.getElementById('content-scaling-counter');
+            if (counterStyle) {
+                counterStyle.remove();
+            }
         }
         
         updateContentScaleDisplay() {
@@ -17544,8 +17499,6 @@ class AccessibilityWidget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
-            `;
-    
             `;
     
             document.head.appendChild(style);
@@ -22578,9 +22531,16 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    /* READABLE FONT: Only apply to specific text content, not symbols */
+                    /* READABLE FONT: Only change font-family, no size or weight changes */
                     
-                    /* 1. HEADINGS - Apply readable font to headings */
+                    /* Prevent horizontal overflow */
+                    .readable-font {
+                        overflow-x: hidden !important;
+                        word-wrap: break-word !important;
+                        overflow-wrap: break-word !important;
+                    }
+                    
+                    /* 1. HEADINGS - Apply readable font to headings (font-family only) */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22588,11 +22548,11 @@ class AccessibilityWidget {
                     .readable-font h5,
                     .readable-font h6 {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 600 !important;
-                        letter-spacing: 0.8px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements only */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements (font-family only) */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22605,35 +22565,34 @@ class AccessibilityWidget {
                     .readable-font strong,
                     .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 3. LINKS - Apply readable font to links but preserve their styling */
+                    /* 3. LINKS - Apply readable font to links (font-family only) */
                     .readable-font a {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text (font-family only) */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text */
+                    /* 5. BUTTON TEXT - Apply readable font to button text (font-family only) */
                     .readable-font button {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
                     /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
-
                     /* The MOST reliable way to exclude icon fonts and symbols */
                     .readable-font i,
                     .readable-font [class*="icon"],
@@ -22645,9 +22604,6 @@ class AccessibilityWidget {
                     .readable-font .w-icon-dropdown-toggle,
                     .readable-font svg * {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
@@ -22664,9 +22620,6 @@ class AccessibilityWidget {
                     .readable-font [aria-label*="chevron"],
                     .readable-font [aria-label*="caret"] {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
@@ -22677,9 +22630,6 @@ class AccessibilityWidget {
                     .readable-font button [class*="icon"],
                     .readable-font button [class*="arrow"] {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 9. PRESERVE LINK ICONS - Don't affect link symbols */
@@ -22688,9 +22638,18 @@ class AccessibilityWidget {
                     .readable-font a [class*="arrow"],
                     .readable-font a svg {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
+                    }
+                    
+                    /* 10. PREVENT HORIZONTAL OVERFLOW - Ensure content doesn't go out of screen */
+                    .readable-font * {
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    
+                    .readable-font body,
+                    .readable-font html {
+                        overflow-x: hidden !important;
+                        width: 100% !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -28703,98 +28662,62 @@ class AccessibilityWidget {
         // Enhanced Panel Toggle with Screen Reader Support
     
         togglePanel() {
+            // PERFORMANCE OPTIMIZATION: Use cached elements
+            const elements = this.getCachedElements();
+            const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
+            const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
     
-            if (this.shadowRoot) {
-    
-                const panel = this.shadowRoot.getElementById('accessibility-panel');
-    
-                const icon = this.shadowRoot.getElementById('accessibility-icon');
-    
-                
-    
-                if (panel && icon) {
-                    const isVisible = panel.style.display !== 'none';
-                    const isCurrentlyOpen = panel.classList.contains('active');
-                    if (isVisible) {
-                        // Hide panel
-                        panel.style.display = 'none';
-                        panel.style.visibility = 'hidden';
-                        icon.setAttribute('aria-expanded', 'false');
-                        
-                        
-                        // Re-enable smooth scrolling libraries when panel is closed
-                        this.enableSmoothScrollingLibraries();
-                    } else {
-                        // Show panel
-                        this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                        this.updateInterfacePosition(); // Position panel next to icon
-                        panel.style.display = 'block';
-                        panel.style.visibility = 'visible';
-                        icon.setAttribute('aria-expanded', 'true');
-                        
-                        
-                        // Fix scrolling conflicts with GSAP/Lenis libraries
-                        setTimeout(() => {
-                            this.fixPanelScrolling();
-                        }, 100);
-                    }
+            if (!panel || !icon) return;
+            
+            // PERFORMANCE OPTIMIZATION: Use CSS transforms instead of display toggling
+            const isCurrentlyOpen = panel.classList.contains('active');
+            const currentTransform = panel.style.transform || '';
+            const isHidden = currentTransform.includes('translateX(-100%)') || 
+                           panel.style.visibility === 'hidden' ||
+                           panel.style.display === 'none';
+            
+            // Use requestAnimationFrame for smooth transitions
+            requestAnimationFrame(() => {
+                if (isCurrentlyOpen || !isHidden) {
+                    // Hide panel using transform (better performance than display)
+                    panel.style.transform = 'translateX(-100%)';
+                    panel.style.visibility = 'hidden';
+                    panel.style.pointerEvents = 'none';
+                    panel.classList.remove('active');
+                    panel.setAttribute('aria-hidden', 'true');
+                    icon.setAttribute('aria-expanded', 'false');
+                    this.isPanelOpen = false;
                     
-    
-                    if (isCurrentlyOpen) {
-    
-                        // Close panel
-    
-                        panel.classList.remove('active');
-    
-                        panel.setAttribute('aria-hidden', 'true');
-    
-                        icon.setAttribute('aria-expanded', 'false');
-    
-                        this.isPanelOpen = false;
-    
-                        
-    
-                        // Return focus to icon
-    
-                        icon.focus();
-    
-                        this.announceToScreenReader('Accessibility panel closed');
-    
-                    } else {
-    
-                        // Open panel
-                        this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                        panel.classList.add('active');
-    
-                        panel.setAttribute('aria-hidden', 'false');
-    
-                        icon.setAttribute('aria-expanded', 'true');
-    
-                        this.isPanelOpen = true;
-    
-                        
-    
-                        // Focus first focusable element in panel
-    
-                        setTimeout(() => {
-    
-                            this.ensureFocusInPanel();
-    
-                        }, 100);
-    
-                        
-    
-                        this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
-    
-                    }
-    
+                    // Re-enable smooth scrolling libraries when panel is closed
+                    this.enableSmoothScrollingLibraries();
+                } else {
+                    // Show panel
+                    this.ensureBasePanelCSS(); // Ensure base CSS is applied
+                    this.updateInterfacePosition(); // Position panel next to icon
                     
-    
-    
+                    // Reset transform to show panel
+                    panel.style.transform = '';
+                    panel.style.visibility = 'visible';
+                    panel.style.pointerEvents = 'auto';
+                    panel.style.display = 'block'; // Keep for compatibility
+                    panel.classList.add('active');
+                    panel.setAttribute('aria-hidden', 'false');
+                    icon.setAttribute('aria-expanded', 'true');
+                    this.isPanelOpen = true;
+                    
+                    // Fix scrolling conflicts with GSAP/Lenis libraries
+                    requestAnimationFrame(() => {
+                        this.fixPanelScrolling();
+                    });
+                    
+                    // Focus first focusable element in panel
+                    requestAnimationFrame(() => {
+                        this.ensureFocusInPanel();
+                    });
+                    
+                    this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
                 }
-    
-            }
-    
+            });
         }
     
         // Fetch customization data from the API
@@ -29176,8 +29099,210 @@ class AccessibilityWidget {
         
         // Handle window resize to update icon visibility based on device type
         handleWindowResize() {
-
             this.showIcon();
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Get cached DOM elements with refresh capability
+        getCachedElements(forceRefresh = false) {
+            const now = Date.now();
+            // Refresh cache every 5 seconds or if forced
+            if (forceRefresh || now - this._cachedElements.lastCacheTime > 5000) {
+                this._cachedElements.icon = this.shadowRoot?.getElementById('accessibility-icon');
+                this._cachedElements.panel = this.shadowRoot?.getElementById('accessibility-panel');
+                this._cachedElements.closeBtn = this.shadowRoot?.getElementById('close-panel');
+                this._cachedElements.lastCacheTime = now;
+            }
+            return this._cachedElements;
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Debounce utility
+        debounce(func, wait) {
+            return (...args) => {
+                clearTimeout(this._resizeTimer);
+                this._resizeTimer = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Throttle utility using requestAnimationFrame
+        throttle(func) {
+            return (...args) => {
+                if (!this._rafPending) {
+                    this._rafPending = true;
+                    requestAnimationFrame(() => {
+                        func.apply(this, args);
+                        this._rafPending = false;
+                    });
+                }
+            };
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
+        setupOptimizedResizeHandlers() {
+            // Debounced resize handler (150ms delay)
+            const debouncedResize = this.debounce(() => {
+                this.handleResizeOptimized();
+            }, 150);
+            
+            // Single resize listener
+            window.addEventListener('resize', debouncedResize, { passive: true });
+            
+            // Use ResizeObserver for better responsive mode detection
+            if (this.shadowRoot && window.ResizeObserver) {
+                const resizeObserver = new ResizeObserver(() => {
+                    debouncedResize();
+                });
+                
+                const panel = this.shadowRoot.getElementById('accessibility-panel');
+                const icon = this.shadowRoot.getElementById('accessibility-icon');
+                if (panel) resizeObserver.observe(panel);
+                if (icon) resizeObserver.observe(icon);
+                
+                // Store observer for cleanup if needed
+                this._resizeObserver = resizeObserver;
+            }
+            
+            // Listen to media query changes for breakpoints
+            if (window.matchMedia) {
+                const mobileQuery = window.matchMedia('(max-width: 768px)');
+                const handleMediaChange = (e) => {
+                    this.handleResizeOptimized();
+                };
+                
+                // Modern browsers
+                if (mobileQuery.addEventListener) {
+                    mobileQuery.addEventListener('change', handleMediaChange);
+                } else {
+                    // Legacy browsers
+                    mobileQuery.addListener(handleMediaChange);
+                }
+                
+                // Device pixel ratio changes
+                const pixelRatioQuery = window.matchMedia('(min-resolution: 1.5dppx)');
+                const handlePixelRatioChange = () => {
+                    this.handleResizeOptimized();
+                };
+                
+                if (pixelRatioQuery.addEventListener) {
+                    pixelRatioQuery.addEventListener('change', handlePixelRatioChange);
+                } else {
+                    pixelRatioQuery.addListener(handlePixelRatioChange);
+                }
+            }
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Optimized resize handler
+        handleResizeOptimized() {
+            const elements = this.getCachedElements();
+            const icon = elements.icon;
+            const panel = elements.panel;
+            
+            if (!icon || !panel) return;
+            
+            // Use requestAnimationFrame for DOM updates
+            requestAnimationFrame(() => {
+                const screenWidth = window.innerWidth;
+                const isMobile = screenWidth <= 768;
+                
+                // Update icon visibility
+                this.handleWindowResize();
+                
+                // Ensure base CSS is applied
+                this.ensureBasePanelCSS();
+                
+                // Use CSS transforms instead of display toggling for better performance
+                // Only update if state actually changed
+                const currentTransform = panel.style.transform || '';
+                const needsUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
+                                 (!isMobile && panel.classList.contains('mobile-mode'));
+                
+                if (needsUpdate || !currentTransform) {
+                    if (isMobile) {
+                        // Apply mobile settings
+                        this.applyMobileResponsiveStyles();
+                        panel.classList.add('mobile-mode');
+                        
+                        // Reapply mobile positioning if it was set
+                        if (this.customizationData) {
+                            if (this.customizationData.mobileTriggerHorizontalPosition && 
+                                this.customizationData.mobileTriggerVerticalPosition) {
+                                this.updateMobileTriggerCombinedPosition(
+                                    this.customizationData.mobileTriggerHorizontalPosition, 
+                                    this.customizationData.mobileTriggerVerticalPosition
+                                );
+                            }
+                        }
+                    } else {
+                        // Apply desktop settings
+                        this.removeMobileResponsiveStyles();
+                        panel.classList.remove('mobile-mode');
+                    }
+                }
+            });
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
+        setupThrottledMutationObserver() {
+            if (!this.shadowRoot) return;
+            
+            // Throttled callback using requestAnimationFrame
+            const throttledCallback = this.throttle(() => {
+                const panel = this._cachedElements.panel || this.shadowRoot.getElementById('accessibility-panel');
+                if (panel) {
+                    this.ensureBasePanelCSS();
+                }
+            });
+            
+            const observer = new MutationObserver((mutations) => {
+                // Only process if panel style changed
+                const hasPanelStyleChange = mutations.some(mutation => 
+                    mutation.type === 'attributes' && 
+                    mutation.attributeName === 'style' &&
+                    mutation.target === this._cachedElements.panel
+                );
+                
+                if (hasPanelStyleChange) {
+                    throttledCallback();
+                }
+            });
+            
+            const panel = this.shadowRoot.getElementById('accessibility-panel');
+            if (panel) {
+                observer.observe(panel, { 
+                    attributes: true, 
+                    attributeFilter: ['style'] 
+                });
+                this._mutationObserver = observer;
+            }
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Periodic style check with throttling
+        setupPeriodicStyleCheck() {
+            // Check every 3 seconds instead of 2, and use requestAnimationFrame
+            setInterval(() => {
+                const panel = this._cachedElements.panel || this.shadowRoot?.getElementById('accessibility-panel');
+                if (!panel) return;
+                
+                // Use requestAnimationFrame to batch the check
+                requestAnimationFrame(() => {
+                    // Check if panel is visible (using transform instead of display)
+                    const computedStyle = window.getComputedStyle(panel);
+                    const isVisible = computedStyle.visibility !== 'hidden' && 
+                                     computedStyle.opacity !== '0' &&
+                                     panel.style.transform !== 'translateX(-100%)';
+                    
+                    if (isVisible) {
+                        // Check if essential CSS properties are missing
+                        const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+                                             computedStyle.backgroundColor !== 'transparent';
+                        const hasBoxShadow = computedStyle.boxShadow !== 'none';
+                        const hasBorderRadius = computedStyle.borderRadius !== '0px';
+                        
+                        if (!hasBackground || !hasBoxShadow || !hasBorderRadius) {
+                            this.ensureBasePanelCSS();
+                        }
+                    }
+                });
+            }, 3000);
         }
     
         applyLanguage(language) {
