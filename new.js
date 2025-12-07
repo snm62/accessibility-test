@@ -17619,365 +17619,13 @@ class AccessibilityWidget {
         // Low Saturation Methods
 
         enableLowSaturation() {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
-    
-                /* Specific fixes for common navbar classes and frameworks */
-                body.high-contrast .navbar-fixed-top,
-                body.high-contrast .navbar-fixed,
-                body.high-contrast .fixed-top,
-                body.high-contrast .is-fixed,
-                body.high-contrast [data-fixed] {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-
-                /* Preserve sticky classes - don't force to fixed */
-                body.high-contrast .sticky-top,
-                body.high-contrast .is-sticky,
-                body.high-contrast [data-sticky] {
-                    position: sticky !important;
-                    z-index: 9999 !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-    
-                /* Preserve sticky positioning for elements that should stick */
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"] {
-                    position: sticky !important;
-                    /* Ensure sticky elements maintain their behavior */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-    
-                /* High contrast visual enhancements without breaking positioning */
-                body.high-contrast {
-                    /* Apply high contrast to the page content, not positioned elements */
-                    /* Removed global filter that breaks sticky positioning */
-                }
-
-                /* Apply high contrast to content elements only, preserving sticky positioning */
-                body.high-contrast main,
-                body.high-contrast section,
-                body.high-contrast article,
-                body.high-contrast .content,
-                body.high-contrast .container,
-                body.high-contrast .wrapper,
-                body.high-contrast p,
-                body.high-contrast h1,
-                body.high-contrast h2,
-                body.high-contrast h3,
-                body.high-contrast h4,
-                body.high-contrast h5,
-                body.high-contrast h6,
-                body.high-contrast span,
-                body.high-contrast div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar):not(img):not(video):not(canvas):not(iframe):not(svg) {
-                    filter: contrast(1.1) brightness(1.05) !important;
-                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
-                }
-    
-                /* But exclude fixed/sticky elements from the filter to preserve positioning */
-                body.high-contrast [style*="position: fixed"],
-                body.high-contrast [style*="position:fixed"],
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"],
-                body.high-contrast .fixed,
-                body.high-contrast .sticky,
-                body.high-contrast [class*="fixed"],
-                body.high-contrast [class*="sticky"],
-                body.high-contrast nav,
-                body.high-contrast header,
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* Apply high contrast colors directly instead of filters */
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    border-color: #ffffff !important;
-                }
-    
-                /* Ensure links in fixed elements are visible */
-                body.high-contrast nav a,
-                body.high-contrast header a,
-                body.high-contrast .navbar a,
-                body.high-contrast .nav-bar a,
-                body.high-contrast .navigation a,
-                body.high-contrast .header a,
-                body.high-contrast .top-bar a,
-                body.high-contrast .menu-bar a {
-                    color: #ffffff !important;
-                    text-decoration: underline !important;
-                }
-                
-                /* Preserve images and media elements from high contrast filters */
-                body.high-contrast img,
-                body.high-contrast video,
-                body.high-contrast canvas,
-                body.high-contrast iframe,
-                body.high-contrast svg,
-                body.high-contrast [class*="animated"],
-                body.high-contrast [class*="animation"],
-                body.high-contrast [class*="motion"] {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                }
-    
-                body.high-contrast nav a:hover,
-                body.high-contrast header a:hover,
-                body.high-contrast .navbar a:hover,
-                body.high-contrast .nav-bar a:hover,
-                body.high-contrast .navigation a:hover,
-                body.high-contrast .header a:hover,
-                body.high-contrast .top-bar a:hover,
-                body.high-contrast .menu-bar a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Preserve button styles in fixed elements */
-                body.high-contrast nav button,
-                body.high-contrast header button,
-                body.high-contrast .navbar button,
-                body.high-contrast .nav-bar button,
-                body.high-contrast .navigation button,
-                body.high-contrast .header button,
-                body.high-contrast .top-bar button,
-                body.high-contrast .menu-bar button {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                }
-    
-                body.high-contrast nav button:hover,
-                body.high-contrast header button:hover,
-                body.high-contrast .navbar button:hover,
-                body.high-contrast .nav-bar button:hover,
-                body.high-contrast .navigation button:hover,
-                body.high-contrast .header button:hover,
-                body.high-contrast .top-bar button:hover,
-                body.high-contrast .menu-bar button:hover {
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                }
-    
-                /* Ensure dropdowns and menus in fixed elements work properly */
-                body.high-contrast nav .dropdown-menu,
-                body.high-contrast header .dropdown-menu,
-                body.high-contrast .navbar .dropdown-menu,
-                body.high-contrast .nav-bar .dropdown-menu,
-                body.high-contrast .navigation .dropdown-menu,
-                body.high-contrast .header .dropdown-menu,
-                body.high-contrast .top-bar .dropdown-menu,
-                body.high-contrast .menu-bar .dropdown-menu {
-                    background-color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
-                }
-    
-                body.high-contrast nav .dropdown-menu a,
-                body.high-contrast header .dropdown-menu a,
-                body.high-contrast .navbar .dropdown-menu a,
-                body.high-contrast .nav-bar .dropdown-menu a,
-                body.high-contrast .navigation .dropdown-menu a,
-                body.high-contrast .header .dropdown-menu a,
-                body.high-contrast .top-bar .dropdown-menu a,
-                body.high-contrast .menu-bar .dropdown-menu a {
-                    color: #ffffff !important;
-                }
-    
-                body.high-contrast nav .dropdown-menu a:hover,
-                body.high-contrast header .dropdown-menu a:hover,
-                body.high-contrast .navbar .dropdown-menu a:hover,
-                body.high-contrast .nav-bar .dropdown-menu a:hover,
-                body.high-contrast .navigation .dropdown-menu a:hover,
-                body.high-contrast .header .dropdown-menu a:hover,
-                body.high-contrast .top-bar .dropdown-menu a:hover,
-                body.high-contrast .menu-bar .dropdown-menu a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Ensure mobile menu toggles work */
-                body.high-contrast .navbar-toggler,
-                body.high-contrast .menu-toggle,
-                body.high-contrast .hamburger {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                }
-    
-                /* Fix for Bootstrap and other framework navbars */
-                body.high-contrast .navbar-default,
-                body.high-contrast .navbar-inverse,
-                body.high-contrast .navbar-light,
-                body.high-contrast .navbar-dark {
-                    background-color: #000000 !important;
-                    border-color: #ffffff !important;
-                }
-    
-                /* Ensure proper z-index stacking */
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
-                    z-index: 9999 !important;
-                }
-    
-                /* Prevent any transform or filter effects that might break positioning */
-                body.high-contrast [style*="position: fixed"],
-                body.high-contrast [style*="position:fixed"],
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"] {
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
-    
-                /* Additional fixes for common frameworks and libraries */
-                body.high-contrast .navbar-expand-lg,
-                body.high-contrast .navbar-expand-md,
-                body.high-contrast .navbar-expand-sm,
-                body.high-contrast .navbar-expand,
-                body.high-contrast .navbar-brand,
-                body.high-contrast .navbar-nav,
-                body.high-contrast .navbar-toggler,
-                body.high-contrast .navbar-collapse {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Fix for WordPress themes and common CMS navbars */
-                body.high-contrast .main-navigation,
-                body.high-contrast .site-header,
-                body.high-contrast .site-navigation,
-                body.high-contrast .primary-menu,
-                body.high-contrast .menu-primary,
-                body.high-contrast .main-menu {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Ensure submenus and dropdowns work in fixed navbars */
-                body.high-contrast .main-navigation ul,
-                body.high-contrast .site-navigation ul,
-                body.high-contrast .primary-menu ul,
-                body.high-contrast .menu-primary ul,
-                body.high-contrast .main-menu ul {
-                    background-color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
-                }
-    
-                body.high-contrast .main-navigation a,
-                body.high-contrast .site-navigation a,
-                body.high-contrast .primary-menu a,
-                body.high-contrast .menu-primary a,
-                body.high-contrast .main-menu a {
-                    color: #ffffff !important;
-                    text-decoration: underline !important;
-                }
-    
-                body.high-contrast .main-navigation a:hover,
-                body.high-contrast .site-navigation a:hover,
-                body.high-contrast .primary-menu a:hover,
-                body.high-contrast .menu-primary a:hover,
-                body.high-contrast .main-menu a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Fix for React/Vue/Angular component navbars */
-                body.high-contrast [data-component="navbar"],
-                body.high-contrast [data-component="navigation"],
-                body.high-contrast [data-component="header"],
-                body.high-contrast .react-navbar,
-                body.high-contrast .vue-navbar,
-                body.high-contrast .angular-navbar {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Ensure mobile responsive navbars work */
-                body.high-contrast .mobile-nav,
-                body.high-contrast .mobile-menu,
-                body.high-contrast .mobile-header,
-                body.high-contrast .responsive-nav {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Fix for sticky headers that might be affected */
-                body.high-contrast .sticky-header,
-                body.high-contrast .sticky-nav,
-                body.high-contrast .sticky-top-bar {
-                    position: sticky !important;
-                    top: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-            `;
-    
-            document.head.appendChild(style);
+            this.settings['low-saturation'] = true;
+            document.body.classList.add('low-saturation');
             
-            // Apply fixes to existing navbar elements
-            this.fixExistingNavbars();
+            // Apply low saturation styles that preserve positioning
+            this.applyLowSaturationStyles();
             
-       
+            this.saveSettings();
         }
     
         // Fix existing navbar elements that might have lost their positioning
@@ -18080,11 +17728,51 @@ class AccessibilityWidget {
     
         // Stop monitoring navbar changes
         stopObservingNavbarChanges() {
-            if (this.navbarObserver) {
-                this.navbarObserver.disconnect();
-                this.navbarObserver = null;
-                
-            }
+            // Find all potential navbar elements
+            const navbarSelectors = [
+                'nav', 'header', '.navbar', '.nav-bar', '.navigation', 
+                '.header', '.top-bar', '.menu-bar', '.main-navigation',
+                '.site-header', '.site-navigation', '.primary-menu',
+                '.menu-primary', '.main-menu', '.mobile-nav', '.mobile-menu',
+                '.mobile-header', '.responsive-nav', '.sticky-header',
+                '.sticky-nav', '.sticky-top-bar'
+            ];
+    
+            navbarSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    // Check if element has fixed or sticky positioning
+                    const computedStyle = window.getComputedStyle(element);
+                    const position = computedStyle.position;
+                    
+                    if (position === 'fixed' || position === 'sticky') {
+                        // Ensure the element maintains its positioning
+                        element.style.setProperty('position', position, 'important');
+                        element.style.setProperty('z-index', '9999', 'important');
+                        element.style.setProperty('filter', 'none', 'important');
+                        element.style.setProperty('-webkit-filter', 'none', 'important');
+                        element.style.setProperty('transform', 'none', 'important');
+                        element.style.setProperty('will-change', 'auto', 'important');
+                        
+                        // Apply high contrast colors
+                        element.style.setProperty('background-color', '#000000', 'important');
+                        element.style.setProperty('color', '#ffffff', 'important');
+                        element.style.setProperty('border-color', '#ffffff', 'important');
+                        
+                     
+                    }
+                });
+            });
+    
+            // Also check for elements with inline styles that might be affected
+            const elementsWithInlinePosition = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"], [style*="position: sticky"], [style*="position:sticky"]');
+            elementsWithInlinePosition.forEach(element => {
+                element.style.setProperty('filter', 'none', 'important');
+                element.style.setProperty('-webkit-filter', 'none', 'important');
+                element.style.setProperty('transform', 'none', 'important');
+                element.style.setProperty('will-change', 'auto', 'important');
+
+            });
         }
     
     
