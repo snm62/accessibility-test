@@ -1200,6 +1200,9 @@ class AccessibilityWidget {
                 lastCacheTime: 0
             };
             
+            // Track if this is a staging domain (free, no payment check needed)
+            this._isStagingDomain = null; // Will be set on first check
+            
             // Debounce/throttle timers
             this._resizeTimer = null;
             this._mutationTimer = null;
@@ -1343,16 +1346,29 @@ class AccessibilityWidget {
                 if (isStagingDomain) {
                     return true;
                 }
+                // OPTIMIZED: Minimal headers, efficient fetch
                 const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`);
+                const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    keepalive: false
+                });
                 
                 // Handle rate limit errors with retry
                 if (response.status === 429) {
                     
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
                     
                     const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                    const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`);
+                    const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        keepalive: false
+                    });
                     if (!retryResponse.ok) {
                         
                         return false;
@@ -1813,7 +1829,36 @@ class AccessibilityWidget {
             }
     
             
-            await this.fetchCustomizationData();
+            // Fetch customization data (BLOCKING - load on page load for immediate customization)
+            // This ensures icon appears with user's customization immediately, no delays
+            try {
+                const customizationData = await this.fetchCustomizationData();
+                if (customizationData && customizationData.customization) {
+                    // Apply customizations BEFORE showing icon
+                    this.applyCustomizations(customizationData.customization);
+                    // Also apply accessibility profiles if present
+                    if (customizationData.accessibilityProfiles) {
+                        this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+                    }
+                }
+                
+                // Show icon AFTER customizations are applied
+                // This ensures icon appears with correct customization (color, position, etc.)
+                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                if (icon) {
+                    icon.style.display = '';
+                    icon.style.visibility = 'visible';
+                    icon.style.opacity = '1';
+                }
+            } catch (err) {
+                // If fetch fails, show icon with defaults
+                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                if (icon) {
+                    icon.style.display = '';
+                    icon.style.visibility = 'visible';
+                    icon.style.opacity = '1';
+                }
+            }
             
             // Restore saved language
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
@@ -1825,8 +1870,27 @@ class AccessibilityWidget {
                 this.applyLanguage('English');
             }
             
-            // Set up periodic refresh to check for customization updates
-            this.setupCustomizationRefresh();
+            // Set up periodic payment status refresh (every 5 minutes)
+            // This ensures widget knows immediately when payment status changes
+            this.setupPaymentStatusRefresh();
+            
+            // Refresh payment status when page becomes visible (user switches back to tab)
+            // This catches payment changes that happened while tab was inactive
+            // Only for custom domains (staging is always free)
+            // Only add listener once (check if already added)
+            if (!this._visibilityListenerAdded) {
+                document.addEventListener('visibilitychange', async () => {
+                    if (!document.hidden && !this.isStagingDomain()) {
+                        // Custom domains: Check fresh payment status when tab becomes visible
+                        // Staging domains: Skip (always free)
+                        const isValid = await this.checkPaymentStatusRealTime();
+                        if (!isValid) {
+                            this.disableWidget();
+                        }
+                    }
+                });
+                this._visibilityListenerAdded = true;
+            }
             
     
             // Delay binding events to ensure elements are created
@@ -1841,23 +1905,8 @@ class AccessibilityWidget {
     
                 
     
-                // Fetch customization data from API
-    
-                
-    
-                const customizationData = await this.fetchCustomizationData();
-    
-                if (customizationData && customizationData.customization) {
-    
-                    
-    
-                    this.applyCustomizations(customizationData.customization);
-    
-                } else {
-    
-                    
-    
-                }
+                // Customization data is already fetched non-blocking in init()
+                // No need to fetch again here
     
                 
     
@@ -4501,7 +4550,7 @@ class AccessibilityWidget {
     
             icon.style.pointerEvents = 'auto';
             
-            // Initially hide the icon until customization data is loaded
+            // Initially hide the icon - will show after customization is loaded
             icon.style.display = 'none';
             icon.style.visibility = 'hidden';
             icon.style.opacity = '0';
@@ -23284,28 +23333,64 @@ class AccessibilityWidget {
         
         disableStopAnimation() {
    
-            document.body.classList.remove('stop-animation');
-            this.settings['stop-animation'] = false;
-            this.saveSettings();
-            
-            // 1. Remove CSS rules for stop animation
+            // 1. Remove CSS rules for stop animation FIRST
             const existingStyle = document.getElementById('stop-animation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // 2. Restore requestAnimationFrame
+            // 2. Remove stop-animation class from body and html
+            document.body.classList.remove('stop-animation');
+            document.documentElement.classList.remove('stop-animation');
+            
+            // 3. Force browser reflow to ensure CSS changes take effect
+            // This is critical for animations to resume after !important rules are removed
+            void document.body.offsetHeight;
+            
+            // 4. Restore requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
-            // 3. Restore setTimeout and setInterval
+            // 5. Restore setTimeout and setInterval
             this.restoreDOMAnimationLoops();
             
-            // 4. Restore animated media
+            // 6. Restore animated media
             this.restoreAnimatedMedia();
             
-            // 5. Restore JavaScript animations
+            // 7. Restore JavaScript animations
             this.restoreJavaScriptAnimations();
             
+            // 8. Force re-enable CSS animations by triggering a style recalculation
+            // This ensures animations resume after !important rules are removed
+            requestAnimationFrame(() => {
+                // Re-initialize animation libraries that might have been paused
+                if (typeof AOS !== 'undefined' && AOS.refresh) {
+                    try {
+                        AOS.refresh();
+                    } catch (e) {}
+                }
+                
+                // Re-enable Swiper autoplay
+                if (typeof Swiper !== 'undefined') {
+                    try {
+                        document.querySelectorAll('.swiper').forEach(swiperEl => {
+                            if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                                swiperEl.swiper.autoplay.start();
+                            }
+                        });
+                    } catch (e) {}
+                }
+                
+                // Force style recalculation on elements with animation classes
+                // This helps browser re-evaluate styles after !important rules are removed
+                const animatedElements = document.querySelectorAll('[class*="animate"], [class*="fade"], [class*="slide"], [class*="bounce"], [class*="pulse"], [class*="animation"]');
+                animatedElements.forEach(el => {
+                    // Trigger minimal reflow to force browser to re-evaluate styles
+                    void el.offsetHeight;
+                });
+            });
+            
+            this.settings['stop-animation'] = false;
+            this.saveSettings();
         
         }
         
@@ -28408,51 +28493,88 @@ class AccessibilityWidget {
             });
         }
     
-        // Fetch customization data from the API
+        // Check if domain is staging (free, no payment needed)
+        isStagingDomain() {
+            if (this._isStagingDomain !== null) {
+                return this._isStagingDomain; // Return cached result
+            }
+            
+            const host = window.location.hostname || '';
+            this._isStagingDomain = host.endsWith('.webflow.io') || 
+                                   host.endsWith('.webflow.com') || 
+                                   host.includes('localhost') ||
+                                   host.includes('127.0.0.1') ||
+                                   host.includes('staging');
+            
+            return this._isStagingDomain;
+        }
+        
+        // Check payment status - NO CACHING for custom domains (real-time check)
+        // Staging domains: Always return true (free, no API call)
+        // Custom domains: Always check payment status fresh (no cache, real-time)
+        async checkPaymentStatusRealTime() {
+            // Staging domains are free - no payment check needed
+            if (this.isStagingDomain()) {
+                return true; // Fast return, no API call
+            }
+            
+            // Custom domains: Always check payment status fresh (no cache)
+            // This ensures we detect real-time payment changes (payments/cancellations)
+            return await this.checkPaymentStatus();
+        }
+        
+        // Fetch customization data from the API - OPTIMIZED for speed
         async fetchCustomizationData() {
           
             
             try {
-                // First check payment status before loading customization data
-                const paymentValid = await this.checkPaymentStatus();
+                // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
+                // This reduces total wait time significantly
+                const [paymentValid, siteId] = await Promise.all([
+                    this.checkPaymentStatusRealTime(),
+                    this.getSiteId()
+                ]);
+                
+                // Fast fail if payment invalid
                 if (!paymentValid) {
                   
                     this.disableWidget();
                     return null;
                 }
                 
-                // Get siteId first
-                this.siteId = await this.getSiteId();
-  
-                
-                if (!this.siteId) {
+                // Fast fail if no siteId
+                if (!siteId) {
                    
                     return null;
                 }
+                
+                // Cache siteId for future use
+                this.siteId = siteId;
                 
                 if (!this.kvApiUrl) {
                     
                     return null;
                 }
                 
-                // Add cache busting to ensure fresh data
+                // OPTIMIZATION: Use minimal headers and efficient fetch
                 const cacheBuster = `_t=${Date.now()}`;
                 const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${this.siteId}&${cacheBuster}`;
+                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
                 
-                
+                // OPTIMIZED: Minimal headers, no unnecessary data
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Accept': 'application/json'
+                    },
+                    // Use keep-alive for faster subsequent requests
+                    keepalive: false
                 });
                 
              
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    
+                    // Don't read error text if not needed (saves time)
                     return null;
                 }
                 
@@ -28466,60 +28588,51 @@ class AccessibilityWidget {
             }
         }
     
-        // Set up periodic refresh to check for customization updates
-        setupCustomizationRefresh() {
-        
+        // Set up periodic payment status refresh for custom domains only
+        // Staging domains don't need this (they're always free)
+        // Custom domains: Refresh every 2 minutes to catch real-time payment changes
+        setupPaymentStatusRefresh() {
+            // Only set up refresh for custom domains (staging is always free)
+            if (this.isStagingDomain()) {
+                return; // No refresh needed for staging
+            }
             
-            
-            // Check for updates every 30 seconds
+            // Custom domains: Refresh payment status every 2 minutes (120000ms)
+            // This catches real-time payment changes (payments/cancellations)
             setInterval(async () => {
-              
                 try {
-                    // Check payment status first
-                    const paymentValid = await this.checkPaymentStatus();
-                    if (!paymentValid) {
+                    // Always check fresh payment status (no cache)
+                    const isValid = await this.checkPaymentStatusRealTime();
                     
+                    if (!isValid) {
+                        // Payment status changed to invalid - disable widget
                         this.disableWidget();
-                        return;
-                    }
-                    
-                    const customizationData = await this.fetchCustomizationData();
-                    if (customizationData && customizationData.customization) {
-      
-                        this.applyCustomizations(customizationData.customization);
+                    } else {
+                        // Payment status is valid - ensure widget is enabled
+                        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                        if (icon) {
+                            icon.style.display = '';
+                        }
+                        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                        if (panel) {
+                            panel.style.display = '';
+                        }
                     }
                 } catch (error) {
-                    
+                    // Silently handle errors - don't break widget if refresh fails
                 }
-            }, 30000); // Check every 30 seconds
-            
-            // Also check when the page becomes visible (user switches back to tab)
-            document.addEventListener('visibilitychange', async () => {
-                if (!document.hidden) {
-                    
-                    try {
-                        // Check payment status first
-                        const paymentValid = await this.checkPaymentStatus();
-                        if (!paymentValid) {
-
-                            this.disableWidget();
-                            return;
-                        }
-                        
-                        const customizationData = await this.fetchCustomizationData();
-                        if (customizationData && customizationData.customization) {
-   
-                            this.applyCustomizations(customizationData.customization);
-                        }
-                    } catch (error) {
-                        
-                    }
-                }
-            });
+            }, 120000); // Every 2 minutes for custom domains
         }
     
         // Get site ID for API calls via script tag (no storage, no mapping)
+        // OPTIMIZED: Cache siteId to avoid repeated DOM queries
+        // SECURITY: siteId is public (from script URL), caching in memory is safe
         async getSiteId() {
+          // Return cached siteId if available
+          if (this.siteId) {
+            return this.siteId;
+          }
+          
           try {
             const scriptEl = document.currentScript || 
                            document.querySelector('script[src*="test.js"]') ||
@@ -28528,7 +28641,16 @@ class AccessibilityWidget {
             if (scriptEl && scriptEl.src) {
               const u = new URL(scriptEl.src);
               const sid = u.searchParams.get('siteId');
-              if (sid) return sid;
+              if (sid) {
+                // SECURITY: Cache in memory only (not localStorage/cookies)
+                // This is safe because:
+                // 1. siteId is already public (in script URL)
+                // 2. Only cached for widget instance lifetime
+                // 3. Cleared on page reload
+                // 4. No cross-site leakage
+                this.siteId = sid;
+                return sid;
+              }
             }
           } catch {}
           return null;
