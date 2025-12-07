@@ -60,15 +60,6 @@
     
     AccessibilityWidgetNS.isDesignerContext = isDesignerContext;
     
-    // Make isDesignerContext accessible to class defined outside IIFE
-    // Use a closure-safe pattern instead of window.__
-    (function() {
-        // Store in a way that's accessible but not on window
-        if (typeof globalThis !== 'undefined') {
-            globalThis.__AccessibilityWidget_isDesignerContext = isDesignerContext;
-        }
-    })();
-    
     // CRITICAL: Immediate seizure-safe check - runs before any animations can start
     try {
         
@@ -495,8 +486,7 @@
                                 });
                             } catch (_) {}
                             
-                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
-                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
+                         
                         } catch (err) {
                             
                         }
@@ -527,8 +517,7 @@
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
-                                    // Only neutralize transform if the element is not an icon/arrow
-                                    // and not inside a rotation context such as accordion/FAQ toggles
+                                   
                                     const inRotationContext = (() => {
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
@@ -539,7 +528,7 @@
                                 } catch (_) {}
                             };
                             
-                            // Initial sweep - limit to first 5000 elements for safety
+                            
                             try {
                                 const all = document.querySelectorAll('*');
                                 let count = 0;
@@ -618,7 +607,7 @@
                         }
                     } catch (_) {}
                     
-                    // Install hard blockers at the API level for inline styles when seizure-safe is active
+                  
                     try {
                         if (!AccessibilityWidgetNS.installStyleHardBlockers) {
                             AccessibilityWidgetNS.installStyleHardBlockers = function() {
@@ -709,14 +698,10 @@
             }
         }
         
-        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
-        // SECURITY: Use CSS-based approach instead of global API override
-        // The CSS class 'seizure-safe' on body already disables animations via CSS
-        // We use MutationObserver to intercept and block animation-related style changes
+       
         if (seizureSafeFromStorage === 'true') {
             try {
-                // Use MutationObserver to intercept style changes instead of overriding requestAnimationFrame
-                // This is safer and doesn't break other scripts
+                
                 if (!AccessibilityWidgetNS.seizureStyleObserver) {
                     const styleObserver = new MutationObserver((mutations) => {
                         if (!document.body.classList.contains('seizure-safe')) return;
@@ -902,7 +887,7 @@ function applyVisionImpaired(on) {
             document.head.appendChild(style);
         }
         
-        // ... (Update CSS below) ...
+        
         style.textContent = `
             /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
 
@@ -1278,31 +1263,6 @@ function applyVisionImpaired(on) {
     }
 })();
 
-// Helper function to access isDesignerContext - uses existing window.__AccessibilityWidget pattern
-// This is safer than creating new window properties
-const getIsDesignerContext = function() {
-    // Use the existing window.__AccessibilityWidget that's already established in the codebase
-    if (typeof window !== 'undefined' && window.__AccessibilityWidget && typeof window.__AccessibilityWidget.isDesignerContext === 'function') {
-        return window.__AccessibilityWidget.isDesignerContext;
-    }
-    // Fallback: return a safe function that checks designer context
-    return function() {
-        try {
-            if (typeof window === 'undefined' || typeof document === 'undefined') return true;
-            const hostname = window.location.hostname;
-            if (hostname.includes('design.webflow.com') || hostname.includes('preview.webflow.com')) return true;
-            const body = document.body;
-            if (!body) return true;
-            if (body.classList.contains('w-editor') || body.hasAttribute('data-wf-page')) return true;
-            return false;
-        } catch (e) {
-            return true;
-        }
-    };
-};
-
-const isDesignerContextFn = getIsDesignerContext();
-
 class AccessibilityWidget {
     constructor() {
     
@@ -1666,10 +1626,9 @@ class AccessibilityWidget {
             this.showPaymentRequiredMessage();
         }
         
-        // Show payment required message - DISABLED
+        
         showPaymentRequiredMessage() {
-            // Payment message disabled - no popup will be shown
-            
+           
         }
         
         
@@ -1818,10 +1777,7 @@ class AccessibilityWidget {
             }
         }
         
-        // Set up aggressive monitoring for any text animations that might start
-        // REMOVED: Duplicate setupSeizureSafeMonitoring() - using more comprehensive version below
-        
-        // Set up aggressive monitoring for text animations when seizure-safe mode is active
+      
         setupSeizureSafeMonitoring() {
             try {
                 // Only set up monitoring if seizure-safe mode is active
@@ -1986,17 +1942,7 @@ class AccessibilityWidget {
             }
     
             
-            const customizationData = await this.fetchCustomizationData();
-            
-            // Apply accessibility profiles from published settings
-            if (customizationData && customizationData.accessibilityProfiles) {
-                this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
-            }
-            
-            // Apply customization data
-            if (customizationData && customizationData.customization) {
-                this.applyCustomizations(customizationData.customization);
-            }
+            await this.fetchCustomizationData();
             
             // Restore saved language
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
@@ -2024,7 +1970,6 @@ class AccessibilityWidget {
     
                 
     
-                // Fetch customization data from API
     
                 
     
@@ -2119,7 +2064,7 @@ class AccessibilityWidget {
                     }
     
                 });
-                // Add this in your init function after the existing code
+               
     // Add window resize listener for mobile responsiveness and screen scaling
     window.addEventListener('resize', () => {
         const screenWidth = window.innerWidth;
@@ -2581,13 +2526,6 @@ class AccessibilityWidget {
     
             }
     
-            
-    
-            // Language selector header event listener will be set up after panel creation
-    
-            
-    
-            
     
             // Content scaling control buttons - using Shadow DOM
             const decreaseContentScaleBtn = this.shadowRoot.getElementById('decrease-content-scale-btn');
@@ -2629,9 +2567,7 @@ class AccessibilityWidget {
                     }
                 });
             }
-    
-    
-    
+     
             // Font sizing control buttons - using Shadow DOM
     
             const decreaseFontSizeBtn = this.shadowRoot.getElementById('decrease-font-size-btn');
@@ -2657,8 +2593,7 @@ class AccessibilityWidget {
     
             }
     
-    
-    
+ 
             const increaseFontSizeBtn = this.shadowRoot.getElementById('increase-font-size-btn');
     
             if (increaseFontSizeBtn) {
@@ -2681,11 +2616,6 @@ class AccessibilityWidget {
                 });
     
             }
-    
-    
-    
-    
-    
     
     
             // Letter spacing control buttons - using Shadow DOM
@@ -2738,9 +2668,7 @@ class AccessibilityWidget {
     
             }
     
-    
-    
-            
+           
     
         }
     
@@ -2748,9 +2676,7 @@ class AccessibilityWidget {
     
         initTextMagnifier() {
     
-            // Initialize text magnifier functionality
-    
-            
+            // Initialize text magnifier functionality          
     
         }
     
@@ -2758,10 +2684,7 @@ class AccessibilityWidget {
     
         initKeyboardShortcuts() {
     
-            
-    
-            
-    
+        
             // Remove existing shortcuts if any
     
             this.removeKeyboardShortcuts();
@@ -3053,10 +2976,7 @@ class AccessibilityWidget {
                         break;
     
                     default:
-    
-                        // For any other key, just log it to see if the event listener is working
-    
-                        
+        
     
                         break;
     
@@ -3071,10 +2991,6 @@ class AccessibilityWidget {
             document.addEventListener('keydown', this.keyboardShortcutHandler);
             document.addEventListener('mousedown', this.mouseHandler);
             document.addEventListener('click', this.mouseHandler);
-    
-            
-    
-            
     
             // Test if event listener is working
     
@@ -3115,9 +3031,7 @@ class AccessibilityWidget {
     
                 
     
-            }
-    
-            
+            }   
     
             // Remove all highlighted elements
     
@@ -3135,23 +3049,17 @@ class AccessibilityWidget {
     
         cycleThroughElements(selector, type) {
     
-            
-    
-            
-    
+        
             // Remove previous highlights
     
             this.removeAllHighlights();
     
-            
-    
+        
             // Get all matching elements
     
             const elements = Array.from(document.querySelectorAll(selector));
     
-            
-    
-            
+         
     
             if (elements.length === 0) {
     
@@ -3169,11 +3077,7 @@ class AccessibilityWidget {
     
             const element = elements[currentIndex];
     
-            
-    
-            
-    
-            
+        
     
             // Create highlight
     
@@ -3185,10 +3089,7 @@ class AccessibilityWidget {
     
             this.currentElementIndex[type] = (currentIndex + 1) % elements.length;
     
-            
-    
-            
-    
+        
         }
     
     
@@ -3201,9 +3102,6 @@ class AccessibilityWidget {
     
             const rect = element.getBoundingClientRect();
     
-            
-    
-            
     
             // Create highlight box
     
@@ -3284,10 +3182,6 @@ class AccessibilityWidget {
             document.body.appendChild(highlight);
     
             document.body.appendChild(label);
-    
-            
-    
-            
     
             
     
@@ -3397,9 +3291,7 @@ class AccessibilityWidget {
     
                 document.head.appendChild(link);
     
-                // Add this after your existing CSS
-    
-                // Define overrideCSS first
+            
                 const overrideCSS = `
     .accessibility-panel {
       left: auto !important;
@@ -4690,7 +4582,7 @@ class AccessibilityWidget {
     }
     `;
     
-                if (!isDesignerContextFn() && document.head) {
+                if (!isDesignerContext() && document.head) {
                     const style = document.createElement('style');
                     style.textContent = overrideCSS;
                     document.head.appendChild(style);
@@ -4704,7 +4596,7 @@ class AccessibilityWidget {
     
     
         createWidget() {
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
     
             const widgetContainer = document.createElement('div');
             widgetContainer.id = 'accessibility-widget-container';
@@ -4793,7 +4685,7 @@ class AccessibilityWidget {
     
             panel.setAttribute('aria-describedby', 'panel-description');
     
-            if (isDesignerContextFn()) {
+            if (isDesignerContext()) {
                 return;
             }
             
@@ -4863,7 +4755,7 @@ class AccessibilityWidget {
     
             languageDropdown.style.display = 'none';
     
-            if (!isDesignerContextFn()) {
+            if (!isDesignerContext()) {
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = this.getLanguageDropdownContent();
@@ -4876,26 +4768,13 @@ class AccessibilityWidget {
     
             // Append dropdown INSIDE the panel, not to shadowRoot
             panel.appendChild(languageDropdown);
-    
-            
-    
-            
-    
-            
-    
-            
-    
-            // Dropdown is ready for use
-    
+   
             
     
             // Set up language dropdown event listeners after dropdown is created
     
             this.setupLanguageDropdownListeners();
-    
-            
-    
-    
+
     
             // Create screen reader announcements container
     
@@ -4921,29 +4800,14 @@ class AccessibilityWidget {
     
                 const panelCheck = shadowRoot.getElementById('accessibility-panel');
     
-                
-    
-                
-    
-                
-    
+
                 // Debug: Check panel visibility
     
                 if (panelCheck) {
     
                     const computedStyle = window.getComputedStyle(panelCheck);
     
-                    
-    
-                    
-    
-                    
-    
-                    
-    
-                    
-    
-                    
+        
     
                 }
     
@@ -6686,7 +6550,7 @@ class AccessibilityWidget {
     
     
     
-                /* Preserve widget appearance when high contrast is enabled - no foggy filter */
+                /* Reduce high contrast intensity for Shadow DOM content */
     
                 :host(.high-contrast) .accessibility-icon,
     
@@ -6694,9 +6558,9 @@ class AccessibilityWidget {
     
                 :host(.high-contrast) .accessibility-panel * {
     
-                    filter: none !important;
+                    filter: contrast(0.8) !important;
     
-                    -webkit-filter: none !important;
+                    -webkit-filter: contrast(0.8) !important;
     
                 }
     
@@ -6746,7 +6610,7 @@ class AccessibilityWidget {
     
     
     
-                /* Readable Font - Apply to widget elements (only font-family, preserve size and weight) */
+                /* Readable Font - Apply to widget elements (must come after default rules) */
     
                 :host(.readable-font) .accessibility-icon,
     
@@ -6754,7 +6618,9 @@ class AccessibilityWidget {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
     
-                    /* Do not change font-size or font-weight - preserve original */
+                    font-weight: 500 !important;
+    
+                    letter-spacing: 0.5px !important;
     
                 }
     
@@ -6778,7 +6644,9 @@ class AccessibilityWidget {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
     
-                    /* Do not change font-size or font-weight - preserve original */
+                    font-weight: 500 !important;
+    
+                    letter-spacing: 0.5px !important;
     
                 }
     
@@ -13845,9 +13713,6 @@ class AccessibilityWidget {
             this.saveSettings(); // Persist the reset
     
     
-            
-    
-            // Additional safety: ensure no font-size styles remain
     
             setTimeout(() => {
     
@@ -13917,12 +13782,6 @@ class AccessibilityWidget {
                     existingStyle.remove();
                 }
                 
-                // Remove counter-scaling from widget
-                const widget = document.querySelector('accessibility-widget');
-                if (widget) {
-                    widget.style.zoom = '';
-                }
-                
                 return;
             }
             
@@ -13935,7 +13794,6 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
-            const counterScale = 1 / scale;
             
             style.textContent = `
                 /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
@@ -13949,36 +13807,12 @@ class AccessibilityWidget {
                     overflow-y: auto !important;
                 }
                 
-                /* Keep the accessibility widget unscaled - counter the zoom to maintain fixed height */
-                accessibility-widget,
-                ACCESSIBILITY-WIDGET {
-                    zoom: ${counterScale} !important;
-                    height: auto !important;
-                    min-height: unset !important;
-                    max-height: unset !important;
-                }
-                
-                /* Keep accessibility panel and icon unscaled */
-                .accessibility-panel, 
-                #accessibility-icon, 
-                .accessibility-icon {
-                    zoom: ${counterScale} !important;
+                /* Keep the accessibility UI unscaled - counter the zoom */
+                .accessibility-panel, #accessibility-icon, .accessibility-icon, accessibility-widget, ACCESSIBILITY-WIDGET {
+                    zoom: ${1 / scale} !important;
                 }
             `;
             
-            // Also apply counter-scaling directly to the widget element
-            const widget = document.querySelector('accessibility-widget');
-            if (widget) {
-                widget.style.zoom = counterScale;
-            }
-            
-            // Update panel CSS to ensure it maintains fixed height
-            if (this.shadowRoot) {
-                const panel = this.shadowRoot.getElementById('accessibility-panel');
-                if (panel) {
-                    this.ensureBasePanelCSS();
-                }
-            }
       
         }
         
@@ -15495,8 +15329,6 @@ class AccessibilityWidget {
     
             this.removeUsefulLinksDropdown();
     
-
-    
         }
     
     
@@ -15676,9 +15508,6 @@ class AccessibilityWidget {
         navigateToSection(section) {
     
       
-    
-            
-    
             switch(section) {
     
                 case 'home':
@@ -15965,8 +15794,6 @@ class AccessibilityWidget {
     
     
     
-        // Additional method to force remove reading mask overlay (can be called externally if needed)
-    
         forceRemoveReadingMaskOverlay() {
     
          
@@ -16021,10 +15848,7 @@ class AccessibilityWidget {
     
             this.removeReadingMaskSpotlight();
     
-            
-    
-            // Create full-screen dark overlay with rectangular spotlight cutout
-            // Using two overlay elements: top and bottom
+        
     
             const spotlight = document.createElement('div');
             spotlight.id = 'reading-mask-spotlight';
@@ -16070,8 +15894,6 @@ class AccessibilityWidget {
             document.body.appendChild(spotlight);
     
     
-    
-            // Ensure accessibility widget stays above spotlight
     
             const widget = document.querySelector('.accessibility-widget');
     
@@ -16635,13 +16457,7 @@ class AccessibilityWidget {
             // Reset line height
     
             this.resetLineHeight();
-    
-            
-    
-    
-    
-            
-    
+  
             // Reset letter spacing
     
             this.resetLetterSpacing();
@@ -20294,21 +20110,14 @@ class AccessibilityWidget {
             });
         }
         
-        // SECURITY: Removed global prototype overrides for audio/video methods
-        // Instead, use event listeners on individual elements and MutationObserver for new elements
-        // This approach is safer and doesn't break other scripts
+        
         overrideGlobalAudioMethods() {
             // Initialize originalMethods if not already initialized (for restoration)
             if (!this.originalMethods) {
                 this.originalMethods = {};
             }
             
-            // SECURITY: Instead of overriding prototypes, we intercept play() calls using event listeners
-            // This is done per-element via addMediaEventListeners() and muteElement()
-            // The aggressive monitoring (startAggressiveMediaMonitoring) handles existing and new elements
-            
-            // For Web Audio API, we track AudioContext instances and suspend them
-            // We use a Proxy or wrapper approach instead of overriding the constructor
+
             if (typeof AudioContext !== 'undefined' && !this.originalMethods.AudioContext) {
                 try {
                     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
@@ -20316,10 +20125,7 @@ class AccessibilityWidget {
                         this.originalMethods.AudioContext = OriginalAudioContext;
                         const self = this;
                         
-                        // SECURITY: Use a wrapper function instead of overriding the global constructor
-                        // This is safer but still allows us to track and suspend contexts
-                        // Note: This only affects contexts created after mute is enabled
-                        // Existing contexts are handled by muteAllAudioContexts()
+                      
                         if (!window.__AccessibilityWidgetAudioContextWrapper) {
                             window.__AccessibilityWidgetAudioContextWrapper = function(...args) {
                                 const context = new OriginalAudioContext(...args);
@@ -20336,9 +20142,6 @@ class AccessibilityWidget {
                 } catch(_) {}
             }
             
-            // SECURITY: Removed Howler.js and SoundJS overrides
-            // These libraries should be handled via their own APIs or element-level event listeners
-            // The aggressive monitoring will catch any audio they produce
         }
     
     
@@ -20401,9 +20204,7 @@ class AccessibilityWidget {
                 player.style.opacity = '';
             });
         }
-        
-        // Restore global audio methods
-        // SECURITY: Updated to match the new scoped approach (no prototype overrides)
+    
         restoreGlobalAudioMethods() {
             // Since we no longer override prototypes, we just need to clean up any wrappers
             // Event listeners are cleaned up by removeMediaEventListeners()
@@ -21598,19 +21399,16 @@ class AccessibilityWidget {
             // Stop any existing observer
             this.stopImageObserver();
             
-            const self = this;
             this.imageObserver = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach((node) => {
                             if (node.nodeType === Node.ELEMENT_NODE) {
-                                self.hideImageElement(node);
+                                this.hideImageElement(node);
                                 
                                 // Also check for nested images
                                 const nestedImages = node.querySelectorAll ? node.querySelectorAll('img, picture, svg, video, canvas, iframe[src*="image"], iframe[src*="img"]') : [];
-                                nestedImages.forEach((img) => {
-                                    self.hideImageElement(img);
-                                });
+                                nestedImages.forEach(img => this.hideImageElement(img));
                             }
                         });
                     }
@@ -21622,6 +21420,8 @@ class AccessibilityWidget {
                 childList: true,
                 subtree: true
             });
+            
+           
         }
         
         stopImageObserver() {
@@ -21676,54 +21476,67 @@ class AccessibilityWidget {
     
             
     
-            // SECURITY: Sanitize HTML content before inserting
-            const sanitizedContent = this.sanitizeHTML(finalContent);
+            // Create overlay with extracted content
+    
+            const overlayHTML = `
+    
+                <div id="read-mode-overlay" style="
+    
+                    position: fixed !important;
+    
+                    top: 0 !important;
+    
+                    left: 0 !important;
+    
+                    width: 100vw !important;
+    
+                    height: 100vh !important;
+    
+                    background: #e8f4f8 !important;
+    
+                    z-index: 99997 !important;
+    
+                    font-family: Arial, sans-serif !important;
+    
+                    overflow-y: auto !important;
+    
+                ">
+    
+                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+    
+                        ${finalContent}
+    
+                    </div>
+    
+                </div>
+    
+            `;
     
             
     
-            // Create overlay with extracted content using safe DOM methods
+            // SECURITY: Use safe DOM methods instead of insertAdjacentHTML
             const overlay = document.createElement('div');
             overlay.id = 'read-mode-overlay';
             overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;';
             
             const contentDiv = document.createElement('div');
             contentDiv.style.cssText = 'padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;';
-            // SECURITY: Use innerHTML with sanitized content (content is already from page, but we sanitize to be safe)
-            contentDiv.innerHTML = sanitizedContent;
+            // SECURITY: Use textContent to safely insert content (prevents XSS)
+            contentDiv.textContent = finalContent || '';
             overlay.appendChild(contentDiv);
             
-            if (!window.__AccessibilityWidget?.isDesignerContext() && document.body) {
+            if (!isDesignerContext() && document.body) {
                 document.body.appendChild(overlay);
             }
-        }
     
-        // SECURITY: Sanitize HTML to prevent XSS attacks
-        sanitizeHTML(html) {
-            if (!html || typeof html !== 'string') {
-                return '';
+
+    
             }
     
-            // Create a temporary container to parse and sanitize
-            const temp = document.createElement('div');
-            temp.innerHTML = html;
+            
     
-            // Remove script tags and event handlers
-            const scripts = temp.querySelectorAll('script, iframe, object, embed, form');
-            scripts.forEach(el => el.remove());
+         
     
-            // Remove event handlers from all elements
-            const allElements = temp.querySelectorAll('*');
-            allElements.forEach(el => {
-                // Remove all event handler attributes
-                Array.from(el.attributes).forEach(attr => {
-                    if (attr.name.startsWith('on') || attr.name.startsWith('javascript:')) {
-                        el.removeAttribute(attr.name);
-                    }
-                });
-            });
-    
-            // Return sanitized HTML
-            return temp.innerHTML;
         }
     
     
@@ -22367,14 +22180,10 @@ class AccessibilityWidget {
  
     
         }
-    
-    
+   
     
         disableReadingGuide() {
     
-          
-    
-            
     
             // Remove reading guide bar
     
@@ -22638,7 +22447,7 @@ class AccessibilityWidget {
     
     
     
-        disableHighlightFocus() {
+        disableHighlightFocus(); {
     
             // Update toggle state
     
@@ -22654,9 +22463,6 @@ class AccessibilityWidget {
     
             document.body.classList.remove('highlight-focus');
     
-    
-    
-            
     
             // Remove focus styles from the currently tracked focused element
     
@@ -22742,7 +22548,7 @@ class AccessibilityWidget {
     
     
     
-        showStatement() {
+        showStatement(); {
            
             // Check if we have a custom accessibility statement link
             if (this.customizationData && this.customizationData.accessibilityStatementLink) {
@@ -22778,9 +22584,9 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    /* READABLE FONT: Only change font-family, preserve original font-size and weight */
+                    /* READABLE FONT: Only apply to specific text content, not symbols */
                     
-                    /* 1. HEADINGS - Apply readable font to headings (preserve original size and weight) */
+                    /* 1. HEADINGS - Apply readable font to headings */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22788,10 +22594,11 @@ class AccessibilityWidget {
                     .readable-font h5,
                     .readable-font h6 {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Do not change font-size or font-weight - preserve original */
+                        font-weight: 600 !important;
+                        letter-spacing: 0.8px !important;
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements only (preserve original size and weight) */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements only */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22804,27 +22611,31 @@ class AccessibilityWidget {
                     .readable-font strong,
                     .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Do not change font-size or font-weight - preserve original */
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
                     }
                     
                     /* 3. LINKS - Apply readable font to links but preserve their styling */
                     .readable-font a {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Do not change font-size or font-weight - preserve original */
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text (preserve original size and weight) */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Do not change font-size or font-weight - preserve original */
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text (preserve original size and weight) */
+                    /* 5. BUTTON TEXT - Apply readable font to button text */
                     .readable-font button {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Do not change font-size or font-weight - preserve original */
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
                     }
                     
                     /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
@@ -22897,7 +22708,7 @@ class AccessibilityWidget {
     
     
     
-        disableReadableFont() {
+        disableReadableFont(); {
             this.settings['readable-font'] = false;
             document.body.classList.remove('readable-font');
             
@@ -23551,122 +23362,70 @@ class AccessibilityWidget {
         
         // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
         injectStopAnimationCSS() {
-            // Remove existing style if it exists to ensure fresh injection
-            const existingStyle = document.getElementById('stop-animation-css');
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-            
-            const style = document.createElement('style');
-            style.id = 'stop-animation-css';
-            style.textContent = `
-                /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types with higher specificity */
-                body.stop-animation *,
-                body.stop-animation *::before,
-                body.stop-animation *::after,
-                .stop-animation *,
-                .stop-animation *::before,
-                .stop-animation *::after {
-                    /* Stop all CSS animations and transitions */
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
+            if (!document.getElementById('stop-animation-css')) {
+                const style = document.createElement('style');
+                style.id = 'stop-animation-css';
+                style.textContent = `
+                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types */
+                    .stop-animation *,
+                    .stop-animation *::before,
+                    .stop-animation *::after {
+                        /* Stop all CSS animations and transitions */
+                        animation: none !important;
+                        transition: none !important;
+                        animation-play-state: paused !important;
+                        
+                        /* Stop blinking and flashing text */
+                        text-decoration: none !important;
+                    }
                     
-                    /* Stop blinking and flashing text */
-                    text-decoration: none !important;
-                }
-                
-                /* Stop all animation classes and libraries with higher specificity */
-                body.stop-animation *[class*="animate"],
-                body.stop-animation *[class*="fade"],
-                body.stop-animation *[class*="slide"],
-                body.stop-animation *[class*="bounce"],
-                body.stop-animation *[class*="pulse"],
-                body.stop-animation *[class*="shake"],
-                body.stop-animation *[class*="flash"],
-                body.stop-animation *[class*="blink"],
-                body.stop-animation *[class*="glow"],
-                body.stop-animation *[class*="spin"],
-                body.stop-animation *[class*="rotate"],
-                body.stop-animation *[class*="scale"],
-                body.stop-animation *[class*="zoom"],
-                body.stop-animation *[class*="wiggle"],
-                body.stop-animation *[class*="jiggle"],
-                body.stop-animation *[class*="twist"],
-                body.stop-animation *[class*="flip"],
-                body.stop-animation *[class*="swing"],
-                body.stop-animation *[class*="wobble"],
-                body.stop-animation *[class*="tilt"],
-                .stop-animation *[class*="animate"],
-                .stop-animation *[class*="fade"],
-                .stop-animation *[class*="slide"],
-                .stop-animation *[class*="bounce"],
-                .stop-animation *[class*="pulse"],
-                .stop-animation *[class*="shake"],
-                .stop-animation *[class*="flash"],
-                .stop-animation *[class*="blink"],
-                .stop-animation *[class*="glow"],
-                .stop-animation *[class*="spin"],
-                .stop-animation *[class*="rotate"],
-                .stop-animation *[class*="scale"],
-                .stop-animation *[class*="zoom"],
-                .stop-animation *[class*="wiggle"],
-                .stop-animation *[class*="jiggle"],
-                .stop-animation *[class*="twist"],
-                .stop-animation *[class*="flip"],
-                .stop-animation *[class*="swing"],
-                .stop-animation *[class*="wobble"],
-                .stop-animation *[class*="tilt"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
-                }
-                
-                /* Stop SVG and Canvas animations */
-                body.stop-animation svg,
-                body.stop-animation svg path,
-                body.stop-animation svg line,
-                body.stop-animation canvas,
-                .stop-animation svg,
-                .stop-animation svg path,
-                .stop-animation svg line,
-                .stop-animation canvas {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
-                }
-                
-                /* Stop text splitting animations */
-                body.stop-animation [data-splitting],
-                body.stop-animation .split, 
-                body.stop-animation .char, 
-                body.stop-animation .word,
-                .stop-animation [data-splitting],
-                .stop-animation .split, 
-                .stop-animation .char, 
-                .stop-animation .word {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
-                }
-            `;
-            document.head.appendChild(style);
+                    /* Stop all animation classes and libraries */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"],
+                    /* REMOVED: Scroll-related classes to preserve scroll animations */
+                    
+                    /* Stop SVG and Canvas animations */
+                    .stop-animation svg,
+                    .stop-animation svg path,
+                    .stop-animation svg line,
+                    .stop-animation canvas {
+                        animation: none !important;
+                        transition: none !important;
+                        /* Removed visibility and transform rules to prevent positioning issues */
+                    }
+                    
+                    /* Stop text splitting animations */
+                    .stop-animation [data-splitting],
+                    .stop-animation .split, 
+                    .stop-animation .char, 
+                    .stop-animation .word {
+                        animation: none !important;
+                        transition: none !important;
+                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
+                    }
+                `;
+                document.head.appendChild(style);
+            }
         }
         
-        // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-        // REMOVED: Duplicate overrideRequestAnimationFrame() - using more comprehensive version at line 24467
-        
-        // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
-        // REMOVED: Duplicate stopAnimationLibraries() - using more comprehensive version at line 24703
-        // REMOVED: Duplicate replaceAnimatedMedia() - using more comprehensive version at line 24832
-        
-        // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
         stopDOMAnimationLoops() {
             // Store original functions if not already stored
             if (!window._originalSetTimeout) {
@@ -24879,7 +24638,7 @@ class AccessibilityWidget {
     
         // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
         overrideRequestAnimationFrame() {
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
             try {
                 if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -25210,7 +24969,7 @@ class AccessibilityWidget {
         
         // Restore original requestAnimationFrame when seizure-safe is disabled
         restoreRequestAnimationFrame() {
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
             try {
                 if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
@@ -25332,8 +25091,8 @@ class AccessibilityWidget {
                 `;
     
                 
-                
-                if (isDesignerContextFn()) return;
+    
+                if (isDesignerContext()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -25549,8 +25308,8 @@ class AccessibilityWidget {
                 `;
     
                 
-                
-                if (isDesignerContextFn()) return;
+    
+                if (isDesignerContext()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -25768,8 +25527,8 @@ class AccessibilityWidget {
                 `;
     
                 
-                
-                if (isDesignerContextFn()) return;
+    
+                if (isDesignerContext()) return;
                 
                 const fragment = document.createDocumentFragment();
                 const tempDiv = document.createElement('div');
@@ -26528,7 +26287,7 @@ class AccessibilityWidget {
         // Stop all JavaScript animations (requestAnimationFrame, setInterval, setTimeout)
         stopAllJavaScriptAnimations() {
   
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
             try {
                 if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -26906,7 +26665,7 @@ class AccessibilityWidget {
         restoreAllMediaAndAnimations() {
    
             
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
             try {
                 if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
                     window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
@@ -28242,7 +28001,7 @@ class AccessibilityWidget {
     
             alignmentContainer.className = 'alignment-controls';
     
-            if (isDesignerContextFn()) return;
+            if (isDesignerContext()) return;
             
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = `
@@ -29058,9 +28817,119 @@ class AccessibilityWidget {
         }
     
         // Fetch customization data from the API
-        // Customization data is stored and received as plaintext - Cloudflare KV provides security
-        
+        // Encryption utilities for customization data
         // @ts-ignore
+        async encryptCustomizationData(data, siteId) {
+            try {
+                const ENCRYPTION_ALGORITHM = 'AES-GCM';
+                const KEY_LENGTH = 256;
+                const IV_LENGTH = 12;
+                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
+                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
+                // Generate with: openssl rand -base64 32
+                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
+                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
+                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
+                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
+                }
+                
+                const encoder = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    encoder.encode(`${siteId}:${secret}`),
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveKey']
+                );
+
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: encoder.encode('accessibility-widget-salt'),
+                        iterations: 100000,
+                        hash: 'SHA-256',
+                    },
+                    keyMaterial,
+                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
+                    false,
+                    ['encrypt', 'decrypt']
+                );
+                
+                const dataString = JSON.stringify(data);
+                const dataBytes = encoder.encode(dataString);
+                const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: ENCRYPTION_ALGORITHM, iv },
+                    key,
+                    dataBytes
+                );
+                
+                const combined = new Uint8Array(iv.length + encryptedData.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(encryptedData), iv.length);
+                
+                return btoa(String.fromCharCode(...combined));
+            } catch (error) {
+                console.error('Encryption error:', error);
+                throw new Error('Failed to encrypt customization data');
+            }
+        }
+        
+        async decryptCustomizationData(encryptedData, siteId) {
+            try {
+                const ENCRYPTION_ALGORITHM = 'AES-GCM';
+                const KEY_LENGTH = 256;
+                const IV_LENGTH = 12;
+                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
+                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
+                // Generate with: openssl rand -base64 32
+                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
+                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
+                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
+                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
+                }
+                
+                const encoder = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    encoder.encode(`${siteId}:${secret}`),
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveKey']
+                );
+
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: encoder.encode('accessibility-widget-salt'),
+                        iterations: 100000,
+                        hash: 'SHA-256',
+                    },
+                    keyMaterial,
+                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
+                    false,
+                    ['encrypt', 'decrypt']
+                );
+                
+                const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+                const iv = combined.slice(0, IV_LENGTH);
+                const encrypted = combined.slice(IV_LENGTH);
+                
+                const decryptedData = await crypto.subtle.decrypt(
+                    { name: ENCRYPTION_ALGORITHM, iv },
+                    key,
+                    encrypted
+                );
+                
+                const decoder = new TextDecoder();
+                const dataString = decoder.decode(decryptedData);
+                return JSON.parse(dataString);
+            } catch (error) {
+                console.error('Decryption error:', error);
+                throw new Error('Failed to decrypt customization data');
+            }
+        }
+        
         async fetchCustomizationData() {
           
             
@@ -29110,10 +28979,14 @@ class AccessibilityWidget {
                 
                 const data = await response.json();
 
-                // Customization is stored and received as plaintext object
-                if (data.customization && typeof data.customization !== 'object') {
-                    // If it's not an object, treat as empty
-                    data.customization = {};
+                // Decrypt customization data if it's encrypted
+                if (data.customization && typeof data.customization === 'string') {
+                    try {
+                        data.customization = await this.decryptCustomizationData(data.customization, this.siteId);
+                    } catch (error) {
+                        console.warn('Failed to decrypt customization data:', error);
+                        return null;
+                    }
                 }
 
                 return data;
@@ -29142,14 +29015,9 @@ class AccessibilityWidget {
                     }
                     
                     const customizationData = await this.fetchCustomizationData();
-                    if (customizationData) {
-                        if (customizationData.customization) {
-                            this.applyCustomizations(customizationData.customization);
-                        }
-                        // Apply accessibility profiles
-                        if (customizationData.accessibilityProfiles) {
-                            this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
-                        }
+                    if (customizationData && customizationData.customization) {
+      
+                        this.applyCustomizations(customizationData.customization);
                     }
                 } catch (error) {
                     
@@ -29170,14 +29038,9 @@ class AccessibilityWidget {
                         }
                         
                         const customizationData = await this.fetchCustomizationData();
-                        if (customizationData) {
-                            if (customizationData.customization) {
-                                this.applyCustomizations(customizationData.customization);
-                            }
-                            // Apply accessibility profiles
-                            if (customizationData.accessibilityProfiles) {
-                                this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
-                            }
+                        if (customizationData && customizationData.customization) {
+   
+                            this.applyCustomizations(customizationData.customization);
                         }
                     } catch (error) {
                         
@@ -29187,7 +29050,6 @@ class AccessibilityWidget {
         }
     
         // Get site ID for API calls via script tag (no storage, no mapping)
-        // @ts-ignore
         async getSiteId() {
           try {
             const scriptEl = document.currentScript || 
@@ -29202,52 +29064,6 @@ class AccessibilityWidget {
           } catch {}
           return null;
         }
-    
-    applyAccessibilityProfiles(profiles) {
-        if (!profiles || typeof profiles !== 'object') {
-            return;
-        }
-        
-        // Apply vision impaired profile if enabled
-        if (profiles.visionImpaired === true) {
-            this.enableVisionImpaired();
-        } else if (profiles.visionImpaired === false) {
-            this.disableVisionImpaired();
-        }
-        
-        // Apply seizure safe profile if enabled
-        if (profiles.seizureSafe === true && !this.settings['seizure-safe']) {
-            this.enableSeizureSafe(true);
-        }
-        
-        // Apply ADHD friendly profile if enabled
-        if (profiles.adhdFriendly === true) {
-            this.enableADHDFriendly();
-        } else if (profiles.adhdFriendly === false) {
-            this.disableADHDFriendly();
-        }
-        
-        // Apply cognitive disability profile if enabled
-        if (profiles.cognitiveDisability === true) {
-            this.enableCognitiveDisability();
-        } else if (profiles.cognitiveDisability === false) {
-            this.disableCognitiveDisability();
-        }
-        
-        // Apply keyboard navigation profile if enabled
-        if (profiles.keyboardNavigation === true) {
-            this.applyFeature('keyboard-nav', true);
-        } else if (profiles.keyboardNavigation === false) {
-            this.applyFeature('keyboard-nav', false);
-        }
-        
-        // Apply blind users profile if enabled
-        if (profiles.blindUsers === true) {
-            this.enableBlindUsers();
-        } else if (profiles.blindUsers === false) {
-            this.disableBlindUsers();
-        }
-    }
     
     applyCustomizations(customizationData) {
         
@@ -30765,18 +30581,6 @@ class AccessibilityWidget {
                 panel.style.setProperty('overflow-wrap', 'break-word', 'important');
                 panel.style.setProperty('hyphens', 'auto', 'important');
                 
-                // Ensure panel maintains fixed height when content scaling is active
-                // Counter-scaling is handled in updateContentScale, but ensure height doesn't shrink
-                if (this.contentScale !== 100) {
-                    const currentHeight = panel.offsetHeight;
-                    if (currentHeight > 0) {
-                        // Maintain the current height to prevent shrinking
-                        panel.style.setProperty('min-height', currentHeight + 'px', 'important');
-                    }
-                } else {
-                    // Reset min-height when scaling is at 100%
-                    panel.style.removeProperty('min-height');
-                }
           
             }
         }
@@ -31805,8 +31609,6 @@ class AccessibilityWidget {
     
     
     
-    }
-
     // Initialize the widget when DOM is loaded
     
     let accessibilityWidget;
