@@ -25955,6 +25955,17 @@ class AccessibilityWidget {
                         will-change: filter;
                     }
                     
+                    /* Prevent ALL elements from overflowing - comprehensive approach */
+                    body.vision-impaired * {
+                        box-sizing: border-box;
+                        max-width: 100%;
+                    }
+                    
+                    /* Override fixed widths that exceed viewport */
+                    body.vision-impaired [style*="width"] {
+                        max-width: 100%;
+                    }
+                    
                     /* Prevent containers from overflowing and shifting */
                     body.vision-impaired > *,
                     body.vision-impaired .container,
@@ -25965,7 +25976,10 @@ class AccessibilityWidget {
                     body.vision-impaired article,
                     body.vision-impaired header,
                     body.vision-impaired footer,
-                    body.vision-impaired nav {
+                    body.vision-impaired nav,
+                    body.vision-impaired [class*="container"],
+                    body.vision-impaired [class*="wrapper"],
+                    body.vision-impaired [class*="section"] {
                         max-width: 100%;
                         overflow-x: hidden;
                         box-sizing: border-box;
@@ -25973,6 +25987,8 @@ class AccessibilityWidget {
                         position: relative;
                         left: auto;
                         right: auto;
+                        /* Allow flex/grid items to shrink */
+                        min-width: 0;
                     }
                     
                     /* Prevent text elements from causing overflow */
@@ -25981,16 +25997,63 @@ class AccessibilityWidget {
                     body.vision-impaired span,
                     body.vision-impaired li,
                     body.vision-impaired td,
-                    body.vision-impaired th {
+                    body.vision-impaired th,
+                    body.vision-impaired label,
+                    body.vision-impaired small {
                         word-wrap: break-word;
                         overflow-wrap: break-word;
                         max-width: 100%;
                         box-sizing: border-box;
+                        /* Prevent text from expanding beyond container */
+                        min-width: 0;
                     }
                     
-                    /* Prevent inline elements from breaking layout */
-                    body.vision-impaired * {
+                    /* Prevent headings from causing overflow */
+                    body.vision-impaired h1,
+                    body.vision-impaired h2,
+                    body.vision-impaired h3,
+                    body.vision-impaired h4,
+                    body.vision-impaired h5,
+                    body.vision-impaired h6 {
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
                         box-sizing: border-box;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent links from causing overflow */
+                    body.vision-impaired a {
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        box-sizing: border-box;
+                        display: inline-block;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent buttons and inputs from overflowing */
+                    body.vision-impaired button,
+                    body.vision-impaired input,
+                    body.vision-impaired textarea,
+                    body.vision-impaired select {
+                        max-width: 100%;
+                        box-sizing: border-box;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent tables from overflowing */
+                    body.vision-impaired table {
+                        max-width: 100%;
+                        width: 100%;
+                        table-layout: auto;
+                        box-sizing: border-box;
+                    }
+                    
+                    body.vision-impaired td,
+                    body.vision-impaired th {
+                        word-break: break-word;
+                        overflow-wrap: break-word;
                     }
                     
                     /* EXCEPTION: Allow accessibility panel to have vertical scrollbar - HIGH SPECIFICITY */
@@ -26013,9 +26076,43 @@ class AccessibilityWidget {
                     body.vision-impaired video,
                     body.vision-impaired iframe,
                     body.vision-impaired embed,
-                    body.vision-impaired object {
-                        max-width: 100% !important;
-                        height: auto !important;
+                    body.vision-impaired object,
+                    body.vision-impaired svg,
+                    body.vision-impaired canvas {
+                        max-width: 100%;
+                        width: auto;
+                        height: auto;
+                        box-sizing: border-box;
+                    }
+                    
+                    /* Prevent flex and grid containers from overflowing */
+                    body.vision-impaired [style*="display: flex"],
+                    body.vision-impaired [style*="display:grid"],
+                    body.vision-impaired .flex,
+                    body.vision-impaired .grid,
+                    body.vision-impaired [class*="flex"],
+                    body.vision-impaired [class*="grid"] {
+                        max-width: 100%;
+                        min-width: 0;
+                        overflow-x: hidden;
+                    }
+                    
+                    /* Prevent absolutely/fixed positioned elements from causing overflow */
+                    body.vision-impaired [style*="position: absolute"],
+                    body.vision-impaired [style*="position:fixed"] {
+                        max-width: 100vw;
+                    }
+                    
+                    /* Force all inline and inline-block elements to respect container width */
+                    body.vision-impaired span,
+                    body.vision-impaired a,
+                    body.vision-impaired strong,
+                    body.vision-impaired em,
+                    body.vision-impaired b,
+                    body.vision-impaired i {
+                        max-width: 100%;
+                        word-break: break-word;
+                        overflow-wrap: break-word;
                     }
                     
                     /* 11. PRESERVE LAYOUT - No footer modifications */
@@ -31069,10 +31166,16 @@ class AccessibilityWidget {
                                  panel.style.visibility === 'hidden' ||
                                  !panel.classList.contains('active');
             
+            // Set left position
             panel.style.setProperty('left', `${finalLeft}px`, 'important');
             panel.style.setProperty('right', 'auto', 'important');
-            panel.style.setProperty('bottom', 'auto', 'important');
-            panel.style.setProperty('top', `${finalTop}px`, 'important');
+            
+            // CRITICAL: Always maintain full viewport height
+            // Override any top position - panel should cover full height from top to bottom
+            panel.style.setProperty('height', '100vh', 'important');
+            panel.style.setProperty('top', '0', 'important');
+            panel.style.setProperty('bottom', '0', 'important');
+            
             panel.style.setProperty('z-index', '100001', 'important');
             panel.style.setProperty('position', 'fixed', 'important');
             
