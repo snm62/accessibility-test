@@ -1829,6 +1829,15 @@ class AccessibilityWidget {
             }
     
             
+            // Restore saved language FIRST (before showing icon)
+            // This ensures language is set before any positioning or customization
+            const savedLanguage = localStorage.getItem('accessibility-widget-language');
+            if (savedLanguage) {
+                this.applyLanguage(savedLanguage);
+            } else {
+                this.applyLanguage('English');
+            }
+            
             // Fetch customization data (BLOCKING - load on page load for immediate customization)
             // This ensures icon appears with user's customization immediately, no delays
             try {
@@ -1858,16 +1867,6 @@ class AccessibilityWidget {
                     icon.style.visibility = 'visible';
                     icon.style.opacity = '1';
                 }
-            }
-            
-            // Restore saved language
-            const savedLanguage = localStorage.getItem('accessibility-widget-language');
-            if (savedLanguage) {
-                
-                this.applyLanguage(savedLanguage);
-            } else {
-                
-                this.applyLanguage('English');
             }
             
             // Set up periodic payment status refresh (every 5 minutes)
