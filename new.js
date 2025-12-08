@@ -28959,8 +28959,13 @@ class AccessibilityWidget {
         
         // Handle window resize to update icon visibility based on device type
         handleWindowResize() {
+            // Don't call showIcon() if icon was explicitly shown during initialization
+            // This prevents ResizeObserver from hiding the icon immediately after it's shown
+            if (this._iconExplicitlyShown) {
+                return; // Icon visibility is already correctly set, don't change it
+            }
+            
             // Only update icon visibility if customization data is available
-            // Don't hide icon if it was explicitly shown during initialization
             if (!this.customizationData) {
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
@@ -29014,7 +29019,11 @@ class AccessibilityWidget {
             // Use ResizeObserver for better responsive mode detection
             if (this.shadowRoot && window.ResizeObserver) {
                 const resizeObserver = new ResizeObserver(() => {
-                    debouncedResize();
+                    // Don't trigger resize handler if icon was just explicitly shown
+                    // This prevents immediate firing when ResizeObserver starts observing
+                    if (!this._iconExplicitlyShown) {
+                        debouncedResize();
+                    }
                 });
                 
                 const panel = this.shadowRoot.getElementById('accessibility-panel');
