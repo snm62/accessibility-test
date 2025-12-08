@@ -1203,6 +1203,10 @@ class AccessibilityWidget {
             // Track if this is a staging domain (free, no payment check needed)
             this._isStagingDomain = null; // Will be set on first check
             
+            // Track if icon was explicitly shown during initialization
+            // This prevents ResizeObserver and other events from hiding it
+            this._iconExplicitlyShown = false;
+            
             // Debounce/throttle timers
             this._resizeTimer = null;
             this._mutationTimer = null;
@@ -1847,7 +1851,7 @@ class AccessibilityWidget {
                     // Apply customizations BEFORE showing icon
                     this.applyCustomizations(customizationData.customization);
                     // Also apply accessibility profiles if present
-                    if (customizationData.accessibilityProfiles) {
+                    if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
                         this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
                     }
                 }
@@ -1890,6 +1894,9 @@ class AccessibilityWidget {
                     icon.style.display = '';
                     icon.style.visibility = 'visible';
                     icon.style.opacity = '1';
+                    // Mark that icon was explicitly shown during initialization
+                    // This prevents showIcon() from hiding it during resize events
+                    this._iconExplicitlyShown = true;
                 }
             }
             
@@ -1925,6 +1932,13 @@ class AccessibilityWidget {
                 this.bindEvents();
     
                 this.applySettings();
+                
+                // Set up ResizeObserver AFTER icon visibility is determined
+                // This prevents it from firing before _iconExplicitlyShown is set
+                if (this._iconExplicitlyShown !== undefined) {
+                    // Icon visibility has been determined, safe to set up ResizeObserver
+                    // (ResizeObserver setup is already in bindEvents via setupOptimizedResizeHandlers)
+                }
     
                 
     
@@ -29044,19 +29058,37 @@ class AccessibilityWidget {
             window.addEventListener('resize', debouncedResize, { passive: true });
             
             // Use ResizeObserver for better responsive mode detection
+            // Only set up ResizeObserver after icon visibility has been determined
+            // Check if _iconExplicitlyShown has been set (it's initialized to false, but set to true when icon is shown)
+            // We need to wait until icon visibility is determined before setting up ResizeObserver
             if (this.shadowRoot && window.ResizeObserver) {
-                const resizeObserver = new ResizeObserver(() => {
-                    console.log('[ICON DEBUG] ResizeObserver callback fired', {
-                        _iconExplicitlyShown: this._iconExplicitlyShown
-                    });
-                    // Don't trigger resize handler if icon was just explicitly shown
-                    // This prevents immediate firing when ResizeObserver starts observing
-                    if (!this._iconExplicitlyShown) {
+                // Delay ResizeObserver setup to ensure icon visibility is determined first
+                // Use a small delay to ensure init() has completed
+                setTimeout(() => {
+                    const resizeObserver = new ResizeObserver(() => {
+                        console.log('[ICON DEBUG] ResizeObserver callback fired', {
+                            _iconExplicitlyShown: this._iconExplicitlyShown
+                        });
+                        // Don't trigger resize handler if icon was explicitly shown during initialization
+                        // This prevents ResizeObserver from hiding the icon after it's been shown
+                        if (this._iconExplicitlyShown === true) {
+                            console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
+                            return;
+                        }
+                        // Icon visibility has been determined (either shown or hidden)
+                        // Safe to call resize handler
                         debouncedResize();
-                    } else {
-                        console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
-                    }
-                });
+                    });
+                    
+                    const panel = this.shadowRoot.getElementById('accessibility-panel');
+                    const icon = this.shadowRoot.getElementById('accessibility-icon');
+                    if (panel) resizeObserver.observe(panel);
+                    if (icon) resizeObserver.observe(icon);
+                    
+                    // Store observer for cleanup if needed
+                    this._resizeObserver = resizeObserver;
+                }, 200); // Small delay to ensure init() completes
+            }
                 
                 const panel = this.shadowRoot.getElementById('accessibility-panel');
                 const icon = this.shadowRoot.getElementById('accessibility-icon');
