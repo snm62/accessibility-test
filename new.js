@@ -29089,15 +29089,6 @@ class AccessibilityWidget {
                     this._resizeObserver = resizeObserver;
                 }, 200); // Small delay to ensure init() completes
             }
-                
-                const panel = this.shadowRoot.getElementById('accessibility-panel');
-                const icon = this.shadowRoot.getElementById('accessibility-icon');
-                if (panel) resizeObserver.observe(panel);
-                if (icon) resizeObserver.observe(icon);
-                
-                // Store observer for cleanup if needed
-                this._resizeObserver = resizeObserver;
-            }
             
             // Listen to media query changes for breakpoints
             if (window.matchMedia) {
