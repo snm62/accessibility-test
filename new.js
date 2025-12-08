@@ -4508,13 +4508,22 @@ class AccessibilityWidget {
     
     
     
-            // Add CSS to Shadow DOM
-    
-            const style = document.createElement('style');
-    
-            style.textContent = this.getWidgetCSS();
-    
-            shadowRoot.appendChild(style);
+            // Add CSS to Shadow DOM - ALWAYS load CSS with widget HTML
+            // Use unique ID to prevent duplicate injection and ensure it's always present
+            let style = shadowRoot.querySelector('style[data-widget-css="true"]');
+            if (!style) {
+                style = document.createElement('style');
+                style.setAttribute('data-widget-css', 'true');
+                style.setAttribute('id', 'accessibility-widget-styles');
+                style.textContent = this.getWidgetCSS();
+                // Insert CSS FIRST before any HTML elements to ensure it's always loaded
+                shadowRoot.appendChild(style);
+            } else {
+                // If style exists but content might be missing, ensure it's populated
+                if (!style.textContent || style.textContent.trim().length === 0) {
+                    style.textContent = this.getWidgetCSS();
+                }
+            }
     
     
     
@@ -28472,6 +28481,7 @@ class AccessibilityWidget {
                     this.enableSmoothScrollingLibraries();
                 } else {
                     // Show panel
+                    this.ensureWidgetCSS(); // Ensure CSS is always present
                     this.ensureBasePanelCSS(); // Ensure base CSS is applied
                     this.updateInterfacePosition(); // Position panel next to icon
                     
@@ -28713,8 +28723,10 @@ class AccessibilityWidget {
             }
             
             if (customizationData.hideTriggerButton) {
- 
-                this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
+                // Only call if method exists (defensive check)
+                if (typeof this.updateTriggerVisibility === 'function') {
+                    this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
+                }
             }
             
             // Apply language - preserve user's language choice
@@ -30690,50 +30702,92 @@ class AccessibilityWidget {
             }
         }
         
-        updateInterfacePosition() {
-          
+        // Ensure CSS is always present in Shadow DOM
+        // This method ensures CSS is loaded together with widget HTML at all times
+        ensureWidgetCSS() {
+            if (!this.shadowRoot) {
+                return; // Shadow root doesn't exist yet
+            }
             
+            // Check if CSS style element exists
+            let style = this.shadowRoot.querySelector('style[data-widget-css="true"]');
+            
+            if (!style) {
+                // CSS is missing - inject it immediately
+                style = document.createElement('style');
+                style.setAttribute('data-widget-css', 'true');
+                style.setAttribute('id', 'accessibility-widget-styles');
+                style.textContent = this.getWidgetCSS();
+                // Insert CSS FIRST in shadowRoot to ensure it loads before any HTML
+                this.shadowRoot.insertBefore(style, this.shadowRoot.firstChild);
+            } else {
+                // CSS exists - verify content is present
+                if (!style.textContent || style.textContent.trim().length === 0) {
+                    style.textContent = this.getWidgetCSS();
+                }
+            }
+        }
+        
+        updateInterfacePosition() {
             const icon = this.shadowRoot?.getElementById('accessibility-icon');
             const panel = this.shadowRoot?.getElementById('accessibility-panel');
             
-            if (icon && panel) {
-                const iconRect = icon.getBoundingClientRect();
-                const panelWidth = 500;
-                const panelHeight = 700;
-                
-               
-                
-                // Force remove all positioning first
-                panel.style.removeProperty('left');
-                panel.style.removeProperty('right');
-                panel.style.removeProperty('top');
-                panel.style.removeProperty('bottom');
-                panel.style.removeProperty('transform');
-    
-                // Position panel on top of the icon (centered horizontally)
-                const iconCenterX = iconRect.left + (iconRect.width / 2);
-                const panelLeft = iconCenterX - (panelWidth / 2);
-                
-                // Ensure panel doesn't go outside viewport horizontally
-                const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
-                
-                // Position panel vertically centered with icon
-                const iconCenterY = iconRect.top + (iconRect.height / 2);
-                const panelCenterY = iconCenterY;
-                const topPosition = panelCenterY - (panelHeight / 2);
-                
-                // Ensure panel doesn't go above or below viewport
-                const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
-                
-                panel.style.setProperty('left', `${finalLeft}px`, 'important');
-                panel.style.setProperty('right', 'auto', 'important');
-                panel.style.setProperty('bottom', 'auto', 'important');
-                panel.style.setProperty('top', `${finalTop}px`, 'important');
+            if (!icon || !panel) {
+                return; // Don't proceed if elements don't exist
+            }
+            
+            // CRITICAL: Only update position if icon is visible
+            // If icon is hidden, getBoundingClientRect() returns zeros and breaks positioning
+            const iconComputedStyle = window.getComputedStyle(icon);
+            const iconIsVisible = iconComputedStyle.display !== 'none' && 
+                                 iconComputedStyle.visibility !== 'hidden' &&
+                                 iconComputedStyle.opacity !== '0';
+            
+            if (!iconIsVisible) {
+                return; // Don't update position if icon is hidden
+            }
+            
+            const iconRect = icon.getBoundingClientRect();
+            
+            // If icon has zero dimensions, it's not properly rendered yet
+            if (iconRect.width === 0 || iconRect.height === 0) {
+                return; // Don't update position if icon isn't rendered
+            }
+            
+            const panelWidth = 500;
+            const panelHeight = 700;
+            
+            // Position panel on top of the icon (centered horizontally)
+            const iconCenterX = iconRect.left + (iconRect.width / 2);
+            const panelLeft = iconCenterX - (panelWidth / 2);
+            
+            // Ensure panel doesn't go outside viewport horizontally
+            const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
+            
+            // Position panel vertically centered with icon
+            const iconCenterY = iconRect.top + (iconRect.height / 2);
+            const panelCenterY = iconCenterY;
+            const topPosition = panelCenterY - (panelHeight / 2);
+            
+            // Ensure panel doesn't go above or below viewport
+            const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
+            
+            // Only update positioning, don't remove transform if panel is hidden
+            // Preserve panel's visibility state
+            const isPanelHidden = panel.style.transform === 'translateX(-100%)' || 
+                                 panel.style.visibility === 'hidden' ||
+                                 !panel.classList.contains('active');
+            
+            panel.style.setProperty('left', `${finalLeft}px`, 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('bottom', 'auto', 'important');
+            panel.style.setProperty('top', `${finalTop}px`, 'important');
+            panel.style.setProperty('z-index', '100001', 'important');
+            panel.style.setProperty('position', 'fixed', 'important');
+            
+            // Only remove transform if panel is visible, otherwise preserve it
+            if (!isPanelHidden) {
                 panel.style.setProperty('transform', 'none', 'important');
-                panel.style.setProperty('z-index', '100001', 'important'); // Higher than icon
-                panel.style.setProperty('position', 'fixed', 'important');
-                
-           
             }
         }
     
