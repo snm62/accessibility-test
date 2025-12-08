@@ -25727,6 +25727,12 @@ class AccessibilityWidget {
                     widget.classList.add('vision-impaired');
                 }
 
+                // Update toggle switch in UI
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                if (viToggle) {
+                    viToggle.checked = true;
+                }
+
                 // Apply comprehensive website scaling and contrast enhancement
                 this.applyVisionImpairedStyles();
 
@@ -25865,12 +25871,57 @@ class AccessibilityWidget {
                         /* No layout modifications */
                     }
                     
-                    /* 10. PRESERVE LAYOUT - No footer modifications */
+                    /* 10. PREVENT CONTENT OVERFLOW - Ensure content stays within viewport */
+                    html.vision-impaired {
+                        overflow-x: hidden !important;
+                        max-width: 100% !important;
+                        width: 100% !important;
+                    }
                     
-                    /* 11. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
+                    body.vision-impaired {
+                        overflow-x: hidden !important;
+                        max-width: 100% !important;
+                        width: 100% !important;
+                    }
+                    
+                    /* Prevent any element from causing horizontal overflow */
+                    body.vision-impaired * {
+                        max-width: 100% !important;
+                        overflow-x: hidden !important;
+                        word-wrap: break-word !important;
+                        overflow-wrap: break-word !important;
+                    }
+                    
+                    /* EXCEPTION: Allow accessibility panel to have vertical scrollbar */
+                    body.vision-impaired #accessibility-panel,
+                    body.vision-impaired .accessibility-panel,
+                    #accessibility-panel,
+                    .accessibility-panel {
+                        overflow-x: hidden !important;
+                        overflow-y: auto !important;
+                        max-width: 100% !important;
+                        word-wrap: break-word !important;
+                        overflow-wrap: break-word !important;
+                    }
+                    
+                    /* Ensure images and media don't overflow */
+                    body.vision-impaired img,
+                    body.vision-impaired video,
+                    body.vision-impaired iframe,
+                    body.vision-impaired embed,
+                    body.vision-impaired object {
+                        max-width: 100% !important;
+                        height: auto !important;
+                    }
+                    
+                    /* 11. PRESERVE LAYOUT - No footer modifications */
+                    
+                    /* 12. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
                             /* No zoom - preserve original layout */
+                            overflow-x: hidden !important;
+                            max-width: 100% !important;
                         }
                     }
                 `;
@@ -25898,6 +25949,12 @@ class AccessibilityWidget {
                 const widget = document.querySelector('.accessibility-widget');
                 if (widget) {
                     widget.classList.remove('vision-impaired');
+                }
+
+                // Update toggle switch in UI
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                if (viToggle) {
+                    viToggle.checked = false;
                 }
 
                 // Remove comprehensive vision impaired styles
