@@ -28833,14 +28833,8 @@ class AccessibilityWidget {
                 this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
             }
             
-            // Show the icon now that customizations have been applied
-            this.showIcon();
-            
         } catch (error) {
            
-            
-            // Show the icon even if there was an error, but with default styling
-            this.showIcon();
         }
     }
     
@@ -30878,9 +30872,8 @@ class AccessibilityWidget {
         }
         
         updateMobileVisibility(visible) {
-           
-            
-            this.showIcon();
+            // Icon visibility is handled explicitly in init() after customizations are applied
+            // No need to call showIcon() here as it may conflict with explicit icon showing
         }
         
         updateMobileTriggerPosition(direction, position) {
