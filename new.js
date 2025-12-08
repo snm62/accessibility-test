@@ -1853,11 +1853,19 @@ class AccessibilityWidget {
                 
                 // Show icon AFTER customizations are applied
                 // This ensures icon appears with correct customization (color, position, etc.)
+                // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
                 const icon = this.shadowRoot?.getElementById('accessibility-icon');
                 if (icon) {
-                    icon.style.display = '';
-                    icon.style.visibility = 'visible';
-                    icon.style.opacity = '1';
+                    const hideTrigger = customizationData?.hideTriggerButton === 'Yes';
+                    const isMobile = window.innerWidth <= 768;
+                    const mobileVisibility = customizationData?.showOnMobile;
+                    
+                    // Only show if not hidden by settings
+                    if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
+                        icon.style.display = '';
+                        icon.style.visibility = 'visible';
+                        icon.style.opacity = '1';
+                    }
                 }
             } catch (err) {
                 // If fetch fails, show icon with defaults
@@ -30683,8 +30691,20 @@ class AccessibilityWidget {
         }
         
         updateTriggerVisibility(hidden) {
-           
-            this.showIcon();
+            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            if (!icon) return;
+            
+            if (hidden) {
+                // Hide icon if hidden is true
+                icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                icon.style.opacity = '0';
+            } else {
+                // Show icon if hidden is false
+                icon.style.display = '';
+                icon.style.visibility = 'visible';
+                icon.style.opacity = '1';
+            }
         }
         
         updateInterfaceColor(color) {
