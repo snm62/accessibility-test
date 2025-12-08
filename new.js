@@ -25806,13 +25806,26 @@ class AccessibilityWidget {
                     html.vision-impaired {
                         /* No zoom - preserve original layout */
                         /* No layout modifications */
+                        margin: 0;
+                        padding: 0;
+                        left: 0;
+                        right: 0;
+                        position: relative;
                     }
                     
                     body.vision-impaired {
                         /* No layout modifications */
-                        /* No layout modifications */
                         /* Slightly enhance text contrast without changing colors */
-                        filter: contrast(1.1) brightness(1.05) !important;
+                        filter: contrast(1.1) brightness(1.05);
+                        /* Prevent filter from causing layout shifts */
+                        transform: translateZ(0);
+                        will-change: filter;
+                        /* Ensure body stays in place */
+                        margin: 0;
+                        padding: 0;
+                        left: 0;
+                        right: 0;
+                        position: relative;
                     }
                     
                     /* Preserve accessibility widget from vision impaired filters and scaling */
@@ -25920,6 +25933,11 @@ class AccessibilityWidget {
                         max-width: 100vw;
                         width: 100%;
                         box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                        left: 0;
+                        right: 0;
+                        position: relative;
                     }
                     
                     body.vision-impaired {
@@ -25928,9 +25946,16 @@ class AccessibilityWidget {
                         width: 100%;
                         box-sizing: border-box;
                         position: relative;
+                        margin: 0;
+                        padding: 0;
+                        left: 0;
+                        right: 0;
+                        /* Prevent filter from causing layout shifts */
+                        transform: translateZ(0);
+                        will-change: filter;
                     }
                     
-                    /* Prevent containers from overflowing */
+                    /* Prevent containers from overflowing and shifting */
                     body.vision-impaired > *,
                     body.vision-impaired .container,
                     body.vision-impaired .wrapper,
@@ -25944,6 +25969,10 @@ class AccessibilityWidget {
                         max-width: 100%;
                         overflow-x: hidden;
                         box-sizing: border-box;
+                        /* Prevent horizontal shifting */
+                        position: relative;
+                        left: auto;
+                        right: auto;
                     }
                     
                     /* Prevent text elements from causing overflow */
