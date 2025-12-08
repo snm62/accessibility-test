@@ -22331,11 +22331,34 @@ class AccessibilityWidget {
                 style.textContent = `
                     /* READABLE FONT: Only change font-family, no size or weight changes */
                     
-                    /* Prevent horizontal overflow */
+                    /* Prevent horizontal overflow - only on block containers */
                     .readable-font {
-                        overflow-x: hidden !important;
-                        word-wrap: break-word !important;
-                        overflow-wrap: break-word !important;
+                        overflow-x: hidden;
+                    }
+                    
+                    /* Only break words in block-level containers, not inline elements */
+                    .readable-font p,
+                    .readable-font div,
+                    .readable-font li,
+                    .readable-font td,
+                    .readable-font th,
+                    .readable-font section,
+                    .readable-font article,
+                    .readable-font main {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    /* Preserve inline elements - don't break words unnecessarily */
+                    .readable-font span,
+                    .readable-font a,
+                    .readable-font strong,
+                    .readable-font em,
+                    .readable-font b,
+                    .readable-font i {
+                        white-space: normal;
+                        word-wrap: normal;
+                        overflow-wrap: normal;
                     }
                     
                     /* 1. HEADINGS - Apply readable font to headings (font-family only) */
@@ -23452,6 +23475,12 @@ class AccessibilityWidget {
             
             this.settings['stop-animation'] = false;
             this.saveSettings();
+            
+            // 9. Refresh the page to ensure all animations resume properly
+            // This ensures a clean state after disabling stop animation
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         
         }
         
@@ -25887,23 +25916,52 @@ class AccessibilityWidget {
                     
                     /* 10. PREVENT CONTENT OVERFLOW - Ensure content stays within viewport */
                     html.vision-impaired {
-                        overflow-x: hidden !important;
-                        max-width: 100% !important;
-                        width: 100% !important;
+                        overflow-x: hidden;
+                        max-width: 100vw;
+                        width: 100%;
+                        box-sizing: border-box;
                     }
                     
                     body.vision-impaired {
-                        overflow-x: hidden !important;
-                        max-width: 100% !important;
-                        width: 100% !important;
+                        overflow-x: hidden;
+                        max-width: 100vw;
+                        width: 100%;
+                        box-sizing: border-box;
+                        position: relative;
                     }
                     
-                    /* Prevent any element from causing horizontal overflow */
+                    /* Prevent containers from overflowing */
+                    body.vision-impaired > *,
+                    body.vision-impaired .container,
+                    body.vision-impaired .wrapper,
+                    body.vision-impaired .content,
+                    body.vision-impaired section,
+                    body.vision-impaired main,
+                    body.vision-impaired article,
+                    body.vision-impaired header,
+                    body.vision-impaired footer,
+                    body.vision-impaired nav {
+                        max-width: 100%;
+                        overflow-x: hidden;
+                        box-sizing: border-box;
+                    }
+                    
+                    /* Prevent text elements from causing overflow */
+                    body.vision-impaired p,
+                    body.vision-impaired div,
+                    body.vision-impaired span,
+                    body.vision-impaired li,
+                    body.vision-impaired td,
+                    body.vision-impaired th {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        max-width: 100%;
+                        box-sizing: border-box;
+                    }
+                    
+                    /* Prevent inline elements from breaking layout */
                     body.vision-impaired * {
-                        max-width: 100% !important;
-                        overflow-x: hidden !important;
-                        word-wrap: break-word !important;
-                        overflow-wrap: break-word !important;
+                        box-sizing: border-box;
                     }
                     
                     /* EXCEPTION: Allow accessibility panel to have vertical scrollbar - HIGH SPECIFICITY */
