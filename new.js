@@ -29059,35 +29059,31 @@ class AccessibilityWidget {
             
             // Use ResizeObserver for better responsive mode detection
             // Only set up ResizeObserver after icon visibility has been determined
-            // Check if _iconExplicitlyShown has been set (it's initialized to false, but set to true when icon is shown)
-            // We need to wait until icon visibility is determined before setting up ResizeObserver
             if (this.shadowRoot && window.ResizeObserver) {
                 // Delay ResizeObserver setup to ensure icon visibility is determined first
-                // Use a small delay to ensure init() has completed
-                setTimeout(() => {
-                    const resizeObserver = new ResizeObserver(() => {
+                const self = this;
+                const debouncedResizeFn = debouncedResize;
+                setTimeout(function() {
+                    const resizeObserver = new ResizeObserver(function() {
                         console.log('[ICON DEBUG] ResizeObserver callback fired', {
-                            _iconExplicitlyShown: this._iconExplicitlyShown
+                            _iconExplicitlyShown: self._iconExplicitlyShown
                         });
                         // Don't trigger resize handler if icon was explicitly shown during initialization
-                        // This prevents ResizeObserver from hiding the icon after it's been shown
-                        if (this._iconExplicitlyShown === true) {
+                        if (self._iconExplicitlyShown === true) {
                             console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
                             return;
                         }
-                        // Icon visibility has been determined (either shown or hidden)
                         // Safe to call resize handler
-                        debouncedResize();
+                        debouncedResizeFn();
                     });
                     
-                    const panel = this.shadowRoot.getElementById('accessibility-panel');
-                    const icon = this.shadowRoot.getElementById('accessibility-icon');
+                    const panel = self.shadowRoot.getElementById('accessibility-panel');
+                    const icon = self.shadowRoot.getElementById('accessibility-icon');
                     if (panel) resizeObserver.observe(panel);
                     if (icon) resizeObserver.observe(icon);
                     
-                    // Store observer for cleanup if needed
-                    this._resizeObserver = resizeObserver;
-                }, 200); // Small delay to ensure init() completes
+                    self._resizeObserver = resizeObserver;
+                }, 200);
             }
             
             // Listen to media query changes for breakpoints
