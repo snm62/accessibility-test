@@ -1495,6 +1495,7 @@ class AccessibilityWidget {
             const panel = this.shadowRoot?.getElementById('accessibility-panel');
             
             if (icon) {
+                console.log('[ICON HIDE] disableWidget() - Payment failed, hiding icon');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -1791,7 +1792,7 @@ class AccessibilityWidget {
     
             // Check if interface should be hidden
             if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
-                
+                console.log('[ICON HIDE] init() - Interface is hidden in localStorage, preventing widget creation');
                 return;
             }
     
@@ -1862,16 +1863,28 @@ class AccessibilityWidget {
                     
                     // Only show if not hidden by settings
                     if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
+                        console.log('[ICON SHOW] init() - Showing icon after customization loaded', {
+                            hideTrigger,
+                            isMobile,
+                            mobileVisibility
+                        });
                         icon.style.display = '';
                         icon.style.visibility = 'visible';
                         icon.style.opacity = '1';
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
+                    } else {
+                        console.log('[ICON HIDE] init() - Not showing icon due to settings', {
+                            hideTrigger,
+                            isMobile,
+                            mobileVisibility
+                        });
                     }
                 }
             } catch (err) {
                 // If fetch fails, show icon with defaults
+                console.log('[ICON SHOW] init() - Fetch failed, showing icon with defaults', err);
                 const icon = this.shadowRoot?.getElementById('accessibility-icon');
                 if (icon) {
                     icon.style.display = '';
@@ -4570,6 +4583,7 @@ class AccessibilityWidget {
             icon.style.pointerEvents = 'auto';
             
             // Initially hide the icon - will show after customization is loaded
+            console.log('[ICON HIDE] createWidget() - Initially hiding icon (will show after customization loads)');
             icon.style.display = 'none';
             icon.style.visibility = 'hidden';
             icon.style.opacity = '0';
@@ -28847,9 +28861,14 @@ class AccessibilityWidget {
     
         // Show the icon after customizations are loaded
         showIcon() {
+            console.log('[ICON DEBUG] showIcon() called', {
+                _iconExplicitlyShown: this._iconExplicitlyShown,
+                paymentFailed: this.paymentFailed,
+                customizationData: this.customizationData ? 'exists' : 'null'
+            });
             const icon = this.shadowRoot?.getElementById('accessibility-icon');
             if (!icon) {
-      
+                console.log('[ICON DEBUG] showIcon() - Icon element not found');
                 return;
             }
             
@@ -28865,12 +28884,14 @@ class AccessibilityWidget {
                 // Only hide if visibility rules actually require it
                 if (!isMobile && hideTrigger) {
                     // Desktop and hideTrigger is Yes - hide it
+                    console.log('[ICON HIDE] showIcon() - _iconExplicitlyShown=true, Desktop, hideTriggerButton=Yes');
                     icon.style.display = 'none';
                     icon.style.visibility = 'hidden';
                     icon.style.opacity = '0';
                     return;
                 } else if (isMobile && mobileVisibility === 'Hide') {
                     // Mobile and showOnMobile is Hide - hide it
+                    console.log('[ICON HIDE] showIcon() - _iconExplicitlyShown=true, Mobile, showOnMobile=Hide');
                     icon.style.display = 'none';
                     icon.style.visibility = 'hidden';
                     icon.style.opacity = '0';
@@ -28886,7 +28907,7 @@ class AccessibilityWidget {
             
             // Check if payment failed - if so, don't show icon
             if (this.paymentFailed) {
-                
+                console.log('[ICON HIDE] showIcon() - Payment failed (this.paymentFailed=true)');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -28898,7 +28919,7 @@ class AccessibilityWidget {
             if (widgetContainer && (widgetContainer.style.display === 'none' || 
                 widgetContainer.style.visibility === 'hidden' || 
                 widgetContainer.style.opacity === '0')) {
-               
+                console.log('[ICON HIDE] showIcon() - Widget container is hidden (payment issues)');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -28914,7 +28935,7 @@ class AccessibilityWidget {
     
             // Desktop/Tablet logic: hide if hideTriggerButton is Yes
             if (!isMobile && hideTrigger) {
-               
+                console.log('[ICON HIDE] showIcon() - Desktop, hideTriggerButton=Yes');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -28923,7 +28944,7 @@ class AccessibilityWidget {
     
             // Mobile logic: hide if showOnMobile is Hide (ignore hideTriggerButton for mobile)
             if (isMobile && mobileVisibility === 'Hide') {
-            
+                console.log('[ICON HIDE] showIcon() - Mobile, showOnMobile=Hide');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -28959,14 +28980,20 @@ class AccessibilityWidget {
         
         // Handle window resize to update icon visibility based on device type
         handleWindowResize() {
+            console.log('[ICON DEBUG] handleWindowResize() called', {
+                _iconExplicitlyShown: this._iconExplicitlyShown,
+                hasCustomizationData: !!this.customizationData
+            });
             // Don't call showIcon() if icon was explicitly shown during initialization
             // This prevents ResizeObserver from hiding the icon immediately after it's shown
             if (this._iconExplicitlyShown) {
+                console.log('[ICON DEBUG] handleWindowResize() - Skipping because _iconExplicitlyShown=true');
                 return; // Icon visibility is already correctly set, don't change it
             }
             
             // Only update icon visibility if customization data is available
             if (!this.customizationData) {
+                console.log('[ICON DEBUG] handleWindowResize() - Skipping because no customizationData');
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
             this.showIcon();
@@ -29019,10 +29046,15 @@ class AccessibilityWidget {
             // Use ResizeObserver for better responsive mode detection
             if (this.shadowRoot && window.ResizeObserver) {
                 const resizeObserver = new ResizeObserver(() => {
+                    console.log('[ICON DEBUG] ResizeObserver callback fired', {
+                        _iconExplicitlyShown: this._iconExplicitlyShown
+                    });
                     // Don't trigger resize handler if icon was just explicitly shown
                     // This prevents immediate firing when ResizeObserver starts observing
                     if (!this._iconExplicitlyShown) {
                         debouncedResize();
+                    } else {
+                        console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
                     }
                 });
                 
@@ -29066,11 +29098,15 @@ class AccessibilityWidget {
         
         // PERFORMANCE OPTIMIZATION: Optimized resize handler
         handleResizeOptimized() {
+            console.log('[ICON DEBUG] handleResizeOptimized() called');
             const elements = this.getCachedElements();
             const icon = elements.icon;
             const panel = elements.panel;
             
-            if (!icon || !panel) return;
+            if (!icon || !panel) {
+                console.log('[ICON DEBUG] handleResizeOptimized() - Icon or panel not found');
+                return;
+            }
             
             // Use requestAnimationFrame for DOM updates
             requestAnimationFrame(() => {
@@ -30105,6 +30141,7 @@ class AccessibilityWidget {
              
             }
             if (icon) {
+                console.log('[ICON HIDE] acceptHideInterface() - User accepted hiding interface');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -30740,11 +30777,13 @@ class AccessibilityWidget {
             
             if (hidden) {
                 // Hide icon if hidden is true
+                console.log('[ICON HIDE] updateTriggerVisibility() - hidden=true');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
             } else {
                 // Show icon if hidden is false
+                console.log('[ICON SHOW] updateTriggerVisibility() - hidden=false');
                 icon.style.display = '';
                 icon.style.visibility = 'visible';
                 icon.style.opacity = '1';
