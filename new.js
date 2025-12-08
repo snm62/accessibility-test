@@ -25800,32 +25800,47 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'vision-impaired-comprehensive';
                 style.textContent = `
-                    /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
+                    /* VISION IMPAIRED: Zoom content while preventing overflow */
                     
-                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
+                    /* 1. ZOOM ENTIRE PAGE - Use zoom to scale everything up, but clip overflow */
                     html.vision-impaired {
-                        /* No zoom - preserve original layout */
-                        /* No layout modifications */
+                        /* Use zoom to scale everything including images */
+                        zoom: 1.05;
+                        /* Fallback for Firefox - use transform with proper containment */
+                        -moz-transform: scale(1.05);
+                        -moz-transform-origin: top left;
+                        /* CRITICAL: Clip any overflow from zoom */
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        /* Constrain to viewport */
+                        width: 100vw;
+                        max-width: 100vw;
+                        box-sizing: border-box;
                         margin: 0;
                         padding: 0;
-                        left: 0;
-                        right: 0;
                         position: relative;
                     }
                     
+                    /* Adjust body width to compensate for zoom - when zoomed 1.05x, need smaller base width */
                     body.vision-impaired {
-                        /* No layout modifications */
-                        /* Slightly enhance text contrast without changing colors */
+                        /* Slightly enhance text contrast */
                         filter: contrast(1.1) brightness(1.05);
-                        /* Prevent filter from causing layout shifts */
-                        transform: translateZ(0);
-                        will-change: filter;
-                        /* Ensure body stays in place */
+                        /* Prevent overflow - constrain body to fit within zoomed viewport */
+                        overflow-x: hidden;
+                        width: calc(100vw / 1.05);
+                        max-width: calc(100vw / 1.05);
+                        box-sizing: border-box;
                         margin: 0;
                         padding: 0;
-                        left: 0;
-                        right: 0;
                         position: relative;
+                        /* Ensure body doesn't exceed viewport */
+                        min-width: 0;
+                    }
+                    
+                    /* Ensure all direct children of body respect the constrained width */
+                    body.vision-impaired > * {
+                        max-width: 100%;
+                        overflow-x: hidden;
                     }
                     
                     /* Preserve accessibility widget from vision impaired filters and scaling */
@@ -25928,32 +25943,8 @@ class AccessibilityWidget {
                     }
                     
                     /* 10. PREVENT CONTENT OVERFLOW - Ensure content stays within viewport */
-                    html.vision-impaired {
-                        overflow-x: hidden;
-                        max-width: 100vw;
-                        width: 100%;
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                        left: 0;
-                        right: 0;
-                        position: relative;
-                    }
-                    
-                    body.vision-impaired {
-                        overflow-x: hidden;
-                        max-width: 100vw;
-                        width: 100%;
-                        box-sizing: border-box;
-                        position: relative;
-                        margin: 0;
-                        padding: 0;
-                        left: 0;
-                        right: 0;
-                        /* Prevent filter from causing layout shifts */
-                        transform: translateZ(0);
-                        will-change: filter;
-                    }
+                    /* Note: Zoom is handled in section 1 above */
+                    /* Additional overflow prevention for all elements */
                     
                     /* Prevent ALL elements from overflowing - comprehensive approach */
                     body.vision-impaired * {
