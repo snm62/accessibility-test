@@ -25892,16 +25892,19 @@ class AccessibilityWidget {
                         overflow-wrap: break-word !important;
                     }
                     
-                    /* EXCEPTION: Allow accessibility panel to have vertical scrollbar */
+                    /* EXCEPTION: Allow accessibility panel to have vertical scrollbar - HIGH SPECIFICITY */
                     body.vision-impaired #accessibility-panel,
                     body.vision-impaired .accessibility-panel,
+                    html body.vision-impaired #accessibility-panel,
+                    html body.vision-impaired .accessibility-panel,
                     #accessibility-panel,
                     .accessibility-panel {
-                        overflow-x: hidden !important;
-                        overflow-y: auto !important;
-                        max-width: 100% !important;
-                        word-wrap: break-word !important;
-                        overflow-wrap: break-word !important;
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        overflow: hidden auto;
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
                     }
                     
                     /* Ensure images and media don't overflow */
@@ -30516,17 +30519,24 @@ class AccessibilityWidget {
                 panel.style.setProperty('border-radius', '8px', 'important');
                 panel.style.setProperty('font-family', "'DM Sans', sans-serif", 'important');
                 panel.style.setProperty('pointer-events', 'auto', 'important');
-                panel.style.setProperty('overflow-y', 'auto', 'important');
-                panel.style.setProperty('overflow-x', 'hidden', 'important');
-                panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-                panel.style.setProperty('scroll-behavior', 'smooth', 'important');
-                panel.style.setProperty('overscroll-behavior', 'contain', 'important');
+                panel.style.setProperty('overflow-y', 'auto');
+                panel.style.setProperty('overflow-x', 'hidden');
+                panel.style.setProperty('-webkit-overflow-scrolling', 'touch');
+                panel.style.setProperty('scroll-behavior', 'smooth');
+                panel.style.setProperty('overscroll-behavior', 'contain');
+                
+                // Ensure panel has a max-height so it can scroll
+                // If no max-height is set, set a default
+                const currentMaxHeight = panel.style.maxHeight || window.getComputedStyle(panel).maxHeight;
+                if (!currentMaxHeight || currentMaxHeight === 'none' || currentMaxHeight === '') {
+                    panel.style.setProperty('max-height', '85vh');
+                }
                 
                 // Add text wrapping to ensure all text is visible
-                panel.style.setProperty('word-wrap', 'break-word', 'important');
-                panel.style.setProperty('word-break', 'break-word', 'important');
-                panel.style.setProperty('overflow-wrap', 'break-word', 'important');
-                panel.style.setProperty('hyphens', 'auto', 'important');
+                panel.style.setProperty('word-wrap', 'break-word');
+                panel.style.setProperty('word-break', 'break-word');
+                panel.style.setProperty('overflow-wrap', 'break-word');
+                panel.style.setProperty('hyphens', 'auto');
                 
           
             }
