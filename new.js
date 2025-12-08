@@ -1865,6 +1865,9 @@ class AccessibilityWidget {
                         icon.style.display = '';
                         icon.style.visibility = 'visible';
                         icon.style.opacity = '1';
+                        // Mark that icon was explicitly shown during initialization
+                        // This prevents showIcon() from hiding it during resize events
+                        this._iconExplicitlyShown = true;
                     }
                 }
             } catch (err) {
@@ -28854,6 +28857,37 @@ class AccessibilityWidget {
                 return;
             }
             
+            // If icon was explicitly shown during initialization, don't hide it
+            // This prevents ResizeObserver and other events from hiding the icon
+            // after it was correctly shown with the right visibility logic
+            if (this._iconExplicitlyShown) {
+                // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
+                const isMobile = window.innerWidth <= 768;
+                const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
+                const mobileVisibility = this.customizationData?.showOnMobile;
+                
+                // Only hide if visibility rules actually require it
+                if (!isMobile && hideTrigger) {
+                    // Desktop and hideTrigger is Yes - hide it
+                    icon.style.display = 'none';
+                    icon.style.visibility = 'hidden';
+                    icon.style.opacity = '0';
+                    return;
+                } else if (isMobile && mobileVisibility === 'Hide') {
+                    // Mobile and showOnMobile is Hide - hide it
+                    icon.style.display = 'none';
+                    icon.style.visibility = 'hidden';
+                    icon.style.opacity = '0';
+                    return;
+                } else {
+                    // Show it - visibility rules allow it
+                    icon.style.display = '';
+                    icon.style.visibility = 'visible';
+                    icon.style.opacity = '1';
+                    return;
+                }
+            }
+            
             // Check if payment failed - if so, don't show icon
             if (this.paymentFailed) {
                 
@@ -28929,6 +28963,11 @@ class AccessibilityWidget {
         
         // Handle window resize to update icon visibility based on device type
         handleWindowResize() {
+            // Only update icon visibility if customization data is available
+            // Don't hide icon if it was explicitly shown during initialization
+            if (!this.customizationData) {
+                return; // Don't call showIcon() if customization data isn't loaded yet
+            }
             this.showIcon();
         }
         
