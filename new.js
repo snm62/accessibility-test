@@ -28732,12 +28732,8 @@ class AccessibilityWidget {
                 this.updateTriggerOffset('vertical', customizationData.triggerVerticalOffset);
             }
             
-            if (customizationData.hideTriggerButton) {
-                // Only call if method exists (defensive check)
-                if (typeof this.updateTriggerVisibility === 'function') {
-                    this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
-                }
-            }
+            // Don't call updateTriggerVisibility here - icon visibility is handled explicitly
+            // in init() after customizations are applied to avoid conflicts
             
             // Apply language - preserve user's language choice
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
