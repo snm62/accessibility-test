@@ -1855,10 +1855,10 @@ class AccessibilityWidget {
                 // This ensures icon appears with correct customization (color, position, etc.)
                 // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
                 const icon = this.shadowRoot?.getElementById('accessibility-icon');
-                if (icon) {
-                    const hideTrigger = customizationData?.hideTriggerButton === 'Yes';
+                if (icon && customizationData && customizationData.customization) {
+                    const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
                     const isMobile = window.innerWidth <= 768;
-                    const mobileVisibility = customizationData?.showOnMobile;
+                    const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     // Only show if not hidden by settings
                     if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
