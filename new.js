@@ -3313,7 +3313,9 @@ class AccessibilityWidget {
             max-width: 350px;
             padding: 12px;
             font-size: 14px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3389,7 +3391,9 @@ class AccessibilityWidget {
             width: 80vw;
             max-width: 380px;
             padding: 14px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3464,8 +3468,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 75vw;
             max-width: 520px;
-            min-height: 75vh;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             padding: 20px;
             overflow-y: auto;
             scroll-behavior: smooth;
@@ -3541,8 +3546,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 600px;
             max-width: 600px;
-            min-height: 80vh;
-            max-height: 90vh;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             padding: 24px;
             /* Font size controlled by JavaScript */
         }
@@ -3614,7 +3620,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 85vw;
             max-width: 400px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3781,7 +3789,9 @@ class AccessibilityWidget {
             padding: 8px;
             width: 90vw;
             max-width: 300px;
-            max-height: 80vh;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4000,7 +4010,9 @@ class AccessibilityWidget {
             max-width: 450px !important;
             /* Font size controlled by JavaScript */
             padding: 16px !important;
-            max-height: 80vh !important;
+            height: 100vh !important;
+            top: 0 !important;
+            bottom: 0 !important;
             overflow-y: auto !important;
             position: fixed !important;
             z-index: 100001 !important;
@@ -4136,7 +4148,9 @@ class AccessibilityWidget {
             max-width: 320px !important;
             /* Font size controlled by JavaScript */
             padding: 12px !important;
-            max-height: 90vh !important;
+            height: 100vh !important;
+            top: 0 !important;
+            bottom: 0 !important;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -30525,12 +30539,10 @@ class AccessibilityWidget {
                 panel.style.setProperty('scroll-behavior', 'smooth');
                 panel.style.setProperty('overscroll-behavior', 'contain');
                 
-                // Ensure panel has a max-height so it can scroll
-                // If no max-height is set, set a default
-                const currentMaxHeight = panel.style.maxHeight || window.getComputedStyle(panel).maxHeight;
-                if (!currentMaxHeight || currentMaxHeight === 'none' || currentMaxHeight === '') {
-                    panel.style.setProperty('max-height', '85vh');
-                }
+                // Set panel to full viewport height
+                panel.style.setProperty('height', '100vh');
+                panel.style.setProperty('top', '0');
+                panel.style.setProperty('bottom', '0');
                 
                 // Add text wrapping to ensure all text is visible
                 panel.style.setProperty('word-wrap', 'break-word');
@@ -30567,7 +30579,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '12.5vw', 'important');
                     panel.style.setProperty('font-size', '12px', 'important');
                     panel.style.setProperty('padding', '12px', 'important');
-                    panel.style.setProperty('max-height', '70vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     // Verify font-size was applied
                     const newPanelFontSize = window.getComputedStyle(panel).fontSize;
@@ -30601,7 +30615,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '10vw', 'important');
                     panel.style.setProperty('font-size', '13px', 'important');
                     panel.style.setProperty('padding', '14px', 'important');
-                    panel.style.setProperty('max-height', '75vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     // Apply mobile button stacking
                     this.applyMobileButtonStacking();
@@ -30635,7 +30651,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '0.5vw', 'important');
                     panel.style.setProperty('font-size', '15px');
                     panel.style.setProperty('padding', '18px', 'important');
-                    panel.style.setProperty('max-height', '85vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '55px', 'important');
                     icon.style.setProperty('height', '55px', 'important');
@@ -30651,7 +30669,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '1vw', 'important');
                     panel.style.setProperty('font-size', '14px');
                     panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('max-height', '80vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '50px', 'important');
                     icon.style.setProperty('height', '50px', 'important');
@@ -30667,7 +30687,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '5vw', 'important');
                     panel.style.setProperty('font-size', '14px');
                     panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('max-height', '80vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '50px', 'important');
                     icon.style.setProperty('height', '50px', 'important');
