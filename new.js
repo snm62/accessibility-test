@@ -1,68 +1,22 @@
-// @ts-nocheck
+// CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
-    'use strict';
-    
-    const AccessibilityWidgetNS = window.__AccessibilityWidget = window.__AccessibilityWidget || {};
-    
-    function isWebflowDesigner() {
-        if (typeof window === 'undefined' || typeof document === 'undefined') return true;
-        
-        const hostname = window.location.hostname;
-        const pathname = window.location.pathname;
-        
-        if (hostname.includes('design.webflow.com') || 
-            hostname.includes('preview.webflow.com') ||
-            (hostname.includes('webflow.io') && pathname.includes('/design/')) ||
-            typeof window.webflow !== 'undefined') {
-            return true;
-        }
-        
-        try {
-            if (document.querySelector('[data-wf-page]') !== null ||
-                document.querySelector('.w-editor') !== null ||
-                document.querySelector('[class*="w-editor"]') !== null) {
-                return true;
-            }
-        } catch (e) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function isDesignerContext() {
-        if (isWebflowDesigner()) return true;
-        
-        try {
-            const body = document.body;
-            if (!body) return true;
-            
-            if (body.classList.contains('w-editor') ||
-                body.hasAttribute('data-wf-page') ||
-                document.documentElement.hasAttribute('data-wf-page')) {
-                return true;
-            }
-            
-            const scripts = document.querySelectorAll('script[src*="webflow"], script[src*="design"]');
-            if (scripts.length > 0 && window.location.hostname.includes('webflow')) {
-                return true;
-            }
-        } catch (e) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    if (isDesignerContext()) {
-        return;
-    }
-    
-    AccessibilityWidgetNS.isDesignerContext = isDesignerContext;
-    
-    // CRITICAL: Immediate seizure-safe check - runs before any animations can start
     try {
+        // CRITICAL: Don't run widget in Webflow Designer environment
+        const isDesigner = 
+            (window.location.hostname.includes('webflow.com') && 
+             (window.location.pathname.includes('/design/') || 
+              window.location.pathname.includes('/designer'))) ||
+            document.querySelector('[data-webflow-design-mode]') ||
+            (typeof window.webflow !== 'undefined' && 
+             typeof window.webflow.getSiteInfo === 'function' && 
+             window.location.hostname.includes('webflow.com'));
         
+        if (isDesigner) {
+            // Exit early - widget should not run in Designer
+            return;
+        }
+        
+        // Skip accessibility widget if in reader mode or if page is being processed for reader mode
         const isReaderMode = document.documentElement.classList.contains('reader-mode') || 
             (document.body && document.body.classList.contains('reader-mode')) ||
             window.location.search.includes('reader-mode') ||
@@ -91,7 +45,8 @@
         
         // Check localStorage immediately for seizure-safe mode
         const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-        if (seizureSafeFromStorage === 'true' && !isDesignerContext() && document.body) {
+        if (seizureSafeFromStorage === 'true') {
+            
             document.body.classList.add('seizure-safe');
             
             // Apply immediate CSS to stop all animations
@@ -221,11 +176,9 @@
                 /* REMOVED: Duplicate rule - already covered by scroll-triggered animations section */
                 /* REMOVED: Duplicate data-splitting rules - already covered by letter-by-letter animations section */
             `;
-            if (!isDesignerContext() && document.head) {
-                document.head.appendChild(immediateStyle);
-            }
+            document.head.appendChild(immediateStyle);
             
-            if (isDesignerContext()) return;
+            // Reinforce at root: cover both html.seizure-safe and body.seizure-safe
             try {
                 if (!document.getElementById('accessibility-seizure-reinforce')) {
                     const reinforce = document.createElement('style');
@@ -249,7 +202,7 @@
                         html.seizure-safe input[type="tel"], html.seizure-safe input[type="url"], html.seizure-safe input[type="password"],
                         html.seizure-safe textarea, html.seizure-safe [contenteditable="true"] { cursor: text !important; }
                     `;
-                    if (document.head) document.head.appendChild(reinforce);
+                    document.head.appendChild(reinforce);
                 }
             } catch (_) {}
             
@@ -274,7 +227,7 @@
                         /* Do not affect cursor appearance */
                         body.seizure-safe * { cursor: inherit; }
                     `;
-                    if (document.head) document.head.appendChild(master);
+                    document.head.appendChild(master);
                 }
                 
                 // Correction layer: preserve site layout styles while keeping animations disabled
@@ -312,7 +265,7 @@
                             visibility: unset !important;
                         }
                     `;
-                    if (document.head) document.head.appendChild(correction);
+                    document.head.appendChild(correction);
                 }
             } catch (_) {}
             
@@ -335,58 +288,57 @@
                             will-change: auto !important;
                         }
                     `;
-                    if (document.head) document.head.appendChild(enforce);
+                    document.head.appendChild(enforce);
                 }
             } catch (_) {}
             
-            if (!isDesignerContext()) {
-                try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
-            }
+            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
             
+            // Runtime guards: stop JS-driven animations and reveal typewriter/progress instantly
             try {
-                if (!AccessibilityWidgetNS.seizureGuardsApplied) {
-                    AccessibilityWidgetNS.seizureGuardsApplied = true;
+                if (!window.__seizureGuardsApplied) {
+                    window.__seizureGuardsApplied = true;
                     
-                    if (!AccessibilityWidgetNS.origRequestAnimationFrame) {
-                        AccessibilityWidgetNS.origRequestAnimationFrame = window.requestAnimationFrame;
-                        AccessibilityWidgetNS.origCancelAnimationFrame = window.cancelAnimationFrame;
-                        AccessibilityWidgetNS.origSetInterval = window.setInterval;
-                        AccessibilityWidgetNS.origSetTimeout = window.setTimeout;
-                        AccessibilityWidgetNS.origClearInterval = window.clearInterval;
-                        AccessibilityWidgetNS.origClearTimeout = window.clearTimeout;
-                    }
+                    // NOTE: Do not globally override timers/animation frames to avoid breaking sticky/nav behavior
+                    if (!window.__origRequestAnimationFrame) window.__origRequestAnimationFrame = window.requestAnimationFrame;
+                    if (!window.__origCancelAnimationFrame) window.__origCancelAnimationFrame = window.cancelAnimationFrame;
+                    if (!window.__origSetInterval) window.__origSetInterval = window.setInterval;
+                    if (!window.__origSetTimeout) window.__origSetTimeout = window.setTimeout;
+                    if (!window.__origClearInterval) window.__origClearInterval = window.clearInterval;
+                    if (!window.__origClearTimeout) window.__origClearTimeout = window.clearTimeout;
                     
-                    // SECURITY: Removed global Element.prototype.animate override
-                    // Instead, use CSS to disable animations via the 'seizure-safe' class
-                    // The CSS already handles this with: body.seizure-safe * { animation: none !important; }
-                    // For Web Animations API, we intercept at the element level using MutationObserver
+                    // Ensure originals are active
+                    window.requestAnimationFrame = window.__origRequestAnimationFrame;
+                    window.cancelAnimationFrame = window.__origCancelAnimationFrame;
+                    window.setInterval = window.__origSetInterval;
+                    window.setTimeout = window.__origSetTimeout;
+                    window.clearInterval = window.__origClearInterval;
+                    window.clearTimeout = window.__origClearTimeout;
+                    
+                    // Disable Web Animations API - Only when seizure-safe is active
                     try {
-                        if (!AccessibilityWidgetNS.seizureAnimateObserver) {
-                            const animateObserver = new MutationObserver((mutations) => {
-                                if (isDesignerContext() || !document.body || !document.body.classList.contains('seizure-safe')) return;
-                                mutations.forEach((mutation) => {
-                                    const target = mutation.target;
-                                    if (target && target.nodeType === 1) {
-                                        try {
-                                            const animations = target.getAnimations ? target.getAnimations() : [];
-                                            animations.forEach(anim => {
-                                                try { anim.cancel(); } catch(_) {}
-                                            });
-                                        } catch(_) {}
-                                    }
-                                });
-                            });
-                            animateObserver.observe(document.body, {
-                                childList: true,
-                                subtree: true
-                            });
-                            AccessibilityWidgetNS.seizureAnimateObserver = animateObserver;
+                        if (!window.__origElementAnimate) {
+                            window.__origElementAnimate = Element.prototype.animate;
+                            Element.prototype.animate = function(...args) {
+                                // Only block if seizure-safe mode is active
+                                if (document.body.classList.contains('seizure-safe')) {
+                                    // return a stub Animation
+                                    return {
+                                        cancel: function(){}, finish: function(){}, play: function(){}, pause: function(){},
+                                        reverse: function(){}, updatePlaybackRate: function(){}, addEventListener: function(){},
+                                        removeEventListener: function(){}, dispatchEvent: function(){ return false; },
+                                        currentTime: 0, playState: 'finished',
+                                    };
+                                }
+                                // Otherwise, use original (normal behavior)
+                                return window.__origElementAnimate.apply(this, args);
+                            };
                         }
-                    } catch (_) {}
+                    } catch (_) { /* ignore */ }
                     
-                    AccessibilityWidgetNS.applySeizureSafeDOMFreeze = function() {
-                        if (isDesignerContext()) return;
+                    // Helper to reveal typewriter text and freeze progress visuals
+                    window.__applySeizureSafeDOMFreeze = function() {
                         try {
                             // Reveal typewriter/typing effects by consolidating text
                             const typeSelectors = [
@@ -486,17 +438,20 @@
                                 });
                             } catch (_) {}
                             
-                         
+                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
+                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
                         } catch (err) {
                             
                         }
                     };
                     
-                    AccessibilityWidgetNS.applySeizureSafeDOMFreeze();
+                    // Apply immediately and also on DOMContentLoaded as a second safety
+                    window.__applySeizureSafeDOMFreeze();
                     
+                    // Install aggressive animation blocker to neutralize JS-driven animations
                     try {
-                        if (!AccessibilityWidgetNS.animationBlockerInstalled) {
-                            AccessibilityWidgetNS.animationBlockerInstalled = true;
+                        if (!window.__animationBlockerInstalled) {
+                            window.__animationBlockerInstalled = true;
                             const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
                             // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
                             const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
@@ -517,7 +472,8 @@
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
-                                   
+                                    // Only neutralize transform if the element is not an icon/arrow
+                                    // and not inside a rotation context such as accordion/FAQ toggles
                                     const inRotationContext = (() => {
                                         try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
                                     })();
@@ -528,7 +484,7 @@
                                 } catch (_) {}
                             };
                             
-                            
+                            // Initial sweep - limit to first 5000 elements for safety
                             try {
                                 const all = document.querySelectorAll('*');
                                 let count = 0;
@@ -563,7 +519,7 @@
                                 styleObserver.observe(document.documentElement, {
                                     subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
                                 });
-                                AccessibilityWidgetNS.seizureStyleObserver = styleObserver;
+                                window.__seizureStyleObserver = styleObserver;
                             } catch (_) {}
                             
                             // Ensure native scroll behavior on the main document only (avoid breaking custom scrollers)
@@ -591,104 +547,72 @@
                     
                     // Watch for seizure-safe class being toggled later and (re)install hard blockers
                     try {
-                        if (!AccessibilityWidgetNS.seizureClassWatcher) {
+                        if (!window.__seizureClassWatcher) {
                             const classWatcher = new MutationObserver(() => {
                                 const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
                                 if (active) {
-                                    try { if (AccessibilityWidgetNS.applySeizureSafeDOMFreeze) AccessibilityWidgetNS.applySeizureSafeDOMFreeze(); } catch (_) {}
-                                    try { if (AccessibilityWidgetNS.installStyleHardBlockers) AccessibilityWidgetNS.installStyleHardBlockers(); } catch (_) {}
+                                    try { window.__applySeizureSafeDOMFreeze(); } catch (_) {}
+                                    try { window.__installStyleHardBlockers && window.__installStyleHardBlockers(); } catch (_) {}
                                     try { applyUniversalStopMotion(true); } catch (_) {}
                                 } else {
                                     try { applyUniversalStopMotion(false); } catch (_) {}
                                 }
                             });
                             classWatcher.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-                            AccessibilityWidgetNS.seizureClassWatcher = classWatcher;
+                            window.__seizureClassWatcher = classWatcher;
                         }
                     } catch (_) {}
                     
-                  
+                    // Install hard blockers at the API level for inline styles when seizure-safe is active
                     try {
-                        if (!AccessibilityWidgetNS.installStyleHardBlockers) {
-                            AccessibilityWidgetNS.installStyleHardBlockers = function() {
-                                if (isDesignerContext() || !document.body || !document.body.classList.contains('seizure-safe')) return;
+                        if (!window.__installStyleHardBlockers) {
+                            window.__installStyleHardBlockers = function() {
+                                if (!document.body.classList.contains('seizure-safe')) return;
                                 try {
-                                    if (!AccessibilityWidgetNS.seizureSetPropertyObserver) {
-                                        const setPropertyObserver = new MutationObserver((mutations) => {
-                                            if (!document.body.classList.contains('seizure-safe')) return;
-                                            mutations.forEach((mutation) => {
-                                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                                                    const target = mutation.target;
-                                                    if (target && target.style) {
-                                                        // Block animation-related properties via CSS override
-                                                        const style = target.style;
-                                                        if (style.animation) style.setProperty('animation', 'none', 'important');
-                                                        if (style.transition) style.setProperty('transition', 'none', 'important');
-                                                        if (style.animationName) style.setProperty('animation-name', 'none', 'important');
-                                                        if (style.animationDuration) style.setProperty('animation-duration', '0s', 'important');
-                                                        if (style.transitionDuration) style.setProperty('transition-duration', '0s', 'important');
-                                                    }
-                                                }
-                                            });
-                                        });
-                                        setPropertyObserver.observe(document.body, {
-                                            attributes: true,
-                                            attributeFilter: ['style'],
-                                            subtree: true
-                                        });
-                                        AccessibilityWidgetNS.seizureSetPropertyObserver = setPropertyObserver;
+                                    if (!window.__origSetProperty) {
+                                        window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
+                                        CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
+                                            const n = String(name).toLowerCase();
+                                            // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
+                                            if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
+                                                return undefined;
+                                            }
+                                            return window.__origSetProperty.call(this, name, value, priority);
+                                        };
                                     }
                                 } catch (_) {}
                                 try {
-                                    if (!AccessibilityWidgetNS.seizureAttrObserver) {
-                                        const attrObserver = new MutationObserver((mutations) => {
-                                            if (isDesignerContext() || !document.body || !document.body.classList.contains('seizure-safe')) return;
-                                            mutations.forEach((mutation) => {
-                                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                                                    const target = mutation.target;
-                                                    if (target && target.getAttribute) {
-                                                        const styleAttr = target.getAttribute('style');
-                                                        if (styleAttr && typeof styleAttr === 'string') {
-                                                            // Strip animation-related properties
-                                                            let cleaned = styleAttr
-                                                                .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
-                                                                .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
-                                                                .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
-                                                                .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
-                                                            if (cleaned !== styleAttr) {
-                                                                target.setAttribute('style', cleaned);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                        });
-                                        attrObserver.observe(document.body, {
-                                            attributes: true,
-                                            attributeFilter: ['style'],
-                                            subtree: true
-                                        });
-                                        AccessibilityWidgetNS.seizureAttrObserver = attrObserver;
+                                    if (!window.__origStyleAttrSetter) {
+                                        window.__origStyleAttrSetter = Element.prototype.setAttribute;
+                                        Element.prototype.setAttribute = function(attr, val) {
+                                            if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
+                                                // Strip blacklisted properties from inline style strings
+                                                let cleaned = val
+                                                    .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '')
+                                                    .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '');
+                                                return window.__origStyleAttrSetter.call(this, attr, cleaned);
+                                            }
+                                            return window.__origStyleAttrSetter.call(this, attr, val);
+                                        };
                                     }
                                 } catch (_) {}
                             };
                         }
-                        if (AccessibilityWidgetNS.installStyleHardBlockers) {
-                            AccessibilityWidgetNS.installStyleHardBlockers();
-                        }
+                        // Apply immediately if already in seizure-safe
+                        window.__installStyleHardBlockers();
                     } catch (_) {}
                     
+                    // Observe future DOM changes to keep things frozen while seizure-safe is active
                     try {
                         const observer = new MutationObserver(() => {
-                            if (isDesignerContext()) return;
                             if (document.body && document.body.classList.contains('seizure-safe')) {
-                                if (AccessibilityWidgetNS.applySeizureSafeDOMFreeze) {
-                                    AccessibilityWidgetNS.applySeizureSafeDOMFreeze();
-                                }
+                                window.__applySeizureSafeDOMFreeze();
                             }
                         });
                         observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-                        AccessibilityWidgetNS.seizureObserver = observer;
+                        window.__seizureObserver = observer;
                     } catch (obsErr) {
                       
                     }
@@ -698,35 +622,18 @@
             }
         }
         
-       
+        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
         if (seizureSafeFromStorage === 'true') {
             try {
-                
-                if (!AccessibilityWidgetNS.seizureStyleObserver) {
-                    const styleObserver = new MutationObserver((mutations) => {
-                        if (!document.body.classList.contains('seizure-safe')) return;
-                        mutations.forEach((mutation) => {
-                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                                const target = mutation.target;
-                                if (target && target.style) {
-                                    // Block animation-related properties
-                                    if (target.style.animation) target.style.animation = 'none';
-                                    if (target.style.transition) target.style.transition = 'none';
-                                    if (target.style.animationName) target.style.animationName = 'none';
-                                    if (target.style.animationDuration) target.style.animationDuration = '0s';
-                                    if (target.style.transitionDuration) target.style.transitionDuration = '0s';
-                                }
-                            }
-                        });
-                    });
-                    styleObserver.observe(document.body, {
-                        attributes: true,
-                        attributeFilter: ['style'],
-                        subtree: true,
-                        childList: false
-                    });
-                    AccessibilityWidgetNS.seizureStyleObserver = styleObserver;
+                // Override requestAnimationFrame immediately
+                if (!window.__originalRequestAnimationFrame) {
+                    window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
+                window.requestAnimationFrame = function(callback) {
+                    // Block all animations in seizure-safe mode
+                   
+                    return 0;
+                };
                 
                 // Stop Lottie animations immediately
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
@@ -778,7 +685,7 @@ function applyUniversalStopMotion(enabled) {
             if (!css) {
                 css = document.createElement('style');
                 css.id = 'a11y-universal-motion-block';
-                if (!isDesignerContext() && document.head) document.head.appendChild(css);
+                document.head.appendChild(css);
             }
             css.textContent = `
                 html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
@@ -857,27 +764,28 @@ function applyUniversalStopMotion(enabled) {
 
 // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
 function applyVisionImpaired(on) {
-    if (isDesignerContext()) return;
     try {
-        if (document.documentElement) document.documentElement.classList.toggle('vision-impaired', !!on);
-        if (document.body) document.body.classList.toggle('vision-impaired', !!on);
+        // Toggle root classes
+        document.documentElement.classList.toggle('vision-impaired', !!on);
+        document.body.classList.toggle('vision-impaired', !!on);
 
+        // CONTENT WRAPPER (persistent)
         let wrapper = document.getElementById('accessibility-content-wrapper');
-        if (!wrapper && document.body) {
+        if (!wrapper) {
             wrapper = document.createElement('div');
             wrapper.id = 'accessibility-content-wrapper';
+            // Move all current body children into the wrapper once
             while (document.body.firstChild) {
                 wrapper.appendChild(document.body.firstChild);
             }
             document.body.appendChild(wrapper);
         }
 
-        if (document.body) {
-            if (on) {
-                document.body.classList.add('vision-impaired');
-            } else {
-                document.body.classList.remove('vision-impaired');
-            }
+        // Apply vision scaling to body element as requested
+        if (on) {
+            document.body.classList.add('vision-impaired');
+        } else {
+            document.body.classList.remove('vision-impaired');
         }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
@@ -887,7 +795,7 @@ function applyVisionImpaired(on) {
             document.head.appendChild(style);
         }
         
-        
+        // ... (Update CSS below) ...
         style.textContent = `
             /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
 
@@ -903,10 +811,16 @@ function applyVisionImpaired(on) {
             body.vision-impaired {
                 margin: 0 !important;
                 padding: 0 !important;
-                /* Scale the body element while preserving scrollability */
-                transform: scale(1.05) !important;
-                transform-origin: top left !important;
+                /* REMOVED: zoom and scale to prevent zoom and left shift issues */
             }
+            
+            /* Fix overflow for Firefox and other browsers */
+            html.vision-impaired {
+                overflow-x: auto !important;
+                width: 100% !important;
+            }
+            
+            /* REMOVED: width calculation that was causing left shift */
 
             /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
             body.vision-impaired .accessibility-widget,
@@ -1050,9 +964,7 @@ function applyVisionImpaired(on) {
                 }
                 
                 body.vision-impaired {
-                    /* Scale the body element while preserving scrollability */
-                    transform: scale(1.05) !important;
-                    transform-origin: top left !important;
+                    /* REMOVED: zoom and scale to prevent zoom and left shift issues */
                 }
                 
                 /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
@@ -1223,7 +1135,7 @@ function applyVisionImpaired(on) {
                         }
                     }
                 `;
-                if (!isDesignerContext() && document.head) document.head.appendChild(viStyle);
+                document.head.appendChild(viStyle);
             }
         }
 
@@ -1285,6 +1197,26 @@ class AccessibilityWidget {
             this.currentlyFocusedElement = null; // Track currently focused element for highlight focus
             this.isKeyboardNavigation = false; // Track if user is using keyboard navigation
             this.lastInteractionMethod = null; // Track last interaction method (keyboard/mouse)
+            
+            // Performance optimization: Cache DOM elements
+            this._cachedElements = {
+                icon: null,
+                panel: null,
+                closeBtn: null,
+                lastCacheTime: 0
+            };
+            
+            // Track if this is a staging domain (free, no payment check needed)
+            this._isStagingDomain = null; // Will be set on first check
+            
+            // Track if icon was explicitly shown during initialization
+            // This prevents ResizeObserver and other events from hiding it
+            this._iconExplicitlyShown = false;
+            
+            // Debounce/throttle timers
+            this._resizeTimer = null;
+            this._mutationTimer = null;
+            this._rafPending = false;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1293,7 +1225,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev/';
+            this.kvApiUrl = 'https://accessibility-widget.web-8fb.workers.dev/';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -1396,28 +1328,13 @@ class AccessibilityWidget {
                     trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 };
                 
-                // SECURITY: Isolated API call with timeout and error handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/create-trial`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(trialData)
+                });
                 
-                try {
-                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/create-trial`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(trialData),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    return response.ok;
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.name === 'AbortError') {
-                        // Timeout - fail silently
-                        return false;
-                    }
-                    // Other errors - fail silently
-                    return false;
-                }
+                return response.ok;
             } catch (error) {
                 
                 return false;
@@ -1439,56 +1356,46 @@ class AccessibilityWidget {
                 if (isStagingDomain) {
                     return true;
                 }
-                // SECURITY: Isolated API call with timeout and error handling
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const controller1 = new AbortController();
-                const timeoutId1 = setTimeout(() => controller1.abort(), 10000); // 10s timeout
+                // OPTIMIZED: Minimal headers, efficient fetch
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    keepalive: false
+                });
                 
-                try {
-                    const response = await fetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
-                        signal: controller1.signal
+                // Handle rate limit errors with retry
+                if (response.status === 429) {
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
+                    
+                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                    const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        keepalive: false
                     });
-                    clearTimeout(timeoutId1);
-                    
-                    // Handle rate limit errors with retry
-                    if (response.status === 429) {
-                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    if (!retryResponse.ok) {
                         
-                        const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                        const controller2 = new AbortController();
-                        const timeoutId2 = setTimeout(() => controller2.abort(), 10000);
-                        
-                        try {
-                            const retryResponse = await fetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
-                                signal: controller2.signal
-                            });
-                            clearTimeout(timeoutId2);
-                            
-                            if (!retryResponse.ok) {
-                                return false;
-                            }
-                            
-                            const paymentData = await retryResponse.json();
-                            return this.processPaymentResponse(paymentData);
-                        } catch (retryError) {
-                            clearTimeout(timeoutId2);
-                            return false;
-                        }
-                    }
-                    
-                    if (!response.ok) {
                         return false;
                     }
                     
-                    const paymentData = await response.json();
+                    const paymentData = await retryResponse.json();
                     return this.processPaymentResponse(paymentData);
-                } catch (error) {
-                    clearTimeout(timeoutId1);
-                    if (error.name === 'AbortError') {
-                        return false;
-                    }
+                }
+                
+                if (!response.ok) {
+                    
                     return false;
                 }
+                
+                const paymentData = await response.json();
+                
+                return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
                 
@@ -1561,31 +1468,17 @@ class AccessibilityWidget {
                 }
                 
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                // SECURITY: Isolated API call with timeout and error handling
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const response = await fetch(`${base3}/api/accessibility/validate-domain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId })
+                });
                 
-                try {
-                    const response = await fetch(`${base3}/api/accessibility/validate-domain`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId }),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    
-                    if (!response.ok) return false;
-                    
-                    const { isValid } = await response.json();
-                    return isValid;
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.name === 'AbortError') {
-                        return false;
-                    }
-                    return false;
-                }
+                if (!response.ok) return false;
+                
+                const { isValid } = await response.json();
+                return isValid;
             } catch (error) {
                 
                 return false;
@@ -1612,6 +1505,7 @@ class AccessibilityWidget {
             const panel = this.shadowRoot?.getElementById('accessibility-panel');
             
             if (icon) {
+                console.log('[ICON HIDE] disableWidget() - Payment failed, hiding icon');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -1626,9 +1520,10 @@ class AccessibilityWidget {
             this.showPaymentRequiredMessage();
         }
         
-        
+        // Show payment required message - DISABLED
         showPaymentRequiredMessage() {
-           
+            // Payment message disabled - no popup will be shown
+            
         }
         
         
@@ -1777,7 +1672,10 @@ class AccessibilityWidget {
             }
         }
         
-      
+        // Set up aggressive monitoring for any text animations that might start
+        // REMOVED: Duplicate setupSeizureSafeMonitoring() - using more comprehensive version below
+        
+        // Set up aggressive monitoring for text animations when seizure-safe mode is active
         setupSeizureSafeMonitoring() {
             try {
                 // Only set up monitoring if seizure-safe mode is active
@@ -1900,11 +1798,11 @@ class AccessibilityWidget {
     
             this.addFontAwesome();
     
-            this.addCSS(); // Load CSS from hosted URL
+            // CSS is loaded in createWidget() via getWidgetCSS() - no need for separate addCSS()
     
             // Check if interface should be hidden
             if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
-                
+                console.log('[ICON HIDE] init() - Interface is hidden in localStorage, preventing widget creation');
                 return;
             }
     
@@ -1942,20 +1840,93 @@ class AccessibilityWidget {
             }
     
             
-            await this.fetchCustomizationData();
-            
-            // Restore saved language
+            // Restore saved language FIRST (before showing icon)
+            // This ensures language is set before any positioning or customization
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
             if (savedLanguage) {
-                
                 this.applyLanguage(savedLanguage);
             } else {
-                
                 this.applyLanguage('English');
             }
             
-            // Set up periodic refresh to check for customization updates
-            this.setupCustomizationRefresh();
+            // Fetch customization data (BLOCKING - load on page load for immediate customization)
+            // This ensures icon appears with user's customization immediately, no delays
+            try {
+                const customizationData = await this.fetchCustomizationData();
+                if (customizationData && customizationData.customization) {
+                    // Apply customizations BEFORE showing icon
+                    this.applyCustomizations(customizationData.customization);
+                    // Also apply accessibility profiles if present
+                    if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
+                        this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+                    }
+                }
+                
+                // Show icon AFTER customizations are applied
+                // This ensures icon appears with correct customization (color, position, etc.)
+                // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
+                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                if (icon && customizationData && customizationData.customization) {
+                    const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
+                    const isMobile = window.innerWidth <= 768;
+                    const mobileVisibility = customizationData.customization.showOnMobile;
+                    
+                    // Only show if not hidden by settings
+                    if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
+                        console.log('[ICON SHOW] init() - Showing icon after customization loaded', {
+                            hideTrigger,
+                            isMobile,
+                            mobileVisibility
+                        });
+                        icon.style.display = '';
+                        icon.style.visibility = 'visible';
+                        icon.style.opacity = '1';
+                        // Mark that icon was explicitly shown during initialization
+                        // This prevents showIcon() from hiding it during resize events
+                        this._iconExplicitlyShown = true;
+                    } else {
+                        console.log('[ICON HIDE] init() - Not showing icon due to settings', {
+                            hideTrigger,
+                            isMobile,
+                            mobileVisibility
+                        });
+                    }
+                }
+            } catch (err) {
+                // If fetch fails, show icon with defaults
+                console.log('[ICON SHOW] init() - Fetch failed, showing icon with defaults', err);
+                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                if (icon) {
+                    icon.style.display = '';
+                    icon.style.visibility = 'visible';
+                    icon.style.opacity = '1';
+                    // Mark that icon was explicitly shown during initialization
+                    // This prevents showIcon() from hiding it during resize events
+                    this._iconExplicitlyShown = true;
+                }
+            }
+            
+            // Set up periodic payment status refresh (every 5 minutes)
+            // This ensures widget knows immediately when payment status changes
+            this.setupPaymentStatusRefresh();
+            
+            // Refresh payment status when page becomes visible (user switches back to tab)
+            // This catches payment changes that happened while tab was inactive
+            // Only for custom domains (staging is always free)
+            // Only add listener once (check if already added)
+            if (!this._visibilityListenerAdded) {
+                document.addEventListener('visibilitychange', async () => {
+                    if (!document.hidden && !this.isStagingDomain()) {
+                        // Custom domains: Check fresh payment status when tab becomes visible
+                        // Staging domains: Skip (always free)
+                        const isValid = await this.checkPaymentStatusRealTime();
+                        if (!isValid) {
+                            this.disableWidget();
+                        }
+                    }
+                });
+                this._visibilityListenerAdded = true;
+            }
             
     
             // Delay binding events to ensure elements are created
@@ -1967,25 +1938,18 @@ class AccessibilityWidget {
                 this.bindEvents();
     
                 this.applySettings();
-    
                 
-    
-    
-                
-    
-                const customizationData = await this.fetchCustomizationData();
-    
-                if (customizationData && customizationData.customization) {
-    
-                    
-    
-                    this.applyCustomizations(customizationData.customization);
-    
-                } else {
-    
-                    
-    
+                // Set up ResizeObserver AFTER icon visibility is determined
+                // This prevents it from firing before _iconExplicitlyShown is set
+                if (this._iconExplicitlyShown !== undefined) {
+                    // Icon visibility has been determined, safe to set up ResizeObserver
+                    // (ResizeObserver setup is already in bindEvents via setupOptimizedResizeHandlers)
                 }
+    
+                
+    
+                // Customization data is already fetched non-blocking in init()
+                // No need to fetch again here
     
                 
     
@@ -2064,127 +2028,19 @@ class AccessibilityWidget {
                     }
     
                 });
-               
-    // Add window resize listener for mobile responsiveness and screen scaling
-    window.addEventListener('resize', () => {
-        const screenWidth = window.innerWidth;
-        const isMobile = screenWidth <= 768;
-        const icon = this.shadowRoot?.getElementById('accessibility-icon');
-        
-        // Update icon visibility based on device type and settings
-        this.handleWindowResize();
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        
-
-        if (icon && panel) {
-            // Add a small delay to ensure proper rendering after resize
-            setTimeout(() => {
-                // First, ensure base panel CSS is applied
-                this.ensureBasePanelCSS();
+                // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
+                this.setupOptimizedResizeHandlers();
                 
-                // Force re-render to ensure styles are applied
-                panel.style.display = 'none';
-                panel.offsetHeight; // Trigger reflow
-                panel.style.display = '';
+                // Apply mobile responsive styles on load if mobile
+                if (window.innerWidth <= 768) {
+                    this.applyMobileResponsiveStyles();
+                }
                 
-            if (isMobile) {
-                // Apply mobile settings - force small panel near icon
-                    
-                this.applyMobileResponsiveStyles();
+                // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
+                this.setupThrottledMutationObserver();
                 
-                // Reapply mobile positioning if it was set
-                if (this.customizationData) {
-                    if (this.customizationData.mobileTriggerHorizontalPosition && this.customizationData.mobileTriggerVerticalPosition) {
-                            
-                        this.updateMobileTriggerCombinedPosition(this.customizationData.mobileTriggerHorizontalPosition, this.customizationData.mobileTriggerVerticalPosition);
-                    }
-                }
-            } else {
-                // Apply desktop settings
-                   
-                this.removeMobileResponsiveStyles();
-            }
-            }, 100); // Small delay to ensure proper rendering
-        } else {
-
-        }
-    });
-    
-    // Apply mobile responsive styles on load if mobile
-    if (window.innerWidth <= 768) {
-        this.applyMobileResponsiveStyles();
-    }
-    
-    // Add listener for display scaling changes and device pixel ratio changes
-    window.addEventListener('resize', () => {
-        // Update icon visibility based on device type and settings
-        this.handleWindowResize();
-        
-        // Force re-application of base CSS after any resize to maintain styling
-        setTimeout(() => {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
-            if (panel) {
-
-                this.ensureBasePanelCSS();
-            }
-        }, 50);
-    });
-    
-    // Add listener for device pixel ratio changes (display scaling)
-    if (window.matchMedia) {
-        const mediaQuery = window.matchMedia('(min-resolution: 1.5dppx)');
-        const handlePixelRatioChange = () => {
-           
-            setTimeout(() => {
-                const panel = this.shadowRoot?.getElementById('accessibility-panel');
-                if (panel) {
-                    this.ensureBasePanelCSS();
-                }
-            }, 100);
-        };
-        
-        mediaQuery.addListener(handlePixelRatioChange);
-    }
-    
-    // Add MutationObserver to watch for style changes and reapply base CSS
-    if (this.shadowRoot) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    const panel = this.shadowRoot?.getElementById('accessibility-panel');
-                    if (panel && panel === mutation.target) {
-                        
-                        setTimeout(() => {
-                            this.ensureBasePanelCSS();
-                        }, 10);
-                    }
-                }
-            });
-        });
-        
-        // Start observing the panel for style changes
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        if (panel) {
-            observer.observe(panel, { attributes: true, attributeFilter: ['style'] });
-        }
-    }
-    
-    // Add periodic check to ensure panel maintains its CSS (every 2 seconds)
-    setInterval(() => {
-        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-        if (panel && panel.style.display !== 'none') {
-            // Check if essential CSS properties are missing
-            const computedStyle = window.getComputedStyle(panel);
-            const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && computedStyle.backgroundColor !== 'transparent';
-            const hasBoxShadow = computedStyle.boxShadow !== 'none';
-            const hasBorderRadius = computedStyle.borderRadius !== '0px';
-            
-            if (!hasBackground || !hasBoxShadow || !hasBorderRadius) {
-              
-                this.ensureBasePanelCSS();
-            }
-        }
-    }, 2000);
+                // PERFORMANCE OPTIMIZATION: Periodic check with throttling
+                this.setupPeriodicStyleCheck();
                 
     
                 // Keyboard event for icon
@@ -2526,6 +2382,13 @@ class AccessibilityWidget {
     
             }
     
+            
+    
+            // Language selector header event listener will be set up after panel creation
+    
+            
+    
+            
     
             // Content scaling control buttons - using Shadow DOM
             const decreaseContentScaleBtn = this.shadowRoot.getElementById('decrease-content-scale-btn');
@@ -2567,7 +2430,9 @@ class AccessibilityWidget {
                     }
                 });
             }
-     
+    
+    
+    
             // Font sizing control buttons - using Shadow DOM
     
             const decreaseFontSizeBtn = this.shadowRoot.getElementById('decrease-font-size-btn');
@@ -2593,7 +2458,8 @@ class AccessibilityWidget {
     
             }
     
- 
+    
+    
             const increaseFontSizeBtn = this.shadowRoot.getElementById('increase-font-size-btn');
     
             if (increaseFontSizeBtn) {
@@ -2616,6 +2482,11 @@ class AccessibilityWidget {
                 });
     
             }
+    
+    
+    
+    
+    
     
     
             // Letter spacing control buttons - using Shadow DOM
@@ -2668,7 +2539,9 @@ class AccessibilityWidget {
     
             }
     
-           
+    
+    
+            
     
         }
     
@@ -2676,7 +2549,9 @@ class AccessibilityWidget {
     
         initTextMagnifier() {
     
-            // Initialize text magnifier functionality          
+            // Initialize text magnifier functionality
+    
+            
     
         }
     
@@ -2684,7 +2559,10 @@ class AccessibilityWidget {
     
         initKeyboardShortcuts() {
     
-        
+            
+    
+            
+    
             // Remove existing shortcuts if any
     
             this.removeKeyboardShortcuts();
@@ -2734,8 +2612,12 @@ class AccessibilityWidget {
                 
     
                 // Global shortcuts (only work when keyboard navigation is enabled)
+                // Check both settings and body class to ensure keyboard-nav is active
+                const isKeyboardNavEnabled = this.settings['keyboard-nav'] || 
+                                            document.body.classList.contains('keyboard-nav') ||
+                                            this.isKeyboardNavigation;
     
-                if (e.altKey && this.settings['keyboard-nav']) {
+                if (e.altKey && isKeyboardNavEnabled) {
     
                     switch(e.key.toLowerCase()) {
     
@@ -2976,7 +2858,10 @@ class AccessibilityWidget {
                         break;
     
                     default:
-        
+    
+                        // For any other key, just log it to see if the event listener is working
+    
+                        
     
                         break;
     
@@ -2991,6 +2876,10 @@ class AccessibilityWidget {
             document.addEventListener('keydown', this.keyboardShortcutHandler);
             document.addEventListener('mousedown', this.mouseHandler);
             document.addEventListener('click', this.mouseHandler);
+    
+            
+    
+            
     
             // Test if event listener is working
     
@@ -3031,7 +2920,9 @@ class AccessibilityWidget {
     
                 
     
-            }   
+            }
+    
+            
     
             // Remove all highlighted elements
     
@@ -3049,17 +2940,23 @@ class AccessibilityWidget {
     
         cycleThroughElements(selector, type) {
     
-        
+            
+    
+            
+    
             // Remove previous highlights
     
             this.removeAllHighlights();
     
-        
+            
+    
             // Get all matching elements
     
             const elements = Array.from(document.querySelectorAll(selector));
     
-         
+            
+    
+            
     
             if (elements.length === 0) {
     
@@ -3077,7 +2974,11 @@ class AccessibilityWidget {
     
             const element = elements[currentIndex];
     
-        
+            
+    
+            
+    
+            
     
             // Create highlight
     
@@ -3089,7 +2990,10 @@ class AccessibilityWidget {
     
             this.currentElementIndex[type] = (currentIndex + 1) % elements.length;
     
-        
+            
+    
+            
+    
         }
     
     
@@ -3102,6 +3006,9 @@ class AccessibilityWidget {
     
             const rect = element.getBoundingClientRect();
     
+            
+    
+            
     
             // Create highlight box
     
@@ -3182,6 +3089,10 @@ class AccessibilityWidget {
             document.body.appendChild(highlight);
     
             document.body.appendChild(label);
+    
+            
+    
+            
     
             
     
@@ -3291,7 +3202,9 @@ class AccessibilityWidget {
     
                 document.head.appendChild(link);
     
-            
+                // Add this after your existing CSS
+    
+                // Define overrideCSS first
                 const overrideCSS = `
     .accessibility-panel {
       left: auto !important;
@@ -3406,7 +3319,9 @@ class AccessibilityWidget {
             max-width: 350px;
             padding: 12px;
             font-size: 14px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3482,7 +3397,9 @@ class AccessibilityWidget {
             width: 80vw;
             max-width: 380px;
             padding: 14px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3557,8 +3474,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 75vw;
             max-width: 520px;
-            min-height: 75vh;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             padding: 20px;
             overflow-y: auto;
             scroll-behavior: smooth;
@@ -3634,8 +3552,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 600px;
             max-width: 600px;
-            min-height: 80vh;
-            max-height: 90vh;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             padding: 24px;
             /* Font size controlled by JavaScript */
         }
@@ -3707,7 +3626,9 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 85vw;
             max-width: 400px;
-            max-height: 90vh !important;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3874,7 +3795,9 @@ class AccessibilityWidget {
             padding: 8px;
             width: 90vw;
             max-width: 300px;
-            max-height: 80vh;
+            height: 100vh;
+            top: 0;
+            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4093,7 +4016,9 @@ class AccessibilityWidget {
             max-width: 450px !important;
             /* Font size controlled by JavaScript */
             padding: 16px !important;
-            max-height: 80vh !important;
+            height: 100vh !important;
+            top: 0 !important;
+            bottom: 0 !important;
             overflow-y: auto !important;
             position: fixed !important;
             z-index: 100001 !important;
@@ -4229,7 +4154,9 @@ class AccessibilityWidget {
             max-width: 320px !important;
             /* Font size controlled by JavaScript */
             padding: 12px !important;
-            max-height: 90vh !important;
+            height: 100vh !important;
+            top: 0 !important;
+            bottom: 0 !important;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4582,11 +4509,14 @@ class AccessibilityWidget {
     }
     `;
     
-                if (!isDesignerContext() && document.head) {
-                    const style = document.createElement('style');
-                    style.textContent = overrideCSS;
-                    document.head.appendChild(style);
-                }
+                // Inject the override CSS
+                const style = document.createElement('style');
+                style.textContent = overrideCSS;
+                document.head.appendChild(style);
+                
+                const overrideStyle = document.createElement('style');
+                overrideStyle.textContent = overrideCSS;
+                document.head.appendChild(overrideStyle);
                 
     
             }
@@ -4596,11 +4526,32 @@ class AccessibilityWidget {
     
     
         createWidget() {
-            if (isDesignerContext()) return;
     
+            // Create widget container that will host the Shadow DOM
+            
             const widgetContainer = document.createElement('div');
+    
             widgetContainer.id = 'accessibility-widget-container';
-            widgetContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;';
+    
+            widgetContainer.style.cssText = `
+    
+                position: fixed;
+    
+                top: 0;
+    
+                left: 0;
+    
+                width: 100%;
+    
+                height: 100%;
+    
+                pointer-events: none;
+    
+                z-index: 99998;
+    
+            `;
+    
+            // Append to documentElement instead of body to avoid transform issues
     
             document.documentElement.appendChild(widgetContainer);
     
@@ -4614,13 +4565,22 @@ class AccessibilityWidget {
     
     
     
-            // Add CSS to Shadow DOM
-    
-            const style = document.createElement('style');
-    
-            style.textContent = this.getWidgetCSS();
-    
-            shadowRoot.appendChild(style);
+            // Add CSS to Shadow DOM - ALWAYS load CSS with widget HTML
+            // Use unique ID to prevent duplicate injection and ensure it's always present
+            let style = shadowRoot.querySelector('style[data-widget-css="true"]');
+            if (!style) {
+                style = document.createElement('style');
+                style.setAttribute('data-widget-css', 'true');
+                style.setAttribute('id', 'accessibility-widget-styles');
+                style.textContent = this.getWidgetCSS();
+                // Insert CSS FIRST before any HTML elements to ensure it's always loaded
+                shadowRoot.appendChild(style);
+            } else {
+                // If style exists but content might be missing, ensure it's populated
+                if (!style.textContent || style.textContent.trim().length === 0) {
+                    style.textContent = this.getWidgetCSS();
+                }
+            }
     
     
     
@@ -4656,7 +4616,8 @@ class AccessibilityWidget {
     
             icon.style.pointerEvents = 'auto';
             
-            // Initially hide the icon until customization data is loaded
+            // Initially hide the icon - will show after customization is loaded
+            console.log('[ICON HIDE] createWidget() - Initially hiding icon (will show after customization loads)');
             icon.style.display = 'none';
             icon.style.visibility = 'hidden';
             icon.style.opacity = '0';
@@ -4685,23 +4646,21 @@ class AccessibilityWidget {
     
             panel.setAttribute('aria-describedby', 'panel-description');
     
-            if (isDesignerContext()) {
-                return;
-            }
-            
-            const fragment = document.createDocumentFragment();
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = this.getPanelHTML();
-            while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-            }
-            panel.appendChild(fragment);
-            tempDiv.remove();
+            panel.innerHTML = this.getPanelHTML();
     
             panel.style.pointerEvents = 'auto';
-            panel.style.display = 'none';
-            panel.style.visibility = 'hidden';
+    
             shadowRoot.appendChild(panel);
+    
+            
+    
+            
+            // In your createWidget function, after creating the panel:
+            panel.style.pointerEvents = 'auto';
+            panel.style.display = 'none'; // Hide panel by default
+            panel.style.visibility = 'hidden'; // Also hide with visibility
+            shadowRoot.appendChild(panel);
+            // Initialize current language display
     
             this.initializeLanguageDisplay();
     
@@ -4755,26 +4714,30 @@ class AccessibilityWidget {
     
             languageDropdown.style.display = 'none';
     
-            if (!isDesignerContext()) {
-                const fragment = document.createDocumentFragment();
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = this.getLanguageDropdownContent();
-                while (tempDiv.firstChild) {
-                    fragment.appendChild(tempDiv.firstChild);
-                }
-                languageDropdown.appendChild(fragment);
-                tempDiv.remove();
-            }
+            languageDropdown.innerHTML = this.getLanguageDropdownContent();
     
             // Append dropdown INSIDE the panel, not to shadowRoot
             panel.appendChild(languageDropdown);
-   
+    
+            
+    
+            
+    
+            
+    
+            
+    
+            // Dropdown is ready for use
+    
             
     
             // Set up language dropdown event listeners after dropdown is created
     
             this.setupLanguageDropdownListeners();
-
+    
+            
+    
+    
     
             // Create screen reader announcements container
     
@@ -4800,14 +4763,29 @@ class AccessibilityWidget {
     
                 const panelCheck = shadowRoot.getElementById('accessibility-panel');
     
-
+                
+    
+                
+    
+                
+    
                 // Debug: Check panel visibility
     
                 if (panelCheck) {
     
                     const computedStyle = window.getComputedStyle(panelCheck);
     
-        
+                    
+    
+                    
+    
+                    
+    
+                    
+    
+                    
+    
+                    
     
                 }
     
@@ -6552,16 +6530,12 @@ class AccessibilityWidget {
     
                 /* Reduce high contrast intensity for Shadow DOM content */
     
+                /* High contrast should NOT affect widget - remove any filters */
                 :host(.high-contrast) .accessibility-icon,
-    
                 :host(.high-contrast) .accessibility-panel,
-    
                 :host(.high-contrast) .accessibility-panel * {
-    
-                    filter: contrast(0.8) !important;
-    
-                    -webkit-filter: contrast(0.8) !important;
-    
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
     
     
@@ -6618,10 +6592,6 @@ class AccessibilityWidget {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
     
-                    font-weight: 500 !important;
-    
-                    letter-spacing: 0.5px !important;
-    
                 }
     
     
@@ -6643,10 +6613,6 @@ class AccessibilityWidget {
                 :host(.readable-font) .accessibility-panel label {
     
                     font-family: 'Arial', 'Open Sans', sans-serif !important;
-    
-                    font-weight: 500 !important;
-    
-                    letter-spacing: 0.5px !important;
     
                 }
     
@@ -12164,11 +12130,9 @@ class AccessibilityWidget {
                 switch(feature) {
     
                     case 'keyboard-nav':
-    
+                        // Ensure setting is stored so keyboard shortcuts work
+                        this.settings['keyboard-nav'] = true;
                         this.initKeyboardShortcuts();
-    
-                       
-    
                         break;
     
                     case 'text-magnifier':
@@ -12432,10 +12396,9 @@ class AccessibilityWidget {
                 switch(feature) {
     
                     case 'keyboard-nav':
-    
+                        // Remove setting when disabled
+                        this.settings['keyboard-nav'] = false;
                         this.removeKeyboardShortcuts();
-    
-                      
                         break;
     
                     case 'text-magnifier':
@@ -13713,6 +13676,9 @@ class AccessibilityWidget {
             this.saveSettings(); // Persist the reset
     
     
+            
+    
+            // Additional safety: ensure no font-size styles remain
     
             setTimeout(() => {
     
@@ -13770,17 +13736,16 @@ class AccessibilityWidget {
         updateContentScale() {
             const body = document.body;
             
-           
-            
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
-               
-                
                 // Remove any existing content scaling CSS
                 const existingStyle = document.getElementById('content-scaling-styles');
                 if (existingStyle) {
                     existingStyle.remove();
                 }
+                
+                // Reset widget elements to normal size
+                this.resetWidgetScale();
                 
                 return;
             }
@@ -13794,6 +13759,7 @@ class AccessibilityWidget {
             }
             
             const scale = this.contentScale / 100;
+            const inverseScale = 1 / scale;
             
             style.textContent = `
                 /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
@@ -13806,14 +13772,49 @@ class AccessibilityWidget {
                     overflow-x: hidden !important;
                     overflow-y: auto !important;
                 }
-                
-                /* Keep the accessibility UI unscaled - counter the zoom */
-                .accessibility-panel, #accessibility-icon, .accessibility-icon, accessibility-widget, ACCESSIBILITY-WIDGET {
-                    zoom: ${1 / scale} !important;
-                }
             `;
             
-      
+            // Counter-scale widget elements directly via JavaScript (Shadow DOM can't be targeted by CSS)
+            this.applyWidgetCounterScale(inverseScale);
+        }
+        
+        // Apply counter-scaling to widget elements to maintain fixed size
+        applyWidgetCounterScale(inverseScale) {
+            if (!this.shadowRoot) return;
+            
+            // Inject counter-scaling styles into Shadow DOM
+            let counterStyle = this.shadowRoot.getElementById('content-scaling-counter');
+            if (!counterStyle) {
+                counterStyle = document.createElement('style');
+                counterStyle.id = 'content-scaling-counter';
+                this.shadowRoot.appendChild(counterStyle);
+            }
+            
+            // Use zoom to counter the html zoom - maintains original visual size
+            counterStyle.textContent = `
+                /* Counter-scale widget elements to maintain fixed size */
+                #accessibility-panel,
+                #accessibility-icon {
+                    zoom: ${inverseScale} !important;
+                }
+                
+                /* Ensure panel maintains its height regardless of zoom */
+                #accessibility-panel {
+                    min-height: auto !important;
+                    height: auto !important;
+                }
+            `;
+        }
+        
+        // Reset widget scale when content scaling is disabled
+        resetWidgetScale() {
+            if (!this.shadowRoot) return;
+            
+            // Remove counter-scaling styles
+            const counterStyle = this.shadowRoot.getElementById('content-scaling-counter');
+            if (counterStyle) {
+                counterStyle.remove();
+            }
         }
         
         updateContentScaleDisplay() {
@@ -15329,6 +15330,8 @@ class AccessibilityWidget {
     
             this.removeUsefulLinksDropdown();
     
+
+    
         }
     
     
@@ -15377,35 +15380,55 @@ class AccessibilityWidget {
     
                 
     
-                // SECURITY: Create dropdown content using safe DOM methods instead of innerHTML
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'useful-links-content';
+                // Create dropdown content
+    
+                dropdownContainer.innerHTML = `
+    
+                    <div class="useful-links-content">
+    
+                        <select id="useful-links-select">
+    
+                            <option value="">Select an option</option>
+    
+                            <option value="home">Home</option>
+    
+                            <option value="header">Header</option>
+    
+                            <option value="footer">Footer</option>
+    
+                            <option value="main-content">Main content</option>
+    
+                            <option value="about-us">About us</option>
+    
+                            <option value="portfolio">Portfolio</option>
+    
+                        </select>
+    
+                    </div>
+    
+                `;
+    
                 
-                const selectElement = document.createElement('select');
-                selectElement.id = 'useful-links-select';
+    
+                // Insert the dropdown INSIDE the profile-item, after the profile-info
+    
+                const profileInfo = usefulLinksModule.querySelector('.profile-info');
+    
+                const toggleSwitch = usefulLinksModule.querySelector('.toggle-switch');
+    
                 
-                const options = [
-                    { value: '', text: 'Select an option' },
-                    { value: 'home', text: 'Home' },
-                    { value: 'header', text: 'Header' },
-                    { value: 'footer', text: 'Footer' },
-                    { value: 'main-content', text: 'Main content' },
-                    { value: 'about-us', text: 'About us' },
-                    { value: 'portfolio', text: 'Portfolio' }
-                ];
-                
-                options.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt.value;
-                    option.textContent = opt.text;
-                    selectElement.appendChild(option);
-                });
-                
-                contentDiv.appendChild(selectElement);
-                dropdownContainer.appendChild(contentDiv);
+    
+                // Add class to profile-item to indicate dropdown is present
     
                 usefulLinksModule.classList.add('has-dropdown');
+                
+    
+                // Insert dropdown after the entire profile-item to avoid flex layout issues
                 usefulLinksModule.parentNode.insertBefore(dropdownContainer, usefulLinksModule.nextSibling);
+    
+                
+    
+                // Add event listener to select
     
                 const select = dropdownContainer.querySelector('#useful-links-select');
     
@@ -15508,6 +15531,9 @@ class AccessibilityWidget {
         navigateToSection(section) {
     
       
+    
+            
+    
             switch(section) {
     
                 case 'home':
@@ -15794,6 +15820,8 @@ class AccessibilityWidget {
     
     
     
+        // Additional method to force remove reading mask overlay (can be called externally if needed)
+    
         forceRemoveReadingMaskOverlay() {
     
          
@@ -15848,7 +15876,10 @@ class AccessibilityWidget {
     
             this.removeReadingMaskSpotlight();
     
-        
+            
+    
+            // Create full-screen dark overlay with rectangular spotlight cutout
+            // Using two overlay elements: top and bottom
     
             const spotlight = document.createElement('div');
             spotlight.id = 'reading-mask-spotlight';
@@ -15894,6 +15925,8 @@ class AccessibilityWidget {
             document.body.appendChild(spotlight);
     
     
+    
+            // Ensure accessibility widget stays above spotlight
     
             const widget = document.querySelector('.accessibility-widget');
     
@@ -16457,7 +16490,13 @@ class AccessibilityWidget {
             // Reset line height
     
             this.resetLineHeight();
-  
+    
+            
+    
+    
+    
+            
+    
             // Reset letter spacing
     
             this.resetLetterSpacing();
@@ -16953,49 +16992,40 @@ class AccessibilityWidget {
                 };
        
                 
-                // SECURITY: Isolated API call with timeout and error handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/save-settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settingsData)
+                });
                 
-                try {
-                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/save-settings`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(settingsData),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        return;
-                    }
+            
                 
-                    // Attempt JSON parse only if response is JSON
-                    const ctSave = response.headers.get('content-type') || '';
-                    if (ctSave.includes('application/json')) {
-                        const result = await response.json();
-                    } else {
-                        const text = await response.text();
-                    }
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.name === 'AbortError') {
-                        // Timeout - fail silently
-                        return;
-                    }
-                    // Other errors - fail silently
+                if (!response.ok) {
+                    const errorText = await response.text();
+                 
                     return;
                 }
+                
+                // Attempt JSON parse only if response is JSON
+                const ctSave = response.headers.get('content-type') || '';
+                if (ctSave.includes('application/json')) {
+                    const result = await response.json();
+                 
+                } else {
+                    const text = await response.text();
+                
+                }
+                
             } catch (error) {
-                // Outer try-catch error handling
-                return;
-            }
+                         }
         }
         
+        // Load user settings from KV storage
         async loadSettingsFromKV() {
+       
+            
             try {
                 // First check payment status before loading settings
                 const paymentValid = await this.checkPaymentStatus();
@@ -17017,41 +17047,39 @@ class AccessibilityWidget {
                     return;
                 }
 
-                // SECURITY: Isolated API call with timeout and error handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
                 
-                try {
-                    const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-settings?siteId=${siteId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    
-                    if (!response.ok) {
-                        return;
+                const response = await fetch(`${this.kvApiUrl}/api/accessibility/user-settings?siteId=${siteId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
+                });
+              
                 
-                    // Safely parse JSON only when Content-Type is JSON
-                    const ct = response.headers.get('content-type') || '';
-                    let data = null;
-                    if (ct.includes('application/json')) {
-                        try {
-                            data = await response.json();
-                        } catch (parseErr) {
-                            const raw = await response.text();
-                            return;
-                        }
-                    } else {
+                if (!response.ok) {
+                    
+                    return;
+                }
+                
+                // Safely parse JSON only when Content-Type is JSON
+                const ct = response.headers.get('content-type') || '';
+                let data = null;
+                if (ct.includes('application/json')) {
+                    try {
+                        data = await response.json();
+                    } catch (parseErr) {
                         const raw = await response.text();
+                  
                         return;
                     }
-         
-                    
-                    if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
+                } else {
+                    const raw = await response.text();
+                 
+                    return;
+                }
+     
+                
+                if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
                     // Merge KV settings with existing settings (KV takes precedence)
                     const kvSettings = data.settings;
                     
@@ -17061,23 +17089,15 @@ class AccessibilityWidget {
                         this.settings[key] = kvSettings[key];
                     });
                     
-                        // Save merged settings back to localStorage
-                        localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
-                    } else {
-                        // No settings found
-                    }
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.name === 'AbortError') {
-                        // Timeout - fail silently
-                        return;
-                    }
-                    // Other errors - fail silently
-                    return;
+                    // Save merged settings back to localStorage
+            localStorage.setItem('accessibility-settings', JSON.stringify(this.settings));
+    
+                } else {
+                 
                 }
+                
             } catch (error) {
-                // Outer try-catch error handling
-                return;
+             
             }
         }
     
@@ -17589,8 +17609,6 @@ class AccessibilityWidget {
                 }
             `;
     
-            `;
-    
             document.head.appendChild(style);
           
         }
@@ -17709,365 +17727,13 @@ class AccessibilityWidget {
         // Low Saturation Methods
 
         enableLowSaturation() {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
-    
-                /* Specific fixes for common navbar classes and frameworks */
-                body.high-contrast .navbar-fixed-top,
-                body.high-contrast .navbar-fixed,
-                body.high-contrast .fixed-top,
-                body.high-contrast .is-fixed,
-                body.high-contrast [data-fixed] {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-
-                /* Preserve sticky classes - don't force to fixed */
-                body.high-contrast .sticky-top,
-                body.high-contrast .is-sticky,
-                body.high-contrast [data-sticky] {
-                    position: sticky !important;
-                    z-index: 9999 !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-    
-                /* Preserve sticky positioning for elements that should stick */
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"] {
-                    position: sticky !important;
-                    /* Ensure sticky elements maintain their behavior */
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-    
-                /* High contrast visual enhancements without breaking positioning */
-                body.high-contrast {
-                    /* Apply high contrast to the page content, not positioned elements */
-                    /* Removed global filter that breaks sticky positioning */
-                }
-
-                /* Apply high contrast to content elements only, preserving sticky positioning */
-                body.high-contrast main,
-                body.high-contrast section,
-                body.high-contrast article,
-                body.high-contrast .content,
-                body.high-contrast .container,
-                body.high-contrast .wrapper,
-                body.high-contrast p,
-                body.high-contrast h1,
-                body.high-contrast h2,
-                body.high-contrast h3,
-                body.high-contrast h4,
-                body.high-contrast h5,
-                body.high-contrast h6,
-                body.high-contrast span,
-                body.high-contrast div:not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="position: sticky"]):not([style*="position:sticky"]):not(.fixed):not(.sticky):not([class*="fixed"]):not([class*="sticky"]):not(nav):not(header):not(.navbar):not(.nav-bar):not(.navigation):not(.header):not(.top-bar):not(.menu-bar):not(img):not(video):not(canvas):not(iframe):not(svg) {
-                    filter: contrast(1.1) brightness(1.05) !important;
-                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
-                }
-    
-                /* But exclude fixed/sticky elements from the filter to preserve positioning */
-                body.high-contrast [style*="position: fixed"],
-                body.high-contrast [style*="position:fixed"],
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"],
-                body.high-contrast .fixed,
-                body.high-contrast .sticky,
-                body.high-contrast [class*="fixed"],
-                body.high-contrast [class*="sticky"],
-                body.high-contrast nav,
-                body.high-contrast header,
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* Apply high contrast colors directly instead of filters */
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    border-color: #ffffff !important;
-                }
-    
-                /* Ensure links in fixed elements are visible */
-                body.high-contrast nav a,
-                body.high-contrast header a,
-                body.high-contrast .navbar a,
-                body.high-contrast .nav-bar a,
-                body.high-contrast .navigation a,
-                body.high-contrast .header a,
-                body.high-contrast .top-bar a,
-                body.high-contrast .menu-bar a {
-                    color: #ffffff !important;
-                    text-decoration: underline !important;
-                }
-                
-                /* Preserve images and media elements from high contrast filters */
-                body.high-contrast img,
-                body.high-contrast video,
-                body.high-contrast canvas,
-                body.high-contrast iframe,
-                body.high-contrast svg,
-                body.high-contrast [class*="animated"],
-                body.high-contrast [class*="animation"],
-                body.high-contrast [class*="motion"] {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                }
-    
-                body.high-contrast nav a:hover,
-                body.high-contrast header a:hover,
-                body.high-contrast .navbar a:hover,
-                body.high-contrast .nav-bar a:hover,
-                body.high-contrast .navigation a:hover,
-                body.high-contrast .header a:hover,
-                body.high-contrast .top-bar a:hover,
-                body.high-contrast .menu-bar a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Preserve button styles in fixed elements */
-                body.high-contrast nav button,
-                body.high-contrast header button,
-                body.high-contrast .navbar button,
-                body.high-contrast .nav-bar button,
-                body.high-contrast .navigation button,
-                body.high-contrast .header button,
-                body.high-contrast .top-bar button,
-                body.high-contrast .menu-bar button {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                }
-    
-                body.high-contrast nav button:hover,
-                body.high-contrast header button:hover,
-                body.high-contrast .navbar button:hover,
-                body.high-contrast .nav-bar button:hover,
-                body.high-contrast .navigation button:hover,
-                body.high-contrast .header button:hover,
-                body.high-contrast .top-bar button:hover,
-                body.high-contrast .menu-bar button:hover {
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                }
-    
-                /* Ensure dropdowns and menus in fixed elements work properly */
-                body.high-contrast nav .dropdown-menu,
-                body.high-contrast header .dropdown-menu,
-                body.high-contrast .navbar .dropdown-menu,
-                body.high-contrast .nav-bar .dropdown-menu,
-                body.high-contrast .navigation .dropdown-menu,
-                body.high-contrast .header .dropdown-menu,
-                body.high-contrast .top-bar .dropdown-menu,
-                body.high-contrast .menu-bar .dropdown-menu {
-                    background-color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
-                }
-    
-                body.high-contrast nav .dropdown-menu a,
-                body.high-contrast header .dropdown-menu a,
-                body.high-contrast .navbar .dropdown-menu a,
-                body.high-contrast .nav-bar .dropdown-menu a,
-                body.high-contrast .navigation .dropdown-menu a,
-                body.high-contrast .header .dropdown-menu a,
-                body.high-contrast .top-bar .dropdown-menu a,
-                body.high-contrast .menu-bar .dropdown-menu a {
-                    color: #ffffff !important;
-                }
-    
-                body.high-contrast nav .dropdown-menu a:hover,
-                body.high-contrast header .dropdown-menu a:hover,
-                body.high-contrast .navbar .dropdown-menu a:hover,
-                body.high-contrast .nav-bar .dropdown-menu a:hover,
-                body.high-contrast .navigation .dropdown-menu a:hover,
-                body.high-contrast .header .dropdown-menu a:hover,
-                body.high-contrast .top-bar .dropdown-menu a:hover,
-                body.high-contrast .menu-bar .dropdown-menu a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Ensure mobile menu toggles work */
-                body.high-contrast .navbar-toggler,
-                body.high-contrast .menu-toggle,
-                body.high-contrast .hamburger {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                }
-    
-                /* Fix for Bootstrap and other framework navbars */
-                body.high-contrast .navbar-default,
-                body.high-contrast .navbar-inverse,
-                body.high-contrast .navbar-light,
-                body.high-contrast .navbar-dark {
-                    background-color: #000000 !important;
-                    border-color: #ffffff !important;
-                }
-    
-                /* Ensure proper z-index stacking */
-                body.high-contrast .navbar,
-                body.high-contrast .nav-bar,
-                body.high-contrast .navigation,
-                body.high-contrast .header,
-                body.high-contrast .top-bar,
-                body.high-contrast .menu-bar {
-                    z-index: 9999 !important;
-                }
-    
-                /* Prevent any transform or filter effects that might break positioning */
-                body.high-contrast [style*="position: fixed"],
-                body.high-contrast [style*="position:fixed"],
-                body.high-contrast [style*="position: sticky"],
-                body.high-contrast [style*="position:sticky"] {
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                    will-change: auto !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
-    
-                /* Additional fixes for common frameworks and libraries */
-                body.high-contrast .navbar-expand-lg,
-                body.high-contrast .navbar-expand-md,
-                body.high-contrast .navbar-expand-sm,
-                body.high-contrast .navbar-expand,
-                body.high-contrast .navbar-brand,
-                body.high-contrast .navbar-nav,
-                body.high-contrast .navbar-toggler,
-                body.high-contrast .navbar-collapse {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Fix for WordPress themes and common CMS navbars */
-                body.high-contrast .main-navigation,
-                body.high-contrast .site-header,
-                body.high-contrast .site-navigation,
-                body.high-contrast .primary-menu,
-                body.high-contrast .menu-primary,
-                body.high-contrast .main-menu {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Ensure submenus and dropdowns work in fixed navbars */
-                body.high-contrast .main-navigation ul,
-                body.high-contrast .site-navigation ul,
-                body.high-contrast .primary-menu ul,
-                body.high-contrast .menu-primary ul,
-                body.high-contrast .main-menu ul {
-                    background-color: #000000 !important;
-                    border: 2px solid #ffffff !important;
-                    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3) !important;
-                }
-    
-                body.high-contrast .main-navigation a,
-                body.high-contrast .site-navigation a,
-                body.high-contrast .primary-menu a,
-                body.high-contrast .menu-primary a,
-                body.high-contrast .main-menu a {
-                    color: #ffffff !important;
-                    text-decoration: underline !important;
-                }
-    
-                body.high-contrast .main-navigation a:hover,
-                body.high-contrast .site-navigation a:hover,
-                body.high-contrast .primary-menu a:hover,
-                body.high-contrast .menu-primary a:hover,
-                body.high-contrast .main-menu a:hover {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                }
-    
-                /* Fix for React/Vue/Angular component navbars */
-                body.high-contrast [data-component="navbar"],
-                body.high-contrast [data-component="navigation"],
-                body.high-contrast [data-component="header"],
-                body.high-contrast .react-navbar,
-                body.high-contrast .vue-navbar,
-                body.high-contrast .angular-navbar {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Ensure mobile responsive navbars work */
-                body.high-contrast .mobile-nav,
-                body.high-contrast .mobile-menu,
-                body.high-contrast .mobile-header,
-                body.high-contrast .responsive-nav {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-    
-                /* Fix for sticky headers that might be affected */
-                body.high-contrast .sticky-header,
-                body.high-contrast .sticky-nav,
-                body.high-contrast .sticky-top-bar {
-                    position: sticky !important;
-                    top: 0 !important;
-                    z-index: 9999 !important;
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
-                }
-            `;
-    
-            document.head.appendChild(style);
+            this.settings['low-saturation'] = true;
+            document.body.classList.add('low-saturation');
             
-            // Apply fixes to existing navbar elements
-            this.fixExistingNavbars();
+            // Apply low saturation styles that preserve positioning
+            this.applyLowSaturationStyles();
             
-       
+            this.saveSettings();
         }
     
         // Fix existing navbar elements that might have lost their positioning
@@ -18170,11 +17836,51 @@ class AccessibilityWidget {
     
         // Stop monitoring navbar changes
         stopObservingNavbarChanges() {
-            if (this.navbarObserver) {
-                this.navbarObserver.disconnect();
-                this.navbarObserver = null;
-                
-            }
+            // Find all potential navbar elements
+            const navbarSelectors = [
+                'nav', 'header', '.navbar', '.nav-bar', '.navigation', 
+                '.header', '.top-bar', '.menu-bar', '.main-navigation',
+                '.site-header', '.site-navigation', '.primary-menu',
+                '.menu-primary', '.main-menu', '.mobile-nav', '.mobile-menu',
+                '.mobile-header', '.responsive-nav', '.sticky-header',
+                '.sticky-nav', '.sticky-top-bar'
+            ];
+    
+            navbarSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    // Check if element has fixed or sticky positioning
+                    const computedStyle = window.getComputedStyle(element);
+                    const position = computedStyle.position;
+                    
+                    if (position === 'fixed' || position === 'sticky') {
+                        // Ensure the element maintains its positioning
+                        element.style.setProperty('position', position, 'important');
+                        element.style.setProperty('z-index', '9999', 'important');
+                        element.style.setProperty('filter', 'none', 'important');
+                        element.style.setProperty('-webkit-filter', 'none', 'important');
+                        element.style.setProperty('transform', 'none', 'important');
+                        element.style.setProperty('will-change', 'auto', 'important');
+                        
+                        // Apply high contrast colors
+                        element.style.setProperty('background-color', '#000000', 'important');
+                        element.style.setProperty('color', '#ffffff', 'important');
+                        element.style.setProperty('border-color', '#ffffff', 'important');
+                        
+                     
+                    }
+                });
+            });
+    
+            // Also check for elements with inline styles that might be affected
+            const elementsWithInlinePosition = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"], [style*="position: sticky"], [style*="position:sticky"]');
+            elementsWithInlinePosition.forEach(element => {
+                element.style.setProperty('filter', 'none', 'important');
+                element.style.setProperty('-webkit-filter', 'none', 'important');
+                element.style.setProperty('transform', 'none', 'important');
+                element.style.setProperty('will-change', 'auto', 'important');
+
+            });
         }
     
     
@@ -19267,47 +18973,37 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'color-picker-content';
-                
-                const h4 = document.createElement('h4');
-                h4.textContent = 'Adjust Text Colors';
-                contentDiv.appendChild(h4);
-                
-                const colorOptionsDiv = document.createElement('div');
-                colorOptionsDiv.className = 'color-options';
-                
-                const colors = [
-                    { color: '#3b82f6', selected: false },
-                    { color: '#8b5cf6', selected: true },
-                    { color: '#ef4444', selected: false },
-                    { color: '#f97316', selected: false },
-                    { color: '#14b8a6', selected: false },
-                    { color: '#84cc16', selected: false },
-                    { color: '#ffffff', selected: false, border: true },
-                    { color: '#000000', selected: false }
-                ];
-                
-                colors.forEach(colorData => {
-                    const colorOption = document.createElement('div');
-                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
-                    colorOption.setAttribute('data-color', colorData.color);
-                    colorOption.style.backgroundColor = colorData.color;
-                    if (colorData.border) {
-                        colorOption.style.border = '1px solid #ccc';
-                    }
-                    colorOptionsDiv.appendChild(colorOption);
-                });
-                
-                contentDiv.appendChild(colorOptionsDiv);
-                
-                const cancelBtn = document.createElement('button');
-                cancelBtn.className = 'cancel-btn';
-                cancelBtn.textContent = 'Cancel';
-                contentDiv.appendChild(cancelBtn);
-                
-                colorPicker.appendChild(contentDiv);
+                colorPicker.innerHTML = `
+    
+                    <div class="color-picker-content">
+    
+                        <h4>Adjust Text Colors</h4>
+    
+                        <div class="color-options">
+    
+                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
+    
+                            <div class="color-option selected" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
+    
+                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
+    
+                            <div class="color-option" data-color="#f97316" style="background-color: #f97316;"></div>
+    
+                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
+    
+                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
+    
+                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
+    
+                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
+    
+                        </div>
+    
+                        <button class="cancel-btn">Cancel</button>
+    
+                    </div>
+    
+                `;
     
                 
     
@@ -19347,9 +19043,14 @@ class AccessibilityWidget {
     
                 
     
-                const cancelBtnElement = colorPicker.querySelector('.cancel-btn');
-                if (cancelBtnElement) {
-                    cancelBtnElement.addEventListener('click', () => {
+                // Add event listener to cancel button
+    
+                const cancelBtn = colorPicker.querySelector('.cancel-btn');
+    
+                if (cancelBtn) {
+    
+                    cancelBtn.addEventListener('click', () => {
+    
                         this.resetTextColors();
     
                         this.hideTextColorPicker();
@@ -19523,47 +19224,37 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'color-picker-content';
-                
-                const h4 = document.createElement('h4');
-                h4.textContent = 'Adjust Title Colors';
-                contentDiv.appendChild(h4);
-                
-                const colorOptionsDiv = document.createElement('div');
-                colorOptionsDiv.className = 'color-options';
-                
-                const colors = [
-                    { color: '#3b82f6', selected: false },
-                    { color: '#8b5cf6', selected: false },
-                    { color: '#ef4444', selected: false },
-                    { color: '#f97316', selected: true },
-                    { color: '#14b8a6', selected: false },
-                    { color: '#84cc16', selected: false },
-                    { color: '#ffffff', selected: false, border: true },
-                    { color: '#000000', selected: false }
-                ];
-                
-                colors.forEach(colorData => {
-                    const colorOption = document.createElement('div');
-                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
-                    colorOption.setAttribute('data-color', colorData.color);
-                    colorOption.style.backgroundColor = colorData.color;
-                    if (colorData.border) {
-                        colorOption.style.border = '1px solid #ccc';
-                    }
-                    colorOptionsDiv.appendChild(colorOption);
-                });
-                
-                contentDiv.appendChild(colorOptionsDiv);
-                
-                const cancelBtn = document.createElement('button');
-                cancelBtn.className = 'cancel-btn';
-                cancelBtn.textContent = 'Cancel';
-                contentDiv.appendChild(cancelBtn);
-                
-                colorPicker.appendChild(contentDiv);
+                colorPicker.innerHTML = `
+    
+                    <div class="color-picker-content">
+    
+                        <h4>Adjust Title Colors</h4>
+    
+                        <div class="color-options">
+    
+                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
+    
+                            <div class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
+    
+                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
+    
+                            <div class="color-option selected" data-color="#f97316" style="background-color: #f97316;"></div>
+    
+                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
+    
+                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
+    
+                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
+    
+                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
+    
+                        </div>
+    
+                        <button class="cancel-btn">Cancel</button>
+    
+                    </div>
+    
+                `;
     
                 
     
@@ -19603,9 +19294,14 @@ class AccessibilityWidget {
     
                 
     
-                const cancelBtnElement2 = colorPicker.querySelector('.cancel-btn');
-                if (cancelBtnElement2) {
-                    cancelBtnElement2.addEventListener('click', () => {
+                // Add event listener to cancel button
+    
+                const cancelBtn = colorPicker.querySelector('.cancel-btn');
+    
+                if (cancelBtn) {
+    
+                    cancelBtn.addEventListener('click', () => {
+    
                         this.resetTitleColors();
     
                         this.hideTitleColorPicker();
@@ -19746,53 +19442,37 @@ class AccessibilityWidget {
     
                 colorPicker.className = 'color-picker-inline';
     
-                // SECURITY: Create color picker using safe DOM methods instead of innerHTML
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'color-picker-content';
-                
-                const h4 = document.createElement('h4');
-                h4.textContent = 'Adjust Background Colors';
-                contentDiv.appendChild(h4);
-                
-                const colorOptionsDiv = document.createElement('div');
-                colorOptionsDiv.className = 'color-options';
-                
-                const colors = [
-                    { color: '#3b82f6', selected: false },
-                    { color: '#8b5cf6', selected: false },
-                    { color: '#ef4444', selected: false },
-                    { color: '#f97316', selected: true },
-                    { color: '#14b8a6', selected: false },
-                    { color: '#84cc16', selected: false },
-                    { color: '#ffffff', selected: false, border: true },
-                    { color: '#000000', selected: false }
-                ];
-                
-                colors.forEach(colorData => {
-                    const colorOption = document.createElement('div');
-                    colorOption.className = 'color-option' + (colorData.selected ? ' selected' : '');
-                    colorOption.setAttribute('data-color', colorData.color);
-                    colorOption.style.backgroundColor = colorData.color;
-                    if (colorData.border) {
-                        colorOption.style.border = '1px solid #ccc';
-                    }
-                    colorOptionsDiv.appendChild(colorOption);
-                });
-                
-                contentDiv.appendChild(colorOptionsDiv);
-                
-                const cancelBtn = document.createElement('button');
-                cancelBtn.className = 'cancel-btn';
-                cancelBtn.textContent = 'Cancel';
-                // SECURITY: Use addEventListener instead of onclick attribute
-                cancelBtn.addEventListener('click', () => {
-                    if (this.hideBackgroundColorPicker) {
-                        this.hideBackgroundColorPicker();
-                    }
-                });
-                contentDiv.appendChild(cancelBtn);
-                
-                colorPicker.appendChild(contentDiv);
+                colorPicker.innerHTML = `
+    
+                    <div class="color-picker-content">
+    
+                        <h4>Adjust Background Colors</h4>
+    
+                        <div class="color-options">
+    
+                            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
+    
+                            <div class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
+    
+                            <div class="color-option" data-color="#ef4444" style="background-color: #ef4444;"></div>
+    
+                            <div class="color-option selected" data-color="#f97316" style="background-color: #f97316;"></div>
+    
+                            <div class="color-option" data-color="#14b8a6" style="background-color: #14b8a6;"></div>
+    
+                            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
+    
+                            <div class="color-option" data-color="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></div>
+    
+                            <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
+    
+                        </div>
+    
+                        <button class="cancel-btn" onclick="accessibilityWidget.hideBackgroundColorPicker()">Cancel</button>
+    
+                    </div>
+    
+                `;
     
                 
     
@@ -19832,9 +19512,14 @@ class AccessibilityWidget {
     
                 
     
-                const cancelBtnElement3 = colorPicker.querySelector('.cancel-btn');
-                if (cancelBtnElement3) {
-                    cancelBtnElement3.addEventListener('click', () => {
+                // Add event listener to cancel button
+    
+                const cancelBtn = colorPicker.querySelector('.cancel-btn');
+    
+                if (cancelBtn) {
+    
+                    cancelBtn.addEventListener('click', () => {
+    
                         this.resetBackgroundColors();
     
                         this.hideBackgroundColorPicker();
@@ -20110,38 +19795,143 @@ class AccessibilityWidget {
             });
         }
         
-        
+        // Override global audio/video methods to prevent any new audio from playing
         overrideGlobalAudioMethods() {
-            // Initialize originalMethods if not already initialized (for restoration)
+            // Initialize originalMethods if not already initialized
             if (!this.originalMethods) {
                 this.originalMethods = {};
             }
             
-
-            if (typeof AudioContext !== 'undefined' && !this.originalMethods.AudioContext) {
-                try {
+            // Override HTMLAudioElement methods - Only when mute-sound is active
+            if (typeof HTMLAudioElement !== 'undefined' && !this.originalMethods.audioPlay) {
+                this.originalMethods.audioPlay = HTMLAudioElement.prototype.play;
+                const originalAudioPlay = this.originalMethods.audioPlay; // Capture original method
+                HTMLAudioElement.prototype.play = function() {
+                    // Only mute if mute-sound mode is active
+                    let isMuteSoundActive = false;
+                    try {
+                        const settingsStr = localStorage.getItem('accessibility-settings');
+                        if (settingsStr) {
+                            const settings = JSON.parse(settingsStr);
+                            isMuteSoundActive = settings['mute-sound'] === true;
+                        }
+                    } catch (e) {
+                        // If parsing fails, continue with normal behavior
+                    }
+                    
+                    if (isMuteSoundActive) {
+                        // Immediately mute and pause to prevent any sound
+                        this.muted = true;
+                        this.volume = 0;
+                        if (!this.paused) {
+                            this.pause();
+                        }
+                        // Return a resolved promise that doesn't actually play
+                        return Promise.resolve();
+                    }
+                    // Otherwise, use original (normal behavior)
+                    return originalAudioPlay.apply(this, arguments);
+                };
+            }
+            
+            // Override HTMLVideoElement methods - Only when mute-sound is active
+            if (typeof HTMLVideoElement !== 'undefined' && !this.originalMethods.videoPlay) {
+                this.originalMethods.videoPlay = HTMLVideoElement.prototype.play;
+                const originalVideoPlay = this.originalMethods.videoPlay; // Capture original method
+                HTMLVideoElement.prototype.play = function() {
+                    // Only mute if mute-sound mode is active
+                    let isMuteSoundActive = false;
+                    try {
+                        const settingsStr = localStorage.getItem('accessibility-settings');
+                        if (settingsStr) {
+                            const settings = JSON.parse(settingsStr);
+                            isMuteSoundActive = settings['mute-sound'] === true;
+                        }
+                    } catch (e) {
+                        // If parsing fails, continue with normal behavior
+                    }
+                    
+                    if (isMuteSoundActive) {
+                        // Immediately mute and pause to prevent any sound
+                        this.muted = true;
+                        this.volume = 0;
+                        if (!this.paused) {
+                            this.pause();
+                        }
+                        // Return a resolved promise that doesn't actually play
+                        return Promise.resolve();
+                    }
+                    // Otherwise, use original (normal behavior)
+                    return originalVideoPlay.apply(this, arguments);
+                };
+            }
+            
+            // Override Web Audio API methods
+            if (typeof AudioContext !== 'undefined') {
+                // Override createBufferSource
+                if (!this.originalMethods.createBufferSource) {
+                    this.originalMethods.createBufferSource = AudioContext.prototype.createBufferSource;
+                    AudioContext.prototype.createBufferSource = function() {
+                        // Return a dummy object that doesn't produce sound
+                        return {
+                            connect: () => {},
+                            start: () => {},
+                            stop: () => {},
+                            disconnect: () => {},
+                            pause: () => {}
+                        };
+                    };
+                }
+                
+                // Override AudioContext constructor to track all instances
+                if (!this.originalMethods.AudioContext) {
                     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
                     if (OriginalAudioContext) {
                         this.originalMethods.AudioContext = OriginalAudioContext;
                         const self = this;
+                        window.AudioContext = function(...args) {
+                            const context = new OriginalAudioContext(...args);
+                            // Immediately suspend if mute is active
+                            if (self.settings['mute-sound']) {
+                                context.suspend();
+                            }
+                            return context;
+                        };
+                        window.AudioContext.prototype = OriginalAudioContext.prototype;
                         
-                      
-                        if (!window.__AccessibilityWidgetAudioContextWrapper) {
-                            window.__AccessibilityWidgetAudioContextWrapper = function(...args) {
-                                const context = new OriginalAudioContext(...args);
-                                // Immediately suspend if mute is active
-                                if (self.settings['mute-sound']) {
-                                    try {
-                                        context.suspend();
-                                    } catch(_) {}
-                                }
-                                return context;
-                            };
+                        // Also override webkitAudioContext if it exists
+                        if (window.webkitAudioContext) {
+                            window.webkitAudioContext = window.AudioContext;
                         }
                     }
-                } catch(_) {}
+                }
             }
             
+            // Override common audio library methods
+            if (typeof window !== 'undefined') {
+                // Override Howler.js if present
+                if (window.Howl && !this.originalMethods.howl) {
+                    this.originalMethods.howl = window.Howl;
+                    window.Howl = function() {
+                        return {
+                            play: () => {},
+                            pause: () => {},
+                            stop: () => {},
+                            mute: () => {},
+                            volume: () => {},
+                            unload: () => {}
+                        };
+                    };
+                }
+                
+                // Override SoundJS if present
+                if (window.createjs && window.createjs.Sound && !this.originalMethods.soundJS) {
+                    this.originalMethods.soundJS = window.createjs.Sound.play;
+                    window.createjs.Sound.play = function() {
+                        return null;
+                    };
+                }
+            }
         }
     
     
@@ -20204,20 +19994,32 @@ class AccessibilityWidget {
                 player.style.opacity = '';
             });
         }
-    
+        
+        // Restore global audio methods
         restoreGlobalAudioMethods() {
-            // Since we no longer override prototypes, we just need to clean up any wrappers
-            // Event listeners are cleaned up by removeMediaEventListeners()
-            if (this.originalMethods && this.originalMethods.AudioContext) {
-                // Restore AudioContext constructor if we wrapped it
-                // Note: We don't actually override it anymore, so this is just cleanup
-                try {
-                    if (window.__AccessibilityWidgetAudioContextWrapper) {
-                        // The wrapper is optional and doesn't break anything if left in place
-                        // But we can remove it for cleanliness
-                        delete window.__AccessibilityWidgetAudioContextWrapper;
+            if (this.originalMethods) {
+                // Restore HTMLAudioElement methods
+                if (this.originalMethods.audioPlay && typeof HTMLAudioElement !== 'undefined') {
+                    HTMLAudioElement.prototype.play = this.originalMethods.audioPlay;
+                }
+                
+                // Restore HTMLVideoElement methods
+                if (this.originalMethods.videoPlay && typeof HTMLVideoElement !== 'undefined') {
+                    HTMLVideoElement.prototype.play = this.originalMethods.videoPlay;
+                }
+                
+                // Restore Web Audio API methods
+                if (this.originalMethods.createBufferSource && typeof AudioContext !== 'undefined') {
+                    AudioContext.prototype.createBufferSource = this.originalMethods.createBufferSource;
+                }
+                
+                // Restore AudioContext constructor
+                if (this.originalMethods.AudioContext) {
+                    window.AudioContext = this.originalMethods.AudioContext;
+                    if (window.webkitAudioContext) {
+                        window.webkitAudioContext = this.originalMethods.AudioContext;
                     }
-                } catch(_) {}
+                }
             }
         }
         
@@ -21477,57 +21279,25 @@ class AccessibilityWidget {
             
     
             // Create overlay with extracted content
-    
-            const overlayHTML = `
-    
-                <div id="read-mode-overlay" style="
-    
-                    position: fixed !important;
-    
-                    top: 0 !important;
-    
-                    left: 0 !important;
-    
-                    width: 100vw !important;
-    
-                    height: 100vh !important;
-    
-                    background: #e8f4f8 !important;
-    
-                    z-index: 99997 !important;
-    
-                    font-family: Arial, sans-serif !important;
-    
-                    overflow-y: auto !important;
-    
-                ">
-    
-                    <div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">
-    
-                        ${finalContent}
-    
-                    </div>
-    
-                </div>
-    
-            `;
+            // Use string concatenation instead of template literal interpolation to avoid syntax errors
+            const overlayHTML = '<div id="read-mode-overlay" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;"><div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">' + finalContent + '</div></div>';
     
             
     
-            // SECURITY: Use safe DOM methods instead of insertAdjacentHTML
-            const overlay = document.createElement('div');
-            overlay.id = 'read-mode-overlay';
-            overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;';
+            // Insert the HTML directly into the body
+    
+            document.body.insertAdjacentHTML('beforeend', overlayHTML);
+    
             
-            const contentDiv = document.createElement('div');
-            contentDiv.style.cssText = 'padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;';
-            // SECURITY: Use textContent to safely insert content (prevents XSS)
-            contentDiv.textContent = finalContent || '';
-            overlay.appendChild(contentDiv);
-            
-            if (!isDesignerContext() && document.body) {
-                document.body.appendChild(overlay);
-            }
+    
+            // Verify the overlay was created
+    
+            const overlay = document.getElementById('read-mode-overlay');
+    
+            if (overlay) {
+    
+    
+            } else {
     
 
     
@@ -22180,10 +21950,14 @@ class AccessibilityWidget {
  
     
         }
-   
+    
+    
     
         disableReadingGuide() {
     
+          
+    
+            
     
             // Remove reading guide bar
     
@@ -22447,7 +22221,7 @@ class AccessibilityWidget {
     
     
     
-        disableHighlightFocus(); {
+        disableHighlightFocus() {
     
             // Update toggle state
     
@@ -22463,6 +22237,9 @@ class AccessibilityWidget {
     
             document.body.classList.remove('highlight-focus');
     
+    
+    
+            
     
             // Remove focus styles from the currently tracked focused element
     
@@ -22548,7 +22325,7 @@ class AccessibilityWidget {
     
     
     
-        showStatement(); {
+        showStatement() {
            
             // Check if we have a custom accessibility statement link
             if (this.customizationData && this.customizationData.accessibilityStatementLink) {
@@ -22584,9 +22361,39 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    /* READABLE FONT: Only apply to specific text content, not symbols */
+                    /* READABLE FONT: Only change font-family, no size or weight changes */
                     
-                    /* 1. HEADINGS - Apply readable font to headings */
+                    /* Prevent horizontal overflow - only on block containers */
+                    .readable-font {
+                        overflow-x: hidden;
+                    }
+                    
+                    /* Only break words in block-level containers, not inline elements */
+                    .readable-font p,
+                    .readable-font div,
+                    .readable-font li,
+                    .readable-font td,
+                    .readable-font th,
+                    .readable-font section,
+                    .readable-font article,
+                    .readable-font main {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    /* Preserve inline elements - don't break words unnecessarily */
+                    .readable-font span,
+                    .readable-font a,
+                    .readable-font strong,
+                    .readable-font em,
+                    .readable-font b,
+                    .readable-font i {
+                        white-space: normal;
+                        word-wrap: normal;
+                        overflow-wrap: normal;
+                    }
+                    
+                    /* 1. HEADINGS - Apply readable font to headings (font-family only) */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22594,11 +22401,11 @@ class AccessibilityWidget {
                     .readable-font h5,
                     .readable-font h6 {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 600 !important;
-                        letter-spacing: 0.8px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements only */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements (font-family only) */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22611,35 +22418,34 @@ class AccessibilityWidget {
                     .readable-font strong,
                     .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 3. LINKS - Apply readable font to links but preserve their styling */
+                    /* 3. LINKS - Apply readable font to links (font-family only) */
                     .readable-font a {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text (font-family only) */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text */
+                    /* 5. BUTTON TEXT - Apply readable font to button text (font-family only) */
                     .readable-font button {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        font-weight: 500 !important;
-                        letter-spacing: 0.5px !important;
+                        /* REMOVED: font-weight - causes text to appear larger */
+                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
                     }
                     
                     /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
-
                     /* The MOST reliable way to exclude icon fonts and symbols */
                     .readable-font i,
                     .readable-font [class*="icon"],
@@ -22651,9 +22457,6 @@ class AccessibilityWidget {
                     .readable-font .w-icon-dropdown-toggle,
                     .readable-font svg * {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
@@ -22670,9 +22473,6 @@ class AccessibilityWidget {
                     .readable-font [aria-label*="chevron"],
                     .readable-font [aria-label*="caret"] {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
@@ -22683,9 +22483,6 @@ class AccessibilityWidget {
                     .readable-font button [class*="icon"],
                     .readable-font button [class*="arrow"] {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
                     }
                     
                     /* 9. PRESERVE LINK ICONS - Don't affect link symbols */
@@ -22694,9 +22491,18 @@ class AccessibilityWidget {
                     .readable-font a [class*="arrow"],
                     .readable-font a svg {
                         font-family: initial !important;
-                        font-weight: initial !important;
-                        letter-spacing: initial !important;
-                        text-transform: initial !important;
+                    }
+                    
+                    /* 10. PREVENT HORIZONTAL OVERFLOW - Ensure content doesn't go out of screen */
+                    .readable-font * {
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    
+                    .readable-font body,
+                    .readable-font html {
+                        overflow-x: hidden !important;
+                        width: 100% !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -22708,7 +22514,7 @@ class AccessibilityWidget {
     
     
     
-        disableReadableFont(); {
+        disableReadableFont() {
             this.settings['readable-font'] = false;
             document.body.classList.remove('readable-font');
             
@@ -23426,6 +23232,14 @@ class AccessibilityWidget {
             }
         }
         
+        // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
+        // REMOVED: Duplicate overrideRequestAnimationFrame() - using more comprehensive version at line 24467
+        
+        // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+        // REMOVED: Duplicate stopAnimationLibraries() - using more comprehensive version at line 24703
+        // REMOVED: Duplicate replaceAnimatedMedia() - using more comprehensive version at line 24832
+        
+        // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
         stopDOMAnimationLoops() {
             // Store original functions if not already stored
             if (!window._originalSetTimeout) {
@@ -23635,28 +23449,70 @@ class AccessibilityWidget {
         
         disableStopAnimation() {
    
-            document.body.classList.remove('stop-animation');
-            this.settings['stop-animation'] = false;
-            this.saveSettings();
-            
-            // 1. Remove CSS rules for stop animation
+            // 1. Remove CSS rules for stop animation FIRST
             const existingStyle = document.getElementById('stop-animation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // 2. Restore requestAnimationFrame
+            // 2. Remove stop-animation class from body and html
+            document.body.classList.remove('stop-animation');
+            document.documentElement.classList.remove('stop-animation');
+            
+            // 3. Force browser reflow to ensure CSS changes take effect
+            // This is critical for animations to resume after !important rules are removed
+            void document.body.offsetHeight;
+            
+            // 4. Restore requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
-            // 3. Restore setTimeout and setInterval
+            // 5. Restore setTimeout and setInterval
             this.restoreDOMAnimationLoops();
             
-            // 4. Restore animated media
+            // 6. Restore animated media
             this.restoreAnimatedMedia();
             
-            // 5. Restore JavaScript animations
+            // 7. Restore JavaScript animations
             this.restoreJavaScriptAnimations();
             
+            // 8. Force re-enable CSS animations by triggering a style recalculation
+            // This ensures animations resume after !important rules are removed
+            requestAnimationFrame(() => {
+                // Re-initialize animation libraries that might have been paused
+                if (typeof AOS !== 'undefined' && AOS.refresh) {
+                    try {
+                        AOS.refresh();
+                    } catch (e) {}
+                }
+                
+                // Re-enable Swiper autoplay
+                if (typeof Swiper !== 'undefined') {
+                    try {
+                        document.querySelectorAll('.swiper').forEach(swiperEl => {
+                            if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                                swiperEl.swiper.autoplay.start();
+                            }
+                        });
+                    } catch (e) {}
+                }
+                
+                // Force style recalculation on elements with animation classes
+                // This helps browser re-evaluate styles after !important rules are removed
+                const animatedElements = document.querySelectorAll('[class*="animate"], [class*="fade"], [class*="slide"], [class*="bounce"], [class*="pulse"], [class*="animation"]');
+                animatedElements.forEach(el => {
+                    // Trigger minimal reflow to force browser to re-evaluate styles
+                    void el.offsetHeight;
+                });
+            });
+            
+            this.settings['stop-animation'] = false;
+            this.saveSettings();
+            
+            // 9. Refresh the page to ensure all animations resume properly
+            // This ensures a clean state after disabling stop animation
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         
         }
         
@@ -24638,17 +24494,14 @@ class AccessibilityWidget {
     
         // JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
         overrideRequestAnimationFrame() {
-            if (isDesignerContext()) return;
             try {
-                if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
-                    AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
-                    AccessibilityWidgetNS.originalCancelAnimationFrame = window.cancelAnimationFrame;
+                // Store original requestAnimationFrame if not already stored
+                if (!window.__originalRequestAnimationFrame) {
+                    window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                if (!AccessibilityWidgetNS.rafOverridden) {
-                    AccessibilityWidgetNS.rafOverridden = true;
-                    const originalRAF = AccessibilityWidgetNS.originalRequestAnimationFrame;
-                    window.requestAnimationFrame = function(callback) {
+                // Block visual animations but preserve scroll-related animations
+                window.requestAnimationFrame = function(callback) {
                     if (callback && typeof callback === 'function') {
                         try {
                             const callbackStr = callback.toString().toLowerCase();
@@ -24664,9 +24517,10 @@ class AccessibilityWidget {
                                 callbackStr.includes('locomotive') ||
                                 callbackStr.includes('smooth') ||
                                 callbackStr.includes('parallax')) {
-                                return originalRAF.call(window, callback);
+                                return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
+                            // Block visual animations (Lottie, CSS animations, etc.)
                             if (callbackStr.includes('animation') || 
                                 callbackStr.includes('animate') ||
                                 callbackStr.includes('lottie') ||
@@ -24689,10 +24543,11 @@ class AccessibilityWidget {
                                 callbackStr.includes('swing') ||
                                 callbackStr.includes('wobble') ||
                                 callbackStr.includes('tilt')) {
-                                return 0;
+                                return 0; // Block visual animations
                             }
                             
-                            return originalRAF.call(window, callback);
+                            // Allow other callbacks (scroll, etc.)
+                            return window.__originalRequestAnimationFrame.call(window, callback);
                         } catch (e) {
                             
                             return 0;
@@ -24701,11 +24556,14 @@ class AccessibilityWidget {
                     return 0;
                 };
                 
-                    const originalCAF = AccessibilityWidgetNS.originalCancelAnimationFrame;
-                    window.cancelAnimationFrame = function(id) {
-                        return originalCAF.call(window, id);
-                    };
+                // Also override cancelAnimationFrame to be safe
+                if (!window.__originalCancelAnimationFrame) {
+                    window.__originalCancelAnimationFrame = window.cancelAnimationFrame;
                 }
+                
+                window.cancelAnimationFrame = function(id) {
+                    return window.__originalCancelAnimationFrame.call(window, id);
+                };
                 
           
                 
@@ -24969,14 +24827,17 @@ class AccessibilityWidget {
         
         // Restore original requestAnimationFrame when seizure-safe is disabled
         restoreRequestAnimationFrame() {
-            if (isDesignerContext()) return;
             try {
-                if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
-                    window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
-                    AccessibilityWidgetNS.rafOverridden = false;
+                // Restore original requestAnimationFrame if it was stored
+                if (window.__originalRequestAnimationFrame) {
+                    window.requestAnimationFrame = window.__originalRequestAnimationFrame;
+                  
                 }
-                if (AccessibilityWidgetNS.originalCancelAnimationFrame) {
-                    window.cancelAnimationFrame = AccessibilityWidgetNS.originalCancelAnimationFrame;
+                
+                // Restore original cancelAnimationFrame if it was stored
+                if (window.__originalCancelAnimationFrame) {
+                    window.cancelAnimationFrame = window.__originalCancelAnimationFrame;
+                   
                 }
                 
             } catch (error) {
@@ -25092,16 +24953,9 @@ class AccessibilityWidget {
     
                 
     
-                if (isDesignerContext()) return;
-                
-                const fragment = document.createDocumentFragment();
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = colorPickerHTML;
-                while (tempDiv.firstChild) {
-                    fragment.appendChild(tempDiv.firstChild);
-                }
-                textColorsModule.parentNode.insertBefore(fragment, textColorsModule.nextSibling);
-                tempDiv.remove();
+                // Insert the color picker after the profile item
+    
+                textColorsModule.insertAdjacentHTML('afterend', colorPickerHTML);
     
                 
     
@@ -25309,16 +25163,9 @@ class AccessibilityWidget {
     
                 
     
-                if (isDesignerContext()) return;
-                
-                const fragment = document.createDocumentFragment();
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = colorPickerHTML;
-                while (tempDiv.firstChild) {
-                    fragment.appendChild(tempDiv.firstChild);
-                }
-                titleColorsModule.parentNode.insertBefore(fragment, titleColorsModule.nextSibling);
-                tempDiv.remove();
+                // Insert the color picker after the profile item
+    
+                titleColorsModule.insertAdjacentHTML('afterend', colorPickerHTML);
     
                 
     
@@ -25528,16 +25375,9 @@ class AccessibilityWidget {
     
                 
     
-                if (isDesignerContext()) return;
-                
-                const fragment = document.createDocumentFragment();
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = colorPickerHTML;
-                while (tempDiv.firstChild) {
-                    fragment.appendChild(tempDiv.firstChild);
-                }
-                bgColorsModule.parentNode.insertBefore(fragment, bgColorsModule.nextSibling);
-                tempDiv.remove();
+                // Insert the color picker after the profile item
+    
+                bgColorsModule.insertAdjacentHTML('afterend', colorPickerHTML);
     
                 
     
@@ -25962,6 +25802,12 @@ class AccessibilityWidget {
                     widget.classList.add('vision-impaired');
                 }
 
+                // Update toggle switch in UI
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                if (viToggle) {
+                    viToggle.checked = true;
+                }
+
                 // Apply comprehensive website scaling and contrast enhancement
                 this.applyVisionImpairedStyles();
 
@@ -25986,19 +25832,47 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'vision-impaired-comprehensive';
                 style.textContent = `
-                    /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
+                    /* VISION IMPAIRED: Zoom content while preventing overflow */
                     
-                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
+                    /* 1. ZOOM ENTIRE PAGE - Use zoom to scale everything up, but clip overflow */
                     html.vision-impaired {
-                        /* No zoom - preserve original layout */
-                        /* No layout modifications */
+                        /* Use zoom to scale everything including images */
+                        zoom: 1.05;
+                        /* Fallback for Firefox - use transform with proper containment */
+                        -moz-transform: scale(1.05);
+                        -moz-transform-origin: top left;
+                        /* CRITICAL: Clip any overflow from zoom */
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        /* Constrain to viewport */
+                        width: 100vw;
+                        max-width: 100vw;
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                        position: relative;
                     }
                     
+                    /* Adjust body width to compensate for zoom - when zoomed 1.05x, need smaller base width */
                     body.vision-impaired {
-                        /* No layout modifications */
-                        /* No layout modifications */
-                        /* Slightly enhance text contrast without changing colors */
-                        filter: contrast(1.1) brightness(1.05) !important;
+                        /* Slightly enhance text contrast */
+                        filter: contrast(1.1) brightness(1.05);
+                        /* Prevent overflow - constrain body to fit within zoomed viewport */
+                        overflow-x: hidden;
+                        width: calc(100vw / 1.05);
+                        max-width: calc(100vw / 1.05);
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                        position: relative;
+                        /* Ensure body doesn't exceed viewport */
+                        min-width: 0;
+                    }
+                    
+                    /* Ensure all direct children of body respect the constrained width */
+                    body.vision-impaired > * {
+                        max-width: 100%;
+                        overflow-x: hidden;
                     }
                     
                     /* Preserve accessibility widget from vision impaired filters and scaling */
@@ -26100,12 +25974,178 @@ class AccessibilityWidget {
                         /* No layout modifications */
                     }
                     
-                    /* 10. PRESERVE LAYOUT - No footer modifications */
+                    /* 10. PREVENT CONTENT OVERFLOW - Ensure content stays within viewport */
+                    /* Note: Zoom is handled in section 1 above */
+                    /* Additional overflow prevention for all elements */
                     
-                    /* 11. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
+                    /* Prevent ALL elements from overflowing - comprehensive approach */
+                    body.vision-impaired * {
+                        box-sizing: border-box;
+                        max-width: 100%;
+                    }
+                    
+                    /* Override fixed widths that exceed viewport */
+                    body.vision-impaired [style*="width"] {
+                        max-width: 100%;
+                    }
+                    
+                    /* Prevent containers from overflowing and shifting */
+                    body.vision-impaired > *,
+                    body.vision-impaired .container,
+                    body.vision-impaired .wrapper,
+                    body.vision-impaired .content,
+                    body.vision-impaired section,
+                    body.vision-impaired main,
+                    body.vision-impaired article,
+                    body.vision-impaired header,
+                    body.vision-impaired footer,
+                    body.vision-impaired nav,
+                    body.vision-impaired [class*="container"],
+                    body.vision-impaired [class*="wrapper"],
+                    body.vision-impaired [class*="section"] {
+                        max-width: 100%;
+                        overflow-x: hidden;
+                        box-sizing: border-box;
+                        /* Prevent horizontal shifting */
+                        position: relative;
+                        left: auto;
+                        right: auto;
+                        /* Allow flex/grid items to shrink */
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent text elements from causing overflow */
+                    body.vision-impaired p,
+                    body.vision-impaired div,
+                    body.vision-impaired span,
+                    body.vision-impaired li,
+                    body.vision-impaired td,
+                    body.vision-impaired th,
+                    body.vision-impaired label,
+                    body.vision-impaired small {
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        max-width: 100%;
+                        box-sizing: border-box;
+                        /* Prevent text from expanding beyond container */
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent headings from causing overflow */
+                    body.vision-impaired h1,
+                    body.vision-impaired h2,
+                    body.vision-impaired h3,
+                    body.vision-impaired h4,
+                    body.vision-impaired h5,
+                    body.vision-impaired h6 {
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        box-sizing: border-box;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent links from causing overflow */
+                    body.vision-impaired a {
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        box-sizing: border-box;
+                        display: inline-block;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent buttons and inputs from overflowing */
+                    body.vision-impaired button,
+                    body.vision-impaired input,
+                    body.vision-impaired textarea,
+                    body.vision-impaired select {
+                        max-width: 100%;
+                        box-sizing: border-box;
+                        min-width: 0;
+                    }
+                    
+                    /* Prevent tables from overflowing */
+                    body.vision-impaired table {
+                        max-width: 100%;
+                        width: 100%;
+                        table-layout: auto;
+                        box-sizing: border-box;
+                    }
+                    
+                    body.vision-impaired td,
+                    body.vision-impaired th {
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    /* EXCEPTION: Allow accessibility panel to have vertical scrollbar - HIGH SPECIFICITY */
+                    body.vision-impaired #accessibility-panel,
+                    body.vision-impaired .accessibility-panel,
+                    html body.vision-impaired #accessibility-panel,
+                    html body.vision-impaired .accessibility-panel,
+                    #accessibility-panel,
+                    .accessibility-panel {
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        overflow: hidden auto;
+                        max-width: 100%;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    /* Ensure images and media don't overflow */
+                    body.vision-impaired img,
+                    body.vision-impaired video,
+                    body.vision-impaired iframe,
+                    body.vision-impaired embed,
+                    body.vision-impaired object,
+                    body.vision-impaired svg,
+                    body.vision-impaired canvas {
+                        max-width: 100%;
+                        width: auto;
+                        height: auto;
+                        box-sizing: border-box;
+                    }
+                    
+                    /* Prevent flex and grid containers from overflowing */
+                    body.vision-impaired [style*="display: flex"],
+                    body.vision-impaired [style*="display:grid"],
+                    body.vision-impaired .flex,
+                    body.vision-impaired .grid,
+                    body.vision-impaired [class*="flex"],
+                    body.vision-impaired [class*="grid"] {
+                        max-width: 100%;
+                        min-width: 0;
+                        overflow-x: hidden;
+                    }
+                    
+                    /* Prevent absolutely/fixed positioned elements from causing overflow */
+                    body.vision-impaired [style*="position: absolute"],
+                    body.vision-impaired [style*="position:fixed"] {
+                        max-width: 100vw;
+                    }
+                    
+                    /* Force all inline and inline-block elements to respect container width */
+                    body.vision-impaired span,
+                    body.vision-impaired a,
+                    body.vision-impaired strong,
+                    body.vision-impaired em,
+                    body.vision-impaired b,
+                    body.vision-impaired i {
+                        max-width: 100%;
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    /* 11. PRESERVE LAYOUT - No footer modifications */
+                    
+                    /* 12. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
                     @media (max-width: 768px) {
                         html.vision-impaired {
                             /* No zoom - preserve original layout */
+                            overflow-x: hidden !important;
+                            max-width: 100% !important;
                         }
                     }
                 `;
@@ -26133,6 +26173,12 @@ class AccessibilityWidget {
                 const widget = document.querySelector('.accessibility-widget');
                 if (widget) {
                     widget.classList.remove('vision-impaired');
+                }
+
+                // Update toggle switch in UI
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                if (viToggle) {
+                    viToggle.checked = false;
                 }
 
                 // Remove comprehensive vision impaired styles
@@ -26287,20 +26333,23 @@ class AccessibilityWidget {
         // Stop all JavaScript animations (requestAnimationFrame, setInterval, setTimeout)
         stopAllJavaScriptAnimations() {
   
-            if (isDesignerContext()) return;
             try {
-                if (!AccessibilityWidgetNS.originalRequestAnimationFrame) {
-                    AccessibilityWidgetNS.originalRequestAnimationFrame = window.requestAnimationFrame;
-                    AccessibilityWidgetNS.originalCancelAnimationFrame = window.cancelAnimationFrame;
+                // CRITICAL: Override requestAnimationFrame to stop all high-performance animations
+                if (!window.__originalRequestAnimationFrame) {
+                    window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                if (!AccessibilityWidgetNS.rafOverridden) {
-                    AccessibilityWidgetNS.rafOverridden = true;
-                    window.requestAnimationFrame = function(callback) {
-                        return 0;
-                    };
-                    window.cancelAnimationFrame = function() { return; };
+                // Override requestAnimationFrame to freeze all animation loops
+                window.requestAnimationFrame = function(callback) {
+                    // Intentionally do NOT call the callback, freezing the animation loop
+                    return 0; // Return dummy handle
+                };
+                
+                // Override cancelAnimationFrame to prevent cleanup
+                if (!window.__originalCancelAnimationFrame) {
+                    window.__originalCancelAnimationFrame = window.cancelAnimationFrame;
                 }
+                window.cancelAnimationFrame = function() { return; };
                 
                 // Stop all current requestAnimationFrame loops
                 const highestId = setTimeout(() => {}, 0);
@@ -26627,8 +26676,9 @@ class AccessibilityWidget {
                             window.lottie.unfreeze();
                         }
                         
-                        if (AccessibilityWidgetNS.originalLottieLoadAnimation) {
-                            window.lottie.loadAnimation = AccessibilityWidgetNS.originalLottieLoadAnimation;
+                        // Restore original loadAnimation function
+                        if (window.__originalLottieLoadAnimation) {
+                            window.lottie.loadAnimation = window.__originalLottieLoadAnimation;
                         }
                         
                       
@@ -26665,14 +26715,13 @@ class AccessibilityWidget {
         restoreAllMediaAndAnimations() {
    
             
-            if (isDesignerContext()) return;
             try {
-                if (AccessibilityWidgetNS.originalRequestAnimationFrame) {
-                    window.requestAnimationFrame = AccessibilityWidgetNS.originalRequestAnimationFrame;
-                    AccessibilityWidgetNS.rafOverridden = false;
+                // Restore requestAnimationFrame
+                if (window.__originalRequestAnimationFrame) {
+                    window.requestAnimationFrame = window.__originalRequestAnimationFrame;
                 }
-                if (AccessibilityWidgetNS.originalCancelAnimationFrame) {
-                    window.cancelAnimationFrame = AccessibilityWidgetNS.originalCancelAnimationFrame;
+                if (window.__originalCancelAnimationFrame) {
+                    window.cancelAnimationFrame = window.__originalCancelAnimationFrame;
                 }
                 
                 // Restore videos and audio
@@ -28001,10 +28050,7 @@ class AccessibilityWidget {
     
             alignmentContainer.className = 'alignment-controls';
     
-            if (isDesignerContext()) return;
-            
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = `
+            alignmentContainer.innerHTML = `
     
                 <div class="control-group">
     
@@ -28041,12 +28087,7 @@ class AccessibilityWidget {
                 </div>
     
             `;
-            const fragment = document.createDocumentFragment();
-            while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-            }
-            alignmentContainer.appendChild(fragment);
-            tempDiv.remove();
+    
     
     
             // Add event listeners
@@ -28722,272 +28763,158 @@ class AccessibilityWidget {
         // Enhanced Panel Toggle with Screen Reader Support
     
         togglePanel() {
+            // PERFORMANCE OPTIMIZATION: Use cached elements
+            const elements = this.getCachedElements();
+            const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
+            const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
     
-            if (this.shadowRoot) {
-    
-                const panel = this.shadowRoot.getElementById('accessibility-panel');
-    
-                const icon = this.shadowRoot.getElementById('accessibility-icon');
-    
-                
-    
-                if (panel && icon) {
-                    const isVisible = panel.style.display !== 'none';
-                    const isCurrentlyOpen = panel.classList.contains('active');
-                    if (isVisible) {
-                        // Hide panel
-                        panel.style.display = 'none';
-                        panel.style.visibility = 'hidden';
-                        icon.setAttribute('aria-expanded', 'false');
-                        
-                        
-                        // Re-enable smooth scrolling libraries when panel is closed
-                        this.enableSmoothScrollingLibraries();
-                    } else {
-                        // Show panel
-                        this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                        this.updateInterfacePosition(); // Position panel next to icon
-                        panel.style.display = 'block';
-                        panel.style.visibility = 'visible';
-                        icon.setAttribute('aria-expanded', 'true');
-                        
-                        
-                        // Fix scrolling conflicts with GSAP/Lenis libraries
-                        setTimeout(() => {
-                            this.fixPanelScrolling();
-                        }, 100);
-                    }
+            if (!panel || !icon) return;
+            
+            // PERFORMANCE OPTIMIZATION: Use CSS transforms instead of display toggling
+            const isCurrentlyOpen = panel.classList.contains('active');
+            const currentTransform = panel.style.transform || '';
+            const isHidden = currentTransform.includes('translateX(-100%)') || 
+                           panel.style.visibility === 'hidden' ||
+                           panel.style.display === 'none';
+            
+            // Use requestAnimationFrame for smooth transitions
+            requestAnimationFrame(() => {
+                if (isCurrentlyOpen || !isHidden) {
+                    // Hide panel using transform (better performance than display)
+                    panel.style.transform = 'translateX(-100%)';
+                    panel.style.visibility = 'hidden';
+                    panel.style.pointerEvents = 'none';
+                    panel.classList.remove('active');
                     
-    
-                    if (isCurrentlyOpen) {
-    
-                        // Close panel
-    
-                        panel.classList.remove('active');
-    
-                        panel.setAttribute('aria-hidden', 'true');
-    
-                        icon.setAttribute('aria-expanded', 'false');
-    
-                        this.isPanelOpen = false;
-    
-                        
-    
-                        // Return focus to icon
-    
-                        icon.focus();
-    
-                        this.announceToScreenReader('Accessibility panel closed');
-    
-                    } else {
-    
-                        // Open panel
-                        this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                        panel.classList.add('active');
-    
-                        panel.setAttribute('aria-hidden', 'false');
-    
-                        icon.setAttribute('aria-expanded', 'true');
-    
-                        this.isPanelOpen = true;
-    
-                        
-    
-                        // Focus first focusable element in panel
-    
-                        setTimeout(() => {
-    
-                            this.ensureFocusInPanel();
-    
-                        }, 100);
-    
-                        
-    
-                        this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
-    
+                    // CRITICAL: Ensure icon stays visible when panel closes
+                    if (icon) {
+                        icon.style.display = '';
+                        icon.style.visibility = 'visible';
+                        icon.style.opacity = '1';
                     }
-    
+                    panel.setAttribute('aria-hidden', 'true');
+                    icon.setAttribute('aria-expanded', 'false');
+                    this.isPanelOpen = false;
                     
-    
-    
+                    // Re-enable smooth scrolling libraries when panel is closed
+                    this.enableSmoothScrollingLibraries();
+                } else {
+                    // Show panel
+                    this.ensureWidgetCSS(); // Ensure CSS is always present
+                    this.ensureBasePanelCSS(); // Ensure base CSS is applied
+                    this.updateInterfacePosition(); // Position panel next to icon
+                    
+                    // Reset transform to show panel
+                    panel.style.transform = '';
+                    panel.style.visibility = 'visible';
+                    panel.style.pointerEvents = 'auto';
+                    panel.style.display = 'block'; // Keep for compatibility
+                    panel.classList.add('active');
+                    panel.setAttribute('aria-hidden', 'false');
+                    icon.setAttribute('aria-expanded', 'true');
+                    this.isPanelOpen = true;
+                    
+                    // Fix scrolling conflicts with GSAP/Lenis libraries
+                    requestAnimationFrame(() => {
+                        this.fixPanelScrolling();
+                    });
+                    
+                    // Focus first focusable element in panel
+                    requestAnimationFrame(() => {
+                        this.ensureFocusInPanel();
+                    });
+                    
+                    this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
                 }
-    
-            }
-    
+            });
         }
     
-        // Fetch customization data from the API
-        // Encryption utilities for customization data
-        // @ts-ignore
-        async encryptCustomizationData(data, siteId) {
-            try {
-                const ENCRYPTION_ALGORITHM = 'AES-GCM';
-                const KEY_LENGTH = 256;
-                const IV_LENGTH = 12;
-                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
-                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
-                // Generate with: openssl rand -base64 32
-                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
-                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
-                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
-                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
-                }
-                
-                const encoder = new TextEncoder();
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw',
-                    encoder.encode(`${siteId}:${secret}`),
-                    { name: 'PBKDF2' },
-                    false,
-                    ['deriveKey']
-                );
-
-                const key = await crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: encoder.encode('accessibility-widget-salt'),
-                        iterations: 100000,
-                        hash: 'SHA-256',
-                    },
-                    keyMaterial,
-                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
-                    false,
-                    ['encrypt', 'decrypt']
-                );
-                
-                const dataString = JSON.stringify(data);
-                const dataBytes = encoder.encode(dataString);
-                const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-                const encryptedData = await crypto.subtle.encrypt(
-                    { name: ENCRYPTION_ALGORITHM, iv },
-                    key,
-                    dataBytes
-                );
-                
-                const combined = new Uint8Array(iv.length + encryptedData.byteLength);
-                combined.set(iv, 0);
-                combined.set(new Uint8Array(encryptedData), iv.length);
-                
-                return btoa(String.fromCharCode(...combined));
-            } catch (error) {
-                console.error('Encryption error:', error);
-                throw new Error('Failed to encrypt customization data');
+        // Check if domain is staging (free, no payment needed)
+        isStagingDomain() {
+            if (this._isStagingDomain !== null) {
+                return this._isStagingDomain; // Return cached result
             }
+            
+            const host = window.location.hostname || '';
+            this._isStagingDomain = host.endsWith('.webflow.io') || 
+                                   host.endsWith('.webflow.com') || 
+                                   host.includes('localhost') ||
+                                   host.includes('127.0.0.1') ||
+                                   host.includes('staging');
+            
+            return this._isStagingDomain;
         }
         
-        async decryptCustomizationData(encryptedData, siteId) {
-            try {
-                const ENCRYPTION_ALGORITHM = 'AES-GCM';
-                const KEY_LENGTH = 256;
-                const IV_LENGTH = 12;
-                // PRODUCTION: Inject encryption secret during build via window.__ACCESSIBILITY_ENCRYPTION_SECRET
-                // Must match VITE_SCRIPT_ENCRYPTION_KEY and ENCRYPTION_SECRET
-                // Generate with: openssl rand -base64 32
-                const DEFAULT_SECRET = 'default-encryption-key-change-in-production';
-                const secret = window.__ACCESSIBILITY_ENCRYPTION_SECRET || DEFAULT_SECRET;
-                if (!window.__ACCESSIBILITY_ENCRYPTION_SECRET || secret === DEFAULT_SECRET) {
-                    console.warn('WARNING: Using default encryption key. Inject __ACCESSIBILITY_ENCRYPTION_SECRET in production!');
-                }
-                
-                const encoder = new TextEncoder();
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw',
-                    encoder.encode(`${siteId}:${secret}`),
-                    { name: 'PBKDF2' },
-                    false,
-                    ['deriveKey']
-                );
-
-                const key = await crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: encoder.encode('accessibility-widget-salt'),
-                        iterations: 100000,
-                        hash: 'SHA-256',
-                    },
-                    keyMaterial,
-                    { name: ENCRYPTION_ALGORITHM, length: KEY_LENGTH },
-                    false,
-                    ['encrypt', 'decrypt']
-                );
-                
-                const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-                const iv = combined.slice(0, IV_LENGTH);
-                const encrypted = combined.slice(IV_LENGTH);
-                
-                const decryptedData = await crypto.subtle.decrypt(
-                    { name: ENCRYPTION_ALGORITHM, iv },
-                    key,
-                    encrypted
-                );
-                
-                const decoder = new TextDecoder();
-                const dataString = decoder.decode(decryptedData);
-                return JSON.parse(dataString);
-            } catch (error) {
-                console.error('Decryption error:', error);
-                throw new Error('Failed to decrypt customization data');
+        // Check payment status - NO CACHING for custom domains (real-time check)
+        // Staging domains: Always return true (free, no API call)
+        // Custom domains: Always check payment status fresh (no cache, real-time)
+        async checkPaymentStatusRealTime() {
+            // Staging domains are free - no payment check needed
+            if (this.isStagingDomain()) {
+                return true; // Fast return, no API call
             }
+            
+            // Custom domains: Always check payment status fresh (no cache)
+            // This ensures we detect real-time payment changes (payments/cancellations)
+            return await this.checkPaymentStatus();
         }
         
+        // Fetch customization data from the API - OPTIMIZED for speed
         async fetchCustomizationData() {
           
             
             try {
-                // First check payment status before loading customization data
-                const paymentValid = await this.checkPaymentStatus();
+                // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
+                // This reduces total wait time significantly
+                const [paymentValid, siteId] = await Promise.all([
+                    this.checkPaymentStatusRealTime(),
+                    this.getSiteId()
+                ]);
+                
+                // Fast fail if payment invalid
                 if (!paymentValid) {
                   
                     this.disableWidget();
                     return null;
                 }
                 
-                // Get siteId first
-                this.siteId = await this.getSiteId();
-  
-                
-                if (!this.siteId) {
+                // Fast fail if no siteId
+                if (!siteId) {
                    
                     return null;
                 }
+                
+                // Cache siteId for future use
+                this.siteId = siteId;
                 
                 if (!this.kvApiUrl) {
                     
                     return null;
                 }
                 
-                // Add cache busting to ensure fresh data
+                // OPTIMIZATION: Use minimal headers and efficient fetch
                 const cacheBuster = `_t=${Date.now()}`;
-                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${this.siteId}&${cacheBuster}`;
+                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
                 
-                
+                // OPTIMIZED: Minimal headers, no unnecessary data
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Accept': 'application/json'
+                    },
+                    // Use keep-alive for faster subsequent requests
+                    keepalive: false
                 });
                 
              
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    
+                    // Don't read error text if not needed (saves time)
                     return null;
                 }
                 
                 const data = await response.json();
-
-                // Decrypt customization data if it's encrypted
-                if (data.customization && typeof data.customization === 'string') {
-                    try {
-                        data.customization = await this.decryptCustomizationData(data.customization, this.siteId);
-                    } catch (error) {
-                        console.warn('Failed to decrypt customization data:', error);
-                        return null;
-                    }
-                }
 
                 return data;
                 
@@ -28997,60 +28924,51 @@ class AccessibilityWidget {
             }
         }
     
-        // Set up periodic refresh to check for customization updates
-        setupCustomizationRefresh() {
-        
+        // Set up periodic payment status refresh for custom domains only
+        // Staging domains don't need this (they're always free)
+        // Custom domains: Refresh every 2 minutes to catch real-time payment changes
+        setupPaymentStatusRefresh() {
+            // Only set up refresh for custom domains (staging is always free)
+            if (this.isStagingDomain()) {
+                return; // No refresh needed for staging
+            }
             
-            
-            // Check for updates every 30 seconds
+            // Custom domains: Refresh payment status every 2 minutes (120000ms)
+            // This catches real-time payment changes (payments/cancellations)
             setInterval(async () => {
-              
                 try {
-                    // Check payment status first
-                    const paymentValid = await this.checkPaymentStatus();
-                    if (!paymentValid) {
+                    // Always check fresh payment status (no cache)
+                    const isValid = await this.checkPaymentStatusRealTime();
                     
+                    if (!isValid) {
+                        // Payment status changed to invalid - disable widget
                         this.disableWidget();
-                        return;
-                    }
-                    
-                    const customizationData = await this.fetchCustomizationData();
-                    if (customizationData && customizationData.customization) {
-      
-                        this.applyCustomizations(customizationData.customization);
+                    } else {
+                        // Payment status is valid - ensure widget is enabled
+                        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                        if (icon) {
+                            icon.style.display = '';
+                        }
+                        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                        if (panel) {
+                            panel.style.display = '';
+                        }
                     }
                 } catch (error) {
-                    
+                    // Silently handle errors - don't break widget if refresh fails
                 }
-            }, 30000); // Check every 30 seconds
-            
-            // Also check when the page becomes visible (user switches back to tab)
-            document.addEventListener('visibilitychange', async () => {
-                if (!document.hidden) {
-                    
-                    try {
-                        // Check payment status first
-                        const paymentValid = await this.checkPaymentStatus();
-                        if (!paymentValid) {
-
-                            this.disableWidget();
-                            return;
-                        }
-                        
-                        const customizationData = await this.fetchCustomizationData();
-                        if (customizationData && customizationData.customization) {
-   
-                            this.applyCustomizations(customizationData.customization);
-                        }
-                    } catch (error) {
-                        
-                    }
-                }
-            });
+            }, 120000); // Every 2 minutes for custom domains
         }
     
         // Get site ID for API calls via script tag (no storage, no mapping)
+        // OPTIMIZED: Cache siteId to avoid repeated DOM queries
+        // SECURITY: siteId is public (from script URL), caching in memory is safe
         async getSiteId() {
+          // Return cached siteId if available
+          if (this.siteId) {
+            return this.siteId;
+          }
+          
           try {
             const scriptEl = document.currentScript || 
                            document.querySelector('script[src*="test.js"]') ||
@@ -29059,7 +28977,16 @@ class AccessibilityWidget {
             if (scriptEl && scriptEl.src) {
               const u = new URL(scriptEl.src);
               const sid = u.searchParams.get('siteId');
-              if (sid) return sid;
+              if (sid) {
+                // SECURITY: Cache in memory only (not localStorage/cookies)
+                // This is safe because:
+                // 1. siteId is already public (in script URL)
+                // 2. Only cached for widget instance lifetime
+                // 3. Cleared on page reload
+                // 4. No cross-site leakage
+                this.siteId = sid;
+                return sid;
+              }
             }
           } catch {}
           return null;
@@ -29114,10 +29041,8 @@ class AccessibilityWidget {
                 this.updateTriggerOffset('vertical', customizationData.triggerVerticalOffset);
             }
             
-            if (customizationData.hideTriggerButton) {
- 
-                this.updateTriggerVisibility(customizationData.hideTriggerButton === 'Yes');
-            }
+            // Don't call updateTriggerVisibility here - icon visibility is handled explicitly
+            // in init() after customizations are applied to avoid conflicts
             
             // Apply language - preserve user's language choice
             const savedLanguage = localStorage.getItem('accessibility-widget-language');
@@ -29224,28 +29149,60 @@ class AccessibilityWidget {
                 this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
             }
             
-            // Show the icon now that customizations have been applied
-            this.showIcon();
-            
         } catch (error) {
            
-            
-            // Show the icon even if there was an error, but with default styling
-            this.showIcon();
         }
     }
     
         // Show the icon after customizations are loaded
         showIcon() {
+            console.log('[ICON DEBUG] showIcon() called', {
+                _iconExplicitlyShown: this._iconExplicitlyShown,
+                paymentFailed: this.paymentFailed,
+                customizationData: this.customizationData ? 'exists' : 'null'
+            });
             const icon = this.shadowRoot?.getElementById('accessibility-icon');
             if (!icon) {
-      
+                console.log('[ICON DEBUG] showIcon() - Icon element not found');
                 return;
+            }
+            
+            // If icon was explicitly shown during initialization, don't hide it
+            // This prevents ResizeObserver and other events from hiding the icon
+            // after it was correctly shown with the right visibility logic
+            if (this._iconExplicitlyShown) {
+                // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
+                const isMobile = window.innerWidth <= 768;
+                const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
+                const mobileVisibility = this.customizationData?.showOnMobile;
+                
+                // Only hide if visibility rules actually require it
+                if (!isMobile && hideTrigger) {
+                    // Desktop and hideTrigger is Yes - hide it
+                    console.log('[ICON HIDE] showIcon() - _iconExplicitlyShown=true, Desktop, hideTriggerButton=Yes');
+                    icon.style.display = 'none';
+                    icon.style.visibility = 'hidden';
+                    icon.style.opacity = '0';
+                    return;
+                } else if (isMobile && mobileVisibility === 'Hide') {
+                    // Mobile and showOnMobile is Hide - hide it
+                    console.log('[ICON HIDE] showIcon() - _iconExplicitlyShown=true, Mobile, showOnMobile=Hide');
+                    icon.style.display = 'none';
+                    icon.style.visibility = 'hidden';
+                    icon.style.opacity = '0';
+                    return;
+                } else {
+                    // Show it - visibility rules allow it
+                    icon.style.display = '';
+                    icon.style.visibility = 'visible';
+                    icon.style.opacity = '1';
+                    return;
+                }
             }
             
             // Check if payment failed - if so, don't show icon
             if (this.paymentFailed) {
-                
+                console.log('[ICON HIDE] showIcon() - Payment failed (this.paymentFailed=true)');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -29257,7 +29214,7 @@ class AccessibilityWidget {
             if (widgetContainer && (widgetContainer.style.display === 'none' || 
                 widgetContainer.style.visibility === 'hidden' || 
                 widgetContainer.style.opacity === '0')) {
-               
+                console.log('[ICON HIDE] showIcon() - Widget container is hidden (payment issues)');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -29273,7 +29230,7 @@ class AccessibilityWidget {
     
             // Desktop/Tablet logic: hide if hideTriggerButton is Yes
             if (!isMobile && hideTrigger) {
-               
+                console.log('[ICON HIDE] showIcon() - Desktop, hideTriggerButton=Yes');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -29282,7 +29239,7 @@ class AccessibilityWidget {
     
             // Mobile logic: hide if showOnMobile is Hide (ignore hideTriggerButton for mobile)
             if (isMobile && mobileVisibility === 'Hide') {
-            
+                console.log('[ICON HIDE] showIcon() - Mobile, showOnMobile=Hide');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -29318,8 +29275,244 @@ class AccessibilityWidget {
         
         // Handle window resize to update icon visibility based on device type
         handleWindowResize() {
-
+            console.log('[ICON DEBUG] handleWindowResize() called', {
+                _iconExplicitlyShown: this._iconExplicitlyShown,
+                hasCustomizationData: !!this.customizationData
+            });
+            // Don't call showIcon() if icon was explicitly shown during initialization
+            // This prevents ResizeObserver from hiding the icon immediately after it's shown
+            if (this._iconExplicitlyShown) {
+                console.log('[ICON DEBUG] handleWindowResize() - Skipping because _iconExplicitlyShown=true');
+                return; // Icon visibility is already correctly set, don't change it
+            }
+            
+            // Only update icon visibility if customization data is available
+            if (!this.customizationData) {
+                console.log('[ICON DEBUG] handleWindowResize() - Skipping because no customizationData');
+                return; // Don't call showIcon() if customization data isn't loaded yet
+            }
             this.showIcon();
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Get cached DOM elements with refresh capability
+        getCachedElements(forceRefresh = false) {
+            const now = Date.now();
+            // Refresh cache every 5 seconds or if forced
+            if (forceRefresh || now - this._cachedElements.lastCacheTime > 5000) {
+                this._cachedElements.icon = this.shadowRoot?.getElementById('accessibility-icon');
+                this._cachedElements.panel = this.shadowRoot?.getElementById('accessibility-panel');
+                this._cachedElements.closeBtn = this.shadowRoot?.getElementById('close-panel');
+                this._cachedElements.lastCacheTime = now;
+            }
+            return this._cachedElements;
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Debounce utility
+        debounce(func, wait) {
+            return (...args) => {
+                clearTimeout(this._resizeTimer);
+                this._resizeTimer = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Throttle utility using requestAnimationFrame
+        throttle(func) {
+            return (...args) => {
+                if (!this._rafPending) {
+                    this._rafPending = true;
+                    requestAnimationFrame(() => {
+                        func.apply(this, args);
+                        this._rafPending = false;
+                    });
+                }
+            };
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
+        setupOptimizedResizeHandlers() {
+            // Debounced resize handler (150ms delay)
+            const debouncedResize = this.debounce(() => {
+                this.handleResizeOptimized();
+            }, 150);
+            
+            // Single resize listener
+            window.addEventListener('resize', debouncedResize, { passive: true });
+            
+            // Use ResizeObserver for better responsive mode detection
+            // Only set up ResizeObserver after icon visibility has been determined
+            if (this.shadowRoot && window.ResizeObserver) {
+                // Delay ResizeObserver setup to ensure icon visibility is determined first
+                const self = this;
+                const debouncedResizeFn = debouncedResize;
+                setTimeout(function() {
+                    const resizeObserver = new ResizeObserver(function() {
+                        console.log('[ICON DEBUG] ResizeObserver callback fired', {
+                            _iconExplicitlyShown: self._iconExplicitlyShown
+                        });
+                        // Don't trigger resize handler if icon was explicitly shown during initialization
+                        if (self._iconExplicitlyShown === true) {
+                            console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
+                            return;
+                        }
+                        // Safe to call resize handler
+                        debouncedResizeFn();
+                    });
+                    
+                    const panel = self.shadowRoot.getElementById('accessibility-panel');
+                    const icon = self.shadowRoot.getElementById('accessibility-icon');
+                    if (panel) resizeObserver.observe(panel);
+                    if (icon) resizeObserver.observe(icon);
+                    
+                    self._resizeObserver = resizeObserver;
+                }, 200);
+            }
+            
+            // Listen to media query changes for breakpoints
+            if (window.matchMedia) {
+                const mobileQuery = window.matchMedia('(max-width: 768px)');
+                const handleMediaChange = (e) => {
+                    this.handleResizeOptimized();
+                };
+                
+                // Modern browsers
+                if (mobileQuery.addEventListener) {
+                    mobileQuery.addEventListener('change', handleMediaChange);
+                } else {
+                    // Legacy browsers
+                    mobileQuery.addListener(handleMediaChange);
+                }
+                
+                // Device pixel ratio changes
+                const pixelRatioQuery = window.matchMedia('(min-resolution: 1.5dppx)');
+                const handlePixelRatioChange = () => {
+                    this.handleResizeOptimized();
+                };
+                
+                if (pixelRatioQuery.addEventListener) {
+                    pixelRatioQuery.addEventListener('change', handlePixelRatioChange);
+                } else {
+                    pixelRatioQuery.addListener(handlePixelRatioChange);
+                }
+            }
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Optimized resize handler
+        handleResizeOptimized() {
+            console.log('[ICON DEBUG] handleResizeOptimized() called');
+            const elements = this.getCachedElements();
+            const icon = elements.icon;
+            const panel = elements.panel;
+            
+            if (!icon || !panel) {
+                console.log('[ICON DEBUG] handleResizeOptimized() - Icon or panel not found');
+                return;
+            }
+            
+            // Use requestAnimationFrame for DOM updates
+            requestAnimationFrame(() => {
+                const screenWidth = window.innerWidth;
+                const isMobile = screenWidth <= 768;
+                
+                // Update icon visibility
+                this.handleWindowResize();
+                
+                // Ensure base CSS is applied
+                this.ensureBasePanelCSS();
+                
+                // Use CSS transforms instead of display toggling for better performance
+                // Only update if state actually changed
+                const currentTransform = panel.style.transform || '';
+                const needsUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
+                                 (!isMobile && panel.classList.contains('mobile-mode'));
+                
+                if (needsUpdate || !currentTransform) {
+                    if (isMobile) {
+                        // Apply mobile settings
+                        this.applyMobileResponsiveStyles();
+                        panel.classList.add('mobile-mode');
+                        
+                        // Reapply mobile positioning if it was set
+                        if (this.customizationData) {
+                            if (this.customizationData.mobileTriggerHorizontalPosition && 
+                                this.customizationData.mobileTriggerVerticalPosition) {
+                                this.updateMobileTriggerCombinedPosition(
+                                    this.customizationData.mobileTriggerHorizontalPosition, 
+                                    this.customizationData.mobileTriggerVerticalPosition
+                                );
+                            }
+                        }
+                    } else {
+                        // Apply desktop settings
+                        this.removeMobileResponsiveStyles();
+                        panel.classList.remove('mobile-mode');
+                    }
+                }
+            });
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
+        setupThrottledMutationObserver() {
+            if (!this.shadowRoot) return;
+            
+            // Throttled callback using requestAnimationFrame
+            const throttledCallback = this.throttle(() => {
+                const panel = this._cachedElements.panel || this.shadowRoot.getElementById('accessibility-panel');
+                if (panel) {
+                    this.ensureBasePanelCSS();
+                }
+            });
+            
+            const observer = new MutationObserver((mutations) => {
+                // Only process if panel style changed
+                const hasPanelStyleChange = mutations.some(mutation => 
+                    mutation.type === 'attributes' && 
+                    mutation.attributeName === 'style' &&
+                    mutation.target === this._cachedElements.panel
+                );
+                
+                if (hasPanelStyleChange) {
+                    throttledCallback();
+                }
+            });
+            
+            const panel = this.shadowRoot.getElementById('accessibility-panel');
+            if (panel) {
+                observer.observe(panel, { 
+                    attributes: true, 
+                    attributeFilter: ['style'] 
+                });
+                this._mutationObserver = observer;
+            }
+        }
+        
+        // PERFORMANCE OPTIMIZATION: Periodic style check with throttling
+        setupPeriodicStyleCheck() {
+            // Check every 3 seconds instead of 2, and use requestAnimationFrame
+            setInterval(() => {
+                const panel = this._cachedElements.panel || this.shadowRoot?.getElementById('accessibility-panel');
+                if (!panel) return;
+                
+                // Use requestAnimationFrame to batch the check
+                requestAnimationFrame(() => {
+                    // Check if panel is visible (using transform instead of display)
+                    const computedStyle = window.getComputedStyle(panel);
+                    const isVisible = computedStyle.visibility !== 'hidden' && 
+                                     computedStyle.opacity !== '0' &&
+                                     panel.style.transform !== 'translateX(-100%)';
+                    
+                    if (isVisible) {
+                        // Check if essential CSS properties are missing
+                        const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+                                             computedStyle.backgroundColor !== 'transparent';
+                        const hasBoxShadow = computedStyle.boxShadow !== 'none';
+                        const hasBorderRadius = computedStyle.borderRadius !== '0px';
+                        
+                        if (!hasBackground || !hasBoxShadow || !hasBorderRadius) {
+                            this.ensureBasePanelCSS();
+                        }
+                    }
+                });
+            }, 3000);
         }
     
         applyLanguage(language) {
@@ -29360,12 +29553,7 @@ class AccessibilityWidget {
             // Update action buttons
             const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
             if (resetBtn) {
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                resetBtn.textContent = '';
-                const icon1 = document.createElement('i');
-                icon1.className = 'fas fa-redo';
-                resetBtn.appendChild(icon1);
-                resetBtn.appendChild(document.createTextNode(' ' + (content.resetSettings || 'Reset Settings')));
+                resetBtn.innerHTML = `<i class="fas fa-redo"></i> ${content.resetSettings}`;
 
             } else {
                
@@ -29373,12 +29561,7 @@ class AccessibilityWidget {
             
             const statementBtn = this.shadowRoot?.querySelector('#statement');
             if (statementBtn) {
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                statementBtn.textContent = '';
-                const icon2 = document.createElement('i');
-                icon2.className = 'fas fa-file-alt';
-                statementBtn.appendChild(icon2);
-                statementBtn.appendChild(document.createTextNode(' ' + (content.statement || 'Statement')));
+                statementBtn.innerHTML = `<i class="fas fa-file-alt"></i> ${content.statement}`;
 
             } else {
 
@@ -29386,12 +29569,7 @@ class AccessibilityWidget {
             
             const hideBtn = this.shadowRoot?.querySelector('#hide-interface');
             if (hideBtn) {
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                hideBtn.textContent = '';
-                const icon3 = document.createElement('i');
-                icon3.className = 'fas fa-eye-slash';
-                hideBtn.appendChild(icon3);
-                hideBtn.appendChild(document.createTextNode(' ' + (content.hideInterface || 'Hide Interface')));
+                hideBtn.innerHTML = `<i class="fas fa-eye-slash"></i> ${content.hideInterface}`;
               
             } else {
 
@@ -29479,11 +29657,7 @@ class AccessibilityWidget {
             // Update keyboard navigation note
             const keyboardNavNote = this.shadowRoot?.querySelector('#keyboard-nav')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
             if (keyboardNavNote && content.keyboardNavNote) {
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                keyboardNavNote.textContent = '';
-                const strong1 = document.createElement('strong');
-                keyboardNavNote.appendChild(strong1);
-                keyboardNavNote.appendChild(document.createTextNode(' ' + (content.keyboardNavNote ? content.keyboardNavNote.replace('Note: ', '') : '')));
+                keyboardNavNote.innerHTML = `<strong></strong> ${content.keyboardNavNote.replace('Note: ', '')}`;
 
             }
             
@@ -29497,11 +29671,7 @@ class AccessibilityWidget {
             // Update screen reader note
             const screenReaderNote = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p:last-child');
             if (screenReaderNote && content.screenReaderNote) {
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                screenReaderNote.textContent = '';
-                const strong2 = document.createElement('strong');
-                screenReaderNote.appendChild(strong2);
-                screenReaderNote.appendChild(document.createTextNode(' ' + (content.screenReaderNote ? content.screenReaderNote.replace('Note: ', '') : '')));
+                screenReaderNote.innerHTML = `<strong></strong> ${content.screenReaderNote.replace('Note: ', '')}`;
               
             }
             
@@ -30271,6 +30441,7 @@ class AccessibilityWidget {
              
             }
             if (icon) {
+                console.log('[ICON HIDE] acceptHideInterface() - User accepted hiding interface');
                 icon.style.display = 'none';
                 icon.style.visibility = 'hidden';
                 icon.style.opacity = '0';
@@ -30569,17 +30740,22 @@ class AccessibilityWidget {
                 panel.style.setProperty('border-radius', '8px', 'important');
                 panel.style.setProperty('font-family', "'DM Sans', sans-serif", 'important');
                 panel.style.setProperty('pointer-events', 'auto', 'important');
-                panel.style.setProperty('overflow-y', 'auto', 'important');
-                panel.style.setProperty('overflow-x', 'hidden', 'important');
-                panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-                panel.style.setProperty('scroll-behavior', 'smooth', 'important');
-                panel.style.setProperty('overscroll-behavior', 'contain', 'important');
+                panel.style.setProperty('overflow-y', 'auto');
+                panel.style.setProperty('overflow-x', 'hidden');
+                panel.style.setProperty('-webkit-overflow-scrolling', 'touch');
+                panel.style.setProperty('scroll-behavior', 'smooth');
+                panel.style.setProperty('overscroll-behavior', 'contain');
+                
+                // Set panel to full viewport height
+                panel.style.setProperty('height', '100vh');
+                panel.style.setProperty('top', '0');
+                panel.style.setProperty('bottom', '0');
                 
                 // Add text wrapping to ensure all text is visible
-                panel.style.setProperty('word-wrap', 'break-word', 'important');
-                panel.style.setProperty('word-break', 'break-word', 'important');
-                panel.style.setProperty('overflow-wrap', 'break-word', 'important');
-                panel.style.setProperty('hyphens', 'auto', 'important');
+                panel.style.setProperty('word-wrap', 'break-word');
+                panel.style.setProperty('word-break', 'break-word');
+                panel.style.setProperty('overflow-wrap', 'break-word');
+                panel.style.setProperty('hyphens', 'auto');
                 
           
             }
@@ -30610,7 +30786,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '12.5vw', 'important');
                     panel.style.setProperty('font-size', '12px', 'important');
                     panel.style.setProperty('padding', '12px', 'important');
-                    panel.style.setProperty('max-height', '70vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     // Verify font-size was applied
                     const newPanelFontSize = window.getComputedStyle(panel).fontSize;
@@ -30644,7 +30822,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '10vw', 'important');
                     panel.style.setProperty('font-size', '13px', 'important');
                     panel.style.setProperty('padding', '14px', 'important');
-                    panel.style.setProperty('max-height', '75vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     // Apply mobile button stacking
                     this.applyMobileButtonStacking();
@@ -30678,7 +30858,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '0.5vw', 'important');
                     panel.style.setProperty('font-size', '15px');
                     panel.style.setProperty('padding', '18px', 'important');
-                    panel.style.setProperty('max-height', '85vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '55px', 'important');
                     icon.style.setProperty('height', '55px', 'important');
@@ -30694,7 +30876,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '1vw', 'important');
                     panel.style.setProperty('font-size', '14px');
                     panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('max-height', '80vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '50px', 'important');
                     icon.style.setProperty('height', '50px', 'important');
@@ -30710,7 +30894,9 @@ class AccessibilityWidget {
                     panel.style.setProperty('left', '5vw', 'important');
                     panel.style.setProperty('font-size', '14px');
                     panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('max-height', '80vh', 'important');
+                    panel.style.setProperty('height', '100vh', 'important');
+                    panel.style.setProperty('top', '0', 'important');
+                    panel.style.setProperty('bottom', '0', 'important');
                     
                     icon.style.setProperty('width', '50px', 'important');
                     icon.style.setProperty('height', '50px', 'important');
@@ -30901,8 +31087,22 @@ class AccessibilityWidget {
         }
         
         updateTriggerVisibility(hidden) {
-           
-            this.showIcon();
+            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            if (!icon) return;
+            
+            if (hidden) {
+                // Hide icon if hidden is true
+                console.log('[ICON HIDE] updateTriggerVisibility() - hidden=true');
+                icon.style.display = 'none';
+                icon.style.visibility = 'hidden';
+                icon.style.opacity = '0';
+            } else {
+                // Show icon if hidden is false
+                console.log('[ICON SHOW] updateTriggerVisibility() - hidden=false');
+                icon.style.display = '';
+                icon.style.visibility = 'visible';
+                icon.style.opacity = '1';
+            }
         }
         
         updateInterfaceColor(color) {
@@ -30913,50 +31113,98 @@ class AccessibilityWidget {
             }
         }
         
-        updateInterfacePosition() {
-          
+        // Ensure CSS is always present in Shadow DOM
+        // This method ensures CSS is loaded together with widget HTML at all times
+        ensureWidgetCSS() {
+            if (!this.shadowRoot) {
+                return; // Shadow root doesn't exist yet
+            }
             
+            // Check if CSS style element exists
+            let style = this.shadowRoot.querySelector('style[data-widget-css="true"]');
+            
+            if (!style) {
+                // CSS is missing - inject it immediately
+                style = document.createElement('style');
+                style.setAttribute('data-widget-css', 'true');
+                style.setAttribute('id', 'accessibility-widget-styles');
+                style.textContent = this.getWidgetCSS();
+                // Insert CSS FIRST in shadowRoot to ensure it loads before any HTML
+                this.shadowRoot.insertBefore(style, this.shadowRoot.firstChild);
+            } else {
+                // CSS exists - verify content is present
+                if (!style.textContent || style.textContent.trim().length === 0) {
+                    style.textContent = this.getWidgetCSS();
+                }
+            }
+        }
+        
+        updateInterfacePosition() {
             const icon = this.shadowRoot?.getElementById('accessibility-icon');
             const panel = this.shadowRoot?.getElementById('accessibility-panel');
             
-            if (icon && panel) {
-                const iconRect = icon.getBoundingClientRect();
-                const panelWidth = 500;
-                const panelHeight = 700;
-                
-               
-                
-                // Force remove all positioning first
-                panel.style.removeProperty('left');
-                panel.style.removeProperty('right');
-                panel.style.removeProperty('top');
-                panel.style.removeProperty('bottom');
-                panel.style.removeProperty('transform');
-    
-                // Position panel on top of the icon (centered horizontally)
-                const iconCenterX = iconRect.left + (iconRect.width / 2);
-                const panelLeft = iconCenterX - (panelWidth / 2);
-                
-                // Ensure panel doesn't go outside viewport horizontally
-                const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
-                
-                // Position panel vertically centered with icon
-                const iconCenterY = iconRect.top + (iconRect.height / 2);
-                const panelCenterY = iconCenterY;
-                const topPosition = panelCenterY - (panelHeight / 2);
-                
-                // Ensure panel doesn't go above or below viewport
-                const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
-                
-                panel.style.setProperty('left', `${finalLeft}px`, 'important');
-                panel.style.setProperty('right', 'auto', 'important');
-                panel.style.setProperty('bottom', 'auto', 'important');
-                panel.style.setProperty('top', `${finalTop}px`, 'important');
+            if (!icon || !panel) {
+                return; // Don't proceed if elements don't exist
+            }
+            
+            // CRITICAL: Only update position if icon is visible
+            // If icon is hidden, getBoundingClientRect() returns zeros and breaks positioning
+            const iconComputedStyle = window.getComputedStyle(icon);
+            const iconIsVisible = iconComputedStyle.display !== 'none' && 
+                                 iconComputedStyle.visibility !== 'hidden' &&
+                                 iconComputedStyle.opacity !== '0';
+            
+            if (!iconIsVisible) {
+                return; // Don't update position if icon is hidden
+            }
+            
+            const iconRect = icon.getBoundingClientRect();
+            
+            // If icon has zero dimensions, it's not properly rendered yet
+            if (iconRect.width === 0 || iconRect.height === 0) {
+                return; // Don't update position if icon isn't rendered
+            }
+            
+            const panelWidth = 500;
+            const panelHeight = 700;
+            
+            // Position panel on top of the icon (centered horizontally)
+            const iconCenterX = iconRect.left + (iconRect.width / 2);
+            const panelLeft = iconCenterX - (panelWidth / 2);
+            
+            // Ensure panel doesn't go outside viewport horizontally
+            const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
+            
+            // Position panel vertically centered with icon
+            const iconCenterY = iconRect.top + (iconRect.height / 2);
+            const panelCenterY = iconCenterY;
+            const topPosition = panelCenterY - (panelHeight / 2);
+            
+            // Ensure panel doesn't go above or below viewport
+            const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
+            
+            // Only update positioning, don't remove transform if panel is hidden
+            // Preserve panel's visibility state
+            const isPanelHidden = panel.style.transform === 'translateX(-100%)' || 
+                                 panel.style.visibility === 'hidden' ||
+                                 !panel.classList.contains('active');
+            
+            // Set left position
+            panel.style.setProperty('left', `${finalLeft}px`, 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            
+            // CRITICAL: Always maintain full viewport height
+            // Override any top position - panel should cover full height from top to bottom
+            panel.style.setProperty('height', '100vh', 'important');
+            panel.style.setProperty('top', '0', 'important');
+            panel.style.setProperty('bottom', '0', 'important');
+            
+            panel.style.setProperty('z-index', '100001', 'important');
+            panel.style.setProperty('position', 'fixed', 'important');
+            
+            // Only remove transform if panel is visible, otherwise preserve it
+            if (!isPanelHidden) {
                 panel.style.setProperty('transform', 'none', 'important');
-                panel.style.setProperty('z-index', '100001', 'important'); // Higher than icon
-                panel.style.setProperty('position', 'fixed', 'important');
-                
-           
             }
         }
     
@@ -31027,11 +31275,7 @@ class AccessibilityWidget {
                 const iconClass = iconMap[icon] || 'fas fa-universal-access';
                 
                 // Clear existing content and add the new icon
-                // SECURITY: Use safe DOM methods instead of innerHTML
-                iconElement.textContent = '';
-                const icon = document.createElement('i');
-                icon.className = iconClass;
-                iconElement.appendChild(icon);
+                iconElement.innerHTML = `<i class="${iconClass}"></i>`;
                 
                 // Ensure proper styling
                 iconElement.style.display = 'flex';
@@ -31052,9 +31296,8 @@ class AccessibilityWidget {
         }
         
         updateMobileVisibility(visible) {
-           
-            
-            this.showIcon();
+            // Icon visibility is handled explicitly in init() after customizations are applied
+            // No need to call showIcon() here as it may conflict with explicit icon showing
         }
         
         updateMobileTriggerPosition(direction, position) {
@@ -31605,7 +31848,7 @@ class AccessibilityWidget {
 
         }
     
-    
+    }
     
     
     
@@ -31725,61 +31968,33 @@ class AccessibilityWidget {
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                // SECURITY: Isolated API call with timeout and error handling
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-                
-                try {
-                    let resp = await fetch(`${base}/api/accessibility/validate-domain`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId }),
-                        signal: controller.signal
-                    });
-                    
-                    if (!resp.ok) {
-                        try {
-                            const err = await resp.json();
-                            if (resp.status === 401 && err && err.error) {
-                                await new Promise(r => setTimeout(r, 500));
-                                clearTimeout(timeoutId);
-                                const controller2 = new AbortController();
-                                const timeoutId2 = setTimeout(() => controller2.abort(), 10000);
-                                
-                                try {
-                                    resp = await fetch(`${base}/api/accessibility/validate-domain`, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId }),
-                                        signal: controller2.signal
-                                    });
-                                    clearTimeout(timeoutId2);
-                                } catch (retryError) {
-                                    clearTimeout(timeoutId2);
-                                    return { hasAccess: false };
-                                }
-                            }
-                        } catch {}
-                    }
-                    
-                    clearTimeout(timeoutId);
-                    
-                    if (!resp.ok) {
-                        return { hasAccess: false };
-                    }
-                    const v = await resp.json();
-                    if (v && v.isValid) {
-                        return { hasAccess: true };
-                    }
-                    return { hasAccess: false };
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.name === 'AbortError') {
-                        return { hasAccess: false };
-                    }
-                    return { hasAccess: false, error: error.message };
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                let resp = await fetch(`${base}/api/accessibility/validate-domain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId })
+                });
+                if (!resp.ok) {
+                    try {
+                        const err = await resp.json();
+                        if (resp.status === 401 && err && err.error) {
+                            await new Promise(r => setTimeout(r, 500));
+                            resp = await fetch(`${base}/api/accessibility/validate-domain`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ domain: currentDomain, siteId: siteIdParam, siteToken: siteTokenParam, visitorId })
+                            });
+                        }
+                    } catch {}
                 }
+                if (!resp.ok) {
+                    return { hasAccess: false };
+                }
+                const v = await resp.json();
+                if (v && v.isValid) {
+                    return { hasAccess: true };
+                }
+                return { hasAccess: false };
                 
             } catch (error) {
                 
