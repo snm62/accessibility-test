@@ -6585,7 +6585,36 @@ class AccessibilityWidget {
     
     
                 /* Widget panel font should NOT change when readable font is active */
-                /* Removed readable font styles for widget - widget keeps its original font always */
+                /* Explicitly set widget font even when readable-font class is on body */
+                :host(.readable-font) .accessibility-icon,
+                :host(.readable-font) .accessibility-panel,
+                :host .accessibility-icon,
+                :host .accessibility-panel {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-weight: normal;
+                    letter-spacing: normal;
+                }
+                
+                :host(.readable-font) .accessibility-panel h2,
+                :host(.readable-font) .accessibility-panel h3,
+                :host(.readable-font) .accessibility-panel h4,
+                :host(.readable-font) .accessibility-panel p,
+                :host(.readable-font) .accessibility-panel .action-btn,
+                :host(.readable-font) .accessibility-panel button,
+                :host(.readable-font) .accessibility-panel input,
+                :host(.readable-font) .accessibility-panel label,
+                :host .accessibility-panel h2,
+                :host .accessibility-panel h3,
+                :host .accessibility-panel h4,
+                :host .accessibility-panel p,
+                :host .accessibility-panel .action-btn,
+                :host .accessibility-panel button,
+                :host .accessibility-panel input,
+                :host .accessibility-panel label {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-weight: normal;
+                    letter-spacing: normal;
+                }
     
     
     
@@ -22363,22 +22392,17 @@ class AccessibilityWidget {
                         overflow-wrap: normal;
                     }
                     
-                    /* 1. HEADINGS - Apply readable font to headings (ONLY font-family, preserve all other properties) */
+                    /* 1. HEADINGS - Apply readable font to headings (ONLY font-family, all other properties preserved automatically) */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
                     .readable-font h4,
                     .readable-font h5,
                     .readable-font h6 {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Explicitly preserve font-size, letter-spacing, and line-height to prevent visual size changes */
-                        font-size: inherit !important;
-                        letter-spacing: inherit !important;
-                        line-height: inherit !important;
-                        font-weight: inherit !important;
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements (ONLY font-family, preserve all other properties) */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements (ONLY font-family, all other properties preserved automatically) */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22390,44 +22414,24 @@ class AccessibilityWidget {
                     .readable-font em,
                     .readable-font strong,
                     .readable-font b {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Explicitly preserve font-size, letter-spacing, and line-height to prevent visual size changes */
-                        font-size: inherit !important;
-                        letter-spacing: inherit !important;
-                        line-height: inherit !important;
-                        font-weight: inherit !important;
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 3. LINKS - Apply readable font to links (ONLY font-family, preserve all other properties) */
+                    /* 3. LINKS - Apply readable font to links (ONLY font-family, all other properties preserved automatically) */
                     .readable-font a {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Explicitly preserve font-size, letter-spacing, and line-height to prevent visual size changes */
-                        font-size: inherit !important;
-                        letter-spacing: inherit !important;
-                        line-height: inherit !important;
-                        font-weight: inherit !important;
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text (ONLY font-family, preserve all other properties) */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text (ONLY font-family, all other properties preserved automatically) */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Explicitly preserve font-size, letter-spacing, and line-height to prevent visual size changes */
-                        font-size: inherit !important;
-                        letter-spacing: inherit !important;
-                        line-height: inherit !important;
-                        font-weight: inherit !important;
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text (ONLY font-family, preserve all other properties) */
+                    /* 5. BUTTON TEXT - Apply readable font to button text (ONLY font-family, all other properties preserved automatically) */
                     .readable-font button {
-                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* Explicitly preserve font-size, letter-spacing, and line-height to prevent visual size changes */
-                        font-size: inherit !important;
-                        letter-spacing: inherit !important;
-                        line-height: inherit !important;
-                        font-weight: inherit !important;
+                        font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
                     /* EXCLUDE WIDGET FROM READABLE FONT - Widget should never get readable font styles */
@@ -22436,16 +22440,14 @@ class AccessibilityWidget {
                     .readable-font .accessibility-panel,
                     .readable-font .accessibility-icon,
                     .readable-font [data-ck-widget],
-                    .readable-font [class*="accessibility"] {
-                        font-family: revert !important;
-                        font-size: revert !important;
-                        letter-spacing: revert !important;
-                        line-height: revert !important;
-                        font-weight: revert !important;
+                    .readable-font [class*="accessibility"],
+                    .readable-font .accessibility-widget *,
+                    .readable-font #accessibility-widget *,
+                    .readable-font .accessibility-panel * {
+                        font-family: revert;
                     }
                     
-                    /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
-                    /* The MOST reliable way to exclude icon fonts and symbols */
+                    /* 6. PRESERVE ALL SYMBOLS AND ICONS - Exclude icon fonts from readable font */
                     .readable-font i,
                     .readable-font [class*="icon"],
                     .readable-font [class*="symbol"],
@@ -22455,7 +22457,7 @@ class AccessibilityWidget {
                     .readable-font [class*="material-icons"],
                     .readable-font .w-icon-dropdown-toggle,
                     .readable-font svg * {
-                        font-family: initial !important;
+                        font-family: initial;
                     }
                     
                     /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
@@ -22471,7 +22473,7 @@ class AccessibilityWidget {
                     .readable-font [aria-label*="arrow"],
                     .readable-font [aria-label*="chevron"],
                     .readable-font [aria-label*="caret"] {
-                        font-family: initial !important;
+                        font-family: initial;
                     }
                     
                     /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
