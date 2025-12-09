@@ -22362,10 +22362,8 @@ class AccessibilityWidget {
                 style.textContent = `
                     /* READABLE FONT: Only change font-family, no size or weight changes */
                     
-                    /* Prevent horizontal overflow - only on block containers */
-                    .readable-font {
-                        overflow-x: hidden;
-                    }
+                    /* Removed overflow-x: hidden from .readable-font - it was hiding slider content */
+                    /* Overflow is handled at html/body level only */
                     
                     /* Only break words in block-level containers, not inline elements */
                     .readable-font p,
@@ -22494,16 +22492,35 @@ class AccessibilityWidget {
                         font-family: initial !important;
                     }
                     
-                    /* 10. PREVENT HORIZONTAL OVERFLOW - Ensure content doesn't go out of screen */
-                    .readable-font * {
-                        max-width: 100% !important;
-                        box-sizing: border-box !important;
+                    /* 10. PREVENT HORIZONTAL OVERFLOW - Only on block containers, not all elements */
+                    /* Removed universal selector * - it was breaking sliders and positioned content */
+                    .readable-font p,
+                    .readable-font div,
+                    .readable-font section,
+                    .readable-font article,
+                    .readable-font main,
+                    .readable-font header,
+                    .readable-font footer {
+                        max-width: 100%;
+                        box-sizing: border-box;
+                    }
+                    
+                    /* Exclude sliders, carousels, and positioned content from overflow constraints */
+                    .readable-font [class*="slider"],
+                    .readable-font [class*="carousel"],
+                    .readable-font [class*="swiper"],
+                    .readable-font [data-slider],
+                    .readable-font [data-carousel],
+                    .readable-font [style*="position: absolute"],
+                    .readable-font [style*="position: fixed"] {
+                        max-width: none;
+                        overflow: visible;
                     }
                     
                     .readable-font body,
                     .readable-font html {
-                        overflow-x: hidden !important;
-                        width: 100% !important;
+                        overflow-x: hidden;
+                        width: 100%;
                     }
                 `;
                 document.head.appendChild(style);
