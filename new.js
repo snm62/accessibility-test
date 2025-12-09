@@ -6584,37 +6584,8 @@ class AccessibilityWidget {
     
     
     
-                /* Readable Font - Apply to widget elements (must come after default rules) */
-    
-                :host(.readable-font) .accessibility-icon,
-    
-                :host(.readable-font) .accessibility-panel {
-    
-                    font-family: 'Arial', 'Open Sans', sans-serif !important;
-    
-                }
-    
-    
-    
-                :host(.readable-font) .accessibility-panel h2,
-    
-                :host(.readable-font) .accessibility-panel h3,
-    
-                :host(.readable-font) .accessibility-panel h4,
-    
-                :host(.readable-font) .accessibility-panel p,
-    
-                :host(.readable-font) .accessibility-panel .action-btn,
-    
-                :host(.readable-font) .accessibility-panel button,
-    
-                :host(.readable-font) .accessibility-panel input,
-    
-                :host(.readable-font) .accessibility-panel label {
-    
-                    font-family: 'Arial', 'Open Sans', sans-serif !important;
-    
-                }
+                /* Widget panel font should NOT change when readable font is active */
+                /* Removed readable font styles for widget - widget keeps its original font always */
     
     
     
@@ -12336,7 +12307,7 @@ class AccessibilityWidget {
     
                     case 'vision-impaired':
     
-                       
+                        this.enableVisionImpaired();
     
                         break;
     
@@ -12513,6 +12484,7 @@ class AccessibilityWidget {
     
                     case 'vision-impaired':
     
+                        this.disableVisionImpaired();
     
                         break;
     
@@ -22393,7 +22365,7 @@ class AccessibilityWidget {
                         overflow-wrap: normal;
                     }
                     
-                    /* 1. HEADINGS - Apply readable font to headings (font-family only) */
+                    /* 1. HEADINGS - Apply readable font to headings (ONLY font-family, all other properties preserved) */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22401,11 +22373,10 @@ class AccessibilityWidget {
                     .readable-font h5,
                     .readable-font h6 {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* REMOVED: font-weight - causes text to appear larger */
-                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
+                        /* DO NOT set font-weight, letter-spacing, or line-height - preserve original values */
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements (font-family only) */
+                    /* 2. TEXT CONTENT - Apply readable font to text elements (ONLY font-family, all other properties preserved) */
                     .readable-font p,
                     .readable-font span,
                     .readable-font div,
@@ -22418,31 +22389,27 @@ class AccessibilityWidget {
                     .readable-font strong,
                     .readable-font b {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* REMOVED: font-weight - causes text to appear larger */
-                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
+                        /* DO NOT set font-weight, letter-spacing, or line-height - preserve original values */
                     }
                     
-                    /* 3. LINKS - Apply readable font to links (font-family only) */
+                    /* 3. LINKS - Apply readable font to links (ONLY font-family, all other properties preserved) */
                     .readable-font a {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* REMOVED: font-weight - causes text to appear larger */
-                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
+                        /* DO NOT set font-weight, letter-spacing, or line-height - preserve original values */
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text (font-family only) */
+                    /* 4. FORM ELEMENTS - Apply readable font to form text (ONLY font-family, all other properties preserved) */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* REMOVED: font-weight - causes text to appear larger */
-                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
+                        /* DO NOT set font-weight, letter-spacing, or line-height - preserve original values */
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text (font-family only) */
+                    /* 5. BUTTON TEXT - Apply readable font to button text (ONLY font-family, all other properties preserved) */
                     .readable-font button {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif !important;
-                        /* REMOVED: font-weight - causes text to appear larger */
-                        /* REMOVED: letter-spacing - causes text to be wider and overflow */
+                        /* DO NOT set font-weight, letter-spacing, or line-height - preserve original values */
                     }
                     
                     /* 6. PRESERVE ALL SYMBOLS AND ICONS (REVISED) */
@@ -25836,10 +25803,10 @@ class AccessibilityWidget {
                     
                     /* 1. ZOOM ENTIRE PAGE - Use zoom to scale everything up, but clip overflow */
                     html.vision-impaired {
-                        /* Use zoom to scale everything including images */
-                        zoom: 1.05;
+                        /* Use zoom to scale everything including images - increased for better visibility */
+                        zoom: 1.15;
                         /* Fallback for Firefox - use transform with proper containment */
-                        -moz-transform: scale(1.05);
+                        -moz-transform: scale(1.15);
                         -moz-transform-origin: top left;
                         /* CRITICAL: Clip any overflow from zoom */
                         overflow-x: hidden;
@@ -25853,14 +25820,14 @@ class AccessibilityWidget {
                         position: relative;
                     }
                     
-                    /* Adjust body width to compensate for zoom - when zoomed 1.05x, need smaller base width */
+                    /* Adjust body width to compensate for zoom - when zoomed 1.15x, need smaller base width */
                     body.vision-impaired {
-                        /* Slightly enhance text contrast */
-                        filter: contrast(1.1) brightness(1.05);
+                        /* Enhanced text contrast for better visibility */
+                        filter: contrast(1.15) brightness(1.08);
                         /* Prevent overflow - constrain body to fit within zoomed viewport */
                         overflow-x: hidden;
-                        width: calc(100vw / 1.05);
-                        max-width: calc(100vw / 1.05);
+                        width: calc(100vw / 1.15);
+                        max-width: calc(100vw / 1.15);
                         box-sizing: border-box;
                         margin: 0;
                         padding: 0;
