@@ -1917,18 +1917,28 @@ class AccessibilityWidget {
                             isMobile,
                             mobileVisibility
                         });
-                        icon.style.display = '';
-                        icon.style.visibility = 'visible';
-                        icon.style.opacity = '1';
+                        // Remove any conflicting inline styles first
+                        icon.style.removeProperty('display');
+                        icon.style.removeProperty('visibility');
+                        icon.style.removeProperty('opacity');
+                        // Use setProperty with !important to override any CSS rules
+                        icon.style.setProperty('display', 'flex', 'important');
+                        icon.style.setProperty('visibility', 'visible', 'important');
+                        icon.style.setProperty('opacity', '1', 'important');
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
+                        // Force a reflow to ensure styles are applied
+                        void icon.offsetHeight;
                         console.log('[ICON SHOW] Icon styles applied:', {
                             display: icon.style.display,
                             visibility: icon.style.visibility,
                             opacity: icon.style.opacity,
                             computedDisplay: window.getComputedStyle(icon).display,
-                            computedVisibility: window.getComputedStyle(icon).visibility
+                            computedVisibility: window.getComputedStyle(icon).visibility,
+                            computedOpacity: window.getComputedStyle(icon).opacity,
+                            iconOffsetHeight: icon.offsetHeight,
+                            iconOffsetWidth: icon.offsetWidth
                         });
                     } else {
                         console.log('[ICON HIDE] init() - Not showing icon due to settings', {
