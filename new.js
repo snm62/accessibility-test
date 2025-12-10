@@ -2576,6 +2576,16 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseContentScale();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseContentScale();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.increaseContentScale();
                     }
                 });
             }
@@ -2595,6 +2605,16 @@ class AccessibilityWidget {
                         e.preventDefault();
                         e.stopPropagation();
                         
+                        this.increaseContentScale();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseContentScale();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
                         this.increaseContentScale();
                     }
                 });
@@ -2622,6 +2642,16 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseFontSize();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseFontSize();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.increaseFontSize();
                     }
                 });
     
@@ -2646,6 +2676,16 @@ class AccessibilityWidget {
                         e.preventDefault();
                         e.stopPropagation();
                         
+                        this.increaseFontSize();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseFontSize();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
                         this.increaseFontSize();
                     }
                 });
@@ -2678,6 +2718,16 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseLetterSpacing();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseLetterSpacing();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.increaseLetterSpacing();
                     }
                 });
     
@@ -2702,6 +2752,16 @@ class AccessibilityWidget {
                         e.preventDefault();
                         e.stopPropagation();
                         
+                        this.increaseLetterSpacing();
+                    } else if (e.key === 'ArrowLeft') {
+                        // Left arrow decreases
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.decreaseLetterSpacing();
+                    } else if (e.key === 'ArrowRight') {
+                        // Right arrow increases
+                        e.preventDefault();
+                        e.stopPropagation();
                         this.increaseLetterSpacing();
                     }
                 });
@@ -2784,6 +2844,59 @@ class AccessibilityWidget {
                                             this.isKeyboardNavigation;
     
                 if (e.altKey && isKeyboardNavEnabled) {
+    
+                    // Arrow key adjustments for scaling values
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        // Check if user is typing in an input field - don't interfere
+                        const activeElement = document.activeElement;
+                        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.contentEditable === 'true')) {
+                            return; // Don't interfere with typing
+                        }
+                        
+                        e.preventDefault();
+                        
+                        if (e.shiftKey && e.ctrlKey) {
+                            // Alt+Shift+Ctrl+ArrowUp/Down: Adjust letter spacing
+                            if (e.key === 'ArrowUp') {
+                                this.increaseLetterSpacing();
+                                this.announceToScreenReader(`Letter spacing increased to ${this.letterSpacing}%`);
+                            } else {
+                                this.decreaseLetterSpacing();
+                                this.announceToScreenReader(`Letter spacing decreased to ${this.letterSpacing}%`);
+                            }
+                            return;
+                        } else if (e.ctrlKey) {
+                            // Alt+Ctrl+ArrowUp/Down: Adjust line height
+                            if (e.key === 'ArrowUp') {
+                                this.increaseLineHeight();
+                                this.announceToScreenReader(`Line height increased to ${this.lineHeight}%`);
+                            } else {
+                                this.decreaseLineHeight();
+                                this.announceToScreenReader(`Line height decreased to ${this.lineHeight}%`);
+                            }
+                            return;
+                        } else if (e.shiftKey) {
+                            // Alt+Shift+ArrowUp/Down: Adjust font size
+                            if (e.key === 'ArrowUp') {
+                                this.increaseFontSize();
+                                this.announceToScreenReader(`Font size increased to ${this.fontSize}%`);
+                            } else {
+                                this.decreaseFontSize();
+                                this.announceToScreenReader(`Font size decreased to ${this.fontSize}%`);
+                            }
+                            return;
+                        } else {
+                            // Alt+ArrowUp/Down: Adjust content scale
+                            if (e.key === 'ArrowUp') {
+                                this.increaseContentScale();
+                                this.announceToScreenReader(`Content scale increased to ${this.contentScale}%`);
+                            } else {
+                                this.decreaseContentScale();
+                                this.announceToScreenReader(`Content scale decreased to ${this.contentScale}%`);
+                            }
+                            return;
+                        }
+                    }
     
                     switch(e.key.toLowerCase()) {
     
@@ -7396,20 +7509,48 @@ class AccessibilityWidget {
     
                 }
     
-                /* Big Black Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
+                /* Big Black Cursor - Proper Arrow Cursor Shape - MAXIMUM SPECIFICITY */
     body.big-black-cursor,
     html body.big-black-cursor,
     body.big-black-cursor *,
     html body.big-black-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>') 0 0, auto !important;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M2 2 L2 30 L12 20 L18 26 L22 22 L14 14 L30 14 Z" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>') 2 2, auto !important;
     }
     
-    /* Big White Cursor - Proper Arrow Headed - MAXIMUM SPECIFICITY */
+    /* Big Black Cursor - Hand Pointer for Links */
+    body.big-black-cursor a,
+    body.big-black-cursor a *,
+    body.big-black-cursor button,
+    body.big-black-cursor button *,
+    body.big-black-cursor [role="button"],
+    body.big-black-cursor [role="button"] *,
+    body.big-black-cursor [onclick],
+    body.big-black-cursor [onclick] *,
+    body.big-black-cursor [tabindex]:not([tabindex="-1"]),
+    body.big-black-cursor [tabindex]:not([tabindex="-1"]) * {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M8 4 C8 1.5, 9.5 0, 11 0 C12.5 0, 14 1.5, 14 4 L14 10 L16 10 C17.5 10, 19 11.5, 19 13 C19 14.5, 17.5 16, 16 16 L14 16 L14 22 C14 25, 11.5 27, 8 27 C4.5 27, 2 25, 2 22 L2 16 L0 16 C-1.5 16, -3 14.5, -3 13 C-3 11.5, -1.5 10, 0 10 L2 10 L2 4 C2 1.5, 3.5 0, 5 0 C6.5 0, 8 1.5, 8 4 Z M20 6 L20 28 C20 31, 22.5 33, 25 33 C27.5 33, 30 31, 30 28 L30 6 C30 3, 28.5 2, 27 2 C25.5 2, 24 3, 24 6 L24 26 C24 27.5, 22.5 29, 21 29 C19.5 29, 18 27.5, 18 26 Z" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 4 L22 8 L26 8 L26 4 Z" fill="black"/></svg>') 10 4, pointer !important;
+    }
+    
+    /* Big White Cursor - Proper Arrow Cursor Shape - MAXIMUM SPECIFICITY */
     body.big-white-cursor,
     html body.big-white-cursor,
     body.big-white-cursor *,
     html body.big-white-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>') 0 0, auto !important;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M2 2 L2 30 L12 20 L18 26 L22 22 L14 14 L30 14 Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>') 2 2, auto !important;
+    }
+    
+    /* Big White Cursor - Hand Pointer for Links */
+    body.big-white-cursor a,
+    body.big-white-cursor a *,
+    body.big-white-cursor button,
+    body.big-white-cursor button *,
+    body.big-white-cursor [role="button"],
+    body.big-white-cursor [role="button"] *,
+    body.big-white-cursor [onclick],
+    body.big-white-cursor [onclick] *,
+    body.big-white-cursor [tabindex]:not([tabindex="-1"]),
+    body.big-white-cursor [tabindex]:not([tabindex="-1"]) * {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M8 4 C8 1.5, 9.5 0, 11 0 C12.5 0, 14 1.5, 14 4 L14 10 L16 10 C17.5 10, 19 11.5, 19 13 C19 14.5, 17.5 16, 16 16 L14 16 L14 22 C14 25, 11.5 27, 8 27 C4.5 27, 2 25, 2 22 L2 16 L0 16 C-1.5 16, -3 14.5, -3 13 C-3 11.5, -1.5 10, 0 10 L2 10 L2 4 C2 1.5, 3.5 0, 5 0 C6.5 0, 8 1.5, 8 4 Z M20 6 L20 28 C20 31, 22.5 33, 25 33 C27.5 33, 30 31, 30 28 L30 6 C30 3, 28.5 2, 27 2 C25.5 2, 24 3, 24 6 L24 26 C24 27.5, 22.5 29, 21 29 C19.5 29, 18 27.5, 18 26 Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 4 L22 8 L26 8 L26 4 Z" fill="white"/></svg>') 10 4, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -14348,6 +14489,16 @@ class AccessibilityWidget {
                             e.stopPropagation();
                          
                             this.decreaseLineHeight();
+                        } else if (e.key === 'ArrowLeft') {
+                            // Left arrow decreases
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.decreaseLineHeight();
+                        } else if (e.key === 'ArrowRight') {
+                            // Right arrow increases
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.increaseLineHeight();
                         }
                     });
     
@@ -14394,7 +14545,17 @@ class AccessibilityWidget {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             e.stopPropagation();
-                          
+                         
+                            this.increaseLineHeight();
+                        } else if (e.key === 'ArrowLeft') {
+                            // Left arrow decreases
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.decreaseLineHeight();
+                        } else if (e.key === 'ArrowRight') {
+                            // Right arrow increases
+                            e.preventDefault();
+                            e.stopPropagation();
                             this.increaseLineHeight();
                         }
                     });
@@ -15755,39 +15916,73 @@ class AccessibilityWidget {
             switch(section) {
     
                 case 'home':
-    
-                    this.scrollToElement('body');
-    
+                    // Try to find home link or navigate to root
+                    const homeLink = document.querySelector('a[href="/"], a[href*="home"], a[href*="index"], nav a[href="/"]');
+                    if (homeLink && homeLink.href) {
+                        window.location.href = homeLink.href;
+                    } else {
+                        // Navigate to root page
+                        const baseUrl = window.location.origin;
+                        window.location.href = baseUrl + '/';
+                    }
                     break;
     
                 case 'header':
-    
                     this.scrollToElement('header, .header, nav, .navbar');
-    
                     break;
     
                 case 'footer':
-    
                     this.scrollToElement('footer, .footer');
-    
                     break;
     
                 case 'main-content':
-    
                     this.scrollToElement('main, .main, .content, .container');
-    
                     break;
     
                 case 'about-us':
-    
-                    this.scrollToElement('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
-    
+                    // First try to find about section on current page
+                    const aboutElement = this.findElementBySelector('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
+                    if (aboutElement) {
+                        this.scrollToElement('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
+                    } else {
+                        // Try to find about link in navigation
+                        const aboutLink = document.querySelector('a[href*="about"], nav a[href*="about"], .nav a[href*="about"]');
+                        if (aboutLink && aboutLink.href) {
+                            window.location.href = aboutLink.href;
+                        } else {
+                            // Try common about page paths
+                            const baseUrl = window.location.origin;
+                            const aboutPaths = ['/about', '/about-us', '/aboutus', '/about.html'];
+                            for (const path of aboutPaths) {
+                                // Try to navigate to about page
+                                window.location.href = baseUrl + path;
+                                break;
+                            }
+                        }
+                    }
                     break;
     
                 case 'portfolio':
-    
-                    this.scrollToElement('[id*="portfolio"], [class*="portfolio"], h1:contains("Portfolio"), h2:contains("Portfolio")');
-    
+                    // First try to find portfolio section on current page
+                    const portfolioElement = this.findElementBySelector('[id*="portfolio"], [class*="portfolio"], h1:contains("Portfolio"), h2:contains("Portfolio")');
+                    if (portfolioElement) {
+                        this.scrollToElement('[id*="portfolio"], [class*="portfolio"], h1:contains("Portfolio"), h2:contains("Portfolio")');
+                    } else {
+                        // Try to find portfolio link in navigation
+                        const portfolioLink = document.querySelector('a[href*="portfolio"], nav a[href*="portfolio"], .nav a[href*="portfolio"]');
+                        if (portfolioLink && portfolioLink.href) {
+                            window.location.href = portfolioLink.href;
+                        } else {
+                            // Try common portfolio page paths
+                            const baseUrl = window.location.origin;
+                            const portfolioPaths = ['/portfolio', '/work', '/projects', '/portfolio.html'];
+                            for (const path of portfolioPaths) {
+                                // Try to navigate to portfolio page
+                                window.location.href = baseUrl + path;
+                                break;
+                            }
+                        }
+                    }
                     break;
     
                 default:
@@ -15796,6 +15991,26 @@ class AccessibilityWidget {
     
             }
     
+        }
+        
+        findElementBySelector(selector) {
+            // Try multiple selectors
+            const selectors = selector.split(', ');
+            let element = null;
+            
+            for (const sel of selectors) {
+                if (sel.includes(':contains')) {
+                    // Handle text content search
+                    const text = sel.match(/:contains\("([^"]+)"\)/)[1];
+                    element = this.findElementByText(text);
+                } else {
+                    element = document.querySelector(sel);
+                }
+                
+                if (element) break;
+            }
+            
+            return element;
         }
     
     
@@ -18316,14 +18531,25 @@ class AccessibilityWidget {
     
           
     
-            // Remove light contrast if active
-            document.body.classList.remove('light-contrast');
+            // Disable light contrast if active (mutually exclusive)
+            if (this.settings['light-contrast']) {
+                this.settings['light-contrast'] = false;
+                document.body.classList.remove('light-contrast');
+                this.removeLightContrastCSS();
+                this.stopLightContrastMonitoring();
+                // Update toggle switch
+                this.updateToggleSwitch('light-contrast', false);
+            }
 
             // Add dark contrast class
             document.body.classList.add('dark-contrast');
+            this.settings['dark-contrast'] = true;
 
             // Inject dark contrast CSS
             this.injectDarkContrastCSS();
+            
+            // Save settings
+            this.saveSettings();
     
     
         }
@@ -18333,9 +18559,13 @@ class AccessibilityWidget {
         disableDarkContrast() {
     
             document.body.classList.remove('dark-contrast');
+            this.settings['dark-contrast'] = false;
 
             // Remove dark contrast CSS
             this.removeDarkContrastCSS();
+            
+            // Save settings
+            this.saveSettings();
     
            
     
@@ -18348,17 +18578,27 @@ class AccessibilityWidget {
         enableLightContrast() {
     
     
-            // Remove dark contrast if active
-            document.body.classList.remove('dark-contrast');
+            // Disable dark contrast if active (mutually exclusive)
+            if (this.settings['dark-contrast']) {
+                this.settings['dark-contrast'] = false;
+                document.body.classList.remove('dark-contrast');
+                this.removeDarkContrastCSS();
+                // Update toggle switch
+                this.updateToggleSwitch('dark-contrast', false);
+            }
 
             // Add light contrast class
             document.body.classList.add('light-contrast');
+            this.settings['light-contrast'] = true;
 
             // Inject light contrast CSS
             this.injectLightContrastCSS();
             
             // Start monitoring for dynamically added dark elements
             this.startLightContrastMonitoring();
+            
+            // Save settings
+            this.saveSettings();
     
       
     
@@ -18369,12 +18609,16 @@ class AccessibilityWidget {
         disableLightContrast() {
     
             document.body.classList.remove('light-contrast');
+            this.settings['light-contrast'] = false;
 
             // Remove light contrast CSS
             this.removeLightContrastCSS();
             
             // Stop monitoring for dynamically added elements
             this.stopLightContrastMonitoring();
+            
+            // Save settings
+            this.saveSettings();
     
             
             // Refresh the page to ensure all elements return to their original state
@@ -20076,14 +20320,12 @@ class AccessibilityWidget {
                     }
                     
                     if (isMuteSoundActive) {
-                        // Immediately mute and pause to prevent any sound
+                        // Mute the video but still allow it to play (visual content)
                         this.muted = true;
                         this.volume = 0;
-                        if (!this.paused) {
-                            this.pause();
-                        }
-                        // Return a resolved promise that doesn't actually play
-                        return Promise.resolve();
+                        // Don't pause - allow video to play visually, just muted
+                        // Call the original play method so video can still play
+                        return originalVideoPlay.apply(this, arguments);
                     }
                     // Otherwise, use original (normal behavior)
                     return originalVideoPlay.apply(this, arguments);
@@ -20661,13 +20903,18 @@ class AccessibilityWidget {
                 
                 // Handle different types of media elements
                 if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-                    // Standard HTML5 media - force mute and pause immediately
+                    // Standard HTML5 media - mute immediately
                     try {
                         element.muted = true;
                         element.volume = 0;
-                        element.pause(); // Always pause, even if already paused
-                        element.currentTime = 0; // Reset to beginning
-                        // Add event listeners to prevent unmuting or playing
+                        // For audio: pause to stop sound
+                        // For video: don't pause - allow visual playback, just muted
+                        if (element.tagName === 'AUDIO') {
+                            element.pause(); // Always pause audio, even if already paused
+                            element.currentTime = 0; // Reset to beginning
+                        }
+                        // Videos can continue playing visually, just muted
+                        // Add event listeners to prevent unmuting
                         this.addMuteEventListeners(element);
                         totalMuted++;
                     } catch (e) {
@@ -20756,9 +21003,14 @@ class AccessibilityWidget {
                     try {
                         source.muted = true;
                         source.volume = 0;
-                        source.pause(); // Always pause
-                        source.currentTime = 0; // Reset to beginning
-                        // Add event listeners to prevent unmuting or playing
+                        // For audio: pause to stop sound
+                        // For video: don't pause - allow visual playback, just muted
+                        if (source.tagName === 'AUDIO') {
+                            source.pause(); // Always pause audio
+                            source.currentTime = 0; // Reset to beginning
+                        }
+                        // Videos can continue playing visually, just muted
+                        // Add event listeners to prevent unmuting
                         this.addMuteEventListeners(source);
                         totalMuted++;
                     } catch (e) {
@@ -20784,8 +21036,13 @@ class AccessibilityWidget {
                                 try {
                                     element.volume = 0;
                                     element.muted = true;
-                                    element.pause(); // Always pause
-                                    element.currentTime = 0; // Reset to beginning
+                                    // For audio: pause to stop sound
+                                    // For video: don't pause - allow visual playback, just muted
+                                    if (element.tagName === 'AUDIO') {
+                                        element.pause(); // Always pause audio
+                                        element.currentTime = 0; // Reset to beginning
+                                    }
+                                    // Videos can continue playing visually, just muted
                                     totalMuted++;
                                 } catch (e) {
                                     // Ignore errors for iframe content (CORS)
@@ -20821,7 +21078,12 @@ class AccessibilityWidget {
                         [...shadowAudio, ...shadowVideo].forEach(element => {
                             element.muted = true;
                             element.volume = 0;
-                            if (!element.paused) element.pause();
+                            // For audio: pause to stop sound
+                            // For video: don't pause - allow visual playback, just muted
+                            if (element.tagName === 'AUDIO' && !element.paused) {
+                                element.pause();
+                            }
+                            // Videos can continue playing visually, just muted
                             totalMuted++;
                         });
                     } catch (e) {
@@ -21122,9 +21384,12 @@ class AccessibilityWidget {
                 if (this.settings['mute-sound']) {
                     element.volume = 0;
                     element.muted = true;
-                    if (!element.paused) {
+                    // For audio: pause to stop sound
+                    // For video: don't pause - allow visual playback, just muted
+                    if (element.tagName === 'AUDIO' && !element.paused) {
                         element.pause();
                     }
+                    // Videos can continue playing visually, just muted
                 }
             };
     
@@ -21141,7 +21406,15 @@ class AccessibilityWidget {
     
             const playHandler = (e) => {
                 if (this.settings['mute-sound']) {
-                    element.pause();
+                    // For audio: pause to stop sound
+                    // For video: just ensure it's muted, but allow playback
+                    if (element.tagName === 'AUDIO') {
+                        element.pause();
+                    } else if (element.tagName === 'VIDEO') {
+                        // Ensure video is muted but allow it to play
+                        element.muted = true;
+                        element.volume = 0;
+                    }
                 }
             };
     
@@ -25834,6 +26107,20 @@ class AccessibilityWidget {
         // Seizure Safe Profile Methods
     
         enableSeizureSafe(immediate = false) {
+            // Disable other mutually exclusive features
+            if (this.settings['vision-impaired']) {
+                this.disableVisionImpaired();
+                this.updateToggleSwitch('vision-impaired', false);
+            }
+            if (this.settings['adhd-friendly']) {
+                this.disableADHDFriendly();
+                this.updateToggleSwitch('adhd-friendly', false);
+            }
+            if (this.settings['cognitive-disability']) {
+                this.disableCognitiveDisability();
+                this.updateToggleSwitch('cognitive-disability', false);
+            }
+            
             this.settings['seizure-safe'] = true;
             document.body.classList.add('seizure-safe');
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
@@ -26022,6 +26309,20 @@ class AccessibilityWidget {
         // Vision Impaired - comprehensive scaling and contrast enhancement
         enableVisionImpaired() {
             try {
+                // Disable other mutually exclusive features
+                if (this.settings['seizure-safe']) {
+                    this.disableSeizureSafe();
+                    this.updateToggleSwitch('seizure-safe', false);
+                }
+                if (this.settings['adhd-friendly']) {
+                    this.disableADHDFriendly();
+                    this.updateToggleSwitch('adhd-friendly', false);
+                }
+                if (this.settings['cognitive-disability']) {
+                    this.disableCognitiveDisability();
+                    this.updateToggleSwitch('cognitive-disability', false);
+                }
+                
                 this.settings['vision-impaired'] = true;
                 document.body.classList.add('vision-impaired');
                 document.documentElement.classList.add('vision-impaired');
@@ -27724,6 +28025,19 @@ class AccessibilityWidget {
         // ADHD Friendly Profile Methods
     
         enableADHDFriendly() {
+            // Disable other mutually exclusive features
+            if (this.settings['seizure-safe']) {
+                this.disableSeizureSafe();
+                this.updateToggleSwitch('seizure-safe', false);
+            }
+            if (this.settings['vision-impaired']) {
+                this.disableVisionImpaired();
+                this.updateToggleSwitch('vision-impaired', false);
+            }
+            if (this.settings['cognitive-disability']) {
+                this.disableCognitiveDisability();
+                this.updateToggleSwitch('cognitive-disability', false);
+            }
     
             this.settings['adhd-friendly'] = true;
     
@@ -28005,11 +28319,29 @@ class AccessibilityWidget {
         // Cognitive Disability Profile Methods
     
         enableCognitiveDisability() {
+            // Disable other mutually exclusive features
+            if (this.settings['seizure-safe']) {
+                this.disableSeizureSafe();
+                this.updateToggleSwitch('seizure-safe', false);
+            }
+            if (this.settings['vision-impaired']) {
+                this.disableVisionImpaired();
+                this.updateToggleSwitch('vision-impaired', false);
+            }
+            if (this.settings['adhd-friendly']) {
+                this.disableADHDFriendly();
+                this.updateToggleSwitch('adhd-friendly', false);
+            }
+            
+            this.settings['cognitive-disability'] = true;
             document.body.classList.add('cognitive-disability');
             
             // Add CSS to minimize layout impact
             this.addCognitiveCSS();
             this.addCognitiveBoxes();
+            
+            // Save settings
+            this.saveSettings();
             
         }
         
@@ -28056,6 +28388,7 @@ class AccessibilityWidget {
     
     
         disableCognitiveDisability() {
+            this.settings['cognitive-disability'] = false;
             document.body.classList.remove('cognitive-disability');
             
             // Remove cognitive CSS
@@ -28065,6 +28398,9 @@ class AccessibilityWidget {
             }
             
             this.removeCognitiveBoxes();
+            
+            // Save settings
+            this.saveSettings();
             
             
 
