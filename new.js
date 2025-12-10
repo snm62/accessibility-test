@@ -1807,7 +1807,15 @@ class AccessibilityWidget {
                 return;
             }
     
+            console.log('[INIT] Creating widget...');
             this.createWidget();
+            console.log('[INIT] Widget created, checking if icon exists...');
+            const iconCheck = this.shadowRoot?.getElementById('accessibility-icon');
+            console.log('[INIT] Icon check after createWidget():', {
+                hasIcon: !!iconCheck,
+                iconDisplay: iconCheck ? iconCheck.style.display : 'N/A',
+                iconVisibility: iconCheck ? iconCheck.style.visibility : 'N/A'
+            });
             
             this.loadSettings();
     
@@ -1852,25 +1860,55 @@ class AccessibilityWidget {
             
             // Fetch customization data (BLOCKING - load on page load for immediate customization)
             // This ensures icon appears with user's customization immediately, no delays
+            console.log('[INIT] Starting customization data fetch...');
             try {
                 const customizationData = await this.fetchCustomizationData();
+                console.log('[INIT] fetchCustomizationData() returned:', {
+                    hasData: !!customizationData,
+                    hasCustomization: !!(customizationData && customizationData.customization),
+                    customizationKeys: customizationData && customizationData.customization ? Object.keys(customizationData.customization) : [],
+                    fullData: customizationData
+                });
+                
                 if (customizationData && customizationData.customization) {
+                    console.log('[INIT] Applying customizations...');
                     // Apply customizations BEFORE showing icon
                     this.applyCustomizations(customizationData.customization);
                     // Also apply accessibility profiles if present
                     if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
                         this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
                     }
+                    console.log('[INIT] Customizations applied successfully');
+                } else {
+                    console.warn('[INIT] No customization data to apply');
                 }
                 
                 // Show icon AFTER customizations are applied
                 // This ensures icon appears with correct customization (color, position, etc.)
                 // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
+                // IMPORTANT: Icon only shows if customization data exists (as per user requirement)
                 const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                console.log('[INIT] Checking icon visibility conditions:', {
+                    hasIcon: !!icon,
+                    hasCustomizationData: !!customizationData,
+                    hasCustomization: !!(customizationData && customizationData.customization),
+                    iconElement: icon,
+                    iconCurrentDisplay: icon ? icon.style.display : 'N/A',
+                    iconCurrentVisibility: icon ? icon.style.visibility : 'N/A',
+                    iconCurrentOpacity: icon ? icon.style.opacity : 'N/A'
+                });
+                
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
                     const isMobile = window.innerWidth <= 768;
                     const mobileVisibility = customizationData.customization.showOnMobile;
+                    
+                    console.log('[INIT] Icon visibility settings:', {
+                        hideTrigger,
+                        isMobile,
+                        mobileVisibility,
+                        shouldShow: !hideTrigger || (isMobile && mobileVisibility === 'Show')
+                    });
                     
                     // Only show if not hidden by settings
                     if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
@@ -1885,6 +1923,13 @@ class AccessibilityWidget {
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
+                        console.log('[ICON SHOW] Icon styles applied:', {
+                            display: icon.style.display,
+                            visibility: icon.style.visibility,
+                            opacity: icon.style.opacity,
+                            computedDisplay: window.getComputedStyle(icon).display,
+                            computedVisibility: window.getComputedStyle(icon).visibility
+                        });
                     } else {
                         console.log('[ICON HIDE] init() - Not showing icon due to settings', {
                             hideTrigger,
@@ -1892,19 +1937,21 @@ class AccessibilityWidget {
                             mobileVisibility
                         });
                     }
+                } else {
+                    console.warn('[ICON HIDE] init() - No customization data available', {
+                        hasCustomizationData: !!customizationData,
+                        hasCustomization: !!(customizationData && customizationData.customization),
+                        hasIcon: !!icon,
+                        siteId: this.siteId,
+                        reason: !icon ? 'Icon element not found' : 
+                                !customizationData ? 'No customization data returned' : 
+                                'Customization object missing'
+                    });
                 }
             } catch (err) {
-                // If fetch fails, show icon with defaults
-                console.log('[ICON SHOW] init() - Fetch failed, showing icon with defaults', err);
-                const icon = this.shadowRoot?.getElementById('accessibility-icon');
-                if (icon) {
-                    icon.style.display = '';
-                    icon.style.visibility = 'visible';
-                    icon.style.opacity = '1';
-                    // Mark that icon was explicitly shown during initialization
-                    // This prevents showIcon() from hiding it during resize events
-                    this._iconExplicitlyShown = true;
-                }
+                // Log error but don't show icon (user wants icon only with customization data)
+                console.error('[ICON HIDE] init() - Error fetching customization data:', err);
+                console.error('[ICON HIDE] Error stack:', err.stack);
             }
             
             // Set up periodic payment status refresh (every 5 minutes)
@@ -29183,12 +29230,15 @@ class AccessibilityWidget {
         // Enhanced Panel Toggle with Screen Reader Support
     
         togglePanel() {
-            // PERFORMANCE OPTIMIZATION: Use cached elements
-            const elements = this.getCachedElements();
+            // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
+            const elements = this.getCachedElements(true); // Force refresh to get current elements
             const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
             const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
     
-            if (!panel || !icon) return;
+            if (!panel || !icon) {
+                console.warn('[PANEL TOGGLE] Panel or icon not found', { panel: !!panel, icon: !!icon });
+                return;
+            }
             
             // PERFORMANCE OPTIMIZATION: Use CSS transforms instead of display toggling
             const isCurrentlyOpen = panel.classList.contains('active');
@@ -29310,31 +29360,50 @@ class AccessibilityWidget {
         // Staging domains: Always return true (free, no API call)
         // Custom domains: Always check payment status fresh (no cache, real-time)
         async checkPaymentStatusRealTime() {
+            console.log('[PAYMENT] checkPaymentStatusRealTime() called');
             // Staging domains are free - no payment check needed
-            if (this.isStagingDomain()) {
+            const isStaging = this.isStagingDomain();
+            console.log('[PAYMENT] Domain check:', {
+                isStaging,
+                hostname: window.location.hostname
+            });
+            
+            if (isStaging) {
+                console.log('[PAYMENT] Staging domain detected, returning true (free)');
                 return true; // Fast return, no API call
             }
             
             // Custom domains: Always check payment status fresh (no cache)
             // This ensures we detect real-time payment changes (payments/cancellations)
-            return await this.checkPaymentStatus();
+            console.log('[PAYMENT] Custom domain detected, checking payment status...');
+            const result = await this.checkPaymentStatus();
+            console.log('[PAYMENT] Payment status result:', result);
+            return result;
         }
         
         // Fetch customization data from the API - OPTIMIZED for speed
         async fetchCustomizationData() {
-          
+            console.log('[FETCH] fetchCustomizationData() called');
             
             try {
                 // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
                 // This reduces total wait time significantly
+                console.log('[FETCH] Starting parallel payment check and siteId fetch...');
                 const [paymentValid, siteId] = await Promise.all([
                     this.checkPaymentStatusRealTime(),
                     this.getSiteId()
                 ]);
                 
+                console.log('[FETCH] Payment and siteId results:', {
+                    paymentValid,
+                    siteId,
+                    paymentType: typeof paymentValid
+                });
+                
                 // Only disable widget if payment is definitively invalid (false)
                 // Don't disable on check failures (null) - preserve current state
                 if (paymentValid === false) {
+                    console.warn('[FETCH] Payment invalid, disabling widget');
                     this.disableWidget();
                     return null;
                 }
@@ -29343,15 +29412,16 @@ class AccessibilityWidget {
                 
                 // Fast fail if no siteId
                 if (!siteId) {
-                   
+                    console.warn('[FETCH] No siteId found, returning null');
                     return null;
                 }
                 
                 // Cache siteId for future use
                 this.siteId = siteId;
+                console.log('[FETCH] SiteId cached:', siteId);
                 
                 if (!this.kvApiUrl) {
-                    
+                    console.warn('[FETCH] No kvApiUrl configured, returning null');
                     return null;
                 }
                 
@@ -29359,6 +29429,12 @@ class AccessibilityWidget {
                 const cacheBuster = `_t=${Date.now()}`;
                 const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
                 const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
+                
+                console.log('[FETCH] Making API request:', {
+                    apiUrl,
+                    baseCfg,
+                    kvApiUrl: this.kvApiUrl
+                });
                 
                 // OPTIMIZED: Minimal headers, no unnecessary data
                 const response = await fetch(apiUrl, {
@@ -29370,19 +29446,43 @@ class AccessibilityWidget {
                     keepalive: false
                 });
                 
-             
+                console.log('[FETCH] API response received:', {
+                    ok: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
                 
                 if (!response.ok) {
-                    // Don't read error text if not needed (saves time)
+                    // Log error for debugging
+                    const errorText = await response.text().catch(() => 'Unable to read error response');
+                    console.error('[CUSTOMIZATION FETCH] API error:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        url: apiUrl,
+                        errorBody: errorText
+                    });
                     return null;
                 }
                 
                 const data = await response.json();
+                console.log('[FETCH] API response data:', {
+                    hasData: !!data,
+                    hasCustomization: !!(data && data.customization),
+                    keys: data ? Object.keys(data) : [],
+                    customizationKeys: data && data.customization ? Object.keys(data.customization) : [],
+                    fullData: data
+                });
 
                 return data;
                 
             } catch (error) {
-             
+                // Log error for debugging
+                console.error('[CUSTOMIZATION FETCH] Fetch failed:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 return null;
             }
         }
@@ -29437,8 +29537,10 @@ class AccessibilityWidget {
         // OPTIMIZED: Cache siteId to avoid repeated DOM queries
         // SECURITY: siteId is public (from script URL), caching in memory is safe
         async getSiteId() {
+          console.log('[GET_SITE_ID] getSiteId() called');
           // Return cached siteId if available
           if (this.siteId) {
+            console.log('[GET_SITE_ID] Returning cached siteId:', this.siteId);
             return this.siteId;
           }
           
@@ -29447,9 +29549,20 @@ class AccessibilityWidget {
                            document.querySelector('script[src*="test.js"]') ||
                            document.querySelector('script[src*="new.js"]') ||
                            document.querySelector('script[src*="accessibility"]');
+            console.log('[GET_SITE_ID] Script element found:', {
+              hasScriptEl: !!scriptEl,
+              hasSrc: !!(scriptEl && scriptEl.src),
+              src: scriptEl ? scriptEl.src : 'N/A'
+            });
+            
             if (scriptEl && scriptEl.src) {
               const u = new URL(scriptEl.src);
               const sid = u.searchParams.get('siteId');
+              console.log('[GET_SITE_ID] Parsed URL:', {
+                url: scriptEl.src,
+                siteId: sid
+              });
+              
               if (sid) {
                 // SECURITY: Cache in memory only (not localStorage/cookies)
                 // This is safe because:
@@ -29458,10 +29571,18 @@ class AccessibilityWidget {
                 // 3. Cleared on page reload
                 // 4. No cross-site leakage
                 this.siteId = sid;
+                console.log('[GET_SITE_ID] SiteId cached and returned:', sid);
                 return sid;
+              } else {
+                console.warn('[GET_SITE_ID] No siteId found in URL params');
               }
+            } else {
+              console.warn('[GET_SITE_ID] No script element or src found');
             }
-          } catch {}
+          } catch (error) {
+            console.error('[GET_SITE_ID] Error getting siteId:', error);
+          }
+          console.warn('[GET_SITE_ID] Returning null - no siteId found');
           return null;
         }
     
