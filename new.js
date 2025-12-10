@@ -1932,17 +1932,69 @@ class AccessibilityWidget {
                         // Force a reflow to ensure styles are applied
                         void icon.offsetHeight;
                         // Double-check and force styles again after reflow
+                        // Inject CSS rule into shadow DOM to force icon visibility
+                        // This overrides any CSS rules that might be hiding it
+                        const shadowRoot = icon.getRootNode();
+                        if (shadowRoot && shadowRoot.nodeType === 11) { // ShadowRoot
+                            const forceVisibleStyle = document.createElement('style');
+                            forceVisibleStyle.id = 'force-icon-visible';
+                            forceVisibleStyle.textContent = `
+                                #accessibility-icon {
+                                    display: flex !important;
+                                    visibility: visible !important;
+                                    opacity: 1 !important;
+                                    pointer-events: auto !important;
+                                }
+                            `;
+                            // Remove existing force style if present
+                            const existing = shadowRoot.getElementById('force-icon-visible');
+                            if (existing) {
+                                existing.remove();
+                            }
+                            shadowRoot.appendChild(forceVisibleStyle);
+                            console.log('[ICON SHOW] Injected CSS rule to force visibility');
+                        }
+                        
                         requestAnimationFrame(() => {
                             icon.style.setProperty('display', 'flex', 'important');
                             icon.style.setProperty('visibility', 'visible', 'important');
                             icon.style.setProperty('opacity', '1', 'important');
                             icon.style.setProperty('pointer-events', 'auto', 'important');
+                            
+                            const computed = window.getComputedStyle(icon);
                             console.log('[ICON SHOW] After requestAnimationFrame:', {
-                                computedDisplay: window.getComputedStyle(icon).display,
-                                computedVisibility: window.getComputedStyle(icon).visibility,
-                                computedOpacity: window.getComputedStyle(icon).opacity,
-                                computedPointerEvents: window.getComputedStyle(icon).pointerEvents
+                                computedDisplay: computed.display,
+                                computedVisibility: computed.visibility,
+                                computedOpacity: computed.opacity,
+                                computedPointerEvents: computed.pointerEvents,
+                                iconOffsetHeight: icon.offsetHeight,
+                                iconOffsetWidth: icon.offsetWidth,
+                                iconZIndex: computed.zIndex,
+                                iconPosition: computed.position
                             });
+                            
+                            // Verify click listener is attached
+                            const hasClickListeners = icon.onclick !== null || 
+                                (icon.getEventListeners && icon.getEventListeners('click')?.length > 0);
+                            console.log('[ICON SHOW] Click listener check:', {
+                                hasClickListeners,
+                                iconOnClick: icon.onclick,
+                                note: 'If hasClickListeners is false, bindEvents() may not have run yet'
+                            });
+                            
+                            // Add a test mousedown listener to verify mouse events work
+                            icon.addEventListener('mousedown', (e) => {
+                                console.log('[ICON MOUSEDOWN] Mouse down detected!', {
+                                    event: e,
+                                    target: e.target,
+                                    currentTarget: e.currentTarget
+                                });
+                            }, { once: true });
+                            
+                            // Also try mouseenter to verify hover works
+                            icon.addEventListener('mouseenter', () => {
+                                console.log('[ICON MOUSEENTER] Mouse entered icon area');
+                            }, { once: true });
                         });
                         console.log('[ICON SHOW] Icon styles applied:', {
                             display: icon.style.display,
@@ -2095,9 +2147,13 @@ class AccessibilityWidget {
             
     
             if (icon) {
-    
+                console.log('[BIND EVENTS] Attaching click listener to icon', {
+                    icon: icon,
+                    iconComputedVisibility: window.getComputedStyle(icon).visibility,
+                    iconComputedOpacity: window.getComputedStyle(icon).opacity,
+                    iconComputedPointerEvents: window.getComputedStyle(icon).pointerEvents
+                });
                 // Click event
-    
                 icon.addEventListener('click', (e) => {
                     console.log('[ICON CLICK] Icon clicked!', {
                         event: e,
