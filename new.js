@@ -187,13 +187,71 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations */
-                body.seizure-safe *[class*="scroll"], body.seizure-safe *[class*="progress"], body.seizure-safe *[class*="bar"], body.seizure-safe *[class*="line"], body.seizure-safe *[class*="timeline"], body.seizure-safe *[class*="track"], body.seizure-safe *[class*="path"], body.seizure-safe *[class*="stroke"], body.seizure-safe *[class*="fill"], body.seizure-safe *[class*="gradient"], body.seizure-safe *[class*="wave"], body.seizure-safe *[class*="flow"], body.seizure-safe *[class*="stream"], body.seizure-safe *[class*="runner"], body.seizure-safe *[class*="mover"], body.seizure-safe *[class*="slider"], body.seizure-safe *[class*="indicator"], body.seizure-safe *[class*="stopper"], body.seizure-safe *[class*="marker"], body.seizure-safe *[class*="pointer"], body.seizure-safe *[class*="cursor"], body.seizure-safe *[class*="dot"], body.seizure-safe *[class*="circle"], body.seizure-safe *[class*="ring"], body.seizure-safe *[class*="orbit"] {
+                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations IMMEDIATELY */
+                body.seizure-safe *[class*="scroll"], 
+                body.seizure-safe *[class*="progress"], 
+                body.seizure-safe *[class*="bar"], 
+                body.seizure-safe *[class*="line"], 
+                body.seizure-safe *[class*="timeline"], 
+                body.seizure-safe *[class*="track"], 
+                body.seizure-safe *[class*="path"], 
+                body.seizure-safe *[class*="stroke"], 
+                body.seizure-safe *[class*="fill"], 
+                body.seizure-safe *[class*="gradient"], 
+                body.seizure-safe *[class*="wave"], 
+                body.seizure-safe *[class*="flow"], 
+                body.seizure-safe *[class*="stream"], 
+                body.seizure-safe *[class*="runner"], 
+                body.seizure-safe *[class*="mover"], 
+                body.seizure-safe *[class*="indicator"], 
+                body.seizure-safe *[class*="stopper"], 
+                body.seizure-safe *[class*="marker"], 
+                body.seizure-safe *[class*="pointer"], 
+                body.seizure-safe *[class*="cursor"], 
+                body.seizure-safe *[class*="dot"], 
+                body.seizure-safe *[class*="circle"], 
+                body.seizure-safe *[class*="ring"], 
+                body.seizure-safe *[class*="orbit"],
+                body.seizure-safe [data-scroll],
+                body.seizure-safe [data-aos],
+                body.seizure-safe [data-animate],
+                body.seizure-safe [data-wf-page],
+                body.seizure-safe [data-w-id] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                }
+                
+                /* SLIDERS: Block auto-play animations but allow manual navigation */
+                body.seizure-safe .swiper,
+                body.seizure-safe .swiper-container,
+                body.seizure-safe .slick-slider,
+                body.seizure-safe .carousel,
+                body.seizure-safe [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
+                body.seizure-safe [class*="carousel"],
+                body.seizure-safe [data-slider],
+                body.seizure-safe [data-carousel] {
+                    /* Block auto-play animations */
+                    animation: none !important;
+                    /* Allow pointer events for manual navigation */
+                    pointer-events: auto !important;
+                    cursor: default !important;
+                    /* Allow slide transitions for manual navigation */
+                    transition: transform 0.3s ease !important;
+                }
+                
+                /* Slider slides: block auto-animations but allow manual slide changes */
+                body.seizure-safe .swiper-slide,
+                body.seizure-safe .slick-slide,
+                body.seizure-safe .carousel-item {
+                    animation: none !important;
+                    /* Allow transform for manual slide navigation */
+                    transition: transform 0.3s ease !important;
+                    pointer-events: auto !important;
                 }
                 /* REMOVED: Duplicate rule - already covered by scroll-triggered animations section */
                 /* REMOVED: Duplicate data-splitting rules - already covered by letter-by-letter animations section */
@@ -1422,8 +1480,8 @@ class AccessibilityWidget {
                         keepalive: false
                     });
                     if (!retryResponse.ok) {
-                        
-                        return false;
+                        // API error - return null to indicate check failed (not payment invalid)
+                        return null;
                     }
                     
                     const paymentData = await retryResponse.json();
@@ -1431,8 +1489,9 @@ class AccessibilityWidget {
                 }
                 
                 if (!response.ok) {
-                    
-                    return false;
+                    // API error - return null to indicate check failed (not payment invalid)
+                    // Don't hide widget on temporary API errors
+                    return null;
                 }
                 
                 const paymentData = await response.json();
@@ -1440,8 +1499,9 @@ class AccessibilityWidget {
                 return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
-                
-                return false;
+                // Network/parsing error - return null to indicate check failed (not payment invalid)
+                // Don't hide widget on temporary network errors
+                return null;
             }
         }
         
@@ -1451,11 +1511,14 @@ class AccessibilityWidget {
             
             
             // Determine active/cancelled from Stripe-derived fields
-            if (!paymentData || typeof paymentData !== 'object') return false;
+            if (!paymentData || typeof paymentData !== 'object') {
+                // Invalid response - return null to indicate check failed (not payment invalid)
+                return null;
+            }
             const cancelled = paymentData.subscriptionStatus === 'cancelled' || paymentData.paymentStatus === 'cancelled' || paymentData.isSubscribed === false;
-            if (cancelled) return false;
+            if (cancelled) return false; // Payment is definitively invalid
             const active = paymentData.paymentStatus === 'paid' || paymentData.subscriptionStatus === 'complete' || paymentData.subscriptionStatus === 'active' || paymentData.isSubscribed === true;
-            return !!active;
+            return !!active; // true if active, false if not active
         }
         
         // Validate domain access
@@ -1815,12 +1878,42 @@ class AccessibilityWidget {
                     body.seizure-safe *[class*="progress"],
                     body.seizure-safe *[class*="bar"],
                     body.seizure-safe *[class*="line"],
-                    body.seizure-safe *[class*="timeline"] {
+                    body.seizure-safe *[class*="timeline"],
+                    body.seizure-safe [data-scroll],
+                    body.seizure-safe [data-aos],
+                    body.seizure-safe [data-animate],
+                    body.seizure-safe [data-wf-page],
+                    body.seizure-safe [data-w-id] {
                         animation: none !important;
                         transition: none !important;
                         opacity: 1 !important;
                         visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        transform: none !important;
+                        will-change: auto !important;
+                    }
+                    
+                    /* Allow slider manual navigation - preserve pointer events and allow slide transitions */
+                    body.seizure-safe .swiper,
+                    body.seizure-safe .swiper-container,
+                    body.seizure-safe .slick-slider,
+                    body.seizure-safe .carousel,
+                    body.seizure-safe [class*="slider"]:not([class*="toggle"]),
+                    body.seizure-safe [class*="carousel"],
+                    body.seizure-safe [data-slider],
+                    body.seizure-safe [data-carousel] {
+                        pointer-events: auto !important;
+                        cursor: default !important;
+                        /* Allow slide transitions for manual navigation */
+                        transition: transform 0.3s ease !important;
+                    }
+                    
+                    /* Block auto-slide animations but allow manual slide changes */
+                    body.seizure-safe .swiper-slide,
+                    body.seizure-safe .slick-slide,
+                    body.seizure-safe .carousel-item {
+                        animation: none !important;
+                        /* Allow transform for manual slide navigation */
+                        transition: transform 0.3s ease !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -1961,9 +2054,29 @@ class AccessibilityWidget {
                     if (!document.hidden && !this.isStagingDomain()) {
                         // Custom domains: Check fresh payment status when tab becomes visible
                         // Staging domains: Skip (always free)
-                        const isValid = await this.checkPaymentStatusRealTime();
-                        if (!isValid) {
-                            this.disableWidget();
+                        try {
+                            const isValid = await this.checkPaymentStatusRealTime();
+                            // Only hide widget if payment is definitively invalid AND widget was not already hidden
+                            // Don't hide on check failures (network errors, etc.)
+                            if (isValid === false && this.paymentFailed === false) {
+                                this.disableWidget();
+                            } else if (isValid === true && this.paymentFailed === true) {
+                                // Payment status changed from invalid to valid - re-enable widget
+                                this.paymentFailed = false;
+                                const widgetContainer = document.getElementById('accessibility-widget-container');
+                                if (widgetContainer) {
+                                    widgetContainer.style.display = '';
+                                    widgetContainer.style.visibility = '';
+                                    widgetContainer.style.opacity = '';
+                                }
+                                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                                if (icon) {
+                                    this.showIcon();
+                                }
+                            }
+                            // If isValid is null/undefined (check failed), don't change widget state
+                        } catch (error) {
+                            // Silently handle errors - don't change widget state on check failures
                         }
                     }
                 });
@@ -7642,7 +7755,7 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-down"></i> -2%
     
@@ -7650,7 +7763,7 @@ class AccessibilityWidget {
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-up"></i> +2%
     
@@ -7804,7 +7917,7 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-down"></i> -5%
     
@@ -7812,7 +7925,7 @@ class AccessibilityWidget {
     
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-up"></i> +5%
     
@@ -7882,7 +7995,7 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-down"></i> -10%
     
@@ -7890,7 +8003,7 @@ class AccessibilityWidget {
     
                                         <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-up"></i> +10%
     
@@ -7932,7 +8045,7 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-down"></i> -10%
     
@@ -7940,7 +8053,7 @@ class AccessibilityWidget {
     
                                         <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
     
                                             <i class="fas fa-chevron-up"></i> +10%
     
@@ -16456,6 +16569,9 @@ class AccessibilityWidget {
             localStorage.removeItem('font-sizing-used');
             localStorage.removeItem('line-height-used');
             localStorage.removeItem('letter-spacing-used');
+            
+            // Clear vision-impaired localStorage
+            localStorage.removeItem('accessibility-widget-vision-impaired');
 
             
             // Reset language to English
@@ -16606,15 +16722,18 @@ class AccessibilityWidget {
             
     
             // Disable all profiles
-    
+            
             this.disableSeizureSafe();
-    
-            // Vision impaired feature removed
-    
+            
+            this.disableVisionImpaired();
+            
+            // Explicitly update vision-impaired toggle switch to off
+            this.updateToggleSwitch('vision-impaired', false);
+            
             this.disableADHDFriendly();
-    
+            
             this.disableCognitiveDisability();
-    
+            
             this.disableReadableFont();
     
             
@@ -25651,30 +25770,55 @@ class AccessibilityWidget {
             this.replaceAnimatedMedia();
     
             // Stop any JavaScript-based animations (like the slider auto-slide)
-    
+            // BUT preserve manual navigation (click/swipe to change slides)
             if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-    
-    
-                window.slider.disableAutoSlide();
-    
+                try {
+                    window.slider.disableAutoSlide();
+                } catch (e) {
+                    // Silent fail
+                }
             } else {
-    
-         
-    
                 // Try again after a short delay in case slider is still initializing
-    
                 setTimeout(() => {
-    
                     if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-    
-                       
-    
-                        window.slider.disableAutoSlide();
-    
+                        try {
+                            window.slider.disableAutoSlide();
+                        } catch (e) {
+                            // Silent fail
+                        }
                     }
-    
                 }, 100);
-    
+            }
+            
+            // Stop Swiper autoplay but preserve manual navigation
+            if (typeof Swiper !== 'undefined') {
+                try {
+                    document.querySelectorAll('.swiper, .swiper-container').forEach(swiperEl => {
+                        if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                            swiperEl.swiper.autoplay.stop();
+                        }
+                    });
+                } catch (e) {
+                    // Silent fail
+                }
+            }
+            
+            // Ensure slider containers allow pointer events for manual navigation
+            try {
+                const sliderSelectors = [
+                    '.swiper', '.swiper-container', '.slick-slider', '.carousel', 
+                    '[class*="slider"]', '[class*="carousel"]', '[data-slider]', '[data-carousel]'
+                ];
+                document.querySelectorAll(sliderSelectors.join(',')).forEach(slider => {
+                    // Allow pointer events for manual navigation
+                    slider.style.pointerEvents = 'auto';
+                    slider.style.cursor = 'default';
+                    // Ensure slider content is visible
+                    slider.style.visibility = 'visible';
+                    slider.style.opacity = '1';
+                });
+            } catch (e) {
+                // Silent fail
             }
     
             
@@ -27622,44 +27766,9 @@ class AccessibilityWidget {
                         transition: filter 0.3s ease-in-out !important;
                     }
                     
-                    /* 2. TEXT CONTRAST ENHANCEMENT - Make text more readable */
-                    body.adhd-friendly p,
-                    body.adhd-friendly span,
-                    body.adhd-friendly div,
-                    body.adhd-friendly li,
-                    body.adhd-friendly td,
-                    body.adhd-friendly th {
-                        color: #1a1a1a !important;
-                        text-shadow: 0 0 1px rgba(0, 0, 0, 0.1) !important;
-                        font-weight: 500 !important;
-                        transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out !important;
-                    }
-                    
-                    /* 3. HEADING CONTRAST ENHANCEMENT - Stronger headings */
-                    body.adhd-friendly h1,
-                    body.adhd-friendly h2,
-                    body.adhd-friendly h3,
-                    body.adhd-friendly h4,
-                    body.adhd-friendly h5,
-                    body.adhd-friendly h6 {
-                        color: #000000 !important;
-                        text-shadow: 0 0 2px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 700 !important;
-                        transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out !important;
-                    }
-                    
-                    /* 4. LINK CONTRAST ENHANCEMENT - More visible links */
-                    body.adhd-friendly a {
-                        color: #0066cc !important;
-                        text-decoration: underline !important;
-                        font-weight: 600 !important;
-                        transition: color 0.3s ease-in-out !important;
-                    }
-                    
-                    body.adhd-friendly a:hover {
-                        color: #004499 !important;
-                        text-decoration: underline !important;
-                    }
+                    /* REMOVED: TEXT CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes */
+                    /* REMOVED: HEADING CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes */
+                    /* REMOVED: LINK CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes or underlines */
                     
                     /* 5. BUTTON CONTRAST ENHANCEMENT - More visible buttons */
                     body.adhd-friendly button,
@@ -27715,29 +27824,7 @@ class AccessibilityWidget {
                         transition: filter 0.3s ease-in-out !important;
                     }
                     
-                    /* 9. NAVIGATION CONTRAST ENHANCEMENT - Better nav visibility */
-                    body.adhd-friendly nav,
-                    body.adhd-friendly .nav,
-                    body.adhd-friendly .navbar {
-                        background-color: #f8f9fa !important;
-                        border-bottom: 2px solid #0066cc !important;
-                    }
-                    
-                    body.adhd-friendly nav a,
-                    body.adhd-friendly .nav a,
-                    body.adhd-friendly .navbar a {
-                        color: #0066cc !important;
-                        font-weight: 600 !important;
-                        padding: 8px 12px !important;
-                        transition: all 0.3s ease-in-out !important;
-                    }
-                    
-                    body.adhd-friendly nav a:hover,
-                    body.adhd-friendly .nav a:hover,
-                    body.adhd-friendly .navbar a:hover {
-                        background-color: #e3f2fd !important;
-                        color: #004499 !important;
-                    }
+                    /* REMOVED: NAVIGATION CONTRAST ENHANCEMENT - User only wants spotlight, not nav text color changes or underlines */
                 `;
                 
                 document.head.appendChild(style);
@@ -28330,50 +28417,36 @@ class AccessibilityWidget {
                
             }
             
-            // Additional fix: Disable smooth scrolling libraries when panel is open
-            this.disableSmoothScrollingLibraries();
+            // REMOVED: disableSmoothScrollingLibraries() call
+            // This was stopping scroll animations on the website when panel opened
+            // Only disable smooth scrolling if seizure-safe or stop-animation is active
+            if (document.body.classList.contains('seizure-safe') || 
+                document.body.classList.contains('stop-animation')) {
+                this.disableSmoothScrollingLibraries();
+            }
         }
         
         // Disable smooth scrolling libraries that interfere with panel scrolling
+        // IMPORTANT: Only disable smooth scrolling, NOT scroll animations
         disableSmoothScrollingLibraries() {
-           
+            // Only disable smooth scrolling behavior, not scroll animations
+            // This should NOT affect scroll-triggered animations on the website
             
-            // Don't destroy Lenis - just pause it temporarily
-            if (window.lenis) {
-                try {
-                    // Store original state
-                    if (!window._originalLenisState) {
-                        window._originalLenisState = {
-                            isActive: window.lenis.isActive,
-                            isStopped: window.lenis.isStopped
-                        };
-                    }
-                    // Pause instead of destroy to preserve scroll functionality
-                    if (window.lenis.pause) {
-                        window.lenis.pause();
-                   
-                    }
-                } catch (e) {
-               
-                }
+            // Don't pause Lenis or ScrollTrigger - they handle scroll animations
+            // Only disable smooth scroll behavior for the panel itself
+            // The panel's scroll behavior is already set in fixPanelScrolling()
+            
+            // REMOVED: Lenis pause - this was stopping scroll animations
+            // REMOVED: ScrollTrigger disable - this was stopping scroll animations
+            // REMOVED: body/html scroll-behavior change - this was affecting the website
+            
+            // Only change scroll behavior if seizure-safe or stop-animation is active
+            if (document.body.classList.contains('seizure-safe') || 
+                document.body.classList.contains('stop-animation')) {
+                // Only then disable smooth scrolling
+                document.body.style.scrollBehavior = 'auto';
+                document.documentElement.style.scrollBehavior = 'auto';
             }
-            
-            // Disable GSAP ScrollTrigger
-            if (window.ScrollTrigger) {
-                try {
-                
-                } catch (e) {
-                   
-                }
-            }
-            
-            // Disable any other smooth scrolling
-            document.body.style.scrollBehavior = 'auto';
-            document.documentElement.style.scrollBehavior = 'auto';
-            
-            // Force native scrolling
-            document.body.style.overflow = 'auto';
-            document.documentElement.style.overflow = 'auto';
         }
         
         // Re-enable smooth scrolling libraries when panel is closed
@@ -28990,8 +29063,32 @@ class AccessibilityWidget {
                     this.isPanelOpen = true;
                     
                     // Fix scrolling conflicts with GSAP/Lenis libraries
+                    // Only fix panel scrolling - don't affect website scroll animations
                     const fixScrolling = () => {
-                        this.fixPanelScrolling();
+                        // Only fix panel scrolling, not website animations
+                        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                        if (panel) {
+                            // Force native scrolling behavior for panel only
+                            panel.style.overflowY = 'auto';
+                            panel.style.overflowX = 'hidden';
+                            panel.style.scrollBehavior = 'smooth';
+                            panel.style.webkitOverflowScrolling = 'touch';
+                            panel.style.overscrollBehavior = 'contain';
+                            
+                            // Prevent panel scroll events from bubbling to website
+                            panel.addEventListener('wheel', (e) => {
+                                e.stopPropagation();
+                            }, { passive: false, once: false });
+                            
+                            panel.addEventListener('touchstart', (e) => {
+                                e.stopPropagation();
+                            }, { passive: false, once: false });
+                            
+                            panel.addEventListener('touchmove', (e) => {
+                                e.stopPropagation();
+                            }, { passive: false, once: false });
+                        }
+                        // DO NOT call disableSmoothScrollingLibraries() - it was stopping website scroll animations
                     };
                     const rafId1 = requestAnimationFrame(fixScrolling);
                     // Fallback if requestAnimationFrame is blocked (seizure-safe mode)
@@ -29063,12 +29160,14 @@ class AccessibilityWidget {
                     this.getSiteId()
                 ]);
                 
-                // Fast fail if payment invalid
-                if (!paymentValid) {
-                  
+                // Only disable widget if payment is definitively invalid (false)
+                // Don't disable on check failures (null) - preserve current state
+                if (paymentValid === false) {
                     this.disableWidget();
                     return null;
                 }
+                // If paymentValid is null (check failed), don't disable widget
+                // Continue loading customization even if payment check failed
                 
                 // Fast fail if no siteId
                 if (!siteId) {
@@ -29132,22 +29231,32 @@ class AccessibilityWidget {
                     // Always check fresh payment status (no cache)
                     const isValid = await this.checkPaymentStatusRealTime();
                     
-                    if (!isValid) {
-                        // Payment status changed to invalid - disable widget
+                    // Only hide widget if payment is definitively invalid
+                    // Don't hide on check failures (network errors, etc.) - preserve current state
+                    if (isValid === false && this.paymentFailed === false) {
+                        // Payment status changed from valid to invalid - disable widget
                         this.disableWidget();
-                    } else {
-                        // Payment status is valid - ensure widget is enabled
+                    } else if (isValid === true && this.paymentFailed === true) {
+                        // Payment status changed from invalid to valid - re-enable widget
+                        this.paymentFailed = false;
+                        // Re-initialize widget if it was disabled
+                        const widgetContainer = document.getElementById('accessibility-widget-container');
+                        if (widgetContainer) {
+                            widgetContainer.style.display = '';
+                            widgetContainer.style.visibility = '';
+                            widgetContainer.style.opacity = '';
+                        }
+                        // Show icon if it exists
                         const icon = this.shadowRoot?.getElementById('accessibility-icon');
                         if (icon) {
-                            icon.style.display = '';
-                        }
-                        const panel = this.shadowRoot?.getElementById('accessibility-panel');
-                        if (panel) {
-                            panel.style.display = '';
+                            this.showIcon();
                         }
                     }
+                    // If isValid is null/undefined (check failed), don't change widget state
+                    // This prevents hiding widget on temporary network errors
                 } catch (error) {
-                    // Silently handle errors - don't break widget if refresh fails
+                    // Silently handle errors - don't change widget state on check failures
+                    // This prevents widget from disappearing on temporary network issues
                 }
             }, 120000); // Every 2 minutes for custom domains
         }
