@@ -875,231 +875,88 @@ function applyUniversalStopMotion(enabled) {
     } catch (_) {}
 }
 
-// Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
+// Vision Impaired helper: apply simple zoom and brightness
 function applyVisionImpaired(on) {
     try {
         // Toggle root classes
         document.documentElement.classList.toggle('vision-impaired', !!on);
         document.body.classList.toggle('vision-impaired', !!on);
 
-        // CONTENT WRAPPER (persistent)
-        let wrapper = document.getElementById('accessibility-content-wrapper');
-        if (!wrapper) {
-            wrapper = document.createElement('div');
-            wrapper.id = 'accessibility-content-wrapper';
-            // Move all current body children into the wrapper once
-            while (document.body.firstChild) {
-                wrapper.appendChild(document.body.firstChild);
+        // Remove content wrapper if it exists (cleanup from old implementation)
+        const wrapper = document.getElementById('accessibility-content-wrapper');
+        if (wrapper && !on) {
+            // Move all wrapper children back to body
+            while (wrapper.firstChild) {
+                document.body.insertBefore(wrapper.firstChild, wrapper);
             }
-            document.body.appendChild(wrapper);
-        }
-
-        // Apply vision scaling to body element as requested
-        if (on) {
-            document.body.classList.add('vision-impaired');
-        } else {
-            document.body.classList.remove('vision-impaired');
+            wrapper.remove();
         }
         
         let style = document.getElementById('accessibility-vision-impaired-immediate-early');
-        if (!style) {
+        if (!style && on) {
             style = document.createElement('style');
             style.id = 'accessibility-vision-impaired-immediate-early';
             document.head.appendChild(style);
+        } else if (!on && style) {
+            style.remove();
+            return;
         }
         
-        // ... (Update CSS below) ...
+        if (!on) return;
+        
+        // Simple CSS: zoom and brightness only
         style.textContent = `
-            /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
-
-            /* 1. VISION IMPAIRED SCALING - Clean approach without layout breaking */
-            html.vision-impaired {
-                /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
-                /* REMOVED: transform-origin - This was interfering with panel positioning */
-                /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
-                min-height: 100vh !important;
-                /* REMOVED: transition - This was interfering with panel positioning */
-            }
-
-            body.vision-impaired {
-                margin: 0 !important;
-                padding: 0 !important;
-                /* REMOVED: zoom and scale to prevent zoom and left shift issues */
-            }
+            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
             
-            /* Fix overflow for Firefox and other browsers */
             html.vision-impaired {
-                overflow-x: auto !important;
-                width: 100% !important;
-            }
-            
-            /* REMOVED: width calculation that was causing left shift */
-
-            /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            body.vision-impaired .accessibility-panel {
-                position: fixed !important;
-                z-index: 999999 !important;
-                transform: none !important;
-                zoom: 1 !important;
-                -moz-transform: none !important;
-                -webkit-transform: none !important;
-            }
-
-            /* 2. CONTENT WRAPPER - Simplified approach */
-            #accessibility-content-wrapper {
-                height: 100% !important;
-                min-height: 100vh !important;
-                overflow: visible !important;
-                display: block !important;
-                filter: contrast(1.04) brightness(1.01) !important;
-                transition: filter 240ms ease !important;
-            }
-            
-            /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
-            html.vision-impaired {
+                zoom: 1.1 !important;
                 overflow-x: hidden !important;
             }
             
-            /* 4. ENSURE FOOTER AND CONTENT FILL VIEWPORT */
-            body.vision-impaired main,
-            body.vision-impaired section,
-            body.vision-impaired article,
-            body.vision-impaired .content,
-            body.vision-impaired .container,
-            body.vision-impaired .wrapper {
-                min-height: 100vh !important;
+            body.vision-impaired {
+                filter: brightness(1.1) !important;
             }
             
-            /* 5. ACCESSIBILITY PANEL - Exclude from scaling to preserve viewport positioning */
-            .accessibility-widget.vision-impaired,
-            #accessibility-widget.vision-impaired,
-            .accessibility-panel.vision-impaired,
+            /* Exclude widget from zoom and brightness */
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            body.vision-impaired .accessibility-panel,
+            body.vision-impaired .accessibility-icon,
+            body.vision-impaired #accessibility-icon,
             .accessibility-widget,
             #accessibility-widget,
             .accessibility-panel,
             .accessibility-icon,
             #accessibility-icon {
-                transform: none !important;
-                transform-origin: unset !important;
-                transition: none !important;
-                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+                zoom: 1 !important;
+                filter: none !important;
                 z-index: 999999 !important;
             }
             
-            /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
-            #accessibility-content-wrapper [style*="position: sticky"],
-            #accessibility-content-wrapper [style*="position: -webkit-sticky"],
-            #accessibility-content-wrapper .sticky,
-            #accessibility-content-wrapper .fixed-nav,
-            #accessibility-content-wrapper nav[style*="position: sticky"],
-            #accessibility-content-wrapper nav[style*="position: -webkit-sticky"] {
-                position: sticky !important;
-                position: -webkit-sticky !important;
-                /* Ensure sticky elements maintain their behavior */
-                z-index: 9999 !important;
+            /* Keep images at original size (no zoom) */
+            body.vision-impaired img,
+            html.vision-impaired img {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
             
-            /* 6. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
-            #accessibility-content-wrapper p,
-            #accessibility-content-wrapper span,
-            #accessibility-content-wrapper div,
-            #accessibility-content-wrapper li,
-            #accessibility-content-wrapper td,
-            #accessibility-content-wrapper th {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions (only when vision-impaired is active) */
-            body.vision-impaired #accessibility-content-wrapper *:focus,
-            html.vision-impaired #accessibility-content-wrapper *:focus {
-                outline: 2px solid #0066cc !important;
-                outline-offset: 1px !important;
-                transition: outline 0.2s ease-in-out !important;
-            }
-            
-            /* 8. IMPROVE LINK VISIBILITY - Smooth link transitions */
-            #accessibility-content-wrapper a {
-                font-weight: 500 !important;
-                transition: font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 9. ENHANCE BUTTON READABILITY - Smooth button transitions */
-            #accessibility-content-wrapper button,
-            #accessibility-content-wrapper input[type="button"],
-            #accessibility-content-wrapper input[type="submit"],
-            #accessibility-content-wrapper input[type="reset"] {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 10. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
-            #accessibility-content-wrapper input,
-            #accessibility-content-wrapper textarea,
-            #accessibility-content-wrapper select {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 11. ENHANCE HEADING READABILITY - Smooth heading transitions */
-            #accessibility-content-wrapper h1,
-            #accessibility-content-wrapper h2,
-            #accessibility-content-wrapper h3,
-            #accessibility-content-wrapper h4,
-            #accessibility-content-wrapper h5,
-            #accessibility-content-wrapper h6 {
-                text-shadow: 0 0 0.4px rgba(0, 0, 0, 0.25) !important;
-                font-weight: 600 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 12. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
-            #accessibility-content-wrapper img {
-                filter: none !important;
-            }
-            
-            /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
-            @media (max-width: 768px) {
-                html.vision-impaired {
-                    /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
-                    /* REMOVED: transform-origin - This was interfering with panel positioning */
-                    /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
-                    min-height: 100vh !important;
-                }
-                
-                body.vision-impaired {
-                    /* REMOVED: zoom and scale to prevent zoom and left shift issues */
-                }
-                
-                /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
-                body.vision-impaired .accessibility-widget,
-                body.vision-impaired #accessibility-widget,
-                body.vision-impaired .accessibility-panel {
-                    position: fixed !important;
-                    z-index: 999999 !important;
-                    transform: none !important;
-                    zoom: 1 !important;
-                    -moz-transform: none !important;
-                    -webkit-transform: none !important;
-                }
-                
-                .accessibility-widget.vision-impaired,
-                #accessibility-widget.vision-impaired,
-                .accessibility-panel.vision-impaired,
-                .accessibility-widget,
-                #accessibility-widget,
-                .accessibility-panel,
-                .accessibility-icon,
-                #accessibility-icon {
-                    transform: none !important;
-                    /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
-                    z-index: 999999 !important;
-                }
+            /* Keep sliders at original size (no zoom) */
+            body.vision-impaired [class*="slider"],
+            body.vision-impaired [id*="slider"],
+            body.vision-impaired [data-slider],
+            body.vision-impaired [class*="swiper"],
+            body.vision-impaired [id*="swiper"],
+            body.vision-impaired [class*="carousel"],
+            body.vision-impaired [id*="carousel"],
+            html.vision-impaired [class*="slider"],
+            html.vision-impaired [id*="slider"],
+            html.vision-impaired [data-slider],
+            html.vision-impaired [class*="swiper"],
+            html.vision-impaired [id*="swiper"],
+            html.vision-impaired [class*="carousel"],
+            html.vision-impaired [id*="carousel"] {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
         `;
     } catch (_) {}
@@ -3584,12 +3441,12 @@ class AccessibilityWidget {
         /* Ensure text nodes in buttons are properly aligned */
         .accessibility-panel .scaling-btn {
             white-space: nowrap;
+            padding: 5px 10px !important;
         }
         
-        .accessibility-panel .scaling-btn::after,
-        .accessibility-panel .scaling-btn::before {
-            content: '';
-            flex: 0 0 auto;
+        .accessibility-panel .scaling-btn span {
+            display: inline-block;
+            line-height: 1;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3739,13 +3596,19 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 5px 8px;
+            padding: 5px 10px !important;
             min-height: 26px;
             /* Font size controlled by JavaScript */
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             gap: 4px !important;
+            text-align: center !important;
+        }
+        
+        .accessibility-panel .scaling-btn span {
+            display: inline-block;
+            line-height: 1;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5418,6 +5281,7 @@ class AccessibilityWidget {
                     line-height: 1.2 !important;
                     height: auto !important;
                     white-space: nowrap !important;
+                    padding: 5px 10px !important;
                 }
                 
                 .scaling-btn i.fas {
@@ -5427,6 +5291,11 @@ class AccessibilityWidget {
                     flex-shrink: 0;
                     margin: 0;
                     padding: 0;
+                }
+                
+                .scaling-btn span {
+                    display: inline-block;
+                    line-height: 1;
                 }
                 
                 .scaling-btn,
@@ -7999,17 +7868,17 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
     
-                                            <i class="fas fa-chevron-down"></i> -2%
+                                            <i class="fas fa-chevron-down"></i><span>-2%</span>
     
                                         </button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
     
-                                            <i class="fas fa-chevron-up"></i> +2%
+                                            <i class="fas fa-chevron-up"></i><span>+2%</span>
     
                                         </button>
     
@@ -20836,10 +20705,18 @@ class AccessibilityWidget {
             const audioElements = element.querySelectorAll('audio');
             const videoElements = element.querySelectorAll('video');
             
-            [...audioElements, ...videoElements].forEach(mediaElement => {
+            // Mute audio elements and pause them
+            audioElements.forEach(mediaElement => {
                 mediaElement.muted = true;
                 mediaElement.volume = 0;
                 if (!mediaElement.paused) mediaElement.pause();
+            });
+            
+            // Mute video elements but allow them to play visually
+            videoElements.forEach(mediaElement => {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+                // Don't pause videos - allow visual playback
             });
             
             // Try to find and mute any Web Audio API sources
@@ -21174,12 +21051,21 @@ class AccessibilityWidget {
                     const allEmbeds = document.querySelectorAll('embed, object');
                     
                     // Mute standard media elements
-                    [...allAudio, ...allVideo].forEach(element => {
+                    // For audio: mute and pause
+                    allAudio.forEach(element => {
                         if (!element.paused && !element.muted) {
-                           
                             element.muted = true;
                             element.volume = 0;
                             element.pause();
+                        }
+                    });
+                    
+                    // For video: mute but allow visual playback
+                    allVideo.forEach(element => {
+                        if (!element.muted) {
+                            element.muted = true;
+                            element.volume = 0;
+                            // Don't pause videos - allow visual playback
                         }
                     });
                     
@@ -21262,11 +21148,7 @@ class AccessibilityWidget {
                 element.muted = true;
                 element.volume = 0;
                 
-                // Pause if playing
-                if (!element.paused) {
-                   
-                    element.pause();
-                }
+                // Don't pause videos - allow visual playback, just muted
                 
                 // Add event listeners to prevent unmuting
                 element.addEventListener('volumechange', () => {
@@ -21325,11 +21207,12 @@ class AccessibilityWidget {
                 element.muted = true;
                 element.volume = 0;
                 
-                // If currently playing, pause it
-                if (!element.paused) {
-                   
+                // For audio: pause to stop sound
+                // For video: don't pause - allow visual playback, just muted
+                if (element.tagName === 'AUDIO' && !element.paused) {
                     element.pause();
                 }
+                // Videos can continue playing visually, just muted
                 
                 // Add event listeners to prevent unmuting
                 this.addMuteEventListeners(element);
@@ -21406,10 +21289,12 @@ class AccessibilityWidget {
             element.volume = 0;
             element.muted = true;
             
-            // If currently playing, pause it
-            if (!element.paused) {
+            // For audio: pause to stop sound
+            // For video: don't pause - allow visual playback, just muted
+            if (element.tagName === 'AUDIO' && !element.paused) {
                 element.pause();
             }
+            // Videos can continue playing visually, just muted
             
             // Add event listeners to prevent unmuting
             this.addMuteEventListeners(element);
@@ -26398,30 +26283,21 @@ class AccessibilityWidget {
             }
         }
         
-        // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
+        // Vision Impaired helper: apply simple zoom and brightness
         applyVisionImpaired(on) {
             try {
                 // Toggle root classes
                 document.documentElement.classList.toggle('vision-impaired', !!on);
                 document.body.classList.toggle('vision-impaired', !!on);
 
-                // CONTENT WRAPPER (persistent)
-                let wrapper = document.getElementById('accessibility-content-wrapper');
-                if (!wrapper && on) {
-                    wrapper = document.createElement('div');
-                    wrapper.id = 'accessibility-content-wrapper';
-                    // Move all current body children into the wrapper once
-                    while (document.body.firstChild) {
-                        wrapper.appendChild(document.body.firstChild);
+                // Remove content wrapper if it exists (cleanup from old implementation)
+                const wrapper = document.getElementById('accessibility-content-wrapper');
+                if (wrapper && !on) {
+                    // Move all wrapper children back to body
+                    while (wrapper.firstChild) {
+                        document.body.insertBefore(wrapper.firstChild, wrapper);
                     }
-                    document.body.appendChild(wrapper);
-                }
-
-                // Apply vision scaling to body element as requested
-                if (on) {
-                    document.body.classList.add('vision-impaired');
-                } else {
-                    document.body.classList.remove('vision-impaired');
+                    wrapper.remove();
                 }
                 
                 let style = document.getElementById('accessibility-vision-impaired-immediate-early');
@@ -26436,197 +26312,59 @@ class AccessibilityWidget {
                 
                 if (!on) return;
                 
-                // ... (Update CSS below) ...
+                // Simple CSS: zoom and brightness only
                 style.textContent = `
-            /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
-
-            /* 1. VISION IMPAIRED SCALING - Clean approach without layout breaking */
-            html.vision-impaired {
-                /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
-                /* REMOVED: transform-origin - This was interfering with panel positioning */
-                /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
-                min-height: 100vh !important;
-                /* REMOVED: transition - This was interfering with panel positioning */
-            }
-
-            body.vision-impaired {
-                margin: 0 !important;
-                padding: 0 !important;
-                /* REMOVED: zoom and scale to prevent zoom and left shift issues */
-            }
+            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
             
-            /* Fix overflow for Firefox and other browsers */
             html.vision-impaired {
-                overflow-x: auto !important;
-                width: 100% !important;
-            }
-            
-            /* REMOVED: width calculation that was causing left shift */
-
-            /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            body.vision-impaired .accessibility-panel {
-                position: fixed !important;
-                z-index: 999999 !important;
-                transform: none !important;
-                zoom: 1 !important;
-                -moz-transform: none !important;
-                -webkit-transform: none !important;
-            }
-
-            /* 2. CONTENT WRAPPER - Simplified approach */
-            #accessibility-content-wrapper {
-                height: 100% !important;
-                min-height: 100vh !important;
-                overflow: visible !important;
-                display: block !important;
-                filter: contrast(1.04) brightness(1.01) !important;
-                transition: filter 240ms ease !important;
-            }
-            
-            /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
-            html.vision-impaired {
+                zoom: 1.1 !important;
                 overflow-x: hidden !important;
             }
             
-            /* 4. ENSURE FOOTER AND CONTENT FILL VIEWPORT */
-            body.vision-impaired main,
-            body.vision-impaired section,
-            body.vision-impaired article,
-            body.vision-impaired .content,
-            body.vision-impaired .container,
-            body.vision-impaired .wrapper {
-                min-height: 100vh !important;
+            body.vision-impaired {
+                filter: brightness(1.1) !important;
             }
             
-            /* 5. ACCESSIBILITY PANEL - Exclude from scaling to preserve viewport positioning */
-            .accessibility-widget.vision-impaired,
-            #accessibility-widget.vision-impaired,
-            .accessibility-panel.vision-impaired,
+            /* Exclude widget from zoom and brightness */
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            body.vision-impaired .accessibility-panel,
+            body.vision-impaired .accessibility-icon,
+            body.vision-impaired #accessibility-icon,
             .accessibility-widget,
             #accessibility-widget,
             .accessibility-panel,
             .accessibility-icon,
             #accessibility-icon {
-                transform: none !important;
-                transform-origin: unset !important;
-                transition: none !important;
-                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+                zoom: 1 !important;
+                filter: none !important;
                 z-index: 999999 !important;
             }
             
-            /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
-            #accessibility-content-wrapper [style*="position: sticky"],
-            #accessibility-content-wrapper [style*="position: -webkit-sticky"],
-            #accessibility-content-wrapper .sticky,
-            #accessibility-content-wrapper .fixed-nav,
-            #accessibility-content-wrapper nav[style*="position: sticky"],
-            #accessibility-content-wrapper nav[style*="position: -webkit-sticky"] {
-                position: sticky !important;
-                position: -webkit-sticky !important;
-                /* Ensure sticky elements maintain their behavior */
-                z-index: 9999 !important;
+            /* Keep images at original size (no zoom) */
+            body.vision-impaired img,
+            html.vision-impaired img {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
             
-            /* 6. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
-            #accessibility-content-wrapper p,
-            #accessibility-content-wrapper span,
-            #accessibility-content-wrapper div,
-            #accessibility-content-wrapper li,
-            #accessibility-content-wrapper td,
-            #accessibility-content-wrapper th {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.2) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
-            #accessibility-content-wrapper *:focus {
-                outline: 2px solid #0066cc !important;
-                outline-offset: 1px !important;
-                transition: outline 0.2s ease-in-out !important;
-            }
-            
-            /* 8. IMPROVE LINK VISIBILITY - Smooth link transitions */
-            #accessibility-content-wrapper a {
-                font-weight: 500 !important;
-                transition: font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 9. ENHANCE BUTTON READABILITY - Smooth button transitions */
-            #accessibility-content-wrapper button,
-            #accessibility-content-wrapper input[type="button"],
-            #accessibility-content-wrapper input[type="submit"],
-            #accessibility-content-wrapper input[type="reset"] {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 10. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
-            #accessibility-content-wrapper input,
-            #accessibility-content-wrapper textarea,
-            #accessibility-content-wrapper select {
-                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
-                font-weight: 500 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 11. ENHANCE HEADING READABILITY - Smooth heading transitions */
-            #accessibility-content-wrapper h1,
-            #accessibility-content-wrapper h2,
-            #accessibility-content-wrapper h3,
-            #accessibility-content-wrapper h4,
-            #accessibility-content-wrapper h5,
-            #accessibility-content-wrapper h6 {
-                text-shadow: 0 0 0.4px rgba(0, 0, 0, 0.25) !important;
-                font-weight: 600 !important;
-                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
-            }
-            
-            /* 12. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
-            #accessibility-content-wrapper img {
-                filter: none !important;
-            }
-            
-            /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
-            @media (max-width: 768px) {
-                html.vision-impaired {
-                    /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
-                    /* REMOVED: transform-origin - This was interfering with panel positioning */
-                    /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
-                    min-height: 100vh !important;
-                }
-                
-                body.vision-impaired {
-                    /* REMOVED: zoom and scale to prevent zoom and left shift issues */
-                }
-                
-                /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
-                body.vision-impaired .accessibility-widget,
-                body.vision-impaired #accessibility-widget,
-                body.vision-impaired .accessibility-panel {
-                    position: fixed !important;
-                    z-index: 999999 !important;
-                    transform: none !important;
-                    zoom: 1 !important;
-                    -moz-transform: none !important;
-                    -webkit-transform: none !important;
-                }
-                
-                .accessibility-widget.vision-impaired,
-                #accessibility-widget.vision-impaired,
-                .accessibility-panel.vision-impaired,
-                .accessibility-widget,
-                #accessibility-widget,
-                .accessibility-panel,
-                .accessibility-icon,
-                #accessibility-icon {
-                    transform: none !important;
-                    /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
-                    z-index: 999999 !important;
-                }
+            /* Keep sliders at original size (no zoom) */
+            body.vision-impaired [class*="slider"],
+            body.vision-impaired [id*="slider"],
+            body.vision-impaired [data-slider],
+            body.vision-impaired [class*="swiper"],
+            body.vision-impaired [id*="swiper"],
+            body.vision-impaired [class*="carousel"],
+            body.vision-impaired [id*="carousel"],
+            html.vision-impaired [class*="slider"],
+            html.vision-impaired [id*="slider"],
+            html.vision-impaired [data-slider],
+            html.vision-impaired [class*="swiper"],
+            html.vision-impaired [id*="swiper"],
+            html.vision-impaired [class*="carousel"],
+            html.vision-impaired [id*="carousel"] {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
         `;
                 
