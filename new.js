@@ -3430,9 +3430,8 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn i.fas {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             line-height: 1;
             flex-shrink: 0;
             margin: 0;
@@ -3446,11 +3445,8 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn span {
-            display: flex;
-            align-items: center;
+            display: inline-block;
             line-height: 1;
-            margin: 0;
-            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3611,11 +3607,8 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn span {
-            display: flex;
-            align-items: center;
+            display: inline-block;
             line-height: 1;
-            margin: 0;
-            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5292,9 +5285,8 @@ class AccessibilityWidget {
                 }
                 
                 .scaling-btn i.fas {
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
-                    justify-content: center;
                     line-height: 1;
                     flex-shrink: 0;
                     margin: 0;
@@ -5302,14 +5294,14 @@ class AccessibilityWidget {
                 }
                 
                 .scaling-btn span {
-                    display: flex;
-                    align-items: center;
+                    display: inline-block;
                     line-height: 1;
-                    margin: 0;
-                    padding: 0;
                 }
                 
-                /* Removed vertical-align - it interferes with flex alignment */
+                .scaling-btn,
+                .scaling-btn * {
+                    vertical-align: middle !important;
+                }
                 
                 .scaling-btn:focus-visible,
     
@@ -30581,20 +30573,9 @@ class AccessibilityWidget {
                     .scaling-btn i.fas,
                     button[class*="increase"] i.fas,
                     button[class*="decrease"] i.fas {
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        line-height: 1 !important;
-                    }
-                    
-                    .scaling-btn span,
-                    button[class*="increase"] span,
-                    button[class*="decrease"] span {
-                        display: flex !important;
+                        display: inline-flex !important;
                         align-items: center !important;
                         line-height: 1 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
                     }
                 }
             `;
