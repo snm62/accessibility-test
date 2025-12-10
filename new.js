@@ -3427,49 +3427,30 @@ class AccessibilityWidget {
             line-height: 1.2 !important;
             height: auto !important;
             min-height: auto !important;
-            flex-direction: row !important;
-            width: auto !important;
-            min-width: auto !important;
-            margin: 0 auto !important;
-        }
-        
-        .accessibility-panel .scaling-btn {
-            white-space: nowrap;
-            padding: 5px 10px !important;
-            flex-direction: row !important;
-            direction: ltr !important;
-            text-align: center !important;
-            align-content: center !important;
         }
         
         .accessibility-panel .scaling-btn i.fas {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            line-height: 1 !important;
-            flex-shrink: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: auto !important;
-            min-width: auto !important;
-            max-width: none !important;
-            text-align: center !important;
-            flex-basis: auto !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0;
+            margin: 0;
+            padding: 0;
         }
         
-        /* Override Font Awesome default width for icons in scaling buttons */
-        .accessibility-panel .scaling-btn i.fas::before {
-            width: auto !important;
-            text-align: center !important;
+        /* Ensure text nodes in buttons are properly aligned */
+        .accessibility-panel .scaling-btn {
+            white-space: nowrap;
+            padding: 5px 10px !important;
         }
         
         .accessibility-panel .scaling-btn span {
-            display: flex !important;
-            align-items: center !important;
-            line-height: 1 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            flex-shrink: 0 !important;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3630,8 +3611,11 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn span {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             line-height: 1;
+            margin: 0;
+            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5308,34 +5292,24 @@ class AccessibilityWidget {
                 }
                 
                 .scaling-btn i.fas {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    line-height: 1 !important;
-                    flex-shrink: 0 !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    width: auto !important;
-                }
-                
-                .scaling-btn span {
-                    display: flex !important;
-                    align-items: center !important;
-                    line-height: 1 !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    flex-shrink: 0 !important;
-                }
-                
-                .scaling-btn span {
-                    display: inline-block;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     line-height: 1;
+                    flex-shrink: 0;
+                    margin: 0;
+                    padding: 0;
                 }
                 
-                .scaling-btn,
-                .scaling-btn * {
-                    vertical-align: middle !important;
+                .scaling-btn span {
+                    display: flex;
+                    align-items: center;
+                    line-height: 1;
+                    margin: 0;
+                    padding: 0;
                 }
+                
+                /* Removed vertical-align - it interferes with flex alignment */
                 
                 .scaling-btn:focus-visible,
     
@@ -20503,12 +20477,10 @@ class AccessibilityWidget {
             if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
                 element.muted = true;
                 element.volume = 0;
-                // For audio: pause to stop sound
-                // For video: don't pause - allow visual playback, just muted
-                if (element.tagName === 'AUDIO' && !element.paused) {
+                if (!element.paused) {
                     element.pause();
                 }
-                // Videos can continue playing visually, just muted
+     
             }
         }
         
@@ -20544,16 +20516,17 @@ class AccessibilityWidget {
             
             // Try to mute via postMessage (for supported players)
             // Security: Use specific target origins instead of wildcard
-            const iframeSrc = iframe.src || iframe.getAttribute('src') || '';
-            if (!iframeSrc) return;
-            
-            let targetOrigin = null;
-            let platform = null;
-            
-            // Extract origin from iframe src for security
             try {
-                const iframeUrl = new URL(iframeSrc);
-                targetOrigin = iframeUrl.origin;
+                const iframeSrc = iframe.src || iframe.getAttribute('src') || '';
+                if (!iframeSrc) return;
+                
+                let targetOrigin = null;
+                let platform = null;
+                
+                // Extract origin from iframe src for security
+                try {
+                    const iframeUrl = new URL(iframeSrc);
+                    targetOrigin = iframeUrl.origin;
                     
                     // Detect platform for specific commands
                     const hostname = iframeUrl.hostname.toLowerCase();
@@ -20602,74 +20575,84 @@ class AccessibilityWidget {
                     }
                 }
                 
-            if (!targetOrigin) return;
-            
-            // Send platform-specific mute commands - only mute, don't pause
-            if (platform === 'youtube') {
-                // YouTube iframe API commands - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    event: 'command',
-                    func: 'mute',
-                    args: ''
-                }), targetOrigin);
+                if (!targetOrigin) return;
                 
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    event: 'command',
-                    func: 'setVolume',
-                    args: '0'
-                }), targetOrigin);
-                // Removed pauseVideo - allow videos to play visually while muted
-            } else if (platform === 'vimeo') {
-                // Vimeo Player API commands - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    method: 'setVolume',
-                    value: 0
-                }), targetOrigin);
-                // Removed pause - allow videos to play visually while muted
-            } else if (platform === 'soundcloud') {
-                // SoundCloud Widget API - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    method: 'setVolume',
-                    value: 0
-                }), targetOrigin);
-                // Removed pause - allow audio to play visually while muted
-            } else if (platform === 'spotify') {
-                // Spotify Embed API - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    command: 'setVolume',
-                    value: 0
-                }), targetOrigin);
-            } else if (platform === 'twitch') {
-                // Twitch Player API - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    type: 'mute'
-                }), targetOrigin);
-            } else if (platform === 'dailymotion') {
-                // Dailymotion Player API - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    command: 'mute'
-                }), targetOrigin);
-            } else if (platform === 'jwplayer') {
-                // JW Player API - only mute, don't pause
-                iframe.contentWindow.postMessage(JSON.stringify({
-                    type: 'mute'
-                }), targetOrigin);
-            } else {
-                // Generic postMessage attempts for unknown players
-                // Try common mute commands - only mute, don't pause
-                const muteCommands = [
-                    { method: 'mute' },
-                    { command: 'mute' },
-                    { type: 'mute' },
-                    { action: 'mute' },
-                    { method: 'setVolume', value: 0 },
-                    { command: 'setVolume', value: 0 }
-                    // Removed pause commands - allow videos to play visually while muted
-                ];
-                
-                muteCommands.forEach(cmd => {
-                    iframe.contentWindow.postMessage(JSON.stringify(cmd), targetOrigin);
-                });
+                // Send platform-specific mute commands
+                if (platform === 'youtube') {
+                    // YouTube iframe API commands
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'mute',
+                        args: ''
+                    }), targetOrigin);
+                    
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'setVolume',
+                        args: '0'
+                    }), targetOrigin);
+                    
+                    // Removed pauseVideo - allow videos to play visually while muted
+                } else if (platform === 'vimeo') {
+                    // Vimeo Player API commands
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                    
+                    // Removed pause - allow videos to play visually while muted
+                } else if (platform === 'soundcloud') {
+                    // SoundCloud Widget API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        method: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                    
+                    // Removed pause - allow audio to play visually while muted
+                } else if (platform === 'spotify') {
+                    // Spotify Embed API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        command: 'setVolume',
+                        value: 0
+                    }), targetOrigin);
+                } else if (platform === 'twitch') {
+                    // Twitch Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        type: 'mute'
+                    }), targetOrigin);
+                } else if (platform === 'dailymotion') {
+                    // Dailymotion Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        command: 'mute'
+                    }), targetOrigin);
+                } else if (platform === 'jwplayer') {
+                    // JW Player API
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        type: 'mute'
+                    }), targetOrigin);
+                } else {
+                    // Generic postMessage attempts for unknown players
+                    // Try common mute commands
+                    const muteCommands = [
+                        { method: 'mute' },
+                        { command: 'mute' },
+                        { type: 'mute' },
+                        { action: 'mute' },
+                        { method: 'setVolume', value: 0 },
+                        { command: 'setVolume', value: 0 }
+                        // Removed pause commands - allow videos to play visually while muted
+                    ];
+                    
+                    muteCommands.forEach(cmd => {
+                        try {
+                            iframe.contentWindow.postMessage(JSON.stringify(cmd), targetOrigin);
+                        } catch (e) {
+                            // Ignore errors
+                        }
+                    });
+                }
+            } catch (e) {
+                // Ignore errors
             }
             
             // Keep iframe visible but muted
@@ -30602,10 +30585,6 @@ class AccessibilityWidget {
                         align-items: center !important;
                         justify-content: center !important;
                         line-height: 1 !important;
-                        flex-shrink: 0 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        width: auto !important;
                     }
                     
                     .scaling-btn span,
@@ -30616,7 +30595,6 @@ class AccessibilityWidget {
                         line-height: 1 !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        flex-shrink: 0 !important;
                     }
                 }
             `;
