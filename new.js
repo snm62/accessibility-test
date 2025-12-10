@@ -949,11 +949,12 @@ function applyVisionImpaired(on) {
 
             /* 2. CONTENT WRAPPER - Simplified approach */
             #accessibility-content-wrapper {
-                
                 height: 100% !important;
                 min-height: 100vh !important;
                 overflow: visible !important;
                 display: block !important;
+                filter: contrast(1.04) brightness(1.01) !important;
+                transition: filter 240ms ease !important;
             }
             
             /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
@@ -985,12 +986,6 @@ function applyVisionImpaired(on) {
                 transition: none !important;
                 /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 z-index: 999999 !important;
-            }
-
-            /* 4. CONTENT ENHANCEMENT - No font-size changes, optional subtle contrast only */
-            #accessibility-content-wrapper {
-                filter: contrast(1.04) brightness(1.01) !important;
-                transition: filter 240ms ease !important;
             }
             
             /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
@@ -3571,12 +3566,30 @@ class AccessibilityWidget {
             align-items: center !important;
             justify-content: center !important;
             gap: 4px !important;
+            text-align: center !important;
+            line-height: 1.2 !important;
+            height: auto !important;
+            min-height: auto !important;
         }
         
         .accessibility-panel .scaling-btn i.fas {
             display: inline-flex;
             align-items: center;
             line-height: 1;
+            flex-shrink: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Ensure text nodes in buttons are properly aligned */
+        .accessibility-panel .scaling-btn {
+            white-space: nowrap;
+        }
+        
+        .accessibility-panel .scaling-btn::after,
+        .accessibility-panel .scaling-btn::before {
+            content: '';
+            flex: 0 0 auto;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5400,10 +5413,25 @@ class AccessibilityWidget {
                 .action-btn:focus-visible,
     
                 /* Ensure icons inside scaling buttons align properly */
+                .scaling-btn {
+                    text-align: center !important;
+                    line-height: 1.2 !important;
+                    height: auto !important;
+                    white-space: nowrap !important;
+                }
+                
                 .scaling-btn i.fas {
                     display: inline-flex;
                     align-items: center;
                     line-height: 1;
+                    flex-shrink: 0;
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                .scaling-btn,
+                .scaling-btn * {
+                    vertical-align: middle !important;
                 }
                 
                 .scaling-btn:focus-visible,
@@ -7509,15 +7537,15 @@ class AccessibilityWidget {
     
                 }
     
-                /* Big Black Cursor - Proper Arrow Cursor Shape - MAXIMUM SPECIFICITY */
+                /* Big Black Cursor - Clean Arrow Cursor Shape - MAXIMUM SPECIFICITY */
     body.big-black-cursor,
     html body.big-black-cursor,
     body.big-black-cursor *,
     html body.big-black-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M2 2 L2 30 L12 20 L18 26 L22 22 L14 14 L30 14 Z" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>') 2 2, auto !important;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M1 1 L1 28 L10 19 L14 23 L18 19 L10 11 L28 11 Z" fill="black" stroke="white" stroke-width="1"/></svg>') 1 1, auto !important;
     }
     
-    /* Big Black Cursor - Hand Pointer for Links */
+    /* Big Black Cursor - Hand Pointer for Links - Higher specificity to override default */
     body.big-black-cursor a,
     body.big-black-cursor a *,
     body.big-black-cursor button,
@@ -7527,19 +7555,25 @@ class AccessibilityWidget {
     body.big-black-cursor [onclick],
     body.big-black-cursor [onclick] *,
     body.big-black-cursor [tabindex]:not([tabindex="-1"]),
-    body.big-black-cursor [tabindex]:not([tabindex="-1"]) * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M8 4 C8 1.5, 9.5 0, 11 0 C12.5 0, 14 1.5, 14 4 L14 10 L16 10 C17.5 10, 19 11.5, 19 13 C19 14.5, 17.5 16, 16 16 L14 16 L14 22 C14 25, 11.5 27, 8 27 C4.5 27, 2 25, 2 22 L2 16 L0 16 C-1.5 16, -3 14.5, -3 13 C-3 11.5, -1.5 10, 0 10 L2 10 L2 4 C2 1.5, 3.5 0, 5 0 C6.5 0, 8 1.5, 8 4 Z M20 6 L20 28 C20 31, 22.5 33, 25 33 C27.5 33, 30 31, 30 28 L30 6 C30 3, 28.5 2, 27 2 C25.5 2, 24 3, 24 6 L24 26 C24 27.5, 22.5 29, 21 29 C19.5 29, 18 27.5, 18 26 Z" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 4 L22 8 L26 8 L26 4 Z" fill="black"/></svg>') 10 4, pointer !important;
+    body.big-black-cursor [tabindex]:not([tabindex="-1"]) *,
+    body.big-black-cursor input[type="button"],
+    body.big-black-cursor input[type="submit"],
+    body.big-black-cursor input[type="reset"],
+    body.big-black-cursor .btn,
+    body.big-black-cursor [class*="button"],
+    body.big-black-cursor [class*="link"] {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 3 C8 1.5, 9 0.5, 10.5 0.5 C12 0.5, 13 1.5, 13 3 L13 9 L15 9 C16 9, 16.5 9.5, 16.5 10.5 C16.5 11.5, 16 12, 15 12 L13 12 L13 18 C13 20, 11 22, 9 22 C7 22, 5 20, 5 18 L5 12 L3 12 C2 12, 1.5 11.5, 1.5 10.5 C1.5 9.5, 2 9, 3 9 L5 9 L5 3 C5 1.5, 6 0.5, 7.5 0.5 C9 0.5, 9 1.5, 9 3 L9 9 L11 9 L11 3 C11 1.5, 12 0.5, 13.5 0.5 C15 0.5, 16 1.5, 16 3 L16 19 C16 20.5, 17 21.5, 18.5 21.5 C20 21.5, 21 20.5, 21 19 L21 3 C21 1.5, 22 0.5, 23.5 0.5 C25 0.5, 26 1.5, 26 3 L26 19 C26 21.5, 24 24, 21.5 24 C19 24, 17 21.5, 17 19 Z" fill="black" stroke="white" stroke-width="1"/></svg>') 8 3, pointer !important;
     }
     
-    /* Big White Cursor - Proper Arrow Cursor Shape - MAXIMUM SPECIFICITY */
+    /* Big White Cursor - Clean Arrow Cursor Shape - MAXIMUM SPECIFICITY */
     body.big-white-cursor,
     html body.big-white-cursor,
     body.big-white-cursor *,
     html body.big-white-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M2 2 L2 30 L12 20 L18 26 L22 22 L14 14 L30 14 Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>') 2 2, auto !important;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M1 1 L1 28 L10 19 L14 23 L18 19 L10 11 L28 11 Z" fill="white" stroke="black" stroke-width="1"/></svg>') 1 1, auto !important;
     }
     
-    /* Big White Cursor - Hand Pointer for Links */
+    /* Big White Cursor - Hand Pointer for Links - Higher specificity to override default */
     body.big-white-cursor a,
     body.big-white-cursor a *,
     body.big-white-cursor button,
@@ -7549,8 +7583,14 @@ class AccessibilityWidget {
     body.big-white-cursor [onclick],
     body.big-white-cursor [onclick] *,
     body.big-white-cursor [tabindex]:not([tabindex="-1"]),
-    body.big-white-cursor [tabindex]:not([tabindex="-1"]) * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M8 4 C8 1.5, 9.5 0, 11 0 C12.5 0, 14 1.5, 14 4 L14 10 L16 10 C17.5 10, 19 11.5, 19 13 C19 14.5, 17.5 16, 16 16 L14 16 L14 22 C14 25, 11.5 27, 8 27 C4.5 27, 2 25, 2 22 L2 16 L0 16 C-1.5 16, -3 14.5, -3 13 C-3 11.5, -1.5 10, 0 10 L2 10 L2 4 C2 1.5, 3.5 0, 5 0 C6.5 0, 8 1.5, 8 4 Z M20 6 L20 28 C20 31, 22.5 33, 25 33 C27.5 33, 30 31, 30 28 L30 6 C30 3, 28.5 2, 27 2 C25.5 2, 24 3, 24 6 L24 26 C24 27.5, 22.5 29, 21 29 C19.5 29, 18 27.5, 18 26 Z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 4 L22 8 L26 8 L26 4 Z" fill="white"/></svg>') 10 4, pointer !important;
+    body.big-white-cursor [tabindex]:not([tabindex="-1"]) *,
+    body.big-white-cursor input[type="button"],
+    body.big-white-cursor input[type="submit"],
+    body.big-white-cursor input[type="reset"],
+    body.big-white-cursor .btn,
+    body.big-white-cursor [class*="button"],
+    body.big-white-cursor [class*="link"] {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 3 C8 1.5, 9 0.5, 10.5 0.5 C12 0.5, 13 1.5, 13 3 L13 9 L15 9 C16 9, 16.5 9.5, 16.5 10.5 C16.5 11.5, 16 12, 15 12 L13 12 L13 18 C13 20, 11 22, 9 22 C7 22, 5 20, 5 18 L5 12 L3 12 C2 12, 1.5 11.5, 1.5 10.5 C1.5 9.5, 2 9, 3 9 L5 9 L5 3 C5 1.5, 6 0.5, 7.5 0.5 C9 0.5, 9 1.5, 9 3 L9 9 L11 9 L11 3 C11 1.5, 12 0.5, 13.5 0.5 C15 0.5, 16 1.5, 16 3 L16 19 C16 20.5, 17 21.5, 18.5 21.5 C20 21.5, 21 20.5, 21 19 L21 3 C21 1.5, 22 0.5, 23.5 0.5 C25 0.5, 26 1.5, 26 3 L26 19 C26 21.5, 24 24, 21.5 24 C19 24, 17 21.5, 17 19 Z" fill="white" stroke="black" stroke-width="1"/></svg>') 8 3, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -12634,7 +12674,7 @@ class AccessibilityWidget {
     
                     case 'adhd-friendly':
     
-                        this.createADHDSpotlight();
+                        this.enableADHDFriendly();
     
                         break;
     
@@ -12811,7 +12851,7 @@ class AccessibilityWidget {
     
                     case 'adhd-friendly':
     
-                        this.removeADHDSpotlight();
+                        this.disableADHDFriendly();
     
                         break;
     
@@ -20611,10 +20651,18 @@ class AccessibilityWidget {
                     const audioElements = iframeDoc.querySelectorAll('audio');
                     const videoElements = iframeDoc.querySelectorAll('video');
                     
-                    [...audioElements, ...videoElements].forEach(element => {
+                    // Mute audio elements and pause them
+                    audioElements.forEach(element => {
                         element.muted = true;
                         element.volume = 0;
                         if (!element.paused) element.pause();
+                    });
+                    
+                    // Mute video elements but allow them to play visually
+                    videoElements.forEach(element => {
+                        element.muted = true;
+                        element.volume = 0;
+                        // Don't pause videos - allow visual playback
                     });
                 }
             } catch (e) {
@@ -20699,11 +20747,7 @@ class AccessibilityWidget {
                         args: '0'
                     }), targetOrigin);
                     
-                    iframe.contentWindow.postMessage(JSON.stringify({
-                        event: 'command',
-                        func: 'pauseVideo',
-                        args: ''
-                    }), targetOrigin);
+                    // Removed pauseVideo - allow videos to play visually while muted
                 } else if (platform === 'vimeo') {
                     // Vimeo Player API commands
                     iframe.contentWindow.postMessage(JSON.stringify({
@@ -20711,9 +20755,7 @@ class AccessibilityWidget {
                         value: 0
                     }), targetOrigin);
                     
-                    iframe.contentWindow.postMessage(JSON.stringify({
-                        method: 'pause'
-                    }), targetOrigin);
+                    // Removed pause - allow videos to play visually while muted
                 } else if (platform === 'soundcloud') {
                     // SoundCloud Widget API
                     iframe.contentWindow.postMessage(JSON.stringify({
@@ -20721,9 +20763,7 @@ class AccessibilityWidget {
                         value: 0
                     }), targetOrigin);
                     
-                    iframe.contentWindow.postMessage(JSON.stringify({
-                        method: 'pause'
-                    }), targetOrigin);
+                    // Removed pause - allow audio to play visually while muted
                 } else if (platform === 'spotify') {
                     // Spotify Embed API
                     iframe.contentWindow.postMessage(JSON.stringify({
@@ -20754,9 +20794,8 @@ class AccessibilityWidget {
                         { type: 'mute' },
                         { action: 'mute' },
                         { method: 'setVolume', value: 0 },
-                        { command: 'setVolume', value: 0 },
-                        { method: 'pause' },
-                        { command: 'pause' }
+                        { command: 'setVolume', value: 0 }
+                        // Removed pause commands - allow videos to play visually while muted
                     ];
                     
                     muteCommands.forEach(cmd => {
@@ -25260,7 +25299,7 @@ class AccessibilityWidget {
                 const iframes = document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="player"]');
                 iframes.forEach(iframe => {
                     try {
-                        // Try to pause iframe content if possible
+                        // Try to mute iframe content (but allow visual playback)
                         // Security: Use specific target origins instead of wildcard
                         if (iframe.contentWindow && iframe.contentWindow.postMessage) {
                             const iframeSrc = iframe.src || '';
@@ -25276,7 +25315,10 @@ class AccessibilityWidget {
                                     targetOrigin = 'https://player.vimeo.com';
                                 }
                             }
-                            iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', targetOrigin);
+                            // Removed pauseVideo - allow videos to play visually while muted
+                            // Only send mute commands
+                            iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', targetOrigin);
+                            iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":"0"}', targetOrigin);
                          
                         }
                     } catch (error) {
@@ -26345,7 +26387,7 @@ class AccessibilityWidget {
                 }
 
                 // Apply comprehensive website scaling and contrast enhancement
-                this.applyVisionImpairedStyles();
+                this.applyVisionImpaired(true);
 
                 // Persist and sync
                 this.saveSettings();
@@ -26356,336 +26398,237 @@ class AccessibilityWidget {
             }
         }
         
-        // Apply comprehensive vision impaired styles
-        applyVisionImpairedStyles() {
+        // Vision Impaired helper: apply comprehensive website scaling and contrast enhancement
+        applyVisionImpaired(on) {
             try {
-                // Remove existing vision impaired styles if any
-                const existingStyle = document.getElementById('vision-impaired-comprehensive');
-                if (existingStyle) {
-                    existingStyle.remove();
+                // Toggle root classes
+                document.documentElement.classList.toggle('vision-impaired', !!on);
+                document.body.classList.toggle('vision-impaired', !!on);
+
+                // CONTENT WRAPPER (persistent)
+                let wrapper = document.getElementById('accessibility-content-wrapper');
+                if (!wrapper && on) {
+                    wrapper = document.createElement('div');
+                    wrapper.id = 'accessibility-content-wrapper';
+                    // Move all current body children into the wrapper once
+                    while (document.body.firstChild) {
+                        wrapper.appendChild(document.body.firstChild);
+                    }
+                    document.body.appendChild(wrapper);
                 }
 
-                const style = document.createElement('style');
-                style.id = 'vision-impaired-comprehensive';
-                style.textContent = `
-                    /* VISION IMPAIRED: Zoom content while preventing overflow */
-                    
-                    /* 1. ZOOM ENTIRE PAGE - Use zoom on body instead of html to avoid breaking scroll animations */
-                    html.vision-impaired {
-                        /* DO NOT apply zoom/transform to html - it breaks scroll-based animations */
-                        /* Keep html normal to preserve scroll position calculations */
-                        overflow-x: hidden;
-                        overflow-y: auto;
-                        width: 100%;
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    
-                    /* Apply only filter for contrast - DO NOT use zoom/transform as it breaks animations */
-                    /* Apply zoom to body instead - this preserves scroll position calculations */
-                    body.vision-impaired {
-                        /* Enhanced text contrast for better visibility */
-                        filter: contrast(1.15) brightness(1.08);
-                        /* Use zoom on body instead of html to avoid breaking scroll animations */
-                        zoom: 1.15;
-                        /* Fallback for Firefox */
-                        -moz-transform: scale(1.15);
-                        -moz-transform-origin: top left;
-                        /* Prevent overflow */
-                        overflow-x: hidden;
-                        width: calc(100vw / 1.15);
-                        max-width: calc(100vw / 1.15);
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                        position: relative;
-                        /* Ensure body doesn't exceed viewport */
-                        min-width: 0;
-                    }
-                    
-                    /* Ensure all direct children of body respect the constrained width */
-                    body.vision-impaired > * {
-                        max-width: 100%;
-                        overflow-x: hidden;
-                    }
-                    
-                    /* Preserve accessibility widget from vision impaired filters and scaling */
-                    body.vision-impaired .accessibility-widget,
-                    body.vision-impaired .accessibility-panel,
-                    body.vision-impaired .accessibility-icon,
-                    body.vision-impaired #accessibility-widget,
-                    body.vision-impaired #accessibility-panel,
-                    body.vision-impaired #accessibility-icon,
-                    body.vision-impaired [data-ck-widget],
-                    body.vision-impaired [class*="accessibility"],
-                    .accessibility-widget,
-                    #accessibility-widget,
-                    .accessibility-panel,
-                    .accessibility-icon,
-                    #accessibility-icon {
-                        filter: none !important;
-                        -webkit-filter: none !important;
-                        transform: none !important;
-                        transform-origin: unset !important;
-                        /* CRITICAL: DO NOT force fixed positioning - let JavaScript control positioning */
-                        /* Removed position: fixed !important to allow widget to scroll with page */
-                        z-index: 999999 !important;
-                        /* CRITICAL: DO NOT override positioning - let JavaScript control viewport positioning */
-                        /* Removed problematic positioning overrides that break viewport scrolling */
-                        /* Prevent any scaling or positioning interference */
-                        scale: 1 !important;
-                        rotate: 0deg !important;
-                        translate: none !important;
-                    }
-                    
-                    /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
-                    body.vision-impaired p,
-                    body.vision-impaired span,
-                    body.vision-impaired div,
-                    body.vision-impaired li,
-                    body.vision-impaired td,
-                    body.vision-impaired th {
-                        /* Slightly improve text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        /* Increased font weight for better readability */
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
-                    body.vision-impaired *:focus {
-                        outline: 2px solid #0066cc !important;
-                        outline-offset: 1px !important;
-                    }
-                    
-                    /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
-                    body.vision-impaired a {
-                        /* Slightly improve link contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        /* Increased font weight for better visibility */
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
-                    body.vision-impaired button,
-                    body.vision-impaired input[type="button"],
-                    body.vision-impaired input[type="submit"],
-                    body.vision-impaired input[type="reset"] {
-                        /* Slightly improve button text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
-                    body.vision-impaired input,
-                    body.vision-impaired textarea,
-                    body.vision-impaired select {
-                        /* Slightly improve form text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
-                    body.vision-impaired h1,
-                    body.vision-impaired h2,
-                    body.vision-impaired h3,
-                    body.vision-impaired h4,
-                    body.vision-impaired h5,
-                    body.vision-impaired h6 {
-                        /* Slightly improve heading contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        font-weight: 700 !important;
-                    }
-                    
-                    /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
-                    body.vision-impaired img {
-                        /* Slightly improve image contrast */
-                        filter: contrast(1.05) brightness(1.02) !important;
-                    }
-                    
-                    /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
-                    body.vision-impaired * {
-                        box-sizing: border-box !important;
-                        /* No layout modifications */
-                    }
-                    
-                    /* 10. PREVENT CONTENT OVERFLOW - Only constrain containers, not all elements */
-                    /* REMOVED: max-width: 100% on ALL elements - it breaks animations and layouts */
-                    /* Only apply to main containers */
-                    body.vision-impaired .container,
-                    body.vision-impaired .wrapper,
-                    body.vision-impaired .content,
-                    body.vision-impaired main,
-                    body.vision-impaired section,
-                    body.vision-impaired article {
-                        box-sizing: border-box;
-                        max-width: 100%;
-                    }
-                    
-                    /* Override fixed widths that exceed viewport */
-                    body.vision-impaired [style*="width"] {
-                        max-width: 100%;
-                    }
-                    
-                    /* Prevent containers from overflowing and shifting */
-                    body.vision-impaired > *,
-                    body.vision-impaired .container,
-                    body.vision-impaired .wrapper,
-                    body.vision-impaired .content,
-                    body.vision-impaired section,
-                    body.vision-impaired main,
-                    body.vision-impaired article,
-                    body.vision-impaired header,
-                    body.vision-impaired footer,
-                    body.vision-impaired nav,
-                    body.vision-impaired [class*="container"],
-                    body.vision-impaired [class*="wrapper"],
-                    body.vision-impaired [class*="section"] {
-                        max-width: 100%;
-                        overflow-x: hidden;
-                        box-sizing: border-box;
-                        /* Prevent horizontal shifting */
-                        position: relative;
-                        left: auto;
-                        right: auto;
-                        /* Allow flex/grid items to shrink */
-                        min-width: 0;
-                    }
-                    
-                    /* Prevent text elements from causing overflow - but don't break animations */
-                    body.vision-impaired p,
-                    body.vision-impaired div,
-                    body.vision-impaired span,
-                    body.vision-impaired li,
-                    body.vision-impaired td,
-                    body.vision-impaired th,
-                    body.vision-impaired label,
-                    body.vision-impaired small {
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
-                        box-sizing: border-box;
-                    }
-                    
-                    /* Prevent headings from causing overflow */
-                    body.vision-impaired h1,
-                    body.vision-impaired h2,
-                    body.vision-impaired h3,
-                    body.vision-impaired h4,
-                    body.vision-impaired h5,
-                    body.vision-impaired h6 {
-                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                        box-sizing: border-box;
-                    }
-                    
-                    /* Prevent links from causing overflow - but don't break animations */
-                    body.vision-impaired a {
-                        /* REMOVED: max-width: 100% - it breaks animations */
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                        box-sizing: border-box;
-                        /* REMOVED: display: inline-block - it can break link animations */
-                        /* REMOVED: min-width: 0 - not needed */
-                    }
-                    
-                    /* Prevent buttons and inputs from overflowing - but don't break animations */
-                    body.vision-impaired button,
-                    body.vision-impaired input,
-                    body.vision-impaired textarea,
-                    body.vision-impaired select {
-                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
-                        box-sizing: border-box;
-                        /* REMOVED: min-width: 0 - not needed and can break layouts */
-                    }
-                    
-                    /* Prevent tables from overflowing */
-                    body.vision-impaired table {
-                        max-width: 100%;
-                        width: 100%;
-                        table-layout: auto;
-                        box-sizing: border-box;
-                    }
-                    
-                    body.vision-impaired td,
-                    body.vision-impaired th {
-                        word-break: break-word;
-                        overflow-wrap: break-word;
-                    }
-                    
-                    /* EXCEPTION: Allow accessibility panel to have vertical scrollbar - HIGH SPECIFICITY */
-                    body.vision-impaired #accessibility-panel,
-                    body.vision-impaired .accessibility-panel,
-                    html body.vision-impaired #accessibility-panel,
-                    html body.vision-impaired .accessibility-panel,
-                    #accessibility-panel,
-                    .accessibility-panel {
-                        overflow-x: hidden;
-                        overflow-y: auto;
-                        overflow: hidden auto;
-                        max-width: 100%;
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                    }
-                    
-                    /* Ensure images and media don't overflow */
-                    body.vision-impaired img,
-                    body.vision-impaired video,
-                    body.vision-impaired iframe,
-                    body.vision-impaired embed,
-                    body.vision-impaired object,
-                    body.vision-impaired svg,
-                    body.vision-impaired canvas {
-                        max-width: 100%;
-                        width: auto;
-                        height: auto;
-                        box-sizing: border-box;
-                    }
-                    
-                    /* Prevent flex and grid containers from overflowing */
-                    body.vision-impaired [style*="display: flex"],
-                    body.vision-impaired [style*="display:grid"],
-                    body.vision-impaired .flex,
-                    body.vision-impaired .grid,
-                    body.vision-impaired [class*="flex"],
-                    body.vision-impaired [class*="grid"] {
-                        max-width: 100%;
-                        min-width: 0;
-                        overflow-x: hidden;
-                    }
-                    
-                    /* Prevent absolutely/fixed positioned elements from causing overflow */
-                    body.vision-impaired [style*="position: absolute"],
-                    body.vision-impaired [style*="position:fixed"] {
-                        max-width: 100vw;
-                    }
-                    
-                    /* Force all inline and inline-block elements to respect container width */
-                    body.vision-impaired span,
-                    body.vision-impaired a,
-                    body.vision-impaired strong,
-                    body.vision-impaired em,
-                    body.vision-impaired b,
-                    body.vision-impaired i {
-                        max-width: 100%;
-                        word-break: break-word;
-                        overflow-wrap: break-word;
-                    }
-                    
-                    /* 11. PRESERVE LAYOUT - No footer modifications */
-                    
-                    /* 12. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
-                    @media (max-width: 768px) {
-                        html.vision-impaired {
-                            /* No zoom - preserve original layout */
-                            overflow-x: hidden !important;
-                            max-width: 100% !important;
-                        }
-                    }
-                `;
+                // Apply vision scaling to body element as requested
+                if (on) {
+                    document.body.classList.add('vision-impaired');
+                } else {
+                    document.body.classList.remove('vision-impaired');
+                }
                 
-                document.head.appendChild(style);
+                let style = document.getElementById('accessibility-vision-impaired-immediate-early');
+                if (!style && on) {
+                    style = document.createElement('style');
+                    style.id = 'accessibility-vision-impaired-immediate-early';
+                    document.head.appendChild(style);
+                } else if (!on && style) {
+                    style.remove();
+                    return;
+                }
+                
+                if (!on) return;
+                
+                // ... (Update CSS below) ...
+                style.textContent = `
+            /* VISION IMPAIRED: Safe Content Scaling with Transform (variable-driven) */
+
+            /* 1. VISION IMPAIRED SCALING - Clean approach without layout breaking */
+            html.vision-impaired {
+                /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
+                /* REMOVED: transform-origin - This was interfering with panel positioning */
+                /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
+                min-height: 100vh !important;
+                /* REMOVED: transition - This was interfering with panel positioning */
+            }
+
+            body.vision-impaired {
+                margin: 0 !important;
+                padding: 0 !important;
+                /* REMOVED: zoom and scale to prevent zoom and left shift issues */
+            }
+            
+            /* Fix overflow for Firefox and other browsers */
+            html.vision-impaired {
+                overflow-x: auto !important;
+                width: 100% !important;
+            }
+            
+            /* REMOVED: width calculation that was causing left shift */
+
+            /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            body.vision-impaired .accessibility-panel {
+                position: fixed !important;
+                z-index: 999999 !important;
+                transform: none !important;
+                zoom: 1 !important;
+                -moz-transform: none !important;
+                -webkit-transform: none !important;
+            }
+
+            /* 2. CONTENT WRAPPER - Simplified approach */
+            #accessibility-content-wrapper {
+                height: 100% !important;
+                min-height: 100vh !important;
+                overflow: visible !important;
+                display: block !important;
+                filter: contrast(1.04) brightness(1.01) !important;
+                transition: filter 240ms ease !important;
+            }
+            
+            /* 3. PREVENT EXTRA WHITE SPACE - Ensure content fills viewport */
+            html.vision-impaired {
+                overflow-x: hidden !important;
+            }
+            
+            /* 4. ENSURE FOOTER AND CONTENT FILL VIEWPORT */
+            body.vision-impaired main,
+            body.vision-impaired section,
+            body.vision-impaired article,
+            body.vision-impaired .content,
+            body.vision-impaired .container,
+            body.vision-impaired .wrapper {
+                min-height: 100vh !important;
+            }
+            
+            /* 5. ACCESSIBILITY PANEL - Exclude from scaling to preserve viewport positioning */
+            .accessibility-widget.vision-impaired,
+            #accessibility-widget.vision-impaired,
+            .accessibility-panel.vision-impaired,
+            .accessibility-widget,
+            #accessibility-widget,
+            .accessibility-panel,
+            .accessibility-icon,
+            #accessibility-icon {
+                transform: none !important;
+                transform-origin: unset !important;
+                transition: none !important;
+                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+                z-index: 999999 !important;
+            }
+            
+            /* 5. PRESERVE STICKY POSITIONING - Ensure sticky elements work correctly */
+            #accessibility-content-wrapper [style*="position: sticky"],
+            #accessibility-content-wrapper [style*="position: -webkit-sticky"],
+            #accessibility-content-wrapper .sticky,
+            #accessibility-content-wrapper .fixed-nav,
+            #accessibility-content-wrapper nav[style*="position: sticky"],
+            #accessibility-content-wrapper nav[style*="position: -webkit-sticky"] {
+                position: sticky !important;
+                position: -webkit-sticky !important;
+                /* Ensure sticky elements maintain their behavior */
+                z-index: 9999 !important;
+            }
+            
+            /* 6. IMPROVE TEXT READABILITY - Smooth transitions for text enhancements */
+            #accessibility-content-wrapper p,
+            #accessibility-content-wrapper span,
+            #accessibility-content-wrapper div,
+            #accessibility-content-wrapper li,
+            #accessibility-content-wrapper td,
+            #accessibility-content-wrapper th {
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.2) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
+            }
+            
+            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
+            #accessibility-content-wrapper *:focus {
+                outline: 2px solid #0066cc !important;
+                outline-offset: 1px !important;
+                transition: outline 0.2s ease-in-out !important;
+            }
+            
+            /* 8. IMPROVE LINK VISIBILITY - Smooth link transitions */
+            #accessibility-content-wrapper a {
+                font-weight: 500 !important;
+                transition: font-weight 0.3s ease-in-out !important;
+            }
+            
+            /* 9. ENHANCE BUTTON READABILITY - Smooth button transitions */
+            #accessibility-content-wrapper button,
+            #accessibility-content-wrapper input[type="button"],
+            #accessibility-content-wrapper input[type="submit"],
+            #accessibility-content-wrapper input[type="reset"] {
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
+            }
+            
+            /* 10. IMPROVE FORM ELEMENT READABILITY - Smooth form transitions */
+            #accessibility-content-wrapper input,
+            #accessibility-content-wrapper textarea,
+            #accessibility-content-wrapper select {
+                text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.15) !important;
+                font-weight: 500 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
+            }
+            
+            /* 11. ENHANCE HEADING READABILITY - Smooth heading transitions */
+            #accessibility-content-wrapper h1,
+            #accessibility-content-wrapper h2,
+            #accessibility-content-wrapper h3,
+            #accessibility-content-wrapper h4,
+            #accessibility-content-wrapper h5,
+            #accessibility-content-wrapper h6 {
+                text-shadow: 0 0 0.4px rgba(0, 0, 0, 0.25) !important;
+                font-weight: 600 !important;
+                transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
+            }
+            
+            /* 12. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
+            #accessibility-content-wrapper img {
+                filter: none !important;
+            }
+            
+            /* 13. RESPONSIVE ADJUSTMENTS - Mobile scaling */
+            @media (max-width: 768px) {
+                html.vision-impaired {
+                    /* REMOVED: transform: scale() - This was interfering with panel viewport behavior */
+                    /* REMOVED: transform-origin - This was interfering with panel positioning */
+                    /* REMOVED: width/height calculations - This was interfering with panel viewport behavior */
+                    min-height: 100vh !important;
+                }
+                
+                body.vision-impaired {
+                    /* REMOVED: zoom and scale to prevent zoom and left shift issues */
+                }
+                
+                /* Ensure accessibility panel maintains viewport positioning when vision scaling is active */
+                body.vision-impaired .accessibility-widget,
+                body.vision-impaired #accessibility-widget,
+                body.vision-impaired .accessibility-panel {
+                    position: fixed !important;
+                    z-index: 999999 !important;
+                    transform: none !important;
+                    zoom: 1 !important;
+                    -moz-transform: none !important;
+                    -webkit-transform: none !important;
+                }
+                
+                .accessibility-widget.vision-impaired,
+                #accessibility-widget.vision-impaired,
+                .accessibility-panel.vision-impaired,
+                .accessibility-widget,
+                #accessibility-widget,
+                .accessibility-panel,
+                .accessibility-icon,
+                #accessibility-icon {
+                    transform: none !important;
+                    /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
+                    z-index: 999999 !important;
+                }
+            }
+        `;
                 
                 
             } catch (error) {
@@ -26717,11 +26660,23 @@ class AccessibilityWidget {
                 }
 
                 // Remove comprehensive vision impaired styles
-                const existingStyle = document.getElementById('vision-impaired-comprehensive');
+                const existingStyle = document.getElementById('accessibility-vision-impaired-immediate-early');
                 if (existingStyle) {
                     existingStyle.remove();
-                    
                 }
+                
+                // Remove content wrapper and restore body children
+                const wrapper = document.getElementById('accessibility-content-wrapper');
+                if (wrapper) {
+                    // Move all wrapper children back to body
+                    while (wrapper.firstChild) {
+                        document.body.insertBefore(wrapper.firstChild, wrapper);
+                    }
+                    wrapper.remove();
+                }
+                
+                // Apply vision impaired with false to clean up
+                this.applyVisionImpaired(false);
 
                 // Persist and sync
                 this.saveSettings();
