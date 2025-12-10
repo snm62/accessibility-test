@@ -53,6 +53,24 @@
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessibility-seizure-immediate-early';
             immediateStyle.textContent = `
+                /* APPLY GREYISH COLOR FILTER IMMEDIATELY - Reduce color intensity to prevent seizures */
+                body.seizure-safe,
+                html.seizure-safe {
+                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                }
+                
+                /* Exclude widget from color filter */
+                body.seizure-safe .accessibility-widget,
+                body.seizure-safe #accessibility-widget,
+                body.seizure-safe .accessibility-panel,
+                body.seizure-safe .accessibility-icon,
+                body.seizure-safe [data-ck-widget],
+                body.seizure-safe [class*="accessibility"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
                 /* REMOVED: Duplicate universal selector - already covered by main rule */
                 /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
                 body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
@@ -572,6 +590,10 @@
                                     if (!window.__origSetProperty) {
                                         window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
                                         CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
+                                            // Only block if seizure-safe mode is active
+                                            if (!document.body.classList.contains('seizure-safe')) {
+                                                return window.__origSetProperty.call(this, name, value, priority);
+                                            }
                                             const n = String(name).toLowerCase();
                                             // Block animations/transitions/filters that cause flashing; allow transform so toggles/arrows can rotate
                                             if (n === 'animation' || n.startsWith('animation-') || n === 'transition' || n.startsWith('transition-') || n === 'opacity' || n === 'filter') {
@@ -709,10 +731,25 @@ function applyUniversalStopMotion(enabled) {
             }
         } catch (_) {}
 
-        // GSAP detected - do not pause global timeline to preserve ScrollTrigger
+        // GSAP detected - disable ScrollTrigger and pause animations
         try {
-            if (enabled && typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
-                
+            if (enabled && typeof window.gsap !== 'undefined') {
+                // Disable ScrollTrigger if it exists
+                if (window.gsap.registerPlugin && typeof window.gsap.registerPlugin === 'function') {
+                    try {
+                        // Pause all GSAP animations including ScrollTrigger
+                        if (window.gsap.globalTimeline) {
+                            window.gsap.globalTimeline.pause();
+                        }
+                        // Kill all ScrollTrigger instances
+                        if (window.ScrollTrigger && typeof window.ScrollTrigger.getAll === 'function') {
+                            const triggers = window.ScrollTrigger.getAll();
+                            triggers.forEach(trigger => {
+                                try { trigger.kill(); } catch (_) {}
+                            });
+                        }
+                    } catch (_) {}
+                }
             }
         } catch (_) {}
 
@@ -905,8 +942,9 @@ function applyVisionImpaired(on) {
                 transition: text-shadow 0.3s ease-in-out, font-weight 0.3s ease-in-out !important;
             }
             
-            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions */
-            #accessibility-content-wrapper *:focus {
+            /* 7. ENHANCE FOCUS INDICATORS - Smooth focus transitions (only when vision-impaired is active) */
+            body.vision-impaired #accessibility-content-wrapper *:focus,
+            html.vision-impaired #accessibility-content-wrapper *:focus {
                 outline: 2px solid #0066cc !important;
                 outline-offset: 1px !important;
                 transition: outline 0.2s ease-in-out !important;
@@ -2601,12 +2639,9 @@ class AccessibilityWidget {
                     this.isKeyboardNavigation = true;
                     this.lastInteractionMethod = 'keyboard';
                     
-                    
-                    // Automatically enable highlight focus when Tab is used
-                    if (!document.body.classList.contains('highlight-focus')) {
-                        
-                        this.enableHighlightFocus();
-                    }
+                    // REMOVED: Auto-enable highlight focus on Tab press
+                    // Only enable highlight-focus if user explicitly turns it on in widget settings
+                    // This prevents unwanted focus boxes from appearing when clicking links
                 }
     
                 
@@ -22360,37 +22395,9 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
                 style.textContent = `
-                    /* READABLE FONT: Only change font-family, no size or weight changes */
+                    /* READABLE FONT: ONLY change font-family, nothing else */
                     
-                    /* Removed overflow-x: hidden from .readable-font - it was hiding slider content */
-                    /* Overflow is handled at html/body level only */
-                    
-                    /* Only break words in block-level containers, not inline elements */
-                    .readable-font p,
-                    .readable-font div,
-                    .readable-font li,
-                    .readable-font td,
-                    .readable-font th,
-                    .readable-font section,
-                    .readable-font article,
-                    .readable-font main {
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                    }
-                    
-                    /* Preserve inline elements - don't break words unnecessarily */
-                    .readable-font span,
-                    .readable-font a,
-                    .readable-font strong,
-                    .readable-font em,
-                    .readable-font b,
-                    .readable-font i {
-                        white-space: normal;
-                        word-wrap: normal;
-                        overflow-wrap: normal;
-                    }
-                    
-                    /* 1. HEADINGS - Apply readable font to headings (ONLY font-family, all other properties preserved automatically) */
+                    /* 1. HEADINGS - Only font-family */
                     .readable-font h1,
                     .readable-font h2,
                     .readable-font h3,
@@ -22400,10 +22407,9 @@ class AccessibilityWidget {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 2. TEXT CONTENT - Apply readable font to text elements (ONLY font-family, all other properties preserved automatically) */
+                    /* 2. TEXT CONTENT - Only font-family */
                     .readable-font p,
-                    .readable-font span,
-                    .readable-font div,
+                    .readable-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),
                     .readable-font li,
                     .readable-font td,
                     .readable-font th,
@@ -22415,24 +22421,24 @@ class AccessibilityWidget {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 3. LINKS - Apply readable font to links (ONLY font-family, all other properties preserved automatically) */
-                    .readable-font a {
+                    /* 3. LINKS - Only font-family */
+                    .readable-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]) {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 4. FORM ELEMENTS - Apply readable font to form text (ONLY font-family, all other properties preserved automatically) */
+                    /* 4. FORM ELEMENTS - Only font-family */
                     .readable-font input,
                     .readable-font textarea,
                     .readable-font select {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* 5. BUTTON TEXT - Apply readable font to button text (ONLY font-family, all other properties preserved automatically) */
-                    .readable-font button {
+                    /* 5. BUTTON TEXT - Only font-family */
+                    .readable-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]) {
                         font-family: 'Arial', 'Open Sans', 'Helvetica', sans-serif;
                     }
                     
-                    /* EXCLUDE WIDGET FROM READABLE FONT - Widget should never get readable font styles */
+                    /* EXCLUDE WIDGET - Never apply readable font to widget */
                     .readable-font .accessibility-widget,
                     .readable-font #accessibility-widget,
                     .readable-font .accessibility-panel,
@@ -22445,7 +22451,24 @@ class AccessibilityWidget {
                         font-family: revert;
                     }
                     
-                    /* 6. PRESERVE ALL SYMBOLS AND ICONS - Exclude icon fonts from readable font */
+                    /* EXCLUDE SLIDERS AND CAROUSELS - Never apply readable font to slider content */
+                    .readable-font [class*="slider"],
+                    .readable-font [class*="carousel"],
+                    .readable-font [class*="swiper"],
+                    .readable-font [data-slider],
+                    .readable-font [data-carousel],
+                    .readable-font [id*="slider"],
+                    .readable-font [id*="carousel"],
+                    .readable-font [id*="swiper"],
+                    .readable-font [class*="slider"] *,
+                    .readable-font [class*="carousel"] *,
+                    .readable-font [class*="swiper"] *,
+                    .readable-font [data-slider] *,
+                    .readable-font [data-carousel] * {
+                        font-family: revert;
+                    }
+                    
+                    /* EXCLUDE ICONS AND SYMBOLS */
                     .readable-font i,
                     .readable-font [class*="icon"],
                     .readable-font [class*="symbol"],
@@ -22456,71 +22479,6 @@ class AccessibilityWidget {
                     .readable-font .w-icon-dropdown-toggle,
                     .readable-font svg * {
                         font-family: initial;
-                    }
-                    
-                    /* 7. PRESERVE NAVIGATION ELEMENTS - Don't affect nav symbols */
-                    .readable-font nav,
-                    .readable-font .nav,
-                    .readable-font .navbar,
-                    .readable-font .menu,
-                    .readable-font .breadcrumb,
-                    .readable-font .pagination,
-                    .readable-font .dropdown,
-                    .readable-font [role="button"],
-                    .readable-font [role="menuitem"],
-                    .readable-font [aria-label*="arrow"],
-                    .readable-font [aria-label*="chevron"],
-                    .readable-font [aria-label*="caret"] {
-                        font-family: initial;
-                    }
-                    
-                    /* 8. PRESERVE BUTTON ICONS - Don't affect button symbols */
-                    .readable-font .btn i,
-                    .readable-font .btn [class*="icon"],
-                    .readable-font .btn [class*="arrow"],
-                    .readable-font button i,
-                    .readable-font button [class*="icon"],
-                    .readable-font button [class*="arrow"] {
-                        font-family: initial !important;
-                    }
-                    
-                    /* 9. PRESERVE LINK ICONS - Don't affect link symbols */
-                    .readable-font a i,
-                    .readable-font a [class*="icon"],
-                    .readable-font a [class*="arrow"],
-                    .readable-font a svg {
-                        font-family: initial !important;
-                    }
-                    
-                    /* 10. PREVENT HORIZONTAL OVERFLOW - Only on block containers, not all elements */
-                    /* Removed universal selector * - it was breaking sliders and positioned content */
-                    .readable-font p,
-                    .readable-font div,
-                    .readable-font section,
-                    .readable-font article,
-                    .readable-font main,
-                    .readable-font header,
-                    .readable-font footer {
-                        max-width: 100%;
-                        box-sizing: border-box;
-                    }
-                    
-                    /* Exclude sliders, carousels, and positioned content from overflow constraints */
-                    .readable-font [class*="slider"],
-                    .readable-font [class*="carousel"],
-                    .readable-font [class*="swiper"],
-                    .readable-font [data-slider],
-                    .readable-font [data-carousel],
-                    .readable-font [style*="position: absolute"],
-                    .readable-font [style*="position: fixed"] {
-                        max-width: none;
-                        overflow: visible;
-                    }
-                    
-                    .readable-font body,
-                    .readable-font html {
-                        overflow-x: hidden;
-                        width: 100%;
                     }
                 `;
                 document.head.appendChild(style);
@@ -24515,24 +24473,22 @@ class AccessibilityWidget {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // Block visual animations but preserve scroll-related animations
+                // Block ALL animations including scroll-related animations
                 window.requestAnimationFrame = function(callback) {
                     if (callback && typeof callback === 'function') {
                         try {
                             const callbackStr = callback.toString().toLowerCase();
                             
-                            // Allow scroll-related animations
-                            if (callbackStr.includes('scroll') || 
-                                callbackStr.includes('wheel') || 
-                                callbackStr.includes('touch') ||
-                                callbackStr.includes('mouse') ||
-                                callbackStr.includes('lenis') ||
-                                callbackStr.includes('gsap') ||
-                                callbackStr.includes('scrolltrigger') ||
+                            // Block scroll-triggered animations (AOS, ScrollTrigger, parallax, etc.)
+                            if (callbackStr.includes('scrolltrigger') ||
+                                callbackStr.includes('scroll-trigger') ||
+                                callbackStr.includes('aos') ||
+                                callbackStr.includes('parallax') ||
                                 callbackStr.includes('locomotive') ||
-                                callbackStr.includes('smooth') ||
-                                callbackStr.includes('parallax')) {
-                                return window.__originalRequestAnimationFrame.call(window, callback);
+                                callbackStr.includes('lenis') ||
+                                (callbackStr.includes('scroll') && callbackStr.includes('animate')) ||
+                                (callbackStr.includes('scroll') && callbackStr.includes('animation'))) {
+                                return 0; // Block scroll animations
                             }
                             
                             // Block visual animations (Lottie, CSS animations, etc.)
@@ -24561,8 +24517,16 @@ class AccessibilityWidget {
                                 return 0; // Block visual animations
                             }
                             
-                            // Allow other callbacks (scroll, etc.)
-                            return window.__originalRequestAnimationFrame.call(window, callback);
+                            // Allow only basic scroll/wheel/touch handlers (not animations)
+                            if (callbackStr.includes('scroll') && 
+                                !callbackStr.includes('animate') && 
+                                !callbackStr.includes('animation') &&
+                                !callbackStr.includes('trigger')) {
+                                return window.__originalRequestAnimationFrame.call(window, callback);
+                            }
+                            
+                            // Block all other animations
+                            return 0;
                         } catch (e) {
                             
                             return 0;
@@ -26929,6 +26893,24 @@ class AccessibilityWidget {
             style.textContent = `
                 /* COMPREHENSIVE SEIZURE-SAFE STYLES - AccessiBe-style animation stopping */
                 
+                /* 0. APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
+                body.seizure-safe,
+                html.seizure-safe {
+                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                }
+                
+                /* Exclude widget from color filter */
+                body.seizure-safe .accessibility-widget,
+                body.seizure-safe #accessibility-widget,
+                body.seizure-safe .accessibility-panel,
+                body.seizure-safe .accessibility-icon,
+                body.seizure-safe [data-ck-widget],
+                body.seizure-safe [class*="accessibility"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
                 /* 1. HALT CSS ANIMATIONS - Stop all CSS animations immediately */
                 body.seizure-safe *,
                 body.seizure-safe *::before,
@@ -26985,7 +26967,7 @@ class AccessibilityWidget {
                 body.seizure-safe *::after {
                     visibility: visible !important;
                     opacity: 1 !important;
-                    color: inherit !important;
+                    /* REMOVED: color: inherit !important; - Don't change font colors, only apply overall greyscale filter */
                     text-decoration: none !important;
                     animation-duration: 0s !important;
                     transition-duration: 0s !important;
@@ -27066,7 +27048,7 @@ class AccessibilityWidget {
                     animation-fill-mode: none !important;
                 }
                 
-                /* Stop specific animation classes - PRESERVE SCROLL ANIMATIONS */
+                /* Stop specific animation classes - INCLUDING SCROLL ANIMATIONS */
                 body.seizure-safe *[class*="animate"],
                 body.seizure-safe *[class*="fade"],
                 body.seizure-safe *[class*="slide"],
@@ -27086,7 +27068,8 @@ class AccessibilityWidget {
                 body.seizure-safe *[class*="flip"],
                 body.seizure-safe *[class*="swing"],
                 body.seizure-safe *[class*="wobble"],
-                body.seizure-safe *[class*="tilt"] {
+                body.seizure-safe *[class*="tilt"],
+                body.seizure-safe *[class*="scroll"] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
@@ -27094,7 +27077,7 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
-                /* Stop library animations - PRESERVE SCROLL ANIMATIONS */
+                /* Stop library animations - INCLUDING SCROLL ANIMATIONS */
                 body.seizure-safe .fade-up,
                 body.seizure-safe .fade-left,
                 body.seizure-safe .fade-right,
@@ -27110,7 +27093,7 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
-                /* Stop text animations - PRESERVE SCROLL ANIMATIONS */
+                /* Stop text animations - INCLUDING SCROLL ANIMATIONS */
                 body.seizure-safe [data-splitting],
                 body.seizure-safe .split, 
                 body.seizure-safe .char, 
@@ -27122,7 +27105,7 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
-                /* Stop SVG animations - PRESERVE SCROLL ANIMATIONS */
+                /* Stop SVG animations - INCLUDING SCROLL ANIMATIONS */
                 body.seizure-safe svg,
                 body.seizure-safe svg path,
                 body.seizure-safe svg line,
@@ -27135,6 +27118,28 @@ class AccessibilityWidget {
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
+                }
+                
+                /* STOP SCROLL-TRIGGERED ANIMATIONS - AOS, ScrollTrigger, WOW, etc. */
+                body.seizure-safe [data-scroll],
+                body.seizure-safe [data-aos],
+                body.seizure-safe [data-animate],
+                body.seizure-safe [data-scroll-speed],
+                body.seizure-safe [data-scroll-direction],
+                body.seizure-safe .aos-init,
+                body.seizure-safe .aos-animate,
+                body.seizure-safe .wow,
+                body.seizure-safe .animated,
+                body.seizure-safe [class*="scroll-trigger"],
+                body.seizure-safe [class*="scroll-animate"],
+                body.seizure-safe [class*="scroll-reveal"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -27161,31 +27166,35 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
-                /* REMOVED: Stop scroll animations - This was interfering with scroll animated websites */
-                /* body.seizure-safe *[class*="scroll"],
+                /* STOP SCROLL ANIMATIONS - Stop all scroll-triggered animations */
+                body.seizure-safe *[class*="scroll"],
                 body.seizure-safe *[class*="progress"],
                 body.seizure-safe *[class*="bar"],
                 body.seizure-safe *[class*="line"],
-                body.seizure-safe *[class*="timeline"] {
+                body.seizure-safe *[class*="timeline"],
+                body.seizure-safe *[class*="scroll-progress"],
+                body.seizure-safe *[class*="scroll-indicator"] {
                     animation: none !important;
                     transition: none !important;
-                } */
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                }
                 
-                /* Stop media animations - PRESERVE SCROLL ANIMATIONS */
+                /* Stop media animations */
                 body.seizure-safe video,
                 body.seizure-safe audio {
                     animation: none !important;
                     transition: none !important;
-                    /* REMOVED: animation-fill-mode: forwards !important; - This was interfering with scroll animations */
+                    animation-fill-mode: forwards !important;
                 }
                 
                 /* CRITICAL: Ensure scrolling works properly and prevent zooming */
                 body.seizure-safe {
-                    filter: saturate(0.95) !important;
+                    /* Greyscale filter is applied at html/body level, not here */
                     overflow: auto !important;
                     overflow-x: auto !important;
                     overflow-y: auto !important;
-                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
+                    scroll-behavior: auto !important;
                     position: static !important;
                     transform: none !important;
                     scale: 1 !important;
