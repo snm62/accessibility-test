@@ -1925,11 +1925,25 @@ class AccessibilityWidget {
                         icon.style.setProperty('display', 'flex', 'important');
                         icon.style.setProperty('visibility', 'visible', 'important');
                         icon.style.setProperty('opacity', '1', 'important');
+                        icon.style.setProperty('pointer-events', 'auto', 'important');
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
                         // Force a reflow to ensure styles are applied
                         void icon.offsetHeight;
+                        // Double-check and force styles again after reflow
+                        requestAnimationFrame(() => {
+                            icon.style.setProperty('display', 'flex', 'important');
+                            icon.style.setProperty('visibility', 'visible', 'important');
+                            icon.style.setProperty('opacity', '1', 'important');
+                            icon.style.setProperty('pointer-events', 'auto', 'important');
+                            console.log('[ICON SHOW] After requestAnimationFrame:', {
+                                computedDisplay: window.getComputedStyle(icon).display,
+                                computedVisibility: window.getComputedStyle(icon).visibility,
+                                computedOpacity: window.getComputedStyle(icon).opacity,
+                                computedPointerEvents: window.getComputedStyle(icon).pointerEvents
+                            });
+                        });
                         console.log('[ICON SHOW] Icon styles applied:', {
                             display: icon.style.display,
                             visibility: icon.style.visibility,
@@ -2084,17 +2098,27 @@ class AccessibilityWidget {
     
                 // Click event
     
-                icon.addEventListener('click', () => {
-    
-                   
-    
-                    this.togglePanel();
-    
+                icon.addEventListener('click', (e) => {
+                    console.log('[ICON CLICK] Icon clicked!', {
+                        event: e,
+                        icon: icon,
+                        iconComputedVisibility: window.getComputedStyle(icon).visibility,
+                        iconComputedOpacity: window.getComputedStyle(icon).opacity,
+                        iconPointerEvents: window.getComputedStyle(icon).pointerEvents,
+                        iconDisplay: window.getComputedStyle(icon).display
+                    });
                     
-    
+                    this.togglePanel();
+                    
                     // Debug: Check panel state
-    
                     const panel = this.shadowRoot.getElementById('accessibility-panel');
+                    console.log('[ICON CLICK] Panel state after toggle:', {
+                        hasPanel: !!panel,
+                        panelDisplay: panel ? window.getComputedStyle(panel).display : 'N/A',
+                        panelVisibility: panel ? window.getComputedStyle(panel).visibility : 'N/A',
+                        panelTransform: panel ? panel.style.transform : 'N/A',
+                        isPanelOpen: this.isPanelOpen
+                    });
     
                     if (panel) {
 
@@ -29240,10 +29264,18 @@ class AccessibilityWidget {
         // Enhanced Panel Toggle with Screen Reader Support
     
         togglePanel() {
+            console.log('[PANEL TOGGLE] togglePanel() called');
             // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
             const elements = this.getCachedElements(true); // Force refresh to get current elements
             const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
             const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
+    
+            console.log('[PANEL TOGGLE] Elements found:', {
+                hasPanel: !!panel,
+                hasIcon: !!icon,
+                panel: panel,
+                icon: icon
+            });
     
             if (!panel || !icon) {
                 console.warn('[PANEL TOGGLE] Panel or icon not found', { panel: !!panel, icon: !!icon });
