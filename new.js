@@ -60,13 +60,17 @@
                     -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
                 }
                 
-                /* Exclude widget from color filter */
-                body.seizure-safe .accessibility-widget,
-                body.seizure-safe #accessibility-widget,
-                body.seizure-safe .accessibility-panel,
-                body.seizure-safe .accessibility-icon,
-                body.seizure-safe [data-ck-widget],
-                body.seizure-safe [class*="accessibility"] {
+                /* Exclude widget container and all its contents from color filter */
+                body.seizure-safe #accessibility-widget-container,
+                body.seizure-safe [id*="accessibility-widget"],
+                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe [data-ck-widget] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Also exclude any shadow DOM content by targeting the host element */
+                body.seizure-safe accessibility-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -6447,12 +6451,14 @@ class AccessibilityWidget {
     
                 /* Global Accessibility Feature Classes - These will sync with main page */
     
+                /* Exclude widget from seizure-safe filter - widget should never have greyscale */
+                :host,
+                :host(.seizure-safe),
                 :host(.seizure-safe) .accessibility-icon,
-    
-                :host(.seizure-safe) .accessibility-panel {
-    
-                    filter: grayscale(0.9) contrast(1.0) !important;
-    
+                :host(.seizure-safe) .accessibility-panel,
+                :host(.seizure-safe) * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
     
                 
@@ -25612,15 +25618,10 @@ class AccessibilityWidget {
         enableSeizureSafe(immediate = false) {
             this.settings['seizure-safe'] = true;
             document.body.classList.add('seizure-safe');
+            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
     
-            if (immediate) {
-                this.addSeizureSafeStyles();
-            } else {
-                // Add a small delay to allow initial page load animations to start
-                setTimeout(() => {
-                    this.addSeizureSafeStyles();
-                }, 100);
-            }
+            // Always apply styles immediately when toggled (no delay needed)
+            this.addSeizureSafeStyles();
 
             // REMOVED: enforceNativeScroll calls that were blocking scroll
     
@@ -25635,6 +25636,7 @@ class AccessibilityWidget {
             this.stopAllGIFsAndVideos();
             this.stopAllAnimationLibraries();
             this.stopAllParallaxAndScrollEffects();
+            this.stopAllScrollInteractions();
     
             // Lock button styles to prevent hover color changes
             this.lockButtonHoverStyles();
@@ -25697,6 +25699,17 @@ class AccessibilityWidget {
             document.body.classList.remove('seizure-safe');
     
             this.removeSeizureSafeStyles();
+            
+            // Restore addEventListener if it was overridden
+            if (window.__originalAddEventListener) {
+                EventTarget.prototype.addEventListener = window.__originalAddEventListener;
+            }
+            
+            // Disconnect scroll style observer
+            if (window.__scrollStyleObserver) {
+                window.__scrollStyleObserver.disconnect();
+                window.__scrollStyleObserver = null;
+            }
             
             // Restore portfolio animations when seizure safety is disabled
             this.restorePortfolioAnimations();
@@ -26314,13 +26327,35 @@ class AccessibilityWidget {
   
             try {
                 // CRITICAL: Override requestAnimationFrame to stop all high-performance animations
+                // BUT allow widget functionality to work
                 if (!window.__originalRequestAnimationFrame) {
                     window.__originalRequestAnimationFrame = window.requestAnimationFrame;
                 }
                 
-                // Override requestAnimationFrame to freeze all animation loops
+                // Override requestAnimationFrame to freeze animation loops but allow widget functionality
                 window.requestAnimationFrame = function(callback) {
-                    // Intentionally do NOT call the callback, freezing the animation loop
+                    if (callback && typeof callback === 'function') {
+                        try {
+                            const callbackStr = callback.toString().toLowerCase();
+                            // Allow widget-related callbacks (panel opening, widget functionality)
+                            if (callbackStr.includes('togglepanel') ||
+                                callbackStr.includes('accessibility-panel') ||
+                                callbackStr.includes('accessibility-icon') ||
+                                callbackStr.includes('ensurewidgetcss') ||
+                                callbackStr.includes('ensurebasepanelcss') ||
+                                callbackStr.includes('updateinterfaceposition') ||
+                                callbackStr.includes('fixpanelscrolling') ||
+                                callbackStr.includes('ensurefocusinpanel') ||
+                                callbackStr.includes('shadowroot') ||
+                                callbackStr.includes('widget')) {
+                                // Allow widget functionality
+                                return window.__originalRequestAnimationFrame.call(window, callback);
+                            }
+                        } catch (e) {
+                            // If we can't check, block it to be safe
+                        }
+                    }
+                    // Block all other animations
                     return 0; // Return dummy handle
                 };
                 
@@ -26539,6 +26574,106 @@ class AccessibilityWidget {
              
             } catch (e) {
           
+            }
+        }
+        
+        // Stop all scroll-based interactions (Webflow, custom scroll animations, etc.) - Generic approach
+        stopAllScrollInteractions() {
+            try {
+                // Override addEventListener to intercept scroll event listeners
+                if (!window.__originalAddEventListener) {
+                    window.__originalAddEventListener = EventTarget.prototype.addEventListener;
+                }
+                
+                const self = this;
+                EventTarget.prototype.addEventListener = function(type, listener, options) {
+                    // If seizure-safe is active and this is a scroll-related event, block it
+                    if (document.body.classList.contains('seizure-safe')) {
+                        const typeLower = String(type).toLowerCase();
+                        // Block scroll, wheel, touchmove events that might trigger animations
+                        if (typeLower === 'scroll' || typeLower === 'wheel' || typeLower === 'touchmove') {
+                            // Check if listener modifies styles (animations)
+                            if (listener && typeof listener === 'function') {
+                                const listenerStr = listener.toString().toLowerCase();
+                                // Block if it modifies transform, opacity, or other animation properties
+                                if (listenerStr.includes('transform') || 
+                                    listenerStr.includes('opacity') || 
+                                    listenerStr.includes('style') ||
+                                    listenerStr.includes('translate') ||
+                                    listenerStr.includes('scale') ||
+                                    listenerStr.includes('rotate')) {
+                                    return; // Block this listener
+                                }
+                            }
+                        }
+                    }
+                    // Otherwise, allow the event listener
+                    return window.__originalAddEventListener.call(this, type, listener, options);
+                };
+                
+                // Use MutationObserver to revert style changes that happen during scroll
+                if (!window.__scrollStyleObserver) {
+                    window.__scrollStyleObserver = new MutationObserver(function(mutations) {
+                        if (!document.body.classList.contains('seizure-safe')) {
+                            return; // Only act when seizure-safe is active
+                        }
+                        
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                const target = mutation.target;
+                                // Revert transform and opacity changes that might be from scroll animations
+                                if (target.style && (target.style.transform || target.style.opacity !== '')) {
+                                    // Check if this element should be frozen
+                                    if (!target.hasAttribute('data-seizure-safe-allow-transform')) {
+                                        // Store original values if not already stored
+                                        if (!target.__seizureSafeOriginalTransform) {
+                                            target.__seizureSafeOriginalTransform = target.style.transform || 'none';
+                                        }
+                                        if (!target.__seizureSafeOriginalOpacity) {
+                                            target.__seizureSafeOriginalOpacity = target.style.opacity || '1';
+                                        }
+                                        
+                                        // Revert to stored values immediately (don't use requestAnimationFrame as it may be blocked)
+                                        if (document.body.classList.contains('seizure-safe')) {
+                                            // Use setTimeout to avoid blocking the main thread
+                                            setTimeout(function() {
+                                                if (document.body.classList.contains('seizure-safe')) {
+                                                    target.style.transform = target.__seizureSafeOriginalTransform;
+                                                    target.style.opacity = target.__seizureSafeOriginalOpacity;
+                                                }
+                                            }, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Observe all elements for style attribute changes
+                    window.__scrollStyleObserver.observe(document.documentElement, {
+                        attributes: true,
+                        attributeFilter: ['style'],
+                        subtree: true,
+                        childList: false
+                    });
+                }
+                
+                // Also block any ongoing scroll animations by freezing elements
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(function(el) {
+                    if (el.style && (el.style.transform || el.style.opacity !== '')) {
+                        // Store current state
+                        if (!el.__seizureSafeOriginalTransform) {
+                            el.__seizureSafeOriginalTransform = el.style.transform || 'none';
+                        }
+                        if (!el.__seizureSafeOriginalOpacity) {
+                            el.__seizureSafeOriginalOpacity = el.style.opacity || '1';
+                        }
+                    }
+                });
+                
+            } catch (e) {
+                // Silent fail
             }
         }
         
@@ -26900,13 +27035,17 @@ class AccessibilityWidget {
                     -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
                 }
                 
-                /* Exclude widget from color filter */
-                body.seizure-safe .accessibility-widget,
-                body.seizure-safe #accessibility-widget,
-                body.seizure-safe .accessibility-panel,
-                body.seizure-safe .accessibility-icon,
-                body.seizure-safe [data-ck-widget],
-                body.seizure-safe [class*="accessibility"] {
+                /* Exclude widget container and all its contents from color filter */
+                body.seizure-safe #accessibility-widget-container,
+                body.seizure-safe [id*="accessibility-widget"],
+                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe [data-ck-widget] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Also exclude any shadow DOM content by targeting the host element */
+                body.seizure-safe accessibility-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -27120,7 +27259,7 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
-                /* STOP SCROLL-TRIGGERED ANIMATIONS - AOS, ScrollTrigger, WOW, etc. */
+                /* STOP SCROLL-TRIGGERED ANIMATIONS - AOS, ScrollTrigger, WOW, Webflow interactions, etc. - Generic approach */
                 body.seizure-safe [data-scroll],
                 body.seizure-safe [data-aos],
                 body.seizure-safe [data-animate],
@@ -27132,7 +27271,10 @@ class AccessibilityWidget {
                 body.seizure-safe .animated,
                 body.seizure-safe [class*="scroll-trigger"],
                 body.seizure-safe [class*="scroll-animate"],
-                body.seizure-safe [class*="scroll-reveal"] {
+                body.seizure-safe [class*="scroll-reveal"],
+                body.seizure-safe [class*="w-"],
+                body.seizure-safe [data-wf-page],
+                body.seizure-safe [data-w-id] {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
@@ -27140,6 +27282,15 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                     visibility: visible !important;
                     transform: none !important;
+                    will-change: auto !important;
+                }
+                
+                /* GENERIC: Freeze any elements with inline transform/opacity styles (common in scroll animations like Webflow) */
+                body.seizure-safe *[style*="transform"],
+                body.seizure-safe *[style*="opacity"]:not([data-seizure-safe-allow-transform]) {
+                    transform: none !important;
+                    opacity: 1 !important;
+                    transition: none !important;
                 }
                 
                 /* Stop Lottie animations specifically - DON'T HIDE THEM */
@@ -28801,8 +28952,8 @@ class AccessibilityWidget {
                            panel.style.visibility === 'hidden' ||
                            panel.style.display === 'none';
             
-            // Use requestAnimationFrame for smooth transitions
-            requestAnimationFrame(() => {
+            // Execute panel toggle - use requestAnimationFrame if available, otherwise execute immediately
+            const executePanelToggle = () => {
                 if (isCurrentlyOpen || !isHidden) {
                     // Hide panel using transform (better performance than display)
                     panel.style.transform = 'translateX(-100%)';
@@ -28839,18 +28990,35 @@ class AccessibilityWidget {
                     this.isPanelOpen = true;
                     
                     // Fix scrolling conflicts with GSAP/Lenis libraries
-                    requestAnimationFrame(() => {
+                    const fixScrolling = () => {
                         this.fixPanelScrolling();
-                    });
+                    };
+                    const rafId1 = requestAnimationFrame(fixScrolling);
+                    // Fallback if requestAnimationFrame is blocked (seizure-safe mode)
+                    if (rafId1 === 0) {
+                        setTimeout(fixScrolling, 0);
+                    }
                     
                     // Focus first focusable element in panel
-                    requestAnimationFrame(() => {
+                    const focusPanel = () => {
                         this.ensureFocusInPanel();
-                    });
+                    };
+                    const rafId2 = requestAnimationFrame(focusPanel);
+                    // Fallback if requestAnimationFrame is blocked (seizure-safe mode)
+                    if (rafId2 === 0) {
+                        setTimeout(focusPanel, 0);
+                    }
                     
                     this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
                 }
-            });
+            };
+            
+            // Try requestAnimationFrame, but execute immediately if it's blocked (seizure-safe mode)
+            const rafId = requestAnimationFrame(executePanelToggle);
+            if (rafId === 0) {
+                // requestAnimationFrame is blocked (seizure-safe mode), execute immediately
+                executePanelToggle();
+            }
         }
     
         // Check if domain is staging (free, no payment needed)
