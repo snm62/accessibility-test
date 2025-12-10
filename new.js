@@ -7868,19 +7868,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
-    
-                                            <i class="fas fa-chevron-down"></i><span>-2%</span>
-    
-                                        </button>
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;"><i class="fas fa-chevron-down"></i><span>-2%</span></button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
-    
-                                            <i class="fas fa-chevron-up"></i><span>+2%</span>
-    
-                                        </button>
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;"><i class="fas fa-chevron-up"></i><span>+2%</span></button>
     
                                     </div>
     
@@ -8030,19 +8022,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-down"></i> -5%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i><span>-5%</span></button>
     
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-up"></i> +5%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i><span>+5%</span></button>
     
                                     </div>
     
@@ -8108,19 +8092,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-down"></i> -10%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i><span>-10%</span></button>
     
                                         <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-up"></i> +10%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i><span>+10%</span></button>
     
                                     </div>
     
@@ -8158,19 +8134,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-down"></i> -10%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i><span>-10%</span></button>
     
                                         <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-    
-                                            <i class="fas fa-chevron-up"></i> +10%
-    
-                                        </button>
+                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i><span>+10%</span></button>
     
                                     </div>
     
@@ -20858,7 +20826,8 @@ class AccessibilityWidget {
             
             allElements.forEach(element => {
                 const tagName = element.tagName.toLowerCase();
-                const className = element.className || '';
+                // Convert className to string (it might be a DOMTokenList)
+                const className = (typeof element.className === 'string' ? element.className : (element.className?.toString() || '')) || '';
                 const id = element.id || '';
                 const textContent = element.textContent || '';
                 
@@ -20876,10 +20845,10 @@ class AccessibilityWidget {
                     (element.src && (element.src.includes('.mp3') || element.src.includes('.wav') || element.src.includes('.ogg') || 
                      element.src.includes('.mp4') || element.src.includes('.webm') || element.src.includes('.avi'))) ||
                     // Check for specific media-related classes (be more specific)
-                    (className.includes('audio-player') || className.includes('video-player') || 
+                    (className && typeof className.includes === 'function' && (className.includes('audio-player') || className.includes('video-player') || 
                      className.includes('media-player') || className.includes('sound-player') ||
                      className.includes('music-player') || className.includes('video-container') ||
-                     className.includes('audio-container'));
+                     className.includes('audio-container')));
                 
                 if (hasAudioVideo) {
                 
@@ -20897,8 +20866,13 @@ class AccessibilityWidget {
                     try {
                         element.muted = true;
                         element.volume = 0;
-                        element.pause(); // Always pause, even if already paused
-                        element.currentTime = 0; // Reset to beginning
+                        // For audio: pause to stop sound
+                        // For video: don't pause - allow visual playback, just muted
+                        if (element.tagName === 'AUDIO') {
+                            element.pause(); // Always pause audio, even if already paused
+                            element.currentTime = 0; // Reset to beginning
+                        }
+                        // Videos can continue playing visually, just muted
                         // Add event listeners to prevent unmuting or playing
                         this.addMuteEventListeners(element);
                         totalMuted++;
@@ -21470,13 +21444,22 @@ class AccessibilityWidget {
                     // Try to access iframe content (may fail due to CORS)
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                     if (iframeDoc) {
-                        const iframeAudio = iframeDoc.querySelectorAll('audio, video');
+                        // Mute audio elements and pause them
+                        const iframeAudio = iframeDoc.querySelectorAll('audio');
                         iframeAudio.forEach(element => {
                             element.volume = 0;
                             element.muted = true;
                             if (!element.paused) {
                                 element.pause();
                             }
+                        });
+                        
+                        // Mute video elements but allow them to play visually
+                        const iframeVideo = iframeDoc.querySelectorAll('video');
+                        iframeVideo.forEach(element => {
+                            element.volume = 0;
+                            element.muted = true;
+                            // Don't pause videos - allow visual playback
                         });
                     }
                 } catch (e) {
