@@ -3460,6 +3460,12 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
+        .accessibility-panel .scaling-btn i.fas {
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+        }
+        
         .accessibility-panel .profile-info h4 {
             font-size: 0.8em;
         }
@@ -5280,6 +5286,13 @@ class AccessibilityWidget {
     
                 .action-btn:focus-visible,
     
+                /* Ensure icons inside scaling buttons align properly */
+                .scaling-btn i.fas {
+                    display: inline-flex;
+                    align-items: center;
+                    line-height: 1;
+                }
+                
                 .scaling-btn:focus-visible,
     
                 .close-btn:focus-visible,
@@ -24672,7 +24685,7 @@ class AccessibilityWidget {
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
-                            // Block scroll-triggered animations (AOS, ScrollTrigger, parallax, etc.)
+                            // Block scroll-triggered animations (AOS, ScrollTrigger, parallax, Webflow, etc.)
                             if (callbackStr.includes('scrolltrigger') ||
                                 callbackStr.includes('scroll-trigger') ||
                                 callbackStr.includes('scrolltrigger') ||
@@ -24680,6 +24693,14 @@ class AccessibilityWidget {
                                 callbackStr.includes('parallax') ||
                                 callbackStr.includes('locomotive') ||
                                 callbackStr.includes('lenis') ||
+                                callbackStr.includes('webflow') ||
+                                callbackStr.includes('wf-') ||
+                                callbackStr.includes('data-wf-page') ||
+                                callbackStr.includes('data-w-id') ||
+                                callbackStr.includes('w-[') ||
+                                callbackStr.includes('framer-motion') ||
+                                callbackStr.includes('gsap') ||
+                                callbackStr.includes('reveal') ||
                                 callbackStr.includes('reveal') ||
                                 callbackStr.includes('framer-motion') ||
                                 callbackStr.includes('framer') ||
@@ -26060,6 +26081,7 @@ class AccessibilityWidget {
                         padding: 0;
                     }
                     
+                    /* Apply only filter for contrast - DO NOT use zoom/transform as it breaks animations */
                     /* Apply zoom to body instead - this preserves scroll position calculations */
                     body.vision-impaired {
                         /* Enhanced text contrast for better visibility */
@@ -26186,12 +26208,15 @@ class AccessibilityWidget {
                         /* No layout modifications */
                     }
                     
-                    /* 10. PREVENT CONTENT OVERFLOW - Ensure content stays within viewport */
-                    /* Note: Zoom is handled in section 1 above */
-                    /* Additional overflow prevention for all elements */
-                    
-                    /* Prevent ALL elements from overflowing - comprehensive approach */
-                    body.vision-impaired * {
+                    /* 10. PREVENT CONTENT OVERFLOW - Only constrain containers, not all elements */
+                    /* REMOVED: max-width: 100% on ALL elements - it breaks animations and layouts */
+                    /* Only apply to main containers */
+                    body.vision-impaired .container,
+                    body.vision-impaired .wrapper,
+                    body.vision-impaired .content,
+                    body.vision-impaired main,
+                    body.vision-impaired section,
+                    body.vision-impaired article {
                         box-sizing: border-box;
                         max-width: 100%;
                     }
@@ -26226,7 +26251,7 @@ class AccessibilityWidget {
                         min-width: 0;
                     }
                     
-                    /* Prevent text elements from causing overflow */
+                    /* Prevent text elements from causing overflow - but don't break animations */
                     body.vision-impaired p,
                     body.vision-impaired div,
                     body.vision-impaired span,
@@ -26237,10 +26262,8 @@ class AccessibilityWidget {
                     body.vision-impaired small {
                         word-wrap: break-word;
                         overflow-wrap: break-word;
-                        max-width: 100%;
+                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
                         box-sizing: border-box;
-                        /* Prevent text from expanding beyond container */
-                        min-width: 0;
                     }
                     
                     /* Prevent headings from causing overflow */
@@ -26250,31 +26273,30 @@ class AccessibilityWidget {
                     body.vision-impaired h4,
                     body.vision-impaired h5,
                     body.vision-impaired h6 {
-                        max-width: 100%;
+                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
                         word-wrap: break-word;
                         overflow-wrap: break-word;
                         box-sizing: border-box;
-                        min-width: 0;
                     }
                     
-                    /* Prevent links from causing overflow */
+                    /* Prevent links from causing overflow - but don't break animations */
                     body.vision-impaired a {
-                        max-width: 100%;
+                        /* REMOVED: max-width: 100% - it breaks animations */
                         word-wrap: break-word;
                         overflow-wrap: break-word;
                         box-sizing: border-box;
-                        display: inline-block;
-                        min-width: 0;
+                        /* REMOVED: display: inline-block - it can break link animations */
+                        /* REMOVED: min-width: 0 - not needed */
                     }
                     
-                    /* Prevent buttons and inputs from overflowing */
+                    /* Prevent buttons and inputs from overflowing - but don't break animations */
                     body.vision-impaired button,
                     body.vision-impaired input,
                     body.vision-impaired textarea,
                     body.vision-impaired select {
-                        max-width: 100%;
+                        /* REMOVED: max-width: 100% - it breaks animations that need specific widths */
                         box-sizing: border-box;
-                        min-width: 0;
+                        /* REMOVED: min-width: 0 - not needed and can break layouts */
                     }
                     
                     /* Prevent tables from overflowing */
@@ -26813,29 +26835,45 @@ class AccessibilityWidget {
                         // Block scroll, wheel, touchmove events that might trigger animations
                         if (typeLower === 'scroll' || typeLower === 'wheel' || typeLower === 'touchmove') {
                             // CRITICAL: Allow slider manual navigation events
-                            const isSliderElement = this.classList && (
+                            const isSliderElement = (this.classList && (
                                 this.classList.contains('swiper') ||
                                 this.classList.contains('swiper-container') ||
+                                this.classList.contains('swiper-slide') ||
                                 this.classList.contains('slick-slider') ||
+                                this.classList.contains('slick-slide') ||
                                 this.classList.contains('carousel') ||
-                                Array.from(this.classList).some(cls => cls.includes('slider') || cls.includes('carousel'))
-                            ) || this.closest && this.closest('.swiper, .swiper-container, .slick-slider, .carousel, [class*="slider"], [class*="carousel"], [data-slider], [data-carousel]');
+                                this.classList.contains('carousel-item') ||
+                                Array.from(this.classList || []).some(cls => cls.includes('slider') || cls.includes('carousel') || cls.includes('swiper') || cls.includes('slick'))
+                            )) || (this.hasAttribute && (this.hasAttribute('data-slider') || this.hasAttribute('data-carousel'))) || (this.closest && this.closest('.swiper, .swiper-container, .swiper-slide, .slick-slider, .slick-slide, .carousel, .carousel-item, [class*="slider"], [class*="carousel"], [class*="swiper"], [class*="slick"], [data-slider], [data-carousel]'));
                             
                             if (isSliderElement) {
                                 // Allow slider events for manual navigation
                                 return window.__originalAddEventListener.call(this, type, listener, options);
                             }
                             
-                            // Check if listener modifies styles (animations)
+                            // Check if listener modifies styles (animations) - but allow slider navigation
                             if (listener && typeof listener === 'function') {
                                 const listenerStr = listener.toString().toLowerCase();
                                 // Block if it modifies transform, opacity, or other animation properties
-                                if (listenerStr.includes('transform') || 
+                                // BUT allow if it's for slider navigation (swiper, slick, carousel)
+                                const isSliderListener = listenerStr.includes('swiper') || 
+                                    listenerStr.includes('slick') || 
+                                    listenerStr.includes('carousel') ||
+                                    (listenerStr.includes('slide') && (listenerStr.includes('next') || listenerStr.includes('prev') || listenerStr.includes('go')));
+                                
+                                if (!isSliderListener && (
+                                    listenerStr.includes('transform') || 
                                     listenerStr.includes('opacity') || 
                                     (listenerStr.includes('style') && (listenerStr.includes('transform') || listenerStr.includes('opacity'))) ||
                                     listenerStr.includes('translate') ||
                                     (listenerStr.includes('scale') && !listenerStr.includes('swiper') && !listenerStr.includes('slick')) ||
-                                    listenerStr.includes('rotate')) {
+                                    listenerStr.includes('rotate') ||
+                                    listenerStr.includes('webflow') ||
+                                    listenerStr.includes('wf-') ||
+                                    listenerStr.includes('data-wf-page') ||
+                                    listenerStr.includes('data-w-id') ||
+                                    listenerStr.includes('w-[')
+                                )) {
                                     return; // Block this listener
                                 }
                             }
@@ -26861,11 +26899,18 @@ class AccessibilityWidget {
                                     target.classList.contains('swiper-slide') ||
                                     target.classList.contains('slick-slide') ||
                                     target.classList.contains('carousel-item') ||
-                                    target.closest && target.closest('.swiper, .swiper-container, .slick-slider, .carousel, [class*="slider"], [class*="carousel"], [data-slider], [data-carousel]')
+                                    target.classList.contains('swiper') ||
+                                    target.classList.contains('swiper-container') ||
+                                    target.classList.contains('slick-slider') ||
+                                    target.classList.contains('carousel') ||
+                                    Array.from(target.classList || []).some(cls => cls.includes('slider') || cls.includes('carousel') || cls.includes('swiper') || cls.includes('slick')) ||
+                                    target.hasAttribute('data-slider') ||
+                                    target.hasAttribute('data-carousel') ||
+                                    (target.closest && target.closest('.swiper, .swiper-container, .swiper-slide, .slick-slider, .slick-slide, .carousel, .carousel-item, [class*="slider"], [class*="carousel"], [class*="swiper"], [class*="slick"], [data-slider], [data-carousel]'))
                                 );
                                 
                                 if (isSliderElement) {
-                                    // Allow slider transforms for manual navigation
+                                    // Allow slider transforms for manual navigation - don't revert them
                                     return;
                                 }
                                 
@@ -27523,7 +27568,8 @@ class AccessibilityWidget {
                 body.seizure-safe [class*="scroll-reveal"],
                 body.seizure-safe [class*="w-"],
                 body.seizure-safe [data-wf-page],
-                body.seizure-safe [data-w-id] {
+                body.seizure-safe [data-w-id],
+                body.seizure-safe [class*="w-"]:not([class*="slider"]):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]) {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
@@ -27535,8 +27581,9 @@ class AccessibilityWidget {
                 }
                 
                 /* GENERIC: Freeze any elements with inline transform/opacity styles (common in scroll animations like Webflow) */
-                body.seizure-safe *[style*="transform"],
-                body.seizure-safe *[style*="opacity"]:not([data-seizure-safe-allow-transform]) {
+                /* BUT exclude sliders to allow manual navigation */
+                body.seizure-safe *[style*="transform"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]),
+                body.seizure-safe *[style*="opacity"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]) {
                     transform: none !important;
                     opacity: 1 !important;
                     transition: none !important;
@@ -30471,7 +30518,8 @@ class AccessibilityWidget {
                     btn.style.setProperty('padding', '1px 6px', 'important');
                     btn.style.setProperty('font-size', '9px', 'important');
                     btn.style.setProperty('border-radius', '4px', 'important');
-                    btn.style.setProperty('line-height', '1', 'important');
+                    // Don't set line-height when using flexbox - it interferes with centering
+                    // btn.style.setProperty('line-height', '1', 'important');
                     btn.style.setProperty('width', 'auto', 'important');
                     btn.style.setProperty('min-width', '32px', 'important');
                     // Ensure flexbox centering for button content
@@ -30479,6 +30527,13 @@ class AccessibilityWidget {
                     btn.style.setProperty('align-items', 'center', 'important');
                     btn.style.setProperty('justify-content', 'center', 'important');
                     btn.style.setProperty('gap', '4px', 'important');
+                    // Ensure icon aligns properly
+                    const icon = btn.querySelector('i.fas');
+                    if (icon) {
+                        icon.style.setProperty('display', 'inline-flex', 'important');
+                        icon.style.setProperty('align-items', 'center', 'important');
+                        icon.style.setProperty('line-height', '1', 'important');
+                    }
                     
                 });
             }
@@ -30493,13 +30548,22 @@ class AccessibilityWidget {
                         padding: 1px 6px !important;
                         font-size: 9px !important;
                         border-radius: 4px !important;
-                        line-height: 1 !important;
+                        /* Don't set line-height when using flexbox - it interferes with centering */
                         width: auto !important;
                         min-width: 32px !important;
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
                         gap: 4px !important;
+                    }
+                    
+                    /* Ensure icons inside buttons align properly */
+                    .scaling-btn i.fas,
+                    button[class*="increase"] i.fas,
+                    button[class*="decrease"] i.fas {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        line-height: 1 !important;
                     }
                 }
             `;
