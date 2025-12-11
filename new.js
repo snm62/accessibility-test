@@ -3653,18 +3653,28 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             font-size: 0.7em;
-            padding: 6px 20px;
+            padding: 4px 16px;
             text-align: center;
-            line-height: 28px;
-            height: 28px;
+            line-height: 22px;
+            height: 22px;
             min-width: 80px;
             width: auto;
             white-space: nowrap;
+            vertical-align: middle;
         }
         
         .accessibility-panel .scaling-btn i.fas {
             display: inline-block;
-            line-height: 1;
+            vertical-align: middle;
+            line-height: 22px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .accessibility-panel .scaling-btn span {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 22px;
             margin: 0;
             padding: 0;
         }
