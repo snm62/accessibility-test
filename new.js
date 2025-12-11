@@ -3652,15 +3652,16 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            font-size: 0.7em;
+            font-size: 14px;
             padding: 0;
             text-align: center;
-            line-height: 22px;
-            height: 22px;
+            line-height: 28px;
+            height: 28px;
             min-width: 80px;
             width: auto;
             white-space: nowrap;
             vertical-align: middle;
+            color: white;
         }
         
         .accessibility-panel .scaling-btn i.fas {
@@ -30857,25 +30858,36 @@ class AccessibilityWidget {
             const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn, .scaling-btn');
             if (arrowBtns && arrowBtns.length > 0) {
                 arrowBtns.forEach((btn, index) => {
-                    btn.style.setProperty('height', '20px', 'important');
-                    btn.style.setProperty('min-height', '20px', 'important');
-                    btn.style.setProperty('padding', '0', 'important');
-                    btn.style.setProperty('font-size', '9px', 'important');
-                    btn.style.setProperty('border-radius', '4px', 'important');
-                    // Don't set line-height when using flexbox - it interferes with centering
-                    // btn.style.setProperty('line-height', '1', 'important');
-                    btn.style.setProperty('width', 'auto', 'important');
-                    btn.style.setProperty('min-width', '32px', 'important');
-                    // Ensure flexbox centering for button content
-                    btn.style.setProperty('display', 'flex', 'important');
-                    btn.style.setProperty('align-items', 'center', 'important');
-                    btn.style.setProperty('justify-content', 'center', 'important');
-                    btn.style.setProperty('gap', '4px', 'important');
+                    // Check if this is a scaling button (has percentage text)
+                    const isScalingBtn = btn.classList.contains('scaling-btn') || btn.id.includes('increase') || btn.id.includes('decrease');
+                    
+                    if (isScalingBtn) {
+                        // For scaling buttons, use larger font and proper height
+                        btn.style.setProperty('height', '28px', 'important');
+                        btn.style.setProperty('min-height', '28px', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('font-size', '14px', 'important');
+                        btn.style.setProperty('border-radius', '4px', 'important');
+                        btn.style.setProperty('width', 'auto', 'important');
+                        btn.style.setProperty('min-width', '80px', 'important');
+                        btn.style.setProperty('text-align', 'center', 'important');
+                        btn.style.setProperty('line-height', '28px', 'important');
+                        btn.style.setProperty('color', 'white', 'important');
+                    } else {
+                        // For other buttons, use smaller mobile size
+                        btn.style.setProperty('height', '20px', 'important');
+                        btn.style.setProperty('min-height', '20px', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('font-size', '9px', 'important');
+                        btn.style.setProperty('border-radius', '4px', 'important');
+                        btn.style.setProperty('width', 'auto', 'important');
+                        btn.style.setProperty('min-width', '32px', 'important');
+                    }
                     // Ensure icon aligns properly
                     const icon = btn.querySelector('i.fas');
                     if (icon) {
-                        icon.style.setProperty('display', 'inline-flex', 'important');
-                        icon.style.setProperty('align-items', 'center', 'important');
+                        icon.style.setProperty('display', 'inline-block', 'important');
+                        icon.style.setProperty('vertical-align', 'middle', 'important');
                         icon.style.setProperty('line-height', '1', 'important');
                     }
                     
@@ -30886,19 +30898,26 @@ class AccessibilityWidget {
             const mobileControlStyle = document.createElement('style');
             mobileControlStyle.textContent = `
                 @media (max-width: 768px) {
-                    .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
+                    .scaling-btn, button[class*="increase"], button[class*="decrease"] {
+                        height: 28px !important;
+                        min-height: 28px !important;
+                        padding: 0 !important;
+                        font-size: 14px !important;
+                        border-radius: 4px !important;
+                        width: auto !important;
+                        min-width: 80px !important;
+                        text-align: center !important;
+                        line-height: 28px !important;
+                        color: white !important;
+                    }
+                    .arrow-btn, .control-btn {
                         height: 20px !important;
                         min-height: 20px !important;
                         padding: 0 !important;
                         font-size: 9px !important;
                         border-radius: 4px !important;
-                        /* Don't set line-height when using flexbox - it interferes with centering */
                         width: auto !important;
                         min-width: 32px !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        gap: 4px !important;
                     }
                     
                     /* Ensure icons inside buttons align properly */
