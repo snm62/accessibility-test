@@ -8102,11 +8102,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-2%</button>
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i>-2%</button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+2%</button>
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i>+2%</button>
     
                                     </div>
     
@@ -8256,11 +8256,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-5%</button>
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i>-5%</button>
     
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+5%</button>
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i>+5%</button>
     
                                     </div>
     
@@ -8326,11 +8326,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
+                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i>-10%</button>
     
                                         <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
+                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i>+10%</button>
     
                                     </div>
     
@@ -8368,11 +8368,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
+                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-down"></i>-10%</button>
     
                                         <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
+                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i class="fas fa-chevron-up"></i>+10%</button>
     
                                     </div>
     
