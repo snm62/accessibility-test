@@ -924,7 +924,7 @@ function applyVisionImpaired(on) {
             .accessibility-panel {
                 zoom: 1 !important;
                 filter: none !important;
-                z-index: 2147483647 !important;
+                z-index: 2147483646 !important;
             }
             
             body.vision-impaired .accessibility-icon,
@@ -3653,11 +3653,11 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             font-size: 0.7em;
-            padding: 0;
+            padding: 8px 16px;
             text-align: center;
             line-height: 1.2;
-            height: auto;
-            min-height: auto;
+            height: 32px;
+            min-width: 60px;
             white-space: nowrap;
         }
         
@@ -26538,7 +26538,7 @@ class AccessibilityWidget {
             .accessibility-panel {
                 zoom: 1 !important;
                 filter: none !important;
-                z-index: 2147483647 !important;
+                z-index: 2147483646 !important;
             }
             
             body.vision-impaired .accessibility-icon,
