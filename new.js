@@ -930,7 +930,7 @@ function applyVisionImpaired(on) {
             #accessibility-icon {
                 zoom: 1 !important;
                 filter: none !important;
-                z-index: 999999 !important;
+                z-index: 2147483647 !important;
             }
             
             /* Keep images at original size (no zoom) */
@@ -1807,7 +1807,15 @@ class AccessibilityWidget {
                 return;
             }
     
+            console.log('[INIT] Creating widget...');
             this.createWidget();
+            console.log('[INIT] Widget created, checking if icon exists...');
+            const iconCheck = this.shadowRoot?.getElementById('accessibility-icon');
+            console.log('[INIT] Icon check after createWidget():', {
+                hasIcon: !!iconCheck,
+                iconDisplay: iconCheck ? iconCheck.style.display : 'N/A',
+                iconVisibility: iconCheck ? iconCheck.style.visibility : 'N/A'
+            });
             
             this.loadSettings();
     
@@ -1852,25 +1860,55 @@ class AccessibilityWidget {
             
             // Fetch customization data (BLOCKING - load on page load for immediate customization)
             // This ensures icon appears with user's customization immediately, no delays
+            console.log('[INIT] Starting customization data fetch...');
             try {
                 const customizationData = await this.fetchCustomizationData();
+                console.log('[INIT] fetchCustomizationData() returned:', {
+                    hasData: !!customizationData,
+                    hasCustomization: !!(customizationData && customizationData.customization),
+                    customizationKeys: customizationData && customizationData.customization ? Object.keys(customizationData.customization) : [],
+                    fullData: customizationData
+                });
+                
                 if (customizationData && customizationData.customization) {
+                    console.log('[INIT] Applying customizations...');
                     // Apply customizations BEFORE showing icon
                     this.applyCustomizations(customizationData.customization);
                     // Also apply accessibility profiles if present
                     if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
                         this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
                     }
+                    console.log('[INIT] Customizations applied successfully');
+                } else {
+                    console.warn('[INIT] No customization data to apply');
                 }
                 
                 // Show icon AFTER customizations are applied
                 // This ensures icon appears with correct customization (color, position, etc.)
                 // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
+                // IMPORTANT: Icon only shows if customization data exists (as per user requirement)
                 const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                console.log('[INIT] Checking icon visibility conditions:', {
+                    hasIcon: !!icon,
+                    hasCustomizationData: !!customizationData,
+                    hasCustomization: !!(customizationData && customizationData.customization),
+                    iconElement: icon,
+                    iconCurrentDisplay: icon ? icon.style.display : 'N/A',
+                    iconCurrentVisibility: icon ? icon.style.visibility : 'N/A',
+                    iconCurrentOpacity: icon ? icon.style.opacity : 'N/A'
+                });
+                
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
                     const isMobile = window.innerWidth <= 768;
                     const mobileVisibility = customizationData.customization.showOnMobile;
+                    
+                    console.log('[INIT] Icon visibility settings:', {
+                        hideTrigger,
+                        isMobile,
+                        mobileVisibility,
+                        shouldShow: !hideTrigger || (isMobile && mobileVisibility === 'Show')
+                    });
                     
                     // Only show if not hidden by settings
                     if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
@@ -1879,12 +1917,176 @@ class AccessibilityWidget {
                             isMobile,
                             mobileVisibility
                         });
-                        icon.style.display = '';
-                        icon.style.visibility = 'visible';
-                        icon.style.opacity = '1';
+                        // Remove any conflicting inline styles first
+                        icon.style.removeProperty('display');
+                        icon.style.removeProperty('visibility');
+                        icon.style.removeProperty('opacity');
+                        // Use setProperty with !important to override any CSS rules
+                        icon.style.setProperty('display', 'flex', 'important');
+                        icon.style.setProperty('visibility', 'visible', 'important');
+                        icon.style.setProperty('opacity', '1', 'important');
+                        icon.style.setProperty('pointer-events', 'auto', 'important');
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
+                        
+                        // Inject CSS rule into shadow DOM to force icon visibility IMMEDIATELY
+                        // This overrides any CSS rules that might be hiding it
+                        const shadowRoot = icon.getRootNode();
+                        if (shadowRoot && shadowRoot.nodeType === 11) { // ShadowRoot
+                            const forceVisibleStyle = document.createElement('style');
+                            forceVisibleStyle.id = 'force-icon-visible';
+                            // Use multiple selectors with highest specificity to override everything
+                            forceVisibleStyle.textContent = `
+                                #accessibility-icon.accessibility-icon,
+                                #accessibility-icon.circle,
+                                #accessibility-icon.accessibility-icon.circle,
+                                div#accessibility-icon,
+                                div#accessibility-icon.accessibility-icon,
+                                div#accessibility-icon.circle,
+                                div#accessibility-icon.accessibility-icon.circle {
+                                    display: flex !important;
+                                    visibility: visible !important;
+                                    opacity: 1 !important;
+                                    pointer-events: auto !important;
+                                    transition: none !important;
+                                    animation: none !important;
+                                    z-index: 2147483646 !important;
+                                }
+                            `;
+                            // Remove existing force style if present
+                            const existing = shadowRoot.getElementById('force-icon-visible');
+                            if (existing) {
+                                existing.remove();
+                            }
+                            // Insert at the END of shadow DOM to ensure it's last (highest priority)
+                            shadowRoot.appendChild(forceVisibleStyle);
+                            console.log('[ICON SHOW] Injected CSS rule to force visibility');
+                            
+                            // Debug: Check all style tags in shadow DOM
+                            const allStyles = shadowRoot.querySelectorAll('style');
+                            console.log('[ICON SHOW] All style tags in shadow DOM:', {
+                                count: allStyles.length,
+                                styles: Array.from(allStyles).map((s, i) => ({
+                                    index: i,
+                                    id: s.id,
+                                    isLast: i === allStyles.length - 1,
+                                    textContent: s.textContent.substring(0, 200)
+                                }))
+                            });
+                        }
+                        
+                        // Force a reflow to ensure styles are applied
+                        void icon.offsetHeight;
+                        
+                        // Debug: Check computed styles immediately after injection
+                        const initialComputed = window.getComputedStyle(icon);
+                        console.log('[ICON SHOW] Immediately after CSS injection:', {
+                            computedDisplay: initialComputed.display,
+                            computedVisibility: initialComputed.visibility,
+                            computedOpacity: initialComputed.opacity,
+                            iconOffsetHeight: icon.offsetHeight,
+                            iconOffsetWidth: icon.offsetWidth
+                        });
+                        
+                        // Apply styles multiple times with requestAnimationFrame to ensure they stick
+                        const applyStyles = () => {
+                            icon.style.setProperty('display', 'flex', 'important');
+                            icon.style.setProperty('visibility', 'visible', 'important');
+                            icon.style.setProperty('opacity', '1', 'important');
+                            icon.style.setProperty('pointer-events', 'auto', 'important');
+                            // Disable any transitions that might be interfering
+                            icon.style.setProperty('transition', 'none', 'important');
+                            icon.style.setProperty('animation', 'none', 'important');
+                        };
+                        
+                        // Apply immediately
+                        applyStyles();
+                        
+                        // Apply again in next frame
+                        requestAnimationFrame(() => {
+                            applyStyles();
+                            const computed = window.getComputedStyle(icon);
+                            console.log('[ICON SHOW] After requestAnimationFrame:', {
+                                computedDisplay: computed.display,
+                                computedVisibility: computed.visibility,
+                                computedOpacity: computed.opacity,
+                                computedPointerEvents: computed.pointerEvents,
+                                iconOffsetHeight: icon.offsetHeight,
+                                iconOffsetWidth: icon.offsetWidth,
+                                iconZIndex: computed.zIndex,
+                                iconPosition: computed.position
+                            });
+                            
+                            // Apply again in another frame to ensure it sticks
+                            requestAnimationFrame(() => {
+                                applyStyles();
+                                const computed2 = window.getComputedStyle(icon);
+                                
+                                // Check what CSS rules are actually being applied
+                                const allStyles = {
+                                    display: computed2.display,
+                                    visibility: computed2.visibility,
+                                    opacity: computed2.opacity,
+                                    pointerEvents: computed2.pointerEvents,
+                                    transition: computed2.transition,
+                                    animation: computed2.animation,
+                                    iconOffsetHeight: icon.offsetHeight,
+                                    iconOffsetWidth: icon.offsetWidth
+                                };
+                                
+                                console.log('[ICON SHOW] After second requestAnimationFrame:', allStyles);
+                                
+                                // If still not visible, try one more time with a delay
+                                if (computed2.visibility === 'hidden' || computed2.opacity === '0' || parseFloat(computed2.opacity) < 0.9) {
+                                    console.warn('[ICON SHOW] Icon still not fully visible, trying one more time...');
+                                    setTimeout(() => {
+                                        applyStyles();
+                                        const computed3 = window.getComputedStyle(icon);
+                                        console.log('[ICON SHOW] After setTimeout (final attempt):', {
+                                            computedDisplay: computed3.display,
+                                            computedVisibility: computed3.visibility,
+                                            computedOpacity: computed3.opacity,
+                                            iconOffsetHeight: icon.offsetHeight,
+                                            iconOffsetWidth: icon.offsetWidth
+                                        });
+                                    }, 100);
+                                }
+                            });
+                            
+                            // Verify click listener is attached
+                            const hasClickListeners = icon.onclick !== null || 
+                                (icon.getEventListeners && icon.getEventListeners('click')?.length > 0);
+                            console.log('[ICON SHOW] Click listener check:', {
+                                hasClickListeners,
+                                iconOnClick: icon.onclick,
+                                note: 'If hasClickListeners is false, bindEvents() may not have run yet'
+                            });
+                            
+                            // Add a test mousedown listener to verify mouse events work
+                            icon.addEventListener('mousedown', (e) => {
+                                console.log('[ICON MOUSEDOWN] Mouse down detected!', {
+                                    event: e,
+                                    target: e.target,
+                                    currentTarget: e.currentTarget
+                                });
+                            }, { once: true });
+                            
+                            // Also try mouseenter to verify hover works
+                            icon.addEventListener('mouseenter', () => {
+                                console.log('[ICON MOUSEENTER] Mouse entered icon area');
+                            }, { once: true });
+                        });
+                        console.log('[ICON SHOW] Icon styles applied:', {
+                            display: icon.style.display,
+                            visibility: icon.style.visibility,
+                            opacity: icon.style.opacity,
+                            computedDisplay: window.getComputedStyle(icon).display,
+                            computedVisibility: window.getComputedStyle(icon).visibility,
+                            computedOpacity: window.getComputedStyle(icon).opacity,
+                            iconOffsetHeight: icon.offsetHeight,
+                            iconOffsetWidth: icon.offsetWidth
+                        });
                     } else {
                         console.log('[ICON HIDE] init() - Not showing icon due to settings', {
                             hideTrigger,
@@ -1892,19 +2094,21 @@ class AccessibilityWidget {
                             mobileVisibility
                         });
                     }
+                } else {
+                    console.warn('[ICON HIDE] init() - No customization data available', {
+                        hasCustomizationData: !!customizationData,
+                        hasCustomization: !!(customizationData && customizationData.customization),
+                        hasIcon: !!icon,
+                        siteId: this.siteId,
+                        reason: !icon ? 'Icon element not found' : 
+                                !customizationData ? 'No customization data returned' : 
+                                'Customization object missing'
+                    });
                 }
             } catch (err) {
-                // If fetch fails, show icon with defaults
-                console.log('[ICON SHOW] init() - Fetch failed, showing icon with defaults', err);
-                const icon = this.shadowRoot?.getElementById('accessibility-icon');
-                if (icon) {
-                    icon.style.display = '';
-                    icon.style.visibility = 'visible';
-                    icon.style.opacity = '1';
-                    // Mark that icon was explicitly shown during initialization
-                    // This prevents showIcon() from hiding it during resize events
-                    this._iconExplicitlyShown = true;
-                }
+                // Log error but don't show icon (user wants icon only with customization data)
+                console.error('[ICON HIDE] init() - Error fetching customization data:', err);
+                console.error('[ICON HIDE] Error stack:', err.stack);
             }
             
             // Set up periodic payment status refresh (every 5 minutes)
@@ -2024,20 +2228,34 @@ class AccessibilityWidget {
             
     
             if (icon) {
-    
+                console.log('[BIND EVENTS] Attaching click listener to icon', {
+                    icon: icon,
+                    iconComputedVisibility: window.getComputedStyle(icon).visibility,
+                    iconComputedOpacity: window.getComputedStyle(icon).opacity,
+                    iconComputedPointerEvents: window.getComputedStyle(icon).pointerEvents
+                });
                 // Click event
-    
-                icon.addEventListener('click', () => {
-    
-                   
-    
-                    this.togglePanel();
-    
+                icon.addEventListener('click', (e) => {
+                    console.log('[ICON CLICK] Icon clicked!', {
+                        event: e,
+                        icon: icon,
+                        iconComputedVisibility: window.getComputedStyle(icon).visibility,
+                        iconComputedOpacity: window.getComputedStyle(icon).opacity,
+                        iconPointerEvents: window.getComputedStyle(icon).pointerEvents,
+                        iconDisplay: window.getComputedStyle(icon).display
+                    });
                     
-    
+                    this.togglePanel();
+                    
                     // Debug: Check panel state
-    
                     const panel = this.shadowRoot.getElementById('accessibility-panel');
+                    console.log('[ICON CLICK] Panel state after toggle:', {
+                        hasPanel: !!panel,
+                        panelDisplay: panel ? window.getComputedStyle(panel).display : 'N/A',
+                        panelVisibility: panel ? window.getComputedStyle(panel).visibility : 'N/A',
+                        panelTransform: panel ? panel.style.transform : 'N/A',
+                        isPanelOpen: this.isPanelOpen
+                    });
     
                     if (panel) {
 
@@ -3167,7 +3385,7 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 1000000;
+                z-index: 2147483645;
     
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
     
@@ -3207,7 +3425,7 @@ class AccessibilityWidget {
     
                 white-space: nowrap;
     
-                z-index: 1000001;
+                z-index: 2147483645;
     
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     
@@ -3360,10 +3578,10 @@ class AccessibilityWidget {
         border-radius: 0px;
     }
     
-    /* Ensure panel always appears on top of icon */
+    /* Ensure panel always appears on top of icon - MAXIMUM z-index */
     .accessibility-panel {
         position: fixed !important;
-        z-index: 100001 !important;
+        z-index: 2147483647 !important;
         overflow-y: auto !important;
         scroll-behavior: smooth !important;
         -webkit-overflow-scrolling: touch !important;
@@ -3371,7 +3589,7 @@ class AccessibilityWidget {
     }
     
     .accessibility-icon {
-        z-index: 99998 !important;
+        z-index: 2147483646 !important;
     }
     
     /* Additional shape classes for compatibility */
@@ -3430,8 +3648,9 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn i.fas {
-            display: inline-flex;
+            display: flex;
             align-items: center;
+            justify-content: center;
             line-height: 1;
             flex-shrink: 0;
             margin: 0;
@@ -3445,8 +3664,11 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn span {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             line-height: 1;
+            margin: 0;
+            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3607,8 +3829,11 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn span {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             line-height: 1;
+            margin: 0;
+            padding: 0;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4744,7 +4969,7 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 99998;
+                z-index: 2147483646 !important;
     
             `;
     
@@ -5156,7 +5381,7 @@ class AccessibilityWidget {
     
                     pointer-events: none;
     
-                    z-index: 99998;
+                    z-index: 2147483646 !important;
     
                     isolation: isolate;
     
@@ -5172,7 +5397,7 @@ class AccessibilityWidget {
     
                     position: fixed !important;
     
-                    z-index: 99998 !important;
+                    z-index: 2147483646 !important;
                     
                     /* Ensure JavaScript positioning takes precedence */
                     top: unset !important;
@@ -5209,7 +5434,7 @@ class AccessibilityWidget {
     
                     pointer-events: auto;
     
-                    z-index: 99998;
+                    z-index: 2147483646 !important;
     
                 }
     
@@ -5285,8 +5510,9 @@ class AccessibilityWidget {
                 }
                 
                 .scaling-btn i.fas {
-                    display: inline-flex;
+                    display: flex;
                     align-items: center;
+                    justify-content: center;
                     line-height: 1;
                     flex-shrink: 0;
                     margin: 0;
@@ -5294,14 +5520,14 @@ class AccessibilityWidget {
                 }
                 
                 .scaling-btn span {
-                    display: inline-block;
+                    display: flex;
+                    align-items: center;
                     line-height: 1;
+                    margin: 0;
+                    padding: 0;
                 }
                 
-                .scaling-btn,
-                .scaling-btn * {
-                    vertical-align: middle !important;
-                }
+                /* Removed vertical-align - it interferes with flex alignment */
                 
                 .scaling-btn:focus-visible,
     
@@ -6655,7 +6881,7 @@ class AccessibilityWidget {
     
                     position: fixed !important;
     
-                    z-index: 99998 !important;
+                    z-index: 2147483646 !important;
     
                 }
     
@@ -12057,7 +12283,7 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 1000000;
+                z-index: 2147483645;
     
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
     
@@ -12908,7 +13134,7 @@ class AccessibilityWidget {
     
                     border-radius: 4px;
     
-                    z-index: 1000000;
+                    z-index: 2147483645;
     
                     transition: top 0.3s;
     
@@ -13132,7 +13358,7 @@ class AccessibilityWidget {
     
                 display: none;
     
-                z-index: 1000000;
+                z-index: 2147483645;
     
                 pointer-events: none;
     
@@ -23450,7 +23676,7 @@ class AccessibilityWidget {
     
                 font-size: 14px;
     
-                z-index: 1000000;
+                z-index: 2147483645;
     
                 pointer-events: none;
     
@@ -26321,7 +26547,7 @@ class AccessibilityWidget {
             #accessibility-icon {
                 zoom: 1 !important;
                 filter: none !important;
-                z-index: 999999 !important;
+                z-index: 2147483647 !important;
             }
             
             /* Keep images at original size (no zoom) */
@@ -29175,12 +29401,23 @@ class AccessibilityWidget {
         // Enhanced Panel Toggle with Screen Reader Support
     
         togglePanel() {
-            // PERFORMANCE OPTIMIZATION: Use cached elements
-            const elements = this.getCachedElements();
+            console.log('[PANEL TOGGLE] togglePanel() called');
+            // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
+            const elements = this.getCachedElements(true); // Force refresh to get current elements
             const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
             const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
     
-            if (!panel || !icon) return;
+            console.log('[PANEL TOGGLE] Elements found:', {
+                hasPanel: !!panel,
+                hasIcon: !!icon,
+                panel: panel,
+                icon: icon
+            });
+    
+            if (!panel || !icon) {
+                console.warn('[PANEL TOGGLE] Panel or icon not found', { panel: !!panel, icon: !!icon });
+                return;
+            }
             
             // PERFORMANCE OPTIMIZATION: Use CSS transforms instead of display toggling
             const isCurrentlyOpen = panel.classList.contains('active');
@@ -29302,31 +29539,50 @@ class AccessibilityWidget {
         // Staging domains: Always return true (free, no API call)
         // Custom domains: Always check payment status fresh (no cache, real-time)
         async checkPaymentStatusRealTime() {
+            console.log('[PAYMENT] checkPaymentStatusRealTime() called');
             // Staging domains are free - no payment check needed
-            if (this.isStagingDomain()) {
+            const isStaging = this.isStagingDomain();
+            console.log('[PAYMENT] Domain check:', {
+                isStaging,
+                hostname: window.location.hostname
+            });
+            
+            if (isStaging) {
+                console.log('[PAYMENT] Staging domain detected, returning true (free)');
                 return true; // Fast return, no API call
             }
             
             // Custom domains: Always check payment status fresh (no cache)
             // This ensures we detect real-time payment changes (payments/cancellations)
-            return await this.checkPaymentStatus();
+            console.log('[PAYMENT] Custom domain detected, checking payment status...');
+            const result = await this.checkPaymentStatus();
+            console.log('[PAYMENT] Payment status result:', result);
+            return result;
         }
         
         // Fetch customization data from the API - OPTIMIZED for speed
         async fetchCustomizationData() {
-          
+            console.log('[FETCH] fetchCustomizationData() called');
             
             try {
                 // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
                 // This reduces total wait time significantly
+                console.log('[FETCH] Starting parallel payment check and siteId fetch...');
                 const [paymentValid, siteId] = await Promise.all([
                     this.checkPaymentStatusRealTime(),
                     this.getSiteId()
                 ]);
                 
+                console.log('[FETCH] Payment and siteId results:', {
+                    paymentValid,
+                    siteId,
+                    paymentType: typeof paymentValid
+                });
+                
                 // Only disable widget if payment is definitively invalid (false)
                 // Don't disable on check failures (null) - preserve current state
                 if (paymentValid === false) {
+                    console.warn('[FETCH] Payment invalid, disabling widget');
                     this.disableWidget();
                     return null;
                 }
@@ -29335,15 +29591,16 @@ class AccessibilityWidget {
                 
                 // Fast fail if no siteId
                 if (!siteId) {
-                   
+                    console.warn('[FETCH] No siteId found, returning null');
                     return null;
                 }
                 
                 // Cache siteId for future use
                 this.siteId = siteId;
+                console.log('[FETCH] SiteId cached:', siteId);
                 
                 if (!this.kvApiUrl) {
-                    
+                    console.warn('[FETCH] No kvApiUrl configured, returning null');
                     return null;
                 }
                 
@@ -29351,6 +29608,12 @@ class AccessibilityWidget {
                 const cacheBuster = `_t=${Date.now()}`;
                 const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
                 const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
+                
+                console.log('[FETCH] Making API request:', {
+                    apiUrl,
+                    baseCfg,
+                    kvApiUrl: this.kvApiUrl
+                });
                 
                 // OPTIMIZED: Minimal headers, no unnecessary data
                 const response = await fetch(apiUrl, {
@@ -29362,19 +29625,43 @@ class AccessibilityWidget {
                     keepalive: false
                 });
                 
-             
+                console.log('[FETCH] API response received:', {
+                    ok: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
                 
                 if (!response.ok) {
-                    // Don't read error text if not needed (saves time)
+                    // Log error for debugging
+                    const errorText = await response.text().catch(() => 'Unable to read error response');
+                    console.error('[CUSTOMIZATION FETCH] API error:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        url: apiUrl,
+                        errorBody: errorText
+                    });
                     return null;
                 }
                 
                 const data = await response.json();
+                console.log('[FETCH] API response data:', {
+                    hasData: !!data,
+                    hasCustomization: !!(data && data.customization),
+                    keys: data ? Object.keys(data) : [],
+                    customizationKeys: data && data.customization ? Object.keys(data.customization) : [],
+                    fullData: data
+                });
 
                 return data;
                 
             } catch (error) {
-             
+                // Log error for debugging
+                console.error('[CUSTOMIZATION FETCH] Fetch failed:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 return null;
             }
         }
@@ -29429,8 +29716,10 @@ class AccessibilityWidget {
         // OPTIMIZED: Cache siteId to avoid repeated DOM queries
         // SECURITY: siteId is public (from script URL), caching in memory is safe
         async getSiteId() {
+          console.log('[GET_SITE_ID] getSiteId() called');
           // Return cached siteId if available
           if (this.siteId) {
+            console.log('[GET_SITE_ID] Returning cached siteId:', this.siteId);
             return this.siteId;
           }
           
@@ -29439,9 +29728,20 @@ class AccessibilityWidget {
                            document.querySelector('script[src*="test.js"]') ||
                            document.querySelector('script[src*="new.js"]') ||
                            document.querySelector('script[src*="accessibility"]');
+            console.log('[GET_SITE_ID] Script element found:', {
+              hasScriptEl: !!scriptEl,
+              hasSrc: !!(scriptEl && scriptEl.src),
+              src: scriptEl ? scriptEl.src : 'N/A'
+            });
+            
             if (scriptEl && scriptEl.src) {
               const u = new URL(scriptEl.src);
               const sid = u.searchParams.get('siteId');
+              console.log('[GET_SITE_ID] Parsed URL:', {
+                url: scriptEl.src,
+                siteId: sid
+              });
+              
               if (sid) {
                 // SECURITY: Cache in memory only (not localStorage/cookies)
                 // This is safe because:
@@ -29450,10 +29750,18 @@ class AccessibilityWidget {
                 // 3. Cleared on page reload
                 // 4. No cross-site leakage
                 this.siteId = sid;
+                console.log('[GET_SITE_ID] SiteId cached and returned:', sid);
                 return sid;
+              } else {
+                console.warn('[GET_SITE_ID] No siteId found in URL params');
               }
+            } else {
+              console.warn('[GET_SITE_ID] No script element or src found');
             }
-          } catch {}
+          } catch (error) {
+            console.error('[GET_SITE_ID] Error getting siteId:', error);
+          }
+          console.warn('[GET_SITE_ID] Returning null - no siteId found');
           return null;
         }
     
@@ -30573,9 +30881,20 @@ class AccessibilityWidget {
                     .scaling-btn i.fas,
                     button[class*="increase"] i.fas,
                     button[class*="decrease"] i.fas {
-                        display: inline-flex !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        line-height: 1 !important;
+                    }
+                    
+                    .scaling-btn span,
+                    button[class*="increase"] span,
+                    button[class*="decrease"] span {
+                        display: flex !important;
                         align-items: center !important;
                         line-height: 1 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
                 }
             `;
@@ -31404,7 +31723,7 @@ class AccessibilityWidget {
                 panel.style.setProperty('transform', 'translateY(-50%)', 'important');
                 panel.style.setProperty('overflow-y', 'auto', 'important');
                 panel.style.setProperty('position', 'fixed', 'important');
-                panel.style.setProperty('z-index', '9999', 'important');
+                panel.style.setProperty('z-index', '2147483647', 'important');
             }
         }
         
@@ -31863,7 +32182,7 @@ class AccessibilityWidget {
                     
                     // Set base positioning with higher specificity
                     icon.style.setProperty('position', 'fixed', 'important');
-                    icon.style.setProperty('z-index', '9999', 'important');
+                    icon.style.setProperty('z-index', '2147483646', 'important');
                     
                    
                     
