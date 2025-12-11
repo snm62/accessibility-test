@@ -3653,7 +3653,7 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             font-size: 0.7em;
-            padding: 4px 16px;
+            padding: 0;
             text-align: center;
             line-height: 22px;
             height: 22px;
@@ -3744,13 +3744,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 4px 6px;
+            padding: 0;
             min-height: 24px;
             font-size: 0.8em;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3827,19 +3827,18 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 5px 10px !important;
+            padding: 0;
             min-height: 26px;
             /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-            text-align: center !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
         }
         
         .accessibility-panel .scaling-btn span {
-            display: flex;
-            align-items: center;
+            display: inline;
             line-height: 1;
             margin: 0;
             padding: 0;
@@ -3918,13 +3917,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 6px 10px;
+            padding: 0;
             min-height: 28px;
             /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3996,13 +3995,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 8px 12px;
+            padding: 0;
             min-height: 32px;
             /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4077,13 +4076,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 4px 6px;
+            padding: 0;
             min-height: 24px;
             /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4131,12 +4130,12 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 4px 8px !important;
+            padding: 0;
             /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4245,12 +4244,12 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             /* Font size controlled by JavaScript */
-            padding: 2px 4px;
+            padding: 0;
             min-height: 20px;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4338,11 +4337,11 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             /* Font size controlled by JavaScript */
-            padding: 3px 6px;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5511,11 +5510,11 @@ class AccessibilityWidget {
     
                 /* Ensure icons inside scaling buttons align properly */
                 .scaling-btn {
-                    text-align: center !important;
-                    line-height: 1.2 !important;
-                    height: auto !important;
-                    white-space: nowrap !important;
-                    padding: 5px 10px !important;
+                    text-align: center;
+                    line-height: 1.2;
+                    height: auto;
+                    white-space: nowrap;
+                    padding: 0;
                 }
                 
                 .scaling-btn i.fas {
@@ -29569,6 +29568,18 @@ class AccessibilityWidget {
             console.log('[FETCH] fetchCustomizationData() called');
             
             try {
+                // Check cache first (5 minute cache as per API Cache-Control header)
+                const cacheKey = `customization_data_${this.siteId || 'unknown'}`;
+                const cachedData = this.customizationDataCache;
+                const cacheTime = this.customizationDataCacheTime;
+                const now = Date.now();
+                const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+                
+                if (cachedData && cacheTime && (now - cacheTime) < CACHE_DURATION) {
+                    console.log('[FETCH] Returning cached customization data');
+                    return cachedData;
+                }
+                
                 // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
                 // This reduces total wait time significantly
                 console.log('[FETCH] Starting parallel payment check and siteId fetch...');
@@ -29609,9 +29620,9 @@ class AccessibilityWidget {
                 }
                 
                 // OPTIMIZATION: Use minimal headers and efficient fetch
-                const cacheBuster = `_t=${Date.now()}`;
+                // Remove cache buster to allow browser/API caching
                 const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
+                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
                 
                 console.log('[FETCH] Making API request:', {
                     apiUrl,
@@ -29657,6 +29668,10 @@ class AccessibilityWidget {
                     fullData: data
                 });
 
+                // Cache the data for 5 minutes
+                this.customizationDataCache = data;
+                this.customizationDataCacheTime = Date.now();
+
                 return data;
                 
             } catch (error) {
@@ -29679,9 +29694,14 @@ class AccessibilityWidget {
                 return; // No refresh needed for staging
             }
             
+            // Prevent multiple intervals from being created
+            if (this.paymentRefreshInterval) {
+                clearInterval(this.paymentRefreshInterval);
+            }
+            
             // Custom domains: Refresh payment status every 2 minutes (120000ms)
             // This catches real-time payment changes (payments/cancellations)
-            setInterval(async () => {
+            this.paymentRefreshInterval = setInterval(async () => {
                 try {
                     // Always check fresh payment status (no cache)
                     const isValid = await this.checkPaymentStatusRealTime();
@@ -30839,7 +30859,7 @@ class AccessibilityWidget {
                 arrowBtns.forEach((btn, index) => {
                     btn.style.setProperty('height', '20px', 'important');
                     btn.style.setProperty('min-height', '20px', 'important');
-                    btn.style.setProperty('padding', '1px 6px', 'important');
+                    btn.style.setProperty('padding', '0', 'important');
                     btn.style.setProperty('font-size', '9px', 'important');
                     btn.style.setProperty('border-radius', '4px', 'important');
                     // Don't set line-height when using flexbox - it interferes with centering
@@ -30869,7 +30889,7 @@ class AccessibilityWidget {
                     .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
                         height: 20px !important;
                         min-height: 20px !important;
-                        padding: 1px 6px !important;
+                        padding: 0 !important;
                         font-size: 9px !important;
                         border-radius: 4px !important;
                         /* Don't set line-height when using flexbox - it interferes with centering */
@@ -30885,20 +30905,19 @@ class AccessibilityWidget {
                     .scaling-btn i.fas,
                     button[class*="increase"] i.fas,
                     button[class*="decrease"] i.fas {
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        line-height: 1 !important;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        line-height: 1;
                     }
                     
                     .scaling-btn span,
                     button[class*="increase"] span,
                     button[class*="decrease"] span {
-                        display: flex !important;
-                        align-items: center !important;
-                        line-height: 1 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        display: inline;
+                        line-height: 1;
+                        margin: 0;
+                        padding: 0;
                     }
                 }
             `;
