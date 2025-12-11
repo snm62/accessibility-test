@@ -921,13 +921,25 @@ function applyVisionImpaired(on) {
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
+            .accessibility-panel {
+                zoom: 1 !important;
+                filter: none !important;
+                z-index: 2147483647 !important;
+            }
+            
             body.vision-impaired .accessibility-icon,
             body.vision-impaired #accessibility-icon,
-            .accessibility-widget,
-            #accessibility-widget,
-            .accessibility-panel,
             .accessibility-icon,
             #accessibility-icon {
+                zoom: 1 !important;
+                filter: none !important;
+                z-index: 2147483646 !important;
+            }
+            
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            .accessibility-widget,
+            #accessibility-widget {
                 zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
@@ -3578,10 +3590,10 @@ class AccessibilityWidget {
         border-radius: 0px;
     }
     
-    /* Ensure panel always appears on top of icon - MAXIMUM z-index */
+    /* Z-index hierarchy: Spotlight > Panel > Icon */
     .accessibility-panel {
         position: fixed !important;
-        z-index: 2147483647 !important;
+        z-index: 2147483646 !important; /* Below spotlight, above icon */
         overflow-y: auto !important;
         scroll-behavior: smooth !important;
         -webkit-overflow-scrolling: touch !important;
@@ -3589,7 +3601,12 @@ class AccessibilityWidget {
     }
     
     .accessibility-icon {
-        z-index: 2147483646 !important;
+        z-index: 2147483645 !important; /* Below panel */
+    }
+    
+    /* Spotlight should be above panel */
+    #reading-mask-spotlight {
+        z-index: 2147483647 !important; /* Highest - above panel */
     }
     
     /* Additional shape classes for compatibility */
@@ -3636,19 +3653,20 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             font-size: 0.7em;
-            padding: 3px 5px;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-            text-align: center !important;
-            line-height: 1.2 !important;
-            height: auto !important;
-            min-height: auto !important;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
+            line-height: 1.2;
+            height: auto;
+            min-height: auto;
+            white-space: nowrap;
         }
         
         .accessibility-panel .scaling-btn i.fas {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             line-height: 1;
@@ -3657,18 +3675,12 @@ class AccessibilityWidget {
             padding: 0;
         }
         
-        /* Ensure text nodes in buttons are properly aligned */
-        .accessibility-panel .scaling-btn {
-            white-space: nowrap;
-            padding: 5px 10px !important;
-        }
-        
         .accessibility-panel .scaling-btn span {
-            display: flex;
-            align-items: center;
+            display: inline;
             line-height: 1;
             margin: 0;
             padding: 0;
+            text-align: center;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -16426,7 +16438,7 @@ class AccessibilityWidget {
                 width: 100vw;
                 height: 100vh;
                 pointer-events: none;
-                z-index: 1000002;
+                z-index: 2147483647 !important;
                 background: transparent;
             `;
     
@@ -16462,15 +16474,7 @@ class AccessibilityWidget {
     
     
     
-            // Ensure accessibility widget stays above spotlight
-    
-            const widget = document.querySelector('.accessibility-widget');
-    
-            if (widget) {
-    
-                widget.style.zIndex = '1000000';
-    
-            }
+            // Spotlight should be above widget panel, so we don't need to lower widget z-index
     
             
     
@@ -26538,13 +26542,25 @@ class AccessibilityWidget {
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
+            .accessibility-panel {
+                zoom: 1 !important;
+                filter: none !important;
+                z-index: 2147483647 !important;
+            }
+            
             body.vision-impaired .accessibility-icon,
             body.vision-impaired #accessibility-icon,
-            .accessibility-widget,
-            #accessibility-widget,
-            .accessibility-panel,
             .accessibility-icon,
             #accessibility-icon {
+                zoom: 1 !important;
+                filter: none !important;
+                z-index: 2147483646 !important;
+            }
+            
+            body.vision-impaired .accessibility-widget,
+            body.vision-impaired #accessibility-widget,
+            .accessibility-widget,
+            #accessibility-widget {
                 zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
@@ -28003,7 +28019,7 @@ class AccessibilityWidget {
     
                 pointer-events: none;
     
-                z-index: 1000002; /* Ensure spotlight stays above the widget panel */
+                z-index: 2147483647 !important; /* Ensure spotlight stays above the widget panel */
     
                 /* Dark overlay with spotlight cutout using box-shadow technique */
                 background: transparent;
@@ -28019,15 +28035,7 @@ class AccessibilityWidget {
     
             
     
-            // Ensure accessibility widget stays above spotlight
-    
-            const widget = document.querySelector('.accessibility-widget');
-    
-            if (widget) {
-    
-                widget.style.zIndex = '1000000';
-    
-            }
+            // Spotlight should be above widget panel, so we don't need to lower widget z-index
     
             
     
@@ -31723,7 +31731,7 @@ class AccessibilityWidget {
                 panel.style.setProperty('transform', 'translateY(-50%)', 'important');
                 panel.style.setProperty('overflow-y', 'auto', 'important');
                 panel.style.setProperty('position', 'fixed', 'important');
-                panel.style.setProperty('z-index', '2147483647', 'important');
+                panel.style.setProperty('z-index', '2147483646', 'important');
             }
         }
         
