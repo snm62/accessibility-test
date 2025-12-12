@@ -807,18 +807,6 @@ function applyUniversalStopMotion(enabled) {
             }
         } catch (_) {}
 
-        // GSAP detected - pause visual animations (preserve scroll animations)
-        try {
-            if (enabled && typeof window.gsap !== 'undefined') {
-                // Disable ScrollTrigger if it exists
-                if (window.gsap.registerPlugin && typeof window.gsap.registerPlugin === 'function') {
-                    try {
-                        // REMOVED: Global timeline pause - preserve scroll animations
-                        // REMOVED: ScrollTrigger killing - preserve scroll animations
-                    } catch (_) {}
-                }
-            }
-        } catch (_) {}
 
         // GIF/APNG replacement (one-frame transparent pixel by default)
         const STATIC_FALLBACK = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
@@ -1000,9 +988,6 @@ function applyVisionImpaired(on) {
 (function() {
     try {
         const visionImpairedFromStorage = localStorage.getItem('accessibility-widget-vision-impaired');
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1003',message:'Early init reading vision-impaired from localStorage',data:{visionImpairedFromStorage:visionImpairedFromStorage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
         if (visionImpairedFromStorage === 'true') {
             try { document.documentElement.classList.add('vision-impaired'); } catch (_) {}
             try { document.body.classList.add('vision-impaired'); } catch (_) {}
@@ -1117,17 +1102,11 @@ function applyVisionImpaired(on) {
                 const input = document.getElementById('vision-impaired');
                 if (!input) return;
                 const enabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1116',message:'syncVisionImpairedToggle reading localStorage',data:{enabled:enabled,localStorageValue:localStorage.getItem('accessibility-widget-vision-impaired')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
                 try { input.checked = enabled; } catch (_) {}
                 if (!input.__viBound) {
                     input.addEventListener('change', function() {
                         const on = !!this.checked;
                         localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
-                        // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1121',message:'syncVisionImpairedToggle checkbox changed',data:{on:on},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                        // #endregion
                         try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
                         try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
                         try {
@@ -5220,9 +5199,6 @@ class AccessibilityWidget {
             // Vision Impaired: apply saved state and bind toggle inside Shadow DOM
             try {
                 const viEnabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:5219',message:'Shadow DOM init reading vision-impaired from localStorage',data:{viEnabled:viEnabled,localStorageValue:localStorage.getItem('accessibility-widget-vision-impaired')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                // #endregion
                 applyVisionImpaired(viEnabled);
 
                 const bindVIToggle = () => {
@@ -20524,6 +20500,9 @@ class AccessibilityWidget {
             
             // Restore custom players
             this.restoreCustomPlayers();
+            
+            // Refresh page to ensure all audio is fully restored
+            window.location.reload();
           
         }
         
@@ -25196,27 +25175,6 @@ class AccessibilityWidget {
                   
                 }
                 
-                // AGGRESSIVE: Stop GSAP visual animations
-                if (typeof window.gsap !== 'undefined') {
-                    try {
-                        // Kill visual animations but preserve scroll-related ones
-                        if (window.gsap.killTweensOf) {
-                            window.gsap.killTweensOf('.fade-up, .fade-left, .fade-right, .fade-in, .slide-in, .scale-in, .zoom-in, .bounce, .pulse, .shake, .flash, .blink, .glow, .spin, .rotate, .scale, .zoom, .wiggle, .jiggle, .twist, .flip, .swing, .wobble, .tilt');
-                        }
-                  
-                    } catch (error) {
-                    
-                    }
-                }
-                
-                // GSAP: Only kill visual animations, preserve scroll-related animations
-                if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
-                    try {
-
-                    } catch (error) {
-                        
-                    }
-                }
                 
                 // Three.js: Stop animations if present
                 if (typeof window.THREE !== 'undefined') {
@@ -25466,16 +25424,6 @@ class AccessibilityWidget {
                             
                         }
                     });
-                }
-                
-                // GSAP: Resume global timeline
-                if (typeof window.gsap !== 'undefined' && window.gsap.globalTimeline) {
-                    try {
-                        window.gsap.globalTimeline.resume();
-                        
-                    } catch (error) {
-                       
-                    }
                 }
                 
                 // jQuery: Re-enable animations
@@ -26438,10 +26386,6 @@ class AccessibilityWidget {
         // Vision Impaired - comprehensive scaling and contrast enhancement
         enableVisionImpaired() {
             try {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26427',message:'enableVisionImpaired called',data:{caller:new Error().stack?.split('\n')[2]?.trim(),beforeLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),beforeSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
-                
                 // Disable other mutually exclusive features
                 if (this.settings['seizure-safe']) {
                     this.disableSeizureSafe();
@@ -26486,15 +26430,8 @@ class AccessibilityWidget {
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
-                
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26478',message:'enableVisionImpaired completed',data:{afterLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),afterSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
            
             } catch (e) {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26485',message:'enableVisionImpaired error',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
             }
         }
         
@@ -26603,10 +26540,6 @@ class AccessibilityWidget {
 
         disableVisionImpaired() {
             try {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26579',message:'disableVisionImpaired called',data:{beforeLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),beforeSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                // #endregion
-                
                 this.settings['vision-impaired'] = false;
                 document.body.classList.remove('vision-impaired');
                 document.documentElement.classList.remove('vision-impaired');
@@ -26653,15 +26586,8 @@ class AccessibilityWidget {
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
-                
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26630',message:'disableVisionImpaired completed',data:{afterLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),afterSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                // #endregion
           
             } catch (e) {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26635',message:'disableVisionImpaired error',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                // #endregion
             }
         }
     
@@ -26728,10 +26654,6 @@ class AccessibilityWidget {
                 window.hoverRAF = null;
             }
             
-            // Stop GSAP animations if available
-            if (typeof gsap !== 'undefined') {
-                
-            }
             
             // CRITICAL: Ensure letter-by-letter text animations show full text immediately
             this.forceCompleteTextAnimations();
@@ -26979,13 +26901,6 @@ class AccessibilityWidget {
           
             
             try {
-                // Stop GSAP animations (preserve scroll animations)
-                if (typeof window.gsap !== 'undefined') {
-                    try {
-                        // REMOVED: Global timeline pause - preserve scroll animations
-                        // REMOVED: killTweensOf('*') - preserve scroll animations
-                    } catch (_) {}
-                }
                 
                 // Stop Lottie animations - Universal approach for all websites
                 this.stopAllLottieAnimations();
@@ -27894,11 +27809,6 @@ class AccessibilityWidget {
                     /* REMOVED: display: none !important; - Don't hide, just stop animations */
                 }
                 
-                /* Stop GSAP animations */
-                body.seizure-safe .gsap-animated,
-                body.seizure-safe [data-gsap] {
-                    animation: none !important;
-                    transition: none !important;
                     animation-play-state: paused !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
@@ -32968,5 +32878,4 @@ class AccessibilityWidget {
         }
         
     })();
-
-                                                         
+    
