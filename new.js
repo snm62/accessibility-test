@@ -807,23 +807,14 @@ function applyUniversalStopMotion(enabled) {
             }
         } catch (_) {}
 
-        // GSAP detected - disable ScrollTrigger and pause animations
+        // GSAP detected - pause visual animations (preserve scroll animations)
         try {
             if (enabled && typeof window.gsap !== 'undefined') {
                 // Disable ScrollTrigger if it exists
                 if (window.gsap.registerPlugin && typeof window.gsap.registerPlugin === 'function') {
                     try {
-                        // Pause all GSAP animations including ScrollTrigger
-                        if (window.gsap.globalTimeline) {
-                            window.gsap.globalTimeline.pause();
-                        }
-                        // Kill all ScrollTrigger instances
-                        if (window.ScrollTrigger && typeof window.ScrollTrigger.getAll === 'function') {
-                            const triggers = window.ScrollTrigger.getAll();
-                            triggers.forEach(trigger => {
-                                try { trigger.kill(); } catch (_) {}
-                            });
-                        }
+                        // REMOVED: Global timeline pause - preserve scroll animations
+                        // REMOVED: ScrollTrigger killing - preserve scroll animations
                     } catch (_) {}
                 }
             }
@@ -1009,6 +1000,9 @@ function applyVisionImpaired(on) {
 (function() {
     try {
         const visionImpairedFromStorage = localStorage.getItem('accessibility-widget-vision-impaired');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1003',message:'Early init reading vision-impaired from localStorage',data:{visionImpairedFromStorage:visionImpairedFromStorage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         if (visionImpairedFromStorage === 'true') {
             try { document.documentElement.classList.add('vision-impaired'); } catch (_) {}
             try { document.body.classList.add('vision-impaired'); } catch (_) {}
@@ -1123,11 +1117,17 @@ function applyVisionImpaired(on) {
                 const input = document.getElementById('vision-impaired');
                 if (!input) return;
                 const enabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1116',message:'syncVisionImpairedToggle reading localStorage',data:{enabled:enabled,localStorageValue:localStorage.getItem('accessibility-widget-vision-impaired')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 try { input.checked = enabled; } catch (_) {}
                 if (!input.__viBound) {
                     input.addEventListener('change', function() {
                         const on = !!this.checked;
                         localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
+                        // #region agent log
+                        fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:1121',message:'syncVisionImpairedToggle checkbox changed',data:{on:on},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                        // #endregion
                         try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
                         try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
                         try {
@@ -3652,33 +3652,19 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            font-size: 14px;
-            padding: 0 8px;
+            font-size: 0.7em;
+            padding: 6px 20px;
+            text-align: center;
+            line-height: 28px;
             height: 28px;
-            min-width: 60px;
+            min-width: 80px;
             width: auto;
             white-space: nowrap;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
         }
         
         .accessibility-panel .scaling-btn i.fas {
             display: inline-block;
-            vertical-align: middle;
-            line-height: 28px;
-            margin: 0;
-            padding: 0;
-            width: auto;
-            max-width: none;
-        }
-        
-        .accessibility-panel .scaling-btn span {
-            display: inline;
-            vertical-align: middle;
-            line-height: 28px;
+            line-height: 1;
             margin: 0;
             padding: 0;
         }
@@ -3748,13 +3734,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 4px 6px;
             min-height: 24px;
             font-size: 0.8em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3831,18 +3817,19 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 5px 10px !important;
             min-height: 26px;
             /* Font size controlled by JavaScript */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            text-align: center;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            text-align: center !important;
         }
         
         .accessibility-panel .scaling-btn span {
-            display: inline;
+            display: flex;
+            align-items: center;
             line-height: 1;
             margin: 0;
             padding: 0;
@@ -3921,13 +3908,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 6px 10px;
             min-height: 28px;
             /* Font size controlled by JavaScript */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3999,13 +3986,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 8px 12px;
             min-height: 32px;
             /* Font size controlled by JavaScript */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4080,13 +4067,13 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 4px 6px;
             min-height: 24px;
             /* Font size controlled by JavaScript */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4134,12 +4121,12 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn {
-            padding: 0;
+            padding: 4px 8px !important;
             /* Font size controlled by JavaScript */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4248,12 +4235,12 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             /* Font size controlled by JavaScript */
-            padding: 0;
+            padding: 2px 4px;
             min-height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4341,11 +4328,11 @@ class AccessibilityWidget {
         
         .accessibility-panel .scaling-btn {
             /* Font size controlled by JavaScript */
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            padding: 3px 6px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -5233,6 +5220,9 @@ class AccessibilityWidget {
             // Vision Impaired: apply saved state and bind toggle inside Shadow DOM
             try {
                 const viEnabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:5219',message:'Shadow DOM init reading vision-impaired from localStorage',data:{viEnabled:viEnabled,localStorageValue:localStorage.getItem('accessibility-widget-vision-impaired')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                // #endregion
                 applyVisionImpaired(viEnabled);
 
                 const bindVIToggle = () => {
@@ -5514,11 +5504,11 @@ class AccessibilityWidget {
     
                 /* Ensure icons inside scaling buttons align properly */
                 .scaling-btn {
-                    text-align: center;
-                    line-height: 1.2;
-                    height: auto;
-                    white-space: nowrap;
-                    padding: 0;
+                    text-align: center !important;
+                    line-height: 1.2 !important;
+                    height: auto !important;
+                    white-space: nowrap !important;
+                    padding: 5px 10px !important;
                 }
                 
                 .scaling-btn i.fas {
@@ -8105,11 +8095,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>-2%</span></button>
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-2%</button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>+2%</span></button>
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+2%</button>
     
                                     </div>
     
@@ -8259,11 +8249,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>-5%</span></button>
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-5%</button>
     
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>+5%</span></button>
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+5%</button>
     
                                     </div>
     
@@ -8329,11 +8319,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>-10%</span></button>
+                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
     
                                         <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>+10%</span></button>
+                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
     
                                     </div>
     
@@ -8371,11 +8361,11 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>-10%</span></button>
+                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
     
                                         <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; border: none; border-radius: 4px !important; cursor: pointer; height: 28px !important; padding: 0 8px !important; color: white !important; font-size: 14px !important; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>+10%</span></button>
+                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
     
                                     </div>
     
@@ -26448,6 +26438,10 @@ class AccessibilityWidget {
         // Vision Impaired - comprehensive scaling and contrast enhancement
         enableVisionImpaired() {
             try {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26427',message:'enableVisionImpaired called',data:{caller:new Error().stack?.split('\n')[2]?.trim(),beforeLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),beforeSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
+                
                 // Disable other mutually exclusive features
                 if (this.settings['seizure-safe']) {
                     this.disableSeizureSafe();
@@ -26486,12 +26480,21 @@ class AccessibilityWidget {
                 // Apply comprehensive website scaling and contrast enhancement
                 this.applyVisionImpaired(true);
 
+                // CRITICAL FIX: Also save to the separate localStorage key that sync functions use
+                localStorage.setItem('accessibility-widget-vision-impaired', 'true');
+
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26478',message:'enableVisionImpaired completed',data:{afterLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),afterSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
            
             } catch (e) {
-                
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26485',message:'enableVisionImpaired error',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
             }
         }
         
@@ -26600,6 +26603,10 @@ class AccessibilityWidget {
 
         disableVisionImpaired() {
             try {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26579',message:'disableVisionImpaired called',data:{beforeLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),beforeSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
+                
                 this.settings['vision-impaired'] = false;
                 document.body.classList.remove('vision-impaired');
                 document.documentElement.classList.remove('vision-impaired');
@@ -26640,12 +26647,21 @@ class AccessibilityWidget {
                 // Apply vision impaired with false to clean up
                 this.applyVisionImpaired(false);
 
+                // CRITICAL FIX: Clear the separate localStorage key that sync functions use
+                localStorage.removeItem('accessibility-widget-vision-impaired');
+                
                 // Persist and sync
                 this.saveSettings();
                 this.updateWidgetAppearance();
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26630',message:'disableVisionImpaired completed',data:{afterLocalStorage:localStorage.getItem('accessibility-widget-vision-impaired'),afterSettings:this.settings['vision-impaired']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
           
             } catch (e) {
-          
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:26635',message:'disableVisionImpaired error',data:{error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
             }
         }
     
@@ -26963,15 +26979,11 @@ class AccessibilityWidget {
           
             
             try {
-                // Stop GSAP animations
+                // Stop GSAP animations (preserve scroll animations)
                 if (typeof window.gsap !== 'undefined') {
                     try {
-                        // Pause all GSAP timelines
-                        if (window.gsap.globalTimeline) {
-                            window.gsap.globalTimeline.pause();
-                        }
-                        // Stop all tweens
-                        window.gsap.killTweensOf('*');
+                        // REMOVED: Global timeline pause - preserve scroll animations
+                        // REMOVED: killTweensOf('*') - preserve scroll animations
                     } catch (_) {}
                 }
                 
@@ -27189,102 +27201,131 @@ class AccessibilityWidget {
         }
         
         // Universal Lottie Animation Stopping - Works on ALL websites
+        // SAFE VERSION: Makes animations invisible instead of destroying (prevents crashes)
         stopAllLottieAnimations() {
             
             
             try {
-                // Method 1: Stop via lottie-web API (most reliable)
+                // Method 1: Stop via lottie-web API (most reliable) - DON'T DESTROY
                 if (typeof window.lottie !== 'undefined') {
                     try {
                         // Get all registered animations
-                        const allAnimations = window.lottie.getRegisteredAnimations();
-                        if (allAnimations && allAnimations.length > 0) {
-                            allAnimations.forEach(anim => {
-                                try {
-                                    anim.stop();
-                                    anim.pause();
-                                    anim.destroy();
-                                } catch (_) {}
-                            });
+                        if (typeof window.lottie.getRegisteredAnimations === 'function') {
+                            const allAnimations = window.lottie.getRegisteredAnimations();
+                            if (allAnimations && allAnimations.length > 0) {
+                                allAnimations.forEach(anim => {
+                                    try {
+                                        // Only stop/pause - NEVER destroy (prevents crashes)
+                                        if (anim && typeof anim.stop === 'function') {
+                                            anim.stop();
+                                        }
+                                        if (anim && typeof anim.pause === 'function') {
+                                            anim.pause();
+                                        }
+                                        // REMOVED: anim.destroy() - Too aggressive, causes crashes
+                                    } catch (_) {}
+                                });
+                            }
                         }
                         
                         // Freeze all future animations
                         if (typeof window.lottie.freeze === 'function') {
-                            window.lottie.freeze();
+                            try {
+                                window.lottie.freeze();
+                            } catch (_) {}
+                        }
+                        
+                        // Method 5: Override Lottie loading globally (store original for restoration)
+                        if (typeof window.lottie.loadAnimation === 'function' && !window.__originalLottieLoadAnimation) {
+                            window.__originalLottieLoadAnimation = window.lottie.loadAnimation;
+                            const self = this;
+                            window.lottie.loadAnimation = function(config) {
+                                try {
+                                    const anim = window.__originalLottieLoadAnimation.call(this, config);
+                                    // Immediately stop any new animations (but don't destroy)
+                                    if (anim) {
+                                        try {
+                                            if (typeof anim.stop === 'function') {
+                                                anim.stop();
+                                            }
+                                            if (typeof anim.pause === 'function') {
+                                                anim.pause();
+                                            }
+                                        } catch (_) {}
+                                    }
+                                    return anim;
+                                } catch (_) {
+                                    // If override fails, return original result
+                                    return window.__originalLottieLoadAnimation.call(this, config);
+                                }
+                            };
                         }
                         
                     } catch (_) {}
                 }
                 
                 // Method 2: Stop via lottie-player web components
-                const lottiePlayers = document.querySelectorAll('lottie-player');
-                lottiePlayers.forEach(player => {
-                    try {
-                        player.stop();
-                        player.pause();
-                        player.setAttribute('data-seizure-safe-stopped', 'true');
-                    } catch (_) {}
-                });
+                try {
+                    const lottiePlayers = document.querySelectorAll('lottie-player');
+                    lottiePlayers.forEach(player => {
+                        try {
+                            if (typeof player.stop === 'function') {
+                                player.stop();
+                            }
+                            if (typeof player.pause === 'function') {
+                                player.pause();
+                            }
+                            player.setAttribute('data-seizure-safe-stopped', 'true');
+                            // Make invisible like stop-animation does
+                            player.style.opacity = '0';
+                            player.style.visibility = 'hidden';
+                        } catch (_) {}
+                    });
+                } catch (_) {}
                 
                 // Method 3: Stop via DOM elements with Lottie data attributes
-                const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
-                lottieElements.forEach(element => {
-                    try {
-                        // Try to find and stop any Lottie instance on this element
-                        if (element.lottie) {
-                            element.lottie.stop();
-                            element.lottie.pause();
-                        }
-                        
-                        // Mark as stopped
-                        element.setAttribute('data-seizure-safe-stopped', 'true');
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                    } catch (_) {}
-                });
-                
-                // Method 4: Stop via CSS - Force all Lottie containers to be static
-                const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"]');
-                lottieContainers.forEach(container => {
-                    try {
-                        container.style.animation = 'none';
-                        container.style.transition = 'none';
-                        container.style.transform = 'none';
-                        container.setAttribute('data-seizure-safe-stopped', 'true');
-                    } catch (_) {}
-                });
-                
-                // Method 5: Override Lottie loading globally
-                if (typeof window.lottie !== 'undefined' && window.lottie.loadAnimation) {
-                    const originalLoadAnimation = window.lottie.loadAnimation;
-                    window.lottie.loadAnimation = function(config) {
-                        const anim = originalLoadAnimation.call(this, config);
-                        // Immediately stop any new animations
-                        if (anim) {
-                            try {
-                                anim.stop();
-                                anim.pause();
-                            } catch (_) {}
-                        }
-                        return anim;
-                    };
-                }
-                
-                // Method 6: Check for prefers-reduced-motion and respect it
-                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                if (prefersReducedMotion) {
-                    
-                    // Force stop all animations regardless of implementation
-                    document.querySelectorAll('*').forEach(el => {
-                        el.style.animation = 'none';
-                        el.style.transition = 'none';
-                        el.style.transform = 'none';
+                try {
+                    const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
+                    lottieElements.forEach(element => {
+                        try {
+                            // Try to find and stop any Lottie instance on this element
+                            if (element.lottie) {
+                                if (typeof element.lottie.stop === 'function') {
+                                    element.lottie.stop();
+                                }
+                                if (typeof element.lottie.pause === 'function') {
+                                    element.lottie.pause();
+                                }
+                            }
+                            
+                            // Mark as stopped and make invisible
+                            element.setAttribute('data-seizure-safe-stopped', 'true');
+                            element.style.animation = 'none';
+                            element.style.transition = 'none';
+                            element.style.opacity = '0';
+                            element.style.visibility = 'hidden';
+                        } catch (_) {}
                     });
-                }
+                } catch (_) {}
+                
+                // Method 4: Make Lottie containers invisible (canvas, svg elements)
+                try {
+                    const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"], canvas[data-lottie], canvas.lottie');
+                    lottieContainers.forEach(container => {
+                        try {
+                            container.style.animation = 'none';
+                            container.style.transition = 'none';
+                            container.style.transform = 'none';
+                            container.style.opacity = '0';
+                            container.style.visibility = 'hidden';
+                            container.setAttribute('data-seizure-safe-stopped', 'true');
+                        } catch (_) {}
+                    });
+                } catch (_) {}
                 
                
             } catch (e) {
-                
+                // Silent fail - don't crash the website
             }
         }
         
@@ -27311,24 +27352,52 @@ class AccessibilityWidget {
                 }
                 
                 // Restore lottie-player web components
-                const lottiePlayers = document.querySelectorAll('lottie-player[data-seizure-safe-stopped]');
-                lottiePlayers.forEach(player => {
-                    try {
-                        player.play();
-                        player.removeAttribute('data-seizure-safe-stopped');
-                    } catch (_) {}
-                });
+                try {
+                    const lottiePlayers = document.querySelectorAll('lottie-player[data-seizure-safe-stopped]');
+                    lottiePlayers.forEach(player => {
+                        try {
+                            if (typeof player.play === 'function') {
+                                player.play();
+                            }
+                            player.removeAttribute('data-seizure-safe-stopped');
+                            // Restore visibility
+                            player.style.opacity = '';
+                            player.style.visibility = '';
+                        } catch (_) {}
+                    });
+                } catch (_) {}
                 
-                // Restore DOM elements
-                const lottieElements = document.querySelectorAll('[data-seizure-safe-stopped]');
-                lottieElements.forEach(element => {
-                    try {
-                        element.removeAttribute('data-seizure-safe-stopped');
-                        element.style.animation = '';
-                        element.style.transition = '';
-                        element.style.transform = '';
-                    } catch (_) {}
-                });
+                // Restore DOM elements with Lottie data attributes
+                try {
+                    const lottieElements = document.querySelectorAll('[data-seizure-safe-stopped]');
+                    lottieElements.forEach(element => {
+                        try {
+                            element.removeAttribute('data-seizure-safe-stopped');
+                            element.style.animation = '';
+                            element.style.transition = '';
+                            element.style.transform = '';
+                            // Restore visibility
+                            element.style.opacity = '';
+                            element.style.visibility = '';
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+                
+                // Restore Lottie containers (canvas, svg, div)
+                try {
+                    const lottieContainers = document.querySelectorAll('div[id*="lottie"][data-seizure-safe-stopped], div[class*="lottie"][data-seizure-safe-stopped], svg[class*="lottie"][data-seizure-safe-stopped], canvas[data-lottie][data-seizure-safe-stopped], canvas.lottie[data-seizure-safe-stopped]');
+                    lottieContainers.forEach(container => {
+                        try {
+                            container.removeAttribute('data-seizure-safe-stopped');
+                            container.style.animation = '';
+                            container.style.transition = '';
+                            container.style.transform = '';
+                            // Restore visibility
+                            container.style.opacity = '';
+                            container.style.visibility = '';
+                        } catch (_) {}
+                    });
+                } catch (_) {}
                 
               
             } catch (e) {
@@ -27597,7 +27666,7 @@ class AccessibilityWidget {
                     will-change: auto !important;
                 }
                 
-                /* 4. STOP LOTTIE ANIMATIONS - Universal Lottie stopping */
+                /* 4. STOP LOTTIE ANIMATIONS - Universal Lottie stopping (make invisible like stop-animation) */
                 body.seizure-safe lottie-player,
                 body.seizure-safe [data-lottie],
                 body.seizure-safe [data-animation],
@@ -27605,11 +27674,15 @@ class AccessibilityWidget {
                 body.seizure-safe .lottie-animation,
                 body.seizure-safe div[id*="lottie"],
                 body.seizure-safe div[class*="lottie"],
-                body.seizure-safe svg[class*="lottie"] {
+                body.seizure-safe svg[class*="lottie"],
+                body.seizure-safe canvas[data-lottie],
+                body.seizure-safe canvas.lottie {
                     animation: none !important;
                     transition: none !important;
                     transform: none !important;
                     animation-play-state: paused !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
                 }
                 
                 /* 5. STOP BLINKING TEXT AND FLASHING ELEMENTS - WCAG 2.3.1 compliance */
@@ -27807,16 +27880,17 @@ class AccessibilityWidget {
                     transition: none !important;
                 }
                 
-                /* Stop Lottie animations specifically - DON'T HIDE THEM */
+                /* Stop Lottie animations specifically - Make invisible to prevent seizures */
                 body.seizure-safe [data-lottie],
                 body.seizure-safe .lottie,
-                body.seizure-safe canvas[data-lottie] {
+                body.seizure-safe canvas[data-lottie],
+                body.seizure-safe canvas.lottie {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
                     /* REMOVED: display: none !important; - Don't hide, just stop animations */
                 }
                 
@@ -29572,18 +29646,6 @@ class AccessibilityWidget {
             console.log('[FETCH] fetchCustomizationData() called');
             
             try {
-                // Check cache first (5 minute cache as per API Cache-Control header)
-                const cacheKey = `customization_data_${this.siteId || 'unknown'}`;
-                const cachedData = this.customizationDataCache;
-                const cacheTime = this.customizationDataCacheTime;
-                const now = Date.now();
-                const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-                
-                if (cachedData && cacheTime && (now - cacheTime) < CACHE_DURATION) {
-                    console.log('[FETCH] Returning cached customization data');
-                    return cachedData;
-                }
-                
                 // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
                 // This reduces total wait time significantly
                 console.log('[FETCH] Starting parallel payment check and siteId fetch...');
@@ -29624,9 +29686,9 @@ class AccessibilityWidget {
                 }
                 
                 // OPTIMIZATION: Use minimal headers and efficient fetch
-                // Remove cache buster to allow browser/API caching
+                const cacheBuster = `_t=${Date.now()}`;
                 const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
+                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
                 
                 console.log('[FETCH] Making API request:', {
                     apiUrl,
@@ -29672,10 +29734,6 @@ class AccessibilityWidget {
                     fullData: data
                 });
 
-                // Cache the data for 5 minutes
-                this.customizationDataCache = data;
-                this.customizationDataCacheTime = Date.now();
-
                 return data;
                 
             } catch (error) {
@@ -29698,14 +29756,9 @@ class AccessibilityWidget {
                 return; // No refresh needed for staging
             }
             
-            // Prevent multiple intervals from being created
-            if (this.paymentRefreshInterval) {
-                clearInterval(this.paymentRefreshInterval);
-            }
-            
             // Custom domains: Refresh payment status every 2 minutes (120000ms)
             // This catches real-time payment changes (payments/cancellations)
-            this.paymentRefreshInterval = setInterval(async () => {
+            setInterval(async () => {
                 try {
                     // Always check fresh payment status (no cache)
                     const isValid = await this.checkPaymentStatusRealTime();
@@ -30861,38 +30914,25 @@ class AccessibilityWidget {
             const arrowBtns = this.shadowRoot?.querySelectorAll('button[class*="arrow"], button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn, .scaling-btn');
             if (arrowBtns && arrowBtns.length > 0) {
                 arrowBtns.forEach((btn, index) => {
-                    // Check if this is a scaling button (has percentage text)
-                    const isScalingBtn = btn.classList.contains('scaling-btn') || btn.id.includes('increase') || btn.id.includes('decrease');
-                    
-                    if (isScalingBtn) {
-                        // For scaling buttons, use larger font and proper height
-                        btn.style.setProperty('height', '28px', 'important');
-                        btn.style.setProperty('min-height', '28px', 'important');
-                        btn.style.setProperty('padding', '0 8px', 'important');
-                        btn.style.setProperty('font-size', '14px', 'important');
-                        btn.style.setProperty('border-radius', '4px', 'important');
-                        btn.style.setProperty('width', 'auto', 'important');
-                        btn.style.setProperty('min-width', '60px', 'important');
-                        btn.style.setProperty('color', 'white', 'important');
-                        btn.style.setProperty('display', 'flex', 'important');
-                        btn.style.setProperty('align-items', 'center', 'important');
-                        btn.style.setProperty('justify-content', 'center', 'important');
-                        btn.style.setProperty('gap', '4px', 'important');
-                    } else {
-                        // For other buttons, use smaller mobile size
-                        btn.style.setProperty('height', '20px', 'important');
-                        btn.style.setProperty('min-height', '20px', 'important');
-                        btn.style.setProperty('padding', '0', 'important');
-                        btn.style.setProperty('font-size', '9px', 'important');
-                        btn.style.setProperty('border-radius', '4px', 'important');
-                        btn.style.setProperty('width', 'auto', 'important');
-                        btn.style.setProperty('min-width', '32px', 'important');
-                    }
+                    btn.style.setProperty('height', '20px', 'important');
+                    btn.style.setProperty('min-height', '20px', 'important');
+                    btn.style.setProperty('padding', '1px 6px', 'important');
+                    btn.style.setProperty('font-size', '9px', 'important');
+                    btn.style.setProperty('border-radius', '4px', 'important');
+                    // Don't set line-height when using flexbox - it interferes with centering
+                    // btn.style.setProperty('line-height', '1', 'important');
+                    btn.style.setProperty('width', 'auto', 'important');
+                    btn.style.setProperty('min-width', '32px', 'important');
+                    // Ensure flexbox centering for button content
+                    btn.style.setProperty('display', 'flex', 'important');
+                    btn.style.setProperty('align-items', 'center', 'important');
+                    btn.style.setProperty('justify-content', 'center', 'important');
+                    btn.style.setProperty('gap', '4px', 'important');
                     // Ensure icon aligns properly
                     const icon = btn.querySelector('i.fas');
                     if (icon) {
-                        icon.style.setProperty('display', 'inline-block', 'important');
-                        icon.style.setProperty('vertical-align', 'middle', 'important');
+                        icon.style.setProperty('display', 'inline-flex', 'important');
+                        icon.style.setProperty('align-items', 'center', 'important');
                         icon.style.setProperty('line-height', '1', 'important');
                     }
                     
@@ -30903,47 +30943,39 @@ class AccessibilityWidget {
             const mobileControlStyle = document.createElement('style');
             mobileControlStyle.textContent = `
                 @media (max-width: 768px) {
-                    .scaling-btn, button[class*="increase"], button[class*="decrease"] {
-                        height: 28px !important;
-                        min-height: 28px !important;
-                        padding: 0 8px !important;
-                        font-size: 14px !important;
+                    .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
+                        height: 20px !important;
+                        min-height: 20px !important;
+                        padding: 1px 6px !important;
+                        font-size: 9px !important;
                         border-radius: 4px !important;
+                        /* Don't set line-height when using flexbox - it interferes with centering */
                         width: auto !important;
-                        min-width: 60px !important;
-                        color: white !important;
+                        min-width: 32px !important;
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
                         gap: 4px !important;
-                    }
-                    .arrow-btn, .control-btn {
-                        height: 20px !important;
-                        min-height: 20px !important;
-                        padding: 0 !important;
-                        font-size: 9px !important;
-                        border-radius: 4px !important;
-                        width: auto !important;
-                        min-width: 32px !important;
                     }
                     
                     /* Ensure icons inside buttons align properly */
                     .scaling-btn i.fas,
                     button[class*="increase"] i.fas,
                     button[class*="decrease"] i.fas {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        line-height: 1;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        line-height: 1 !important;
                     }
                     
                     .scaling-btn span,
                     button[class*="increase"] span,
                     button[class*="decrease"] span {
-                        display: inline;
-                        line-height: 1;
-                        margin: 0;
-                        padding: 0;
+                        display: flex !important;
+                        align-items: center !important;
+                        line-height: 1 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
                 }
             `;
@@ -32936,4 +32968,5 @@ class AccessibilityWidget {
         }
         
     })();
-    
+
+                                                         
