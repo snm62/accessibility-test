@@ -317,7 +317,10 @@
                     master.textContent = `
                         /* Hard stop for CSS animations and transitions */
                         /* Force animations to final state immediately - either prevent from starting or jump to final state */
-                        body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                        /* Exclude nav/header to preserve sticky positioning and layout */
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                             /* Set duration to 0s so animations complete instantly (jump to final state) */
                             animation-duration: 0s !important;
                             animation-delay: 0s !important;
@@ -453,14 +456,27 @@
                             ];
                             document.querySelectorAll(typeSelectors.join(',')).forEach(el => {
                                 try {
+                                    // Skip if already processed to prevent duplication
+                                    if (el.hasAttribute('data-seizure-processed')) return;
+                                    el.setAttribute('data-seizure-processed', 'true');
+                                    
                                     const datasetText = el.getAttribute('data-full-text') || el.getAttribute('data-text') || '';
-                                    if (datasetText) { el.textContent = datasetText; return; }
-                                    // If split into character spans, join them
+                                    if (datasetText) { 
+                                        el.textContent = datasetText; 
+                                        return; 
+                                    }
+                                    // If split into character spans, join them (but preserve original structure)
                                     const charSpans = el.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"]');
                                     if (charSpans && charSpans.length > 0) {
-                                        let joined = '';
-                                        charSpans.forEach(n => { joined += n.textContent || ''; });
-                                        el.textContent = joined;
+                                        // Only consolidate if the element doesn't already have complete text
+                                        const currentText = el.textContent.trim();
+                                        if (!currentText || currentText.length < charSpans.length) {
+                                            let joined = '';
+                                            charSpans.forEach(n => { joined += n.textContent || ''; });
+                                            if (joined && joined.trim()) {
+                                                el.textContent = joined;
+                                            }
+                                        }
                                     }
                                 } catch (_) { /* ignore per-element errors */ }
                             });
@@ -799,8 +815,13 @@ function applyUniversalStopMotion(enabled) {
                 document.head.appendChild(css);
             }
             css.textContent = `
-                html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
-                body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                /* Exclude nav/header to preserve sticky positioning and layout */
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                     /* Force animations to final state immediately - either prevent from starting or jump to final state */
                     animation-duration: 0s !important;
                     animation-delay: 0s !important;
@@ -25107,10 +25128,22 @@ class AccessibilityWidget {
                         try {
                             const callbackStr = callback.toString().toLowerCase();
                             
+                            // #region agent log
+                            const isGSAPScrollTrigger = (typeof window.gsap !== 'undefined' && window.gsap.ScrollTrigger) || (typeof window.ScrollTrigger !== 'undefined');
+                            const isLenis = typeof window.lenis !== 'undefined';
+                            const hasScroll = callbackStr.includes('scroll');
+                            const hasTransform = callbackStr.includes('transform') || callbackStr.includes('translate') || callbackStr.includes('opacity') || callbackStr.includes('scale') || callbackStr.includes('rotate');
+                            const hasScrollTrigger = callbackStr.includes('scrolltrigger') || callbackStr.includes('scroll-trigger');
+                            fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25129',message:'RAF callback check',data:{hasScroll,hasTransform,hasScrollTrigger,isGSAPScrollTrigger,isLenis,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                            // #endregion
+                            
                             // CRITICAL: Allow widget-related callbacks (panel opening, etc.)
                             if (callbackStr.includes('accessibility') || 
                                 callbackStr.includes('widget') ||
                                 callbackStr.includes('togglepanel')) {
+                                // #region agent log
+                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25135',message:'ALLOWED: widget callback',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                                // #endregion
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
@@ -25125,28 +25158,43 @@ class AccessibilityWidget {
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
-                            // Block scroll-triggered animations (AOS, ScrollTrigger, parallax, Webflow, etc.)
-                            if (callbackStr.includes('scrolltrigger') ||
+                            // CRITICAL: Allow GSAP ScrollTrigger and Lenis FIRST (before blocking checks)
+                            // This must come BEFORE the blocking check to prevent false positives
+                            if (callbackStr.includes('scrolltrigger') || 
                                 callbackStr.includes('scroll-trigger') ||
-                                callbackStr.includes('scrolltrigger') ||
-                                callbackStr.includes('aos') ||
-                                callbackStr.includes('parallax') ||
-                                callbackStr.includes('locomotive') ||
                                 callbackStr.includes('lenis') ||
+                                (isGSAPScrollTrigger && hasScroll) ||
+                                (isLenis && hasScroll)) {
+                                // #region agent log
+                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25166',message:'ALLOWED: GSAP ScrollTrigger/Lenis',data:{hasScrollTrigger,isGSAPScrollTrigger,isLenis,hasScroll,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                                // #endregion
+                                // Allow these to run - they handle scroll functionality
+                                return window.__originalRequestAnimationFrame.call(window, callback);
+                            }
+                            
+                            // Block scroll-triggered VISUAL animations (AOS, parallax, Webflow, etc.)
+                            // BUT allow GSAP ScrollTrigger and Lenis to handle scroll functionality
+                            if (callbackStr.includes('aos') ||
+                                callbackStr.includes('parallax') ||
                                 callbackStr.includes('webflow') ||
                                 callbackStr.includes('wf-') ||
                                 callbackStr.includes('data-wf-page') ||
                                 callbackStr.includes('data-w-id') ||
                                 callbackStr.includes('w-[') ||
                                 callbackStr.includes('framer-motion') ||
-                                callbackStr.includes('gsap') ||
-                                callbackStr.includes('reveal') ||
-                                callbackStr.includes('reveal') ||
-                                callbackStr.includes('framer-motion') ||
                                 callbackStr.includes('framer') ||
-                                callbackStr.includes('gsap') ||
+                                callbackStr.includes('reveal') ||
                                 (callbackStr.includes('scroll') && (callbackStr.includes('animate') || callbackStr.includes('animation') || callbackStr.includes('transform') || callbackStr.includes('opacity') || callbackStr.includes('translate') || callbackStr.includes('scale') || callbackStr.includes('rotate')))) {
+                                // #region agent log
+                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25188',message:'BLOCKED: scroll animation',data:{hasScroll,hasTransform,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                                // #endregion
                                 return 0; // Block scroll animations
+                            }
+                            
+                            // Allow GSAP core functionality (but we'll stop visual tweens separately)
+                            if (callbackStr.includes('gsap') && !callbackStr.includes('tween') && !callbackStr.includes('timeline')) {
+                                // Allow GSAP core and ScrollTrigger to work
+                                return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
                             // Block visual animations (Lottie, CSS animations, etc.)
@@ -25186,10 +25234,16 @@ class AccessibilityWidget {
                                 !callbackStr.includes('translate') &&
                                 !callbackStr.includes('scale') &&
                                 !callbackStr.includes('rotate')) {
+                                // #region agent log
+                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25216',message:'ALLOWED: basic scroll handler',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                                // #endregion
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
                             // Block all other animations
+                            // #region agent log
+                            fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25220',message:'BLOCKED: default block',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                            // #endregion
                             return 0;
                         } catch (e) {
                             
@@ -27582,36 +27636,47 @@ class AccessibilityWidget {
         
         // Force complete letter-by-letter text animations for seizure safety
         // This ensures all text is immediately visible in its final state
+        // Prevents duplication by checking if already processed
         forceCompleteTextAnimations() {
-
+            // Use a flag to prevent multiple executions from duplicating content
+            if (this._textAnimationsCompleted) return;
+            this._textAnimationsCompleted = true;
             
             // Find all elements with letter-by-letter animations
             const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
             
             textElements.forEach(element => {
+                // Skip if already processed
+                if (element.hasAttribute('data-seizure-text-processed')) return;
+                element.setAttribute('data-seizure-text-processed', 'true');
+                
                 // Force animation to final state immediately
                 element.style.animation = 'none';
                 element.style.transition = 'none';
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
-                element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
+                // Don't force display - let it be whatever it naturally is
+                if (element.style.display === 'none') {
+                    element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
+                }
                 element.style.transform = 'none';
                 element.style.clipPath = 'none';
                 element.style.webkitClipPath = 'none';
-                element.style.width = 'auto';
-                element.style.height = 'auto';
-                element.style.maxWidth = 'none';
-                element.style.maxHeight = 'none';
+                // Don't force width/height - let layout be natural
                 
                 // Remove animation-related classes
                 element.classList.remove('animate', 'fade', 'slide', 'bounce', 'pulse', 'shake', 'flash', 'blink', 'glow', 'spin', 'rotate', 'scale', 'zoom');
                 
-                // Ensure all child elements are also visible
+                // Ensure all child elements are also visible (but don't duplicate text)
                 const children = element.querySelectorAll('.char, .word, span, div, [class*="char"], [class*="word"], [class*="letter"]');
                 children.forEach(child => {
+                    if (child.hasAttribute('data-seizure-text-processed')) return;
+                    child.setAttribute('data-seizure-text-processed', 'true');
                     child.style.opacity = '1';
                     child.style.visibility = 'visible';
-                    child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
+                    if (child.style.display === 'none') {
+                        child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
+                    }
                     child.style.animation = 'none';
                     child.style.transition = 'none';
                     child.style.transform = 'none';
@@ -27621,24 +27686,29 @@ class AccessibilityWidget {
             });
             
             // Also handle any text that might be using GSAP TextPlugin or similar
-            // Force all text elements to be fully visible
+            // Force all text elements to be fully visible (but be more selective)
             const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, [class*="text"], [class*="title"], [class*="heading"]');
             allTextElements.forEach(element => {
+                // Skip if already processed or if it's a nav/header element
+                if (element.hasAttribute('data-seizure-text-processed') || 
+                    element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]')) return;
+                element.setAttribute('data-seizure-text-processed', 'true');
+                
                 const computedStyle = window.getComputedStyle(element);
-                // If element has opacity less than 1 or visibility hidden, force it visible
+                // Only force visibility if actually hidden
                 if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
                     element.style.opacity = '1';
                     element.style.visibility = 'visible';
                 }
-                // Remove any animation/transition
-                if (element.style.animation || element.style.transition || computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
+                // Only remove animation/transition if present
+                if (computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
                     element.style.animation = 'none';
                     element.style.transition = 'none';
-                    element.style.transform = 'none';
+                    if (computedStyle.transform !== 'none') {
+                        element.style.transform = 'none';
+                    }
                 }
             });
-            
-           
         }
     
         // Lock current button visual state to prevent hover color changes during seizure-safe
