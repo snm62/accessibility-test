@@ -27798,13 +27798,24 @@ class AccessibilityWidget {
             
             // Also handle any text that might be using GSAP TextPlugin or similar
             // Look for elements with multiple overlapping text layers (common in GSAP text animations)
-            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div, [class*="text"], [class*="title"], [class*="heading"]');
+            // Only process elements that are likely part of text animations, not all paragraphs/divs
+            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="text"], [class*="title"], [class*="heading"]');
             allTextContainers.forEach(element => {
                 // Skip if already processed or if it's a nav/header element
                 if (element.hasAttribute('data-seizure-text-processed') || 
                     element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]')) return;
                 
                 const computedStyle = window.getComputedStyle(element);
+                
+                // Only process if element has animation-related classes or is part of a text animation
+                const hasAnimationClass = element.classList.toString().match(/(animate|fade|slide|typing|typewriter|split|char|letter|text-animation)/i);
+                const hasAnimationStyle = computedStyle.animation !== 'none' || computedStyle.transition !== 'none';
+                const hasHiddenChildren = element.querySelectorAll('.char, .word, [class*="char"], [class*="letter"]').length > 0;
+                
+                // Skip if element doesn't appear to be part of a text animation
+                if (!hasAnimationClass && !hasAnimationStyle && !hasHiddenChildren) {
+                    return;
+                }
                 
                 // Check if this element has multiple text layers (indicated by multiple children with same text)
                 const children = Array.from(element.children);
@@ -27822,8 +27833,8 @@ class AccessibilityWidget {
                             child.style.visibility = 'hidden';
                             child.style.opacity = '0';
                         });
-                    } else if (childTexts.length > 0) {
-                        // Different texts - concatenate them
+                    } else if (childTexts.length > 0 && hasHiddenChildren) {
+                        // Different texts - concatenate them (only if has hidden children indicating animation)
                         const fullText = childTexts.join('');
                         if (fullText.trim() && fullText.trim() !== element.textContent.trim()) {
                             element.textContent = fullText.trim();
@@ -27838,20 +27849,22 @@ class AccessibilityWidget {
                 
                 element.setAttribute('data-seizure-text-processed', 'true');
                 
-                // Force visibility and remove animations
-                if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
-                    element.style.opacity = '1';
-                    element.style.visibility = 'visible';
-                }
-                if (computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
-                    element.style.animation = 'none';
-                    element.style.transition = 'none';
-                    if (computedStyle.transform !== 'none') {
-                        element.style.transform = 'none';
+                // Only force visibility if element was actually hidden due to animation
+                if (hasAnimationStyle || hasHiddenChildren) {
+                    if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
                     }
+                    if (computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
+                        element.style.animation = 'none';
+                        element.style.transition = 'none';
+                        if (computedStyle.transform !== 'none') {
+                            element.style.transform = 'none';
+                        }
+                    }
+                    element.style.clipPath = 'none';
+                    element.style.webkitClipPath = 'none';
                 }
-                element.style.clipPath = 'none';
-                element.style.webkitClipPath = 'none';
             });
             
             // Run again after a short delay to catch any dynamically added text
