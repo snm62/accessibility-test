@@ -25355,10 +25355,22 @@ class AccessibilityWidget {
                         // Kill all active GSAP tweens and timelines
                         if (window.gsap.killTweensOf) {
                             // Stop motionPath animations (orbit animations) - target elements with motionPath animations
+                            // BUT ensure they remain visible in their final position
                             const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
                             orbitElements.forEach(el => {
                                 try {
+                                    // Kill the animation but preserve final state
+                                    const currentTransform = window.getComputedStyle(el).transform;
+                                    const currentOpacity = window.getComputedStyle(el).opacity;
                                     window.gsap.killTweensOf(el);
+                                    // Ensure element remains visible
+                                    el.style.opacity = currentOpacity !== '0' ? '1' : '1';
+                                    el.style.visibility = 'visible';
+                                    el.style.display = '';
+                                    // Preserve final transform position
+                                    if (currentTransform && currentTransform !== 'none' && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)') {
+                                        el.style.transform = currentTransform;
+                                    }
                                 } catch (_) {}
                             });
                             
@@ -27103,10 +27115,22 @@ class AccessibilityWidget {
                         // Kill all active GSAP tweens and timelines
                         if (window.gsap.killTweensOf) {
                             // Stop motionPath animations (orbit animations) - target elements with motionPath animations
+                            // BUT ensure they remain visible in their final position
                             const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
                             orbitElements.forEach(el => {
                                 try {
+                                    // Kill the animation but preserve final state
+                                    const currentTransform = window.getComputedStyle(el).transform;
+                                    const currentOpacity = window.getComputedStyle(el).opacity;
                                     window.gsap.killTweensOf(el);
+                                    // Ensure element remains visible
+                                    el.style.opacity = currentOpacity !== '0' ? '1' : '1';
+                                    el.style.visibility = 'visible';
+                                    el.style.display = '';
+                                    // Preserve final transform position
+                                    if (currentTransform && currentTransform !== 'none' && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)') {
+                                        el.style.transform = currentTransform;
+                                    }
                                 } catch (_) {}
                             });
                             
@@ -27695,46 +27719,116 @@ class AccessibilityWidget {
             this._textAnimationsCompleted = true;
             
             // Find all elements with letter-by-letter animations
-            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
+            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"], [class*="split-text"], [class*="text-split"]');
             
             textElements.forEach(element => {
                 // Skip if already processed
                 if (element.hasAttribute('data-seizure-text-processed')) return;
                 element.setAttribute('data-seizure-text-processed', 'true');
                 
+                // Find parent container to consolidate text
+                const parent = element.parentElement;
+                if (parent && (parent.classList.contains('split') || parent.hasAttribute('data-splitting') || parent.querySelectorAll('.char, .word, [class*="char"], [class*="letter"]').length > 0)) {
+                    // This is a child element - handle at parent level
+                    return;
+                }
+                
                 // Force animation to final state immediately
                 element.style.animation = 'none';
                 element.style.transition = 'none';
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
-                // Don't force display - let it be whatever it naturally is
                 if (element.style.display === 'none') {
                     element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
                 }
                 element.style.transform = 'none';
                 element.style.clipPath = 'none';
                 element.style.webkitClipPath = 'none';
-                // Don't force width/height - let layout be natural
+                element.style.width = '';
+                element.style.height = '';
+                element.style.maxWidth = '';
+                element.style.maxHeight = '';
                 
                 // Remove animation-related classes
                 element.classList.remove('animate', 'fade', 'slide', 'bounce', 'pulse', 'shake', 'flash', 'blink', 'glow', 'spin', 'rotate', 'scale', 'zoom');
                 
-                // Ensure all child elements are also visible (but don't duplicate text)
+                // Collect all text from child elements and consolidate
                 const children = element.querySelectorAll('.char, .word, span, div, [class*="char"], [class*="word"], [class*="letter"]');
-                children.forEach(child => {
-                    if (child.hasAttribute('data-seizure-text-processed')) return;
-                    child.setAttribute('data-seizure-text-processed', 'true');
-                    child.style.opacity = '1';
-                    child.style.visibility = 'visible';
-                    if (child.style.display === 'none') {
-                        child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
+                if (children.length > 0) {
+                    // Build complete text from all children
+                    let completeText = '';
+                    children.forEach(child => {
+                        if (child.hasAttribute('data-seizure-text-processed')) return;
+                        child.setAttribute('data-seizure-text-processed', 'true');
+                        const childText = child.textContent || '';
+                        if (childText.trim()) {
+                            completeText += childText;
+                        }
+                        // Make child visible but prepare for consolidation
+                        child.style.opacity = '1';
+                        child.style.visibility = 'visible';
+                        child.style.animation = 'none';
+                        child.style.transition = 'none';
+                        child.style.transform = 'none';
+                        child.style.clipPath = 'none';
+                        child.style.webkitClipPath = 'none';
+                    });
+                    
+                    // If we have complete text and it's different from current, update parent
+                    if (completeText.trim() && completeText.trim() !== element.textContent.trim()) {
+                        // Set the complete text on the parent element
+                        element.textContent = completeText.trim();
+                        // Hide duplicate child elements to prevent layering
+                        children.forEach(child => {
+                            child.style.display = 'none';
+                        });
+                    } else {
+                        // Just ensure all children are visible
+                        children.forEach(child => {
+                            if (child.style.display === 'none') {
+                                child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
+                            }
+                        });
                     }
-                    child.style.animation = 'none';
-                    child.style.transition = 'none';
-                    child.style.transform = 'none';
-                    child.style.clipPath = 'none';
-                    child.style.webkitClipPath = 'none';
-                });
+                }
+            });
+            
+            // Handle parent containers with split text animations
+            const splitContainers = document.querySelectorAll('[data-splitting], .split, [class*="split-text"], [class*="text-split"], [class*="text-animation"]');
+            splitContainers.forEach(container => {
+                if (container.hasAttribute('data-seizure-text-processed')) return;
+                container.setAttribute('data-seizure-text-processed', 'true');
+                
+                const charElements = container.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"]');
+                if (charElements.length > 0) {
+                    // Collect all text
+                    let fullText = '';
+                    charElements.forEach(char => {
+                        const charText = char.textContent || '';
+                        if (charText.trim()) {
+                            fullText += charText;
+                        }
+                    });
+                    
+                    // If we have text, consolidate it
+                    if (fullText.trim()) {
+                        // Set complete text on container
+                        container.textContent = fullText.trim();
+                        // Hide individual char elements to prevent layering
+                        charElements.forEach(char => {
+                            char.style.display = 'none';
+                        });
+                    }
+                    
+                    // Ensure container is visible
+                    container.style.opacity = '1';
+                    container.style.visibility = 'visible';
+                    container.style.animation = 'none';
+                    container.style.transition = 'none';
+                    container.style.transform = 'none';
+                    container.style.clipPath = 'none';
+                    container.style.webkitClipPath = 'none';
+                }
             });
             
             // Also handle any text that might be using GSAP TextPlugin or similar
