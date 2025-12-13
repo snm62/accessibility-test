@@ -3557,11 +3557,12 @@ class AccessibilityWidget {
                 // Define overrideCSS first
                 const overrideCSS = `
     .accessibility-panel {
-      left: auto !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: auto !important;
-      transform: none !important;
+      /* Position controlled by JavaScript - no hardcoded positioning */
+      left: auto;
+      right: auto;
+      top: auto;
+      bottom: auto;
+      transform: none;
     }
     
     /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
@@ -3581,12 +3582,17 @@ class AccessibilityWidget {
     
     /* Z-index hierarchy: Spotlight > Panel > Icon */
     .accessibility-panel {
-        position: fixed !important;
-        z-index: 2147483646 !important; /* Below spotlight, above icon */
-        overflow-y: auto !important;
-        scroll-behavior: smooth !important;
-        -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior: contain !important;
+        position: fixed;
+        z-index: 2147483646; /* Below spotlight, above icon */
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        /* Position controlled by JavaScript - no default top/left to prevent top-left positioning */
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
     }
     
     .accessibility-icon {
@@ -3862,6 +3868,11 @@ class AccessibilityWidget {
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            /* Position controlled by JavaScript - no default top/left */
+            top: auto;
+            left: auto;
+            right: auto;
+            bottom: auto;
             /* Font size controlled by JavaScript */
         }
         
@@ -4420,6 +4431,11 @@ class AccessibilityWidget {
             overflow-y: auto;
             position: fixed;
             z-index: 100001;
+            /* Position controlled by JavaScript - no default top/left */
+            top: auto;
+            left: auto;
+            right: auto;
+            bottom: auto;
         }
         
         /* Ensure rounded shape works on iPad Mini */
@@ -4745,6 +4761,11 @@ class AccessibilityWidget {
         display: none !important;
         position: fixed !important;
         z-index: 100001 !important;
+        /* Position controlled by JavaScript - no default top/left */
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
     }
     
     .accessibility-panel.show {
@@ -5728,14 +5749,7 @@ class AccessibilityWidget {
                 
     
                 /* Responsive Design - handled by main responsive CSS above */
-                    
-    
-                    .accessibility-panel.active {
-    
-                        left: 20px !important;
-    
-                    }
-    
+                    /* Position controlled by JavaScript - removed hardcoded left positioning */
                 }
     
                 
@@ -5775,9 +5789,7 @@ class AccessibilityWidget {
                     
     
                     .accessibility-panel.active {
-    
-                        left: 10px !important;
-    
+                        /* Position controlled by JavaScript - removed hardcoded left positioning */
                     }
     
                 }
@@ -32180,12 +32192,13 @@ class AccessibilityWidget {
                                  !panel.classList.contains('active');
             
             // Set position - use fixed positioning relative to viewport
-            panel.style.setProperty('position', 'fixed');
-            panel.style.setProperty('left', `${finalLeft}px`);
-            panel.style.setProperty('right', 'auto');
-            panel.style.setProperty('top', `${finalTop}px`);
-            panel.style.setProperty('bottom', 'auto');
-            panel.style.setProperty('z-index', '2147483646');
+            // Use !important to override any CSS that might force positioning
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('left', `${finalLeft}px`, 'important');
+            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('top', `${finalTop}px`, 'important');
+            panel.style.setProperty('bottom', 'auto', 'important');
+            panel.style.setProperty('z-index', '2147483646', 'important');
             
             // Check if we're on mobile/tablet - adjust height to fit viewport
             const isMobileOrTablet = window.innerWidth <= 819;
