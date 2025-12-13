@@ -27718,20 +27718,66 @@ class AccessibilityWidget {
             if (this._textAnimationsCompleted) return;
             this._textAnimationsCompleted = true;
             
-            // Find all elements with letter-by-letter animations
-            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"], [class*="split-text"], [class*="text-split"]');
-            
-            textElements.forEach(element => {
-                // Skip if already processed
-                if (element.hasAttribute('data-seizure-text-processed')) return;
-                element.setAttribute('data-seizure-text-processed', 'true');
+            // First, find and process all parent containers that have split text
+            // This must be done first to avoid processing children individually
+            const splitContainers = document.querySelectorAll('[data-splitting], .split, [class*="split-text"], [class*="text-split"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
+            splitContainers.forEach(container => {
+                if (container.hasAttribute('data-seizure-text-processed')) return;
+                container.setAttribute('data-seizure-text-processed', 'true');
                 
-                // Find parent container to consolidate text
-                const parent = element.parentElement;
-                if (parent && (parent.classList.contains('split') || parent.hasAttribute('data-splitting') || parent.querySelectorAll('.char, .word, [class*="char"], [class*="letter"]').length > 0)) {
-                    // This is a child element - handle at parent level
-                    return;
+                // Find all character/word elements within this container
+                const charElements = container.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"], .word, [class*="word"]');
+                if (charElements.length > 0) {
+                    // Collect all text from character elements
+                    let fullText = '';
+                    charElements.forEach(char => {
+                        const charText = char.textContent || char.innerText || '';
+                        // Get text even if it's just a single character
+                        if (charText) {
+                            fullText += charText;
+                        }
+                    });
+                    
+                    // If we collected text, consolidate it
+                    if (fullText.trim()) {
+                        // Store original HTML structure if needed, but replace with clean text
+                        const originalHTML = container.innerHTML;
+                        container.textContent = fullText.trim();
+                        
+                        // Hide all child elements to prevent layering
+                        charElements.forEach(char => {
+                            char.style.display = 'none';
+                            char.style.visibility = 'hidden';
+                            char.style.opacity = '0';
+                            char.style.position = 'absolute';
+                            char.style.pointerEvents = 'none';
+                        });
+                    }
+                    
+                    // Ensure container is visible and in final state
+                    container.style.opacity = '1';
+                    container.style.visibility = 'visible';
+                    container.style.animation = 'none';
+                    container.style.transition = 'none';
+                    container.style.transform = 'none';
+                    container.style.clipPath = 'none';
+                    container.style.webkitClipPath = 'none';
+                    container.style.width = '';
+                    container.style.height = '';
+                    container.style.maxWidth = '';
+                    container.style.maxHeight = '';
                 }
+            });
+            
+            // Now handle individual text elements that might be animated
+            const textElements = document.querySelectorAll('.char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"]');
+            textElements.forEach(element => {
+                // Skip if already processed or if parent was processed
+                if (element.hasAttribute('data-seizure-text-processed')) return;
+                const parent = element.parentElement;
+                if (parent && parent.hasAttribute('data-seizure-text-processed')) return;
+                
+                element.setAttribute('data-seizure-text-processed', 'true');
                 
                 // Force animation to final state immediately
                 element.style.animation = 'none';
@@ -27748,105 +27794,55 @@ class AccessibilityWidget {
                 element.style.height = '';
                 element.style.maxWidth = '';
                 element.style.maxHeight = '';
-                
-                // Remove animation-related classes
-                element.classList.remove('animate', 'fade', 'slide', 'bounce', 'pulse', 'shake', 'flash', 'blink', 'glow', 'spin', 'rotate', 'scale', 'zoom');
-                
-                // Collect all text from child elements and consolidate
-                const children = element.querySelectorAll('.char, .word, span, div, [class*="char"], [class*="word"], [class*="letter"]');
-                if (children.length > 0) {
-                    // Build complete text from all children
-                    let completeText = '';
-                    children.forEach(child => {
-                        if (child.hasAttribute('data-seizure-text-processed')) return;
-                        child.setAttribute('data-seizure-text-processed', 'true');
-                        const childText = child.textContent || '';
-                        if (childText.trim()) {
-                            completeText += childText;
-                        }
-                        // Make child visible but prepare for consolidation
-                        child.style.opacity = '1';
-                        child.style.visibility = 'visible';
-                        child.style.animation = 'none';
-                        child.style.transition = 'none';
-                        child.style.transform = 'none';
-                        child.style.clipPath = 'none';
-                        child.style.webkitClipPath = 'none';
-                    });
-                    
-                    // If we have complete text and it's different from current, update parent
-                    if (completeText.trim() && completeText.trim() !== element.textContent.trim()) {
-                        // Set the complete text on the parent element
-                        element.textContent = completeText.trim();
-                        // Hide duplicate child elements to prevent layering
-                        children.forEach(child => {
-                            child.style.display = 'none';
-                        });
-                    } else {
-                        // Just ensure all children are visible
-                        children.forEach(child => {
-                            if (child.style.display === 'none') {
-                                child.style.display = child.tagName === 'SPAN' ? 'inline' : 'block';
-                            }
-                        });
-                    }
-                }
-            });
-            
-            // Handle parent containers with split text animations
-            const splitContainers = document.querySelectorAll('[data-splitting], .split, [class*="split-text"], [class*="text-split"], [class*="text-animation"]');
-            splitContainers.forEach(container => {
-                if (container.hasAttribute('data-seizure-text-processed')) return;
-                container.setAttribute('data-seizure-text-processed', 'true');
-                
-                const charElements = container.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"]');
-                if (charElements.length > 0) {
-                    // Collect all text
-                    let fullText = '';
-                    charElements.forEach(char => {
-                        const charText = char.textContent || '';
-                        if (charText.trim()) {
-                            fullText += charText;
-                        }
-                    });
-                    
-                    // If we have text, consolidate it
-                    if (fullText.trim()) {
-                        // Set complete text on container
-                        container.textContent = fullText.trim();
-                        // Hide individual char elements to prevent layering
-                        charElements.forEach(char => {
-                            char.style.display = 'none';
-                        });
-                    }
-                    
-                    // Ensure container is visible
-                    container.style.opacity = '1';
-                    container.style.visibility = 'visible';
-                    container.style.animation = 'none';
-                    container.style.transition = 'none';
-                    container.style.transform = 'none';
-                    container.style.clipPath = 'none';
-                    container.style.webkitClipPath = 'none';
-                }
             });
             
             // Also handle any text that might be using GSAP TextPlugin or similar
-            // Force all text elements to be fully visible (but be more selective)
-            const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, [class*="text"], [class*="title"], [class*="heading"]');
-            allTextElements.forEach(element => {
+            // Look for elements with multiple overlapping text layers (common in GSAP text animations)
+            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div, [class*="text"], [class*="title"], [class*="heading"]');
+            allTextContainers.forEach(element => {
                 // Skip if already processed or if it's a nav/header element
                 if (element.hasAttribute('data-seizure-text-processed') || 
                     element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]')) return;
-                element.setAttribute('data-seizure-text-processed', 'true');
                 
                 const computedStyle = window.getComputedStyle(element);
-                // Only force visibility if actually hidden
+                
+                // Check if this element has multiple text layers (indicated by multiple children with same text)
+                const children = Array.from(element.children);
+                if (children.length > 0) {
+                    // Check if children contain overlapping text
+                    const childTexts = children.map(child => (child.textContent || '').trim()).filter(t => t);
+                    const uniqueTexts = [...new Set(childTexts)];
+                    
+                    // If we have multiple children with text, consolidate
+                    if (childTexts.length > 1 && uniqueTexts.length === 1) {
+                        // All children have the same text - this is likely a layered animation
+                        element.textContent = uniqueTexts[0];
+                        children.forEach(child => {
+                            child.style.display = 'none';
+                            child.style.visibility = 'hidden';
+                            child.style.opacity = '0';
+                        });
+                    } else if (childTexts.length > 0) {
+                        // Different texts - concatenate them
+                        const fullText = childTexts.join('');
+                        if (fullText.trim() && fullText.trim() !== element.textContent.trim()) {
+                            element.textContent = fullText.trim();
+                            children.forEach(child => {
+                                child.style.display = 'none';
+                                child.style.visibility = 'hidden';
+                                child.style.opacity = '0';
+                            });
+                        }
+                    }
+                }
+                
+                element.setAttribute('data-seizure-text-processed', 'true');
+                
+                // Force visibility and remove animations
                 if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
                     element.style.opacity = '1';
                     element.style.visibility = 'visible';
                 }
-                // Only remove animation/transition if present
                 if (computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
                     element.style.animation = 'none';
                     element.style.transition = 'none';
@@ -27854,7 +27850,15 @@ class AccessibilityWidget {
                         element.style.transform = 'none';
                     }
                 }
+                element.style.clipPath = 'none';
+                element.style.webkitClipPath = 'none';
             });
+            
+            // Run again after a short delay to catch any dynamically added text
+            setTimeout(() => {
+                this._textAnimationsCompleted = false;
+                this.forceCompleteTextAnimations();
+            }, 100);
         }
     
         // Lock current button visual state to prevent hover color changes during seizure-safe
@@ -29978,50 +29982,79 @@ class AccessibilityWidget {
         async fetchCustomizationData() {
             console.log('[FETCH] fetchCustomizationData() called');
             
-            try {
-                // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
-                // This reduces total wait time significantly
-                console.log('[FETCH] Starting parallel payment check and siteId fetch...');
-                const [paymentValid, siteId] = await Promise.all([
-                    this.checkPaymentStatusRealTime(),
-                    this.getSiteId()
-                ]);
-                
-                console.log('[FETCH] Payment and siteId results:', {
-                    paymentValid,
-                    siteId,
-                    paymentType: typeof paymentValid
-                });
-                
-                // Only disable widget if payment is definitively invalid (false)
-                // Don't disable on check failures (null) - preserve current state
-                if (paymentValid === false) {
-                    console.warn('[FETCH] Payment invalid, disabling widget');
-                    this.disableWidget();
-                    return null;
+            // Request deduplication: If a request is already in progress, return the same promise
+            if (this._fetchCustomizationPromise) {
+                console.log('[FETCH] Request already in progress, reusing promise');
+                return this._fetchCustomizationPromise;
+            }
+            
+            // Check cache first (5 minute cache as per worker headers)
+            const cacheKey = `customization_cache_${this.siteId || 'unknown'}`;
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                try {
+                    const cachedData = JSON.parse(cached);
+                    const cacheTime = cachedData.timestamp || 0;
+                    const cacheAge = Date.now() - cacheTime;
+                    const cacheTTL = 5 * 60 * 1000; // 5 minutes
+                    
+                    if (cacheAge < cacheTTL) {
+                        console.log('[FETCH] Returning cached data:', { cacheAge, cacheTTL });
+                        return cachedData.data;
+                    } else {
+                        sessionStorage.removeItem(cacheKey);
+                    }
+                } catch (e) {
+                    sessionStorage.removeItem(cacheKey);
                 }
-                // If paymentValid is null (check failed), don't disable widget
-                // Continue loading customization even if payment check failed
-                
-                // Fast fail if no siteId
-                if (!siteId) {
-                    console.warn('[FETCH] No siteId found, returning null');
-                    return null;
-                }
-                
-                // Cache siteId for future use
-                this.siteId = siteId;
-                console.log('[FETCH] SiteId cached:', siteId);
-                
-                if (!this.kvApiUrl) {
-                    console.warn('[FETCH] No kvApiUrl configured, returning null');
-                    return null;
-                }
-                
-                // OPTIMIZATION: Use minimal headers and efficient fetch
-                const cacheBuster = `_t=${Date.now()}`;
-                const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
-                const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}&${cacheBuster}`;
+            }
+            
+            // Create the fetch promise and store it for deduplication
+            this._fetchCustomizationPromise = (async () => {
+                try {
+                    // OPTIMIZATION: Run payment check and siteId fetch in PARALLEL
+                    // This reduces total wait time significantly
+                    console.log('[FETCH] Starting parallel payment check and siteId fetch...');
+                    const [paymentValid, siteId] = await Promise.all([
+                        this.checkPaymentStatusRealTime(),
+                        this.getSiteId()
+                    ]);
+                    
+                    console.log('[FETCH] Payment and siteId results:', {
+                        paymentValid,
+                        siteId,
+                        paymentType: typeof paymentValid
+                    });
+                    
+                    // Only disable widget if payment is definitively invalid (false)
+                    // Don't disable on check failures (null) - preserve current state
+                    if (paymentValid === false) {
+                        console.warn('[FETCH] Payment invalid, disabling widget');
+                        this.disableWidget();
+                        return null;
+                    }
+                    // If paymentValid is null (check failed), don't disable widget
+                    // Continue loading customization even if payment check failed
+                    
+                    // Fast fail if no siteId
+                    if (!siteId) {
+                        console.warn('[FETCH] No siteId found, returning null');
+                        return null;
+                    }
+                    
+                    // Cache siteId for future use
+                    this.siteId = siteId;
+                    console.log('[FETCH] SiteId cached:', siteId);
+                    
+                    if (!this.kvApiUrl) {
+                        console.warn('[FETCH] No kvApiUrl configured, returning null');
+                        return null;
+                    }
+                    
+                    // OPTIMIZATION: Remove cache buster to allow browser caching
+                    // The worker already sets Cache-Control headers for 5 minutes
+                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessibility-widget.web-8fb.workers.dev').replace(/\/+$/,'');
+                    const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
                 
                 console.log('[FETCH] Making API request:', {
                     apiUrl,
@@ -30029,55 +30062,130 @@ class AccessibilityWidget {
                     kvApiUrl: this.kvApiUrl
                 });
                 
-                // OPTIMIZED: Minimal headers, no unnecessary data
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    // Use keep-alive for faster subsequent requests
-                    keepalive: false
-                });
+                // Retry logic for 429 rate limit errors with exponential backoff
+                const maxRetries = 3;
+                let lastError = null;
                 
-                console.log('[FETCH] API response received:', {
-                    ok: response.ok,
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers.entries())
-                });
-                
-                if (!response.ok) {
-                    // Log error for debugging
-                    const errorText = await response.text().catch(() => 'Unable to read error response');
-                    console.error('[CUSTOMIZATION FETCH] API error:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        url: apiUrl,
-                        errorBody: errorText
-                    });
-                    return null;
+                for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                    try {
+                        // OPTIMIZED: Minimal headers, no unnecessary data
+                        const response = await fetch(apiUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            // Use keep-alive for faster subsequent requests
+                            keepalive: false
+                        });
+                        
+                        console.log('[FETCH] API response received:', {
+                            ok: response.ok,
+                            status: response.status,
+                            statusText: response.statusText,
+                            attempt: attempt + 1,
+                            headers: Object.fromEntries(response.headers.entries())
+                        });
+                        
+                        // If 429 rate limit, retry with exponential backoff
+                        if (response.status === 429 && attempt < maxRetries) {
+                            const retryAfter = response.headers.get('Retry-After');
+                            const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(1000 * Math.pow(2, attempt), 10000);
+                            
+                            console.warn('[CUSTOMIZATION FETCH] Rate limited (429), retrying after delay:', {
+                                attempt: attempt + 1,
+                                maxRetries: maxRetries + 1,
+                                delayMs: delay,
+                                retryAfter: retryAfter
+                            });
+                            
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue; // Retry the request
+                        }
+                        
+                        if (!response.ok) {
+                            // Log error for debugging
+                            const errorText = await response.text().catch(() => 'Unable to read error response');
+                            console.error('[CUSTOMIZATION FETCH] API error:', {
+                                status: response.status,
+                                statusText: response.statusText,
+                                url: apiUrl,
+                                attempt: attempt + 1,
+                                errorBody: errorText
+                            });
+                            
+                            // If it's not a 429 or we've exhausted retries, return null
+                            if (response.status !== 429 || attempt >= maxRetries) {
+                                return null;
+                            }
+                            
+                            lastError = { status: response.status, errorBody: errorText };
+                            continue; // Retry if 429 and we have retries left
+                        }
+                        
+                        // Success - parse and return data
+                        const data = await response.json();
+                        console.log('[FETCH] API response data:', {
+                            hasData: !!data,
+                            hasCustomization: !!(data && data.customization),
+                            keys: data ? Object.keys(data) : [],
+                            customizationKeys: data && data.customization ? Object.keys(data.customization) : [],
+                            attempt: attempt + 1
+                        });
+
+                        // Cache the successful response
+                        if (data && siteId) {
+                            try {
+                                sessionStorage.setItem(`customization_cache_${siteId}`, JSON.stringify({
+                                    data: data,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {
+                                // Ignore storage errors (quota exceeded, etc.)
+                            }
+                        }
+
+                        return data;
+                        
+                    } catch (fetchError) {
+                        // Network error - only retry if we have attempts left
+                        if (attempt < maxRetries) {
+                            const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+                            console.warn('[CUSTOMIZATION FETCH] Network error, retrying:', {
+                                attempt: attempt + 1,
+                                delayMs: delay,
+                                error: fetchError.message
+                            });
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            lastError = fetchError;
+                            continue;
+                        } else {
+                            throw fetchError;
+                        }
+                    }
                 }
                 
-                const data = await response.json();
-                console.log('[FETCH] API response data:', {
-                    hasData: !!data,
-                    hasCustomization: !!(data && data.customization),
-                    keys: data ? Object.keys(data) : [],
-                    customizationKeys: data && data.customization ? Object.keys(data.customization) : [],
-                    fullData: data
-                });
-
-                return data;
-                
-            } catch (error) {
-                // Log error for debugging
-                console.error('[CUSTOMIZATION FETCH] Fetch failed:', {
-                    message: error.message,
-                    stack: error.stack,
-                    name: error.name
+                // All retries exhausted
+                console.error('[CUSTOMIZATION FETCH] All retries exhausted:', {
+                    maxRetries: maxRetries + 1,
+                    lastError: lastError
                 });
                 return null;
-            }
+                
+                } catch (error) {
+                    // Log error for debugging
+                    console.error('[CUSTOMIZATION FETCH] Fetch failed:', {
+                        message: error.message,
+                        stack: error.stack,
+                        name: error.name
+                    });
+                    return null;
+                } finally {
+                    // Clear the promise so future calls can make new requests
+                    this._fetchCustomizationPromise = null;
+                }
+            })();
+            
+            return this._fetchCustomizationPromise;
         }
     
         // Set up periodic payment status refresh for custom domains only
