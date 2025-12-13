@@ -25128,22 +25128,10 @@ class AccessibilityWidget {
                         try {
                             const callbackStr = callback.toString().toLowerCase();
                             
-                            // #region agent log
-                            const isGSAPScrollTrigger = (typeof window.gsap !== 'undefined' && window.gsap.ScrollTrigger) || (typeof window.ScrollTrigger !== 'undefined');
-                            const isLenis = typeof window.lenis !== 'undefined';
-                            const hasScroll = callbackStr.includes('scroll');
-                            const hasTransform = callbackStr.includes('transform') || callbackStr.includes('translate') || callbackStr.includes('opacity') || callbackStr.includes('scale') || callbackStr.includes('rotate');
-                            const hasScrollTrigger = callbackStr.includes('scrolltrigger') || callbackStr.includes('scroll-trigger');
-                            fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25129',message:'RAF callback check',data:{hasScroll,hasTransform,hasScrollTrigger,isGSAPScrollTrigger,isLenis,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                            // #endregion
-                            
                             // CRITICAL: Allow widget-related callbacks (panel opening, etc.)
                             if (callbackStr.includes('accessibility') || 
                                 callbackStr.includes('widget') ||
                                 callbackStr.includes('togglepanel')) {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25135',message:'ALLOWED: widget callback',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                                // #endregion
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
@@ -25160,14 +25148,14 @@ class AccessibilityWidget {
                             
                             // CRITICAL: Allow GSAP ScrollTrigger and Lenis FIRST (before blocking checks)
                             // This must come BEFORE the blocking check to prevent false positives
+                            const isGSAPScrollTrigger = (typeof window.gsap !== 'undefined' && window.gsap.ScrollTrigger) || (typeof window.ScrollTrigger !== 'undefined');
+                            const isLenis = typeof window.lenis !== 'undefined';
+                            const hasScroll = callbackStr.includes('scroll');
                             if (callbackStr.includes('scrolltrigger') || 
                                 callbackStr.includes('scroll-trigger') ||
                                 callbackStr.includes('lenis') ||
                                 (isGSAPScrollTrigger && hasScroll) ||
                                 (isLenis && hasScroll)) {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25166',message:'ALLOWED: GSAP ScrollTrigger/Lenis',data:{hasScrollTrigger,isGSAPScrollTrigger,isLenis,hasScroll,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                                // #endregion
                                 // Allow these to run - they handle scroll functionality
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
@@ -25185,9 +25173,6 @@ class AccessibilityWidget {
                                 callbackStr.includes('framer') ||
                                 callbackStr.includes('reveal') ||
                                 (callbackStr.includes('scroll') && (callbackStr.includes('animate') || callbackStr.includes('animation') || callbackStr.includes('transform') || callbackStr.includes('opacity') || callbackStr.includes('translate') || callbackStr.includes('scale') || callbackStr.includes('rotate')))) {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25188',message:'BLOCKED: scroll animation',data:{hasScroll,hasTransform,callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                                // #endregion
                                 return 0; // Block scroll animations
                             }
                             
@@ -25234,16 +25219,10 @@ class AccessibilityWidget {
                                 !callbackStr.includes('translate') &&
                                 !callbackStr.includes('scale') &&
                                 !callbackStr.includes('rotate')) {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25216',message:'ALLOWED: basic scroll handler',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-                                // #endregion
                                 return window.__originalRequestAnimationFrame.call(window, callback);
                             }
                             
                             // Block all other animations
-                            // #region agent log
-                            fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:25220',message:'BLOCKED: default block',data:{callbackPreview:callbackStr.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                            // #endregion
                             return 0;
                         } catch (e) {
                             
@@ -26409,8 +26388,14 @@ class AccessibilityWidget {
             // Lock button styles to prevent hover color changes
             this.lockButtonHoverStyles();
             
+            // CRITICAL: Override requestAnimationFrame to block animations
+            this.overrideRequestAnimationFrame();
+            
             // CRITICAL: Stop all animation libraries (Lottie, GSAP, etc.)
             this.stopAnimationLibraries();
+            
+            // CRITICAL: Force all animations to final visible state
+            this.forceAllAnimationsToFinalVisibleState();
             
             // Override requestAnimationFrame to block visual animations but preserve scroll
             this.overrideRequestAnimationFrame();
@@ -27446,9 +27431,9 @@ class AccessibilityWidget {
                                 player.pause();
                             }
                             player.setAttribute('data-seizure-safe-stopped', 'true');
-                            // Make invisible like stop-animation does
-                            player.style.opacity = '0';
-                            player.style.visibility = 'hidden';
+                            // Keep visible but stop animation - force to final state
+                            player.style.opacity = '1';
+                            player.style.visibility = 'visible';
                         } catch (_) {}
                     });
                 } catch (_) {}
@@ -27468,12 +27453,12 @@ class AccessibilityWidget {
                                 }
                             }
                             
-                            // Mark as stopped and make invisible
+                            // Mark as stopped but keep visible - force to final state
                             element.setAttribute('data-seizure-safe-stopped', 'true');
                             element.style.animation = 'none';
                             element.style.transition = 'none';
-                            element.style.opacity = '0';
-                            element.style.visibility = 'hidden';
+                            element.style.opacity = '1';
+                            element.style.visibility = 'visible';
                         } catch (_) {}
                     });
                 } catch (_) {}
@@ -27486,8 +27471,8 @@ class AccessibilityWidget {
                             container.style.animation = 'none';
                             container.style.transition = 'none';
                             container.style.transform = 'none';
-                            container.style.opacity = '0';
-                            container.style.visibility = 'hidden';
+                            container.style.opacity = '1';
+                            container.style.visibility = 'visible';
                             container.setAttribute('data-seizure-safe-stopped', 'true');
                         } catch (_) {}
                     });
@@ -27496,6 +27481,73 @@ class AccessibilityWidget {
                
             } catch (e) {
                 // Silent fail - don't crash the website
+            }
+        }
+        
+        // Force all animated elements to their final visible state
+        forceAllAnimationsToFinalVisibleState() {
+            try {
+                // Force all elements with animations to be visible and in final state
+                const allAnimatedElements = document.querySelectorAll('*');
+                allAnimatedElements.forEach(element => {
+                    try {
+                        const computed = window.getComputedStyle(element);
+                        const hasAnimation = computed.animationName && computed.animationName !== 'none';
+                        const hasTransition = computed.transitionProperty && computed.transitionProperty !== 'none';
+                        const isHidden = computed.opacity === '0' || computed.visibility === 'hidden' || computed.display === 'none';
+                        
+                        // If element has animation/transition or is hidden, force to visible final state
+                        if (hasAnimation || hasTransition || isHidden) {
+                            // Skip widget elements
+                            if (element.closest && (element.closest('.accessibility-widget') || element.closest('.accessibility-panel') || element.closest('.accessibility-icon'))) {
+                                return;
+                            }
+                            
+                            // Skip nav/header to preserve sticky behavior
+                            if (element.matches && (element.matches('nav, header, .navbar, [role="navigation"]') || element.closest('nav, header, .navbar, [role="navigation"]'))) {
+                                return;
+                            }
+                            
+                            // Force to final visible state
+                            element.style.animation = 'none';
+                            element.style.transition = 'none';
+                            element.style.opacity = '1';
+                            element.style.visibility = 'visible';
+                            
+                            // Remove clip-path restrictions that might hide content
+                            if (computed.clipPath && computed.clipPath !== 'none') {
+                                element.style.clipPath = 'none';
+                            }
+                            
+                            // Ensure width/height aren't restricting visibility
+                            if (computed.width === '0px' || computed.height === '0px') {
+                                const rect = element.getBoundingClientRect();
+                                if (rect.width === 0 && element.style.width !== 'auto') {
+                                    element.style.width = 'auto';
+                                }
+                                if (rect.height === 0 && element.style.height !== 'auto') {
+                                    element.style.height = 'auto';
+                                }
+                            }
+                        }
+                    } catch (_) {}
+                });
+                
+                // Force all children of animated containers to be visible
+                const animatedContainers = document.querySelectorAll('[class*="animate"], [class*="animation"], [data-animate], [data-animation]');
+                animatedContainers.forEach(container => {
+                    try {
+                        const children = container.querySelectorAll('*');
+                        children.forEach(child => {
+                            if (child.closest && !child.closest('.accessibility-widget')) {
+                                child.style.opacity = '1';
+                                child.style.visibility = 'visible';
+                            }
+                        });
+                    } catch (_) {}
+                });
+            } catch (e) {
+                // Silent fail
             }
         }
         
