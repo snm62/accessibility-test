@@ -3856,9 +3856,7 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 75vw;
             max-width: 520px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
+            max-height: calc(100vh - 40px);
             padding: 20px;
             overflow-y: auto;
             scroll-behavior: smooth;
@@ -3938,9 +3936,7 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 600px;
             max-width: 600px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
+            max-height: calc(100vh - 40px);
             padding: 24px;
             /* Font size controlled by JavaScript */
         }
@@ -4337,11 +4333,11 @@ class AccessibilityWidget {
     /* Override external panel positioning conflicts */
     .accessibility-panel {
         /* Let JavaScript control positioning, not external CSS */
-        left: auto !important;
-        right: auto !important;
-        top: auto !important;
-        bottom: auto !important;
-        transform: none !important;
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+        transform: none;
     }
     
     /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
@@ -16021,15 +16017,48 @@ class AccessibilityWidget {
                     break;
     
                 case 'header':
-                    this.scrollToElement('header, .header, nav, .navbar');
+                    // Find header on current page - try multiple common selectors
+                    const headerElement = document.querySelector('header, .header, nav, .navbar, [class*="header"], [id*="header"], [role="banner"]');
+                    if (headerElement) {
+                        headerElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start',
+                            inline: 'nearest'
+                        });
+                    } else {
+                        // If no header found, scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                     break;
     
                 case 'footer':
-                    this.scrollToElement('footer, .footer');
+                    // Find footer on current page - try multiple common selectors
+                    const footerElement = document.querySelector('footer, .footer, [class*="footer"], [id*="footer"], [role="contentinfo"]');
+                    if (footerElement) {
+                        footerElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'end',
+                            inline: 'nearest'
+                        });
+                    } else {
+                        // If no footer found, scroll to bottom
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }
                     break;
     
                 case 'main-content':
-                    this.scrollToElement('main, .main, .content, .container');
+                    // Find main content on current page - try multiple common selectors
+                    const mainContentElement = document.querySelector('main, .main, .content, .container, [class*="main"], [class*="content"], [id*="main"], [id*="content"], [role="main"]');
+                    if (mainContentElement) {
+                        mainContentElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start',
+                            inline: 'nearest'
+                        });
+                    } else {
+                        // If no main content found, scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                     break;
     
                 case 'about-us':
@@ -30351,6 +30380,11 @@ class AccessibilityWidget {
                         panel.classList.remove('mobile-mode');
                     }
                 }
+                
+                // Update panel position relative to icon on resize (important for tablets)
+                if (panel.classList.contains('active') && !panel.style.transform) {
+                    this.updateInterfacePosition();
+                }
             });
         }
         
@@ -32106,20 +32140,35 @@ class AccessibilityWidget {
                 return; // Don't update position if icon isn't rendered
             }
             
-            const panelWidth = 500;
-            const panelHeight = 700;
+            // Get actual panel dimensions from computed styles (respects CSS media queries)
+            const panelComputedStyle = window.getComputedStyle(panel);
+            // Temporarily make panel visible to get accurate dimensions
+            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none';
+            if (wasHidden) {
+                panel.style.visibility = 'visible';
+                panel.style.display = 'block';
+            }
             
-            // Position panel on top of the icon (centered horizontally)
+            const panelRect = panel.getBoundingClientRect();
+            const panelWidth = panelRect.width || parseFloat(panelComputedStyle.width) || 500;
+            const panelHeight = panelRect.height || parseFloat(panelComputedStyle.height) || 700;
+            
+            // Restore visibility state if it was hidden
+            if (wasHidden) {
+                panel.style.visibility = 'hidden';
+                panel.style.display = 'none';
+            }
+            
+            // Position panel relative to icon (centered horizontally)
             const iconCenterX = iconRect.left + (iconRect.width / 2);
             const panelLeft = iconCenterX - (panelWidth / 2);
             
             // Ensure panel doesn't go outside viewport horizontally
             const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
             
-            // Position panel vertically centered with icon
+            // Position panel vertically - try to center with icon, but adjust if needed
             const iconCenterY = iconRect.top + (iconRect.height / 2);
-            const panelCenterY = iconCenterY;
-            const topPosition = panelCenterY - (panelHeight / 2);
+            const topPosition = iconCenterY - (panelHeight / 2);
             
             // Ensure panel doesn't go above or below viewport
             const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
@@ -32130,30 +32179,26 @@ class AccessibilityWidget {
                                  panel.style.visibility === 'hidden' ||
                                  !panel.classList.contains('active');
             
-            // Set left position
+            // Set position - use fixed positioning relative to viewport
+            panel.style.setProperty('position', 'fixed');
             panel.style.setProperty('left', `${finalLeft}px`);
             panel.style.setProperty('right', 'auto');
+            panel.style.setProperty('top', `${finalTop}px`);
+            panel.style.setProperty('bottom', 'auto');
+            panel.style.setProperty('z-index', '2147483646');
             
-            // Check if we're on mobile/tablet - if so, position relative to icon with max height
+            // Check if we're on mobile/tablet - adjust height to fit viewport
             const isMobileOrTablet = window.innerWidth <= 819;
             
             if (isMobileOrTablet) {
-                // On mobile/tablet: Position panel relative to icon, ensure it doesn't overflow viewport
-                panel.style.setProperty('top', `${finalTop}px`);
-                panel.style.setProperty('bottom', 'auto');
-                // Use calculated height or available viewport space, whichever is smaller
+                // On mobile/tablet: Ensure panel doesn't overflow viewport
                 const maxHeight = window.innerHeight - finalTop - 20;
                 panel.style.setProperty('max-height', `${maxHeight}px`);
                 panel.style.setProperty('height', 'auto');
             } else {
-                // On desktop: Position panel centered relative to icon
-                panel.style.setProperty('top', `${finalTop}px`);
-                panel.style.setProperty('bottom', 'auto');
+                // On desktop: Use calculated or natural height
                 panel.style.setProperty('height', `${panelHeight}px`);
             }
-            
-            panel.style.setProperty('z-index', '2147483646');
-            panel.style.setProperty('position', 'fixed');
             
             // Only remove transform if panel is visible, otherwise preserve it
             if (!isPanelHidden) {
