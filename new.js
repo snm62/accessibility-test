@@ -2582,12 +2582,6 @@ class AccessibilityWidget {
             const resetBtn = this.shadowRoot.getElementById('reset-settings');
     
             if (resetBtn) {
-                // #region agent log
-                resetBtn.addEventListener('focus', function() {
-                    const cs = window.getComputedStyle(this);
-                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2573',message:'reset-settings button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                });
-                // #endregion
                 resetBtn.addEventListener('click', () => {
     
                     
@@ -2603,12 +2597,6 @@ class AccessibilityWidget {
             const statementBtn = this.shadowRoot.getElementById('statement');
     
             if (statementBtn) {
-                // #region agent log
-                statementBtn.addEventListener('focus', function() {
-                    const cs = window.getComputedStyle(this);
-                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2589',message:'statement button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                });
-                // #endregion
                 statementBtn.addEventListener('click', () => {
     
                     
@@ -2624,12 +2612,6 @@ class AccessibilityWidget {
             const hideBtn = this.shadowRoot.getElementById('hide-interface');
     
             if (hideBtn) {
-                // #region agent log
-                hideBtn.addEventListener('focus', function() {
-                    const cs = window.getComputedStyle(this);
-                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2605',message:'hide-interface button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                });
-                // #endregion
                 hideBtn.addEventListener('click', () => {
     
                     
@@ -3706,9 +3688,7 @@ class AccessibilityWidget {
             max-width: 350px;
             padding: 12px;
             font-size: 14px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
+            max-height: calc(100vh - 40px);
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3744,10 +3724,10 @@ class AccessibilityWidget {
             padding: 4px 6px;
             min-height: 24px;
             font-size: 0.8em;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -3788,9 +3768,7 @@ class AccessibilityWidget {
             width: 80vw;
             max-width: 380px;
             padding: 14px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
+            max-height: calc(100vh - 40px);
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4334,10 +4312,10 @@ class AccessibilityWidget {
         .accessibility-panel .scaling-btn {
             /* Font size controlled by JavaScript */
             padding: 3px 6px;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         
         .accessibility-panel .profile-info h4 {
@@ -4438,26 +4416,26 @@ class AccessibilityWidget {
     /* iPad Mini and Tablet - Responsive sizing */
     @media (max-width: 819px) and (min-width: 769px) {
         .accessibility-panel {
-            width: 85vw !important;
-            max-width: 450px !important;
+            width: 85vw;
+            max-width: 450px;
             /* Font size controlled by JavaScript */
-            padding: 16px !important;
-            /* REMOVED: height: 100vh, top: 0, bottom: 0 - Panel should position relative to icon */
-            overflow-y: auto !important;
-            position: fixed !important;
-            z-index: 100001 !important;
+            padding: 16px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: fixed;
+            z-index: 100001;
         }
         
         /* Ensure rounded shape works on iPad Mini */
         .accessibility-icon[data-shape="rounded"] {
-            border-radius: 12px !important;
-            -webkit-border-radius: 12px !important;
-            -moz-border-radius: 12px !important;
+            border-radius: 12px;
+            -webkit-border-radius: 12px;
+            -moz-border-radius: 12px;
         }
         
         .accessibility-icon {
-            width: 50px !important;
-            height: 50px !important;
+            width: 50px;
+            height: 50px;
         }
         
         .accessibility-icon i {
@@ -4467,17 +4445,17 @@ class AccessibilityWidget {
         /* Better content spacing for tablet */
         .accessibility-panel h2 {
             /* Font size controlled by JavaScript */
-            margin-bottom: 12px !important;
+            margin-bottom: 12px;
         }
         
         .accessibility-panel h3 {
             /* Font size controlled by JavaScript */
-            margin-bottom: 10px !important;
+            margin-bottom: 10px;
         }
         
         .profile-item {
-            padding: 10px !important;
-            margin-bottom: 8px !important;
+            padding: 10px;
+            margin-bottom: 8px;
         }
         
         .profile-item h4 {
@@ -4489,7 +4467,7 @@ class AccessibilityWidget {
         }
         
         .action-btn {
-            padding: 8px 12px !important;
+            padding: 8px 12px;
             /* Font size controlled by JavaScript */
         }
     }
@@ -5498,9 +5476,20 @@ class AccessibilityWidget {
     
                 select:focus-visible,
     
-                label:focus-visible,
-    
-                .action-btn:focus-visible,
+                label:focus-visible {
+                    outline: 2px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+                }
+                
+                .action-btn:focus-visible {
+                    outline: 2px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+                    padding: 8px 16px !important;
+                    min-height: auto !important;
+                    transform: none !important;
+                }
     
                 /* Ensure icons inside scaling buttons align properly */
                 .scaling-btn {
@@ -16044,24 +16033,19 @@ class AccessibilityWidget {
                     break;
     
                 case 'about-us':
-                    // First try to find about section on current page
-                    const aboutElement = this.findElementBySelector('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
-                    if (aboutElement) {
-                        this.scrollToElement('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
+                    // First try to find about link in navigation (prioritize navigation over page sections)
+                    const aboutLink = document.querySelector('a[href*="about"], nav a[href*="about"], .nav a[href*="about"], [class*="nav"] a[href*="about"], [class*="menu"] a[href*="about"], [class*="header"] a[href*="about"]');
+                    if (aboutLink && aboutLink.href) {
+                        window.location.href = aboutLink.href;
                     } else {
-                        // Try to find about link in navigation
-                        const aboutLink = document.querySelector('a[href*="about"], nav a[href*="about"], .nav a[href*="about"]');
-                        if (aboutLink && aboutLink.href) {
-                            window.location.href = aboutLink.href;
+                        // If no navigation link found, try to find about section on current page
+                        const aboutElement = this.findElementBySelector('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
+                        if (aboutElement) {
+                            this.scrollToElement('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
                         } else {
-                            // Try common about page paths
-                            const baseUrl = window.location.origin;
-                            const aboutPaths = ['/about', '/about-us', '/aboutus', '/about.html'];
-                            for (const path of aboutPaths) {
-                                // Try to navigate to about page
-                                window.location.href = baseUrl + path;
-                                break;
-                            }
+                            // Don't navigate to non-existent paths - just scroll to top
+                            // This prevents 404 errors
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                     }
                     break;
@@ -32147,32 +32131,33 @@ class AccessibilityWidget {
                                  !panel.classList.contains('active');
             
             // Set left position
-            panel.style.setProperty('left', `${finalLeft}px`, 'important');
-            panel.style.setProperty('right', 'auto', 'important');
+            panel.style.setProperty('left', `${finalLeft}px`);
+            panel.style.setProperty('right', 'auto');
             
-            // Check if we're on mobile/tablet - if so, use full height but position relative to icon
+            // Check if we're on mobile/tablet - if so, position relative to icon with max height
             const isMobileOrTablet = window.innerWidth <= 819;
             
             if (isMobileOrTablet) {
-                // On mobile/tablet: Position panel above icon, but allow it to extend to viewport edges if needed
-                panel.style.setProperty('top', `${finalTop}px`, 'important');
-                panel.style.setProperty('bottom', 'auto', 'important');
-                // Use calculated height or full viewport, whichever is smaller
+                // On mobile/tablet: Position panel relative to icon, ensure it doesn't overflow viewport
+                panel.style.setProperty('top', `${finalTop}px`);
+                panel.style.setProperty('bottom', 'auto');
+                // Use calculated height or available viewport space, whichever is smaller
                 const maxHeight = window.innerHeight - finalTop - 20;
-                panel.style.setProperty('height', `${Math.min(panelHeight, maxHeight)}px`, 'important');
+                panel.style.setProperty('max-height', `${maxHeight}px`);
+                panel.style.setProperty('height', 'auto');
             } else {
                 // On desktop: Position panel centered relative to icon
-                panel.style.setProperty('top', `${finalTop}px`, 'important');
-                panel.style.setProperty('bottom', 'auto', 'important');
-                panel.style.setProperty('height', `${panelHeight}px`, 'important');
+                panel.style.setProperty('top', `${finalTop}px`);
+                panel.style.setProperty('bottom', 'auto');
+                panel.style.setProperty('height', `${panelHeight}px`);
             }
             
-            panel.style.setProperty('z-index', '2147483646', 'important');
-            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('z-index', '2147483646');
+            panel.style.setProperty('position', 'fixed');
             
             // Only remove transform if panel is visible, otherwise preserve it
             if (!isPanelHidden) {
-                panel.style.setProperty('transform', 'none', 'important');
+                panel.style.setProperty('transform', 'none');
             }
         }
     
