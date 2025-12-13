@@ -144,7 +144,7 @@
                     animation: initial !important;
                     transition: initial !important;
                     transform: initial !important;
-                    position: initial !important;
+                    /* REMOVED: position: initial !important; - This was breaking sticky navigation */
                     will-change: initial !important;
                 }
                 /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
@@ -176,8 +176,16 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
                     opacity: 1 !important;
                     visibility: visible !important;
+                    /* Force all text to be fully visible - remove any clipping or width restrictions */
+                    clip-path: none !important;
+                    -webkit-clip-path: none !important;
+                    width: auto !important;
+                    height: auto !important;
+                    max-width: none !important;
+                    max-height: none !important;
                 }
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
                 body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
@@ -280,10 +288,11 @@
                     reinforce.textContent = `
                         html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                            /* Complete animations to final state instead of stopping mid-way */
+                            animation-play-state: paused !important;
+                            animation-fill-mode: forwards !important;
                             animation: none !important;
                             animation-name: none !important;
-                            animation-duration: 0.0001s !important;
-                            animation-play-state: paused !important;
                             transition: none !important;
                             transition-property: none !important;
                         }
@@ -307,16 +316,20 @@
                     master.id = 'accessibility-seizure-master';
                     master.textContent = `
                         /* Hard stop for CSS animations and transitions */
+                        /* Force animations to final state immediately - either prevent from starting or jump to final state */
                         body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
-                            animation: none !important;
-                            animation-name: none !important;
-                            animation-duration: 0.0001s !important;
+                            /* Set duration to 0s so animations complete instantly (jump to final state) */
+                            animation-duration: 0s !important;
+                            animation-delay: 0s !important;
+                            animation-fill-mode: forwards !important;
                             animation-iteration-count: 1 !important;
+                            /* Prevent new animations from starting */
                             animation-play-state: paused !important;
                             transition: none !important;
                             transition-property: none !important;
                             transition-duration: 0s !important;
-                            scroll-behavior: auto !important;
+                            transition-delay: 0s !important;
+                            /* REMOVED: scroll-behavior: auto !important; - This was blocking Lenis smooth scrolling */
                         }
                         /* Do not affect cursor appearance */
                         body.seizure-safe * { cursor: inherit; }
@@ -788,9 +801,14 @@ function applyUniversalStopMotion(enabled) {
             css.textContent = `
                 html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
                 body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                    /* Force animations to final state immediately - either prevent from starting or jump to final state */
                     animation-duration: 0s !important;
-                    transition-duration: 0s !important;
+                    animation-delay: 0s !important;
+                    animation-fill-mode: forwards !important;
                     animation-iteration-count: 1 !important;
+                    animation-play-state: paused !important;
+                    transition-duration: 0s !important;
+                    transition-delay: 0s !important;
                     /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
                 }
             `;
@@ -4759,13 +4777,13 @@ class AccessibilityWidget {
     
     .accessibility-panel {
         display: none !important;
-        position: fixed !important;
+        position: fixed;
         z-index: 100001 !important;
         /* Position controlled by JavaScript - no default top/left */
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
     }
     
     .accessibility-panel.show {
@@ -15909,23 +15927,23 @@ class AccessibilityWidget {
                 
     
                 // Add event listener to select
-    
+                
                 const select = dropdownContainer.querySelector('#useful-links-select');
-    
+                
                 select.addEventListener('change', (e) => {
-    
+                
                     const value = e.target.value;
-    
+                
                     if (value) {
-    
+                
                         this.navigateToSection(value);
-    
+                
                         // Keep the selected value visible instead of resetting
-    
+                
                         // This shows the user what they selected
-    
+                
                     }
-    
+                
                 });
     
                 
@@ -27563,26 +27581,33 @@ class AccessibilityWidget {
         }
         
         // Force complete letter-by-letter text animations for seizure safety
+        // This ensures all text is immediately visible in its final state
         forceCompleteTextAnimations() {
 
             
             // Find all elements with letter-by-letter animations
-            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
+            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
             
             textElements.forEach(element => {
-                // Remove any animation classes and inline styles
+                // Force animation to final state immediately
                 element.style.animation = 'none';
                 element.style.transition = 'none';
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
                 element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
                 element.style.transform = 'none';
+                element.style.clipPath = 'none';
+                element.style.webkitClipPath = 'none';
+                element.style.width = 'auto';
+                element.style.height = 'auto';
+                element.style.maxWidth = 'none';
+                element.style.maxHeight = 'none';
                 
                 // Remove animation-related classes
                 element.classList.remove('animate', 'fade', 'slide', 'bounce', 'pulse', 'shake', 'flash', 'blink', 'glow', 'spin', 'rotate', 'scale', 'zoom');
                 
                 // Ensure all child elements are also visible
-                const children = element.querySelectorAll('.char, .word, span, div');
+                const children = element.querySelectorAll('.char, .word, span, div, [class*="char"], [class*="word"], [class*="letter"]');
                 children.forEach(child => {
                     child.style.opacity = '1';
                     child.style.visibility = 'visible';
@@ -27590,16 +27615,23 @@ class AccessibilityWidget {
                     child.style.animation = 'none';
                     child.style.transition = 'none';
                     child.style.transform = 'none';
+                    child.style.clipPath = 'none';
+                    child.style.webkitClipPath = 'none';
                 });
             });
             
             // Also handle any text that might be using GSAP TextPlugin or similar
-            const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div');
+            // Force all text elements to be fully visible
+            const allTextElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, [class*="text"], [class*="title"], [class*="heading"]');
             allTextElements.forEach(element => {
-                // Check if element has any animation-related inline styles
-                if (element.style.animation || element.style.transition || element.style.opacity !== '') {
+                const computedStyle = window.getComputedStyle(element);
+                // If element has opacity less than 1 or visibility hidden, force it visible
+                if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
                     element.style.opacity = '1';
                     element.style.visibility = 'visible';
+                }
+                // Remove any animation/transition
+                if (element.style.animation || element.style.transition || computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
                     element.style.animation = 'none';
                     element.style.transition = 'none';
                     element.style.transform = 'none';
@@ -29001,14 +29033,8 @@ class AccessibilityWidget {
             // REMOVED: Lenis pause - this was stopping scroll animations
             // REMOVED: ScrollTrigger disable - this was stopping scroll animations
             // REMOVED: body/html scroll-behavior change - this was affecting the website
-            
-            // Only change scroll behavior if seizure-safe or stop-animation is active
-            if (document.body.classList.contains('seizure-safe') || 
-                document.body.classList.contains('stop-animation')) {
-                // Only then disable smooth scrolling
-                document.body.style.scrollBehavior = 'auto';
-                document.documentElement.style.scrollBehavior = 'auto';
-            }
+            // REMOVED: scroll-behavior: auto - This was blocking Lenis smooth scrolling
+            // Lenis and GSAP ScrollTrigger handle smooth scrolling and should not be blocked
         }
         
         // Re-enable smooth scrolling libraries when panel is closed
@@ -32192,13 +32218,13 @@ class AccessibilityWidget {
                                  !panel.classList.contains('active');
             
             // Set position - use fixed positioning relative to viewport
-            // Use !important to override any CSS that might force positioning
-            panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('left', `${finalLeft}px`, 'important');
-            panel.style.setProperty('right', 'auto', 'important');
-            panel.style.setProperty('top', `${finalTop}px`, 'important');
-            panel.style.setProperty('bottom', 'auto', 'important');
-            panel.style.setProperty('z-index', '2147483646', 'important');
+            // Set positioning directly without !important to avoid conflicts
+            panel.style.position = 'fixed';
+            panel.style.left = `${finalLeft}px`;
+            panel.style.right = 'auto';
+            panel.style.top = `${finalTop}px`;
+            panel.style.bottom = 'auto';
+            panel.style.zIndex = '2147483646';
             
             // Check if we're on mobile/tablet - adjust height to fit viewport
             const isMobileOrTablet = window.innerWidth <= 819;
