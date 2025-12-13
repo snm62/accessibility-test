@@ -1135,6 +1135,12 @@ function applyVisionImpaired(on) {
 class AccessibilityWidget {
     constructor() {
     
+            // Prevent multiple initializations
+            if (this._isInitializing || this._isInitialized) {
+                return;
+            }
+            this._isInitializing = true;
+    
             this.settings = {};
     
             this.contentScale = 100; // Start at 100% (normal size)
@@ -1161,6 +1167,13 @@ class AccessibilityWidget {
                 panel: null,
                 closeBtn: null,
                 lastCacheTime: 0
+            };
+            
+            // Cache for API calls to prevent duplicate requests
+            this._fetchCache = {
+                customizationData: null,
+                lastFetchTime: 0,
+                cacheDuration: 5 * 60 * 1000 // 5 minutes
             };
             
             // Track if this is a staging domain (free, no payment check needed)
@@ -2569,7 +2582,12 @@ class AccessibilityWidget {
             const resetBtn = this.shadowRoot.getElementById('reset-settings');
     
             if (resetBtn) {
-    
+                // #region agent log
+                resetBtn.addEventListener('focus', function() {
+                    const cs = window.getComputedStyle(this);
+                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2573',message:'reset-settings button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                });
+                // #endregion
                 resetBtn.addEventListener('click', () => {
     
                     
@@ -2585,7 +2603,12 @@ class AccessibilityWidget {
             const statementBtn = this.shadowRoot.getElementById('statement');
     
             if (statementBtn) {
-    
+                // #region agent log
+                statementBtn.addEventListener('focus', function() {
+                    const cs = window.getComputedStyle(this);
+                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2589',message:'statement button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                });
+                // #endregion
                 statementBtn.addEventListener('click', () => {
     
                     
@@ -2601,7 +2624,12 @@ class AccessibilityWidget {
             const hideBtn = this.shadowRoot.getElementById('hide-interface');
     
             if (hideBtn) {
-    
+                // #region agent log
+                hideBtn.addEventListener('focus', function() {
+                    const cs = window.getComputedStyle(this);
+                    fetch('http://127.0.0.1:7242/ingest/366145e1-b9a6-4d8e-b271-43f459af1edf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'test.js:2605',message:'hide-interface button focused',data:{width:cs.width,height:cs.height,padding:cs.padding,minWidth:cs.minWidth,minHeight:cs.minHeight,fontSize:cs.fontSize,transform:cs.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                });
+                // #endregion
                 hideBtn.addEventListener('click', () => {
     
                     
@@ -4010,9 +4038,7 @@ class AccessibilityWidget {
         .accessibility-panel {
             width: 85vw;
             max-width: 400px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
+            /* REMOVED: height: 100vh, top: 0, bottom: 0 - Panel should position relative to icon */
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4416,9 +4442,7 @@ class AccessibilityWidget {
             max-width: 450px !important;
             /* Font size controlled by JavaScript */
             padding: 16px !important;
-            height: 100vh !important;
-            top: 0 !important;
-            bottom: 0 !important;
+            /* REMOVED: height: 100vh, top: 0, bottom: 0 - Panel should position relative to icon */
             overflow-y: auto !important;
             position: fixed !important;
             z-index: 100001 !important;
@@ -16053,14 +16077,9 @@ class AccessibilityWidget {
                         if (portfolioLink && portfolioLink.href) {
                             window.location.href = portfolioLink.href;
                         } else {
-                            // Try common portfolio page paths
-                            const baseUrl = window.location.origin;
-                            const portfolioPaths = ['/portfolio', '/work', '/projects', '/portfolio.html'];
-                            for (const path of portfolioPaths) {
-                                // Try to navigate to portfolio page
-                                window.location.href = baseUrl + path;
-                                break;
-                            }
+                            // Don't navigate to non-existent paths - just scroll to top or show message
+                            // This prevents 404 errors
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                     }
                     break;
@@ -25254,6 +25273,76 @@ class AccessibilityWidget {
                     }
                 }
                 
+                // GSAP: Stop all animations including motionPath (orbit), progress bars, and pointer animations
+                if (typeof window.gsap !== 'undefined') {
+                    try {
+                        // Kill all active GSAP tweens and timelines
+                        if (window.gsap.killTweensOf) {
+                            // Stop motionPath animations (orbit animations) - target elements with motionPath animations
+                            const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
+                            orbitElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop progress bar animations
+                            const progressElements = document.querySelectorAll('[class*="progress"], [role="progressbar"], .progress, .slider-progress, .progress-bar');
+                            progressElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop pointer animations (click simulation with expanding overlays)
+                            const pointerElements = document.querySelectorAll('.pointer, .color-overlay, .color-overlay-2, [class*="pointer"], [class*="overlay"]');
+                            pointerElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop floating image animations
+                            const floatingElements = document.querySelectorAll('.floating-image, [class*="floating"]');
+                            floatingElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                        }
+                        
+                        // Kill all timelines that might contain these animations
+                        if (window.gsap.globals && window.gsap.globals.timeline) {
+                            try {
+                                const timelines = window.gsap.globals.timeline.getAll ? window.gsap.globals.timeline.getAll() : [];
+                                timelines.forEach(tl => {
+                                    try {
+                                        if (tl && typeof tl.kill === 'function') {
+                                            tl.kill();
+                                        }
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
+                        }
+                        
+                        // Get all active tweens and kill motionPath-related ones
+                        if (window.gsap.getAllTweens) {
+                            try {
+                                const allTweens = window.gsap.getAllTweens();
+                                allTweens.forEach(tween => {
+                                    try {
+                                        if (tween && tween.vars && (tween.vars.motionPath || tween.vars.motionPath)) {
+                                            tween.kill();
+                                        }
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
+                        }
+                    } catch (error) {
+                        // Silent fail
+                    }
+                }
+                
                
                 
             } catch (error) {
@@ -26926,6 +27015,76 @@ class AccessibilityWidget {
                     } catch (_) {}
                 }
                 
+                // GSAP: Stop all animations including motionPath (orbit), progress bars, and pointer animations
+                if (typeof window.gsap !== 'undefined') {
+                    try {
+                        // Kill all active GSAP tweens and timelines
+                        if (window.gsap.killTweensOf) {
+                            // Stop motionPath animations (orbit animations) - target elements with motionPath animations
+                            const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
+                            orbitElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop progress bar animations
+                            const progressElements = document.querySelectorAll('[class*="progress"], [role="progressbar"], .progress, .slider-progress, .progress-bar');
+                            progressElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop pointer animations (click simulation with expanding overlays)
+                            const pointerElements = document.querySelectorAll('.pointer, .color-overlay, .color-overlay-2, [class*="pointer"], [class*="overlay"]');
+                            pointerElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                            
+                            // Stop floating image animations
+                            const floatingElements = document.querySelectorAll('.floating-image, [class*="floating"]');
+                            floatingElements.forEach(el => {
+                                try {
+                                    window.gsap.killTweensOf(el);
+                                } catch (_) {}
+                            });
+                        }
+                        
+                        // Kill all timelines that might contain these animations
+                        if (window.gsap.globals && window.gsap.globals.timeline) {
+                            try {
+                                const timelines = window.gsap.globals.timeline.getAll ? window.gsap.globals.timeline.getAll() : [];
+                                timelines.forEach(tl => {
+                                    try {
+                                        if (tl && typeof tl.kill === 'function') {
+                                            tl.kill();
+                                        }
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
+                        }
+                        
+                        // Get all active tweens and kill motionPath-related ones
+                        if (window.gsap.getAllTweens) {
+                            try {
+                                const allTweens = window.gsap.getAllTweens();
+                                allTweens.forEach(tween => {
+                                    try {
+                                        if (tween && tween.vars && (tween.vars.motionPath || tween.vars.motionPath)) {
+                                            tween.kill();
+                                        }
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
+                        }
+                    } catch (error) {
+                        // Silent fail
+                    }
+                }
+                
           
             } catch (e) {
                
@@ -26954,9 +27113,8 @@ class AccessibilityWidget {
                     el.setAttribute('data-seizure-safe-stopped', 'true');
                 });
                 
-                // Stop smooth scrolling
-                document.documentElement.style.scrollBehavior = 'auto';
-                document.body.style.scrollBehavior = 'auto';
+                // REMOVED: Stop smooth scrolling - This was blocking Lenis smooth scrolling
+                // Lenis handles smooth scrolling and should not be blocked
                 
              
             } catch (e) {
@@ -27615,10 +27773,8 @@ class AccessibilityWidget {
                 }
                 
                 /* 6. STOP SMOOTH SCROLLING - Prevent vestibular-triggering motion */
-                body.seizure-safe html,
-                body.seizure-safe body {
-                    scroll-behavior: auto !important;
-                }
+                /* REMOVED: scroll-behavior: auto - This was blocking Lenis smooth scrolling */
+                /* Lenis handles smooth scrolling and should not be blocked */
                 
                 /* 7. STOP VIDEO AND MEDIA AUTOPLAY */
                 body.seizure-safe video[autoplay],
@@ -31994,11 +32150,22 @@ class AccessibilityWidget {
             panel.style.setProperty('left', `${finalLeft}px`, 'important');
             panel.style.setProperty('right', 'auto', 'important');
             
-            // CRITICAL: Always maintain full viewport height
-            // Override any top position - panel should cover full height from top to bottom
-            panel.style.setProperty('height', '100vh', 'important');
-            panel.style.setProperty('top', '0', 'important');
-            panel.style.setProperty('bottom', '0', 'important');
+            // Check if we're on mobile/tablet - if so, use full height but position relative to icon
+            const isMobileOrTablet = window.innerWidth <= 819;
+            
+            if (isMobileOrTablet) {
+                // On mobile/tablet: Position panel above icon, but allow it to extend to viewport edges if needed
+                panel.style.setProperty('top', `${finalTop}px`, 'important');
+                panel.style.setProperty('bottom', 'auto', 'important');
+                // Use calculated height or full viewport, whichever is smaller
+                const maxHeight = window.innerHeight - finalTop - 20;
+                panel.style.setProperty('height', `${Math.min(panelHeight, maxHeight)}px`, 'important');
+            } else {
+                // On desktop: Position panel centered relative to icon
+                panel.style.setProperty('top', `${finalTop}px`, 'important');
+                panel.style.setProperty('bottom', 'auto', 'important');
+                panel.style.setProperty('height', `${panelHeight}px`, 'important');
+            }
             
             panel.style.setProperty('z-index', '2147483646', 'important');
             panel.style.setProperty('position', 'fixed', 'important');
