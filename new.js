@@ -422,13 +422,31 @@
                             rotate: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
-                            position: unset !important;
+                            /* CRITICAL: Do NOT unset position - this breaks sticky/fixed navigation */
+                            /* REMOVED: position: unset !important; */
                             top: unset !important;
                             left: unset !important;
                             right: unset !important;
                             bottom: unset !important;
                             width: unset !important;
                             height: unset !important;
+                        }
+                        
+                        /* CRITICAL: Preserve positioning for nav elements and ensure their positioning is not affected */
+                        body.seizure-safe nav,
+                        body.seizure-safe header,
+                        body.seizure-safe .navbar,
+                        body.seizure-safe [role="navigation"],
+                        body.seizure-safe [class*="nav"],
+                        body.seizure-safe [class*="header"],
+                        body.seizure-safe [class*="navbar"],
+                        body.seizure-safe [data-sticky],
+                        body.seizure-safe [data-fixed],
+                        body.seizure-safe [style*="position: sticky"],
+                        body.seizure-safe [style*="position:fixed"],
+                        body.seizure-safe [style*="position: fixed"] {
+                            position: inherit !important;
+                            transform: inherit !important;
                         }
                         /* Preserve only genuine navigation/header and explicit opt-outs */
                         body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
@@ -16815,6 +16833,60 @@ class AccessibilityWidget {
             
     
             document.body.classList.add('highlight-focus');
+            
+            // Inject CSS rules for highlight focus to ensure it works reliably
+            if (!document.getElementById('highlight-focus-css')) {
+                const style = document.createElement('style');
+                style.id = 'highlight-focus-css';
+                style.textContent = `
+                    /* Highlight Focus - Show prominent focus indicators */
+                    body.highlight-focus *:focus,
+                    body.highlight-focus *:focus-visible {
+                        outline: 3px solid #6366f1 !important;
+                        outline-offset: 2px !important;
+                        background: rgba(99, 102, 241, 0.1) !important;
+                        border-radius: 4px !important;
+                        transition: outline 0.2s ease, background 0.2s ease !important;
+                    }
+                    
+                    body.highlight-focus a:focus,
+                    body.highlight-focus a:focus-visible,
+                    body.highlight-focus button:focus,
+                    body.highlight-focus button:focus-visible,
+                    body.highlight-focus input:focus,
+                    body.highlight-focus input:focus-visible,
+                    body.highlight-focus select:focus,
+                    body.highlight-focus select:focus-visible,
+                    body.highlight-focus textarea:focus,
+                    body.highlight-focus textarea:focus-visible,
+                    body.highlight-focus [tabindex]:focus,
+                    body.highlight-focus [tabindex]:focus-visible,
+                    body.highlight-focus [role="button"]:focus,
+                    body.highlight-focus [role="button"]:focus-visible,
+                    body.highlight-focus [role="link"]:focus,
+                    body.highlight-focus [role="link"]:focus-visible,
+                    body.highlight-focus [contenteditable="true"]:focus,
+                    body.highlight-focus [contenteditable="true"]:focus-visible {
+                        outline: 3px solid #6366f1 !important;
+                        outline-offset: 2px !important;
+                        background: rgba(99, 102, 241, 0.1) !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                        transition: outline 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+                    }
+                    
+                    /* Exclude accessibility widget from highlight focus */
+                    body.highlight-focus .accessibility-panel *:focus,
+                    body.highlight-focus .accessibility-icon:focus {
+                        outline: inherit !important;
+                        outline-offset: inherit !important;
+                        background: inherit !important;
+                        border-radius: inherit !important;
+                        box-shadow: inherit !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
     
         
     
@@ -16896,7 +16968,7 @@ class AccessibilityWidget {
                     return; // Exit early to prevent other focus handling
                 }
     
-                if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
+                if (document.body.classList.contains('highlight-focus')) {
     
                     const focusedElement = e.target;
     
@@ -17037,6 +17109,12 @@ class AccessibilityWidget {
             
     
             document.body.classList.remove('highlight-focus');
+            
+            // Remove the CSS rules for highlight focus
+            const existingStyle = document.getElementById('highlight-focus-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
     
             
     
@@ -19645,6 +19723,9 @@ class AccessibilityWidget {
                 body.light-contrast .navbar,
                 body.light-contrast .navigation,
                 body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
                 body.light-contrast .menu,
                 body.light-contrast .nav-menu,
                 body.light-contrast button,
@@ -19668,6 +19749,23 @@ class AccessibilityWidget {
                     color: inherit !important;
                     background: inherit !important;
                 }
+                
+                /* CRITICAL: Preserve logo container backgrounds (like black boxes with white logos) */
+                body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
+                body.light-contrast div:has(.logo),
+                body.light-contrast div:has([class*="logo"]),
+                body.light-contrast div:has([id*="logo"]),
+                body.light-contrast header .logo,
+                body.light-contrast nav .logo,
+                body.light-contrast .header .logo,
+                body.light-contrast .navbar .logo {
+                    background: inherit !important;
+                    background-color: inherit !important;
+                    background-image: inherit !important;
+                }
 
                 /* Completely exclude accessibility widget from light contrast effects */
                 .light-contrast .accessibility-panel,
@@ -19686,23 +19784,60 @@ class AccessibilityWidget {
                     box-shadow: inherit !important;
                 }
                 
+                /* Ensure logos are visible on white backgrounds - add border/shadow for white logos */
+                body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
+                body.light-contrast img.logo,
+                body.light-contrast svg.logo,
+                body.light-contrast .logo img,
+                body.light-contrast .logo svg,
+                body.light-contrast [class*="logo"] img,
+                body.light-contrast [class*="logo"] svg,
+                body.light-contrast div[class*="logo"],
+                body.light-contrast div[id*="logo"],
+                body.light-contrast a[class*="logo"],
+                body.light-contrast a[id*="logo"] {
+                    /* Add a border to make white logos visible on white backgrounds */
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    background: inherit !important;
+                }
+                
+                /* Preserve navigation images but ensure they're visible */
+                body.light-contrast header img,
+                body.light-contrast nav img,
+                body.light-contrast .header img,
+                body.light-contrast .navbar img,
+                body.light-contrast [role="navigation"] img {
+                    background: inherit !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    /* Add border for visibility if logo */
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                }
+                
                 /* Ensure images are visible on white backgrounds - add border/shadow for white images */
-                body.light-contrast img,
-                body.light-contrast picture,
-                body.light-contrast [class*="image"],
-                body.light-contrast [class*="img"],
-                body.light-contrast [class*="photo"],
-                body.light-contrast [class*="picture"] {
+                body.light-contrast img:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast picture:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="image"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="img"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="photo"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="picture"]:not([class*="logo"]):not([id*="logo"]) {
                     /* Add a subtle border to make white images visible on white backgrounds */
                     border: 1px solid #cccccc !important;
                     box-shadow: 0 0 2px rgba(0, 0, 0, 0.1) !important;
                 }
                 
                 /* For images that might be completely white, add a stronger border */
-                body.light-contrast img[src*="white"],
-                body.light-contrast img[src*="light"],
-                body.light-contrast img[class*="white"],
-                body.light-contrast img[class*="light"] {
+                body.light-contrast img[src*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[src*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[class*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[class*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]) {
                     border: 2px solid #000000 !important;
                     box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
                 }
@@ -23047,7 +23182,7 @@ class AccessibilityWidget {
                     return; // Exit early to prevent other focus handling
                 }
     
-                if (document.body.classList.contains('highlight-focus') && this.isKeyboardNavigation) {
+                if (document.body.classList.contains('highlight-focus')) {
     
                     const focusedElement = e.target;
     
