@@ -75,41 +75,7 @@
                     -webkit-filter: none !important;
                 }
                 
-                /* REMOVED: Duplicate universal selector - already covered by main rule */
-                /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
-                /* Exclude nav/header and text animation elements to preserve their behavior */
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"]), 
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"])::before, 
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"])::after {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    animation-play-state: paused !important;
-                }
-                /* CRITICAL: Stop animations while preserving final positions */
-                /* Exclude nav/header and text animation elements to preserve their behavior */
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"]) {
-                    /* Stop all animations and transitions */
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                    /* Preserve final animation state */
-                    animation-fill-mode: forwards !important;
-                    /* Ensure visibility without changing positioning */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                /* Only stop animations for animated elements without changing their positions */
-                body.seizure-safe *[class*="animate"], body.seizure-safe *[class*="fade"], body.seizure-safe *[class*="slide"], body.seizure-safe *[class*="bounce"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="shake"], body.seizure-safe *[class*="flash"], body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="glow"], body.seizure-safe *[class*="spin"], body.seizure-safe *[class*="rotate"], body.seizure-safe *[class*="scale"], body.seizure-safe *[class*="zoom"], body.seizure-safe *[class*="wiggle"], body.seizure-safe *[class*="jiggle"], body.seizure-safe *[class*="twist"], body.seizure-safe *[class*="flip"], body.seizure-safe *[class*="swing"], body.seizure-safe *[class*="wobble"], body.seizure-safe *[class*="tilt"] {
-                    /* Stop animations but preserve final state */
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    animation-play-state: paused !important;
-                    /* Ensure visibility without changing positioning */
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
+                /* NOTE: Global animation-kill rules removed per configuration change to allow more motion */
                 /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
                 body.seizure-safe a[href], body.seizure-safe button, body.seizure-safe [role="button"], body.seizure-safe [onclick], body.seizure-safe input[type="button"], body.seizure-safe input[type="submit"], body.seizure-safe input[type="reset"], body.seizure-safe .btn, body.seizure-safe .button, body.seizure-safe [class*="btn"], body.seizure-safe [class*="button"], body.seizure-safe [tabindex]:not([tabindex="-1"]) {
                     cursor: pointer !important;
@@ -134,41 +100,8 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* REMOVED: Duplicate rule - already covered by lines 39-48 */
-                /* Force GSAP and other library animations to final state */
-                body.seizure-safe .fade-up, body.seizure-safe .fade-left, body.seizure-safe .fade-right, body.seizure-safe .fade-in, body.seizure-safe .slide-in, body.seizure-safe .scale-in, body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                }
-                /* Do NOT interfere with navbars/headers sticky/transform behavior */
-                body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar, body.seizure-safe [class*="nav"], body.seizure-safe [class*="header"] {
-                    animation: initial !important;
-                    transition: initial !important;
-                    transform: initial !important;
-                    /* REMOVED: position: initial !important; - This was breaking sticky navigation */
-                    will-change: initial !important;
-                }
-                /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
-                /* Exclude nav/header to preserve sticky positioning */
-                body.seizure-safe *[style*="animation"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[style*="transition"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[style*="transform"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[style*="opacity"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[style*="visibility"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[data-animation]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[data-transition]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[data-transform]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[data-opacity]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                body.seizure-safe *[data-visibility]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
+                /* NOTE: Per configuration, we no longer force fade/scroll utility classes to a static state
+                   and we do not override navbar/header animation or sticky behavior here. */
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
                 body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
                     animation: none !important;
@@ -996,9 +929,9 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        // Vision Impaired: brightness-only, no layout/zoom/font-size changes
         style.textContent = `
-            /* VISION IMPAIRED: Increase brightness slightly without changing layout or font sizes */
+            /* VISION IMPAIRED: Increase brightness slightly with gentle content zoom,
+               without changing page structure or causing horizontal shifts */
             
             html.vision-impaired {
                 /* No zoom or layout changes */
@@ -1034,28 +967,18 @@ function applyVisionImpaired(on) {
                 z-index: 2147483647 !important;
             }
             
-            /* Keep images at original size (no scaling) */
-            body.vision-impaired img,
-            html.vision-impaired img {
-                /* No changes to image layout */
-            }
-            
-            /* Keep sliders and carousels at original size (no scaling) */
-            body.vision-impaired [class*="slider"],
-            body.vision-impaired [id*="slider"],
-            body.vision-impaired [data-slider],
-            body.vision-impaired [class*="swiper"],
-            body.vision-impaired [id*="swiper"],
-            body.vision-impaired [class*="carousel"],
-            body.vision-impaired [id*="carousel"],
-            html.vision-impaired [class*="slider"],
-            html.vision-impaired [id*="slider"],
-            html.vision-impaired [data-slider],
-            html.vision-impaired [class*="swiper"],
-            html.vision-impaired [id*="swiper"],
-            html.vision-impaired [class*="carousel"],
-            html.vision-impaired [id*="carousel"] {
-                /* No changes to slider layout */
+            /* Slight zoom for images and content blocks inside main page structure.
+               Use transform (not layout properties) so there is no left/right shift. */
+            body.vision-impaired main img,
+            body.vision-impaired main div,
+            body.vision-impaired [role="main"] img,
+            body.vision-impaired [role="main"] div,
+            body.vision-impaired .main-content img,
+            body.vision-impaired .main-content div,
+            body.vision-impaired .page-wrapper img,
+            body.vision-impaired .page-wrapper div {
+                transform: scale(1.03);
+                transform-origin: center center;
             }
         `;
     } catch (_) {}
@@ -3778,10 +3701,11 @@ class AccessibilityWidget {
         }
         
         .accessibility-panel .scaling-btn i.fas {
-            display: inline-block;
-            line-height: 1;
-            margin: 0 4px 0 0;
-            padding: 0;
+            /* Hide icon to avoid offsetting the +2% / -2% text horizontally,
+               especially when Font Awesome is not loaded */
+            display: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
         
@@ -26697,7 +26621,6 @@ class AccessibilityWidget {
                 
                 if (!on) return;
                 
-                // Scale only content inside, not the webpage structure
                 style.textContent = `
             /* VISION IMPAIRED: Scale content only, preserve webpage structure */
             
@@ -26750,6 +26673,20 @@ class AccessibilityWidget {
             }
             body.vision-impaired h6 {
                 font-size: 110% !important;
+            }
+
+            /* Slight zoom for images and content blocks inside main page structure.
+               Use transform (not layout properties) so there is no left/right shift. */
+            body.vision-impaired main img,
+            body.vision-impaired main div,
+            body.vision-impaired [role="main"] img,
+            body.vision-impaired [role="main"] div,
+            body.vision-impaired .main-content img,
+            body.vision-impaired .main-content div,
+            body.vision-impaired .page-wrapper img,
+            body.vision-impaired .page-wrapper div {
+                transform: scale(1.03);
+                transform-origin: center center;
             }
             
             /* Scale buttons and interactive elements */
