@@ -92,13 +92,16 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* Stop animations for text elements without changing their layout */
-                body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6, body.seizure-safe p, body.seizure-safe span, body.seizure-safe div, body.seizure-safe a, body.seizure-safe li, body.seizure-safe td, body.seizure-safe th, body.seizure-safe label {
+                /* Stop animations for text elements without forcing hidden animation clones to become visible */
+                body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6,
+                body.seizure-safe p, body.seizure-safe span, body.seizure-safe div, body.seizure-safe a,
+                body.seizure-safe li, body.seizure-safe td, body.seizure-safe th, body.seizure-safe label {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* Do NOT override opacity/visibility here: many animation libraries keep
+                       duplicate text elements hidden with opacity:0; forcing them visible
+                       causes overlapping/ghost text behind the main heading. */
                 }
                 /* Force GSAP and other library fade/slide utilities to final, static state */
                 body.seizure-safe .fade-up,
@@ -1026,16 +1029,8 @@ function applyVisionImpaired(on) {
                 z-index: 2147483647 !important;
             }
             
-            /* Gentle zoom for main content only, centered to avoid left/right shift.
-               Do NOT apply to generic page-wrapper containers to avoid affecting sticky navs
-               that are wrapped together with main content. */
-            body.vision-impaired main,
-            body.vision-impaired [role="main"],
-            body.vision-impaired .main-content {
-                transform: scale(1.02);
-                /* Anchor zoom at the top so nav/hero stay in view and avoid pushing content up */
-                transform-origin: top center;
-            }
+            /* NOTE: Vision Impaired no longer applies a transform-based zoom to avoid extra scrollbars.
+               Zoom and sizing are handled by dedicated font/spacing controls instead. */
         `;
     } catch (_) {}
 }
@@ -1088,11 +1083,9 @@ function applyVisionImpaired(on) {
                 viStyle.textContent = `
                     /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
-                    /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
-            html.vision-impaired {
-                        /* No zoom - preserve original layout */
-                        /* No layout modifications */
-                        /* Prevent horizontal scrollbar on the root element when content is zoomed */
+                    /* 1. Subtle brightness-only adjustment (no zoom) */
+                    html.vision-impaired {
+                        /* Prevent horizontal scrollbar on the root element */
                         overflow-x: hidden !important;
                     }
                     
@@ -1100,16 +1093,6 @@ function applyVisionImpaired(on) {
                         /* Slight brightness bump only, no extra contrast or font changes */
                         filter: brightness(1.06) !important;
                         overflow-x: hidden !important;
-                    }
-                    
-                    /* Gentle zoom for main content only, centered to avoid left/right shift.
-                       Do NOT apply to generic page-wrapper containers to avoid affecting sticky navs
-                       that are wrapped together with main content. */
-                    body.vision-impaired main,
-                    body.vision-impaired [role="main"],
-                    body.vision-impaired .main-content {
-                        transform: scale(1.02);
-                        transform-origin: top center;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -14839,15 +14822,16 @@ class AccessibilityWidget {
             const existingStyle = document.getElementById('line-height-css');
             if (existingStyle) {
                 existingStyle.textContent = `
+                    /* Base document text */
                     body, html {
                         line-height: ${lineHeightValue}px !important;
                     }
                     
-                    body *, html * {
-                        line-height: ${lineHeightValue}px !important;
-                    }
-                    
-                    p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer, main {
+                    /* Apply only to text / inline / form elements so layout boxes (div, section, etc.)
+                       keep their original spacing and don't "jump" on first use. */
+                    p, span, li, td, th, label, small, em, strong, i, b,
+                    h1, h2, h3, h4, h5, h6,
+                    a, button, input, textarea, select {
                         line-height: ${lineHeightValue}px !important;
                     }
                     
