@@ -495,8 +495,9 @@
                         if (!window.__origElementAnimate) {
                             window.__origElementAnimate = Element.prototype.animate;
                             Element.prototype.animate = function(...args) {
-                                // Only block if seizure-safe mode is active
-                                if (document.body.classList.contains('seizure-safe')) {
+                                // Only block if seizure-safe or stop-animation mode is active
+                                const isActive = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
+                                if (isActive) {
                                     // return a stub Animation
                                     return {
                                         cancel: function(){}, finish: function(){}, play: function(){}, pause: function(){},
@@ -846,9 +847,10 @@
                     } catch (_) {}
                     
                     document.addEventListener('DOMContentLoaded', function() {
-                        if (document.body && document.body.classList.contains('seizure-safe')) {
+                        const isActive = document.body && (document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation'));
+                        if (isActive) {
                             window.__applySeizureSafeDOMFreeze();
-                            // Disable scroll-trigger libraries when seizure-safe is active
+                            // Disable scroll-trigger libraries when seizure-safe or stop-animation is active
                             try {
                                 // AOS
                                 if (window.AOS && typeof window.AOS.refreshHard === 'function') {
@@ -881,13 +883,15 @@
                     try {
                         if (!window.__installStyleHardBlockers) {
                             window.__installStyleHardBlockers = function() {
-                                if (!document.body.classList.contains('seizure-safe')) return;
+                                const isActive = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
+                                if (!isActive) return;
                                 try {
                                     if (!window.__origSetProperty) {
                                         window.__origSetProperty = CSSStyleDeclaration.prototype.setProperty;
                                         CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
-                                            // Only block if seizure-safe mode is active
-                                            if (!document.body.classList.contains('seizure-safe')) {
+                                            // Only block if seizure-safe or stop-animation mode is active
+                                            const isActive = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
+                                            if (!isActive) {
                                                 return window.__origSetProperty.call(this, name, value, priority);
                                             }
                                             const n = String(name).toLowerCase();
@@ -903,7 +907,8 @@
                                     if (!window.__origStyleAttrSetter) {
                                         window.__origStyleAttrSetter = Element.prototype.setAttribute;
                                         Element.prototype.setAttribute = function(attr, val) {
-                                            if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && document.body.classList.contains('seizure-safe')) {
+                                            const isActive = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
+                                            if (String(attr).toLowerCase() === 'style' && typeof val === 'string' && isActive) {
                                                 // Strip blacklisted properties from inline style strings
                                                 let cleaned = val
                                                     .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
@@ -1012,7 +1017,13 @@ function applyUniversalStopMotion(enabled) {
                 html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
                 body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
                 body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                     /* Force animations to final state immediately - either prevent from starting or jump to final state */
                     animation-duration: 0s !important;
                     animation-delay: 0s !important;
@@ -1057,7 +1068,7 @@ function applyUniversalStopMotion(enabled) {
         if (enabled) {
             if (!window.__universalMotionObserver) {
                 const obs = new MutationObserver(mutations => {
-                    const active = document.body.classList.contains('seizure-safe');
+                    const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
                     if (!active) return;
                     try {
                         if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
@@ -2814,13 +2825,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseContentScale();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseContentScale();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseContentScale();
@@ -2844,13 +2855,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.increaseContentScale();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseContentScale();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseContentScale();
@@ -2880,13 +2891,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseFontSize();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseFontSize();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseFontSize();
@@ -2915,13 +2926,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.increaseFontSize();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseFontSize();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseFontSize();
@@ -2956,13 +2967,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.decreaseLetterSpacing();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseLetterSpacing();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseLetterSpacing();
@@ -2991,13 +3002,13 @@ class AccessibilityWidget {
                         e.stopPropagation();
                         
                         this.increaseLetterSpacing();
-                    } else if (e.key === 'ArrowLeft') {
-                        // Left arrow decreases
+                    } else if (e.key === 'ArrowDown') {
+                        // Down arrow decreases
                         e.preventDefault();
                         e.stopPropagation();
                         this.decreaseLetterSpacing();
-                    } else if (e.key === 'ArrowRight') {
-                        // Right arrow increases
+                    } else if (e.key === 'ArrowUp') {
+                        // Up arrow increases
                         e.preventDefault();
                         e.stopPropagation();
                         this.increaseLetterSpacing();
@@ -14780,13 +14791,13 @@ class AccessibilityWidget {
                             e.stopPropagation();
                          
                             this.decreaseLineHeight();
-                        } else if (e.key === 'ArrowLeft') {
-                            // Left arrow decreases
+                        } else if (e.key === 'ArrowDown') {
+                            // Down arrow decreases
                             e.preventDefault();
                             e.stopPropagation();
                             this.decreaseLineHeight();
-                        } else if (e.key === 'ArrowRight') {
-                            // Right arrow increases
+                        } else if (e.key === 'ArrowUp') {
+                            // Up arrow increases
                             e.preventDefault();
                             e.stopPropagation();
                             this.increaseLineHeight();
@@ -14838,13 +14849,13 @@ class AccessibilityWidget {
                             e.stopPropagation();
                          
                             this.increaseLineHeight();
-                        } else if (e.key === 'ArrowLeft') {
-                            // Left arrow decreases
+                        } else if (e.key === 'ArrowDown') {
+                            // Down arrow decreases
                             e.preventDefault();
                             e.stopPropagation();
                             this.decreaseLineHeight();
-                        } else if (e.key === 'ArrowRight') {
-                            // Right arrow increases
+                        } else if (e.key === 'ArrowUp') {
+                            // Up arrow increases
                             e.preventDefault();
                             e.stopPropagation();
                             this.increaseLineHeight();
@@ -19674,6 +19685,27 @@ class AccessibilityWidget {
                     border: inherit !important;
                     box-shadow: inherit !important;
                 }
+                
+                /* Ensure images are visible on white backgrounds - add border/shadow for white images */
+                body.light-contrast img,
+                body.light-contrast picture,
+                body.light-contrast [class*="image"],
+                body.light-contrast [class*="img"],
+                body.light-contrast [class*="photo"],
+                body.light-contrast [class*="picture"] {
+                    /* Add a subtle border to make white images visible on white backgrounds */
+                    border: 1px solid #cccccc !important;
+                    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1) !important;
+                }
+                
+                /* For images that might be completely white, add a stronger border */
+                body.light-contrast img[src*="white"],
+                body.light-contrast img[src*="light"],
+                body.light-contrast img[class*="white"],
+                body.light-contrast img[class*="light"] {
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                }
             `;
             document.head.appendChild(style);
         }
@@ -22167,9 +22199,27 @@ class AccessibilityWidget {
     
             
     
+            // Prevent body/html from scrolling when read mode is active
+            const readModeStyle = document.createElement('style');
+            readModeStyle.id = 'read-mode-scroll-fix';
+            readModeStyle.textContent = `
+                html.read-mode,
+                body.read-mode {
+                    overflow: hidden !important;
+                    height: 100vh !important;
+                    position: fixed !important;
+                    width: 100% !important;
+                }
+            `;
+            document.head.appendChild(readModeStyle);
+            
+            // Add read-mode class to body and html
+            document.documentElement.classList.add('read-mode');
+            document.body.classList.add('read-mode');
+            
             // Create overlay with extracted content
             // Use string concatenation instead of template literal interpolation to avoid syntax errors
-            const overlayHTML = '<div id="read-mode-overlay" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important;"><div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">' + finalContent + '</div></div>';
+            const overlayHTML = '<div id="read-mode-overlay" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important;"><div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">' + finalContent + '</div></div>';
     
             
     
@@ -22712,6 +22762,16 @@ class AccessibilityWidget {
             } else {
     
            
+            }
+            
+            // Remove read-mode classes from html and body to restore scrolling
+            document.documentElement.classList.remove('read-mode');
+            document.body.classList.remove('read-mode');
+            
+            // Remove the CSS that prevents body/html scrolling
+            const readModeStyle = document.getElementById('read-mode-scroll-fix');
+            if (readModeStyle) {
+                readModeStyle.remove();
             }
     
             
@@ -23982,6 +24042,7 @@ class AccessibilityWidget {
         enableStopAnimation() {
     
             document.body.classList.add('stop-animation');
+            document.documentElement.classList.add('stop-animation');
             this.settings['stop-animation'] = true;
             this.saveSettings();
             
@@ -24015,6 +24076,12 @@ class AccessibilityWidget {
                 style.id = 'stop-animation-css';
                 style.textContent = `
                     /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types */
+                    html.stop-animation *,
+                    html.stop-animation *::before,
+                    html.stop-animation *::after,
+                    body.stop-animation *,
+                    body.stop-animation *::before,
+                    body.stop-animation *::after,
                     .stop-animation *,
                     .stop-animation *::before,
                     .stop-animation *::after {
@@ -24022,12 +24089,56 @@ class AccessibilityWidget {
                         animation: none !important;
                         transition: none !important;
                         animation-play-state: paused !important;
+                        animation-duration: 0s !important;
+                        animation-delay: 0s !important;
+                        transition-duration: 0s !important;
+                        transition-delay: 0s !important;
                         
                         /* Stop blinking and flashing text */
                         text-decoration: none !important;
                     }
                     
                     /* Stop all animation classes and libraries */
+                    html.stop-animation *[class*="animate"],
+                    html.stop-animation *[class*="fade"],
+                    html.stop-animation *[class*="slide"],
+                    html.stop-animation *[class*="bounce"],
+                    html.stop-animation *[class*="pulse"],
+                    html.stop-animation *[class*="shake"],
+                    html.stop-animation *[class*="flash"],
+                    html.stop-animation *[class*="blink"],
+                    html.stop-animation *[class*="glow"],
+                    html.stop-animation *[class*="spin"],
+                    html.stop-animation *[class*="rotate"],
+                    html.stop-animation *[class*="scale"],
+                    html.stop-animation *[class*="zoom"],
+                    html.stop-animation *[class*="wiggle"],
+                    html.stop-animation *[class*="jiggle"],
+                    html.stop-animation *[class*="twist"],
+                    html.stop-animation *[class*="flip"],
+                    html.stop-animation *[class*="swing"],
+                    html.stop-animation *[class*="wobble"],
+                    html.stop-animation *[class*="tilt"],
+                    body.stop-animation *[class*="animate"],
+                    body.stop-animation *[class*="fade"],
+                    body.stop-animation *[class*="slide"],
+                    body.stop-animation *[class*="bounce"],
+                    body.stop-animation *[class*="pulse"],
+                    body.stop-animation *[class*="shake"],
+                    body.stop-animation *[class*="flash"],
+                    body.stop-animation *[class*="blink"],
+                    body.stop-animation *[class*="glow"],
+                    body.stop-animation *[class*="spin"],
+                    body.stop-animation *[class*="rotate"],
+                    body.stop-animation *[class*="scale"],
+                    body.stop-animation *[class*="zoom"],
+                    body.stop-animation *[class*="wiggle"],
+                    body.stop-animation *[class*="jiggle"],
+                    body.stop-animation *[class*="twist"],
+                    body.stop-animation *[class*="flip"],
+                    body.stop-animation *[class*="swing"],
+                    body.stop-animation *[class*="wobble"],
+                    body.stop-animation *[class*="tilt"],
                     .stop-animation *[class*="animate"],
                     .stop-animation *[class*="fade"],
                     .stop-animation *[class*="slide"],
@@ -24047,27 +24158,51 @@ class AccessibilityWidget {
                     .stop-animation *[class*="flip"],
                     .stop-animation *[class*="swing"],
                     .stop-animation *[class*="wobble"],
-                    .stop-animation *[class*="tilt"],
-                    /* REMOVED: Scroll-related classes to preserve scroll animations */
+                    .stop-animation *[class*="tilt"] {
+                        animation: none !important;
+                        transition: none !important;
+                        animation-duration: 0s !important;
+                        animation-delay: 0s !important;
+                        transition-duration: 0s !important;
+                        transition-delay: 0s !important;
+                    }
                     
                     /* Stop SVG and Canvas animations */
+                    html.stop-animation svg,
+                    html.stop-animation svg path,
+                    html.stop-animation svg line,
+                    html.stop-animation canvas,
+                    body.stop-animation svg,
+                    body.stop-animation svg path,
+                    body.stop-animation svg line,
+                    body.stop-animation canvas,
                     .stop-animation svg,
                     .stop-animation svg path,
                     .stop-animation svg line,
                     .stop-animation canvas {
                         animation: none !important;
                         transition: none !important;
-                        /* Removed visibility and transform rules to prevent positioning issues */
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
                     }
                     
                     /* Stop text splitting animations */
+                    html.stop-animation [data-splitting],
+                    html.stop-animation .split, 
+                    html.stop-animation .char, 
+                    html.stop-animation .word,
+                    body.stop-animation [data-splitting],
+                    body.stop-animation .split, 
+                    body.stop-animation .char, 
+                    body.stop-animation .word,
                     .stop-animation [data-splitting],
                     .stop-animation .split, 
                     .stop-animation .char, 
                     .stop-animation .word {
                         animation: none !important;
                         transition: none !important;
-                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -28609,10 +28744,27 @@ class AccessibilityWidget {
                     overflow-x: auto !important;
                     overflow-y: auto !important;
                     scroll-behavior: auto !important;
-                    position: static !important;
+                    /* Do NOT set position: static on body as it breaks sticky/fixed navigation */
                     transform: none !important;
                     scale: 1 !important;
                     zoom: 1 !important;
+                }
+                
+                /* CRITICAL: Preserve navigation positioning - do not override position for nav elements */
+                body.seizure-safe nav,
+                body.seizure-safe header,
+                body.seizure-safe .navbar,
+                body.seizure-safe [role="navigation"],
+                body.seizure-safe [class*="nav"],
+                body.seizure-safe [class*="header"],
+                body.seizure-safe [class*="navbar"],
+                body.seizure-safe [data-sticky],
+                body.seizure-safe [data-fixed],
+                body.seizure-safe [style*="position: sticky"],
+                body.seizure-safe [style*="position:fixed"],
+                body.seizure-safe [style*="position: fixed"] {
+                    position: inherit !important;
+                    transform: inherit !important;
                 }
                 
                 body.seizure-safe html {
