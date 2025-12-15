@@ -100,8 +100,20 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* NOTE: Per configuration, we no longer force fade/scroll utility classes to a static state
-                   and we do not override navbar/header animation or sticky behavior here. */
+                /* Force GSAP and other library fade/slide utilities to final, static state */
+                body.seizure-safe .fade-up,
+                body.seizure-safe .fade-left,
+                body.seizure-safe .fade-right,
+                body.seizure-safe .fade-in,
+                body.seizure-safe .slide-in,
+                body.seizure-safe .scale-in,
+                body.seizure-safe .zoom-in {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                }
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
                 body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
                     animation: none !important;
@@ -119,8 +131,8 @@
                     visibility: visible !important;
                 }
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
-                /* Hide individual char/word/letter elements within text animation containers to prevent overlapping */
-                /* JS will consolidate them and mark containers with data-seizure-text-processed */
+                /* Instead of hiding characters, show them all at once with no motion */
+                /* JS will still consolidate and mark containers with data-seizure-text-processed when available */
                 body.seizure-safe [data-splitting] .char, 
                 body.seizure-safe [data-splitting] .word,
                 body.seizure-safe .split .char, 
@@ -143,11 +155,15 @@
                 body.seizure-safe [class*="show-text"] .word,
                 body.seizure-safe [class*="text-effect"] .char,
                 body.seizure-safe [class*="text-effect"] .word {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                    position: absolute !important;
-                    pointer-events: none !important;
+                    animation: none !important;
+                    transition: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    position: static !important;
+                    transform: none !important;
+                    clip-path: none !important;
+                    -webkit-clip-path: none !important;
+                    display: inline !important;
                 }
                 /* Show parent containers after JS processes them - these will have the consolidated text */
                 body.seizure-safe [data-splitting][data-seizure-text-processed], 
@@ -930,16 +946,15 @@ function applyVisionImpaired(on) {
         if (!on) return;
         
         style.textContent = `
-            /* VISION IMPAIRED: Increase brightness slightly with gentle content zoom,
-               without changing page structure or causing horizontal shifts */
+            /* VISION IMPAIRED: Slight brightness increase only (no zoom, no font changes) */
             
             html.vision-impaired {
                 /* No zoom or layout changes */
             }
             
             body.vision-impaired {
-                /* Slightly brighten and add a touch of contrast for readability */
-                filter: brightness(1.1) contrast(1.05) !important;
+                /* Slightly brighten the page for low-vision users */
+                filter: brightness(1.06) !important;
             }
             
             /* Exclude widget from brightness adjustments */
@@ -965,20 +980,6 @@ function applyVisionImpaired(on) {
             #accessibility-widget {
                 filter: none !important;
                 z-index: 2147483647 !important;
-            }
-            
-            /* Slight zoom for images and content blocks inside main page structure.
-               Use transform (not layout properties) so there is no left/right shift. */
-            body.vision-impaired main img,
-            body.vision-impaired main div,
-            body.vision-impaired [role="main"] img,
-            body.vision-impaired [role="main"] div,
-            body.vision-impaired .main-content img,
-            body.vision-impaired .main-content div,
-            body.vision-impaired .page-wrapper img,
-            body.vision-impaired .page-wrapper div {
-                transform: scale(1.03);
-                transform-origin: center center;
             }
         `;
     } catch (_) {}
@@ -1038,89 +1039,8 @@ function applyVisionImpaired(on) {
                     }
                     
                     body.vision-impaired {
-                        /* No layout modifications */
-                        /* No layout modifications */
-                        /* Slightly enhance text contrast without changing colors */
-                        filter: contrast(1.1) brightness(1.05) !important;
-                    }
-                    
-                    /* 2. IMPROVE TEXT READABILITY - Enhanced font weight for better readability */
-                    body.vision-impaired p,
-                    body.vision-impaired span,
-                    body.vision-impaired div,
-                    body.vision-impaired li,
-                    body.vision-impaired td,
-                    body.vision-impaired th {
-                        /* Slightly improve text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        /* Increased font weight for better readability */
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 3. ENHANCE FOCUS INDICATORS - Make focus more visible without being disruptive */
-                    body.vision-impaired *:focus {
-                        outline: 2px solid #0066cc !important;
-                        outline-offset: 1px !important;
-                    }
-                    
-                    /* 4. IMPROVE LINK VISIBILITY - Enhanced font weight for links */
-                    body.vision-impaired a {
-                        /* Slightly improve link contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        /* Increased font weight for better visibility */
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 5. ENHANCE BUTTON READABILITY - Enhanced font weight for buttons */
-                    body.vision-impaired button,
-                    body.vision-impaired input[type="button"],
-                    body.vision-impaired input[type="submit"],
-                    body.vision-impaired input[type="reset"] {
-                        /* Slightly improve button text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 6. IMPROVE FORM ELEMENT READABILITY - Enhanced font weight for form elements */
-                    body.vision-impaired input,
-                    body.vision-impaired textarea,
-                    body.vision-impaired select {
-                        /* Slightly improve form text contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* 7. ENHANCE HEADING READABILITY - Increased font weight for headings */
-                    body.vision-impaired h1,
-                    body.vision-impaired h2,
-                    body.vision-impaired h3,
-                    body.vision-impaired h4,
-                    body.vision-impaired h5,
-                    body.vision-impaired h6 {
-                        /* Slightly improve heading contrast */
-                        text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
-                        font-weight: 700 !important;
-                    }
-                    
-                    /* 8. IMPROVE IMAGE CONTRAST - Only enhance images slightly */
-                    body.vision-impaired img {
-                        /* Slightly improve image contrast */
-                        filter: contrast(1.05) brightness(1.02) !important;
-                    }
-                    
-                    /* 9. PREVENT EXTRA WHITESPACE AND SCROLLBARS */
-                    body.vision-impaired * {
-                        box-sizing: border-box !important;
-                        /* No layout modifications */
-                    }
-                    
-                    /* 10. PRESERVE LAYOUT - No footer modifications */
-                    
-                    /* 11. RESPONSIVE ADJUSTMENTS - No scaling on mobile */
-                    @media (max-width: 768px) {
-                        html.vision-impaired {
-                            /* No zoom - preserve original layout */
-                        }
+                        /* Slight brightness bump only, no extra contrast or font changes */
+                        filter: brightness(1.06) !important;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -8137,11 +8057,15 @@ class AccessibilityWidget {
     
                                     <div style="display: flex; align-items: center; gap: 10px;">
     
-                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-2%</button>
+                                        <button class="scaling-btn" id="decrease-content-scale-btn" tabindex="0" aria-label="Decrease content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>-2%</span>
+                                        </button>
     
                                         <span id="content-scale-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
     
-                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+2%</button>
+                                        <button class="scaling-btn" id="increase-content-scale-btn" tabindex="0" aria-label="Increase content scale by 2%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>+2%</span>
+                                        </button>
     
                                     </div>
     
@@ -8288,17 +8212,21 @@ class AccessibilityWidget {
                                 <p id="font-sizing-desc">Font size with arrow controls</p>
     
                                 <div class="scaling-controls" id="font-sizing-controls" style="display: none; margin-top: 10px;">
-    
+
                                     <div style="display: flex; align-items: center; gap: 10px;">
-    
-                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-5%</button>
-    
+
+                                        <button class="scaling-btn" id="decrease-font-size-btn" tabindex="0" aria-label="Decrease font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>-5%</span>
+                                        </button>
+
                                         <span id="font-size-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
-    
-                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+5%</button>
-    
+
+                                        <button class="scaling-btn" id="increase-font-size-btn" tabindex="0" aria-label="Increase font size by 5%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>+5%</span>
+                                        </button>
+
                                     </div>
-    
+
                                 </div>
     
                             </div>
@@ -8358,17 +8286,21 @@ class AccessibilityWidget {
                                 <p>Line height with arrow controls</p>
     
                                 <div class="scaling-controls" id="line-height-controls" style="display: none; margin-top: 10px;">
-    
+
                                     <div style="display: flex; align-items: center; gap: 10px;">
-    
-                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
-    
+
+                                        <button class="scaling-btn" id="decrease-line-height-btn" tabindex="0" aria-label="Decrease line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>-10%</span>
+                                        </button>
+
                                         <span id="line-height-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
-    
-                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
-    
+
+                                        <button class="scaling-btn" id="increase-line-height-btn" tabindex="0" aria-label="Increase line height by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>+10%</span>
+                                        </button>
+
                                     </div>
-    
+
                                 </div>
     
                             </div>
@@ -8400,17 +8332,21 @@ class AccessibilityWidget {
                                 <p>Letter spacing with arrow controls</p>
     
                                 <div class="scaling-controls" id="letter-spacing-controls" style="display: none; margin-top: 10px;">
-    
+
                                     <div style="display: flex; align-items: center; gap: 10px;">
-    
-                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-down"></i>-10%</button>
-    
+
+                                        <button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="0" aria-label="Decrease letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>-10%</span>
+                                        </button>
+
                                         <span id="letter-spacing-value" style="font-weight: bold; min-width: 60px; text-align: center;">100%</span>
-    
-                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;"><i class="fas fa-chevron-up"></i>+10%</button>
-    
+
+                                        <button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="0" aria-label="Increase letter spacing by 10%" style="background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; height: 28px; min-width: 80px; padding: 6px 20px; text-align: center;">
+                                            <span>+10%</span>
+                                        </button>
+
                                     </div>
-    
+
                                 </div>
     
                             </div>
@@ -26622,92 +26558,14 @@ class AccessibilityWidget {
                 if (!on) return;
                 
                 style.textContent = `
-            /* VISION IMPAIRED: Scale content only, preserve webpage structure */
+            /* VISION IMPAIRED: Keep structure and typography intact; small brightness bump only */
             
-            /* Don't scale html/body - keep webpage structure intact */
             html.vision-impaired {
-                /* REMOVED: zoom - this was scaling the entire webpage */
+                /* No zoom or layout changes */
             }
             
             body.vision-impaired {
-                filter: brightness(1.1) !important;
-                /* REMOVED: zoom - this was scaling the entire webpage */
-            }
-            
-            /* Scale only individual text content elements - increase font sizes slightly */
-            /* Don't scale body/html to preserve webpage structure and prevent content shifting */
-            
-            /* Scale text elements */
-            body.vision-impaired p,
-            body.vision-impaired span,
-            body.vision-impaired div,
-            body.vision-impaired a,
-            body.vision-impaired li,
-            body.vision-impaired td,
-            body.vision-impaired th,
-            body.vision-impaired label,
-            body.vision-impaired button,
-            body.vision-impaired input[type="text"],
-            body.vision-impaired input[type="email"],
-            body.vision-impaired input[type="search"],
-            body.vision-impaired textarea,
-            body.vision-impaired select {
-                font-size: 110% !important;
-            }
-            
-            /* Scale headings proportionally */
-            body.vision-impaired h1 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h2 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h3 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h4 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h5 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h6 {
-                font-size: 110% !important;
-            }
-
-            /* Slight zoom for images and content blocks inside main page structure.
-               Use transform (not layout properties) so there is no left/right shift. */
-            body.vision-impaired main img,
-            body.vision-impaired main div,
-            body.vision-impaired [role="main"] img,
-            body.vision-impaired [role="main"] div,
-            body.vision-impaired .main-content img,
-            body.vision-impaired .main-content div,
-            body.vision-impaired .page-wrapper img,
-            body.vision-impaired .page-wrapper div {
-                transform: scale(1.03);
-                transform-origin: center center;
-            }
-            
-            /* Scale buttons and interactive elements */
-            body.vision-impaired button,
-            body.vision-impaired .btn,
-            body.vision-impaired .button,
-            body.vision-impaired [class*="btn"],
-            body.vision-impaired [class*="button"],
-            body.vision-impaired input[type="button"],
-            body.vision-impaired input[type="submit"],
-            body.vision-impaired input[type="reset"] {
-                font-size: 110% !important;
-                padding: calc(1em * 1.1) calc(1.5em * 1.1) !important;
-            }
-            
-            /* Scale form inputs */
-            body.vision-impaired input,
-            body.vision-impaired textarea,
-            body.vision-impaired select {
-                font-size: 110% !important;
-                padding: calc(0.5em * 1.1) calc(0.75em * 1.1) !important;
+                filter: brightness(1.06) !important;
             }
             
             /* Exclude widget from scaling and brightness */
