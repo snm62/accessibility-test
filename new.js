@@ -592,6 +592,45 @@
                         }
                     };
                     
+                    // Helper to consolidate generic split-text / letter-by-letter animations into plain text
+                    // Used both on initial seizure-safe load and when the toggle is turned on.
+                    window.__seizureConsolidateSplitText = function() {
+                        try {
+                            const containers = document.querySelectorAll(
+                                '[data-splitting], .split, [class*="split-text"], [class*="text-split"], ' +
+                                '[class*="text-animation"], [class*="typing"], [class*="typewriter"], ' +
+                                '[class*="reveal"], [class*="unveil"], [class*="show-text"], [class*="text-effect"]'
+                            );
+                            
+                            containers.forEach(container => {
+                                try {
+                                    if (!container || container.hasAttribute('data-seizure-text-processed')) return;
+                                    
+                                    const charElements = container.querySelectorAll(
+                                        '.char, [class*="char"], .letter, [class*="letter"], .word, [class*="word"]'
+                                    );
+                                    
+                                    if (!charElements || charElements.length === 0) return;
+                                    
+                                    let fullText = '';
+                                    charElements.forEach(char => {
+                                        fullText += char.textContent || '';
+                                    });
+                                    
+                                    if (fullText && fullText.trim()) {
+                                        container.textContent = fullText.trim();
+                                        container.setAttribute('data-seizure-text-processed', 'true');
+                                        container.style.opacity = '1';
+                                        container.style.visibility = 'visible';
+                                        container.style.animation = 'none';
+                                        container.style.transition = 'none';
+                                        container.style.transform = 'none';
+                                    }
+                                } catch (_) { /* ignore per-container errors */ }
+                            });
+                        } catch (_) { /* ignore top-level errors */ }
+                    };
+                    
                     // Apply immediately and also on DOMContentLoaded as a second safety
                     window.__applySeizureSafeDOMFreeze();
                     
@@ -951,6 +990,8 @@ function applyVisionImpaired(on) {
             
             html.vision-impaired {
                 /* No zoom or layout changes */
+                /* Prevent horizontal scrollbar on the root element when content is zoomed */
+                overflow-x: hidden !important;
             }
             
             body.vision-impaired {
@@ -1015,6 +1056,7 @@ function applyVisionImpaired(on) {
                     try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
                     if (on) {
                         try { window.__applySeizureSafeDOMFreeze && window.__applySeizureSafeDOMFreeze(); } catch (_) {}
+                        try { window.__seizureConsolidateSplitText && window.__seizureConsolidateSplitText(); } catch (_) {}
                     }
                 });
                 input.__seizureBound = true;
@@ -1047,9 +1089,11 @@ function applyVisionImpaired(on) {
                     /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
                     
                     /* 1. SUBTLE WEBSITE SCALING - Scale entire website by 1.05x (5% larger) */
-                    html.vision-impaired {
+            html.vision-impaired {
                         /* No zoom - preserve original layout */
                         /* No layout modifications */
+                        /* Prevent horizontal scrollbar on the root element when content is zoomed */
+                        overflow-x: hidden !important;
                     }
                     
                     body.vision-impaired {
@@ -14758,15 +14802,18 @@ class AccessibilityWidget {
           
     
             // Store original line-height if not already stored
-    
             if (this.originalLineHeight === null) {
-    
                 const computedStyle = window.getComputedStyle(document.body);
-    
-                this.originalLineHeight = parseFloat(computedStyle.lineHeight);
-    
-             
-    
+                
+                // Some sites report 'normal' for line-height; parseFloat will give NaN.
+                // In that case, approximate from font-size with a comfortable factor.
+                let baseLineHeight = parseFloat(computedStyle.lineHeight);
+                if (isNaN(baseLineHeight)) {
+                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                    baseLineHeight = fontSize * 1.4; // typical readable default
+                }
+                
+                this.originalLineHeight = baseLineHeight;
             }
     
             
@@ -14802,6 +14849,18 @@ class AccessibilityWidget {
                     
                     p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer, main {
                         line-height: ${lineHeightValue}px !important;
+                    }
+                    
+                    /* Do not affect the accessibility widget UI */
+                    .accessibility-widget,
+                    .accessibility-widget *,
+                    #accessibility-widget,
+                    #accessibility-widget *,
+                    .accessibility-panel,
+                    .accessibility-panel *,
+                    .accessibility-icon,
+                    .accessibility-icon * {
+                        line-height: normal !important;
                     }
                 `;
             }
