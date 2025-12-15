@@ -996,25 +996,25 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        // Brightness only; remove all font-size scaling
+        // Simple CSS: zoom and brightness only (original behavior)
         style.textContent = `
-            /* VISION IMPAIRED: Increase brightness only; no layout or font scaling */
+            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
             
-            /* Keep page structure intact */
             html.vision-impaired {
-                /* No zoom */
+                zoom: 1.1 !important;
+                overflow-x: hidden !important;
             }
             
             body.vision-impaired {
                 filter: brightness(1.1) !important;
-                /* No zoom or font-size changes */
             }
             
-            /* Exclude widget from brightness */
+            /* Exclude widget from zoom and brightness */
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
             .accessibility-panel {
+                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
@@ -1023,6 +1023,7 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-icon,
             .accessibility-icon,
             #accessibility-icon {
+                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
@@ -1031,16 +1032,19 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-widget,
             .accessibility-widget,
             #accessibility-widget {
+                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
             
-            /* Keep images at original size (no scaling) */
+            /* Keep images at original size (no zoom) */
             body.vision-impaired img,
             html.vision-impaired img {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
             
-            /* Keep sliders and carousels at original size */
+            /* Keep sliders at original size (no zoom) */
             body.vision-impaired [class*="slider"],
             body.vision-impaired [id*="slider"],
             body.vision-impaired [data-slider],
@@ -1055,6 +1059,8 @@ function applyVisionImpaired(on) {
             html.vision-impaired [id*="swiper"],
             html.vision-impaired [class*="carousel"],
             html.vision-impaired [id*="carousel"] {
+                zoom: 1 !important;
+                transform: scale(1) !important;
             }
         `;
     } catch (_) {}
@@ -7750,7 +7756,7 @@ class AccessibilityWidget {
     html body.big-black-cursor,
     body.big-black-cursor *,
     html body.big-black-cursor * {
-        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWJsYWNrIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuMyIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LWJsYWNrKSIvPjwvc3ZnPg==') 20 10, auto !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjMDAwMDAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1ibGFjaykiLz48L3N2Zz4=') 20 10, auto !important;
     }
     
     /* Big Black Cursor - Hand Pointer for Links - Higher specificity to override default */
@@ -7770,7 +7776,7 @@ class AccessibilityWidget {
     body.big-black-cursor .btn,
     body.big-black-cursor [class*="button"],
     body.big-black-cursor [class*="link"] {
-        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDUyIDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtYmxhY2spIi8+PC9zdmc+') 24 10, pointer !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtYmxhY2siIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC4zIi8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLWJsYWNrKSIvPjwvc3ZnPg==') 24 10, pointer !important;
     }
     
     /* Big White Cursor - Arrow Cursor (default) */
@@ -7778,7 +7784,7 @@ class AccessibilityWidget {
     html body.big-white-cursor,
     body.big-white-cursor *,
     html body.big-white-cursor * {
-        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LXdoaXRlIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuNSIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LXdoaXRlKSIvPjwvc3ZnPg==') 20 10, auto !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy13aGl0ZSkiLz48L3N2Zz4=') 20 10, auto !important;
     }
     
     /* Big White Cursor - Hand Pointer for Links - Higher specificity to override default */
@@ -7798,7 +7804,7 @@ class AccessibilityWidget {
     body.big-white-cursor .btn,
     body.big-white-cursor [class*="button"],
     body.big-white-cursor [class*="link"] {
-        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDU4IDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtd2hpdGUpIi8+PC9zdmc+') 24 10, pointer !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtd2hpdGUiIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC41Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLXdoaXRlKSIvPjwvc3ZnPg==') 24 10, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -23417,11 +23423,11 @@ class AccessibilityWidget {
         
     
         applyBigBlackCursor() {
-            // Use new black arrow cursor (base64 encoded)
-            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWJsYWNrIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuMyIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LWJsYWNrKSIvPjwvc3ZnPg==';
+            // Use black arrow cursor (32x32 base64)
+            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjMDAwMDAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1ibGFjaykiLz48L3N2Zz4=';
             
-            // Use new black hand cursor for links/buttons (base64 encoded)
-            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDUyIDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtYmxhY2spIi8+PC9zdmc+';
+            // Use black hand cursor for links/buttons (32x32 base64)
+            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtYmxhY2siIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC4zIi8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLWJsYWNrKSIvPjwvc3ZnPg==';
             
             // Apply arrow cursor to body
             document.body.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
@@ -23566,11 +23572,11 @@ class AccessibilityWidget {
         
     
         applyBigWhiteCursor() {
-            // Use new white arrow cursor (base64 encoded)
-            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LXdoaXRlIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuNSIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LXdoaXRlKSIvPjwvc3ZnPg==';
+            // Use white arrow cursor (32x32 base64)
+            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy13aGl0ZSkiLz48L3N2Zz4=';
             
-            // Use new white hand cursor for links/buttons (base64 encoded)
-            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDU4IDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtd2hpdGUpIi8+PC9zdmc+';
+            // Use white hand cursor for links/buttons (32x32 base64)
+            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtd2hpdGUiIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC41Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLXdoaXRlKSIvPjwvc3ZnPg==';
             
             // Apply arrow cursor to body
             document.body.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
@@ -26484,6 +26490,10 @@ class AccessibilityWidget {
             
             // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
             this.stopAnimationLibraries();
+
+            // 3b. Force animations/text to final visible state
+            this.forceAllAnimationsToFinalVisibleState();
+            this.forceCompleteTextAnimations();
             
             // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
             this.replaceAnimatedMedia();
