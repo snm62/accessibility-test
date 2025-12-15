@@ -956,6 +956,8 @@ function applyVisionImpaired(on) {
             body.vision-impaired {
                 /* Slightly brighten the page for low-vision users */
                 filter: brightness(1.06) !important;
+                /* Prevent horizontal scrollbar caused by content zoom */
+                overflow-x: hidden !important;
             }
             
             /* Exclude widget from brightness adjustments */
@@ -990,7 +992,8 @@ function applyVisionImpaired(on) {
             body.vision-impaired [role="main"],
             body.vision-impaired .main-content {
                 transform: scale(1.02);
-                transform-origin: center center;
+                /* Anchor zoom at the top so nav/hero stay in view and avoid pushing content up */
+                transform-origin: top center;
             }
         `;
     } catch (_) {}
@@ -1052,6 +1055,7 @@ function applyVisionImpaired(on) {
                     body.vision-impaired {
                         /* Slight brightness bump only, no extra contrast or font changes */
                         filter: brightness(1.06) !important;
+                        overflow-x: hidden !important;
                     }
                     
                     /* Gentle zoom for main content only, centered to avoid left/right shift.
@@ -1061,7 +1065,7 @@ function applyVisionImpaired(on) {
                     body.vision-impaired [role="main"],
                     body.vision-impaired .main-content {
                         transform: scale(1.02);
-                        transform-origin: center center;
+                        transform-origin: top center;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -14767,12 +14771,10 @@ class AccessibilityWidget {
     
             
     
-            // Subtle mapping: keep visual steps at 10% but apply gentle real change
-            // Base comfortable line-height around 1.4 at 100%
-            const base = 1.4;
-            const intensity = 0.3; // total swing ±0.3 across 100% range
-            const delta = ((this.lineHeight - 100) / 100) * intensity;
-            const lineHeightValue = (base + delta).toFixed(3);
+            // Map visual percentage directly to the site's original line-height.
+            // 100% = original line-height, 110% = 1.1 × original, etc.
+            const factor = this.lineHeight / 100;
+            const lineHeightValue = (this.originalLineHeight * factor).toFixed(3);
     
             
     
@@ -14791,15 +14793,15 @@ class AccessibilityWidget {
             if (existingStyle) {
                 existingStyle.textContent = `
                     body, html {
-                        line-height: ${lineHeightValue} !important;
+                        line-height: ${lineHeightValue}px !important;
                     }
                     
                     body *, html * {
-                        line-height: ${lineHeightValue} !important;
+                        line-height: ${lineHeightValue}px !important;
                     }
                     
                     p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer, main {
-                        line-height: ${lineHeightValue} !important;
+                        line-height: ${lineHeightValue}px !important;
                     }
                 `;
             }
@@ -26587,15 +26589,16 @@ class AccessibilityWidget {
             
             body.vision-impaired {
                 filter: brightness(1.06) !important;
+                overflow-x: hidden !important;
             }
             
-            /* Gentle zoom for main content only, centered to avoid left/right shift */
+            /* Gentle zoom for main content only, anchored at top to avoid pushing nav off-screen */
             body.vision-impaired main,
             body.vision-impaired [role="main"],
             body.vision-impaired .main-content,
             body.vision-impaired .page-wrapper {
                 transform: scale(1.02);
-                transform-origin: center center;
+                transform-origin: top center;
             }
             
             /* Exclude widget from scaling and brightness */
