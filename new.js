@@ -996,88 +996,25 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        // Scale only content inside, not the webpage structure
+        // Brightness only; remove all font-size scaling
         style.textContent = `
-            /* VISION IMPAIRED: Scale content only, preserve webpage structure */
+            /* VISION IMPAIRED: Increase brightness only; no layout or font scaling */
             
-            /* Don't scale html/body - keep webpage structure intact */
+            /* Keep page structure intact */
             html.vision-impaired {
-                /* REMOVED: zoom - this was scaling the entire webpage */
+                /* No zoom */
             }
             
             body.vision-impaired {
                 filter: brightness(1.1) !important;
-                /* REMOVED: zoom - this was scaling the entire webpage */
+                /* No zoom or font-size changes */
             }
             
-            /* Scale only individual text content elements - increase font sizes slightly */
-            /* Don't scale body/html to preserve webpage structure and prevent content shifting */
-            
-            /* Scale text elements */
-            body.vision-impaired p,
-            body.vision-impaired span,
-            body.vision-impaired div,
-            body.vision-impaired a,
-            body.vision-impaired li,
-            body.vision-impaired td,
-            body.vision-impaired th,
-            body.vision-impaired label,
-            body.vision-impaired button,
-            body.vision-impaired input[type="text"],
-            body.vision-impaired input[type="email"],
-            body.vision-impaired input[type="search"],
-            body.vision-impaired textarea,
-            body.vision-impaired select {
-                font-size: 110% !important;
-            }
-            
-            /* Scale headings proportionally */
-            body.vision-impaired h1 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h2 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h3 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h4 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h5 {
-                font-size: 110% !important;
-            }
-            body.vision-impaired h6 {
-                font-size: 110% !important;
-            }
-            
-            /* Scale buttons and interactive elements */
-            body.vision-impaired button,
-            body.vision-impaired .btn,
-            body.vision-impaired .button,
-            body.vision-impaired [class*="btn"],
-            body.vision-impaired [class*="button"],
-            body.vision-impaired input[type="button"],
-            body.vision-impaired input[type="submit"],
-            body.vision-impaired input[type="reset"] {
-                font-size: 110% !important;
-                padding: calc(1em * 1.1) calc(1.5em * 1.1) !important;
-            }
-            
-            /* Scale form inputs */
-            body.vision-impaired input,
-            body.vision-impaired textarea,
-            body.vision-impaired select {
-                font-size: 110% !important;
-                padding: calc(0.5em * 1.1) calc(0.75em * 1.1) !important;
-            }
-            
-            /* Exclude widget from scaling and brightness */
+            /* Exclude widget from brightness */
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
             .accessibility-panel {
-                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
@@ -1086,7 +1023,6 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-icon,
             .accessibility-icon,
             #accessibility-icon {
-                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
@@ -1095,7 +1031,6 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-widget,
             .accessibility-widget,
             #accessibility-widget {
-                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
@@ -1103,7 +1038,6 @@ function applyVisionImpaired(on) {
             /* Keep images at original size (no scaling) */
             body.vision-impaired img,
             html.vision-impaired img {
-                /* Images stay at original size */
             }
             
             /* Keep sliders and carousels at original size */
@@ -1121,7 +1055,6 @@ function applyVisionImpaired(on) {
             html.vision-impaired [id*="swiper"],
             html.vision-impaired [class*="carousel"],
             html.vision-impaired [id*="carousel"] {
-                /* Sliders stay at original size */
             }
         `;
     } catch (_) {}
@@ -23484,21 +23417,29 @@ class AccessibilityWidget {
         
     
         applyBigBlackCursor() {
-    
-            // Force apply cursor style with JavaScript to override any conflicts
-            const cursorUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="black" stroke="white" stroke-width="2"/></svg>';
+            // Use new black arrow cursor (base64 encoded)
+            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWJsYWNrIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuMyIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LWJsYWNrKSIvPjwvc3ZnPg==';
             
-            // Apply to body
-            document.body.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+            // Use new black hand cursor for links/buttons (base64 encoded)
+            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDUyIDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtYmxhY2spIi8+PC9zdmc+';
             
-            // Apply to all elements
+            // Apply arrow cursor to body
+            document.body.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
+            
+            // Apply arrow cursor to all elements first
             const allElements = document.querySelectorAll('*');
             allElements.forEach(el => {
-                el.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+                // Skip links and buttons - they'll get hand cursor
+                if (!el.matches('a, button, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]), input[type="button"], input[type="submit"], input[type="reset"], .btn, [class*="button"], [class*="link"]')) {
+                    el.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
+                }
             });
-    
- 
-    
+            
+            // Apply hand cursor to links and buttons
+            const interactiveElements = document.querySelectorAll('a, button, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]), input[type="button"], input[type="submit"], input[type="reset"], .btn, [class*="button"], [class*="link"]');
+            interactiveElements.forEach(el => {
+                el.style.setProperty('cursor', `url('${handCursorUrl}') 24 10, pointer`, 'important');
+            });
         }
     
     
@@ -23625,21 +23566,29 @@ class AccessibilityWidget {
         
     
         applyBigWhiteCursor() {
-    
-            // Force apply cursor style with JavaScript to override any conflicts
-            const cursorUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L0 40 L12 28 L20 36 L24 32 L16 24 L40 24" fill="white" stroke="black" stroke-width="2"/></svg>';
+            // Use new white arrow cursor (base64 encoded)
+            const arrowCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LXdoaXRlIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuNSIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LXdoaXRlKSIvPjwvc3ZnPg==';
             
-            // Apply to body
-            document.body.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+            // Use new white hand cursor for links/buttons (base64 encoded)
+            const handCursorUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDU4IDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtd2hpdGUpIi8+PC9zdmc+';
             
-            // Apply to all elements
+            // Apply arrow cursor to body
+            document.body.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
+            
+            // Apply arrow cursor to all elements first
             const allElements = document.querySelectorAll('*');
             allElements.forEach(el => {
-                el.style.setProperty('cursor', `url('${cursorUrl}') 0 0, auto`, 'important');
+                // Skip links and buttons - they'll get hand cursor
+                if (!el.matches('a, button, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]), input[type="button"], input[type="submit"], input[type="reset"], .btn, [class*="button"], [class*="link"]')) {
+                    el.style.setProperty('cursor', `url('${arrowCursorUrl}') 20 10, auto`, 'important');
+                }
             });
-    
- 
-    
+            
+            // Apply hand cursor to links and buttons
+            const interactiveElements = document.querySelectorAll('a, button, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]), input[type="button"], input[type="submit"], input[type="reset"], .btn, [class*="button"], [class*="link"]');
+            interactiveElements.forEach(el => {
+                el.style.setProperty('cursor', `url('${handCursorUrl}') 24 10, pointer`, 'important');
+            });
         }
     
     
@@ -28168,10 +28117,9 @@ class AccessibilityWidget {
                 style.id = 'seizure-safe-animation-css';
                 style.textContent = `
                     /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types - same as stop-animation */
-                    /* Exclude nav/header to preserve sticky positioning */
-                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,
-                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
+                    .seizure-safe *,
+                    .seizure-safe *::before,
+                    .seizure-safe *::after {
                         /* Stop all CSS animations and transitions */
                         animation: none !important;
                         transition: none !important;
@@ -28181,60 +28129,47 @@ class AccessibilityWidget {
                         text-decoration: none !important;
                     }
                     
-                    /* Stop all animation classes and libraries - exclude nav/header */
-                    .seizure-safe *[class*="animate"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="fade"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="slide"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="bounce"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="pulse"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="shake"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="flash"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="blink"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="glow"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="spin"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="rotate"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="scale"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="zoom"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="wiggle"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="jiggle"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="twist"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="flip"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="swing"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="wobble"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe *[class*="tilt"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    /* Stop all animation classes and libraries */
+                    .seizure-safe *[class*="animate"],
+                    .seizure-safe *[class*="fade"],
+                    .seizure-safe *[class*="slide"],
+                    .seizure-safe *[class*="bounce"],
+                    .seizure-safe *[class*="pulse"],
+                    .seizure-safe *[class*="shake"],
+                    .seizure-safe *[class*="flash"],
+                    .seizure-safe *[class*="blink"],
+                    .seizure-safe *[class*="glow"],
+                    .seizure-safe *[class*="spin"],
+                    .seizure-safe *[class*="rotate"],
+                    .seizure-safe *[class*="scale"],
+                    .seizure-safe *[class*="zoom"],
+                    .seizure-safe *[class*="wiggle"],
+                    .seizure-safe *[class*="jiggle"],
+                    .seizure-safe *[class*="twist"],
+                    .seizure-safe *[class*="flip"],
+                    .seizure-safe *[class*="swing"],
+                    .seizure-safe *[class*="wobble"],
+                    .seizure-safe *[class*="tilt"],
                     /* REMOVED: Scroll-related classes to preserve scroll animations */
                     
-                    /* Stop SVG and Canvas animations - exclude nav/header */
-                    .seizure-safe svg:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe svg path:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe svg line:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe canvas:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
+                    /* Stop SVG and Canvas animations */
+                    .seizure-safe svg,
+                    .seizure-safe svg path,
+                    .seizure-safe svg line,
+                    .seizure-safe canvas {
                         animation: none !important;
                         transition: none !important;
                         /* Removed visibility and transform rules to prevent positioning issues */
                     }
                     
-                    /* Stop text splitting animations - exclude nav/header */
-                    .seizure-safe [data-splitting]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
-                    .seizure-safe .split:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                    .seizure-safe .char:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                    .seizure-safe .word:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
+                    /* Stop text splitting animations */
+                    .seizure-safe [data-splitting],
+                    .seizure-safe .split, 
+                    .seizure-safe .char, 
+                    .seizure-safe .word {
                         animation: none !important;
                         transition: none !important;
                         /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
-                    }
-                    
-                    /* CRITICAL: Preserve nav/header sticky positioning and transforms */
-                    .seizure-safe nav,
-                    .seizure-safe header,
-                    .seizure-safe .navbar,
-                    .seizure-safe [class*="nav"],
-                    .seizure-safe [class*="header"] {
-                        animation: initial !important;
-                        transition: initial !important;
-                        transform: initial !important;
-                        /* REMOVED: position: initial !important; - This breaks sticky navigation */
-                        will-change: initial !important;
                     }
                 `;
                 document.head.appendChild(style);
