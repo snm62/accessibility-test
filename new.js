@@ -60,6 +60,23 @@
                     -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
                 }
                 
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.seizure-safe nav,
+                body.seizure-safe header,
+                body.seizure-safe .navbar,
+                body.seizure-safe [role="navigation"],
+                body.seizure-safe [class*="nav"],
+                body.seizure-safe [class*="header"],
+                body.seizure-safe [class*="navbar"],
+                body.seizure-safe [data-sticky],
+                body.seizure-safe [data-fixed],
+                body.seizure-safe [style*="position: sticky"],
+                body.seizure-safe [style*="position:fixed"],
+                body.seizure-safe [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
                 /* Exclude widget container and all its contents from color filter */
                 body.seizure-safe #accessibility-widget-container,
                 body.seizure-safe [id*="accessibility-widget"],
@@ -210,6 +227,26 @@
                     animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
                     /* Don't force opacity/visibility here - let JS handle consolidation first */
+                }
+                /* Hide duplicate text elements detected by JS (like Webflow's h1 + animated h2) */
+                body.seizure-safe [data-seizure-duplicate-hidden] {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    position: absolute !important;
+                    pointer-events: none !important;
+                }
+                /* Hide per-letter spans in Webflow-style elements that have been consolidated.
+                   Only hide spans in elements that have many child spans (likely per-letter animation) */
+                body.seizure-safe [data-seizure-text-processed][class*="fade-up"] > span,
+                body.seizure-safe [data-seizure-text-processed][class*="fade-in"] > span,
+                body.seizure-safe [data-seizure-text-processed][class*="multi-text"] > span,
+                body.seizure-safe [data-seizure-text-processed].hero-heading > span {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    position: absolute !important;
+                    pointer-events: none !important;
                 }
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
                 body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
@@ -599,6 +636,7 @@
                     // Used both on initial seizure-safe load and when the toggle is turned on.
                     window.__seizureConsolidateSplitText = function() {
                         try {
+                            // First pass: Handle standard split-text containers
                             const containers = document.querySelectorAll(
                                 '[data-splitting], .split, [class*="split-text"], [class*="text-split"], ' +
                                 '[class*="text-animation"], [class*="typing"], [class*="typewriter"], ' +
@@ -630,6 +668,93 @@
                                         container.style.transform = 'none';
                                     }
                                 } catch (_) { /* ignore per-container errors */ }
+                            });
+                            
+                            // Second pass: Handle Webflow-style per-letter spans (plain <span> elements, not .char/.word)
+                            // Look for elements with many child spans that likely contain per-letter text
+                            const webflowContainers = document.querySelectorAll(
+                                '[class*="fade-up"], [class*="fade-in"], [class*="multi-text"], h1, h2, h3, h4, h5, h6'
+                            );
+                            
+                            webflowContainers.forEach(container => {
+                                try {
+                                    if (!container || container.hasAttribute('data-seizure-text-processed')) return;
+                                    
+                                    // Check if this element has many child spans (likely per-letter animation)
+                                    const childSpans = container.querySelectorAll(':scope > span');
+                                    if (childSpans.length < 5) return; // Not enough to be per-letter
+                                    
+                                    // Check if spans contain single characters or very short text
+                                    let isPerLetter = true;
+                                    let fullText = '';
+                                    childSpans.forEach(span => {
+                                        const text = (span.textContent || '').trim();
+                                        fullText += text;
+                                        // If any span has more than 2 characters, it's probably not per-letter
+                                        if (text.length > 2) {
+                                            isPerLetter = false;
+                                        }
+                                    });
+                                    
+                                    if (isPerLetter && fullText && fullText.trim()) {
+                                        container.textContent = fullText.trim();
+                                        container.setAttribute('data-seizure-text-processed', 'true');
+                                        container.style.opacity = '1';
+                                        container.style.visibility = 'visible';
+                                        container.style.animation = 'none';
+                                        container.style.transition = 'none';
+                                        container.style.transform = 'none';
+                                    }
+                                } catch (_) { /* ignore per-container errors */ }
+                            });
+                            
+                            // Third pass: Detect and hide duplicate text elements (like Webflow's h1 + animated h2)
+                            // If we find multiple headings/blocks with similar text content, hide the animated ones
+                            const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="heading"]');
+                            const textMap = new Map();
+                            
+                            textElements.forEach(el => {
+                                try {
+                                    const text = (el.textContent || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                                    if (!text || text.length < 10) return; // Skip very short text
+                                    
+                                    if (!textMap.has(text)) {
+                                        textMap.set(text, []);
+                                    }
+                                    textMap.get(text).push(el);
+                                } catch (_) {}
+                            });
+                            
+                            // For each duplicate text, keep the cleanest version and hide the animated ones
+                            textMap.forEach((elements, text) => {
+                                if (elements.length < 2) return; // No duplicates
+                                
+                                // Find the cleanest version (no per-letter spans, no animation classes)
+                                let cleanest = null;
+                                let cleanestScore = -1;
+                                
+                                elements.forEach(el => {
+                                    const hasSpans = el.querySelectorAll(':scope > span').length > 0;
+                                    const hasAnimClass = el.className.includes('fade') || 
+                                                         el.className.includes('animate') ||
+                                                         el.className.includes('multi-text');
+                                    const score = (hasSpans ? 0 : 10) + (hasAnimClass ? 0 : 5);
+                                    
+                                    if (score > cleanestScore) {
+                                        cleanestScore = score;
+                                        cleanest = el;
+                                    }
+                                });
+                                
+                                // Hide all duplicates except the cleanest one
+                                elements.forEach(el => {
+                                    if (el !== cleanest && !el.hasAttribute('data-seizure-duplicate-hidden')) {
+                                        el.style.display = 'none';
+                                        el.style.visibility = 'hidden';
+                                        el.style.opacity = '0';
+                                        el.setAttribute('data-seizure-duplicate-hidden', 'true');
+                                    }
+                                });
                             });
                         } catch (_) { /* ignore top-level errors */ }
                     };
@@ -989,19 +1114,34 @@ function applyVisionImpaired(on) {
         if (!on) return;
         
         style.textContent = `
-            /* VISION IMPAIRED: Slight brightness increase + gentle centered zoom (no layout shift) */
+            /* VISION IMPAIRED: Brightness only, no layout changes */
             
             html.vision-impaired {
-                /* No zoom or layout changes */
-                /* Prevent horizontal scrollbar on the root element when content is zoomed */
+                /* Prevent horizontal scrollbar without affecting page height */
                 overflow-x: hidden !important;
             }
             
             body.vision-impaired {
                 /* Slightly brighten the page for low-vision users */
                 filter: brightness(1.06) !important;
-                /* Prevent horizontal scrollbar caused by content zoom */
-                overflow-x: hidden !important;
+                /* Don't set overflow-x on body to avoid layout recalculation that might increase page height */
+            }
+            
+            /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+            body.vision-impaired nav,
+            body.vision-impaired header,
+            body.vision-impaired .navbar,
+            body.vision-impaired [role="navigation"],
+            body.vision-impaired [class*="nav"],
+            body.vision-impaired [class*="header"],
+            body.vision-impaired [class*="navbar"],
+            body.vision-impaired [data-sticky],
+            body.vision-impaired [data-fixed],
+            body.vision-impaired [style*="position: sticky"],
+            body.vision-impaired [style*="position:fixed"],
+            body.vision-impaired [style*="position: fixed"] {
+                filter: none !important;
+                -webkit-filter: none !important;
             }
             
             /* Exclude widget from brightness adjustments */
@@ -1081,18 +1221,34 @@ function applyVisionImpaired(on) {
                 const viStyle = document.createElement('style');
                 viStyle.id = 'accessibility-vision-impaired-immediate-early';
                 viStyle.textContent = `
-                    /* VISION IMPAIRED: Subtle Website Scaling and Contrast Enhancement */
+                    /* VISION IMPAIRED: Brightness only, no layout changes */
                     
-                    /* 1. Subtle brightness-only adjustment (no zoom) */
                     html.vision-impaired {
-                        /* Prevent horizontal scrollbar on the root element */
+                        /* Prevent horizontal scrollbar without affecting page height */
                         overflow-x: hidden !important;
                     }
                     
                     body.vision-impaired {
                         /* Slight brightness bump only, no extra contrast or font changes */
                         filter: brightness(1.06) !important;
-                        overflow-x: hidden !important;
+                        /* Don't set overflow-x on body to avoid layout recalculation that might increase page height */
+                    }
+                    
+                    /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                    body.vision-impaired nav,
+                    body.vision-impaired header,
+                    body.vision-impaired .navbar,
+                    body.vision-impaired [role="navigation"],
+                    body.vision-impaired [class*="nav"],
+                    body.vision-impaired [class*="header"],
+                    body.vision-impaired [class*="navbar"],
+                    body.vision-impaired [data-sticky],
+                    body.vision-impaired [data-fixed],
+                    body.vision-impaired [style*="position: sticky"],
+                    body.vision-impaired [style*="position:fixed"],
+                    body.vision-impaired [style*="position: fixed"] {
+                        filter: none !important;
+                        -webkit-filter: none !important;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -1156,7 +1312,8 @@ class AccessibilityWidget {
     
             this.textMagnifierHandlers = new Map(); // Store event handler references
     
-            this.originalLineHeight = null; // Store original line-height
+            this.originalLineHeight = null; // Legacy single baseline (no longer primary)
+            this.originalLineHeights = new Map(); // Store original line-height per element
     
             this.originalFontSizes = new Map(); // Store original font sizes to prevent compounding
     
@@ -14781,76 +14938,47 @@ class AccessibilityWidget {
         // Line Height Methods
     
         updateLineHeight() {
-    
-          
-    
-            // Store original line-height if not already stored
-            if (this.originalLineHeight === null) {
-                const computedStyle = window.getComputedStyle(document.body);
-                
-                // Some sites report 'normal' for line-height; parseFloat will give NaN.
-                // In that case, approximate from font-size with a comfortable factor.
-                let baseLineHeight = parseFloat(computedStyle.lineHeight);
-                if (isNaN(baseLineHeight)) {
-                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
-                    baseLineHeight = fontSize * 1.4; // typical readable default
-                }
-                
-                this.originalLineHeight = baseLineHeight;
-            }
-    
+            // Adjust line-height per element, based on its own original value,
+            // so big headings don't collapse and spacing changes are proportional.
+            const factor = this.lineHeight / 100; // 100 = original, 110 = +10%, etc.
             
-    
-            // Map visual percentage directly to the site's original line-height.
-            // 100% = original line-height, 110% = 1.1 × original, etc.
-            const factor = this.lineHeight / 100;
-            const lineHeightValue = (this.originalLineHeight * factor).toFixed(3);
-    
-            
-    
-            
-            
-    
-            // Add CSS rules for line height if not already added
-            if (!document.getElementById('line-height-css')) {
-                const style = document.createElement('style');
-                style.id = 'line-height-css';
-                document.head.appendChild(style);
-            }
-    
-            // Update the CSS with the new line height value
+            // Clean up any old global CSS rule from previous versions
             const existingStyle = document.getElementById('line-height-css');
             if (existingStyle) {
-                existingStyle.textContent = `
-                    /* Base document text */
-                    body, html {
-                        line-height: ${lineHeightValue}px !important;
-                    }
-                    
-                    /* Apply only to text / inline / form elements so layout boxes (div, section, etc.)
-                       keep their original spacing and don't "jump" on first use. */
-                    p, span, li, td, th, label, small, em, strong, i, b,
-                    h1, h2, h3, h4, h5, h6,
-                    a, button, input, textarea, select {
-                        line-height: ${lineHeightValue}px !important;
-                    }
-                    
-                    /* Do not affect the accessibility widget UI */
-                    .accessibility-widget,
-                    .accessibility-widget *,
-                    #accessibility-widget,
-                    #accessibility-widget *,
-                    .accessibility-panel,
-                    .accessibility-panel *,
-                    .accessibility-icon,
-                    .accessibility-icon * {
-                        line-height: normal !important;
-                    }
-                `;
+                existingStyle.textContent = '';
             }
-    
-        
-    
+            
+            const selector = 'p, span, li, td, th, label, small, em, strong, i, b,' +
+                             'h1, h2, h3, h4, h5, h6,' +
+                             'a, button, input, textarea, select';
+            const elements = document.querySelectorAll(selector);
+            
+            elements.forEach(el => {
+                try {
+                    // Skip anything inside the accessibility widget UI
+                    if (el.closest('.accessibility-widget, #accessibility-widget, .accessibility-panel, .accessibility-icon')) {
+                        return;
+                    }
+                    
+                    // Get or cache this element's original line-height
+                    let base = this.originalLineHeights.get(el);
+                    if (!base) {
+                        const cs = window.getComputedStyle(el);
+                        let lh = parseFloat(cs.lineHeight);
+                        if (isNaN(lh)) {
+                            const fs = parseFloat(cs.fontSize) || 16;
+                            lh = fs * 1.4; // reasonable default ratio
+                        }
+                        base = lh;
+                        this.originalLineHeights.set(el, base);
+                    }
+                    
+                    const newValue = (base * factor).toFixed(3);
+                    el.style.lineHeight = `${newValue}px`;
+                } catch (_) {
+                    // Ignore per-element failures
+                }
+            });
         }
     
     
@@ -15171,6 +15299,9 @@ class AccessibilityWidget {
     
             this.settings['letter-spacing'] = this.letterSpacing; // Save to settings
     
+            // Mark letter spacing feature as used
+            localStorage.setItem('letter-spacing-used', 'true');
+    
             this.updateLetterSpacing();
     
             this.updateLetterSpacingDisplay();
@@ -15190,6 +15321,9 @@ class AccessibilityWidget {
             this.letterSpacing = Math.max(this.letterSpacing - 10, 50);
     
             this.settings['letter-spacing'] = this.letterSpacing; // Save to settings
+    
+            // Mark letter spacing feature as used
+            localStorage.setItem('letter-spacing-used', 'true');
     
             this.updateLetterSpacing();
     
@@ -17493,6 +17627,17 @@ class AccessibilityWidget {
     
             
     
+            // Always update the letter-spacing display to reflect the saved value across pages
+            try {
+                this.updateLetterSpacingDisplay();
+                setTimeout(() => { try { this.updateLetterSpacingDisplay(); } catch (_) {} }, 50);
+            } catch (_) {}
+
+            // Apply letter spacing CSS if it's not the default value
+            if (this.letterSpacing !== 100) {
+                this.updateLetterSpacing();
+            }
+    
             // Load text color from settings
     
             if (this.settings['text-color'] !== undefined && this.settings['text-color'] !== null) {
@@ -18197,6 +18342,23 @@ class AccessibilityWidget {
                     -webkit-filter: contrast(1.1) brightness(1.05) !important;
                 }
                 
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.high-contrast nav,
+                body.high-contrast header,
+                body.high-contrast .navbar,
+                body.high-contrast [role="navigation"],
+                body.high-contrast [class*="nav"],
+                body.high-contrast [class*="header"],
+                body.high-contrast [class*="navbar"],
+                body.high-contrast [data-sticky],
+                body.high-contrast [data-fixed],
+                body.high-contrast [style*="position: sticky"],
+                body.high-contrast [style*="position:fixed"],
+                body.high-contrast [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
                 /* Preserve accessibility widget from contrast filters */
                 body.high-contrast .accessibility-widget,
                 body.high-contrast .accessibility-panel,
@@ -18549,6 +18711,23 @@ class AccessibilityWidget {
                     -webkit-filter: saturate(1.2) !important;
                 }
                 
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.high-saturation nav,
+                body.high-saturation header,
+                body.high-saturation .navbar,
+                body.high-saturation [role="navigation"],
+                body.high-saturation [class*="nav"],
+                body.high-saturation [class*="header"],
+                body.high-saturation [class*="navbar"],
+                body.high-saturation [data-sticky],
+                body.high-saturation [data-fixed],
+                body.high-saturation [style*="position: sticky"],
+                body.high-saturation [style*="position:fixed"],
+                body.high-saturation [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
                 /* Preserve accessibility widget from saturation filters */
                 body.high-saturation .accessibility-widget,
                 body.high-saturation .accessibility-panel,
@@ -18585,6 +18764,23 @@ class AccessibilityWidget {
                 body.low-saturation {
                     filter: saturate(0.6) !important;
                     -webkit-filter: saturate(0.6) !important;
+                }
+                
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.low-saturation nav,
+                body.low-saturation header,
+                body.low-saturation .navbar,
+                body.low-saturation [role="navigation"],
+                body.low-saturation [class*="nav"],
+                body.low-saturation [class*="header"],
+                body.low-saturation [class*="navbar"],
+                body.low-saturation [data-sticky],
+                body.low-saturation [data-fixed],
+                body.low-saturation [style*="position: sticky"],
+                body.low-saturation [style*="position:fixed"],
+                body.low-saturation [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
                 
                 /* Preserve accessibility widget from low saturation filters */
@@ -18633,6 +18829,23 @@ class AccessibilityWidget {
                 body.monochrome {
                     filter: grayscale(100%) !important;
                     -webkit-filter: grayscale(100%) !important;
+                }
+                
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.monochrome nav,
+                body.monochrome header,
+                body.monochrome .navbar,
+                body.monochrome [role="navigation"],
+                body.monochrome [class*="nav"],
+                body.monochrome [class*="header"],
+                body.monochrome [class*="navbar"],
+                body.monochrome [data-sticky],
+                body.monochrome [data-fixed],
+                body.monochrome [style*="position: sticky"],
+                body.monochrome [style*="position:fixed"],
+                body.monochrome [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
                 }
                 
                 /* Preserve accessibility widget from monochrome filters */
@@ -19122,23 +19335,6 @@ class AccessibilityWidget {
                     background: inherit !important;
                 }
                 
-                /* Special preservation for animated images and media */
-                body.dark-contrast img[src*=".gif"],
-                body.dark-contrast img[src*=".apng"],
-                body.dark-contrast img[src*=".webp"],
-                body.dark-contrast img[class*="animated"],
-                body.dark-contrast img[class*="gif"],
-                body.dark-contrast img[data-animated],
-                body.dark-contrast img[data-gif],
-                body.dark-contrast video,
-                body.dark-contrast canvas,
-                body.dark-contrast iframe {
-                    /* Removed opacity and visibility rules to prevent scroll interference */
-                    display: inherit !important;
-                    background: transparent !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
                 body.dark-contrast .modal,
                 body.dark-contrast .dropdown,
                 body.dark-contrast .tooltip,
