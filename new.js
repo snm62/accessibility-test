@@ -996,25 +996,24 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        // Simple CSS: zoom and brightness only (original behavior)
+        // Vision Impaired: brightness-only, no layout/zoom/font-size changes
         style.textContent = `
-            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
+            /* VISION IMPAIRED: Increase brightness slightly without changing layout or font sizes */
             
             html.vision-impaired {
-                zoom: 1.1 !important;
-                overflow-x: hidden !important;
+                /* No zoom or layout changes */
             }
             
             body.vision-impaired {
-                filter: brightness(1.1) !important;
+                /* Slightly brighten and add a touch of contrast for readability */
+                filter: brightness(1.1) contrast(1.05) !important;
             }
             
-            /* Exclude widget from zoom and brightness */
+            /* Exclude widget from brightness adjustments */
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
             .accessibility-panel {
-                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
@@ -1023,7 +1022,6 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-icon,
             .accessibility-icon,
             #accessibility-icon {
-                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
@@ -1032,19 +1030,17 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-widget,
             .accessibility-widget,
             #accessibility-widget {
-                zoom: 1 !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
             
-            /* Keep images at original size (no zoom) */
+            /* Keep images at original size (no scaling) */
             body.vision-impaired img,
             html.vision-impaired img {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* No changes to image layout */
             }
             
-            /* Keep sliders at original size (no zoom) */
+            /* Keep sliders and carousels at original size (no scaling) */
             body.vision-impaired [class*="slider"],
             body.vision-impaired [id*="slider"],
             body.vision-impaired [data-slider],
@@ -1059,8 +1055,7 @@ function applyVisionImpaired(on) {
             html.vision-impaired [id*="swiper"],
             html.vision-impaired [class*="carousel"],
             html.vision-impaired [id*="carousel"] {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* No changes to slider layout */
             }
         `;
     } catch (_) {}
@@ -3769,18 +3764,23 @@ class AccessibilityWidget {
         .accessibility-panel .scaling-btn {
             font-size: 0.7em;
             padding: 6px 20px;
-            text-align: center;
-            line-height: 28px;
             height: 28px;
             min-width: 80px;
             width: auto;
             white-space: nowrap;
+            
+            /* Ensure the percentage value + icon are perfectly centered */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
         }
         
         .accessibility-panel .scaling-btn i.fas {
             display: inline-block;
             line-height: 1;
-            margin: 0;
+            margin: 0 4px 0 0;
             padding: 0;
         }
         
@@ -26494,6 +26494,33 @@ class AccessibilityWidget {
             // 3b. Force animations/text to final visible state
             this.forceAllAnimationsToFinalVisibleState();
             this.forceCompleteTextAnimations();
+            // Extra: normalize hero text block so GSAP/Webflow text animations don't leave overlapping layers
+            try {
+                const heroBlocks = document.querySelectorAll('.hero-text-block, [class*="hero-text"], [class*="hero_heading"], [class*="hero-title"]');
+                heroBlocks.forEach(block => {
+                    const headings = block.querySelectorAll('h1, h2, h3');
+                    if (headings.length > 1) {
+                        const primary = headings[0];
+                        const primaryText = (primary.textContent || '').trim();
+                        for (let i = 1; i < headings.length; i++) {
+                            const h = headings[i];
+                            const text = (h.textContent || '').trim();
+                            // Hide only true duplicates; keep unique text (e.g., subheadings)
+                            if (!text || text === primaryText) {
+                                h.style.display = 'none';
+                                h.style.visibility = 'hidden';
+                                h.style.opacity = '0';
+                                h.style.position = 'absolute';
+                                h.style.pointerEvents = 'none';
+                            }
+                        }
+                        // Ensure primary heading is visible and not transformed
+                        primary.style.opacity = '1';
+                        primary.style.visibility = 'visible';
+                        primary.style.transform = 'none';
+                    }
+                });
+            } catch (e) {}
             
             // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
             this.replaceAnimatedMedia();
