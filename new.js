@@ -131,39 +131,40 @@
                     visibility: visible !important;
                 }
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
-                /* Instead of hiding characters, show them all at once with no motion */
-                /* JS will still consolidate and mark containers with data-seizure-text-processed when available */
-                body.seizure-safe [data-splitting] .char, 
-                body.seizure-safe [data-splitting] .word,
-                body.seizure-safe .split .char, 
-                body.seizure-safe .split .word,
-                body.seizure-safe [class*="split"] [class*="char"]:not([class*="character"]):not([class*="chart"]), 
-                body.seizure-safe [class*="split"] [class*="word"]:not([class*="wording"]),
-                body.seizure-safe [class*="text-animation"] .char,
-                body.seizure-safe [class*="text-animation"] .word,
-                body.seizure-safe [class*="text-animation"] [class*="char"]:not([class*="character"]):not([class*="chart"]),
-                body.seizure-safe [class*="text-animation"] [class*="word"]:not([class*="wording"]),
-                body.seizure-safe [class*="typing"] .char,
-                body.seizure-safe [class*="typing"] .word,
-                body.seizure-safe [class*="typewriter"] .char,
-                body.seizure-safe [class*="typewriter"] .word,
-                body.seizure-safe [class*="reveal"] .char,
-                body.seizure-safe [class*="reveal"] .word,
-                body.seizure-safe [class*="unveil"] .char,
-                body.seizure-safe [class*="unveil"] .word,
-                body.seizure-safe [class*="show-text"] .char,
-                body.seizure-safe [class*="show-text"] .word,
-                body.seizure-safe [class*="text-effect"] .char,
-                body.seizure-safe [class*="text-effect"] .word {
+                /* Hide per-character/word spans ONLY after JS has consolidated text on the container.
+                   This prevents overlap on processed elements, without breaking sites where JS fails. */
+                body.seizure-safe [data-splitting][data-seizure-text-processed] .char, 
+                body.seizure-safe [data-splitting][data-seizure-text-processed] .word,
+                body.seizure-safe .split[data-seizure-text-processed] .char, 
+                body.seizure-safe .split[data-seizure-text-processed] .word,
+                body.seizure-safe [class*="split"][data-seizure-text-processed] [class*="char"]:not([class*="character"]):not([class*="chart"]), 
+                body.seizure-safe [class*="split"][data-seizure-text-processed] [class*="word"]:not([class*="wording"]),
+                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] [class*="char"]:not([class*="character"]):not([class*="chart"]),
+                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] [class*="word"]:not([class*="wording"]),
+                body.seizure-safe [class*="typing"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="typing"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="typewriter"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="typewriter"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="reveal"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="reveal"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="unveil"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="unveil"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="show-text"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="show-text"][data-seizure-text-processed] .word,
+                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] .char,
+                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] .word {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    position: static !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                    position: absolute !important;
                     transform: none !important;
                     clip-path: none !important;
                     -webkit-clip-path: none !important;
-                    display: inline !important;
+                    display: none !important;
+                    pointer-events: none !important;
                 }
                 /* Show parent containers after JS processes them - these will have the consolidated text */
                 body.seizure-safe [data-splitting][data-seizure-text-processed], 
@@ -392,8 +393,8 @@
                         /* Preserve only genuine navigation/header and explicit opt-outs */
                         body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
                         body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
+                            /* Do not touch nav/header positioning to preserve sticky/fixed behavior */
                             transform: unset !important;
-                            position: unset !important;
                             opacity: unset !important;
                             visibility: unset !important;
                         }
@@ -946,7 +947,7 @@ function applyVisionImpaired(on) {
         if (!on) return;
         
         style.textContent = `
-            /* VISION IMPAIRED: Slight brightness increase only (no zoom, no font changes) */
+            /* VISION IMPAIRED: Slight brightness increase + gentle centered zoom (no layout shift) */
             
             html.vision-impaired {
                 /* No zoom or layout changes */
@@ -980,6 +981,16 @@ function applyVisionImpaired(on) {
             #accessibility-widget {
                 filter: none !important;
                 z-index: 2147483647 !important;
+            }
+            
+            /* Gentle zoom for main content only, centered to avoid left/right shift.
+               Do NOT apply to generic page-wrapper containers to avoid affecting sticky navs
+               that are wrapped together with main content. */
+            body.vision-impaired main,
+            body.vision-impaired [role="main"],
+            body.vision-impaired .main-content {
+                transform: scale(1.02);
+                transform-origin: center center;
             }
         `;
     } catch (_) {}
@@ -1041,6 +1052,16 @@ function applyVisionImpaired(on) {
                     body.vision-impaired {
                         /* Slight brightness bump only, no extra contrast or font changes */
                         filter: brightness(1.06) !important;
+                    }
+                    
+                    /* Gentle zoom for main content only, centered to avoid left/right shift.
+                       Do NOT apply to generic page-wrapper containers to avoid affecting sticky navs
+                       that are wrapped together with main content. */
+                    body.vision-impaired main,
+                    body.vision-impaired [role="main"],
+                    body.vision-impaired .main-content {
+                        transform: scale(1.02);
+                        transform-origin: center center;
                     }
                 `;
                 document.head.appendChild(viStyle);
@@ -26558,7 +26579,7 @@ class AccessibilityWidget {
                 if (!on) return;
                 
                 style.textContent = `
-            /* VISION IMPAIRED: Keep structure and typography intact; small brightness bump only */
+            /* VISION IMPAIRED: Keep typography intact; small brightness bump + gentle centered zoom */
             
             html.vision-impaired {
                 /* No zoom or layout changes */
@@ -26566,6 +26587,15 @@ class AccessibilityWidget {
             
             body.vision-impaired {
                 filter: brightness(1.06) !important;
+            }
+            
+            /* Gentle zoom for main content only, centered to avoid left/right shift */
+            body.vision-impaired main,
+            body.vision-impaired [role="main"],
+            body.vision-impaired .main-content,
+            body.vision-impaired .page-wrapper {
+                transform: scale(1.02);
+                transform-origin: center center;
             }
             
             /* Exclude widget from scaling and brightness */
