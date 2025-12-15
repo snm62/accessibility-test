@@ -996,25 +996,88 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        // Simple CSS: zoom and brightness only
+        // Scale only content inside, not the webpage structure
         style.textContent = `
-            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
+            /* VISION IMPAIRED: Scale content only, preserve webpage structure */
             
+            /* Don't scale html/body - keep webpage structure intact */
             html.vision-impaired {
-                zoom: 1.1 !important;
-                overflow-x: hidden !important;
+                /* REMOVED: zoom - this was scaling the entire webpage */
             }
             
             body.vision-impaired {
                 filter: brightness(1.1) !important;
+                /* REMOVED: zoom - this was scaling the entire webpage */
             }
             
-            /* Exclude widget from zoom and brightness */
+            /* Scale only individual text content elements - increase font sizes slightly */
+            /* Don't scale body/html to preserve webpage structure and prevent content shifting */
+            
+            /* Scale text elements */
+            body.vision-impaired p,
+            body.vision-impaired span,
+            body.vision-impaired div,
+            body.vision-impaired a,
+            body.vision-impaired li,
+            body.vision-impaired td,
+            body.vision-impaired th,
+            body.vision-impaired label,
+            body.vision-impaired button,
+            body.vision-impaired input[type="text"],
+            body.vision-impaired input[type="email"],
+            body.vision-impaired input[type="search"],
+            body.vision-impaired textarea,
+            body.vision-impaired select {
+                font-size: 110% !important;
+            }
+            
+            /* Scale headings proportionally */
+            body.vision-impaired h1 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h2 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h3 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h4 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h5 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h6 {
+                font-size: 110% !important;
+            }
+            
+            /* Scale buttons and interactive elements */
+            body.vision-impaired button,
+            body.vision-impaired .btn,
+            body.vision-impaired .button,
+            body.vision-impaired [class*="btn"],
+            body.vision-impaired [class*="button"],
+            body.vision-impaired input[type="button"],
+            body.vision-impaired input[type="submit"],
+            body.vision-impaired input[type="reset"] {
+                font-size: 110% !important;
+                padding: calc(1em * 1.1) calc(1.5em * 1.1) !important;
+            }
+            
+            /* Scale form inputs */
+            body.vision-impaired input,
+            body.vision-impaired textarea,
+            body.vision-impaired select {
+                font-size: 110% !important;
+                padding: calc(0.5em * 1.1) calc(0.75em * 1.1) !important;
+            }
+            
+            /* Exclude widget from scaling and brightness */
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
             .accessibility-panel {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
@@ -1023,7 +1086,7 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-icon,
             .accessibility-icon,
             #accessibility-icon {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
@@ -1032,19 +1095,18 @@ function applyVisionImpaired(on) {
             body.vision-impaired #accessibility-widget,
             .accessibility-widget,
             #accessibility-widget {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
             
-            /* Keep images at original size (no zoom) */
+            /* Keep images at original size (no scaling) */
             body.vision-impaired img,
             html.vision-impaired img {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* Images stay at original size */
             }
             
-            /* Keep sliders at original size (no zoom) */
+            /* Keep sliders and carousels at original size */
             body.vision-impaired [class*="slider"],
             body.vision-impaired [id*="slider"],
             body.vision-impaired [data-slider],
@@ -1059,8 +1121,7 @@ function applyVisionImpaired(on) {
             html.vision-impaired [id*="swiper"],
             html.vision-impaired [class*="carousel"],
             html.vision-impaired [id*="carousel"] {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* Sliders stay at original size */
             }
         `;
     } catch (_) {}
@@ -7751,11 +7812,12 @@ class AccessibilityWidget {
                 }
     
                 /* Big Black Cursor - Clean Arrow Cursor Shape - MAXIMUM SPECIFICITY */
+    /* Big Black Cursor - Arrow Cursor (default) */
     body.big-black-cursor,
     html body.big-black-cursor,
     body.big-black-cursor *,
     html body.big-black-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M1 1 L1 28 L10 19 L14 23 L18 19 L10 11 L28 11 Z" fill="black" stroke="white" stroke-width="1"/></svg>') 1 1, auto !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWJsYWNrIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuMyIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LWJsYWNrKSIvPjwvc3ZnPg==') 20 10, auto !important;
     }
     
     /* Big Black Cursor - Hand Pointer for Links - Higher specificity to override default */
@@ -7775,15 +7837,15 @@ class AccessibilityWidget {
     body.big-black-cursor .btn,
     body.big-black-cursor [class*="button"],
     body.big-black-cursor [class*="link"] {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 3 C8 1.5, 9 0.5, 10.5 0.5 C12 0.5, 13 1.5, 13 3 L13 9 L15 9 C16 9, 16.5 9.5, 16.5 10.5 C16.5 11.5, 16 12, 15 12 L13 12 L13 18 C13 20, 11 22, 9 22 C7 22, 5 20, 5 18 L5 12 L3 12 C2 12, 1.5 11.5, 1.5 10.5 C1.5 9.5, 2 9, 3 9 L5 9 L5 3 C5 1.5, 6 0.5, 7.5 0.5 C9 0.5, 9 1.5, 9 3 L9 9 L11 9 L11 3 C11 1.5, 12 0.5, 13.5 0.5 C15 0.5, 16 1.5, 16 3 L16 19 C16 20.5, 17 21.5, 18.5 21.5 C20 21.5, 21 20.5, 21 19 L21 3 C21 1.5, 22 0.5, 23.5 0.5 C25 0.5, 26 1.5, 26 3 L26 19 C26 21.5, 24 24, 21.5 24 C19 24, 17 21.5, 17 19 Z" fill="black" stroke="white" stroke-width="1"/></svg>') 8 3, pointer !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDUyIDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtYmxhY2spIi8+PC9zdmc+') 24 10, pointer !important;
     }
     
-    /* Big White Cursor - Clean Arrow Cursor Shape - MAXIMUM SPECIFICITY */
+    /* Big White Cursor - Arrow Cursor (default) */
     body.big-white-cursor,
     html body.big-white-cursor,
     body.big-white-cursor *,
     html body.big-white-cursor * {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M1 1 L1 28 L10 19 L14 23 L18 19 L10 11 L28 11 Z" fill="white" stroke="black" stroke-width="1"/></svg>') 1 1, auto !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LXdoaXRlIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVEcm9wU2hhZG93IGR4PSIyIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSIzIiBmbG9vZE9wYWNpdHk9IjAuNSIvPjwvZmlsdGVyPjwvZGVmcz48cGF0aCBkPSJNIDIwIDEwIEwgMjAgODAgTCA0MCA2MCBMIDUwIDg1IEwgNTggODIgTCA0OCA1NyBMIDcwIDUwIFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0ic3F1YXJlIiBmaWx0ZXI9InVybCgjc2hhZG93LXdoaXRlKSIvPjwvc3ZnPg==') 20 10, auto !important;
     }
     
     /* Big White Cursor - Hand Pointer for Links - Higher specificity to override default */
@@ -7803,7 +7865,7 @@ class AccessibilityWidget {
     body.big-white-cursor .btn,
     body.big-white-cursor [class*="button"],
     body.big-white-cursor [class*="link"] {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 3 C8 1.5, 9 0.5, 10.5 0.5 C12 0.5, 13 1.5, 13 3 L13 9 L15 9 C16 9, 16.5 9.5, 16.5 10.5 C16.5 11.5, 16 12, 15 12 L13 12 L13 18 C13 20, 11 22, 9 22 C7 22, 5 20, 5 18 L5 12 L3 12 C2 12, 1.5 11.5, 1.5 10.5 C1.5 9.5, 2 9, 3 9 L5 9 L5 3 C5 1.5, 6 0.5, 7.5 0.5 C9 0.5, 9 1.5, 9 3 L9 9 L11 9 L11 3 C11 1.5, 12 0.5, 13.5 0.5 C15 0.5, 16 1.5, 16 3 L16 19 C16 20.5, 17 21.5, 18.5 21.5 C20 21.5, 21 20.5, 21 19 L21 3 C21 1.5, 22 0.5, 23.5 0.5 C25 0.5, 26 1.5, 26 3 L26 19 C26 21.5, 24 24, 21.5 24 C19 24, 17 21.5, 17 19 Z" fill="white" stroke="black" stroke-width="1"/></svg>') 8 3, pointer !important;
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDgwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaGFkb3ctaGFuZC13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyOCA4IFEgMjYgOCAyNSA5IFEgMjQgMTAgMjQgMTIgTCAyNCA0MiBDIDIyIDQwIDIwIDM4IDE4IDM3IEMgMTYgMzYgMTMgMzYgMTEgMzcuNSBDIDkgMzkgOC41IDQxIDkuNSA0MyBDIDEwLjUgNDUuNSAxMyA0OC41IDE0IDQ5LjUgQyAxNSA1MSAxNy41IDU2IDE5LjUgNTcuNSBDIDIxIDU4LjggMjIgNjIgMjIuNSA2NSBMIDIyLjUgNjggTCA1MiA2OCBMIDU4IDYzIEMgNTIuNSA2MS44IDUzLjUgNjAgNTQuNSA1OSBDIDU2LjUgNTcgNTcgNTMgNTcgNTEuNSBMIDU3IDM2IFEgNTcgMzQuNSA1NS41IDMzIEMgNTQuNSAzMiA1Mi41IDMxLjUgNTAgMzEuMyBDIDQ5LjggMzEgNDkuNSAzMC41IDQ5IDMwLjIgQyA0Ny41IDI5LjIgNDUgMjguOCA0Mi41IDI4LjcgQyA0Mi4zIDI4LjUgNDIgMjguMiA0MS41IDI3LjkgQyA0MCAyNyAzOCAyNi42IDM2IDI2LjUgTCAzNiAxMiBRIDM2IDEwIDM1IDkgUSAzNCA4IDMyIDggUSAzMCA4IDI4IDggWiIgZmlsbD0iI0ZGRkZGRiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjc2hhZG93LWhhbmQtd2hpdGUpIi8+PC9zdmc+') 24 10, pointer !important;
     }
                 /* Hide Interface Modal Styles */
                 .hide-interface-modal {
@@ -26649,25 +26711,88 @@ class AccessibilityWidget {
                 
                 if (!on) return;
                 
-                // Simple CSS: zoom and brightness only
+                // Scale only content inside, not the webpage structure
                 style.textContent = `
-            /* VISION IMPAIRED: Simple zoom and brightness enhancement */
+            /* VISION IMPAIRED: Scale content only, preserve webpage structure */
             
+            /* Don't scale html/body - keep webpage structure intact */
             html.vision-impaired {
-                zoom: 1.1 !important;
-                overflow-x: hidden !important;
+                /* REMOVED: zoom - this was scaling the entire webpage */
             }
             
             body.vision-impaired {
                 filter: brightness(1.1) !important;
+                /* REMOVED: zoom - this was scaling the entire webpage */
             }
             
-            /* Exclude widget from zoom and brightness */
+            /* Scale only individual text content elements - increase font sizes slightly */
+            /* Don't scale body/html to preserve webpage structure and prevent content shifting */
+            
+            /* Scale text elements */
+            body.vision-impaired p,
+            body.vision-impaired span,
+            body.vision-impaired div,
+            body.vision-impaired a,
+            body.vision-impaired li,
+            body.vision-impaired td,
+            body.vision-impaired th,
+            body.vision-impaired label,
+            body.vision-impaired button,
+            body.vision-impaired input[type="text"],
+            body.vision-impaired input[type="email"],
+            body.vision-impaired input[type="search"],
+            body.vision-impaired textarea,
+            body.vision-impaired select {
+                font-size: 110% !important;
+            }
+            
+            /* Scale headings proportionally */
+            body.vision-impaired h1 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h2 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h3 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h4 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h5 {
+                font-size: 110% !important;
+            }
+            body.vision-impaired h6 {
+                font-size: 110% !important;
+            }
+            
+            /* Scale buttons and interactive elements */
+            body.vision-impaired button,
+            body.vision-impaired .btn,
+            body.vision-impaired .button,
+            body.vision-impaired [class*="btn"],
+            body.vision-impaired [class*="button"],
+            body.vision-impaired input[type="button"],
+            body.vision-impaired input[type="submit"],
+            body.vision-impaired input[type="reset"] {
+                font-size: 110% !important;
+                padding: calc(1em * 1.1) calc(1.5em * 1.1) !important;
+            }
+            
+            /* Scale form inputs */
+            body.vision-impaired input,
+            body.vision-impaired textarea,
+            body.vision-impaired select {
+                font-size: 110% !important;
+                padding: calc(0.5em * 1.1) calc(0.75em * 1.1) !important;
+            }
+            
+            /* Exclude widget from scaling and brightness */
             body.vision-impaired .accessibility-widget,
             body.vision-impaired #accessibility-widget,
             body.vision-impaired .accessibility-panel,
             .accessibility-panel {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
@@ -26676,7 +26801,7 @@ class AccessibilityWidget {
             body.vision-impaired #accessibility-icon,
             .accessibility-icon,
             #accessibility-icon {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
@@ -26685,19 +26810,18 @@ class AccessibilityWidget {
             body.vision-impaired #accessibility-widget,
             .accessibility-widget,
             #accessibility-widget {
-                zoom: 1 !important;
+                font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
             
-            /* Keep images at original size (no zoom) */
+            /* Keep images at original size (no scaling) */
             body.vision-impaired img,
             html.vision-impaired img {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* Images stay at original size */
             }
             
-            /* Keep sliders at original size (no zoom) */
+            /* Keep sliders and carousels at original size */
             body.vision-impaired [class*="slider"],
             body.vision-impaired [id*="slider"],
             body.vision-impaired [data-slider],
@@ -26712,8 +26836,7 @@ class AccessibilityWidget {
             html.vision-impaired [id*="swiper"],
             html.vision-impaired [class*="carousel"],
             html.vision-impaired [id*="carousel"] {
-                zoom: 1 !important;
-                transform: scale(1) !important;
+                /* Sliders stay at original size */
             }
         `;
                 
@@ -28045,9 +28168,10 @@ class AccessibilityWidget {
                 style.id = 'seizure-safe-animation-css';
                 style.textContent = `
                     /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types - same as stop-animation */
-                    .seizure-safe *,
-                    .seizure-safe *::before,
-                    .seizure-safe *::after {
+                    /* Exclude nav/header to preserve sticky positioning */
+                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,
+                    .seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                         /* Stop all CSS animations and transitions */
                         animation: none !important;
                         transition: none !important;
@@ -28057,47 +28181,60 @@ class AccessibilityWidget {
                         text-decoration: none !important;
                     }
                     
-                    /* Stop all animation classes and libraries */
-                    .seizure-safe *[class*="animate"],
-                    .seizure-safe *[class*="fade"],
-                    .seizure-safe *[class*="slide"],
-                    .seizure-safe *[class*="bounce"],
-                    .seizure-safe *[class*="pulse"],
-                    .seizure-safe *[class*="shake"],
-                    .seizure-safe *[class*="flash"],
-                    .seizure-safe *[class*="blink"],
-                    .seizure-safe *[class*="glow"],
-                    .seizure-safe *[class*="spin"],
-                    .seizure-safe *[class*="rotate"],
-                    .seizure-safe *[class*="scale"],
-                    .seizure-safe *[class*="zoom"],
-                    .seizure-safe *[class*="wiggle"],
-                    .seizure-safe *[class*="jiggle"],
-                    .seizure-safe *[class*="twist"],
-                    .seizure-safe *[class*="flip"],
-                    .seizure-safe *[class*="swing"],
-                    .seizure-safe *[class*="wobble"],
-                    .seizure-safe *[class*="tilt"],
+                    /* Stop all animation classes and libraries - exclude nav/header */
+                    .seizure-safe *[class*="animate"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="fade"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="slide"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="bounce"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="pulse"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="shake"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="flash"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="blink"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="glow"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="spin"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="rotate"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="scale"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="zoom"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="wiggle"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="jiggle"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="twist"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="flip"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="swing"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="wobble"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe *[class*="tilt"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
                     /* REMOVED: Scroll-related classes to preserve scroll animations */
                     
-                    /* Stop SVG and Canvas animations */
-                    .seizure-safe svg,
-                    .seizure-safe svg path,
-                    .seizure-safe svg line,
-                    .seizure-safe canvas {
+                    /* Stop SVG and Canvas animations - exclude nav/header */
+                    .seizure-safe svg:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe svg path:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe svg line:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe canvas:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
                         animation: none !important;
                         transition: none !important;
                         /* Removed visibility and transform rules to prevent positioning issues */
                     }
                     
-                    /* Stop text splitting animations */
-                    .seizure-safe [data-splitting],
-                    .seizure-safe .split, 
-                    .seizure-safe .char, 
-                    .seizure-safe .word {
+                    /* Stop text splitting animations - exclude nav/header */
+                    .seizure-safe [data-splitting]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),
+                    .seizure-safe .split:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                    .seizure-safe .char:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                    .seizure-safe .word:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
                         animation: none !important;
                         transition: none !important;
                         /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
+                    }
+                    
+                    /* CRITICAL: Preserve nav/header sticky positioning and transforms */
+                    .seizure-safe nav,
+                    .seizure-safe header,
+                    .seizure-safe .navbar,
+                    .seizure-safe [class*="nav"],
+                    .seizure-safe [class*="header"] {
+                        animation: initial !important;
+                        transition: initial !important;
+                        transform: initial !important;
+                        /* REMOVED: position: initial !important; - This breaks sticky navigation */
+                        will-change: initial !important;
                     }
                 `;
                 document.head.appendChild(style);
