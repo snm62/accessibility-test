@@ -77,14 +77,18 @@
                 
                 /* REMOVED: Duplicate universal selector - already covered by main rule */
                 /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
-                body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                /* Exclude nav/header and text animation elements to preserve their behavior */
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"]), 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"])::before, 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"])::after {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
                 }
                 /* CRITICAL: Stop animations while preserving final positions */
-                body.seizure-safe * {
+                /* Exclude nav/header and text animation elements to preserve their behavior */
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([data-splitting]):not(.split):not(.char):not(.word):not([class*="char"]):not([class*="word"]):not([class*="letter"]):not([class*="text-animation"]):not([class*="typing"]):not([class*="typewriter"]):not([class*="reveal"]):not([class*="unveil"]):not([class*="show-text"]):not([class*="text-effect"]) {
                     /* Stop all animations and transitions */
                     animation: none !important;
                     transition: none !important;
@@ -148,7 +152,17 @@
                     will-change: initial !important;
                 }
                 /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
-                body.seizure-safe *[style*="animation"], body.seizure-safe *[style*="transition"], body.seizure-safe *[style*="transform"], body.seizure-safe *[style*="opacity"], body.seizure-safe *[style*="visibility"], body.seizure-safe *[data-animation], body.seizure-safe *[data-transition], body.seizure-safe *[data-transform], body.seizure-safe *[data-opacity], body.seizure-safe *[data-visibility] {
+                /* Exclude nav/header to preserve sticky positioning */
+                body.seizure-safe *[style*="animation"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[style*="transition"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[style*="transform"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[style*="opacity"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[style*="visibility"]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[data-animation]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[data-transition]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[data-transform]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[data-opacity]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *[data-visibility]:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
@@ -172,7 +186,47 @@
                     visibility: visible !important;
                 }
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
-                body.seizure-safe [data-splitting], body.seizure-safe .split, body.seizure-safe .char, body.seizure-safe .word, body.seizure-safe [data-splitting] .char, body.seizure-safe [data-splitting] .word, body.seizure-safe [class*="split"], body.seizure-safe [class*="char"], body.seizure-safe [class*="word"], body.seizure-safe [class*="letter"], body.seizure-safe [class*="text-animation"], body.seizure-safe [class*="typing"], body.seizure-safe [class*="typewriter"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="unveil"], body.seizure-safe [class*="show-text"], body.seizure-safe [class*="text-effect"] {
+                /* Hide individual char/word/letter elements within text animation containers to prevent overlapping */
+                /* JS will consolidate them and mark containers with data-seizure-text-processed */
+                body.seizure-safe [data-splitting] .char, 
+                body.seizure-safe [data-splitting] .word,
+                body.seizure-safe .split .char, 
+                body.seizure-safe .split .word,
+                body.seizure-safe [class*="split"] [class*="char"]:not([class*="character"]):not([class*="chart"]), 
+                body.seizure-safe [class*="split"] [class*="word"]:not([class*="wording"]),
+                body.seizure-safe [class*="text-animation"] .char,
+                body.seizure-safe [class*="text-animation"] .word,
+                body.seizure-safe [class*="text-animation"] [class*="char"]:not([class*="character"]):not([class*="chart"]),
+                body.seizure-safe [class*="text-animation"] [class*="word"]:not([class*="wording"]),
+                body.seizure-safe [class*="typing"] .char,
+                body.seizure-safe [class*="typing"] .word,
+                body.seizure-safe [class*="typewriter"] .char,
+                body.seizure-safe [class*="typewriter"] .word,
+                body.seizure-safe [class*="reveal"] .char,
+                body.seizure-safe [class*="reveal"] .word,
+                body.seizure-safe [class*="unveil"] .char,
+                body.seizure-safe [class*="unveil"] .word,
+                body.seizure-safe [class*="show-text"] .char,
+                body.seizure-safe [class*="show-text"] .word,
+                body.seizure-safe [class*="text-effect"] .char,
+                body.seizure-safe [class*="text-effect"] .word {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    position: absolute !important;
+                    pointer-events: none !important;
+                }
+                /* Show parent containers after JS processes them - these will have the consolidated text */
+                body.seizure-safe [data-splitting][data-seizure-text-processed], 
+                body.seizure-safe .split[data-seizure-text-processed], 
+                body.seizure-safe [class*="split"][data-seizure-text-processed], 
+                body.seizure-safe [class*="text-animation"][data-seizure-text-processed], 
+                body.seizure-safe [class*="typing"][data-seizure-text-processed], 
+                body.seizure-safe [class*="typewriter"][data-seizure-text-processed], 
+                body.seizure-safe [class*="reveal"][data-seizure-text-processed], 
+                body.seizure-safe [class*="unveil"][data-seizure-text-processed], 
+                body.seizure-safe [class*="show-text"][data-seizure-text-processed], 
+                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
@@ -186,6 +240,23 @@
                     height: auto !important;
                     max-width: none !important;
                     max-height: none !important;
+                }
+                /* For text animation containers not yet processed, ensure they're visible but hide overlapping children */
+                body.seizure-safe [data-splitting]:not([data-seizure-text-processed]), 
+                body.seizure-safe .split:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="split"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="text-animation"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="typing"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="typewriter"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="reveal"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="unveil"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="show-text"]:not([data-seizure-text-processed]), 
+                body.seizure-safe [class*="text-effect"]:not([data-seizure-text-processed]) {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
+                    /* Don't force opacity/visibility here - let JS handle consolidation first */
                 }
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
                 body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
@@ -286,8 +357,9 @@
                     const reinforce = document.createElement('style');
                     reinforce.id = 'accessibility-seizure-reinforce';
                     reinforce.textContent = `
-                        html.seizure-safe *, html.seizure-safe *::before, html.seizure-safe *::after,
-                        body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                        /* Exclude nav/header to preserve sticky positioning */
+                        html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                             /* Complete animations to final state instead of stopping mid-way */
                             animation-play-state: paused !important;
                             animation-fill-mode: forwards !important;
@@ -345,13 +417,15 @@
                     const correction = document.createElement('style');
                     correction.id = 'accessibility-seizure-correction';
                     correction.textContent = `
-                        /* Keep animations disabled */
-                        body.seizure-safe * {
+                        /* Keep animations disabled - exclude nav/header to preserve sticky positioning */
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
                             animation: none !important;
                             transition: none !important;
                         }
-                        /* Restore layout-affecting properties to stylesheet values */
-                        body.seizure-safe *, body.seizure-safe *::before, body.seizure-safe *::after {
+                        /* Restore layout-affecting properties to stylesheet values - exclude nav/header */
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
                             transform: unset !important;
                             translate: unset !important;
                             scale: unset !important;
@@ -2513,6 +2587,13 @@ class AccessibilityWidget {
                 profileItem.setAttribute('tabindex', '0');
     
                 profileItem.setAttribute('role', 'button');
+                
+                // Remove tabindex from checkboxes inside profile items to prevent double-tab issue
+                // The profile-item container handles keyboard navigation, so checkboxes should not be in tab order
+                const checkbox = profileItem.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.setAttribute('tabindex', '-1');
+                }
     
                 
     
@@ -26378,106 +26459,35 @@ class AccessibilityWidget {
             this.settings['seizure-safe'] = true;
             document.body.classList.add('seizure-safe');
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
-    
-            // Always apply styles immediately when toggled (no delay needed)
-            this.addSeizureSafeStyles();
-
-            // REMOVED: enforceNativeScroll calls that were blocking scroll
-    
-            // Stop autoplay videos to prevent seizures
-            this.stopAutoplayVideos();
+            this.saveSettings();
             
-            // Stop portfolio animation loops that could cause black screen
-            this.stopPortfolioAnimations();
+            // Apply grey overlay (grayscale filter) - this is the only difference from stop-animation
+            this.addSeizureSafeGreyOverlay();
             
-            // COMPREHENSIVE ANIMATION STOPPING - AccessiBe-style
-            this.stopAllJavaScriptAnimations();
-            this.stopAllGIFsAndVideos();
-            this.stopAllAnimationLibraries();
-            this.stopAllParallaxAndScrollEffects();
-            this.stopAllScrollInteractions();
-    
-            // Lock button styles to prevent hover color changes
-            this.lockButtonHoverStyles();
+            // Use stop-animation's approach for all animation stopping
+            // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
+            this.injectSeizureSafeAnimationCSS();
             
-            // CRITICAL: Override requestAnimationFrame to block animations
+            // 2. Override requestAnimationFrame to block visual animations but preserve scroll
             this.overrideRequestAnimationFrame();
             
-            // CRITICAL: Stop all animation libraries (Lottie, GSAP, etc.)
+            // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
             this.stopAnimationLibraries();
             
-            // CRITICAL: Force all animations to final visible state
-            this.forceAllAnimationsToFinalVisibleState();
-            
-            // Override requestAnimationFrame to block visual animations but preserve scroll
-            this.overrideRequestAnimationFrame();
-            
-            // CRITICAL: Replace animated media (GIFs, videos)
+            // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
             this.replaceAnimatedMedia();
-    
-            // Stop any JavaScript-based animations (like the slider auto-slide)
-            // BUT preserve manual navigation (click/swipe to change slides)
-            if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-                try {
-                    window.slider.disableAutoSlide();
-                } catch (e) {
-                    // Silent fail
-                }
-            } else {
-                // Try again after a short delay in case slider is still initializing
-                setTimeout(() => {
-                    if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
-                        try {
-                            window.slider.disableAutoSlide();
-                        } catch (e) {
-                            // Silent fail
-                        }
-                    }
-                }, 100);
-            }
             
-            // Stop Swiper autoplay but preserve manual navigation
-            if (typeof Swiper !== 'undefined') {
-                try {
-                    document.querySelectorAll('.swiper, .swiper-container').forEach(swiperEl => {
-                        if (swiperEl.swiper && swiperEl.swiper.autoplay) {
-                            swiperEl.swiper.autoplay.stop();
-                        }
-                    });
-                } catch (e) {
-                    // Silent fail
-                }
-            }
+            // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
+            this.stopDOMAnimationLoops();
             
-            // Ensure slider containers allow pointer events for manual navigation
-            try {
-                const sliderSelectors = [
-                    '.swiper', '.swiper-container', '.slick-slider', '.carousel', 
-                    '[class*="slider"]', '[class*="carousel"]', '[data-slider]', '[data-carousel]'
-                ];
-                document.querySelectorAll(sliderSelectors.join(',')).forEach(slider => {
-                    // Allow pointer events for manual navigation
-                    slider.style.pointerEvents = 'auto';
-                    slider.style.cursor = 'default';
-                    // Ensure slider content is visible
-                    slider.style.visibility = 'visible';
-                    slider.style.opacity = '1';
-                });
-            } catch (e) {
-                // Silent fail
-            }
-    
+            // 6. Stop autoplay videos and embedded media
+            this.stopAutoplayMedia();
             
-    
+            // 7. Stop any JavaScript-based animations (like the slider auto-slide)
+            this.stopJavaScriptAnimations();
+            
             // Update widget appearance to sync Shadow DOM host classes
-    
             this.updateWidgetAppearance();
-    
-            
-    
-            this.saveSettings();
-    
-    
         }
     
     
@@ -26485,85 +26495,77 @@ class AccessibilityWidget {
         // REMOVED: enforceNativeScroll function that was blocking scroll
     
         disableSeizureSafe() {
-            this.settings['seizure-safe'] = false;
-            document.body.classList.remove('seizure-safe');
-    
+            // 1. Remove CSS rules for seizure-safe animation stopping FIRST
+            const existingAnimationStyle = document.getElementById('seizure-safe-animation-css');
+            if (existingAnimationStyle) {
+                existingAnimationStyle.remove();
+            }
+            
+            // 2. Remove grey overlay
+            const existingGreyOverlay = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            if (existingGreyOverlay) {
+                existingGreyOverlay.remove();
+            }
+            
+            // 3. Remove old styles if they exist (backward compatibility)
             this.removeSeizureSafeStyles();
             
-            // Restore addEventListener if it was overridden
-            if (window.__originalAddEventListener) {
-                EventTarget.prototype.addEventListener = window.__originalAddEventListener;
-            }
+            // 4. Remove seizure-safe class from body and html
+            document.body.classList.remove('seizure-safe');
+            document.documentElement.classList.remove('seizure-safe');
             
-            // Disconnect scroll style observer
-            if (window.__scrollStyleObserver) {
-                window.__scrollStyleObserver.disconnect();
-                window.__scrollStyleObserver = null;
-            }
+            // 5. Force browser reflow to ensure CSS changes take effect
+            void document.body.offsetHeight;
             
-            // Restore portfolio animations when seizure safety is disabled
-            this.restorePortfolioAnimations();
-    
-            // CRITICAL: Restore original requestAnimationFrame
+            // 6. Restore requestAnimationFrame
             this.restoreRequestAnimationFrame();
             
-            // Restore all media and animations
-            this.restoreAllMediaAndAnimations();
+            // 7. Restore setTimeout and setInterval
+            this.restoreDOMAnimationLoops();
             
-            // CRITICAL: Restore animation libraries
-            this.restoreAnimationLibraries();
+            // 8. Restore animated media
+            this.restoreAnimatedMedia();
             
-            // Restore Lottie animations
-            this.restoreLottieAnimations();
-    
-            // Resume JavaScript-based animations (like the slider auto-slide)
-    
-            if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-    
-    
-                window.slider.enableAutoSlide();
-    
-            } else {
-    
-          
-    
-                // Try again after a short delay in case slider is still initializing
-    
-                setTimeout(() => {
-    
-                    if (window.slider && typeof window.slider.enableAutoSlide === 'function') {
-    
-                      
-    
-                        window.slider.enableAutoSlide();
-    
-                    }
-    
-                }, 100);
-    
-            }
-    
+            // 9. Restore JavaScript animations
+            this.restoreJavaScriptAnimations();
             
-    
-            // Update widget appearance to sync Shadow DOM host classes
-    
-            this.updateWidgetAppearance();
-    
+            // 10. Force re-enable CSS animations by triggering a style recalculation
+            requestAnimationFrame(() => {
+                // Re-initialize animation libraries that might have been paused
+                if (typeof AOS !== 'undefined' && AOS.refresh) {
+                    try {
+                        AOS.refresh();
+                    } catch (e) {}
+                }
+                
+                // Re-enable Swiper autoplay
+                if (typeof Swiper !== 'undefined') {
+                    try {
+                        document.querySelectorAll('.swiper').forEach(swiperEl => {
+                            if (swiperEl.swiper && swiperEl.swiper.autoplay) {
+                                swiperEl.swiper.autoplay.start();
+                            }
+                        });
+                    } catch (e) {}
+                }
+                
+                // Force style recalculation on elements with animation classes
+                const animatedElements = document.querySelectorAll('[class*="animate"], [class*="fade"], [class*="slide"], [class*="bounce"], [class*="pulse"], [class*="animation"]');
+                animatedElements.forEach(el => {
+                    void el.offsetHeight;
+                });
+            });
             
-    
+            this.settings['seizure-safe'] = false;
             this.saveSettings();
-    
-           
-    
-            // Refresh the page after disabling seizure-safe to fully restore animations/media states
-            try {
-                setTimeout(() => {
-                    if (!this.settings['seizure-safe']) {
-                        window.location.reload();
-        }
-                }, 100);
-            } catch (_) {}
-    
+            
+            // 11. Update widget appearance to sync Shadow DOM host classes
+            this.updateWidgetAppearance();
+            
+            // 12. Refresh the page to ensure all animations resume properly
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
@@ -27799,7 +27801,7 @@ class AccessibilityWidget {
             // Also handle any text that might be using GSAP TextPlugin or similar
             // Look for elements with multiple overlapping text layers (common in GSAP text animations)
             // Only process elements that are likely part of text animations, not all paragraphs/divs
-            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="text"], [class*="title"], [class*="heading"]');
+            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="text"], [class*="title"], [class*="heading"], [class*="hero"], [class*="headline"]');
             allTextContainers.forEach(element => {
                 // Skip if already processed or if it's a nav/header element
                 if (element.hasAttribute('data-seizure-text-processed') || 
@@ -27808,13 +27810,49 @@ class AccessibilityWidget {
                 const computedStyle = window.getComputedStyle(element);
                 
                 // Only process if element has animation-related classes or is part of a text animation
-                const hasAnimationClass = element.classList.toString().match(/(animate|fade|slide|typing|typewriter|split|char|letter|text-animation)/i);
+                const hasAnimationClass = element.classList.toString().match(/(animate|fade|slide|typing|typewriter|split|char|letter|text-animation|reveal|unveil)/i);
                 const hasAnimationStyle = computedStyle.animation !== 'none' || computedStyle.transition !== 'none';
                 const hasHiddenChildren = element.querySelectorAll('.char, .word, [class*="char"], [class*="letter"]').length > 0;
                 
+                // Check for overlapping sibling elements (common in GSAP text animations where multiple divs with same text are siblings)
+                const parent = element.parentElement;
+                const hasOverlappingSiblings = parent && Array.from(parent.children).filter(child => {
+                    if (child === element) return false;
+                    const childText = (child.textContent || '').trim();
+                    const elementText = (element.textContent || '').trim();
+                    // Check if sibling has similar or same text (overlapping layers)
+                    return childText && elementText && (
+                        childText === elementText || 
+                        (childText.length > 10 && elementText.length > 10 && 
+                         (childText.includes(elementText.substring(0, 20)) || elementText.includes(childText.substring(0, 20))))
+                    );
+                }).length > 0;
+                
                 // Skip if element doesn't appear to be part of a text animation
-                if (!hasAnimationClass && !hasAnimationStyle && !hasHiddenChildren) {
+                if (!hasAnimationClass && !hasAnimationStyle && !hasHiddenChildren && !hasOverlappingSiblings) {
                     return;
+                }
+                
+                // Handle overlapping siblings - hide siblings with same text (they're overlapping layers)
+                if (hasOverlappingSiblings && parent) {
+                    const siblings = Array.from(parent.children);
+                    const elementText = (element.textContent || '').trim();
+                    siblings.forEach(sibling => {
+                        if (sibling === element) return;
+                        const siblingText = (sibling.textContent || '').trim();
+                        // If sibling has same or very similar text, hide it (it's an overlapping layer)
+                        if (siblingText && elementText && (
+                            siblingText === elementText || 
+                            (siblingText.length > 10 && elementText.length > 10 && 
+                             (siblingText.includes(elementText.substring(0, 20)) || elementText.includes(siblingText.substring(0, 20))))
+                        )) {
+                            sibling.style.display = 'none';
+                            sibling.style.visibility = 'hidden';
+                            sibling.style.opacity = '0';
+                            sibling.style.position = 'absolute';
+                            sibling.style.pointerEvents = 'none';
+                        }
+                    });
                 }
                 
                 // Check if this element has multiple text layers (indicated by multiple children with same text)
@@ -27832,6 +27870,8 @@ class AccessibilityWidget {
                             child.style.display = 'none';
                             child.style.visibility = 'hidden';
                             child.style.opacity = '0';
+                            child.style.position = 'absolute';
+                            child.style.pointerEvents = 'none';
                         });
                     } else if (childTexts.length > 0 && hasHiddenChildren) {
                         // Different texts - concatenate them (only if has hidden children indicating animation)
@@ -27850,7 +27890,7 @@ class AccessibilityWidget {
                 element.setAttribute('data-seizure-text-processed', 'true');
                 
                 // Only force visibility if element was actually hidden due to animation
-                if (hasAnimationStyle || hasHiddenChildren) {
+                if (hasAnimationStyle || hasHiddenChildren || hasOverlappingSiblings) {
                     if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
                         element.style.opacity = '1';
                         element.style.visibility = 'visible';
@@ -27961,6 +28001,109 @@ class AccessibilityWidget {
     
     
     
+        // Apply only the grey overlay (grayscale filter) - this is the only difference from stop-animation
+        addSeizureSafeGreyOverlay() {
+            // Remove existing grey overlay if it exists
+            const existingStyle = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+    
+            // Create style element for grey overlay only
+            const style = document.createElement('style');
+            style.id = 'accessibility-seizure-safe-grey-overlay';
+            style.textContent = `
+                /* APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
+                body.seizure-safe,
+                html.seizure-safe {
+                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                }
+                
+                /* Exclude widget container and all its contents from color filter */
+                body.seizure-safe #accessibility-widget-container,
+                body.seizure-safe [id*="accessibility-widget"],
+                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe [data-ck-widget] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Also exclude any shadow DOM content by targeting the host element */
+                body.seizure-safe accessibility-widget {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // CSS Injection: Stop all CSS animations, transitions, and blinking text - same as stop-animation
+        injectSeizureSafeAnimationCSS() {
+            if (!document.getElementById('seizure-safe-animation-css')) {
+                const style = document.createElement('style');
+                style.id = 'seizure-safe-animation-css';
+                style.textContent = `
+                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types - same as stop-animation */
+                    .seizure-safe *,
+                    .seizure-safe *::before,
+                    .seizure-safe *::after {
+                        /* Stop all CSS animations and transitions */
+                        animation: none !important;
+                        transition: none !important;
+                        animation-play-state: paused !important;
+                        
+                        /* Stop blinking and flashing text */
+                        text-decoration: none !important;
+                    }
+                    
+                    /* Stop all animation classes and libraries */
+                    .seizure-safe *[class*="animate"],
+                    .seizure-safe *[class*="fade"],
+                    .seizure-safe *[class*="slide"],
+                    .seizure-safe *[class*="bounce"],
+                    .seizure-safe *[class*="pulse"],
+                    .seizure-safe *[class*="shake"],
+                    .seizure-safe *[class*="flash"],
+                    .seizure-safe *[class*="blink"],
+                    .seizure-safe *[class*="glow"],
+                    .seizure-safe *[class*="spin"],
+                    .seizure-safe *[class*="rotate"],
+                    .seizure-safe *[class*="scale"],
+                    .seizure-safe *[class*="zoom"],
+                    .seizure-safe *[class*="wiggle"],
+                    .seizure-safe *[class*="jiggle"],
+                    .seizure-safe *[class*="twist"],
+                    .seizure-safe *[class*="flip"],
+                    .seizure-safe *[class*="swing"],
+                    .seizure-safe *[class*="wobble"],
+                    .seizure-safe *[class*="tilt"],
+                    /* REMOVED: Scroll-related classes to preserve scroll animations */
+                    
+                    /* Stop SVG and Canvas animations */
+                    .seizure-safe svg,
+                    .seizure-safe svg path,
+                    .seizure-safe svg line,
+                    .seizure-safe canvas {
+                        animation: none !important;
+                        transition: none !important;
+                        /* Removed visibility and transform rules to prevent positioning issues */
+                    }
+                    
+                    /* Stop text splitting animations */
+                    .seizure-safe [data-splitting],
+                    .seizure-safe .split, 
+                    .seizure-safe .char, 
+                    .seizure-safe .word {
+                        animation: none !important;
+                        transition: none !important;
+                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
         addSeizureSafeStyles() {
             // Remove existing styles if they exist
             this.removeSeizureSafeStyles();
@@ -28329,42 +28472,35 @@ class AccessibilityWidget {
     
     
         removeSeizureSafeStyles() {
-    
+            // Remove old style if it exists (backward compatibility)
             const existingStyle = document.getElementById('accessibility-seizure-safe-styles');
-    
             if (existingStyle) {
-    
                 existingStyle.remove();
-    
-               
-    
             }
-    
             
-    
+            // Remove new animation CSS
+            const existingAnimationStyle = document.getElementById('seizure-safe-animation-css');
+            if (existingAnimationStyle) {
+                existingAnimationStyle.remove();
+            }
+            
+            // Remove grey overlay
+            const existingGreyOverlay = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            if (existingGreyOverlay) {
+                existingGreyOverlay.remove();
+            }
+            
             // Reset cursor styles that were applied by seizure-safe mode
-    
             document.body.style.cursor = '';
-    
             const allElements = document.querySelectorAll('*');
-    
             allElements.forEach(element => {
-    
                 element.style.cursor = '';
-    
             });
-    
             
-    
             // Also reset cursor on Shadow DOM host
-    
             if (this.shadowRoot && this.shadowRoot.host) {
-    
                 this.shadowRoot.host.style.cursor = '';
-    
             }
-
-    
         }
     
     
