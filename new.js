@@ -150,6 +150,38 @@
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
+                
+                /* CRITICAL: Exclude dropdown menus from visibility forcing - they should remain hidden until explicitly opened */
+                /* This rule must come after the hover rule above to override it for dropdowns */
+                /* Handle both normal and hover states to prevent auto-opening */
+                body.seizure-safe [class*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [class*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [id*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [id*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [class*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header),
+                body.seizure-safe [class*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header):hover,
+                body.seizure-safe [id*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header),
+                body.seizure-safe [id*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header):hover,
+                body.seizure-safe [role="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [role="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [role="menubar"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [role="menubar"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                /* Also handle common dropdown patterns like ul/ol inside nav items */
+                body.seizure-safe nav ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe nav ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe header ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe header ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [class*="nav"] ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [class*="nav"] ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [class*="submenu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [class*="submenu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
+                body.seizure-safe [class*="sub-menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
+                body.seizure-safe [class*="sub-menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover {
+                    /* Allow dropdowns to maintain their original visibility state - override the hover rule */
+                    opacity: inherit !important;
+                    visibility: inherit !important;
+                    display: inherit !important;
+                }
                 /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
                 /* Hide per-character/word spans ONLY after JS has consolidated text on the container.
                    This prevents overlap on processed elements, without breaking sites where JS fails. */
@@ -27981,6 +28013,64 @@ class AccessibilityWidget {
                             // Skip nav/header to preserve sticky behavior
                             if (element.matches && (element.matches('nav, header, .navbar, [role="navigation"]') || element.closest('nav, header, .navbar, [role="navigation"]'))) {
                                 return;
+                            }
+                            
+                            // CRITICAL: Skip dropdown menus to prevent them from auto-opening
+                            // Check if element is a dropdown menu that should remain hidden
+                            const className = element.className || '';
+                            const id = element.id || '';
+                            const role = element.getAttribute && element.getAttribute('role') || '';
+                            const ariaExpanded = element.getAttribute && element.getAttribute('aria-expanded');
+                            const tagName = element.tagName ? element.tagName.toLowerCase() : '';
+                            
+                            // Check if element has dropdown/menu classes/ids/roles
+                            const hasDropdownClass = className.includes('dropdown') || id.includes('dropdown');
+                            const hasMenuClass = (className.includes('menu') || id.includes('menu') || role === 'menu' || role === 'menubar') && 
+                                                  !element.matches('nav') && !element.matches('header');
+                            const hasSubmenuClass = className.includes('submenu') || className.includes('sub-menu') || id.includes('submenu') || id.includes('sub-menu');
+                            
+                            // Check for ul/ol elements that are likely dropdowns (nested lists in nav)
+                            const isNestedList = (tagName === 'ul' || tagName === 'ol') && 
+                                                  element.parentElement && 
+                                                  (element.parentElement.matches('nav, header, [class*="nav"], [class*="header"]') ||
+                                                   element.parentElement.closest('nav, header, [class*="nav"], [class*="header"]'));
+                            
+                            // Check if dropdown/menu is closed (not open/active/show)
+                            const isOpen = className.includes('open') || className.includes('active') || className.includes('show') || 
+                                          ariaExpanded === 'true';
+                            
+                            // If it's a dropdown/menu and it's closed, skip it
+                            if ((hasDropdownClass || hasMenuClass || hasSubmenuClass || isNestedList) && !isOpen) {
+                                return; // Don't force visibility on closed dropdown menus
+                            }
+                            
+                            // Also check if element is inside a closed dropdown menu
+                            let parent = element.parentElement;
+                            let depth = 0;
+                            while (parent && depth < 5) { // Check up to 5 levels up
+                                const parentClass = parent.className || '';
+                                const parentId = parent.id || '';
+                                const parentRole = parent.getAttribute && parent.getAttribute('role') || '';
+                                const parentAriaExpanded = parent.getAttribute && parent.getAttribute('aria-expanded');
+                                const parentTagName = parent.tagName ? parent.tagName.toLowerCase() : '';
+                                
+                                const parentHasDropdown = parentClass.includes('dropdown') || parentId.includes('dropdown');
+                                const parentHasMenu = (parentClass.includes('menu') || parentId.includes('menu') || parentRole === 'menu' || parentRole === 'menubar') && 
+                                                      !parent.matches('nav') && !parent.matches('header');
+                                const parentHasSubmenu = parentClass.includes('submenu') || parentClass.includes('sub-menu') || parentId.includes('submenu') || parentId.includes('sub-menu');
+                                const parentIsNestedList = (parentTagName === 'ul' || parentTagName === 'ol') && 
+                                                          parent.parentElement && 
+                                                          (parent.parentElement.matches('nav, header, [class*="nav"], [class*="header"]') ||
+                                                           parent.parentElement.closest('nav, header, [class*="nav"], [class*="header"]'));
+                                const parentIsOpen = parentClass.includes('open') || parentClass.includes('active') || parentClass.includes('show') || 
+                                                     parentAriaExpanded === 'true';
+                                
+                                if ((parentHasDropdown || parentHasMenu || parentHasSubmenu || parentIsNestedList) && !parentIsOpen) {
+                                    return; // Don't force visibility on elements inside closed dropdown menus
+                                }
+                                
+                                parent = parent.parentElement;
+                                depth++;
                             }
                             
                             // Force to final visible state
