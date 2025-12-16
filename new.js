@@ -447,14 +447,17 @@
                         body.seizure-safe [style*="position: fixed"] {
                             position: inherit !important;
                             transform: inherit !important;
+                            /* Preserve opacity and visibility for nav elements to maintain their appearance */
+                            opacity: inherit !important;
+                            visibility: inherit !important;
                         }
                         /* Preserve only genuine navigation/header and explicit opt-outs */
                         body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
                         body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
                             /* Do not touch nav/header positioning to preserve sticky/fixed behavior */
-                            transform: unset !important;
-                            opacity: unset !important;
-                            visibility: unset !important;
+                            /* REMOVED: transform: unset !important; - This was conflicting with transform: inherit above and breaking sticky navigation */
+                            opacity: inherit !important;
+                            visibility: inherit !important;
                         }
                     `;
                     document.head.appendChild(correction);
