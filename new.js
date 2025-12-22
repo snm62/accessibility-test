@@ -106,8 +106,6 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
@@ -125,8 +123,6 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
                 
                 /* CRITICAL: Exclude dropdown menus from visibility forcing - they should remain hidden until explicitly opened */
@@ -211,8 +207,6 @@
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     animation-play-state: paused !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                     /* Force all text to be fully visible - remove any clipping or width restrictions */
                     clip-path: none !important;
                     -webkit-clip-path: none !important;
@@ -1496,7 +1490,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://app.accessbit.io';
+            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -2077,7 +2071,7 @@ class AccessibilityWidget {
                     return true;
                 }
                 // OPTIMIZED: Minimal headers, efficient fetch with isolation
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                     method: 'GET',
                     headers: {
@@ -2091,7 +2085,7 @@ class AccessibilityWidget {
                     
                     await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
                     
-                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                     const retryResponse = await this.isolatedFetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                         method: 'GET',
                         headers: {
@@ -2193,7 +2187,7 @@ class AccessibilityWidget {
                 }
                 
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base3}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -31347,7 +31341,7 @@ class AccessibilityWidget {
                     
                     // OPTIMIZATION: Remove cache buster to allow browser caching
                     // The worker already sets Cache-Control headers for 5 minutes
-                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                     const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
                 
                 console.log('[FETCH] Making API request:', {
@@ -34569,7 +34563,7 @@ class AccessibilityWidget {
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev').replace(/\/+$/,'');
                 let resp = await this.isolatedFetch(`${base}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
