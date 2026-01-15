@@ -1036,6 +1036,76 @@
                     document.head.appendChild(rm);
                 }
 
+                // Create accessible floating toggle for Reduced Motion (always visible)
+                if (!document.getElementById('a11y-reduced-motion-toggle')) {
+                    const rbtn = document.createElement('button');
+                    rbtn.id = 'a11y-reduced-motion-toggle';
+                    rbtn.setAttribute('role','switch');
+                    const reducedFromStorage = localStorage.getItem('accessibility-widget-reduced-motion');
+                    rbtn.setAttribute('aria-checked', reducedFromStorage === 'true' ? 'true' : 'false');
+                    rbtn.setAttribute('aria-label','Toggle Reduced Motion (respect prefers-reduced-motion and halt nonessential motion)');
+                    rbtn.title = 'Reduced Motion: respect system preference or force reduced motion';
+                    rbtn.style.position = 'fixed';
+                    rbtn.style.left = '12px';
+                    rbtn.style.bottom = '12px';
+                    rbtn.style.zIndex = '2147483647';
+                    rbtn.style.background = '#222';
+                    rbtn.style.color = '#fff';
+                    rbtn.style.border = '1px solid rgba(255,255,255,0.08)';
+                    rbtn.style.padding = '6px 8px';
+                    rbtn.style.borderRadius = '6px';
+                    rbtn.style.fontSize = '11px';
+                    rbtn.style.cursor = 'pointer';
+                    rbtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+                    rbtn.textContent = 'Reduced Motion';
+
+                    const reducedHandler = function() {
+                        const currently = document.body.classList.contains('reduced-motion');
+                        const next = !currently;
+                        if (next) {
+                            localStorage.setItem('accessibility-widget-reduced-motion','true');
+                            document.body.classList.add('reduced-motion');
+                            document.documentElement.classList.add('reduced-motion');
+                            // Apply kill switch CSS for reduced motion
+                            try {
+                                if (!document.getElementById('accessibility-reduced-motion-kill')) {
+                                    const kill = document.createElement('style');
+                                    kill.id = 'accessibility-reduced-motion-kill';
+                                    kill.textContent = `
+/* Reduced Motion kill switch - force no animations/transitions */
+.reduced-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]) {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+/* Remove common flash triggers */
+.reduced-motion *[class*="blink"], .reduced-motion *[class*="shimmer"], .reduced-motion *[class*="pulse"] {
+  animation: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+`;
+                                    document.head.appendChild(kill);
+                                }
+                            } catch (_) {}
+                            try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
+                            try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
+                            rbtn.setAttribute('aria-checked','true');
+                        } else {
+                            localStorage.setItem('accessibility-widget-reduced-motion','false');
+                            document.body.classList.remove('reduced-motion');
+                            document.documentElement.classList.remove('reduced-motion');
+                            try { document.getElementById('accessibility-reduced-motion-kill') && document.getElementById('accessibility-reduced-motion-kill').remove(); } catch (_) {}
+                            try { window.__stopStyleSanitizer && window.__stopStyleSanitizer(); } catch (_) {}
+                            try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(false); } catch (_) {}
+                            rbtn.setAttribute('aria-checked','false');
+                        }
+                    };
+                    rbtn.addEventListener('click', reducedHandler, true);
+                    rbtn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reducedHandler(); } }, true);
+                    document.body.appendChild(rbtn);
+                }
+
                 // Create accessible floating toggle for strict Seizure Safe mode
                 if (!document.getElementById('a11y-seizure-toggle')) {
                     const btn = document.createElement('button');
@@ -1045,7 +1115,7 @@
                     btn.setAttribute('aria-label','Toggle Seizure Safe mode (stop flashing/animated content)');
                     btn.title = 'Seizure Safe: stop flashing/animated content';
                     btn.style.position = 'fixed';
-                    btn.style.left = '12px';
+                    btn.style.left = '120px';
                     btn.style.bottom = '12px';
                     btn.style.zIndex = '2147483647';
                     btn.style.background = '#000';
@@ -1067,76 +1137,8 @@
                             try { document.body.classList.add('seizure-safe'); } catch (_) {}
                             try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
                             try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
-                        // Add a compact 'Reduced motion' sibling toggle to the right
-                        if (!document.getElementById('a11y-reduced-motion-toggle')) {
-                        const rbtn = document.createElement('button');
-                        rbtn.id = 'a11y-reduced-motion-toggle';
-                        rbtn.setAttribute('role','switch');
-                        const reducedFromStorage = localStorage.getItem('accessibility-widget-reduced-motion');
-                        rbtn.setAttribute('aria-checked', reducedFromStorage === 'true' ? 'true' : 'false');
-                        rbtn.setAttribute('aria-label','Toggle Reduced Motion (respect prefers-reduced-motion and halt nonessential motion)');
-                        rbtn.title = 'Reduced Motion: respect system preference or force reduced motion';
-                        rbtn.style.position = 'fixed';
-                        rbtn.style.left = '120px';
-                        rbtn.style.bottom = '12px';
-                        rbtn.style.zIndex = '2147483647';
-                        rbtn.style.background = '#222';
-                        rbtn.style.color = '#fff';
-                        rbtn.style.border = '1px solid rgba(255,255,255,0.08)';
-                        rbtn.style.padding = '6px 8px';
-                        rbtn.style.borderRadius = '6px';
-                        rbtn.style.fontSize = '11px';
-                        rbtn.style.cursor = 'pointer';
-                        rbtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-                        rbtn.textContent = 'Reduced Motion';
-
-                        const reducedHandler = function() {
-                            const currently = document.body.classList.contains('reduced-motion');
-                            const next = !currently;
-                            if (next) {
-                                localStorage.setItem('accessibility-widget-reduced-motion','true');
-                                document.body.classList.add('reduced-motion');
-                                document.documentElement.classList.add('reduced-motion');
-                                // Apply kill switch CSS for reduced motion
-                                try {
-                                    if (!document.getElementById('accessibility-reduced-motion-kill')) {
-                                        const kill = document.createElement('style');
-                                        kill.id = 'accessibility-reduced-motion-kill';
-                                        kill.textContent = `
-/* Reduced Motion kill switch - force no animations/transitions */
-.reduced-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]) {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
-}
-/* Remove common flash triggers */
-.reduced-motion *[class*="blink"], .reduced-motion *[class*="shimmer"], .reduced-motion *[class*="pulse"] {
-  animation: none !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-`;
-                                        document.head.appendChild(kill);
-                                    }
-                                } catch (_) {}
-                                try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
-                                try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
-                                rbtn.setAttribute('aria-checked','true');
-                            } else {
-                                localStorage.setItem('accessibility-widget-reduced-motion','false');
-                                document.body.classList.remove('reduced-motion');
-                                document.documentElement.classList.remove('reduced-motion');
-                                try { document.getElementById('accessibility-reduced-motion-kill') && document.getElementById('accessibility-reduced-motion-kill').remove(); } catch (_) {}
-                                try { window.__stopStyleSanitizer && window.__stopStyleSanitizer(); } catch (_) {}
-                                try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(false); } catch (_) {}
-                                rbtn.setAttribute('aria-checked','false');
-                            }
-                        };
-                        rbtn.addEventListener('click', reducedHandler, true);
-                        rbtn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reducedHandler(); } }, true);
-                        document.body.appendChild(rbtn);
-                                try { btn.setAttribute('aria-checked','true'); } catch (_) {}
-                            }
+                            try { btn.setAttribute('aria-checked','true'); } catch (_) {}
+                        } else {
                             try { window.__stopStyleSanitizer && window.__stopStyleSanitizer(); } catch (_) {}
                             try { btn.setAttribute('aria-checked','false'); } catch (_) {}
                         }
@@ -8926,7 +8928,10 @@ class AccessibilityWidget {
                 if (config.extraContent.style) {
                     extraDiv.style.cssText = config.extraContent.style;
                 }
-                if (config.extraContent.html) {
+                // Build scaling controls or other extra content
+                if (config.extraContent.type) {
+                    this.buildExtraContent(extraDiv, config.extraContent);
+                } else if (config.extraContent.html) {
                     // For complex nested structures, we'll build them
                     this.buildExtraContent(extraDiv, config.extraContent.html);
                 }
