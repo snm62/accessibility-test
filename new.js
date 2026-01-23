@@ -1,47 +1,153 @@
 // CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
+    function isDesignerModeStandalone() {
+        try {
+            return (
+                (window.location.hostname.includes('webflow.com') && 
+                 (window.location.pathname.includes('/design/') || 
+                  window.location.pathname.includes('/designer'))) ||
+                document.querySelector('[data-webflow-design-mode]') ||
+                (typeof window.webflow !== 'undefined' && 
+                 typeof window.webflow.getSiteInfo === 'function' && 
+                 window.location.hostname.includes('webflow.com'))
+            );
+        } catch (e) {
+            return false;
+        }
+    }
+    
     try {
-        // CRITICAL: Don't run widget in Webflow Designer environment
-        const isDesigner = 
-            (window.location.hostname.includes('webflow.com') && 
-             (window.location.pathname.includes('/design/') || 
-              window.location.pathname.includes('/designer'))) ||
-            document.querySelector('[data-webflow-design-mode]') ||
-            (typeof window.webflow !== 'undefined' && 
-             typeof window.webflow.getSiteInfo === 'function' && 
-             window.location.hostname.includes('webflow.com'));
-        
-        if (isDesigner) {
-            // Exit early - widget should not run in Designer
+        if (isDesignerModeStandalone()) {
             return;
         }
         
-        // Skip accessibility widget if in reader mode or if page is being processed for reader mode
+        function isReaderModeStandalone() {
+            try {
+                return (
+                    document.documentElement.classList.contains('reader-mode') || 
+                    (document.body && document.body.classList.contains('reader-mode')) ||
+                    window.location.search.includes('reader-mode') ||
+                    document.querySelector('[data-reader-mode]')
+                );
+            } catch (e) {
+                return false;
+            }
+        }
+        
         if (isReaderModeStandalone()) {
             return;
         }
         
-        // Check localStorage immediately for seizure-safe mode
-        const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
-        if (seizureSafeFromStorage === 'true') {
+        // Check localStorage immediately for reduce-motion mode
+        const reduceMotionFromStorage = localStorage.getItem('accessbit-widget-reduce-motion');
+        if (reduceMotionFromStorage === 'true') {
+            // SECURITY: All DOM operations protected by Designer mode check at line 20
+            try {
+                if (document.body) document.body.classList.add('reduce-motion');
+                if (document.documentElement) document.documentElement.classList.add('reduce-motion');
+            } catch (_) {}
             
-            document.body.classList.add('seizure-safe');
+            // Apply immediate CSS to stop all animations
+            const immediateReduceMotionStyle = document.createElement('style');
+            immediateReduceMotionStyle.id = 'accessbit-reduce-motion-immediate-early';
+            immediateReduceMotionStyle.textContent = `
+                /* Per Webflow Security recommendations: Global CSS kill switch for Reduce Motion */
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                    animation: none !important;
+                    transition: none !important;
+                    scroll-behavior: auto !important;
+                }
+                
+                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
+                body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
+                body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
+                body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
+                body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
+                html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
+                html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
+                html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
+                html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                    animation: none !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                
+                /* Remove blinking caret effects */
+                body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
+                body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
+                body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
+                body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
+                html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
+                html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
+                html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
+                html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                    caret-color: transparent !important;
+                }
+            `;
+            // SECURITY: Protected by Designer mode check at line 20 - all DOM operations in this IIFE are safe
+            try {
+                if (document.head) document.head.appendChild(immediateReduceMotionStyle);
+            } catch (_) {}
+            
+            // Use WAAPI to pause/cancel running animations immediately
+            try {
+                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                all.forEach(anim => {
+                    try {
+                        if (typeof anim.pause === 'function') anim.pause();
+                        if (typeof anim.playbackRate !== 'undefined') anim.playbackRate = 0;
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Check localStorage immediately for seizure-safe mode
+        const seizureSafeFromStorage = localStorage.getItem('accessbit-widget-seizure-safe');
+        if (seizureSafeFromStorage === 'true') {
+            // SECURITY: Protected by Designer mode check at line 20
+            try {
+                if (document.body) document.body.classList.add('seizure-safe');
+            } catch (_) {}
             
             // Apply immediate CSS to stop all animations
             const immediateStyle = document.createElement('style');
-            immediateStyle.id = 'accessibility-seizure-immediate-early';
+            immediateStyle.id = 'accessbit-seizure-immediate-early';
             immediateStyle.textContent = `
                 /* APPLY GREYISH COLOR FILTER IMMEDIATELY - Reduce color intensity to prevent seizures */
-                body.seizure-safe,
-                html.seizure-safe {
-                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
-                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                /* CRITICAL: Apply filters to content containers, NOT to body/html, to preserve sticky nav */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on body/html */
+                /* Apply to main content areas and their children to get the grey muted color effect throughout the page */
+                body.seizure-safe main,
+                body.seizure-safe main *,
+                body.seizure-safe section,
+                body.seizure-safe section *,
+                body.seizure-safe article,
+                body.seizure-safe article *,
+                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                body.seizure-safe p:not(nav p):not(header p),
+                body.seizure-safe span:not(nav span):not(header span),
+                html.seizure-safe main,
+                html.seizure-safe main *,
+                html.seizure-safe section,
+                html.seizure-safe section *,
+                html.seizure-safe article,
+                html.seizure-safe article *,
+                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                html.seizure-safe p:not(nav p):not(header p),
+                html.seizure-safe span:not(nav span):not(header span) {
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
                 }
                 
                 /* Per Webflow Security recommendations: Global CSS kill switch for seizure-safe mode */
                 /* This provides stricter controls than prefers-reduced-motion for photosensitive seizure safety */
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessibility-widget-container):not([id*="accessibility-widget"]):not([class*="accessibility-widget"]):not([data-ck-widget]):not(accessibility-widget),
-                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessibility-widget-container):not([id*="accessibility-widget"]):not([class*="accessibility-widget"]):not([data-ck-widget]):not(accessibility-widget) {
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
                     animation: none !important;
                     transition: none !important;
                     scroll-behavior: auto !important;
@@ -79,16 +185,16 @@
                 }
                 
                 /* Exclude widget container and all its contents from color filter */
-                body.seizure-safe #accessibility-widget-container,
-                body.seizure-safe [id*="accessibility-widget"],
-                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
                 body.seizure-safe [data-ck-widget] {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
                 
                 /* Also exclude any shadow DOM content by targeting the host element */
-                body.seizure-safe accessibility-widget {
+                body.seizure-safe accessbit-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -371,14 +477,17 @@
                 }
                 /* REMOVED: Duplicate rule - already covered by scroll-triggered animations section */
                 /* REMOVED: Duplicate data-splitting rules - already covered by letter-by-letter animations section */
-            `;
-            document.head.appendChild(immediateStyle);
+                    `;
+                    // SECURITY: Protected by Designer mode check at line 20
+                    try {
+                        if (document.head) document.head.appendChild(immediateStyle);
+                    } catch (_) {}
             
             // Reinforce at root: cover both html.seizure-safe and body.seizure-safe
             try {
-                if (!document.getElementById('accessibility-seizure-reinforce')) {
+                if (!document.getElementById('accessbit-seizure-reinforce')) {
                     const reinforce = document.createElement('style');
-                    reinforce.id = 'accessibility-seizure-reinforce';
+                    reinforce.id = 'accessbit-seizure-reinforce';
                     reinforce.textContent = `
                         /* Exclude nav/header to preserve sticky positioning */
                         html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
@@ -406,9 +515,9 @@
             
             // Master layer: globally disable CSS animations/transitions without altering layout
             try {
-                if (!document.getElementById('accessibility-seizure-master')) {
+                if (!document.getElementById('accessbit-seizure-master')) {
                     const master = document.createElement('style');
-                    master.id = 'accessibility-seizure-master';
+                    master.id = 'accessbit-seizure-master';
                     master.textContent = `
                         /* Hard stop for CSS animations and transitions */
                         /* Force animations to final state immediately - either prevent from starting or jump to final state */
@@ -436,9 +545,9 @@
                 }
                 
                 // Correction layer: preserve site layout styles while keeping animations disabled
-                if (!document.getElementById('accessibility-seizure-correction')) {
+                if (!document.getElementById('accessbit-seizure-correction')) {
                     const correction = document.createElement('style');
-                    correction.id = 'accessibility-seizure-correction';
+                    correction.id = 'accessbit-seizure-correction';
                     correction.textContent = `
                         /* Keep animations disabled - exclude nav/header to preserve sticky positioning */
                         body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
@@ -499,9 +608,9 @@
             
             // Enforce no-scroll-animations for known libraries/selectors with high specificity
             try {
-                if (!document.getElementById('accessibility-seizure-animation-enforcer')) {
+                if (!document.getElementById('accessbit-seizure-animation-enforcer')) {
                     const enforce = document.createElement('style');
-                    enforce.id = 'accessibility-seizure-animation-enforcer';
+                    enforce.id = 'accessbit-seizure-animation-enforcer';
                     enforce.textContent = `
                         /* Target common scroll animation libs without affecting layout of others */
                         body.seizure-safe [data-aos], body.seizure-safe .aos-init, body.seizure-safe .aos-animate,
@@ -523,17 +632,29 @@
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
             
-            // Runtime guards: stop JS-driven animations and reveal typewriter/progress instantly
+            const seizureState = {
+                guardsApplied: false,
+                animationBlockerInstalled: false,
+                styleObserver: null,
+                classWatcher: null,
+                seizureObserver: null,
+                savedAnimations: new Map(),
+                waapiListenersInstalled: false,
+                onAnimationStart: null,
+                onTransitionRun: null,
+                universalMotionObserver: null,
+                originalLottieLoadAnimation: null,
+                styleSanitizerObserver: null
+            };
+            
+            let applySeizureSafeDOMFreeze, seizureConsolidateSplitText, applyWAAPIStopMotion, installStyleSanitizer, stopStyleSanitizer;
+            
             try {
-                if (!window.__seizureGuardsApplied) {
-                    window.__seizureGuardsApplied = true;
+                
+                if (!seizureState.guardsApplied) {
+                    seizureState.guardsApplied = true;
                     
-                    // SECURITY FIX: Removed global prototype overwrites per Webflow Marketplace security requirements
-                    // Global browser API modifications are prohibited as they can break Designer stability
-                    // Animation blocking is now handled via CSS classes and scoped DOM manipulation only
-                    
-                    // Helper to reveal typewriter text and freeze progress visuals (Designer-safe)
-                    window.__applySeizureSafeDOMFreeze = function() {
+                    const applySeizureSafeDOMFreeze = function() {
                         try {
                             // Check Designer mode first
                             // Use standalone Designer mode check
@@ -589,7 +710,7 @@
                                     }
                                     
                                     // Mark as widget-managed
-                                    el.setAttribute('data-accessibility-widget-managed', 'true');
+                                    el.setAttribute('data-accessbit-widget-managed', 'true');
                                     
                                     const cs = window.getComputedStyle(el);
                                     // Lock width/transform/transition to current (prefer CSS class, fallback to inline)
@@ -672,9 +793,7 @@
                         }
                     };
                     
-                    // Helper to consolidate generic split-text / letter-by-letter animations into plain text
-                    // Used both on initial seizure-safe load and when the toggle is turned on.
-                    window.__seizureConsolidateSplitText = function() {
+                    const seizureConsolidateSplitText = function() {
                         try {
                             // First pass: Handle standard split-text containers
                             const containers = document.querySelectorAll(
@@ -799,13 +918,15 @@
                         } catch (_) { /* ignore top-level errors */ }
                     };
                     
-                    // Apply immediately and also on DOMContentLoaded as a second safety
-                    window.__applySeizureSafeDOMFreeze();
+                    seizureState.applySeizureSafeDOMFreeze = applySeizureSafeDOMFreeze;
+                    seizureState.seizureConsolidateSplitText = seizureConsolidateSplitText;
+                    seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
                     
-                    // Install aggressive animation blocker to neutralize JS-driven animations
+                    applySeizureSafeDOMFreeze();
+                    
                     try {
-                        if (!window.__animationBlockerInstalled) {
-                            window.__animationBlockerInstalled = true;
+                        if (!seizureState.animationBlockerInstalled) {
+                            seizureState.animationBlockerInstalled = true;
                             const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
                             // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
                             const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
@@ -873,7 +994,7 @@
                                 styleObserver.observe(document.documentElement, {
                                     subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
                                 });
-                                window.__seizureStyleObserver = styleObserver;
+                                seizureState.styleObserver = styleObserver;
                             } catch (_) {}
                             
                             // Ensure native scroll behavior on the main document only (avoid breaking custom scrollers)
@@ -888,7 +1009,7 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         const isActive = document.body && (document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation'));
                         if (isActive) {
-                            window.__applySeizureSafeDOMFreeze();
+                            applySeizureSafeDOMFreeze();
                             // Disable scroll-trigger libraries when seizure-safe or stop-animation is active
                             try {
                                 // AOS
@@ -902,22 +1023,21 @@
                     
                     // Watch for seizure-safe class being toggled later and (re)install hard blockers
                     try {
-                        if (!window.__seizureClassWatcher) {
+                        if (!seizureState.classWatcher) {
                             const classWatcher = new MutationObserver(() => {
                                 const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
                                 if (active) {
-                                    try { window.__applySeizureSafeDOMFreeze(); } catch (_) {}
-                                    try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
+                                    try { applySeizureSafeDOMFreeze(); } catch (_) {}
+                                    try { seizureState.installStyleSanitizer && seizureState.installStyleSanitizer(); } catch (_) {}
                                     try { applyUniversalStopMotion(true); } catch (_) {}
                                 } else {
                                     try { applyUniversalStopMotion(false); } catch (_) {}
                                 }
                             });
                             classWatcher.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-                            window.__seizureClassWatcher = classWatcher;
-                            // Install MutationObserver-based inline-style sanitizer (no prototype overrides)
-                            if (!window.__installStyleSanitizer) {
-                                window.__installStyleSanitizer = function() {
+                            seizureState.classWatcher = classWatcher;
+                            
+                            seizureState.installStyleSanitizer = function() {
                                     try {
                                         const isActive = () => document.body && (document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation') || document.body.classList.contains('reduced-motion'));
                                         const sanitizeStyleString = (s) => String(s || '')
@@ -928,7 +1048,7 @@
                                             .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '')
                                             .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '');
 
-                                        if (!window.__styleSanitizerObserver) {
+                                        if (!seizureState.styleSanitizerObserver) {
                                             const obs = new MutationObserver(mutations => {
                                                 if (!isActive()) return;
                                                 for (const m of mutations) {
@@ -962,44 +1082,26 @@
                                                 }
                                             });
                                             obs.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
-                                            window.__styleSanitizerObserver = obs;
+                                            seizureState.styleSanitizerObserver = obs;
                                         }
                                     } catch (_) {}
                                 };
-                                window.__stopStyleSanitizer = function() {
-                                    try { if (window.__styleSanitizerObserver) { try { window.__styleSanitizerObserver.disconnect(); } catch (_) {} window.__styleSanitizerObserver = null; } } catch (_) {}
+                            seizureState.stopStyleSanitizer = function() {
+                                    try { if (seizureState.styleSanitizerObserver) { try { seizureState.styleSanitizerObserver.disconnect(); } catch (_) {} seizureState.styleSanitizerObserver = null; } } catch (_) {}
                                 };
-                            }
                         }
                     } catch (_) {}
                     
-                    // Install hard blockers at the API level for inline styles when seizure-safe is active
-                    try {
-                        if (!window.__installStyleHardBlockers) {
-                            window.__installStyleHardBlockers = function() {
-                                const isActive = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
-                                if (!isActive) return;
-                                try {
-                                    /* Prototype override removed (was blocking CSS property setProperty). Replaced by MutationObserver sanitizer below. */
-                                } catch (_) {}
-                                try {
-                                    /* Prototype override removed (was sanitizing Element.setAttribute for style). Replaced by MutationObserver sanitizer below. */
-                                } catch (_) {}
-                            };
-                        }
-                        // Apply immediately if already in seizure-safe
-                        window.__installStyleSanitizer && window.__installStyleSanitizer();
-                    } catch (_) {}
+                    seizureState.installStyleSanitizer && seizureState.installStyleSanitizer();
                     
-                    // Observe future DOM changes to keep things frozen while seizure-safe is active
                     try {
                         const observer = new MutationObserver(() => {
                             if (document.body && document.body.classList.contains('seizure-safe')) {
-                                window.__applySeizureSafeDOMFreeze();
+                                applySeizureSafeDOMFreeze();
                             }
                         });
                         observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-                        window.__seizureObserver = observer;
+                        seizureState.seizureObserver = observer;
                     } catch (obsErr) {
                       
                     }
@@ -1013,9 +1115,9 @@
         try {
             if (!isDesignerModeStandalone()) {
                 // Default to system preference using @media (prefers-reduced-motion: reduce)
-                if (!document.getElementById('accessibility-reduced-motion-default')) {
+                if (!document.getElementById('accessbit-reduced-motion-default')) {
                     const rm = document.createElement('style');
-                    rm.id = 'accessibility-reduced-motion-default';
+                    rm.id = 'accessbit-reduced-motion-default';
                     rm.textContent = `
 @media (prefers-reduced-motion: reduce) {
   /* Reduce nonessential motion for users who request it at OS level */
@@ -1036,75 +1138,7 @@
                     document.head.appendChild(rm);
                 }
 
-                // Create accessible floating toggle for Reduced Motion (always visible)
-                if (!document.getElementById('a11y-reduced-motion-toggle')) {
-                    const rbtn = document.createElement('button');
-                    rbtn.id = 'a11y-reduced-motion-toggle';
-                    rbtn.setAttribute('role','switch');
-                    const reducedFromStorage = localStorage.getItem('accessibility-widget-reduced-motion');
-                    rbtn.setAttribute('aria-checked', reducedFromStorage === 'true' ? 'true' : 'false');
-                    rbtn.setAttribute('aria-label','Toggle Reduced Motion (respect prefers-reduced-motion and halt nonessential motion)');
-                    rbtn.title = 'Reduced Motion: respect system preference or force reduced motion';
-                    rbtn.style.position = 'fixed';
-                    rbtn.style.left = '12px';
-                    rbtn.style.bottom = '12px';
-                    rbtn.style.zIndex = '2147483647';
-                    rbtn.style.background = '#222';
-                    rbtn.style.color = '#fff';
-                    rbtn.style.border = '1px solid rgba(255,255,255,0.08)';
-                    rbtn.style.padding = '6px 8px';
-                    rbtn.style.borderRadius = '6px';
-                    rbtn.style.fontSize = '11px';
-                    rbtn.style.cursor = 'pointer';
-                    rbtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-                    rbtn.textContent = 'Reduced Motion';
-
-                    const reducedHandler = function() {
-                        const currently = document.body.classList.contains('reduced-motion');
-                        const next = !currently;
-                        if (next) {
-                            localStorage.setItem('accessibility-widget-reduced-motion','true');
-                            document.body.classList.add('reduced-motion');
-                            document.documentElement.classList.add('reduced-motion');
-                            // Apply kill switch CSS for reduced motion
-                            try {
-                                if (!document.getElementById('accessibility-reduced-motion-kill')) {
-                                    const kill = document.createElement('style');
-                                    kill.id = 'accessibility-reduced-motion-kill';
-                                    kill.textContent = `
-/* Reduced Motion kill switch - force no animations/transitions */
-.reduced-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]) {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
-}
-/* Remove common flash triggers */
-.reduced-motion *[class*="blink"], .reduced-motion *[class*="shimmer"], .reduced-motion *[class*="pulse"] {
-  animation: none !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-`;
-                                    document.head.appendChild(kill);
-                                }
-                            } catch (_) {}
-                            try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
-                            try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
-                            rbtn.setAttribute('aria-checked','true');
-                        } else {
-                            localStorage.setItem('accessibility-widget-reduced-motion','false');
-                            document.body.classList.remove('reduced-motion');
-                            document.documentElement.classList.remove('reduced-motion');
-                            try { document.getElementById('accessibility-reduced-motion-kill') && document.getElementById('accessibility-reduced-motion-kill').remove(); } catch (_) {}
-                            try { window.__stopStyleSanitizer && window.__stopStyleSanitizer(); } catch (_) {}
-                            try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(false); } catch (_) {}
-                            rbtn.setAttribute('aria-checked','false');
-                        }
-                    };
-                    rbtn.addEventListener('click', reducedHandler, true);
-                    rbtn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reducedHandler(); } }, true);
-                    document.body.appendChild(rbtn);
-                }
+               
 
                 // Create accessible floating toggle for strict Seizure Safe mode
                 if (!document.getElementById('a11y-seizure-toggle')) {
@@ -1132,21 +1166,25 @@
                         const currently = document.body.classList.contains('seizure-safe');
                         const next = !currently;
                         if (next) {
-                            localStorage.setItem('accessibility-widget-seizure-safe','true');
+                            localStorage.setItem('accessbit-widget-seizure-safe','true');
                             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
                             try { document.body.classList.add('seizure-safe'); } catch (_) {}
-                            try { window.__installStyleSanitizer && window.__installStyleSanitizer(); } catch (_) {}
-                            try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
+                            try { seizureState.installStyleSanitizer && seizureState.installStyleSanitizer(); } catch (_) {}
+                            try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(true); } catch (_) {}
                             try { btn.setAttribute('aria-checked','true'); } catch (_) {}
                         } else {
-                            try { window.__stopStyleSanitizer && window.__stopStyleSanitizer(); } catch (_) {}
+                            try { seizureState.stopStyleSanitizer && seizureState.stopStyleSanitizer(); } catch (_) {}
+                            try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(false); } catch (_) {}
                             try { btn.setAttribute('aria-checked','false'); } catch (_) {}
                         }
                     };
 
                     btn.addEventListener('click', toggleHandler, true);
                     btn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHandler(); } }, true);
-                    document.body.appendChild(btn);
+                    // SECURITY: Protected by Designer mode check at line 20
+                    try {
+                        if (document.body) document.body.appendChild(btn);
+                    } catch (_) {}
                 }
             }
         } catch(_) {}
@@ -1158,7 +1196,7 @@
                 // Animation blocking is now handled via CSS classes only
                 
                 // WAAPI: pause/cancel running WAAPI animations when seizure-safe is active
-                try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(true); } catch (_) {}
+                try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(true); } catch (_) {}
                 
                 // Stop Lottie animations immediately
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
@@ -1243,87 +1281,244 @@ function isReaderModeStandalone() {
         return false;
     }
 }
-
+const seizureState = {
+    savedAnimations: new Map(),
+    waapiListenersInstalled: false,
+    onAnimationStart: null,
+    onTransitionRun: null
+};
 // Universal Stop Motion helper: CSS + Lottie + GSAP + GIF/APNG handling
 
-// WAAPI-based animation control: pause/cancel running Web Animations API animations when strict mode is enabled
-window.__applyWAAPIStopMotion = function(enabled) {
-    if (isDesignerModeStandalone()) return;
-    try {
-        // Saved map to restore playbackRate/play state later
-        window.__savedAnimations = window.__savedAnimations || new Map();
+                    const applyWAAPIStopMotion = function(enabled) {
+                        if (isDesignerModeStandalone()) return;
+                        try {
+                            if (enabled) {
+                                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                                all.forEach(anim => {
+                                    try {
+                                        if (!seizureState.savedAnimations.has(anim)) {
+                                            seizureState.savedAnimations.set(anim, {
+                                                playbackRate: anim.playbackRate || 1,
+                                                playState: anim.playState || null,
+                                                currentTime: anim.currentTime || 0
+                                            });
+                                        }
+                                        if (typeof anim.pause === 'function') try { anim.pause(); } catch(_) {}
+                                        try { anim.playbackRate = 0; } catch(_) {}
+                                    } catch(_) {}
+                                });
 
-        if (enabled) {
-            // Snapshot & pause existing animations
-            const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-            all.forEach(anim => {
-                try {
-                    if (!window.__savedAnimations.has(anim)) {
-                        window.__savedAnimations.set(anim, {
-                            playbackRate: anim.playbackRate || 1,
-                            playState: anim.playState || null,
-                            currentTime: anim.currentTime || 0
-                        });
-                    }
-                    if (typeof anim.pause === 'function') try { anim.pause(); } catch(_) {}
-                    try { anim.playbackRate = 0; } catch(_) {}
-                } catch(_) {}
-            });
-
-            // Listen for new animations and neutralize them immediately
-            if (!window.__seizureWAAPIListenersInstalled) {
-                window.__onSeizureAnimationStart = function(e) {
-                    try {
-                        const target = e.target;
-                        const anims = target.getAnimations ? target.getAnimations() : [];
-                        anims.forEach(a => {
-                            try {
-                                if (!window.__savedAnimations.has(a)) {
-                                    window.__savedAnimations.set(a, { playbackRate: a.playbackRate || 1, playState: a.playState || null, currentTime: a.currentTime || 0 });
+                                if (!seizureState.waapiListenersInstalled) {
+                                    // Function to stop any animation
+                                    const stopAnimation = function(anim) {
+                                        try {
+                                            if (!seizureState.savedAnimations.has(anim)) {
+                                                seizureState.savedAnimations.set(anim, { 
+                                                    playbackRate: anim.playbackRate || 1, 
+                                                    playState: anim.playState || null, 
+                                                    currentTime: anim.currentTime || 0 
+                                                });
+                                            }
+                                            // Stop/finish WAAPI animation to avoid mid-state
+                                            if (typeof anim.pause === 'function') { try { anim.pause(); } catch(_) {} }
+                                            if (typeof anim.finish === 'function') { try { anim.finish(); } catch(_) {} }
+                                            else if (anim.effect && anim.effect.getComputedTiming) {
+                                                try {
+                                                    const end = anim.effect.getComputedTiming().endTime;
+                                                    if (end != null) anim.currentTime = end;
+                                                } catch(_) {}
+                                            }
+                                            try { anim.playbackRate = 0; } catch(_) {}
+                                        } catch(_) {}
+                                    };
+                                    
+                                    // Function to stop all animations on an element
+                                    const stopElementAnimations = function(target) {
+                                        try {
+                                            const anims = target.getAnimations ? target.getAnimations() : [];
+                                            anims.forEach(stopAnimation);
+                                        } catch(_) {}
+                                    };
+                                    
+                                    // animationstart - catch new animations as they start
+                                    seizureState.onAnimationStart = function(e) {
+                                        stopElementAnimations(e.target);
+                                    };
+                                    document.addEventListener('animationstart', seizureState.onAnimationStart, true);
+                                    
+                                    // animationiteration - catch animations that continue
+                                    seizureState.onAnimationIteration = function(e) {
+                                        stopElementAnimations(e.target);
+                                    };
+                                    document.addEventListener('animationiteration', seizureState.onAnimationIteration, true);
+                                    
+                                    // transitionrun - catch transitions
+                                    seizureState.onTransitionRun = function(e) {
+                                        try {
+                                            const t = e.target;
+                                            if (t && t.style) {
+                                                t.style.transition = 'none';
+                                                t.style.animation = 'none';
+                                            }
+                                            stopElementAnimations(t);
+                                        } catch(_) {}
+                                    };
+                                    document.addEventListener('transitionrun', seizureState.onTransitionRun, true);
+                                    
+                                    // transitionstart - catch transitions early
+                                    seizureState.onTransitionStart = function(e) {
+                                        try {
+                                            const t = e.target;
+                                            if (t && t.style) {
+                                                t.style.transition = 'none';
+                                                t.style.animation = 'none';
+                                            }
+                                            stopElementAnimations(t);
+                                        } catch(_) {}
+                                    };
+                                    document.addEventListener('transitionstart', seizureState.onTransitionStart, true);
+                                    
+                                    // Continuous polling to catch animations that start without events
+                                    if (!seizureState.waapiPollInterval) {
+                                        seizureState.waapiPollInterval = setInterval(function() {
+                                            try {
+                                                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                                                all.forEach(stopAnimation);
+                                            } catch(_) {}
+                                        }, 100); // Check every 100ms
+                                    }
+                                    
+                                    // MutationObserver to catch dynamically added elements with animations
+                                    if (!seizureState.waapiMutationObserver) {
+                                        seizureState.waapiMutationObserver = new MutationObserver(function(mutations) {
+                                            mutations.forEach(function(mutation) {
+                                                mutation.addedNodes.forEach(function(node) {
+                                                    if (node.nodeType === 1) { // Element node
+                                                        try {
+                                                            stopElementAnimations(node);
+                                                            
+                                                            // Also stop Lottie animations on new elements
+                                                            if (node.tagName === 'LOTTIE-PLAYER' || node.classList.contains('lottie') || node.classList.contains('lottie-animation') || node.hasAttribute('data-lottie') || node.hasAttribute('data-animation')) {
+                                                                try {
+                                                                    if (node.stop) node.stop();
+                                                                    if (node.pause) node.pause();
+                                                                    if (node.setSpeed) node.setSpeed(0);
+                                                                } catch(_) {}
+                                                                try {
+                                                                    if (node._lottie) {
+                                                                        if (node._lottie.stop) node._lottie.stop();
+                                                                        if (node._lottie.pause) node._lottie.pause();
+                                                                        if (node._lottie.setSpeed) node._lottie.setSpeed(0);
+                                                                    }
+                                                                    if (node.lottie) {
+                                                                        if (node.lottie.stop) node.lottie.stop();
+                                                                        if (node.lottie.pause) node.lottie.pause();
+                                                                        if (node.lottie.setSpeed) node.lottie.setSpeed(0);
+                                                                    }
+                                                                } catch(_) {}
+                                                            }
+                                                            
+                                                            // Also stop GSAP animations on new elements
+                                                            if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
+                                                                try {
+                                                                    window.gsap.killTweensOf(node);
+                                                                    // Also check children for GSAP animations
+                                                                    const children = node.querySelectorAll ? node.querySelectorAll('*') : [];
+                                                                    children.forEach(function(child) {
+                                                                        try {
+                                                                            window.gsap.killTweensOf(child);
+                                                                        } catch(_) {}
+                                                                    });
+                                                                } catch(_) {}
+                                                            }
+                                                            
+                                                            // Also check children
+                                                            const children = node.querySelectorAll ? node.querySelectorAll('*') : [];
+                                                            children.forEach(function(child) {
+                                                                stopElementAnimations(child);
+                                                                
+                                                                // Stop Lottie on children
+                                                                if (child.tagName === 'LOTTIE-PLAYER' || child.classList.contains('lottie') || child.classList.contains('lottie-animation') || child.hasAttribute('data-lottie') || child.hasAttribute('data-animation')) {
+                                                                    try {
+                                                                        if (child.stop) child.stop();
+                                                                        if (child.pause) child.pause();
+                                                                        if (child.setSpeed) child.setSpeed(0);
+                                                                    } catch(_) {}
+                                                                    try {
+                                                                        if (child._lottie) {
+                                                                            if (child._lottie.stop) child._lottie.stop();
+                                                                            if (child._lottie.pause) child._lottie.pause();
+                                                                            if (child._lottie.setSpeed) child._lottie.setSpeed(0);
+                                                                        }
+                                                                        if (child.lottie) {
+                                                                            if (child.lottie.stop) child.lottie.stop();
+                                                                            if (child.lottie.pause) child.lottie.pause();
+                                                                            if (child.lottie.setSpeed) child.lottie.setSpeed(0);
+                                                                        }
+                                                                    } catch(_) {}
+                                                                }
+                                                                
+                                                                // Stop GSAP on children
+                                                                if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
+                                                                    try {
+                                                                        window.gsap.killTweensOf(child);
+                                                                    } catch(_) {}
+                                                                }
+                                                            });
+                                                        } catch(_) {}
+                                                    }
+                                                });
+                                            });
+                                        });
+                                        seizureState.waapiMutationObserver.observe(document.body, {
+                                            childList: true,
+                                            subtree: true
+                                        });
+                                    }
+                                    
+                                    seizureState.waapiListenersInstalled = true;
                                 }
-                                if (typeof a.pause === 'function') try { a.pause(); } catch(_) {}
-                                try { a.playbackRate = 0; } catch(_) {}
-                            } catch(_) {}
-                        });
-                    } catch(_) {}
-                };
-                document.addEventListener('animationstart', window.__onSeizureAnimationStart, true);
-                // transitions are not always controllable via WAAPI - ensure transition-run elements are stripped
-                window.__onSeizureTransitionRun = function(e) {
-                    try {
-                        const t = e.target;
-                        if (t && t.style) {
-                            t.style.transition = 'none';
-                            t.style.animation = 'none';
-                        }
-                    } catch(_) {}
-                };
-                document.addEventListener('transitionrun', window.__onSeizureTransitionRun, true);
-                window.__seizureWAAPIListenersInstalled = true;
-            }
-        } else {
-            // Restore animations where possible
-            if (window.__savedAnimations) {
-                for (const [a, meta] of window.__savedAnimations.entries()) {
-                    try {
-                        if (typeof a.play === 'function') {
-                            try { a.playbackRate = (meta.playbackRate != null ? meta.playbackRate : 1); } catch(_) {}
-                            if (meta.playState === 'running') try { a.play(); } catch(_) {}
-                        }
-                    } catch(_) {}
-                }
-                window.__savedAnimations.clear();
-            }
-            if (window.__seizureWAAPIListenersInstalled) {
-                try { document.removeEventListener('animationstart', window.__onSeizureAnimationStart, true); } catch(_) {}
-                try { document.removeEventListener('transitionrun', window.__onSeizureTransitionRun, true); } catch(_) {}
-                window.__onSeizureAnimationStart = null;
-                window.__onSeizureTransitionRun = null;
-                window.__seizureWAAPIListenersInstalled = false;
-            }
-        }
-    } catch(_) {}
-};
+                            } else {
+                                if (seizureState.savedAnimations) {
+                                    for (const [a, meta] of seizureState.savedAnimations.entries()) {
+                                        try {
+                                            if (typeof a.play === 'function') {
+                                                try { a.playbackRate = (meta.playbackRate != null ? meta.playbackRate : 1); } catch(_) {}
+                                                if (meta.playState === 'running') try { a.play(); } catch(_) {}
+                                            }
+                                        } catch(_) {}
+                                    }
+                                    seizureState.savedAnimations.clear();
+                                }
+                                if (seizureState.waapiListenersInstalled) {
+                                    try { document.removeEventListener('animationstart', seizureState.onAnimationStart, true); } catch(_) {}
+                                    try { document.removeEventListener('animationiteration', seizureState.onAnimationIteration, true); } catch(_) {}
+                                    try { document.removeEventListener('transitionrun', seizureState.onTransitionRun, true); } catch(_) {}
+                                    try { document.removeEventListener('transitionstart', seizureState.onTransitionStart, true); } catch(_) {}
+                                    seizureState.onAnimationStart = null;
+                                    seizureState.onAnimationIteration = null;
+                                    seizureState.onTransitionRun = null;
+                                    seizureState.onTransitionStart = null;
+                                    
+                                    // Clear polling interval
+                                    if (seizureState.waapiPollInterval) {
+                                        clearInterval(seizureState.waapiPollInterval);
+                                        seizureState.waapiPollInterval = null;
+                                    }
+                                    
+                                    // Disconnect MutationObserver
+                                    if (seizureState.waapiMutationObserver) {
+                                        seizureState.waapiMutationObserver.disconnect();
+                                        seizureState.waapiMutationObserver = null;
+                                    }
+                                    
+                                    seizureState.waapiListenersInstalled = false;
+                                }
+                            }
+                        } catch(_) {}
+                    };
+                    
+                    seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
 
 function applyUniversalStopMotion(enabled) {
     // CRITICAL: Don't manipulate Designer DOM
@@ -1370,7 +1565,7 @@ function applyUniversalStopMotion(enabled) {
         }
 
         // WAAPI: pause/cancel running WAAPI animations where possible
-        try { window.__applyWAAPIStopMotion && window.__applyWAAPIStopMotion(enabled); } catch (_) {}
+        try { applyWAAPIStopMotion && applyWAAPIStopMotion(enabled); } catch (_) {}
 
         // Lottie: stop all registered animations
         try {
@@ -1426,7 +1621,7 @@ function applyUniversalStopMotion(enabled) {
 
         // Observe for future Lottie/GIF inserts while active
         if (enabled) {
-            if (!window.__universalMotionObserver) {
+            if (!seizureState.universalMotionObserver) {
                 const obs = new MutationObserver(mutations => {
                     const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
                     if (!active) return;
@@ -1446,11 +1641,11 @@ function applyUniversalStopMotion(enabled) {
                     } catch (_) {}
                 });
                 obs.observe(document.documentElement, { subtree: true, childList: true });
-                window.__universalMotionObserver = obs;
+                seizureState.universalMotionObserver = obs;
             }
-        } else if (window.__universalMotionObserver) {
-            try { window.__universalMotionObserver.disconnect(); } catch (_) {}
-            window.__universalMotionObserver = null;
+        } else if (seizureState.universalMotionObserver) {
+            try { seizureState.universalMotionObserver.disconnect(); } catch (_) {}
+            seizureState.universalMotionObserver = null;
         }
     } catch (_) {}
 }
@@ -1468,7 +1663,7 @@ function applyVisionImpaired(on) {
         document.body.classList.toggle('vision-impaired', !!on);
 
         // Remove content wrapper if it exists (cleanup from old implementation)
-        const wrapper = document.getElementById('accessibility-content-wrapper');
+        const wrapper = document.getElementById('accessbit-content-wrapper');
         if (wrapper && !on) {
             // Move all wrapper children back to body
             while (wrapper.firstChild) {
@@ -1477,10 +1672,10 @@ function applyVisionImpaired(on) {
             wrapper.remove();
         }
         
-        let style = document.getElementById('accessibility-vision-impaired-immediate-early');
+        let style = document.getElementById('accessbit-vision-impaired-immediate-early');
         if (!style && on) {
             style = document.createElement('style');
-            style.id = 'accessibility-vision-impaired-immediate-early';
+            style.id = 'accessbit-vision-impaired-immediate-early';
             document.head.appendChild(style);
         } else if (!on && style) {
             style.remove();
@@ -1521,26 +1716,26 @@ function applyVisionImpaired(on) {
             }
             
             /* Exclude widget from brightness adjustments */
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            body.vision-impaired .accessibility-panel,
-            .accessibility-panel {
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            body.vision-impaired .accessbit-widget-panel,
+            .accessbit-widget-panel {
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
             
-            body.vision-impaired .accessibility-icon,
-            body.vision-impaired #accessibility-icon,
-            .accessibility-icon,
-            #accessibility-icon {
+            body.vision-impaired .accessbit-widget-icon,
+            body.vision-impaired #accessbit-widget-icon,
+            .accessbit-widget-icon,
+            #accessbit-widget-icon {
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
             
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            .accessibility-widget,
-            #accessibility-widget {
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            .accessbit-widget,
+            #accessbit-widget {
                 filter: none !important;
                 z-index: 2147483647 !important;
             }
@@ -1551,23 +1746,122 @@ function applyVisionImpaired(on) {
     } catch (_) {}
 }
 
+// Ensure the reduce-motion toggle actually applies classes and storage immediately
+(function() {
+    try {
+        function bindReduceMotionToggle() {
+            const input = document.getElementById('reduce-motion');
+            if (!input) return;
+            const enabled = localStorage.getItem('accessbit-widget-reduce-motion') === 'true';
+            try { input.checked = enabled; } catch (_) {}
+            if (!input.__reduceMotionBound) {
+                input.addEventListener('change', function() {
+                    const on = !!this.checked;
+                    localStorage.setItem('accessbit-widget-reduce-motion', on ? 'true' : 'false');
+                    try { document.documentElement.classList.toggle('reduce-motion', on); } catch (_) {}
+                    try { document.body.classList.toggle('reduce-motion', on); } catch (_) {}
+                    // Apply CSS and WAAPI controls
+                    if (on) {
+                        const style = document.getElementById('reduce-motion-css') || (() => {
+                            const s = document.createElement('style');
+                            s.id = 'reduce-motion-css';
+                            document.head.appendChild(s);
+                            return s;
+                        })();
+                        if (style && !style.textContent) {
+                            style.textContent = `
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                                    animation: none !important;
+                                    transition: none !important;
+                                    scroll-behavior: auto !important;
+                                }
+                                body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
+                                body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
+                                body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
+                                body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
+                                html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
+                                html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
+                                html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
+                                html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                                    animation: none !important;
+                                    visibility: visible !important;
+                                    opacity: 1 !important;
+                                }
+                                body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
+                                body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
+                                body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
+                                body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
+                                html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
+                                html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
+                                html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
+                                html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                                    caret-color: transparent !important;
+                                }
+                            `;
+                        }
+                        // Use WAAPI to pause animations
+                        try {
+                            const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                            all.forEach(anim => {
+                                try {
+                                    if (typeof anim.pause === 'function') anim.pause();
+                                    if (typeof anim.playbackRate !== 'undefined') anim.playbackRate = 0;
+                                } catch (_) {}
+                            });
+                        } catch (_) {}
+                    } else {
+                        // Remove CSS
+                        const style = document.getElementById('reduce-motion-css');
+                        if (style) style.remove();
+                        // Restore WAAPI animations
+                        try {
+                            const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                            all.forEach(anim => {
+                                try {
+                                    if (typeof anim.playbackRate !== 'undefined') anim.playbackRate = 1;
+                                    if (typeof anim.play === 'function' && anim.playState === 'paused') anim.play();
+                                } catch (_) {}
+                            });
+                        } catch (_) {}
+                    }
+                });
+                input.__reduceMotionBound = true;
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindReduceMotionToggle, { once: true });
+        } else {
+            bindReduceMotionToggle();
+        }
+        // Also check periodically in case widget loads later
+        setInterval(bindReduceMotionToggle, 1000);
+    } catch (e) {
+       
+    }
+})();
+
 // Ensure the seizure-safe toggle actually applies classes and storage immediately
 (function() {
     try {
         function bindSeizureSafeToggle() {
             const input = document.getElementById('seizure-safe');
             if (!input) return;
-            const enabled = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+            const enabled = localStorage.getItem('accessbit-widget-seizure-safe') === 'true';
             try { input.checked = enabled; } catch (_) {}
             if (!input.__seizureBound) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
-                    localStorage.setItem('accessibility-widget-seizure-safe', on ? 'true' : 'false');
+                    localStorage.setItem('accessbit-widget-seizure-safe', on ? 'true' : 'false');
                     try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
                     try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
                     if (on) {
-                        try { window.__applySeizureSafeDOMFreeze && window.__applySeizureSafeDOMFreeze(); } catch (_) {}
-                        try { window.__seizureConsolidateSplitText && window.__seizureConsolidateSplitText(); } catch (_) {}
+                        try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
+                        try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
                     }
                 });
                 input.__seizureBound = true;
@@ -1586,16 +1880,16 @@ function applyVisionImpaired(on) {
 // CRITICAL: Immediate Vision Impaired profile - apply on first paint if previously enabled
 (function() {
     try {
-        const visionImpairedFromStorage = localStorage.getItem('accessibility-widget-vision-impaired');
+        const visionImpairedFromStorage = localStorage.getItem('accessbit-widget-vision-impaired');
         if (visionImpairedFromStorage === 'true') {
             try { document.documentElement.classList.add('vision-impaired'); } catch (_) {}
             try { document.body.classList.add('vision-impaired'); } catch (_) {}
             try { document.documentElement.setAttribute('data-vision-impaired', 'true'); } catch (_) {}
 
             // Apply comprehensive vision impaired styles immediately
-            if (!document.getElementById('accessibility-vision-impaired-immediate-early')) {
+            if (!document.getElementById('accessbit-vision-impaired-immediate-early')) {
                 const viStyle = document.createElement('style');
-                viStyle.id = 'accessibility-vision-impaired-immediate-early';
+                viStyle.id = 'accessbit-vision-impaired-immediate-early';
                 viStyle.textContent = `
                     /* VISION IMPAIRED: Brightness only, no layout changes */
                     
@@ -1636,12 +1930,12 @@ function applyVisionImpaired(on) {
             try {
                 const input = document.getElementById('vision-impaired');
                 if (!input) return;
-                const enabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                const enabled = localStorage.getItem('accessbit-widget-vision-impaired') === 'true';
                 try { input.checked = enabled; } catch (_) {}
                 if (!input.__viBound) {
                     input.addEventListener('change', function() {
                         const on = !!this.checked;
-                        localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
+                        localStorage.setItem('accessbit-widget-vision-impaired', on ? 'true' : 'false');
                         try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
                         try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
                         try {
@@ -1820,9 +2114,9 @@ class AccessibilityWidget {
                         return false;
                     }
                     // Exclude widget's own elements (they're managed separately)
-                    if (el.closest('#accessibility-widget-container') ||
-                        el.closest('accessibility-widget') ||
-                        el.id === 'accessibility-widget-container') {
+                    if (el.closest('#accessbit-widget-container') ||
+                        el.closest('accessbit-widget') ||
+                        el.id === 'accessbit-widget-container') {
                         return false;
                     }
                     return true;
@@ -1853,9 +2147,9 @@ class AccessibilityWidget {
                         continue;
                     }
                     // Exclude widget's own elements
-                    if (el.closest('#accessibility-widget-container') ||
-                        el.closest('accessibility-widget') ||
-                        el.id === 'accessibility-widget-container') {
+                    if (el.closest('#accessbit-widget-container') ||
+                        el.closest('accessbit-widget') ||
+                        el.id === 'accessbit-widget-container') {
                         continue;
                     }
                     return el;
@@ -2097,7 +2391,7 @@ class AccessibilityWidget {
                 }
                 
                 // Mark as widget-manipulated for tracking
-                element.setAttribute('data-accessibility-widget-managed', 'true');
+                element.setAttribute('data-accessbit-widget-managed', 'true');
                 
                 // Add CSS class (preferred method)
                 element.classList.add(className);
@@ -2121,20 +2415,6 @@ class AccessibilityWidget {
          * @param {string} html - HTML content
          * @param {boolean} allowHTML - Whether to allow HTML (false means escape)
          */
-        safeSetInnerHTML(container, html, allowHTML = true) {
-            try {
-                if (!container || !('appendChild' in container)) return;
-                const sanitized = this.sanitizeHTML(String(html || ''), allowHTML);
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(sanitized, 'text/html');
-                // Remove existing children
-                while (container.firstChild) container.removeChild(container.firstChild);
-                // Move new nodes
-                const frag = document.createDocumentFragment();
-                Array.from(doc.body.childNodes).forEach(n => frag.appendChild(n));
-                container.appendChild(frag);
-            } catch (_) {}
-        }
         
         /**
          * Create a scoped overlay container that won't interfere with Designer
@@ -2157,7 +2437,7 @@ class AccessibilityWidget {
                 // Create container with widget scope
                 const container = document.createElement('div');
                 container.id = id;
-                container.setAttribute('data-accessibility-widget-overlay', 'true');
+                container.setAttribute('data-accessbit-widget-overlay', 'true');
 
                 try {
                     const parser = new DOMParser();
@@ -2176,7 +2456,7 @@ class AccessibilityWidget {
                 }
                 
                 // Try to append to widget container first, fallback to body
-                const widgetContainer = document.getElementById('accessibility-widget-container');
+                const widgetContainer = document.getElementById('accessbit-widget-container');
                 if (widgetContainer) {
                     widgetContainer.appendChild(container);
                 } else {
@@ -2450,12 +2730,15 @@ class AccessibilityWidget {
                 }
                 
                 // Read siteToken from this script tag
+                // SAFETY: Using specific script filename patterns to avoid matching user content
+                // Only matches script tags with our widget filenames, not user elements
                 let siteTokenParam = null;
                 try {
                     const scriptEl = document.currentScript || 
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
-                                   document.querySelector('script[src*="accessibility"]');
+                                   document.querySelector('script[src*="accessbit"]') ||
+                                   document.querySelector('script[src*="widget.js"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteTokenParam = u.searchParams.get('siteToken');
@@ -2497,7 +2780,7 @@ class AccessibilityWidget {
             this.paymentFailed = true;
             
             // Hide the widget container
-            const widgetContainer = document.getElementById('accessibility-widget-container');
+            const widgetContainer = document.getElementById('accessbit-widget-container');
             if (widgetContainer) {
                 widgetContainer.style.display = 'none';
                 widgetContainer.style.visibility = 'hidden';
@@ -2505,8 +2788,8 @@ class AccessibilityWidget {
             }
             
             // Hide the icon and panel inside shadow DOM
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             
             if (icon) {
                 console.log('[ICON HIDE] disableWidget() - Payment failed, hiding icon');
@@ -2598,7 +2881,7 @@ class AccessibilityWidget {
             try {
                 // Check if seizure-safe is enabled
                 const isSeizureSafe = document.body.classList.contains('seizure-safe');
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe') === 'true';
+                const seizureSafeFromStorage = localStorage.getItem('accessbit-widget-seizure-safe') === 'true';
                 
                 if (isSeizureSafe || seizureSafeFromStorage) {
                     
@@ -2664,7 +2947,7 @@ class AccessibilityWidget {
         checkAndApplyImmediateSeizureSafe() {
             try {
                 // Check localStorage first for immediate application
-                const seizureSafeFromStorage = localStorage.getItem('accessibility-widget-seizure-safe');
+                const seizureSafeFromStorage = localStorage.getItem('accessbit-widget-seizure-safe');
                 if (seizureSafeFromStorage === 'true') {
                     // Use safe class toggle (Designer-compliant)
                     this.safeBodyClassToggle('seizure-safe', true);
@@ -2738,9 +3021,9 @@ class AccessibilityWidget {
         // Minimal early CSS to pause motion before full seizure-safe styles load
         applyImmediateSeizureCSS() {
             try {
-                if (document.getElementById('accessibility-seizure-immediate')) return;
+                if (document.getElementById('accessbit-seizure-immediate')) return;
                 const style = document.createElement('style');
-                style.id = 'accessibility-seizure-immediate';
+                style.id = 'accessbit-seizure-immediate';
                 style.textContent = `
                     /* IMMEDIATE SEIZURE-SAFE CSS - Minimal approach */
                     body.seizure-safe * {
@@ -2840,7 +3123,7 @@ class AccessibilityWidget {
             // CSS is loaded in createWidget() via getWidgetCSS() - no need for separate addCSS()
     
             // Check if interface should be hidden
-            if (localStorage.getItem('accessibility-widget-hidden') === 'true') {
+            if (localStorage.getItem('accessbit-widget-hidden') === 'true') {
                 console.log('[ICON HIDE] init() - Interface is hidden in localStorage, preventing widget creation');
                 return;
             }
@@ -2848,7 +3131,7 @@ class AccessibilityWidget {
             console.log('[INIT] Creating widget...');
             this.createWidget();
             console.log('[INIT] Widget created, checking if icon exists...');
-            const iconCheck = this.shadowRoot?.getElementById('accessibility-icon');
+            const iconCheck = this.shadowRoot?.getElementById('accessbit-widget-icon');
             console.log('[INIT] Icon check after createWidget():', {
                 hasIcon: !!iconCheck,
                 iconDisplay: iconCheck ? iconCheck.style.display : 'N/A',
@@ -2857,6 +3140,16 @@ class AccessibilityWidget {
             
             this.loadSettings();
     
+            // If reduce-motion was previously enabled, apply it ASAP so it persists on refresh
+            if (this.settings && this.settings['reduce-motion']) {
+                try {
+                    this.safeBodyClassToggle('reduce-motion', true);
+                    this.enableReduceMotion();
+                } catch (e) {
+                    
+                }
+            }
+            
             // If seizure-safe was previously enabled, apply it ASAP so it persists on refresh
             if (this.settings && this.settings['seizure-safe']) {
                 try {
@@ -2890,7 +3183,7 @@ class AccessibilityWidget {
             
             // Restore saved language FIRST (before showing icon)
             // This ensures language is set before any positioning or customization
-            const savedLanguage = localStorage.getItem('accessibility-widget-language');
+            const savedLanguage = localStorage.getItem('accessbit-widget-language');
             if (savedLanguage) {
                 this.applyLanguage(savedLanguage);
             } else {
@@ -2922,11 +3215,8 @@ class AccessibilityWidget {
                     console.warn('[INIT] No customization data to apply');
                 }
                 
-                // Show icon AFTER customizations are applied
-                // This ensures icon appears with correct customization (color, position, etc.)
-                // But respect hideTriggerButton setting - don't show if it's set to 'Yes'
-                // IMPORTANT: Icon only shows if customization data exists (as per user requirement)
-                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+              
+                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                 console.log('[INIT] Checking icon visibility conditions:', {
                     hasIcon: !!icon,
                     hasCustomizationData: !!customizationData,
@@ -2949,12 +3239,24 @@ class AccessibilityWidget {
                         shouldShow: !hideTrigger || (isMobile && mobileVisibility === 'Show')
                     });
                     
-                    // Only show if not hidden by settings
-                    if (!hideTrigger || (isMobile && mobileVisibility === 'Show')) {
+                    // Determine if icon should be shown based on settings
+                    let shouldShow = false;
+                    
+                    // Desktop/Tablet: show only if hideTriggerButton is NOT 'Yes'
+                    if (!isMobile) {
+                        shouldShow = !hideTrigger;
+                    } 
+                    // Mobile: show only if showOnMobile is 'Show'
+                    else {
+                        shouldShow = mobileVisibility === 'Show';
+                    }
+                    
+                    if (shouldShow) {
                         console.log('[ICON SHOW] init() - Showing icon after customization loaded', {
                             hideTrigger,
                             isMobile,
-                            mobileVisibility
+                            mobileVisibility,
+                            shouldShow
                         });
                         // Remove any conflicting inline styles first
                         icon.style.removeProperty('display');
@@ -2968,170 +3270,18 @@ class AccessibilityWidget {
                         // Mark that icon was explicitly shown during initialization
                         // This prevents showIcon() from hiding it during resize events
                         this._iconExplicitlyShown = true;
-                        
-                        // Inject CSS rule into shadow DOM to force icon visibility IMMEDIATELY
-                        // This overrides any CSS rules that might be hiding it
-                        const shadowRoot = icon.getRootNode();
-                        if (shadowRoot && shadowRoot.nodeType === 11) { // ShadowRoot
-                            const forceVisibleStyle = document.createElement('style');
-                            forceVisibleStyle.id = 'force-icon-visible';
-                            // Use multiple selectors with highest specificity to override everything
-                            forceVisibleStyle.textContent = `
-                                #accessibility-icon.accessibility-icon,
-                                #accessibility-icon.circle,
-                                #accessibility-icon.accessibility-icon.circle,
-                                div#accessibility-icon,
-                                div#accessibility-icon.accessibility-icon,
-                                div#accessibility-icon.circle,
-                                div#accessibility-icon.accessibility-icon.circle {
-                                    display: flex !important;
-                                    visibility: visible !important;
-                                    opacity: 1 !important;
-                                    pointer-events: auto !important;
-                                    transition: none !important;
-                                    animation: none !important;
-                                    z-index: 2147483645 !important;
-                                }
-                            `;
-                            // Remove existing force style if present
-                            const existing = shadowRoot.getElementById('force-icon-visible');
-                            if (existing) {
-                                existing.remove();
-                            }
-                            // Insert at the END of shadow DOM to ensure it's last (highest priority)
-                            shadowRoot.appendChild(forceVisibleStyle);
-                            console.log('[ICON SHOW] Injected CSS rule to force visibility');
-                            
-                            // Debug: Check all style tags in shadow DOM
-                            const allStyles = shadowRoot.querySelectorAll('style');
-                            console.log('[ICON SHOW] All style tags in shadow DOM:', {
-                                count: allStyles.length,
-                                styles: Array.from(allStyles).map((s, i) => ({
-                                    index: i,
-                                    id: s.id,
-                                    isLast: i === allStyles.length - 1,
-                                    textContent: s.textContent.substring(0, 200)
-                                }))
-                            });
-                        }
-                        
-                        // Force a reflow to ensure styles are applied
-                        void icon.offsetHeight;
-                        
-                        // Debug: Check computed styles immediately after injection
-                        const initialComputed = window.getComputedStyle(icon);
-                        console.log('[ICON SHOW] Immediately after CSS injection:', {
-                            computedDisplay: initialComputed.display,
-                            computedVisibility: initialComputed.visibility,
-                            computedOpacity: initialComputed.opacity,
-                            iconOffsetHeight: icon.offsetHeight,
-                            iconOffsetWidth: icon.offsetWidth
-                        });
-                        
-                        // Apply styles multiple times with requestAnimationFrame to ensure they stick
-                        const applyStyles = () => {
-                            icon.style.setProperty('display', 'flex', 'important');
-                            icon.style.setProperty('visibility', 'visible', 'important');
-                            icon.style.setProperty('opacity', '1', 'important');
-                            icon.style.setProperty('pointer-events', 'auto', 'important');
-                            // Disable any transitions that might be interfering
-                            icon.style.setProperty('transition', 'none', 'important');
-                            icon.style.setProperty('animation', 'none', 'important');
-                        };
-                        
-                        // Apply immediately
-                        applyStyles();
-                        
-                        // Apply again in next frame
-                        requestAnimationFrame(() => {
-                            applyStyles();
-                            const computed = window.getComputedStyle(icon);
-                            console.log('[ICON SHOW] After requestAnimationFrame:', {
-                                computedDisplay: computed.display,
-                                computedVisibility: computed.visibility,
-                                computedOpacity: computed.opacity,
-                                computedPointerEvents: computed.pointerEvents,
-                                iconOffsetHeight: icon.offsetHeight,
-                                iconOffsetWidth: icon.offsetWidth,
-                                iconZIndex: computed.zIndex,
-                                iconPosition: computed.position
-                            });
-                            
-                            // Apply again in another frame to ensure it sticks
-                            requestAnimationFrame(() => {
-                                applyStyles();
-                                const computed2 = window.getComputedStyle(icon);
-                                
-                                // Check what CSS rules are actually being applied
-                                const allStyles = {
-                                    display: computed2.display,
-                                    visibility: computed2.visibility,
-                                    opacity: computed2.opacity,
-                                    pointerEvents: computed2.pointerEvents,
-                                    transition: computed2.transition,
-                                    animation: computed2.animation,
-                                    iconOffsetHeight: icon.offsetHeight,
-                                    iconOffsetWidth: icon.offsetWidth
-                                };
-                                
-                                console.log('[ICON SHOW] After second requestAnimationFrame:', allStyles);
-                                
-                                // If still not visible, try one more time with a delay
-                                if (computed2.visibility === 'hidden' || computed2.opacity === '0' || parseFloat(computed2.opacity) < 0.9) {
-                                    console.warn('[ICON SHOW] Icon still not fully visible, trying one more time...');
-                                    setTimeout(() => {
-                                        applyStyles();
-                                        const computed3 = window.getComputedStyle(icon);
-                                        console.log('[ICON SHOW] After setTimeout (final attempt):', {
-                                            computedDisplay: computed3.display,
-                                            computedVisibility: computed3.visibility,
-                                            computedOpacity: computed3.opacity,
-                                            iconOffsetHeight: icon.offsetHeight,
-                                            iconOffsetWidth: icon.offsetWidth
-                                        });
-                                    }, 100);
-                                }
-                            });
-                            
-                            // Verify click listener is attached
-                            const hasClickListeners = icon.onclick !== null || 
-                                (icon.getEventListeners && icon.getEventListeners('click')?.length > 0);
-                            console.log('[ICON SHOW] Click listener check:', {
-                                hasClickListeners,
-                                iconOnClick: icon.onclick,
-                                note: 'If hasClickListeners is false, bindEvents() may not have run yet'
-                            });
-                            
-                            // Add a test mousedown listener to verify mouse events work
-                            icon.addEventListener('mousedown', (e) => {
-                                console.log('[ICON MOUSEDOWN] Mouse down detected!', {
-                                    event: e,
-                                    target: e.target,
-                                    currentTarget: e.currentTarget
-                                });
-                            }, { once: true });
-                            
-                            // Also try mouseenter to verify hover works
-                            icon.addEventListener('mouseenter', () => {
-                                console.log('[ICON MOUSEENTER] Mouse entered icon area');
-                            }, { once: true });
-                        });
-                        console.log('[ICON SHOW] Icon styles applied:', {
-                            display: icon.style.display,
-                            visibility: icon.style.visibility,
-                            opacity: icon.style.opacity,
-                            computedDisplay: window.getComputedStyle(icon).display,
-                            computedVisibility: window.getComputedStyle(icon).visibility,
-                            computedOpacity: window.getComputedStyle(icon).opacity,
-                            iconOffsetHeight: icon.offsetHeight,
-                            iconOffsetWidth: icon.offsetWidth
-                        });
                     } else {
-                        console.log('[ICON HIDE] init() - Not showing icon due to settings', {
+                        console.log('[ICON HIDE] init() - Hiding icon based on settings', {
                             hideTrigger,
                             isMobile,
-                            mobileVisibility
+                            mobileVisibility,
+                            shouldShow
                         });
+                        // Ensure icon is hidden
+                        icon.style.setProperty('display', 'none', 'important');
+                        icon.style.setProperty('visibility', 'hidden', 'important');
+                        icon.style.setProperty('opacity', '0', 'important');
+                        this._iconExplicitlyShown = false;
                     }
                 } else {
                     console.warn('[ICON HIDE] init() - No customization data available', {
@@ -3172,13 +3322,13 @@ class AccessibilityWidget {
                             } else if (isValid === true && this.paymentFailed === true) {
                                 // Payment status changed from invalid to valid - re-enable widget
                                 this.paymentFailed = false;
-                                const widgetContainer = document.getElementById('accessibility-widget-container');
+                                const widgetContainer = document.getElementById('accessbit-widget-container');
                                 if (widgetContainer) {
                                     widgetContainer.style.display = '';
                                     widgetContainer.style.visibility = '';
                                     widgetContainer.style.opacity = '';
                                 }
-                                const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                                 if (icon) {
                                     this.showIcon();
                                 }
@@ -3251,9 +3401,9 @@ class AccessibilityWidget {
     
             // Panel toggle functionality - using Shadow DOM
     
-            const icon = this.shadowRoot.getElementById('accessibility-icon');
+            const icon = this.shadowRoot.getElementById('accessbit-widget-icon');
     
-            const panel = this.shadowRoot.getElementById('accessibility-panel');
+            const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
     
             const closeBtn = this.shadowRoot.getElementById('close-panel');
     
@@ -3287,7 +3437,7 @@ class AccessibilityWidget {
                     this.togglePanel();
                     
                     // Debug: Check panel state
-                    const panel = this.shadowRoot.getElementById('accessibility-panel');
+                    const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
                     console.log('[ICON CLICK] Panel state after toggle:', {
                         hasPanel: !!panel,
                         panelDisplay: panel ? window.getComputedStyle(panel).display : 'N/A',
@@ -4582,7 +4732,7 @@ class AccessibilityWidget {
     
             // Check if CSS is already loaded
     
-            if (!document.querySelector('link[href*="accessibility-widget.css"]')) {
+            if (!document.querySelector('link[href*="accessbit-widget.css"]')) {
     
                 const link = document.createElement('link');
     
@@ -4606,7 +4756,7 @@ class AccessibilityWidget {
     
                 // Define overrideCSS first
                 const overrideCSS = `
-    .accessibility-panel {
+    .accessbit-widget-panel {
       /* Position controlled by JavaScript - no hardcoded positioning */
       left: auto;
       right: auto;
@@ -4615,23 +4765,23 @@ class AccessibilityWidget {
       transform: none;
     }
     
-    /* REMOVED the conflicting accessibility-icon rule that was forcing 50% border-radius */
+    /* REMOVED the conflicting accessbit-widget-icon rule that was forcing 50% border-radius */
     
     /* Icon Shape Rules - Simplified */
-    .accessibility-icon[data-shape="circle"] {
+    .accessbit-widget-icon[data-shape="circle"] {
         border-radius: 50%;
     }
     
-    .accessibility-icon[data-shape="rounded"] {
+    .accessbit-widget-icon[data-shape="rounded"] {
         border-radius: 12px;
     }
     
-    .accessibility-icon[data-shape="square"] {
+    .accessbit-widget-icon[data-shape="square"] {
         border-radius: 0px;
     }
     
     /* Z-index hierarchy: Spotlight > Panel > Icon */
-    .accessibility-panel {
+    .accessbit-widget-panel {
         position: fixed;
         z-index: 2147483646; /* Below spotlight, above icon */
         overflow-y: auto;
@@ -4645,7 +4795,7 @@ class AccessibilityWidget {
         bottom: auto;
     }
     
-    .accessibility-icon {
+    .accessbit-widget-icon {
         z-index: 2147483645 !important; /* Below panel */
     }
     
@@ -4655,15 +4805,15 @@ class AccessibilityWidget {
     }
     
     /* Additional shape classes for compatibility */
-    .accessibility-icon.rounded {
+    .accessbit-widget-icon.rounded {
         border-radius: 12px;
     }
     
-    .accessibility-icon.circle {
+    .accessbit-widget-icon.circle {
         border-radius: 50%;
     }
     
-    .accessibility-icon.square {
+    .accessbit-widget-icon.square {
         border-radius: 0px;
     }
     
@@ -4671,32 +4821,32 @@ class AccessibilityWidget {
     
     /* Very Small Mobile Screens (430px and below) */
     @media (max-width: 430px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             font-size: 12px;
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             font-size: 1.3em;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             font-size: 1.1em;
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             font-size: 0.9em;
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             font-size: 0.8em;
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             font-size: 0.8em;
             padding: 4px 8px;
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             font-size: 0.7em;
             padding: 6px 20px;
             height: 28px;
@@ -4712,7 +4862,7 @@ class AccessibilityWidget {
             box-sizing: border-box;
         }
         
-        .accessibility-panel .scaling-btn i.fas {
+        .accessbit-widget-panel .scaling-btn i.fas {
             /* Hide icon to avoid offsetting the +2% / -2% text horizontally,
                especially when Font Awesome is not loaded */
             display: none !important;
@@ -4721,23 +4871,23 @@ class AccessibilityWidget {
         }
         
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             font-size: 0.8em;
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             font-size: 0.7em;
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             font-size: 0.8em;
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             font-size: 0.7em;
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             font-size: 16px;
             padding: 4px;
         }
@@ -4745,7 +4895,7 @@ class AccessibilityWidget {
     
     /* Mobile Devices (Small Screens) - Base styles */
     @media (max-width: 480px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 90vw;
             max-width: 350px;
             padding: 12px;
@@ -4757,32 +4907,32 @@ class AccessibilityWidget {
             overscroll-behavior: contain;
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             margin-bottom: 8px;
             font-size: 1.5em;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             margin-bottom: 6px;
             font-size: 1.2em;
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             font-size: 1em;
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             line-height: 1.3;
             font-size: 0.9em;
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 6px 10px;
             min-height: 28px;
             font-size: 0.9em;
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 4px 6px;
             min-height: 24px;
             font-size: 0.8em;
@@ -4792,41 +4942,41 @@ class AccessibilityWidget {
             gap: 4px;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             font-size: 0.9em;
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             font-size: 0.8em;
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             font-size: 0.9em;
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             font-size: 0.8em;
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             font-size: 18px;
             padding: 6px;
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 45px;
             height: 45px;
             /* Position controlled by JS; do not force a corner here */
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
     }
     
     /* Landscape Phones & Smaller Portrait Tablets */
     @media (min-width: 481px) and (max-width: 768px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 80vw;
             max-width: 380px;
             padding: 14px;
@@ -4838,32 +4988,32 @@ class AccessibilityWidget {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             margin-bottom: 10px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             margin-bottom: 8px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             line-height: 1.4;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 8px 12px;
             min-height: 32px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 5px 10px !important;
             min-height: 26px;
             /* Font size controlled by JavaScript */
@@ -4874,7 +5024,7 @@ class AccessibilityWidget {
             text-align: center !important;
         }
         
-        .accessibility-panel .scaling-btn span {
+        .accessbit-widget-panel .scaling-btn span {
             display: flex;
             align-items: center;
             line-height: 1;
@@ -4882,40 +5032,40 @@ class AccessibilityWidget {
             padding: 0;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 50px;
             height: 50px;
             /* Position controlled by JS */
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
     }
     
     /* Tablets (Portrait & Landscape) & Laptops */
     @media (min-width: 769px) and (max-width: 1024px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 75vw;
             max-width: 520px;
             max-height: calc(100vh - 40px);
@@ -4932,32 +5082,32 @@ class AccessibilityWidget {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             margin-bottom: 12px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             margin-bottom: 10px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             line-height: 1.5;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 10px 14px;
             min-height: 36px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 6px 10px;
             min-height: 28px;
             /* Font size controlled by JavaScript */
@@ -4967,40 +5117,40 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 55px;
             height: 55px;
             /* Position controlled by JS */
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
     }
     
     /* Larger Displays (Desktops) */
     @media (min-width: 1012px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 600px;
             max-width: 600px;
             max-height: calc(100vh - 40px);
@@ -5008,32 +5158,32 @@ class AccessibilityWidget {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             margin-bottom: 14px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             margin-bottom: 12px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             line-height: 1.6;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 12px 16px;
             min-height: 40px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 8px 12px;
             min-height: 32px;
             /* Font size controlled by JavaScript */
@@ -5043,40 +5193,40 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 60px;
             height: 60px;
             /* Position controlled by JS */
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
     }
     
     /* Orientation-specific styles */
     @media (orientation: landscape) and (max-width: 768px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 85vw;
             max-width: 400px;
             /* REMOVED: height: 100vh, top: 0, bottom: 0 - Panel should position relative to icon */
@@ -5087,32 +5237,32 @@ class AccessibilityWidget {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             margin-bottom: 8px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             margin-bottom: 6px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h4 {
+        .accessbit-widget-panel h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel p {
+        .accessbit-widget-panel p {
             line-height: 1.3;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 6px 10px;
             min-height: 28px;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 4px 6px;
             min-height: 24px;
             /* Font size controlled by JavaScript */
@@ -5122,23 +5272,23 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item h4 {
+        .accessbit-widget-panel .profile-item h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-item p {
+        .accessbit-widget-panel .profile-item p {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .close-btn {
+        .accessbit-widget-panel .close-btn {
             /* Font size controlled by JavaScript */
         }
     }
@@ -5146,27 +5296,27 @@ class AccessibilityWidget {
     /* High-resolution screens */
     @media (-webkit-min-device-pixel-ratio: 2),
            (min-resolution: 192dpi) {
-        .accessibility-icon {
+        .accessbit-widget-icon {
             /* Ensure crisp rendering on high-DPI displays */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
     }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             padding: 8px 12px !important;
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             padding: 4px 8px !important;
             /* Font size controlled by JavaScript */
             display: flex !important;
@@ -5175,16 +5325,16 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
         /* Mobile shape adjustments */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px;
         }
     }
@@ -5240,7 +5390,7 @@ class AccessibilityWidget {
         }
         
         /* Ensure rounded shape works on medium mobile */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px !important;
             -webkit-border-radius: 12px !important;
             -moz-border-radius: 12px !important;
@@ -5249,7 +5399,7 @@ class AccessibilityWidget {
     
     /* Small Mobile Screens (375px and below) */
     @media (max-width: 400px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             /* Font size controlled by JavaScript */
             padding: 8px;
             width: 90vw;
@@ -5263,23 +5413,23 @@ class AccessibilityWidget {
             overscroll-behavior: contain;
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 6px;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
             margin-bottom: 4px;
         }
         
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             /* Font size controlled by JavaScript */
             padding: 4px 6px;
             min-height: 24px;
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             /* Font size controlled by JavaScript */
             padding: 2px 4px;
             min-height: 20px;
@@ -5289,11 +5439,11 @@ class AccessibilityWidget {
             gap: 4px !important;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
@@ -5346,7 +5496,7 @@ class AccessibilityWidget {
         }
         
         /* Ensure rounded shape works on small mobile */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px;
             -webkit-border-radius: 12px;
             -moz-border-radius: 12px;
@@ -5354,25 +5504,25 @@ class AccessibilityWidget {
     }
     
     @media (max-width: 480px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             /* Font size controlled by JavaScript */ /* Override external 8px */
         }
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */ /* Override external 9px */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */ /* Override external 8px */
         }
         
         /* Override external button size conflicts */
-        .accessibility-panel .action-btn {
+        .accessbit-widget-panel .action-btn {
             /* Font size controlled by JavaScript */
             padding: 6px 10px;
         }
         
-        .accessibility-panel .scaling-btn {
+        .accessbit-widget-panel .scaling-btn {
             /* Font size controlled by JavaScript */
             padding: 3px 6px;
             display: flex;
@@ -5381,16 +5531,16 @@ class AccessibilityWidget {
             gap: 4px;
         }
         
-        .accessibility-panel .profile-info h4 {
+        .accessbit-widget-panel .profile-info h4 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel .profile-info p {
+        .accessbit-widget-panel .profile-info p {
             /* Font size controlled by JavaScript */
         }
         
         /* Ensure rounded shape works on small mobile */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px;
             -webkit-border-radius: 12px;
             -moz-border-radius: 12px;
@@ -5398,7 +5548,7 @@ class AccessibilityWidget {
     }
     
     /* Override external panel positioning conflicts */
-    .accessibility-panel {
+    .accessbit-widget-panel {
         /* Let JavaScript control positioning, not external CSS */
         left: auto;
         right: auto;
@@ -5412,28 +5562,28 @@ class AccessibilityWidget {
     /* Removed - replaced with mobile-first approach above */
         
         /* Ensure rounded shape works on large tablets */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px !important;
             -webkit-border-radius: 12px !important;
             -moz-border-radius: 12px !important;
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 55px !important;
             height: 55px !important;
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
         
         /* Better content spacing for large tablets */
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 14px !important;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
             margin-bottom: 12px !important;
         }
@@ -5460,25 +5610,25 @@ class AccessibilityWidget {
     /* Removed - replaced with mobile-first approach above */
         
         /* Ensure rounded shape works on tablets */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px !important;
             -webkit-border-radius: 12px !important;
             -moz-border-radius: 12px !important;
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 50px !important;
             height: 50px !important;
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
     }
     
     /* iPad Mini and Tablet - Responsive sizing */
     @media (max-width: 819px) and (min-width: 769px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 85vw;
             max-width: 450px;
             /* Font size controlled by JavaScript */
@@ -5495,28 +5645,28 @@ class AccessibilityWidget {
         }
         
         /* Ensure rounded shape works on iPad Mini */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px;
             -webkit-border-radius: 12px;
             -moz-border-radius: 12px;
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 50px;
             height: 50px;
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
         
         /* Better content spacing for tablet */
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 12px;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
             margin-bottom: 10px;
         }
@@ -5542,22 +5692,22 @@ class AccessibilityWidget {
     
     /* Removed - replaced with mobile-first approach above */
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 45px !important;
             height: 45px !important;
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
         
         /* Reasonable text and toggles for mobile landscape */
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 10px !important;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
             margin-bottom: 8px !important;
         }
@@ -5619,7 +5769,7 @@ class AccessibilityWidget {
     
     /* Mobile Portrait - Reasonable text and toggles */
     @media (max-width: 480px) {
-        .accessibility-panel {
+        .accessbit-widget-panel {
             width: 75vw !important;
             max-width: 320px !important;
             /* Font size controlled by JavaScript */
@@ -5633,22 +5783,22 @@ class AccessibilityWidget {
             overscroll-behavior: contain;
         }
         
-        .accessibility-icon {
+        .accessbit-widget-icon {
             width: 40px !important;
             height: 40px !important;
         }
         
-        .accessibility-icon i {
+        .accessbit-widget-icon i {
             /* Font size controlled by JavaScript */
         }
         
         /* Reasonable text and toggles for mobile portrait */
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 8px !important;
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
             margin-bottom: 6px !important;
         }
@@ -5713,7 +5863,7 @@ class AccessibilityWidget {
     /* Removed conflicting shape styles */
     
     /* DEBUG: Add visual indicators for shape testing */
-    .accessibility-icon[data-shape="circle"]::after {
+    .accessbit-widget-icon[data-shape="circle"]::after {
         content: "CIRCLE" !important;
         position: absolute !important;
         top: -20px !important;
@@ -5724,7 +5874,7 @@ class AccessibilityWidget {
         z-index: 9999 !important;
     }
     
-    .accessibility-icon[data-shape="rounded"]::after {
+    .accessbit-widget-icon[data-shape="rounded"]::after {
         content: "ROUNDED" !important;
         position: absolute !important;
         top: -20px !important;
@@ -5735,7 +5885,7 @@ class AccessibilityWidget {
         z-index: 9999 !important;
     }
     
-    .accessibility-icon[data-shape="square"]::after {
+    .accessbit-widget-icon[data-shape="square"]::after {
         content: "SQUARE" !important;
         position: absolute !important;
         top: -20px !important;
@@ -5759,16 +5909,16 @@ class AccessibilityWidget {
     
     /* Removed - replaced with mobile-first approach above */
         
-        .accessibility-panel h2 {
+        .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
         }
         
-        .accessibility-panel h3 {
+        .accessbit-widget-panel h3 {
             /* Font size controlled by JavaScript */
         }
         
         /* Mobile shape adjustments */
-        .accessibility-icon[data-shape="rounded"] {
+        .accessbit-widget-icon[data-shape="rounded"] {
             border-radius: 12px;
         }
         
@@ -5813,7 +5963,7 @@ class AccessibilityWidget {
         }
     }
     
-    .accessibility-panel {
+    .accessbit-widget-panel {
         display: none !important;
         position: fixed;
         z-index: 100001 !important;
@@ -5824,7 +5974,7 @@ class AccessibilityWidget {
         bottom: auto;
     }
     
-    .accessibility-panel.show {
+    .accessbit-widget-panel.show {
         display: block !important;
         visibility: visible !important;
     }
@@ -5956,30 +6106,30 @@ class AccessibilityWidget {
     }
     
     /* Exclude accessibility widget from text alignment */
-    body.align-left .accessibility-widget,
-    body.align-left .accessibility-panel,
-    body.align-left .accessibility-icon,
-    body.align-left #accessibility-widget,
-    body.align-left #accessibility-panel,
-    body.align-left #accessibility-icon,
+    body.align-left .accessbit-widget,
+    body.align-left .accessbit-widget-panel,
+    body.align-left .accessbit-widget-icon,
+    body.align-left #accessbit-widget,
+    body.align-left #accessbit-widget-panel,
+    body.align-left #accessbit-widget-icon,
     body.align-left [data-ck-widget],
-    body.align-left [class*="accessibility"],
-    body.align-center .accessibility-widget,
-    body.align-center .accessibility-panel,
-    body.align-center .accessibility-icon,
-    body.align-center #accessibility-widget,
-    body.align-center #accessibility-panel,
-    body.align-center #accessibility-icon,
+    body.align-left [class*="accessbit"],
+    body.align-center .accessbit-widget,
+    body.align-center .accessbit-widget-panel,
+    body.align-center .accessbit-widget-icon,
+    body.align-center #accessbit-widget,
+    body.align-center #accessbit-widget-panel,
+    body.align-center #accessbit-widget-icon,
     body.align-center [data-ck-widget],
-    body.align-center [class*="accessibility"],
-    body.align-right .accessibility-widget,
-    body.align-right .accessibility-panel,
-    body.align-right .accessibility-icon,
-    body.align-right #accessibility-widget,
-    body.align-right #accessibility-panel,
-    body.align-right #accessibility-icon,
+    body.align-center [class*="accessbit"],
+    body.align-right .accessbit-widget,
+    body.align-right .accessbit-widget-panel,
+    body.align-right .accessbit-widget-icon,
+    body.align-right #accessbit-widget,
+    body.align-right #accessbit-widget-panel,
+    body.align-right #accessbit-widget-icon,
     body.align-right [data-ck-widget],
-    body.align-right [class*="accessibility"] {
+    body.align-right [class*="accessbit"] {
         text-align: inherit !important;
     }
     `;
@@ -6006,7 +6156,7 @@ class AccessibilityWidget {
             
             const widgetContainer = document.createElement('div');
     
-            widgetContainer.id = 'accessibility-widget-container';
+            widgetContainer.id = 'accessbit-widget-container';
     
             widgetContainer.style.cssText = `
     
@@ -6051,7 +6201,7 @@ class AccessibilityWidget {
             if (!style) {
                 style = document.createElement('style');
                 style.setAttribute('data-widget-css', 'true');
-                style.setAttribute('id', 'accessibility-widget-styles');
+                style.setAttribute('id', 'accessbit-widget-styles');
                 style.textContent = this.getWidgetCSS();
                 // Insert CSS FIRST before any HTML elements to ensure it's always loaded
                 shadowRoot.appendChild(style);
@@ -6068,9 +6218,9 @@ class AccessibilityWidget {
     
             const icon = document.createElement('div');
     
-            icon.id = 'accessibility-icon';
-    
-            icon.className = 'accessibility-icon';
+            icon.id = 'accessbit-widget-icon';
+            
+            icon.className = 'accessbit-widget-icon';
     
             icon.setAttribute('role', 'button');
     
@@ -6080,7 +6230,7 @@ class AccessibilityWidget {
     
             icon.setAttribute('aria-expanded', 'false');
     
-            icon.setAttribute('aria-describedby', 'accessibility-icon-description');
+            icon.setAttribute('aria-describedby', 'accessbit-widget-icon-description');
     
             icon.textContent = '';
             const iconElement = document.createElement('i');
@@ -6088,7 +6238,7 @@ class AccessibilityWidget {
             iconElement.setAttribute('aria-hidden', 'true');
             icon.appendChild(iconElement);
             const descriptionSpan = document.createElement('span');
-            descriptionSpan.id = 'accessibility-icon-description';
+            descriptionSpan.id = 'accessbit-widget-icon-description';
             descriptionSpan.className = 'sr-only';
             descriptionSpan.textContent = 'Click to open accessibility settings panel';
             icon.appendChild(descriptionSpan);
@@ -6111,9 +6261,9 @@ class AccessibilityWidget {
     
             const panel = document.createElement('div');
     
-            panel.id = 'accessibility-panel';
+            panel.id = 'accessbit-widget-panel';
     
-            panel.className = 'accessibility-panel';
+            panel.className = 'accessbit-widget-panel';
     
             panel.setAttribute('role', 'dialog');
     
@@ -6238,9 +6388,9 @@ class AccessibilityWidget {
     
             setTimeout(() => {
     
-                const iconCheck = shadowRoot.getElementById('accessibility-icon');
+                const iconCheck = shadowRoot.getElementById('accessbit-widget-icon');
     
-                const panelCheck = shadowRoot.getElementById('accessibility-panel');
+                const panelCheck = shadowRoot.getElementById('accessbit-widget-panel');
     
                 
     
@@ -6277,7 +6427,7 @@ class AccessibilityWidget {
 
             // Vision Impaired: apply saved state and bind toggle inside Shadow DOM
             try {
-                const viEnabled = localStorage.getItem('accessibility-widget-vision-impaired') === 'true';
+                const viEnabled = localStorage.getItem('accessbit-widget-vision-impaired') === 'true';
                 applyVisionImpaired(viEnabled);
 
                 const bindVIToggle = () => {
@@ -6286,7 +6436,7 @@ class AccessibilityWidget {
                     try { viToggle.checked = viEnabled; } catch (_) {}
                     viToggle.addEventListener('change', () => {
                         const on = !!viToggle.checked;
-                        localStorage.setItem('accessibility-widget-vision-impaired', on ? 'true' : 'false');
+                        localStorage.setItem('accessbit-widget-vision-impaired', on ? 'true' : 'false');
                         applyVisionImpaired(on);
                     });
                     viToggle.__viBound = true;
@@ -6310,97 +6460,97 @@ class AccessibilityWidget {
             @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
             
             /* Force icon shape overrides - must come first */
-            .accessibility-icon {
+            .accessbit-widget-icon {
                 /* REMOVED empty rule that was potentially conflicting */
             }
             
             /* Override external CSS with maximum specificity */
-            .accessibility-icon[data-shape="circle"] {
+            .accessbit-widget-icon[data-shape="circle"] {
                 border-radius: 50% !important;
                 -webkit-border-radius: 50% !important;
                 -moz-border-radius: 50% !important;
             }
             
-            .accessibility-icon[data-shape="rounded"] {
+            .accessbit-widget-icon[data-shape="rounded"] {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
-            .accessibility-icon[data-shape="square"] {
+            .accessbit-widget-icon[data-shape="square"] {
                 border-radius: 0px !important;
                 -webkit-border-radius: 0px !important;
                 -moz-border-radius: 0px !important;
             }
             
             /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE */
-            .accessibility-icon.rounded,
-            .accessibility-icon[data-shape="rounded"],
-            .accessibility-icon.rounded[data-shape="rounded"],
-            .accessibility-icon[data-shape="rounded"].rounded {
+            .accessbit-widget-icon.rounded,
+            .accessbit-widget-icon[data-shape="rounded"],
+            .accessbit-widget-icon.rounded[data-shape="rounded"],
+            .accessbit-widget-icon[data-shape="rounded"].rounded {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Force rounded shape with absolute maximum specificity */
-            .accessibility-icon.rounded[data-shape="rounded"] {
+            .accessbit-widget-icon.rounded[data-shape="rounded"] {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Override any external CSS that might be forcing circle shape */
-            .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+            .accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]) {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Force rounded shape with absolute maximum specificity */
-            .accessibility-icon.rounded,
-            .accessibility-icon[data-shape="rounded"] {
+            .accessbit-widget-icon.rounded,
+            .accessbit-widget-icon[data-shape="rounded"] {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Override any external CSS that might be forcing circle shape */
-            .accessibility-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+            .accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]) {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Maximum specificity override for rounded shape */
-            .accessibility-icon.rounded[data-shape="rounded"] {
+            .accessbit-widget-icon.rounded[data-shape="rounded"] {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Force rounded shape with absolute maximum specificity */
-            .accessibility-icon[data-shape="rounded"].rounded {
+            .accessbit-widget-icon[data-shape="rounded"].rounded {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Override any external CSS with maximum force */
-            .accessibility-icon[data-shape="rounded"] {
+            .accessbit-widget-icon[data-shape="rounded"] {
                 border-radius: 12px !important;
                 -webkit-border-radius: 12px !important;
                 -moz-border-radius: 12px !important;
             }
             
             /* Force panel positioning */
-            .accessibility-panel {
+            .accessbit-widget-panel {
                 /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 z-index: 100001 !important;
                 display: none !important; /* Hidden by default */
             }
             
-            .accessibility-panel.show {
+            .accessbit-widget-panel.show {
                 display: block !important;
                 visibility: visible !important;
             }
@@ -6408,16 +6558,16 @@ class AccessibilityWidget {
             /* Mobile responsiveness - handled by main responsive CSS above */
             
             @media (max-width: 480px) {
-                .accessibility-icon {
+                .accessbit-widget-icon {
                     width: 45px !important;
                     height: 45px !important;
                 }
                 
-                .accessibility-icon i {
+                .accessbit-widget-icon i {
                     /* Font size controlled by JavaScript */
                 }
                 
-                .accessibility-panel {
+                .accessbit-widget-panel {
                     width: 95vw !important;
                     max-width: 350px !important;
                 }
@@ -6450,7 +6600,7 @@ class AccessibilityWidget {
     
                 /* Ensure icon positioning is always fixed and not affected by host context */
     
-                .accessibility-icon {
+                .accessbit-widget-icon {
     
                     position: fixed !important;
     
@@ -6469,7 +6619,7 @@ class AccessibilityWidget {
     
                 /* Accessibility Icon - Visual styling */
     
-                .accessibility-icon {
+                .accessbit-widget-icon {
     
                     width: 60px;
     
@@ -6497,7 +6647,7 @@ class AccessibilityWidget {
     
     
     
-                .accessibility-icon:hover {
+                .accessbit-widget-icon:hover {
     
                     transform: scale(1.05);
     
@@ -6507,7 +6657,7 @@ class AccessibilityWidget {
     
     
     
-                .accessibility-icon i {
+                .accessbit-widget-icon i {
     
                     color: #ffffff;
     
@@ -6519,13 +6669,13 @@ class AccessibilityWidget {
     
                 /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
     
-                .accessibility-icon:focus {
+                .accessbit-widget-icon:focus {
     
                     
                 }
     
                 /* Allow focus indicators when highlight-focus is active */
-                body.highlight-focus .accessibility-icon:focus {
+                body.highlight-focus .accessbit-widget-icon:focus {
                     outline: 3px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
@@ -6534,7 +6684,7 @@ class AccessibilityWidget {
                 }
                 
                 /* Additional focus styles for accessibility icon when keyboard navigation is active */
-                body.highlight-focus #accessibility-icon:focus {
+                body.highlight-focus #accessbit-widget-icon:focus {
                     outline: 3px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
@@ -6644,8 +6794,8 @@ class AccessibilityWidget {
                 }
                 
                 /* Override for accessibility icon to show focus when keyboard navigation is active */
-                body.highlight-focus .accessibility-icon:focus,
-                body.highlight-focus #accessibility-icon:focus {
+                body.highlight-focus .accessbit-widget-icon:focus,
+                body.highlight-focus #accessbit-widget-icon:focus {
                     outline: 3px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
@@ -6710,13 +6860,13 @@ class AccessibilityWidget {
     
                 /* Focus indicators for keyboard navigation */
     
-                .accessibility-icon:focus,
+                .accessbit-widget-icon:focus,
     
-                .accessibility-panel button:focus,
+                .accessbit-widget-panel button:focus,
     
-                .accessibility-panel input:focus,
+                .accessbit-widget-panel input:focus,
     
-                .accessibility-panel label:focus {
+                .accessbit-widget-panel label:focus {
     
                     
                     outline-offset: 0px !important;
@@ -6725,10 +6875,10 @@ class AccessibilityWidget {
                 }
     
                 /* Allow focus indicators when highlight-focus is active (document scope) */
-                body.highlight-focus .accessibility-icon:focus,
-                body.highlight-focus .accessibility-panel button:focus,
-                body.highlight-focus .accessibility-panel input:focus,
-                body.highlight-focus .accessibility-panel label:focus {
+                body.highlight-focus .accessbit-widget-icon:focus,
+                body.highlight-focus .accessbit-widget-panel button:focus,
+                body.highlight-focus .accessbit-widget-panel input:focus,
+                body.highlight-focus .accessbit-widget-panel label:focus {
                     outline: 3px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
@@ -6737,11 +6887,11 @@ class AccessibilityWidget {
                 }
     
                 /* Ensure focus styles work inside Shadow DOM when body has highlight-focus */
-                :host-context(.highlight-focus) #accessibility-icon:focus,
-                :host-context(.highlight-focus) .accessibility-icon:focus,
-                :host-context(.highlight-focus) .accessibility-panel button:focus,
-                :host-context(.highlight-focus) .accessibility-panel input:focus,
-                :host-context(.highlight-focus) .accessibility-panel label:focus {
+                :host-context(.highlight-focus) #accessbit-widget-icon:focus,
+                :host-context(.highlight-focus) .accessbit-widget-icon:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel button:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel input:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel label:focus {
                     outline: 3px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
@@ -6751,11 +6901,11 @@ class AccessibilityWidget {
     
                 /* High contrast focus for better visibility */
     
-                .accessibility-icon:focus-visible,
+                .accessbit-widget-icon:focus-visible,
     
-                .accessibility-panel button:focus-visible,
+                .accessbit-widget-panel button:focus-visible,
     
-                .accessibility-panel input:focus-visible {
+                .accessbit-widget-panel input:focus-visible {
     
                     
     
@@ -6765,7 +6915,7 @@ class AccessibilityWidget {
     
                 /* Accessibility Panel - Fixed position on right side */
     
-                .accessibility-panel {
+                .accessbit-widget-panel {
     
                     /* REMOVED: position: fixed; - This was preventing widget from scrolling with viewport */
     
@@ -6786,17 +6936,17 @@ class AccessibilityWidget {
                 }
                 
                 /* Override GSAP/Lenis smooth scrolling for accessibility panel */
-                .accessibility-panel * {
+                .accessbit-widget-panel * {
                     scroll-behavior: auto !important;
                 }
                 
                 /* Ensure panel content is always scrollable */
-                .accessibility-panel .panel-content {
+                .accessbit-widget-panel .panel-content {
                     overflow-y: auto !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
     
-                .accessibility-panel.active {
+                .accessbit-widget-panel.active {
     
                     display: block !important;
     
@@ -6816,7 +6966,7 @@ class AccessibilityWidget {
     
                 @media (max-width: 480px) {
     
-                    .accessibility-icon {
+                    .accessbit-widget-icon {
     
                         width: 45px !important;
     
@@ -6828,7 +6978,7 @@ class AccessibilityWidget {
     
                     
     
-                    .accessibility-icon i {
+                    .accessbit-widget-icon i {
     
                         /* Font size controlled by JavaScript */
     
@@ -6836,7 +6986,7 @@ class AccessibilityWidget {
     
                     
     
-                    .accessibility-panel {
+                    .accessbit-widget-panel {
     
                         width: 500px !important;
     
@@ -6848,7 +6998,7 @@ class AccessibilityWidget {
     
                     
     
-                    .accessibility-panel.active {
+                    .accessbit-widget-panel.active {
                         /* Position controlled by JavaScript - removed hardcoded left positioning */
                     }
     
@@ -7037,7 +7187,7 @@ class AccessibilityWidget {
     
                 /* Panel Content */
     
-                .accessibility-panel h2 {
+                .accessbit-widget-panel h2 {
     
                     text-align: center;
     
@@ -7929,8 +8079,8 @@ class AccessibilityWidget {
                 /* Exclude widget from seizure-safe filter - widget should never have greyscale */
                 :host,
                 :host(.seizure-safe),
-                :host(.seizure-safe) .accessibility-icon,
-                :host(.seizure-safe) .accessibility-panel,
+                :host(.seizure-safe) .accessbit-widget-icon,
+                :host(.seizure-safe) .accessbit-widget-panel,
                 :host(.seizure-safe) * {
                     filter: none !important;
                     -webkit-filter: none !important;
@@ -7940,7 +8090,7 @@ class AccessibilityWidget {
     
                 /* Ensure seizure safe icon stays in correct position */
     
-                :host(.seizure-safe) .accessibility-icon {
+                :host(.seizure-safe) .accessbit-widget-icon {
     
                     position: fixed !important;
     
@@ -7990,9 +8140,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.adhd-friendly) .accessibility-icon,
+                :host(.adhd-friendly) .accessbit-widget-icon,
     
-                :host(.adhd-friendly) .accessibility-panel {
+                :host(.adhd-friendly) .accessbit-widget-panel {
     
                     filter: saturate(0.9) brightness(0.9) !important;
     
@@ -8000,9 +8150,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.cognitive-disability) .accessibility-icon,
+                :host(.cognitive-disability) .accessbit-widget-icon,
     
-                :host(.cognitive-disability) .accessibility-panel {
+                :host(.cognitive-disability) .accessbit-widget-panel {
     
                     filter: saturate(1.2) brightness(1.1) !important;
     
@@ -8014,9 +8164,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.monochrome) .accessibility-icon,
+                :host(.monochrome) .accessbit-widget-icon,
     
-                :host(.monochrome) .accessibility-panel {
+                :host(.monochrome) .accessbit-widget-panel {
     
                     filter: grayscale(1) !important;
     
@@ -8024,9 +8174,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.dark-contrast) .accessibility-icon,
+                :host(.dark-contrast) .accessbit-widget-icon,
     
-                :host(.dark-contrast) .accessibility-panel {
+                :host(.dark-contrast) .accessbit-widget-panel {
     
                     filter: saturate(1.2) brightness(0.8) contrast(1.3) !important;
     
@@ -8034,9 +8184,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.light-contrast) .accessibility-icon,
+                :host(.light-contrast) .accessbit-widget-icon,
     
-                :host(.light-contrast) .accessibility-panel {
+                :host(.light-contrast) .accessbit-widget-panel {
     
                     filter: saturate(1.2) brightness(1.2) contrast(0.9) !important;
     
@@ -8047,9 +8197,9 @@ class AccessibilityWidget {
                 /* Reduce high contrast intensity for Shadow DOM content */
     
                 /* High contrast should NOT affect widget - remove any filters */
-                :host(.high-contrast) .accessibility-icon,
-                :host(.high-contrast) .accessibility-panel,
-                :host(.high-contrast) .accessibility-panel * {
+                :host(.high-contrast) .accessbit-widget-icon,
+                :host(.high-contrast) .accessbit-widget-panel,
+                :host(.high-contrast) .accessbit-widget-panel * {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -8060,9 +8210,9 @@ class AccessibilityWidget {
     
                 /* Default font styles for widget elements (when readable font is disabled) */
     
-                :host(:not(.readable-font)) .accessibility-icon,
+                :host(:not(.readable-font)) .accessbit-widget-icon,
     
-                :host(:not(.readable-font)) .accessibility-panel {
+                :host(:not(.readable-font)) .accessbit-widget-panel {
     
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     
@@ -8074,21 +8224,21 @@ class AccessibilityWidget {
     
     
     
-                :host(:not(.readable-font)) .accessibility-panel h2,
+                :host(:not(.readable-font)) .accessbit-widget-panel h2,
     
-                :host(:not(.readable-font)) .accessibility-panel h3,
+                :host(:not(.readable-font)) .accessbit-widget-panel h3,
     
-                :host(:not(.readable-font)) .accessibility-panel h4,
+                :host(:not(.readable-font)) .accessbit-widget-panel h4,
     
-                :host(:not(.readable-font)) .accessibility-panel p,
+                :host(:not(.readable-font)) .accessbit-widget-panel p,
     
-                :host(:not(.readable-font)) .accessibility-panel .action-btn,
+                :host(:not(.readable-font)) .accessbit-widget-panel .action-btn,
     
-                :host(:not(.readable-font)) .accessibility-panel button,
+                :host(:not(.readable-font)) .accessbit-widget-panel button,
     
-                :host(:not(.readable-font)) .accessibility-panel input,
+                :host(:not(.readable-font)) .accessbit-widget-panel input,
     
-                :host(:not(.readable-font)) .accessibility-panel label {
+                :host(:not(.readable-font)) .accessbit-widget-panel label {
     
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     
@@ -8102,31 +8252,31 @@ class AccessibilityWidget {
     
                 /* Widget panel font should NOT change when readable font is active */
                 /* Explicitly set widget font even when readable-font class is on body */
-                :host(.readable-font) .accessibility-icon,
-                :host(.readable-font) .accessibility-panel,
-                :host .accessibility-icon,
-                :host .accessibility-panel {
+                :host(.readable-font) .accessbit-widget-icon,
+                :host(.readable-font) .accessbit-widget-panel,
+                :host .accessbit-widget-icon,
+                :host .accessbit-widget-panel {
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                     font-weight: normal;
                     letter-spacing: normal;
                 }
                 
-                :host(.readable-font) .accessibility-panel h2,
-                :host(.readable-font) .accessibility-panel h3,
-                :host(.readable-font) .accessibility-panel h4,
-                :host(.readable-font) .accessibility-panel p,
-                :host(.readable-font) .accessibility-panel .action-btn,
-                :host(.readable-font) .accessibility-panel button,
-                :host(.readable-font) .accessibility-panel input,
-                :host(.readable-font) .accessibility-panel label,
-                :host .accessibility-panel h2,
-                :host .accessibility-panel h3,
-                :host .accessibility-panel h4,
-                :host .accessibility-panel p,
-                :host .accessibility-panel .action-btn,
-                :host .accessibility-panel button,
-                :host .accessibility-panel input,
-                :host .accessibility-panel label {
+                :host(.readable-font) .accessbit-widget-panel h2,
+                :host(.readable-font) .accessbit-widget-panel h3,
+                :host(.readable-font) .accessbit-widget-panel h4,
+                :host(.readable-font) .accessbit-widget-panel p,
+                :host(.readable-font) .accessbit-widget-panel .action-btn,
+                :host(.readable-font) .accessbit-widget-panel button,
+                :host(.readable-font) .accessbit-widget-panel input,
+                :host(.readable-font) .accessbit-widget-panel label,
+                :host .accessbit-widget-panel h2,
+                :host .accessbit-widget-panel h3,
+                :host .accessbit-widget-panel h4,
+                :host .accessbit-widget-panel p,
+                :host .accessbit-widget-panel .action-btn,
+                :host .accessbit-widget-panel button,
+                :host .accessbit-widget-panel input,
+                :host .accessbit-widget-panel label {
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                     font-weight: normal;
                     letter-spacing: normal;
@@ -8134,9 +8284,9 @@ class AccessibilityWidget {
     
     
     
-                :host(.high-saturation) .accessibility-icon,
+                :host(.high-saturation) .accessbit-widget-icon,
     
-                :host(.high-saturation) .accessibility-panel {
+                :host(.high-saturation) .accessbit-widget-panel {
     
                     filter: saturate(1.2) !important;
     
@@ -9108,6 +9258,7 @@ class AccessibilityWidget {
             // Create all profile items
             const profiles = [
                 { id: 'seizure-safe', title: 'Seizure Safe Profile', description: 'Clear flashes & reduces color', descriptionId: 'seizure-safe-desc', ariaLabel: 'Seizure Safe Profile - Clear flashes and reduces color', ariaDescribedBy: 'seizure-safe-desc' },
+                { id: 'reduce-motion', title: 'Reduce Motion', description: 'Disable animations and transitions', descriptionId: 'reduce-motion-desc', ariaLabel: 'Reduce Motion - Disable animations, transitions, and flash triggers', ariaDescribedBy: 'reduce-motion-desc' },
                 { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc' },
                 { id: 'adhd-friendly', title: 'ADHD Friendly Profile', description: 'More focus & fewer distractions', ariaLabel: 'ADHD Friendly Profile - Reduces distractions and highlights focus' },
                 { id: 'cognitive-disability', title: 'Cognitive Disability Profile', description: 'Assists with reading & focusing', ariaLabel: 'Cognitive Disability Profile - Simplifies interface and content' },
@@ -9304,6 +9455,34 @@ class AccessibilityWidget {
                                 <h4>Seizure Safe Profile</h4>
     
                                 <p id="seizure-safe-desc">Clear flashes & reduces color</p>
+    
+                            </div>
+    
+                        </div>
+    
+                    </div>
+    
+    
+    
+                    <!-- Module 1.5: Reduce Motion -->
+    
+                    <div class="profile-item">
+    
+                        <label class="toggle-switch">
+    
+                            <input type="checkbox" id="reduce-motion" tabindex="0" aria-label="Reduce Motion - Disable animations, transitions, and flash triggers" aria-describedby="reduce-motion-desc">
+    
+                            <span class="slider"></span>
+    
+                        </label>
+    
+                        <div class="profile-info">
+    
+                            <div>
+    
+                                <h4>Reduce Motion</h4>
+    
+                                <p id="reduce-motion-desc">Disable animations and transitions</p>
     
                             </div>
     
@@ -10658,6 +10837,10 @@ class AccessibilityWidget {
     
                     bigWhiteCursorDesc: "Increases cursor size",
     
+                    reduceMotion: "Reduce Motion",
+    
+                    reduceMotionDesc: "Disable animations and transitions",
+    
                     resetSettings: "Reset Settings",
     
                     statement: "Statement",
@@ -10759,6 +10942,8 @@ class AccessibilityWidget {
                     usefulLinksDesc: "Recursos y enlaces de accesibilidad",
                     stopAnimation: "Detener Animación",
                     stopAnimationDesc: "Pausa todas las animaciones CSS",
+                    reduceMotion: "Reducir Movimiento",
+                    reduceMotionDesc: "Desactivar animaciones y transiciones",
                     readingMask: "Máscara de Lectura",
                     readingMaskDesc: "Superposición semi-transparente",
         highlightHover: "Resaltar al Pasar",
@@ -10927,6 +11112,10 @@ class AccessibilityWidget {
     
                     stopAnimationDesc: "Pausiert alle CSS-Animationen",
     
+                    reduceMotion: "Bewegung reduzieren",
+    
+                    reduceMotionDesc: "Animationen und Übergänge deaktivieren",
+    
                     readingMask: "Lesemaske",
     
                     readingMaskDesc: "Halbdurchsichtige Überlagerung",
@@ -11046,6 +11235,10 @@ class AccessibilityWidget {
         readingGuideDesc: "Barre de surlignage mobile",
         usefulLinks: "Liens Utiles",
         usefulLinksDesc: "Ressources et liens d'accessibilité",
+        stopAnimation: "Arrêter l'Animation",
+        stopAnimationDesc: "Met en pause toutes les animations CSS",
+        reduceMotion: "Réduire le Mouvement",
+        reduceMotionDesc: "Désactiver les animations et transitions",
         readingMask: "Masque de Lecture",
         readingMaskDesc: "Superposition semi-transparente",
         highlightHover: "Surligner au Survol",
@@ -11147,6 +11340,8 @@ class AccessibilityWidget {
                     usefulLinksDesc: "Recursos e links de acessibilidade",
                     stopAnimation: "Parar Animação",
                     stopAnimationDesc: "Pausa todas as animações CSS",
+                    reduceMotion: "Reduzir Movimento",
+                    reduceMotionDesc: "Desativar animações e transições",
                     readingMask: "Máscara de Leitura",
                     readingMaskDesc: "Sobreposição semi-transparente",
         highlightHover: "Destacar ao Passar",
@@ -11248,6 +11443,8 @@ class AccessibilityWidget {
                     usefulLinksDesc: "Risorse e link di accessibilità",
         stopAnimation: "Fermare Animazione",
                     stopAnimationDesc: "Mette in pausa tutte le animazioni CSS",
+                    reduceMotion: "Ridurre Movimento",
+                    reduceMotionDesc: "Disattiva animazioni e transizioni",
                     readingMask: "Maschera di Lettura",
                     readingMaskDesc: "Sovrapposizione semi-trasparente",
         highlightHover: "Evidenziare al Passaggio",
@@ -11349,6 +11546,8 @@ class AccessibilityWidget {
         usefulLinksDesc: "משאבים וקישורי נגישות",
         stopAnimation: "עצירת אנימציה",
         stopAnimationDesc: "משה את כל אנימציות ה-CSS",
+        reduceMotion: "הפחתת תנועה",
+        reduceMotionDesc: "השבת אנימציות ומעברים",
         readingMask: "מסכת קריאה",
         readingMaskDesc: "שכבת כיסוי שקופה למחצה",
         highlightHover: "הדגשת מעבר עכבר",
@@ -11517,6 +11716,10 @@ class AccessibilityWidget {
     
                     stopAnimationDesc: "משה את כל אנימציות CSS",
     
+                    reduceMotion: "הפחתת תנועה",
+    
+                    reduceMotionDesc: "השבת אנימציות ומעברים",
+    
                     readingMask: "מסכת קריאה",
     
                     readingMaskDesc: "שכבת כיסוי שקופה למחצה",
@@ -11638,6 +11841,8 @@ class AccessibilityWidget {
                     usefulLinksDesc: "Ресурсы и ссылки доступности",
                     stopAnimation: "Остановить анимацию",
                     stopAnimationDesc: "Приостанавливает все CSS анимации",
+                    reduceMotion: "Уменьшить движение",
+                    reduceMotionDesc: "Отключить анимации и переходы",
                     readingMask: "Маска для чтения",
                     readingMaskDesc: "Полупрозрачное наложение",
         highlightHover: "Выделение при наведении",
@@ -11738,6 +11943,8 @@ class AccessibilityWidget {
         usefulLinksDesc: "無障礙資源和連結",
         stopAnimation: "停止動畫",
         stopAnimationDesc: "暫停所有CSS動畫",
+        reduceMotion: "減少動畫",
+        reduceMotionDesc: "停用動畫和過渡效果",
         readingMask: "閱讀遮罩",
         readingMaskDesc: "半透明覆蓋層",
         highlightHover: "懸停突出",
@@ -11905,6 +12112,10 @@ class AccessibilityWidget {
     
                     stopAnimationDesc: "يوقف جميع رسوم CSS المتحركة",
     
+                    reduceMotion: "تقليل الحركة",
+    
+                    reduceMotionDesc: "تعطيل الرسوم المتحركة والانتقالات",
+    
                     readingMask: "قناع القراءة",
     
                     readingMaskDesc: "تراكب شبه شفاف",
@@ -12024,6 +12235,8 @@ class AccessibilityWidget {
         usefulLinksDesc: "مصادر وروابط إمكانية الوصول",
         stopAnimation: "إيقاف الرسوم المتحركة",
         stopAnimationDesc: "يوقف كل رسوم CSS المتحركة",
+        reduceMotion: "تقليل الحركة",
+        reduceMotionDesc: "تعطيل الرسوم المتحركة والانتقالات",
         readingMask: "قناع القراءة",
         readingMaskDesc: "طبقة شفافة جزئياً",
         highlightHover: "تمييز عند التمرير",
@@ -12111,7 +12324,7 @@ class AccessibilityWidget {
     
             
     
-            const panel = this.shadowRoot.getElementById('accessibility-panel');
+            const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
     
             
     
@@ -12170,11 +12383,19 @@ class AccessibilityWidget {
     
     
         showStatement() {
-    
+            // Check if we have a custom accessibility statement link
+            if (this.customizationData && this.customizationData.accessibilityStatementLink) {
+                // Validate the link before opening
+                const link = this.customizationData.accessibilityStatementLink.trim();
+                if (link !== '') {
+                    window.open(link, '_blank');
+                    return;
+                }
+            }
+            
+            // Default statement if no link is provided
             const message = 'Accessibility Statement: This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.';
-    
             alert(message);
-    
         }
     
         
@@ -12574,7 +12795,7 @@ class AccessibilityWidget {
     
             this.currentLanguage = langCode;
     
-            localStorage.setItem('accessibility-widget-language', langCode);
+            localStorage.setItem('accessbit-widget-language', langCode);
     
     
     
@@ -12974,6 +13195,14 @@ class AccessibilityWidget {
     
                         break;
     
+                    case 'reduce-motion':
+    
+                        if (title) title.textContent = translations.reduceMotion || 'Reduce Motion';
+    
+                        if (desc) desc.textContent = translations.reduceMotionDesc || 'Disable animations and transitions';
+    
+                        break;
+    
     
                     case 'reading-mask':
     
@@ -13291,7 +13520,7 @@ class AccessibilityWidget {
     
     
         getCurrentLanguage() {
-            const stored = localStorage.getItem('accessibility-widget-language');
+            const stored = localStorage.getItem('accessbit-widget-language');
             const current = this.currentLanguage || stored || 'en';
           
             return current;
@@ -13380,6 +13609,8 @@ class AccessibilityWidget {
                 const featureNames = {
     
                     'seizure-safe': 'Seizure safe mode',
+    
+                    'reduce-motion': 'Reduce motion mode',
     
                     'vision-impaired': 'Vision impaired mode',
     
@@ -14160,6 +14391,12 @@ class AccessibilityWidget {
     
                         break;
     
+                    case 'reduce-motion':
+    
+                        this.enableReduceMotion();
+    
+                        break;
+    
                     case 'stop-animation':
     
                         this.enableStopAnimation();
@@ -14334,6 +14571,12 @@ class AccessibilityWidget {
                     case 'seizure-safe':
     
                         this.disableSeizureSafe();
+    
+                        break;
+    
+                    case 'reduce-motion':
+    
+                        this.disableReduceMotion();
     
                         break;
     
@@ -14778,17 +15021,17 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements (check both shadow DOM and regular DOM)
     
-                if (element.closest('.accessibility-panel') || 
+                if (element.closest('.accessbit-widget-panel') || 
     
-                    element.closest('#accessibility-icon') ||
+                    element.closest('#accessbit-widget-icon') ||
     
-                    element.closest('accessibility-widget') ||
+                    element.closest('accessbit-widget') ||
     
                     element.tagName === 'ACCESSIBILITY-WIDGET' ||
     
-                    element.id === 'accessibility-icon' ||
+                    element.id === 'accessbit-widget-icon' ||
     
-                    element.id === 'accessibility-panel') {
+                    element.id === 'accessbit-widget-panel') {
     
                     return;
     
@@ -15024,17 +15267,17 @@ class AccessibilityWidget {
     
                 if (target.id === 'text-magnifier' || 
     
-                    target.closest('.accessibility-panel') || 
+                    target.closest('.accessbit-widget-panel') || 
     
-                    target.closest('#accessibility-icon') ||
+                    target.closest('#accessbit-widget-icon') ||
     
-                    target.closest('accessibility-widget') ||
+                    target.closest('accessbit-widget') ||
     
                     target.tagName === 'ACCESSIBILITY-WIDGET' ||
     
-                    target.id === 'accessibility-icon' ||
+                    target.id === 'accessbit-widget-icon' ||
     
-                    target.id === 'accessibility-panel') {
+                    target.id === 'accessbit-widget-panel') {
     
                     return;
     
@@ -15299,9 +15542,9 @@ class AccessibilityWidget {
     
             // Check if accessibility widget is still visible
     
-            const widgetContainer = document.getElementById('accessibility-widget-container');
+            const widgetContainer = document.getElementById('accessbit-widget-container');
     
-            const widgetIcon = document.getElementById('accessibility-icon');
+            const widgetIcon = document.getElementById('accessbit-widget-icon');
     
             
     
@@ -15323,17 +15566,17 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements (check both shadow DOM and regular DOM)
     
-                if (element.closest('.accessibility-panel') || 
+                if (element.closest('.accessbit-widget-panel') || 
     
-                    element.closest('#accessibility-icon') ||
+                    element.closest('#accessbit-widget-icon') ||
     
-                    element.closest('accessibility-widget') ||
+                    element.closest('accessbit-widget') ||
     
                     element.tagName === 'ACCESSIBILITY-WIDGET' ||
     
-                    element.id === 'accessibility-icon' ||
+                    element.id === 'accessbit-widget-icon' ||
     
-                    element.id === 'accessibility-panel') {
+                    element.id === 'accessbit-widget-panel') {
     
                     return;
     
@@ -15630,13 +15873,13 @@ class AccessibilityWidget {
             // Use zoom to counter the html zoom - maintains original visual size
             counterStyle.textContent = `
                 /* Counter-scale widget elements to maintain fixed size */
-                #accessibility-panel,
-                #accessibility-icon {
+                #accessbit-widget-panel,
+                #accessbit-widget-icon {
                     zoom: ${inverseScale} !important;
                 }
                 
                 /* Ensure panel maintains its height regardless of zoom */
-                #accessibility-panel {
+                #accessbit-widget-panel {
                     min-height: auto !important;
                     height: auto !important;
                 }
@@ -16143,7 +16386,7 @@ class AccessibilityWidget {
             elements.forEach(el => {
                 try {
                     // Skip anything inside the accessibility widget UI
-                    if (el.closest('.accessibility-widget, #accessibility-widget, .accessibility-panel, .accessibility-icon')) {
+                    if (el.closest('.accessbit-widget, #accessbit-widget, .accessbit-widget-panel, .accessbit-widget-icon')) {
                         return;
                     }
                     
@@ -16565,7 +16808,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     // Exclude icon fonts and ligature-based icons (prevents turning symbols into text)
                     const isIcon = element.matches('svg, i, .icon, [class*="icon"], [class*="fa-"], [class*="material-icons"], [data-icon], [class*="glyph"], [class*="chevron"], [class*="arrow"], [class*="ion-"], [class*="feather"], [class*="lucide"], [class*="heroicon"]');
                     if (isIcon) {
@@ -16616,7 +16859,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     // Get the current computed size without modifying any styles
     
@@ -16672,7 +16915,7 @@ class AccessibilityWidget {
     
                 elements.forEach(element => {
     
-                    if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                    if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                         element.style.fontSize = '';
     
@@ -16705,7 +16948,7 @@ class AccessibilityWidget {
     
             elements.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.fontSize = '';
     
@@ -16728,7 +16971,7 @@ class AccessibilityWidget {
                     }
                 }
                 // Fallback: plain DOM panel containers
-                const panel = document.querySelector('.accessibility-panel, #accessibility-widget');
+                const panel = document.querySelector('.accessbit-widget-panel, #accessbit-widget');
                 if (panel) {
                     const panelOriginal = this.originalFontSizes.get(panel) || parseFloat(getComputedStyle(panel).fontSize) || 14;
                     panel.style.setProperty('font-size', `${panelOriginal}px`, 'important');
@@ -16752,7 +16995,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, #accessibility-widget')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, #accessbit-widget')) {
     
                     const originalSize = this.originalFontSizes.get(element);
     
@@ -16972,7 +17215,7 @@ class AccessibilityWidget {
             headings.forEach(heading => {
     
                 // Skip if heading is inside accessibility panel
-                if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (heading.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     return;
                 }
     
@@ -17044,7 +17287,7 @@ class AccessibilityWidget {
     
             links.forEach(link => {
                 // Skip if link is inside accessibility panel
-                if (link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (link.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     return;
                 }
     
@@ -17284,21 +17527,16 @@ class AccessibilityWidget {
                 
                 const select = dropdownContainer.querySelector('#useful-links-select');
                 
-                selectElement.addEventListener('change', (e) => {
-                
-                    const value = e.target.value;
-                
-                    if (value) {
-                
-                        this.navigateToSection(value);
-                
-                        // Keep the selected value visible instead of resetting
-                
-                        // This shows the user what they selected
-                
-                    }
-                
-                });
+                if (select) {
+                    select.addEventListener('change', (e) => {
+                        const value = e.target.value;
+                        if (value) {
+                            this.navigateToSection(value);
+                            // Keep the selected value visible instead of resetting
+                            // This shows the user what they selected
+                        }
+                    });
+                }
     
                 
     
@@ -17401,17 +17639,71 @@ class AccessibilityWidget {
                     break;
     
                 case 'header':
-                    // Find header on current page - try multiple common selectors
-                    const headerElement = document.querySelector('header, .header, nav, .navbar, [class*="header"], [id*="header"], [role="banner"]');
+                    // Find header on current page - try multiple common selectors in order of priority
+                    let headerElement = document.querySelector('header[role="banner"], header, [role="banner"]');
+                    
+                    if (!headerElement) {
+                        headerElement = document.querySelector('.header, .site-header, .main-header, .page-header');
+                    }
+                    
+                    if (!headerElement) {
+                        headerElement = document.querySelector('#header, #site-header, #main-header');
+                    }
+                    
+                    if (!headerElement) {
+                        headerElement = document.querySelector('[class*="header"]:not([class*="subheader"]):not([class*="sub-header"])');
+                    }
+                    
+                    if (!headerElement) {
+                        headerElement = document.querySelector('nav.navbar, nav.main-nav, nav[role="navigation"]');
+                    }
+                    
                     if (headerElement) {
-                        headerElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start',
-                            inline: 'nearest'
-                        });
+                        // Get header position
+                        const rect = headerElement.getBoundingClientRect();
+                        const headerTop = window.pageYOffset + rect.top;
+                        
+                        // Check if header is fixed or sticky
+                        const style = window.getComputedStyle(headerElement);
+                        const isFixed = style.position === 'fixed' || style.position === 'sticky';
+                        
+                        if (isFixed) {
+                            // For fixed/sticky headers, just scroll to top
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            // Fallback if smooth scroll is disabled
+                            setTimeout(() => {
+                                if (window.pageYOffset > 5) {
+                                    window.scrollTo({ top: 0, behavior: 'auto' });
+                                }
+                            }, 100);
+                        } else {
+                            // For normal headers, scroll to header position
+                            try {
+                                headerElement.scrollIntoView({ 
+                                    behavior: 'smooth', 
+                                    block: 'start',
+                                    inline: 'nearest'
+                                });
+                                // Fallback if scrollIntoView doesn't work
+                                setTimeout(() => {
+                                    const currentPos = window.pageYOffset || window.scrollY || document.documentElement.scrollTop;
+                                    if (Math.abs(currentPos - headerTop) > 20) {
+                                        window.scrollTo({ top: Math.max(0, headerTop - 10), behavior: 'auto' });
+                                    }
+                                }, 150);
+                            } catch (e) {
+                                // Direct scroll if scrollIntoView fails
+                                window.scrollTo({ top: Math.max(0, headerTop - 10), behavior: 'auto' });
+                            }
+                        }
                     } else {
                         // If no header found, scroll to top
                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setTimeout(() => {
+                            if (window.pageYOffset > 5) {
+                                window.scrollTo({ top: 0, behavior: 'auto' });
+                            }
+                        }, 100);
                     }
                     break;
     
@@ -17447,7 +17739,22 @@ class AccessibilityWidget {
     
                 case 'about-us':
                     // First try to find about link in navigation (prioritize navigation over page sections)
-                    const aboutLink = document.querySelector('a[href*="about"], nav a[href*="about"], .nav a[href*="about"], [class*="nav"] a[href*="about"], [class*="menu"] a[href*="about"], [class*="header"] a[href*="about"]');
+                    // Search more broadly for about links - check all links on the page, not just nav
+                    let aboutLink = document.querySelector('a[href*="about"], nav a[href*="about"], .nav a[href*="about"], [class*="nav"] a[href*="about"], [class*="menu"] a[href*="about"], [class*="header"] a[href*="about"], footer a[href*="about"], .footer a[href*="about"]');
+                    
+                    // If not found in nav, try to find any link with "about" in href or text
+                    if (!aboutLink) {
+                        const allLinks = document.querySelectorAll('a');
+                        for (const link of allLinks) {
+                            const href = (link.getAttribute('href') || '').toLowerCase();
+                            const text = (link.textContent || '').toLowerCase();
+                            if (href.includes('about') || (text.includes('about') && (href.startsWith('/') || href.startsWith('http') || !href.includes('#')))) {
+                                aboutLink = link;
+                                break;
+                            }
+                        }
+                    }
+                    
                     if (aboutLink && aboutLink.href) {
                         window.location.href = aboutLink.href;
                     } else {
@@ -17456,8 +17763,8 @@ class AccessibilityWidget {
                         if (aboutElement) {
                             this.scrollToElement('[id*="about"], [class*="about"], h1:contains("About"), h2:contains("About")');
                         } else {
-                            // Don't navigate to non-existent paths - just scroll to top
-                            // This prevents 404 errors
+                            // If no link or section found, scroll to top
+                            // We don't navigate to guessed paths to avoid 404 errors
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                     }
@@ -18038,8 +18345,8 @@ class AccessibilityWidget {
                     }
                     
                     /* Exclude accessibility widget from highlight focus */
-                    body.highlight-focus .accessibility-panel *:focus,
-                    body.highlight-focus .accessibility-icon:focus {
+                    body.highlight-focus .accessbit-widget-panel *:focus,
+                    body.highlight-focus .accessbit-widget-icon:focus {
                         outline: inherit !important;
                         outline-offset: inherit !important;
                         background: inherit !important;
@@ -18082,7 +18389,7 @@ class AccessibilityWidget {
     
                 // Apply to interactive elements not inside the panel (allow the icon itself)
     
-                if (!activeElement.closest('.accessibility-panel') && 
+                if (!activeElement.closest('.accessbit-widget-panel') && 
     
                     isInteractiveElement) {
     
@@ -18117,7 +18424,7 @@ class AccessibilityWidget {
             
                 
                 // Special debugging for accessibility icon
-                if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
                    
                     
                     // Always apply focus styles to accessibility icon when focused
@@ -18162,7 +18469,7 @@ class AccessibilityWidget {
     
                         focusedElement === document.documentElement ||
     
-                        focusedElement.closest('.accessibility-panel') ||
+                        focusedElement.closest('.accessbit-widget-panel') ||
     
                         !isInteractiveElement) {
     
@@ -18222,7 +18529,7 @@ class AccessibilityWidget {
             
             // Add focusout handler to clean up accessibility icon styles
             this.highlightFocusOutHandler = (e) => {
-                if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
          
                     e.target.style.outline = '';
                     e.target.style.outlineOffset = '';
@@ -18309,7 +18616,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements
     
-                if (element.closest('.accessibility-panel') || element.closest('#accessibility-icon')) {
+                if (element.closest('.accessbit-widget-panel') || element.closest('#accessbit-widget-icon')) {
     
                     return;
     
@@ -18366,17 +18673,18 @@ class AccessibilityWidget {
     
     
         showStatement() {
-          
-            
             // Check if we have a custom accessibility statement link
             if (this.customizationData && this.customizationData.accessibilityStatementLink) {
-             
-                window.open(this.customizationData.accessibilityStatementLink, '_blank');
-            } else {
-               
-                // Default statement
-                alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
+                // Validate the link before opening
+                const link = this.customizationData.accessibilityStatementLink.trim();
+                if (link !== '') {
+                    window.open(link, '_blank');
+                    return;
+                }
             }
+            
+            // Default statement if no link is provided
+            alert('This website is committed to providing an accessible experience for all users. We follow WCAG 2.1 guidelines and continuously work to improve accessibility.');
         }
     
     
@@ -18397,7 +18705,7 @@ class AccessibilityWidget {
             localStorage.removeItem('letter-spacing-used');
             
             // Clear vision-impaired localStorage
-            localStorage.removeItem('accessibility-widget-vision-impaired');
+            localStorage.removeItem('accessbit-widget-vision-impaired');
 
             
             // Reset language to English
@@ -18654,9 +18962,9 @@ class AccessibilityWidget {
             // Ensure widget remains visible after reset - ADD THIS PROTECTION
             setTimeout(() => {
              
-                const widgetContainer = document.getElementById('accessibility-widget-container');
-                const icon = this.shadowRoot?.getElementById('accessibility-icon');
-                const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                const widgetContainer = document.getElementById('accessbit-widget-container');
+                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
                 
                 if (!widgetContainer) {
                 
@@ -19585,40 +19893,80 @@ class AccessibilityWidget {
             this.removeHighContrastStyles();
     
             const style = document.createElement('style');
-            style.id = 'accessibility-high-contrast-fix';
+            style.id = 'accessbit-high-contrast-fix';
             style.textContent = `
                 /* Simple High Contrast Mode - Only increase contrast, preserve everything else */
-                body.high-contrast {
+                /* CRITICAL: Apply filters ONLY to media inside main content areas - NEVER to nav/header or their ancestors */
+                /* Dark/Light contrast work because they use color/background properties, NOT filters */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+                
+                /* Apply filter ONLY to media elements inside main content areas (main, section, article) */
+                /* These are guaranteed to not contain nav elements, preventing stacking context issues */
+                body.high-contrast main img,
+                body.high-contrast main video,
+                body.high-contrast main picture,
+                body.high-contrast main canvas,
+                body.high-contrast main svg,
+                body.high-contrast section img,
+                body.high-contrast section video,
+                body.high-contrast section picture,
+                body.high-contrast section canvas,
+                body.high-contrast section svg,
+                body.high-contrast article img,
+                body.high-contrast article video,
+                body.high-contrast article picture,
+                body.high-contrast article canvas,
+                body.high-contrast article svg {
                     filter: contrast(1.1) brightness(1.05) !important;
                     -webkit-filter: contrast(1.1) brightness(1.05) !important;
                 }
                 
-                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
                 body.high-contrast nav,
+                body.high-contrast nav *,
                 body.high-contrast header,
+                body.high-contrast header *,
                 body.high-contrast .navbar,
+                body.high-contrast .navbar *,
                 body.high-contrast [role="navigation"],
+                body.high-contrast [role="navigation"] *,
                 body.high-contrast [class*="nav"],
+                body.high-contrast [class*="nav"] *,
                 body.high-contrast [class*="header"],
+                body.high-contrast [class*="header"] *,
                 body.high-contrast [class*="navbar"],
+                body.high-contrast [class*="navbar"] *,
                 body.high-contrast [data-sticky],
+                body.high-contrast [data-sticky] *,
                 body.high-contrast [data-fixed],
+                body.high-contrast [data-fixed] *,
                 body.high-contrast [style*="position: sticky"],
+                body.high-contrast [style*="position: sticky"] *,
                 body.high-contrast [style*="position:fixed"],
-                body.high-contrast [style*="position: fixed"] {
+                body.high-contrast [style*="position:fixed"] *,
+                body.high-contrast [style*="position: fixed"],
+                body.high-contrast [style*="position: fixed"] * {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
                 
                 /* Preserve accessibility widget from contrast filters */
-                body.high-contrast .accessibility-widget,
-                body.high-contrast .accessibility-panel,
-                body.high-contrast .accessibility-icon,
-                body.high-contrast #accessibility-widget,
-                body.high-contrast #accessibility-panel,
-                body.high-contrast #accessibility-icon,
+                body.high-contrast .accessbit-widget,
+                body.high-contrast .accessbit-widget *,
+                body.high-contrast .accessbit-widget-panel,
+                body.high-contrast .accessbit-widget-panel *,
+                body.high-contrast .accessbit-widget-icon,
+                body.high-contrast .accessbit-widget-icon *,
+                body.high-contrast #accessbit-widget,
+                body.high-contrast #accessbit-widget *,
+                body.high-contrast #accessbit-widget-panel,
+                body.high-contrast #accessbit-widget-panel *,
+                body.high-contrast #accessbit-widget-icon,
+                body.high-contrast #accessbit-widget-icon *,
                 body.high-contrast [data-ck-widget],
-                body.high-contrast [class*="accessibility"] {
+                body.high-contrast [data-ck-widget] *,
+                body.high-contrast [class*="accessbit"],
+                body.high-contrast [class*="accessbit"] * {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -19659,7 +20007,7 @@ class AccessibilityWidget {
     
         // Remove high contrast styles
         removeHighContrastStyles() {
-            const existingStyle = document.getElementById('accessibility-high-contrast-fix');
+            const existingStyle = document.getElementById('accessbit-high-contrast-fix');
             if (existingStyle) {
                 existingStyle.remove();
 
@@ -19802,7 +20150,7 @@ class AccessibilityWidget {
     
         // Remove high contrast styles
         removeHighContrastStyles() {
-            const existingStyle = document.getElementById('accessibility-high-contrast-fix');
+            const existingStyle = document.getElementById('accessbit-high-contrast-fix');
             if (existingStyle) {
                 existingStyle.remove();
               
@@ -19954,40 +20302,80 @@ class AccessibilityWidget {
             this.removeHighSaturationStyles();
 
             const style = document.createElement('style');
-            style.id = 'accessibility-high-saturation-css';
+            style.id = 'accessbit-high-saturation-css';
             style.textContent = `
                 /* Simple High Saturation Mode - Only increase saturation, preserve everything else */
-                body.high-saturation {
+                /* CRITICAL: Apply filters ONLY to media inside main content areas - NEVER to nav/header or their ancestors */
+                /* Dark/Light contrast work because they use color/background properties, NOT filters */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+                
+                /* Apply filter ONLY to media elements inside main content areas (main, section, article) */
+                /* These are guaranteed to not contain nav elements, preventing stacking context issues */
+                body.high-saturation main img,
+                body.high-saturation main video,
+                body.high-saturation main picture,
+                body.high-saturation main canvas,
+                body.high-saturation main svg,
+                body.high-saturation section img,
+                body.high-saturation section video,
+                body.high-saturation section picture,
+                body.high-saturation section canvas,
+                body.high-saturation section svg,
+                body.high-saturation article img,
+                body.high-saturation article video,
+                body.high-saturation article picture,
+                body.high-saturation article canvas,
+                body.high-saturation article svg {
                     filter: saturate(1.2) !important;
                     -webkit-filter: saturate(1.2) !important;
                 }
                 
-                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
                 body.high-saturation nav,
+                body.high-saturation nav *,
                 body.high-saturation header,
+                body.high-saturation header *,
                 body.high-saturation .navbar,
+                body.high-saturation .navbar *,
                 body.high-saturation [role="navigation"],
+                body.high-saturation [role="navigation"] *,
                 body.high-saturation [class*="nav"],
+                body.high-saturation [class*="nav"] *,
                 body.high-saturation [class*="header"],
+                body.high-saturation [class*="header"] *,
                 body.high-saturation [class*="navbar"],
+                body.high-saturation [class*="navbar"] *,
                 body.high-saturation [data-sticky],
+                body.high-saturation [data-sticky] *,
                 body.high-saturation [data-fixed],
+                body.high-saturation [data-fixed] *,
                 body.high-saturation [style*="position: sticky"],
+                body.high-saturation [style*="position: sticky"] *,
                 body.high-saturation [style*="position:fixed"],
-                body.high-saturation [style*="position: fixed"] {
+                body.high-saturation [style*="position:fixed"] *,
+                body.high-saturation [style*="position: fixed"],
+                body.high-saturation [style*="position: fixed"] * {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
                 
                 /* Preserve accessibility widget from saturation filters */
-                body.high-saturation .accessibility-widget,
-                body.high-saturation .accessibility-panel,
-                body.high-saturation .accessibility-icon,
-                body.high-saturation #accessibility-widget,
-                body.high-saturation #accessibility-panel,
-                body.high-saturation #accessibility-icon,
+                body.high-saturation .accessbit-widget,
+                body.high-saturation .accessbit-widget *,
+                body.high-saturation .accessbit-widget-panel,
+                body.high-saturation .accessbit-widget-panel *,
+                body.high-saturation .accessbit-widget-icon,
+                body.high-saturation .accessbit-widget-icon *,
+                body.high-saturation #accessbit-widget,
+                body.high-saturation #accessbit-widget *,
+                body.high-saturation #accessbit-widget-panel,
+                body.high-saturation #accessbit-widget-panel *,
+                body.high-saturation #accessbit-widget-icon,
+                body.high-saturation #accessbit-widget-icon *,
                 body.high-saturation [data-ck-widget],
-                body.high-saturation [class*="accessibility"] {
+                body.high-saturation [data-ck-widget] *,
+                body.high-saturation [class*="accessbit"],
+                body.high-saturation [class*="accessbit"] * {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -19997,7 +20385,7 @@ class AccessibilityWidget {
         }
 
         removeHighSaturationStyles() {
-            const existingStyle = document.getElementById('accessibility-high-saturation-css');
+            const existingStyle = document.getElementById('accessbit-high-saturation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -20009,7 +20397,7 @@ class AccessibilityWidget {
             this.removeLowSaturationStyles();
 
             const style = document.createElement('style');
-            style.id = 'accessibility-low-saturation-css';
+            style.id = 'accessbit-low-saturation-css';
             style.textContent = `
                 /* Low Saturation Mode - Simple filter overlay approach */
                 body.low-saturation {
@@ -20035,14 +20423,14 @@ class AccessibilityWidget {
                 }
                 
                 /* Preserve accessibility widget from low saturation filters */
-                body.low-saturation .accessibility-widget,
-                body.low-saturation .accessibility-panel,
-                body.low-saturation .accessibility-icon,
-                body.low-saturation #accessibility-widget,
-                body.low-saturation #accessibility-panel,
-                body.low-saturation #accessibility-icon,
+                body.low-saturation .accessbit-widget,
+                body.low-saturation .accessbit-widget-panel,
+                body.low-saturation .accessbit-widget-icon,
+                body.low-saturation #accessbit-widget,
+                body.low-saturation #accessbit-widget-panel,
+                body.low-saturation #accessbit-widget-icon,
                 body.low-saturation [data-ck-widget],
-                body.low-saturation [class*="accessibility"] {
+                body.low-saturation [class*="accessbit"] {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -20051,7 +20439,7 @@ class AccessibilityWidget {
         }
 
         removeLowSaturationStyles() {
-            const existingStyle = document.getElementById('accessibility-low-saturation-css');
+            const existingStyle = document.getElementById('accessbit-low-saturation-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -20073,7 +20461,7 @@ class AccessibilityWidget {
     
             const style = document.createElement('style');
     
-            style.id = 'accessibility-monochrome-styles';
+            style.id = 'accessbit-monochrome-styles';
     
             style.textContent = `
                 /* Monochrome effect - Simple filter overlay approach */
@@ -20100,14 +20488,14 @@ class AccessibilityWidget {
                 }
                 
                 /* Preserve accessibility widget from monochrome filters */
-                body.monochrome .accessibility-widget,
-                body.monochrome .accessibility-panel,
-                body.monochrome .accessibility-icon,
-                body.monochrome #accessibility-widget,
-                body.monochrome #accessibility-panel,
-                body.monochrome #accessibility-icon,
+                body.monochrome .accessbit-widget,
+                body.monochrome .accessbit-widget-panel,
+                body.monochrome .accessbit-widget-icon,
+                body.monochrome #accessbit-widget,
+                body.monochrome #accessbit-widget-panel,
+                body.monochrome #accessbit-widget-icon,
                 body.monochrome [data-ck-widget],
-                body.monochrome [class*="accessibility"] {
+                body.monochrome [class*="accessbit"] {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -20134,7 +20522,7 @@ class AccessibilityWidget {
     
             // Remove monochrome styles
     
-            const style = document.getElementById('accessibility-monochrome-styles');
+            const style = document.getElementById('accessbit-monochrome-styles');
     
             if (style) {
     
@@ -20261,7 +20649,7 @@ class AccessibilityWidget {
             this.removeDarkContrastCSS();
 
             const style = document.createElement('style');
-            style.id = 'accessibility-dark-contrast-css';
+            style.id = 'accessbit-dark-contrast-css';
             style.textContent = `
                 /* Contrast Modes */
                 body.dark-contrast {
@@ -20621,95 +21009,95 @@ class AccessibilityWidget {
                 }
 
                 /* Style accessibility widget for dark contrast */
-                .dark-contrast .accessibility-panel,
-                .dark-contrast .accessibility-icon,
-                .dark-contrast #accessibility-panel,
-                .dark-contrast #accessibility-icon {
+                .dark-contrast .accessbit-widget-panel,
+                .dark-contrast .accessbit-widget-icon,
+                .dark-contrast #accessbit-widget-panel,
+                .dark-contrast #accessbit-widget-icon {
                     background: #1a1a1a !important;
                     color: #ffffff !important;
                     border: 2px solid #ffffff !important;
                 }
 
-                .dark-contrast .accessibility-panel *,
-                .dark-contrast .accessibility-icon *,
-                .dark-contrast #accessibility-panel *,
-                .dark-contrast #accessibility-icon * {
+                .dark-contrast .accessbit-widget-panel *,
+                .dark-contrast .accessbit-widget-icon *,
+                .dark-contrast #accessbit-widget-panel *,
+                .dark-contrast #accessbit-widget-icon * {
                     background: inherit !important;
                     color: inherit !important;
                 }
 
                 /* Override text color for accessibility widget elements */
-                .dark-contrast .accessibility-panel p,
-                .dark-contrast .accessibility-panel h1,
-                .dark-contrast .accessibility-panel h2,
-                .dark-contrast .accessibility-panel h3,
-                .dark-contrast .accessibility-panel h4,
-                .dark-contrast .accessibility-panel h5,
-                .dark-contrast .accessibility-panel h6,
-                .dark-contrast .accessibility-panel span,
-                .dark-contrast .accessibility-panel div,
-                .dark-contrast .accessibility-panel li,
-                .dark-contrast .accessibility-panel td,
-                .dark-contrast .accessibility-panel th,
-                .dark-contrast .accessibility-panel label,
-                .dark-contrast .accessibility-panel small,
-                .dark-contrast .accessibility-panel em,
-                .dark-contrast .accessibility-panel strong,
-                .dark-contrast .accessibility-panel i,
-                .dark-contrast .accessibility-panel b,
-                .dark-contrast .accessibility-panel a {
+                .dark-contrast .accessbit-widget-panel p,
+                .dark-contrast .accessbit-widget-panel h1,
+                .dark-contrast .accessbit-widget-panel h2,
+                .dark-contrast .accessbit-widget-panel h3,
+                .dark-contrast .accessbit-widget-panel h4,
+                .dark-contrast .accessbit-widget-panel h5,
+                .dark-contrast .accessbit-widget-panel h6,
+                .dark-contrast .accessbit-widget-panel span,
+                .dark-contrast .accessbit-widget-panel div,
+                .dark-contrast .accessbit-widget-panel li,
+                .dark-contrast .accessbit-widget-panel td,
+                .dark-contrast .accessbit-widget-panel th,
+                .dark-contrast .accessbit-widget-panel label,
+                .dark-contrast .accessbit-widget-panel small,
+                .dark-contrast .accessbit-widget-panel em,
+                .dark-contrast .accessbit-widget-panel strong,
+                .dark-contrast .accessbit-widget-panel i,
+                .dark-contrast .accessbit-widget-panel b,
+                .dark-contrast .accessbit-widget-panel a {
                     color: #ffffff !important;
                 }
 
                 /* Style accessibility panel header for dark contrast */
-                .dark-contrast .accessibility-panel .panel-header {
+                .dark-contrast .accessbit-widget-panel .panel-header {
                     background: #2a2a2a !important;
                     color: #ffffff !important;
                     border-bottom: 1px solid #ffffff !important;
                 }
 
                 /* Style accessibility panel buttons for dark contrast */
-                .dark-contrast .accessibility-panel .action-btn {
+                .dark-contrast .accessbit-widget-panel .action-btn {
                     background: #2a2a2a !important;
                     color: #ffffff !important;
                     border: 1px solid #ffffff !important;
                 }
 
-                .dark-contrast .accessibility-panel .action-btn:hover {
+                .dark-contrast .accessbit-widget-panel .action-btn:hover {
                     background: #3a3a3a !important;
                     color: #ffffff !important;
                 }
 
                 /* Style accessibility panel footer for dark contrast */
-                .dark-contrast .accessibility-panel .panel-footer {
+                .dark-contrast .accessbit-widget-panel .panel-footer {
                     background: #2a2a2a !important;
                     color: #ffffff !important;
                     border-top: 1px solid #ffffff !important;
                 }
 
                 /* Style toggle switches for dark contrast */
-                .dark-contrast .accessibility-panel .toggle-switch {
+                .dark-contrast .accessbit-widget-panel .toggle-switch {
                     background: #2a2a2a !important;
                     border: 1px solid #ffffff !important;
                 }
 
-                .dark-contrast .accessibility-panel .toggle-switch .slider {
+                .dark-contrast .accessbit-widget-panel .toggle-switch .slider {
                     background: #ffffff !important;
                 }
 
-                .dark-contrast .accessibility-panel .toggle-switch input:checked + .slider {
+                .dark-contrast .accessbit-widget-panel .toggle-switch input:checked + .slider {
                     background: #6366f1 !important;
                 }
 
                 /* Style profile items for dark contrast */
-                .dark-contrast .accessibility-panel .profile-item {
+                .dark-contrast .accessbit-widget-panel .profile-item {
                     background: #2a2a2a !important;
                     color: #ffffff !important;
                     border: 1px solid #ffffff !important;
                     margin: 5px 0 !important;
                 }
 
-                .dark-contrast .accessibility-panel .profile-item:hover {
+                .dark-contrast .accessbit-widget-panel .profile-item:hover {
                     background: #3a3a3a !important;
                 }
             `;
@@ -20717,7 +21105,7 @@ class AccessibilityWidget {
         }
 
         removeDarkContrastCSS() {
-            const existingStyle = document.getElementById('accessibility-dark-contrast-css');
+            const existingStyle = document.getElementById('accessbit-dark-contrast-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -20729,7 +21117,7 @@ class AccessibilityWidget {
             this.removeLightContrastCSS();
 
             const style = document.createElement('style');
-            style.id = 'accessibility-light-contrast-css';
+            style.id = 'accessbit-light-contrast-css';
             style.textContent = `
                 body.light-contrast {
                     background: #ffffff !important;
@@ -20902,12 +21290,12 @@ class AccessibilityWidget {
                 body.light-contrast .tooltip,
                 body.light-contrast .badge,
                 body.light-contrast .alert,
-                body.light-contrast .accessibility-panel,
-                body.light-contrast .accessibility-icon,
-                body.light-contrast #accessibility-panel,
-                body.light-contrast #accessibility-icon,
-                body.light-contrast #accessibility-widget-container,
-                body.light-contrast .accessibility-widget-container {
+                body.light-contrast .accessbit-widget-panel,
+                body.light-contrast .accessbit-widget-icon,
+                body.light-contrast #accessbit-widget-panel,
+                body.light-contrast #accessbit-widget-icon,
+                body.light-contrast #accessbit-widget-container,
+                body.light-contrast .accessbit-widget-container {
                     color: inherit !important;
                     background: inherit !important;
                 }
@@ -20930,14 +21318,14 @@ class AccessibilityWidget {
                 }
 
                 /* Completely exclude accessibility widget from light contrast effects */
-                .light-contrast .accessibility-panel,
-                .light-contrast .accessibility-icon,
-                .light-contrast #accessibility-panel,
-                .light-contrast #accessibility-icon,
-                .light-contrast .accessibility-panel *,
-                .light-contrast .accessibility-icon *,
-                .light-contrast #accessibility-panel *,
-                .light-contrast #accessibility-icon * {
+                .light-contrast .accessbit-widget-panel,
+                .light-contrast .accessbit-widget-icon,
+                .light-contrast #accessbit-widget-panel,
+                .light-contrast #accessbit-widget-icon,
+                .light-contrast .accessbit-widget-panel *,
+                .light-contrast .accessbit-widget-icon *,
+                .light-contrast #accessbit-widget-panel *,
+                .light-contrast #accessbit-widget-icon * {
                     filter: none !important;
                     -webkit-filter: none !important;
                     background: inherit !important;
@@ -21008,7 +21396,7 @@ class AccessibilityWidget {
         }
 
         removeLightContrastCSS() {
-            const existingStyle = document.getElementById('accessibility-light-contrast-css');
+            const existingStyle = document.getElementById('accessbit-light-contrast-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -21286,7 +21674,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside a button, heading, link, or accessibility panel
     
-                if (!element.closest('button, h1, h2, h3, h4, h5, h6, a, .btn, .accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('button, h1, h2, h3, h4, h5, h6, a, .btn, .accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = color;
     
@@ -21304,7 +21692,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = color;
     
@@ -21335,7 +21723,7 @@ class AccessibilityWidget {
     
             textElements.forEach(element => {
     
-                if (!element.closest('button, h1, h2, h3, h4, h5, h6, a, .btn, .accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('button, h1, h2, h3, h4, h5, h6, a, .btn, .accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = '';
     
@@ -21351,7 +21739,7 @@ class AccessibilityWidget {
     
             menuElements.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = '';
     
@@ -21557,7 +21945,7 @@ class AccessibilityWidget {
     
                 // Skip if element is inside accessibility panel
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = color;
     
@@ -21586,7 +21974,7 @@ class AccessibilityWidget {
     
             headingElements.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.color = '';
     
@@ -21788,7 +22176,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility panel elements
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     // Apply background color to specific content areas only
     
@@ -21808,7 +22196,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility panel elements and elements that already have the color
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon') && 
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon') && 
     
                     element.style.backgroundColor !== color) {
     
@@ -21882,7 +22270,7 @@ class AccessibilityWidget {
     
             mainContentAreas.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.backgroundColor = '';
     
@@ -21898,7 +22286,7 @@ class AccessibilityWidget {
     
             allElements.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon') &&
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon') &&
     
                     !element.classList.contains('color-option') && 
     
@@ -21946,8 +22334,7 @@ class AccessibilityWidget {
             // Also try to mute any existing audio contexts
             this.muteAllAudioContexts();
             
-            // Override global audio methods
-            this.overrideGlobalAudioMethods();
+            
             
             // Start aggressive monitoring
             this.startAggressiveMediaMonitoring();
@@ -22002,17 +22389,7 @@ class AccessibilityWidget {
             });
         }
         
-        // SECURITY FIX: Removed global prototype overwrites per Webflow Security requirements
-        // Mute-sound functionality now uses direct element manipulation instead of hijacking prototypes
-        overrideGlobalAudioMethods() {
-            // SECURITY FIX: Removed global prototype overwrites per Webflow Security requirements
-            // Mute-sound functionality now uses direct element manipulation instead of hijacking prototypes
-            // Direct element manipulation is used instead:
-            // - muteAllMediaDirectly() mutes existing elements
-            // - MutationObserver catches new elements
-            // - No global prototype overwrites needed
-            // This approach is safer and doesn't break Designer stability
-        }
+    
     
     
     
@@ -22031,8 +22408,7 @@ class AccessibilityWidget {
             // Restore all media elements
             this.restoreAllMediaDirectly();
             
-            // Restore global audio methods
-            this.restoreGlobalAudioMethods();
+            
             
             // Restore iframe players
             this.restoreIframePlayers();
@@ -22078,12 +22454,7 @@ class AccessibilityWidget {
             });
         }
         
-        // SECURITY FIX: Removed prototype restoration - we no longer overwrite prototypes
-        restoreGlobalAudioMethods() {
-            // No restoration needed - we never overwrite prototypes
-            // Mute-sound uses direct element manipulation instead
-        }
-        
+       
         // Add event listeners to catch new media elements
         addMediaEventListeners() {
             // Listen for new audio/video elements being added to the DOM
@@ -22703,8 +23074,7 @@ class AccessibilityWidget {
             // 5. Suspend all Web Audio API contexts
             this.muteAllAudioContexts();
             
-            // 6. Override common audio/video methods globally
-            this.overrideGlobalAudioMethods();
+           
             
         }
         
@@ -23436,7 +23806,7 @@ class AccessibilityWidget {
             // Create overlay directly on body for full page coverage
             const overlay = document.createElement('div');
             overlay.id = 'read-mode-overlay';
-            overlay.setAttribute('data-accessibility-widget-overlay', 'true');
+            overlay.setAttribute('data-accessbit-widget-overlay', 'true');
 
             overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: #e8f4f8 !important; z-index: 99997 !important; font-family: Arial, sans-serif !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important;';
             
@@ -23538,7 +23908,7 @@ class AccessibilityWidget {
                 }
     
                 // Skip accessibility widget elements
-                if (element.closest('.accessibility-panel') || element.closest('#accessibility-icon')) {
+                if (element.closest('.accessbit-widget-panel') || element.closest('#accessbit-widget-icon')) {
                    
                     return;
                 }
@@ -23885,7 +24255,7 @@ class AccessibilityWidget {
                             parent.closest('.advertisement') || parent.closest('.ad') ||
                             parent.closest('.banner') || parent.closest('.popup') ||
                             parent.closest('.modal') || parent.closest('.overlay') ||
-                            parent.closest('.accessibility-panel') || parent.closest('#accessibility-icon')) {
+                            parent.closest('.accessbit-widget-panel') || parent.closest('#accessbit-widget-icon')) {
                             return NodeFilter.FILTER_REJECT;
                         }
                         
@@ -24228,7 +24598,7 @@ class AccessibilityWidget {
     
                 // Apply to interactive elements not inside the panel (allow the icon itself)
     
-                if (!activeElement.closest('.accessibility-panel') && 
+                if (!activeElement.closest('.accessbit-widget-panel') && 
     
                     isInteractiveElement) {
     
@@ -24262,7 +24632,7 @@ class AccessibilityWidget {
     
                
                 // Special debugging for accessibility icon
-                if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
                   
                     // Always apply focus styles to accessibility icon when focused
                     e.target.style.outline = '3px solid #6366f1';
@@ -24306,7 +24676,7 @@ class AccessibilityWidget {
     
                         focusedElement === document.documentElement ||
     
-                        focusedElement.closest('.accessibility-panel') ||
+                        focusedElement.closest('.accessbit-widget-panel') ||
     
                         !isInteractiveElement) {
     
@@ -24364,7 +24734,7 @@ class AccessibilityWidget {
             
             // Add focusout handler to clean up accessibility icon styles
             this.highlightFocusOutHandler = (e) => {
-                if (e.target.classList && e.target.classList.contains('accessibility-icon')) {
+                if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
                 
                     e.target.style.outline = '';
                     e.target.style.outlineOffset = '';
@@ -24446,7 +24816,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements
     
-                if (element.closest('.accessibility-panel') || element.closest('#accessibility-icon')) {
+                if (element.closest('.accessbit-widget-panel') || element.closest('#accessbit-widget-icon')) {
     
                     return;
     
@@ -24579,15 +24949,15 @@ class AccessibilityWidget {
                     }
                     
                     /* EXCLUDE WIDGET - Never apply readable font to widget */
-                    .readable-font .accessibility-widget,
-                    .readable-font #accessibility-widget,
-                    .readable-font .accessibility-panel,
-                    .readable-font .accessibility-icon,
+                    .readable-font .accessbit-widget,
+                    .readable-font #accessbit-widget,
+                    .readable-font .accessbit-widget-panel,
+                    .readable-font .accessbit-widget-icon,
                     .readable-font [data-ck-widget],
-                    .readable-font [class*="accessibility"],
-                    .readable-font .accessibility-widget *,
-                    .readable-font #accessibility-widget *,
-                    .readable-font .accessibility-panel * {
+                    .readable-font [class*="accessbit"],
+                    .readable-font .accessbit-widget *,
+                    .readable-font #accessbit-widget *,
+                    .readable-font .accessbit-widget-panel * {
                         font-family: revert;
                     }
                     
@@ -24913,7 +25283,7 @@ class AccessibilityWidget {
     
             // Force reset cursor on accessibility panel elements specifically
     
-            const accessibilityElements = document.querySelectorAll('accessibility-widget, .accessibility-panel, #accessibility-icon');
+            const accessibilityElements = document.querySelectorAll('accessbit-widget, .accessbit-widget-panel, #accessbit-widget-icon');
     
             accessibilityElements.forEach(el => {
     
@@ -25071,7 +25441,7 @@ class AccessibilityWidget {
     
             // Force reset cursor on accessibility panel elements specifically
     
-            const accessibilityElements = document.querySelectorAll('accessibility-widget, .accessibility-panel, #accessibility-icon');
+            const accessibilityElements = document.querySelectorAll('accessbit-widget, .accessbit-widget-panel, #accessbit-widget-icon');
     
             accessibilityElements.forEach(el => {
     
@@ -25106,9 +25476,9 @@ class AccessibilityWidget {
             style.textContent = `
     
                 /* Only apply auto cursor when big cursors are NOT active */
-                body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-panel *,
-                body:not(.big-white-cursor):not(.big-black-cursor) .accessibility-widget *,
-                body:not(.big-white-cursor):not(.big-black-cursor) #accessibility-widget * {
+                body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget-panel *,
+                body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget *,
+                body:not(.big-white-cursor):not(.big-black-cursor) #accessbit-widget * {
     
                     cursor: auto !important;
     
@@ -25266,192 +25636,102 @@ class AccessibilityWidget {
     
         // Stop Animation Methods
     
+        // --- STOP ANIMATION (photosensitive: no visual overlay) ---
         enableStopAnimation() {
-    
             document.body.classList.add('stop-animation');
             document.documentElement.classList.add('stop-animation');
             this.settings['stop-animation'] = true;
             this.saveSettings();
             
-            // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
+            // CSS kill switch (no global overrides)
             this.injectStopAnimationCSS();
+
+            // WAAPI pause/cancel running animations (allowed)
+            try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             
-            // SECURITY FIX: Removed requestAnimationFrame override - use CSS-only animation blocking
-            
-            // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+            // Library APIs + polling (official APIs only)
             this.stopAnimationLibraries();
-            
-            // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
-            this.replaceAnimatedMedia();
-            
-            // Stop DOM manipulation animations (setTimeout/setInterval loops)
-            this.stopDOMAnimationLoops();
-            
-            // 6. Stop autoplay videos and embedded media
+            this.startLottieGSAPPolling();
+
+            // Stop autoplay media and JS-driven sliders (e.g., Swiper/Webflow)
             this.stopAutoplayMedia();
-            
-            // 7. Stop any JavaScript-based animations (like the slider auto-slide)
             this.stopJavaScriptAnimations();
-            
+
+            // Stop Webflow interactions / data-w-id transforms and hovers
+            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
         }
         
         // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
         injectStopAnimationCSS() {
-            if (!document.getElementById('stop-animation-css')) {
-                const style = document.createElement('style');
-                style.id = 'stop-animation-css';
-                style.textContent = `
-                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types */
-                    html.stop-animation *,
-                    html.stop-animation *::before,
-                    html.stop-animation *::after,
-                    body.stop-animation *,
-                    body.stop-animation *::before,
-                    body.stop-animation *::after,
-                    .stop-animation *,
-                    .stop-animation *::before,
-                    .stop-animation *::after {
-                        /* Stop all CSS animations and transitions */
+            if (document.getElementById('stop-animation-css')) return;
+            const style = document.createElement('style');
+            style.id = 'stop-animation-css';
+            style.textContent = `
+                /* Respect user/system reduce motion */
+                @media (prefers-reduced-motion: reduce) {
+                    *, *::before, *::after {
                         animation: none !important;
                         transition: none !important;
-                        animation-play-state: paused !important;
-                        animation-duration: 0s !important;
-                        animation-delay: 0s !important;
-                        transition-duration: 0s !important;
-                        transition-delay: 0s !important;
-                        
-                        /* Stop blinking and flashing text */
-                        text-decoration: none !important;
+                        scroll-behavior: auto !important;
                     }
-                    
-                    /* Stop all animation classes and libraries */
-                    html.stop-animation *[class*="animate"],
-                    html.stop-animation *[class*="fade"],
-                    html.stop-animation *[class*="slide"],
-                    html.stop-animation *[class*="bounce"],
-                    html.stop-animation *[class*="pulse"],
-                    html.stop-animation *[class*="shake"],
-                    html.stop-animation *[class*="flash"],
-                    html.stop-animation *[class*="blink"],
-                    html.stop-animation *[class*="glow"],
-                    html.stop-animation *[class*="spin"],
-                    html.stop-animation *[class*="rotate"],
-                    html.stop-animation *[class*="scale"],
-                    html.stop-animation *[class*="zoom"],
-                    html.stop-animation *[class*="wiggle"],
-                    html.stop-animation *[class*="jiggle"],
-                    html.stop-animation *[class*="twist"],
-                    html.stop-animation *[class*="flip"],
-                    html.stop-animation *[class*="swing"],
-                    html.stop-animation *[class*="wobble"],
-                    html.stop-animation *[class*="tilt"],
-                    body.stop-animation *[class*="animate"],
-                    body.stop-animation *[class*="fade"],
-                    body.stop-animation *[class*="slide"],
-                    body.stop-animation *[class*="bounce"],
-                    body.stop-animation *[class*="pulse"],
-                    body.stop-animation *[class*="shake"],
-                    body.stop-animation *[class*="flash"],
-                    body.stop-animation *[class*="blink"],
-                    body.stop-animation *[class*="glow"],
-                    body.stop-animation *[class*="spin"],
-                    body.stop-animation *[class*="rotate"],
-                    body.stop-animation *[class*="scale"],
-                    body.stop-animation *[class*="zoom"],
-                    body.stop-animation *[class*="wiggle"],
-                    body.stop-animation *[class*="jiggle"],
-                    body.stop-animation *[class*="twist"],
-                    body.stop-animation *[class*="flip"],
-                    body.stop-animation *[class*="swing"],
-                    body.stop-animation *[class*="wobble"],
-                    body.stop-animation *[class*="tilt"],
-                    .stop-animation *[class*="animate"],
-                    .stop-animation *[class*="fade"],
-                    .stop-animation *[class*="slide"],
-                    .stop-animation *[class*="bounce"],
-                    .stop-animation *[class*="pulse"],
-                    .stop-animation *[class*="shake"],
-                    .stop-animation *[class*="flash"],
-                    .stop-animation *[class*="blink"],
-                    .stop-animation *[class*="glow"],
-                    .stop-animation *[class*="spin"],
-                    .stop-animation *[class*="rotate"],
-                    .stop-animation *[class*="scale"],
-                    .stop-animation *[class*="zoom"],
-                    .stop-animation *[class*="wiggle"],
-                    .stop-animation *[class*="jiggle"],
-                    .stop-animation *[class*="twist"],
-                    .stop-animation *[class*="flip"],
-                    .stop-animation *[class*="swing"],
-                    .stop-animation *[class*="wobble"],
-                    .stop-animation *[class*="tilt"] {
-                        animation: none !important;
-                        transition: none !important;
-                        animation-duration: 0s !important;
-                        animation-delay: 0s !important;
-                        transition-duration: 0s !important;
-                        transition-delay: 0s !important;
-                    }
-                    
-                    /* Stop SVG and Canvas animations */
-                    html.stop-animation svg,
-                    html.stop-animation svg path,
-                    html.stop-animation svg line,
-                    html.stop-animation canvas,
-                    body.stop-animation svg,
-                    body.stop-animation svg path,
-                    body.stop-animation svg line,
-                    body.stop-animation canvas,
-                    .stop-animation svg,
-                    .stop-animation svg path,
-                    .stop-animation svg line,
-                    .stop-animation canvas {
-                        animation: none !important;
-                        transition: none !important;
-                        animation-duration: 0s !important;
-                        transition-duration: 0s !important;
-                    }
-                    
-                    /* Stop text splitting animations */
-                    html.stop-animation [data-splitting],
-                    html.stop-animation .split, 
-                    html.stop-animation .char, 
-                    html.stop-animation .word,
-                    body.stop-animation [data-splitting],
-                    body.stop-animation .split, 
-                    body.stop-animation .char, 
-                    body.stop-animation .word,
-                    .stop-animation [data-splitting],
-                    .stop-animation .split, 
-                    .stop-animation .char, 
-                    .stop-animation .word {
-                        animation: none !important;
-                        transition: none !important;
-                        animation-duration: 0s !important;
-                        transition-duration: 0s !important;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
+                }
+                /* Explicit stop-animation toggle */
+                html.stop-animation *, html.stop-animation *::before, html.stop-animation *::after,
+                body.stop-animation *, body.stop-animation *::before, body.stop-animation *::after,
+                .stop-animation *, .stop-animation *::before, .stop-animation *::after {
+                    animation: none !important;
+                    transition: none !important;
+                    scroll-behavior: auto !important;
+                    animation-play-state: paused !important;
+                }
+                /* Remove common flash triggers */
+                html.stop-animation *[class*="blink"], html.stop-animation *[class*="shimmer"], 
+                html.stop-animation *[class*="pulse"], html.stop-animation *[class*="caret"], 
+                html.stop-animation *[class*="cursor-blink"], html.stop-animation *[class*="skeleton"],
+                html.stop-animation *[class*="pulsing"], html.stop-animation *[class*="flashing"],
+                body.stop-animation *[class*="blink"], body.stop-animation *[class*="shimmer"], 
+                body.stop-animation *[class*="pulse"], body.stop-animation *[class*="caret"], 
+                body.stop-animation *[class*="cursor-blink"], body.stop-animation *[class*="skeleton"],
+                body.stop-animation *[class*="pulsing"], body.stop-animation *[class*="flashing"] {
+                    animation: none !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                /* Stop Webflow interactions (data-w-id) */
+                html.stop-animation [data-w-id],
+                body.stop-animation [data-w-id],
+                .stop-animation [data-w-id] {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    opacity: 1 !important;
+                }
+
+                /* Stop hover-driven transforms on buttons/links */
+                html.stop-animation a, html.stop-animation button, html.stop-animation [role="button"],
+                body.stop-animation a, body.stop-animation button, body.stop-animation [role="button"],
+                .stop-animation a, .stop-animation button, .stop-animation [role="button"] {
+                    transition: none !important;
+                    transform: none !important;
+                }
+
+                html.stop-animation a:hover, html.stop-animation button:hover, html.stop-animation [role="button"]:hover,
+                body.stop-animation a:hover, body.stop-animation button:hover, body.stop-animation [role="button"]:hover,
+                .stop-animation a:hover, .stop-animation button:hover, .stop-animation [role="button"]:hover {
+                    transition: none !important;
+                    transform: none !important;
+                }
+            `;
+            document.head.appendChild(style);
         }
         
-        // 2. JS Loop Blocking: Override requestAnimationFrame to freeze high-performance animations
-        // REMOVED: Duplicate overrideRequestAnimationFrame() - using more comprehensive version at line 24467
         
-        // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
-        // REMOVED: Duplicate stopAnimationLibraries() - using more comprehensive version at line 24703
-        // REMOVED: Duplicate replaceAnimatedMedia() - using more comprehensive version at line 24832
-        
-        // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
-        // SECURITY FIX: Removed setTimeout/setInterval overrides - global prototype overwrites are prohibited
-        // Animation blocking is now handled via CSS classes only
         stopDOMAnimationLoops() {
-            // Function simplified - no global overrides, only CSS-based animation stopping
-            // This function now only serves as a placeholder for compatibility
-            // All animation blocking is handled via CSS classes applied to the document
+            
         }
         
-        // 6. Stop autoplay videos and embedded media
+        
         stopAutoplayMedia() {
             // Pause all currently playing videos
             document.querySelectorAll('video').forEach(video => {
@@ -25553,80 +25833,132 @@ class AccessibilityWidget {
             }
         }
         
-        disableStopAnimation() {
-   
-            // 1. Remove CSS rules for stop animation FIRST
-            const existingStyle = document.getElementById('stop-animation-css');
+        enableReduceMotion() {
+            // Per Webflow Security recommendations: Add explicit in-product "Reduce Motion" toggle
+            // This is different from "Seizure Safe" - it only disables animations/transitions without color filters
+            document.body.classList.add('reduce-motion');
+            document.documentElement.classList.add('reduce-motion');
+            this.settings['reduce-motion'] = true;
+            this.saveSettings();
+            
+            // Apply global CSS kill switch
+            this.injectReduceMotionCSS();
+            
+            // Use WAAPI to pause/cancel running animations
+            this.applyWAAPIReduceMotion(true);
+        }
+        
+        disableReduceMotion() {
+            // Remove CSS rules
+            const existingStyle = document.getElementById('reduce-motion-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // 2. Remove stop-animation class from body and html
-            document.body.classList.remove('stop-animation');
-            document.documentElement.classList.remove('stop-animation');
+            // Remove reduce-motion class
+            document.body.classList.remove('reduce-motion');
+            document.documentElement.classList.remove('reduce-motion');
             
-            // 3. Force browser reflow to ensure CSS changes take effect
-            // This is critical for animations to resume after !important rules are removed
-            void document.body.offsetHeight;
+            // Restore WAAPI animations
+            this.applyWAAPIReduceMotion(false);
             
-            // 4. Restore requestAnimationFrame
-            this.restoreRequestAnimationFrame();
-            
-            // 5. Restore setTimeout and setInterval
-            this.restoreDOMAnimationLoops();
-            
-            // 6. Restore animated media
-            this.restoreAnimatedMedia();
-            
-            // 7. Restore JavaScript animations
-            this.restoreJavaScriptAnimations();
-            
-            // 8. Force re-enable CSS animations by triggering a style recalculation
-            // This ensures animations resume after !important rules are removed
-            requestAnimationFrame(() => {
-                // Re-initialize animation libraries that might have been paused
-                if (typeof AOS !== 'undefined' && AOS.refresh) {
-                    try {
-                        AOS.refresh();
-                    } catch (e) {}
-                }
-                
-                // Re-enable Swiper autoplay
-                if (typeof Swiper !== 'undefined') {
-                    try {
-                        document.querySelectorAll('.swiper').forEach(swiperEl => {
-                            if (swiperEl.swiper && swiperEl.swiper.autoplay) {
-                                swiperEl.swiper.autoplay.start();
-                            }
-                        });
-                    } catch (e) {}
-                }
-                
-                // Force style recalculation on elements with animation classes
-                // This helps browser re-evaluate styles after !important rules are removed
-                const animatedElements = document.querySelectorAll('[class*="animate"], [class*="fade"], [class*="slide"], [class*="bounce"], [class*="pulse"], [class*="animation"]');
-                animatedElements.forEach(el => {
-                    // Trigger minimal reflow to force browser to re-evaluate styles
-                    void el.offsetHeight;
-                });
-            });
-            
-            this.settings['stop-animation'] = false;
+            this.settings['reduce-motion'] = false;
             this.saveSettings();
-            
-            // 9. Refresh the page to ensure all animations resume properly
-            // This ensures a clean state after disabling stop animation
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
-        
         }
         
-        // Restore requestAnimationFrame
-        // REMOVED: Duplicate restoreRequestAnimationFrame() - using more comprehensive version at line 24737
+        injectReduceMotionCSS() {
+            if (!document.getElementById('reduce-motion-css')) {
+                const style = document.createElement('style');
+                style.id = 'reduce-motion-css';
+                style.textContent = `
+                    /* Per Webflow Security recommendations: Global CSS kill switch for Reduce Motion */
+                    /* This provides stricter controls than prefers-reduced-motion for users who need it */
+                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
+                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                    }
+                    
+                    /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
+                    body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
+                    body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
+                    body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
+                    body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
+                    html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
+                    html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
+                    html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
+                    html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                        animation: none !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+                    
+                    /* Remove blinking caret effects */
+                    body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
+                    body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
+                    body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
+                    body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
+                    html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
+                    html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
+                    html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
+                    html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                        caret-color: transparent !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
         
-        // SECURITY FIX: Removed setTimeout/setInterval overwrites per Webflow Security requirements
-        // Animation loops are now stopped via CSS and WAAPI controls only
+        applyWAAPIReduceMotion(enabled) {
+            // Use WAAPI controls where we own the animations
+            // Per Webflow Security recommendations: Use WAAPI for explicit control
+            try {
+                if (enabled) {
+                    const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                    all.forEach(anim => {
+                        try {
+                            if (typeof anim.pause === 'function') {
+                                anim.pause();
+                            }
+                            if (typeof anim.playbackRate !== 'undefined') {
+                                anim.playbackRate = 0;
+                            }
+                        } catch (_) {}
+                    });
+                } else {
+                    // Restore animations when disabled
+                    const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                    all.forEach(anim => {
+                        try {
+                            if (typeof anim.playbackRate !== 'undefined') {
+                                anim.playbackRate = 1;
+                            }
+                            if (typeof anim.play === 'function' && anim.playState === 'paused') {
+                                anim.play();
+                            }
+                        } catch (_) {}
+                    });
+                }
+            } catch (_) {}
+        }
+        
+        disableStopAnimation() {
+            const existingStyle = document.getElementById('stop-animation-css');
+            if (existingStyle) existingStyle.remove();
+            document.body.classList.remove('stop-animation');
+            document.documentElement.classList.remove('stop-animation');
+            this.stopLottieGSAPPolling();
+            try { window.seizureState?.applyWAAPIStopMotion?.(false); } catch (_) {}
+            this.settings['stop-animation'] = false;
+            this.saveSettings();
+        }
+        
+       
         restoreDOMAnimationLoops() {
             // No restoration needed - we never overwrite setTimeout/setInterval
             // Animation stopping is handled via CSS classes and WAAPI controls
@@ -26594,202 +26926,280 @@ class AccessibilityWidget {
     
         }
     
-        // SECURITY FIX: Removed overrideRequestAnimationFrame() - global prototype overwrites are prohibited
-        // Animation blocking is now handled via CSS classes only
-        overrideRequestAnimationFrame() {
-            // Function removed per Webflow Marketplace security requirements
-            // Global browser API modifications are not allowed
-            // This function now only serves as a placeholder for compatibility
-            // All animation blocking is handled via CSS classes applied to the document
-        }
+        
+       
         
         // API Controls: Execute .stop() or .pause() methods on known animation libraries
         stopAnimationLibraries() {
             try {
-                // Stop Lottie animations (but don't destroy them)
-                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                    const lottieAnimations = window.lottie.getRegisteredAnimations();
-                    lottieAnimations.forEach(animation => {
-                        try {
-                            if (animation && typeof animation.stop === 'function') {
-                                animation.stop();
-                            }
-                            if (animation && typeof animation.pause === 'function') {
-                                animation.pause();
-                            }
-                            // REMOVED: animation.destroy() - Don't destroy, just stop
-                        } catch (error) {
-                           
-                        }
-                    });
-                  
-                }
-                
-                
-                // Three.js: Stop animations if present
-                if (typeof window.THREE !== 'undefined') {
-                    try {
+                // Lottie (official API)
+                this.stopAllLottieAnimations();
 
-                    } catch (error) {
-                       
-                    }
-                }
-                
-                // Anime.js: Stop animations if present
-                if (typeof window.anime !== 'undefined') {
-                    try {
-                        // Pause all anime instances
-                        if (window.anime.pause) {
-                            window.anime.pause();
-                     
-                        }
-                    } catch (error) {
-                        
-                    }
-                }
-                
-                // Velocity.js: Stop animations if present
-                if (typeof window.Velocity !== 'undefined') {
-                    try {
-                        // Stop all velocity animations
-                        if (window.Velocity.Utilities && window.Velocity.Utilities.stopAll) {
-                            window.Velocity.Utilities.stopAll();
-                           
-                        }
-                    } catch (error) {
-                        
-                    }
-                }
-                
-                // jQuery: Stop all jQuery animations
-                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
-                    try {
-                        const $ = window.jQuery || window.$;
-                        if ($ && $.fx) {
-                            $.fx.off = true; // Disable all jQuery animations
-                  
-                        }
-                    } catch (error) {
-                     
-                    }
-                }
-                
-                // Framer Motion: Stop animations if present
-                if (typeof window.framer !== 'undefined' || typeof window.motion !== 'undefined') {
-                    try {
-
-                    } catch (error) {
-                        
-                    }
-                }
-                
-                // AOS (Animate On Scroll): Disable if present
-                if (typeof window.AOS !== 'undefined') {
-                    try {
-                        if (window.AOS.refresh) {
-                            window.AOS.refresh();
-                        }
-                    
-                    } catch (error) {
-                      
-                    }
-                }
-                
-                // WOW.js: Disable if present
-                if (typeof window.WOW !== 'undefined') {
-                    try {
-                      
-                    } catch (error) {
-                     
-                    }
-                }
-                
-                // GSAP: Stop all animations including motionPath (orbit), progress bars, and pointer animations
+                // GSAP (official API)
                 if (typeof window.gsap !== 'undefined') {
                     try {
-                        // Kill all active GSAP tweens and timelines
                         if (window.gsap.killTweensOf) {
-                            // Stop motionPath animations (orbit animations) - target elements with motionPath animations
-                            // BUT ensure they remain visible in their final position
-                            const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
-                            orbitElements.forEach(el => {
+                            window.gsap.killTweensOf('*');
+                        }
+                        if (window.gsap.getAllTimelines) {
+                            const allTimelines = window.gsap.getAllTimelines();
+                            allTimelines.forEach(tl => {
                                 try {
-                                    // Kill the animation but preserve final state
-                                    const currentTransform = window.getComputedStyle(el).transform;
-                                    const currentOpacity = window.getComputedStyle(el).opacity;
-                                    window.gsap.killTweensOf(el);
-                                    // Ensure element remains visible
-                                    el.style.opacity = currentOpacity !== '0' ? '1' : '1';
-                                    el.style.visibility = 'visible';
-                                    el.style.display = '';
-                                    // Preserve final transform position
-                                    if (currentTransform && currentTransform !== 'none' && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)') {
-                                        el.style.transform = currentTransform;
+                                    if (tl && tl.totalProgress) { tl.totalProgress(1); }
+                                    tl && tl.kill && tl.kill();
+                                } catch (_) {}
+                            });
+                        }
+                        if (window.gsap.getAllTweens) {
+                            const allTweens = window.gsap.getAllTweens();
+                            allTweens.forEach(tween => {
+                                try {
+                                    if (tween && tween.totalProgress) { tween.totalProgress(1); }
+                                    tween && tween.kill && tween.kill();
+                                } catch (_) {}
+                            });
+                        }
+                    } catch (_) {}
+                }
+
+                // Webflow IX2 (official require API)
+                try {
+                    if (window.Webflow && typeof window.Webflow.require === 'function') {
+                        const ix2 = window.Webflow.require('ix2');
+                        if (ix2 && typeof ix2.stop === 'function') {
+                            ix2.stop();
+                        }
+                    }
+                } catch (_) {}
+
+                // Webflow Lottie embeds (generic, no hardcoding)
+                try {
+                    const wfLotties = document.querySelectorAll('[data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]');
+                    wfLotties.forEach(el => {
+                        try {
+                            const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
+                            if (inst) {
+                                if (inst.setSpeed) inst.setSpeed(0);
+                                if (inst.stop) inst.stop();
+                                if (inst.pause) inst.pause();
+                                if (inst.goToAndStop) inst.goToAndStop(0, true);
+                                if (inst.autoplay !== undefined) inst.autoplay = false;
+                                if (inst.loop !== undefined) inst.loop = false;
+                            }
+                            // Fallback: pause inner svg/canvas
+                            const svg = el.querySelector('svg, canvas');
+                            if (svg) {
+                                svg.style.animation = 'none';
+                                svg.style.transition = 'none';
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+
+                // Webflow interactions: stop transforms/animations on data-w-id elements (finish to final)
+                try {
+                    const wfElems = document.querySelectorAll('[data-w-id]');
+                    wfElems.forEach(el => {
+                        try {
+                            el.style.transition = 'none';
+                            el.style.animation = 'none';
+                            const cs = window.getComputedStyle(el);
+                            if (cs.transform && cs.transform !== 'none') {
+                                el.style.transform = 'none';
+                            }
+                            if (cs.opacity !== '1') {
+                                el.style.opacity = '1';
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+            } catch (error) {
+               
+            }
+        }
+
+        // Webflow interactions stopper (IX2 + data-w-id fallback)
+        stopWebflowInteractions() {
+            // IX2 official API stop
+            try {
+                if (window.Webflow && typeof window.Webflow.require === 'function') {
+                    const ix2 = window.Webflow.require('ix2');
+                    if (ix2) {
+                        if (typeof ix2.stop === 'function') ix2.stop();
+                        // destroy is heavier; call if available to fully halt interactions
+                        if (typeof ix2.destroy === 'function') ix2.destroy();
+                    }
+                }
+            } catch (_) {}
+
+            // Fallback: neutralize data-w-id elements
+            try {
+                const wfElems = document.querySelectorAll('[data-w-id]');
+                wfElems.forEach(el => {
+                    try {
+                        el.style.transition = 'none';
+                        el.style.animation = 'none';
+                        const cs = window.getComputedStyle(el);
+                        if (cs.transform && cs.transform !== 'none') {
+                            el.style.transform = 'none';
+                        }
+                        if (cs.opacity !== '1') {
+                            el.style.opacity = '1';
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Start continuous polling for Lottie and GSAP animations
+        // This catches animations that start AFTER seizure mode is enabled
+        startLottieGSAPPolling() {
+            // Clear any existing intervals first
+            this.stopLottieGSAPPolling();
+            
+            // Poll for Lottie animations every 100ms
+            if (!this.lottiePollInterval) {
+                this.lottiePollInterval = setInterval(() => {
+                    try {
+                        // Method 1: lottie-player web component - Use official API methods
+                        const lottiePlayers = document.querySelectorAll('lottie-player');
+                        lottiePlayers.forEach(player => {
+                            try {
+                                // Use lottie-player's official API methods in correct order
+                                if (typeof player.setSpeed === 'function') {
+                                    player.setSpeed(0);
+                                }
+                                if (typeof player.stop === 'function') {
+                                    player.stop();
+                                }
+                                if (typeof player.pause === 'function') {
+                                    player.pause();
+                                }
+                                if (typeof player.seek === 'function') {
+                                    player.seek(0);
+                                }
+                                if (typeof player.setMode === 'function') {
+                                    player.setMode('normal');
+                                }
+                                player.setAttribute('autoplay', 'false');
+                                player.removeAttribute('loop');
+                            } catch (_) {}
+                        });
+                        
+                        // Method 2: bodymovin/lottie library - Use official API methods
+                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                            const lottieAnimations = window.lottie.getRegisteredAnimations();
+                            lottieAnimations.forEach(animation => {
+                                try {
+                                    if (animation) {
+                                        // Use Lottie's official API in correct order
+                                        if (typeof animation.setSpeed === 'function') {
+                                            animation.setSpeed(0);
+                                        }
+                                        if (typeof animation.stop === 'function') {
+                                            animation.stop();
+                                        }
+                                        if (typeof animation.pause === 'function') {
+                                            animation.pause();
+                                        }
+                                        if (typeof animation.goToAndStop === 'function') {
+                                            animation.goToAndStop(0, true);
+                                        }
+                                        if (animation.autoplay !== undefined) {
+                                            animation.autoplay = false;
+                                        }
+                                        if (animation.loop !== undefined) {
+                                            animation.loop = false;
+                                        }
                                     }
                                 } catch (_) {}
                             });
-                            
-                            // Stop progress bar animations
-                            const progressElements = document.querySelectorAll('[class*="progress"], [role="progressbar"], .progress, .slider-progress, .progress-bar');
-                            progressElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
-                            
-                            // Stop pointer animations (click simulation with expanding overlays)
-                            const pointerElements = document.querySelectorAll('.pointer, .color-overlay, .color-overlay-2, [class*="pointer"], [class*="overlay"]');
-                            pointerElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
-                            
-                            // Stop floating image animations
-                            const floatingElements = document.querySelectorAll('.floating-image, [class*="floating"]');
-                            floatingElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
                         }
                         
-                        // Kill all timelines that might contain these animations
-                        if (window.gsap.globals && window.gsap.globals.timeline) {
+                        // Method 3: lottie-web (newer API) - check element instances with comprehensive API calls
+                        const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
+                        lottieElements.forEach(el => {
                             try {
-                                const timelines = window.gsap.globals.timeline.getAll ? window.gsap.globals.timeline.getAll() : [];
-                                timelines.forEach(tl => {
+                                const lottieInstance = el._lottie || el.lottie || el.__lottie;
+                                if (lottieInstance) {
+                                    if (typeof lottieInstance.setSpeed === 'function') {
+                                        lottieInstance.setSpeed(0);
+                                    }
+                                    if (typeof lottieInstance.stop === 'function') {
+                                        lottieInstance.stop();
+                                    }
+                                    if (typeof lottieInstance.pause === 'function') {
+                                        lottieInstance.pause();
+                                    }
+                                    if (typeof lottieInstance.goToAndStop === 'function') {
+                                        lottieInstance.goToAndStop(0, true);
+                                    }
+                                    if (lottieInstance.autoplay !== undefined) {
+                                        lottieInstance.autoplay = false;
+                                    }
+                                    if (lottieInstance.loop !== undefined) {
+                                        lottieInstance.loop = false;
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                        
+                        // Method 4: Also handle lottie-player web components in polling (already handled in Method 1 above)
+                        // Note: lottie-player is handled at the start of this polling function
+                    } catch (_) {}
+                }, 100); // Check every 100ms
+            }
+            
+            // Poll for GSAP animations every 100ms
+            if (!this.gsapPollInterval) {
+                this.gsapPollInterval = setInterval(() => {
+                    try {
+                        if (typeof window.gsap !== 'undefined') {
+                            // Kill all active tweens globally
+                            if (window.gsap.killTweensOf) {
+                                window.gsap.killTweensOf('*');
+                            }
+                            
+                            // Kill all timelines
+                            if (window.gsap.getAllTimelines) {
+                                const allTimelines = window.gsap.getAllTimelines();
+                                allTimelines.forEach(tl => {
                                     try {
+                                        if (tl && tl.totalProgress) { tl.totalProgress(1); }
                                         if (tl && typeof tl.kill === 'function') {
                                             tl.kill();
                                         }
                                     } catch (_) {}
                                 });
-                            } catch (_) {}
-                        }
-                        
-                        // Get all active tweens and kill motionPath-related ones
-                        if (window.gsap.getAllTweens) {
-                            try {
+                            }
+                            
+                            // Kill all active tweens (alternative method)
+                            if (window.gsap.getAllTweens) {
                                 const allTweens = window.gsap.getAllTweens();
                                 allTweens.forEach(tween => {
                                     try {
-                                        if (tween && tween.vars && (tween.vars.motionPath || tween.vars.motionPath)) {
+                                        if (tween && tween.totalProgress) { tween.totalProgress(1); }
+                                        if (tween && typeof tween.kill === 'function') {
                                             tween.kill();
                                         }
                                     } catch (_) {}
                                 });
-                            } catch (_) {}
+                            }
                         }
-                    } catch (error) {
-                        // Silent fail
-                    }
-                }
-                
-               
-                
-            } catch (error) {
-               
+                    } catch (_) {}
+                }, 100); // Check every 100ms
+            }
+        }
+        
+        // Stop continuous polling for Lottie and GSAP animations
+        stopLottieGSAPPolling() {
+            if (this.lottiePollInterval) {
+                clearInterval(this.lottiePollInterval);
+                this.lottiePollInterval = null;
+            }
+            if (this.gsapPollInterval) {
+                clearInterval(this.gsapPollInterval);
+                this.gsapPollInterval = null;
             }
         }
         
@@ -26920,17 +27330,7 @@ class AccessibilityWidget {
             }
         }
         
-        // SECURITY FIX: Removed requestAnimationFrame restoration - we no longer overwrite it
-        restoreRequestAnimationFrame() {
-            // No restoration needed - we never overwrite requestAnimationFrame
-            // Animation stopping is handled via CSS classes and WAAPI controls only
-            try {
-                // Restore WAAPI animations if needed
-                if (window.__applyWAAPIStopMotion) {
-                    window.__applyWAAPIStopMotion(false);
-                }
-            } catch (_) {}
-        }
+    
         
         // Restore animation libraries when seizure-safe is disabled
         restoreAnimationLibraries() {
@@ -27030,9 +27430,19 @@ class AccessibilityWidget {
     
                 
     
-                // Insert the color picker after the profile item
-                // CRITICAL: Sanitize HTML to prevent XSS injection
-                textColorsModule.insertAdjacentHTML('afterend', this.sanitizeHTML(colorPickerHTML, true));
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(colorPickerHTML, 'text/html');
+                const frag = document.createDocumentFragment();
+                Array.from(doc.body.childNodes).forEach(n => {
+                    if (n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.TEXT_NODE) {
+                        frag.appendChild(n.cloneNode(true));
+                    }
+                });
+                if (textColorsModule.nextSibling) {
+                    textColorsModule.parentNode.insertBefore(frag, textColorsModule.nextSibling);
+                } else {
+                    textColorsModule.parentNode.appendChild(frag);
+                }
     
                 
     
@@ -27240,9 +27650,19 @@ class AccessibilityWidget {
     
                 
     
-                // Insert the color picker after the profile item
-    
-                titleColorsModule.insertAdjacentHTML('afterend', this.sanitizeHTML(colorPickerHTML, true));
+                const parser2 = new DOMParser();
+                const doc2 = parser2.parseFromString(colorPickerHTML, 'text/html');
+                const frag2 = document.createDocumentFragment();
+                Array.from(doc2.body.childNodes).forEach(n => {
+                    if (n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.TEXT_NODE) {
+                        frag2.appendChild(n.cloneNode(true));
+                    }
+                });
+                if (titleColorsModule.nextSibling) {
+                    titleColorsModule.parentNode.insertBefore(frag2, titleColorsModule.nextSibling);
+                } else {
+                    titleColorsModule.parentNode.appendChild(frag2);
+                }
     
                 
     
@@ -27452,9 +27872,19 @@ class AccessibilityWidget {
     
                 
     
-                // Insert the color picker after the profile item
-    
-                bgColorsModule.insertAdjacentHTML('afterend', this.sanitizeHTML(colorPickerHTML, true));
+                const parser3 = new DOMParser();
+                const doc3 = parser3.parseFromString(colorPickerHTML, 'text/html');
+                const frag3 = document.createDocumentFragment();
+                Array.from(doc3.body.childNodes).forEach(n => {
+                    if (n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.TEXT_NODE) {
+                        frag3.appendChild(n.cloneNode(true));
+                    }
+                });
+                if (bgColorsModule.nextSibling) {
+                    bgColorsModule.parentNode.insertBefore(frag3, bgColorsModule.nextSibling);
+                } else {
+                    bgColorsModule.parentNode.appendChild(frag3);
+                }
     
                 
     
@@ -27561,7 +27991,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility panel elements
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     // Apply background color to specific content areas only
     
@@ -27581,7 +28011,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility panel elements and elements that already have the color
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon') && 
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon') && 
     
                     element.style.backgroundColor !== color) {
     
@@ -27655,7 +28085,7 @@ class AccessibilityWidget {
     
             mainContentAreas.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
     
                     element.style.backgroundColor = '';
     
@@ -27671,7 +28101,7 @@ class AccessibilityWidget {
     
             allElements.forEach(element => {
     
-                if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon') &&
+                if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon') &&
     
                     !element.classList.contains('color-option') && 
     
@@ -27709,81 +28139,29 @@ class AccessibilityWidget {
     
         enableSeizureSafe(immediate = false) {
             // Disable other mutually exclusive features
-            if (this.settings['vision-impaired']) {
-                this.disableVisionImpaired();
-                this.updateToggleSwitch('vision-impaired', false);
-            }
-            if (this.settings['adhd-friendly']) {
-                this.disableADHDFriendly();
-                this.updateToggleSwitch('adhd-friendly', false);
-            }
-            if (this.settings['cognitive-disability']) {
-                this.disableCognitiveDisability();
-                this.updateToggleSwitch('cognitive-disability', false);
-            }
+            if (this.settings['vision-impaired']) { this.disableVisionImpaired(); this.updateToggleSwitch('vision-impaired', false); }
+            if (this.settings['adhd-friendly']) { this.disableADHDFriendly(); this.updateToggleSwitch('adhd-friendly', false); }
+            if (this.settings['cognitive-disability']) { this.disableCognitiveDisability(); this.updateToggleSwitch('cognitive-disability', false); }
             
             this.settings['seizure-safe'] = true;
             document.body.classList.add('seizure-safe');
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             this.saveSettings();
             
-            // Apply grey overlay (grayscale filter) - this is the only difference from stop-animation
+            // 1) Grey overlay (light, non-sticky-breaking)
             this.addSeizureSafeGreyOverlay();
-            
-            // Use stop-animation's approach for all animation stopping
-            // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
+            // 2) CSS kill switch
             this.injectSeizureSafeAnimationCSS();
-            
-            // SECURITY FIX: Removed requestAnimationFrame override - use CSS-only animation blocking
-            
-            // 3. API Controls: Execute .stop() or .pause() methods on known animation libraries
+            // 3) WAAPI pause/cancel running animations (no globals)
+            try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
+            // 4) Library APIs + polling
             this.stopAnimationLibraries();
-
-            // 3b. Force animations/text to final visible state
-            this.forceAllAnimationsToFinalVisibleState();
-            this.forceCompleteTextAnimations();
-            // Extra: normalize hero text block so GSAP/Webflow text animations don't leave overlapping layers
-            try {
-                const heroBlocks = document.querySelectorAll('.hero-text-block, [class*="hero-text"], [class*="hero_heading"], [class*="hero-title"]');
-                heroBlocks.forEach(block => {
-                    const headings = block.querySelectorAll('h1, h2, h3');
-                    if (headings.length > 1) {
-                        const primary = headings[0];
-                        const primaryText = (primary.textContent || '').trim();
-                        for (let i = 1; i < headings.length; i++) {
-                            const h = headings[i];
-                            const text = (h.textContent || '').trim();
-                            // Hide only true duplicates; keep unique text (e.g., subheadings)
-                            if (!text || text === primaryText) {
-                                h.style.display = 'none';
-                                h.style.visibility = 'hidden';
-                                h.style.opacity = '0';
-                                h.style.position = 'absolute';
-                                h.style.pointerEvents = 'none';
-                            }
-                        }
-                        // Ensure primary heading is visible and not transformed
-                        primary.style.opacity = '1';
-                        primary.style.visibility = 'visible';
-                        primary.style.transform = 'none';
-                    }
-                });
-            } catch (e) {}
-            
-            // 4. Media Replacement: Pause autoplay videos and replace animated GIFs with static placeholders
-            this.replaceAnimatedMedia();
-            
-            // 5. Stop DOM manipulation animations (setTimeout/setInterval loops)
-            this.stopDOMAnimationLoops();
-            
-            // 6. Stop autoplay videos and embedded media
+            this.startLottieGSAPPolling();
+            // 5) Stop autoplay media and JS-driven sliders
             this.stopAutoplayMedia();
-            
-            // 7. Stop any JavaScript-based animations (like the slider auto-slide)
             this.stopJavaScriptAnimations();
-            
-            // Update widget appearance to sync Shadow DOM host classes
-            this.updateWidgetAppearance();
+            // 6) Stop Webflow interactions / data-w-id transforms and hovers
+            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
         }
     
     
@@ -27798,7 +28176,7 @@ class AccessibilityWidget {
             }
             
             // 2. Remove grey overlay
-            const existingGreyOverlay = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            const existingGreyOverlay = document.getElementById('accessbit-seizure-safe-grey-overlay');
             if (existingGreyOverlay) {
                 existingGreyOverlay.remove();
             }
@@ -27810,58 +28188,21 @@ class AccessibilityWidget {
             this.safeBodyClassToggle('seizure-safe', false);
             document.documentElement.classList.remove('seizure-safe');
             
-            // 5. Force browser reflow to ensure CSS changes take effect
-            void document.body.offsetHeight;
+            // 5. Stop continuous polling for Lottie and GSAP
+            this.stopLottieGSAPPolling();
             
-            // 6. Restore requestAnimationFrame
-            this.restoreRequestAnimationFrame();
-            
-            // 7. Restore setTimeout and setInterval
-            this.restoreDOMAnimationLoops();
-            
-            // 8. Restore animated media
-            this.restoreAnimatedMedia();
-            
-            // 9. Restore JavaScript animations
-            this.restoreJavaScriptAnimations();
-            
-            // 10. Force re-enable CSS animations by triggering a style recalculation
-            requestAnimationFrame(() => {
-                // Re-initialize animation libraries that might have been paused
-                if (typeof AOS !== 'undefined' && AOS.refresh) {
-                    try {
-                        AOS.refresh();
-                    } catch (e) {}
+            // 6. Restore WAAPI animations
+            try {
+                if (window.seizureState && window.seizureState.applyWAAPIStopMotion) {
+                    window.seizureState.applyWAAPIStopMotion(false);
                 }
-                
-                // Re-enable Swiper autoplay
-                if (typeof Swiper !== 'undefined') {
-                    try {
-                        document.querySelectorAll('.swiper').forEach(swiperEl => {
-                            if (swiperEl.swiper && swiperEl.swiper.autoplay) {
-                                swiperEl.swiper.autoplay.start();
-                            }
-                        });
-                    } catch (e) {}
-                }
-                
-                // Force style recalculation on elements with animation classes
-                const animatedElements = document.querySelectorAll('[class*="animate"], [class*="fade"], [class*="slide"], [class*="bounce"], [class*="pulse"], [class*="animation"]');
-                animatedElements.forEach(el => {
-                    void el.offsetHeight;
-                });
-            });
+            } catch (_) {}
             
             this.settings['seizure-safe'] = false;
             this.saveSettings();
             
-            // 11. Update widget appearance to sync Shadow DOM host classes
+            // Update widget appearance to sync Shadow DOM host classes
             this.updateWidgetAppearance();
-            
-            // 12. Refresh the page to ensure all animations resume properly
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
@@ -27891,7 +28232,7 @@ class AccessibilityWidget {
                 }
                 
                 // Also apply to the widget container if it exists
-                const widget = document.querySelector('.accessibility-widget');
+                const widget = document.querySelector('.accessbit-widget');
                 if (widget) {
                     widget.classList.add('vision-impaired');
                 }
@@ -27906,7 +28247,7 @@ class AccessibilityWidget {
                 this.applyVisionImpaired(true);
 
                 // CRITICAL FIX: Also save to the separate localStorage key that sync functions use
-                localStorage.setItem('accessibility-widget-vision-impaired', 'true');
+                localStorage.setItem('accessbit-widget-vision-impaired', 'true');
 
                 // Persist and sync
                 this.saveSettings();
@@ -27929,7 +28270,7 @@ class AccessibilityWidget {
                 document.body.classList.toggle('vision-impaired', !!on);
 
                 // Remove content wrapper if it exists (cleanup from old implementation)
-                const wrapper = document.getElementById('accessibility-content-wrapper');
+                const wrapper = document.getElementById('accessbit-content-wrapper');
                 if (wrapper && !on) {
                     // Move all wrapper children back to body
                     while (wrapper.firstChild) {
@@ -27938,10 +28279,10 @@ class AccessibilityWidget {
                     wrapper.remove();
                 }
                 
-                let style = document.getElementById('accessibility-vision-impaired-immediate-early');
+                let style = document.getElementById('accessbit-vision-impaired-immediate-early');
                 if (!style && on) {
                     style = document.createElement('style');
-                    style.id = 'accessibility-vision-impaired-immediate-early';
+                    style.id = 'accessbit-vision-impaired-immediate-early';
                     document.head.appendChild(style);
                 } else if (!on && style) {
                     style.remove();
@@ -27958,8 +28299,28 @@ class AccessibilityWidget {
             }
             
             body.vision-impaired {
-                filter: brightness(1.06) !important;
                 overflow-x: hidden !important;
+            }
+            
+            /* CRITICAL: Apply brightness filter ONLY to media inside main content areas - NEVER to nav/header */
+            /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+            body.vision-impaired main img,
+            body.vision-impaired main video,
+            body.vision-impaired main picture,
+            body.vision-impaired main canvas,
+            body.vision-impaired main svg,
+            body.vision-impaired section img,
+            body.vision-impaired section video,
+            body.vision-impaired section picture,
+            body.vision-impaired section canvas,
+            body.vision-impaired section svg,
+            body.vision-impaired article img,
+            body.vision-impaired article video,
+            body.vision-impaired article picture,
+            body.vision-impaired article canvas,
+            body.vision-impaired article svg {
+                filter: brightness(1.06) !important;
+                -webkit-filter: brightness(1.06) !important;
             }
             
             /* Gentle zoom for main content only, anchored at top to avoid pushing nav off-screen */
@@ -27972,28 +28333,28 @@ class AccessibilityWidget {
             }
             
             /* Exclude widget from scaling and brightness */
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            body.vision-impaired .accessibility-panel,
-            .accessibility-panel {
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            body.vision-impaired .accessbit-widget-panel,
+            .accessbit-widget-panel {
                 font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483646 !important;
             }
             
-            body.vision-impaired .accessibility-icon,
-            body.vision-impaired #accessibility-icon,
-            .accessibility-icon,
-            #accessibility-icon {
+            body.vision-impaired .accessbit-widget-icon,
+            body.vision-impaired #accessbit-widget-icon,
+            .accessbit-widget-icon,
+            #accessbit-widget-icon {
                 font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483645 !important;
             }
             
-            body.vision-impaired .accessibility-widget,
-            body.vision-impaired #accessibility-widget,
-            .accessibility-widget,
-            #accessibility-widget {
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            .accessbit-widget,
+            #accessbit-widget {
                 font-size: 100% !important;
                 filter: none !important;
                 z-index: 2147483647 !important;
@@ -28042,7 +28403,7 @@ class AccessibilityWidget {
                 }
                 
                 // Also remove from the widget container if it exists
-                const widget = document.querySelector('.accessibility-widget');
+                const widget = document.querySelector('.accessbit-widget');
                 if (widget) {
                     widget.classList.remove('vision-impaired');
                 }
@@ -28054,13 +28415,13 @@ class AccessibilityWidget {
                 }
 
                 // Remove comprehensive vision impaired styles
-                const existingStyle = document.getElementById('accessibility-vision-impaired-immediate-early');
+                const existingStyle = document.getElementById('accessbit-vision-impaired-immediate-early');
                 if (existingStyle) {
                     existingStyle.remove();
                 }
                 
                 // Remove content wrapper and restore body children
-                const wrapper = document.getElementById('accessibility-content-wrapper');
+                const wrapper = document.getElementById('accessbit-content-wrapper');
                 if (wrapper) {
                     // Move all wrapper children back to body
                     while (wrapper.firstChild) {
@@ -28073,7 +28434,7 @@ class AccessibilityWidget {
                 this.applyVisionImpaired(false);
 
                 // CRITICAL FIX: Clear the separate localStorage key that sync functions use
-                localStorage.removeItem('accessibility-widget-vision-impaired');
+                localStorage.removeItem('accessbit-widget-vision-impaired');
                 
                 // Persist and sync
                 this.saveSettings();
@@ -28220,8 +28581,8 @@ class AccessibilityWidget {
                 // Animation blocking is now handled via CSS classes and WAAPI controls only
                 // Use WAAPI to pause/cancel running animations instead of hijacking global methods
                 try {
-                    if (window.__applyWAAPIStopMotion) {
-                        window.__applyWAAPIStopMotion(true);
+                    if (seizureState && seizureState.applyWAAPIStopMotion) {
+                        seizureState.applyWAAPIStopMotion(true);
                     }
                     } catch (_) {}
                 
@@ -28497,12 +28858,12 @@ class AccessibilityWidget {
         }
         
         // Universal Lottie Animation Stopping - Works on ALL websites
-        // SAFE VERSION: Makes animations invisible instead of destroying (prevents crashes)
+        // Uses Lottie's official API methods as recommended by Lottie documentation
         stopAllLottieAnimations() {
             
             
             try {
-                // Method 1: Stop via lottie-web API (most reliable) - DON'T DESTROY
+                // Method 1: Stop via lottie-web API (most reliable) - Using Lottie's official methods
                 if (typeof window.lottie !== 'undefined') {
                     try {
                         // Get all registered animations
@@ -28511,20 +28872,55 @@ class AccessibilityWidget {
                             if (allAnimations && allAnimations.length > 0) {
                                 allAnimations.forEach(anim => {
                                     try {
-                                        // Only stop/pause - NEVER destroy (prevents crashes)
-                                        if (anim && typeof anim.stop === 'function') {
-                                            anim.stop();
+                                        if (anim) {
+                                            // CRITICAL: Use Lottie's official API methods in the correct order
+                                            // 1. Set speed to 0 first (immediately stops playback)
+                                            if (typeof anim.setSpeed === 'function') {
+                                                anim.setSpeed(0);
+                                            }
+                                            
+                                            // 2. Stop the animation (stops playback)
+                                            if (typeof anim.stop === 'function') {
+                                                anim.stop();
+                                            }
+                                            
+                                            // 3. Pause the animation (pauses at current frame)
+                                            if (typeof anim.pause === 'function') {
+                                                anim.pause();
+                                            }
+                                            
+                                            // 4. Go to first frame and stop (ensures it's at frame 0)
+                                            if (typeof anim.goToAndStop === 'function') {
+                                                anim.goToAndStop(0, true);
+                                            }
+                                            
+                                            // 5. Prevent autoplay
+                                            if (anim.autoplay !== undefined) {
+                                                anim.autoplay = false;
+                                            }
+                                            
+                                            // 6. Set direction to normal (prevents reverse)
+                                            if (typeof anim.setDirection === 'function') {
+                                                anim.setDirection(1);
+                                            }
+                                            
+                                            // 7. Remove all event listeners that might restart animation
+                                            if (anim.removeEventListener) {
+                                                anim.removeEventListener('complete', anim.restart);
+                                                anim.removeEventListener('loopComplete', anim.restart);
+                                            }
+                                            
+                                            // 8. Disable looping
+                                            if (anim.loop !== undefined) {
+                                                anim.loop = false;
+                                            }
                                         }
-                                        if (anim && typeof anim.pause === 'function') {
-                                            anim.pause();
-                                        }
-                                        // REMOVED: anim.destroy() - Too aggressive, causes crashes
                                     } catch (_) {}
                                 });
                             }
                         }
                         
-                        // Freeze all future animations
+                        // Freeze all future animations (prevents new animations from starting)
                         if (typeof window.lottie.freeze === 'function') {
                             try {
                                 window.lottie.freeze();
@@ -28532,27 +28928,39 @@ class AccessibilityWidget {
                         }
                         
                         // Method 5: Override Lottie loading globally (store original for restoration)
-                        if (typeof window.lottie.loadAnimation === 'function' && !window.__originalLottieLoadAnimation) {
-                            window.__originalLottieLoadAnimation = window.lottie.loadAnimation;
+                        // Prevents new animations from starting when seizure-safe is active
+                        if (typeof window.lottie.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
+                            seizureState.originalLottieLoadAnimation = window.lottie.loadAnimation;
                             const self = this;
                             window.lottie.loadAnimation = function(config) {
                                 try {
-                                    const anim = window.__originalLottieLoadAnimation.call(this, config);
-                                    // Immediately stop any new animations (but don't destroy)
+                                    const anim = seizureState.originalLottieLoadAnimation.call(this, config);
                                     if (anim) {
                                         try {
+                                            // Immediately stop new animations using comprehensive API methods
+                                            if (typeof anim.setSpeed === 'function') {
+                                                anim.setSpeed(0);
+                                            }
                                             if (typeof anim.stop === 'function') {
                                                 anim.stop();
                                             }
                                             if (typeof anim.pause === 'function') {
                                                 anim.pause();
                                             }
+                                            if (typeof anim.goToAndStop === 'function') {
+                                                anim.goToAndStop(0, true);
+                                            }
+                                            if (anim.autoplay !== undefined) {
+                                                anim.autoplay = false;
+                                            }
+                                            if (anim.loop !== undefined) {
+                                                anim.loop = false;
+                                            }
                                         } catch (_) {}
                                     }
                                     return anim;
                                 } catch (_) {
-                                    // If override fails, return original result
-                                    return window.__originalLottieLoadAnimation.call(this, config);
+                                    return seizureState.originalLottieLoadAnimation.call(this, config);
                                 }
                             };
                         }
@@ -28560,17 +28968,41 @@ class AccessibilityWidget {
                     } catch (_) {}
                 }
                 
-                // Method 2: Stop via lottie-player web components
+                // Method 2: Stop via lottie-player web components (using official lottie-player API)
                 try {
                     const lottiePlayers = document.querySelectorAll('lottie-player');
                     lottiePlayers.forEach(player => {
                         try {
+                            // Use lottie-player's official API methods
+                            // 1. Stop the animation
                             if (typeof player.stop === 'function') {
                                 player.stop();
                             }
+                            
+                            // 2. Pause the animation
                             if (typeof player.pause === 'function') {
                                 player.pause();
                             }
+                            
+                            // 3. Set speed to 0
+                            if (typeof player.setSpeed === 'function') {
+                                player.setSpeed(0);
+                            }
+                            
+                            // 4. Go to first frame and stop
+                            if (typeof player.seek === 'function') {
+                                player.seek(0);
+                            }
+                            
+                            // 5. Set mode to 'normal' (prevents looping)
+                            if (typeof player.setMode === 'function') {
+                                player.setMode('normal');
+                            }
+                            
+                            // 6. Disable autoplay via attribute
+                            player.setAttribute('autoplay', 'false');
+                            player.removeAttribute('loop');
+                            
                             player.setAttribute('data-seizure-safe-stopped', 'true');
                             // Keep visible but stop animation - force to final state
                             player.style.opacity = '1';
@@ -28579,18 +29011,34 @@ class AccessibilityWidget {
                     });
                 } catch (_) {}
                 
-                // Method 3: Stop via DOM elements with Lottie data attributes
+                // Method 3: Stop via DOM elements with Lottie data attributes (using element.lottie reference)
                 try {
                     const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
                     lottieElements.forEach(element => {
                         try {
                             // Try to find and stop any Lottie instance on this element
-                            if (element.lottie) {
-                                if (typeof element.lottie.stop === 'function') {
-                                    element.lottie.stop();
+                            // Check both element.lottie and element._lottie (different implementations store it differently)
+                            const lottieInstance = element.lottie || element._lottie || element.__lottie;
+                            
+                            if (lottieInstance) {
+                                // Use Lottie's official API methods
+                                if (typeof lottieInstance.setSpeed === 'function') {
+                                    lottieInstance.setSpeed(0);
                                 }
-                                if (typeof element.lottie.pause === 'function') {
-                                    element.lottie.pause();
+                                if (typeof lottieInstance.stop === 'function') {
+                                    lottieInstance.stop();
+                                }
+                                if (typeof lottieInstance.pause === 'function') {
+                                    lottieInstance.pause();
+                                }
+                                if (typeof lottieInstance.goToAndStop === 'function') {
+                                    lottieInstance.goToAndStop(0, true);
+                                }
+                                if (lottieInstance.autoplay !== undefined) {
+                                    lottieInstance.autoplay = false;
+                                }
+                                if (lottieInstance.loop !== undefined) {
+                                    lottieInstance.loop = false;
                                 }
                             }
                             
@@ -28640,7 +29088,7 @@ class AccessibilityWidget {
                         // If element has animation/transition or is hidden, force to visible final state
                         if (hasAnimation || hasTransition || isHidden) {
                             // Skip widget elements
-                            if (element.closest && (element.closest('.accessibility-widget') || element.closest('.accessibility-panel') || element.closest('.accessibility-icon'))) {
+                            if (element.closest && (element.closest('.accessbit-widget') || element.closest('.accessbit-widget-panel') || element.closest('.accessbit-widget-icon'))) {
                                 return;
                             }
                             
@@ -28738,7 +29186,7 @@ class AccessibilityWidget {
                     try {
                         const children = container.querySelectorAll('*');
                         children.forEach(child => {
-                            if (child.closest && !child.closest('.accessibility-widget')) {
+                            if (child.closest && !child.closest('.accessbit-widget')) {
                                 child.style.opacity = '1';
                                 child.style.visibility = 'visible';
                             }
@@ -28764,8 +29212,8 @@ class AccessibilityWidget {
                         }
                         
                         // Restore original loadAnimation function
-                        if (window.__originalLottieLoadAnimation) {
-                            window.lottie.loadAnimation = window.__originalLottieLoadAnimation;
+                        if (seizureState && seizureState.originalLottieLoadAnimation) {
+                            window.lottie.loadAnimation = seizureState.originalLottieLoadAnimation;
                         }
                         
                       
@@ -28829,9 +29277,8 @@ class AccessibilityWidget {
         // SECURITY FIX: Removed requestAnimationFrame restoration - we no longer overwrite it
         restoreAllMediaAndAnimations() {
             try {
-                // Restore WAAPI animations if needed
-                if (window.__applyWAAPIStopMotion) {
-                    window.__applyWAAPIStopMotion(false);
+                if (seizureState && seizureState.applyWAAPIStopMotion) {
+                    seizureState.applyWAAPIStopMotion(false);
                 }
                 
                 // Restore videos and audio
@@ -29170,33 +29617,52 @@ class AccessibilityWidget {
         // Apply only the grey overlay (grayscale filter) - this is the only difference from stop-animation
         addSeizureSafeGreyOverlay() {
             // Remove existing grey overlay if it exists
-            const existingStyle = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            const existingStyle = document.getElementById('accessbit-seizure-safe-grey-overlay');
             if (existingStyle) {
                 existingStyle.remove();
             }
     
             // Create style element for grey overlay only
             const style = document.createElement('style');
-            style.id = 'accessibility-seizure-safe-grey-overlay';
+            style.id = 'accessbit-seizure-safe-grey-overlay';
             style.textContent = `
                 /* APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
-                body.seizure-safe,
-                html.seizure-safe {
-                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
-                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                /* CRITICAL: Apply filters to content containers, NOT to body/html, to preserve sticky nav */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on body/html */
+                /* Apply to main content areas and their children to get the grey muted color effect throughout the page */
+                body.seizure-safe main,
+                body.seizure-safe main *,
+                body.seizure-safe section,
+                body.seizure-safe section *,
+                body.seizure-safe article,
+                body.seizure-safe article *,
+                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                body.seizure-safe p:not(nav p):not(header p),
+                body.seizure-safe span:not(nav span):not(header span),
+                html.seizure-safe main,
+                html.seizure-safe main *,
+                html.seizure-safe section,
+                html.seizure-safe section *,
+                html.seizure-safe article,
+                html.seizure-safe article *,
+                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                html.seizure-safe p:not(nav p):not(header p),
+                html.seizure-safe span:not(nav span):not(header span) {
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
                 }
                 
                 /* Exclude widget container and all its contents from color filter */
-                body.seizure-safe #accessibility-widget-container,
-                body.seizure-safe [id*="accessibility-widget"],
-                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
                 body.seizure-safe [data-ck-widget] {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
                 
                 /* Also exclude any shadow DOM content by targeting the host element */
-                body.seizure-safe accessibility-widget {
+                body.seizure-safe accessbit-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -29210,61 +29676,42 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'seizure-safe-animation-css';
                 style.textContent = `
-                    /* UNIVERSAL ANIMATION STOPPER - Covers all CSS animation types - same as stop-animation */
-                    .seizure-safe *,
-                    .seizure-safe *::before,
-                    .seizure-safe *::after {
-                        /* Stop all CSS animations and transitions */
+                    /* Seizure-safe animation kill switch */
+                    .seizure-safe *, .seizure-safe *::before, .seizure-safe *::after {
                         animation: none !important;
                         transition: none !important;
+                        scroll-behavior: auto !important;
                         animation-play-state: paused !important;
-                        
-                        /* Stop blinking and flashing text */
-                        text-decoration: none !important;
                     }
-                    
-                    /* Stop all animation classes and libraries */
-                    .seizure-safe *[class*="animate"],
-                    .seizure-safe *[class*="fade"],
-                    .seizure-safe *[class*="slide"],
-                    .seizure-safe *[class*="bounce"],
-                    .seizure-safe *[class*="pulse"],
-                    .seizure-safe *[class*="shake"],
-                    .seizure-safe *[class*="flash"],
-                    .seizure-safe *[class*="blink"],
-                    .seizure-safe *[class*="glow"],
-                    .seizure-safe *[class*="spin"],
-                    .seizure-safe *[class*="rotate"],
-                    .seizure-safe *[class*="scale"],
-                    .seizure-safe *[class*="zoom"],
-                    .seizure-safe *[class*="wiggle"],
-                    .seizure-safe *[class*="jiggle"],
-                    .seizure-safe *[class*="twist"],
-                    .seizure-safe *[class*="flip"],
-                    .seizure-safe *[class*="swing"],
-                    .seizure-safe *[class*="wobble"],
-                    .seizure-safe *[class*="tilt"],
-                    /* REMOVED: Scroll-related classes to preserve scroll animations */
-                    
-                    /* Stop SVG and Canvas animations */
-                    .seizure-safe svg,
-                    .seizure-safe svg path,
-                    .seizure-safe svg line,
-                    .seizure-safe canvas {
+
+                    /* Remove common flash triggers */
+                    .seizure-safe *[class*="blink"], .seizure-safe *[class*="shimmer"], 
+                    .seizure-safe *[class*="pulse"], .seizure-safe *[class*="caret"], 
+                    .seizure-safe *[class*="cursor-blink"], .seizure-safe *[class*="skeleton"],
+                    .seizure-safe *[class*="pulsing"], .seizure-safe *[class*="flashing"] {
                         animation: none !important;
-                        transition: none !important;
-                        /* Removed visibility and transform rules to prevent positioning issues */
+                        visibility: visible !important;
+                        opacity: 1 !important;
                     }
-                    
-                    /* Stop text splitting animations */
-                    .seizure-safe [data-splitting],
-                    .seizure-safe .split, 
-                    .seizure-safe .char, 
-                    .seizure-safe .word {
-                        animation: none !important;
-                        transition: none !important;
-                        /* Removed opacity, visibility, and display rules to prevent extra text and positioning issues */
-                    }
+
+                /* Stop Webflow interactions (data-w-id) */
+                .seizure-safe [data-w-id] {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    opacity: 1 !important;
+                }
+
+                /* Stop hover-driven transforms on buttons/links */
+                .seizure-safe a, .seizure-safe button, .seizure-safe [role="button"] {
+                    transition: none !important;
+                    transform: none !important;
+                }
+
+                .seizure-safe a:hover, .seizure-safe button:hover, .seizure-safe [role="button"]:hover {
+                    transition: none !important;
+                    transform: none !important;
+                }
                 `;
                 document.head.appendChild(style);
             }
@@ -29276,28 +29723,28 @@ class AccessibilityWidget {
     
             // Create style element for seizure-safe overlay
             const style = document.createElement('style');
-            style.id = 'accessibility-seizure-safe-styles';
+            style.id = 'accessbit-seizure-safe-styles';
             style.textContent = `
                 /* COMPREHENSIVE SEIZURE-SAFE STYLES - AccessiBe-style animation stopping */
                 
                 /* 0. APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
                 body.seizure-safe,
                 html.seizure-safe {
-                    filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
-                    -webkit-filter: grayscale(30%) contrast(0.9) brightness(0.95) !important;
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
                 }
                 
                 /* Exclude widget container and all its contents from color filter */
-                body.seizure-safe #accessibility-widget-container,
-                body.seizure-safe [id*="accessibility-widget"],
-                body.seizure-safe [class*="accessibility-widget"],
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
                 body.seizure-safe [data-ck-widget] {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
                 
                 /* Also exclude any shadow DOM content by targeting the host element */
-                body.seizure-safe accessibility-widget {
+                body.seizure-safe accessbit-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -29641,8 +30088,8 @@ class AccessibilityWidget {
                 } */
                 
                 /* Preserve accessibility widget */
-                body.seizure-safe .accessibility-widget,
-                body.seizure-safe .accessibility-panel,
+                body.seizure-safe .accessbit-widget,
+                body.seizure-safe .accessbit-widget-panel,
                 body.seizure-safe .toggle-switch {
                     filter: saturate(0.95) !important;
                 }
@@ -29656,7 +30103,7 @@ class AccessibilityWidget {
     
         removeSeizureSafeStyles() {
             // Remove old style if it exists (backward compatibility)
-            const existingStyle = document.getElementById('accessibility-seizure-safe-styles');
+            const existingStyle = document.getElementById('accessbit-seizure-safe-styles');
             if (existingStyle) {
                 existingStyle.remove();
             }
@@ -29668,7 +30115,7 @@ class AccessibilityWidget {
             }
             
             // Remove grey overlay
-            const existingGreyOverlay = document.getElementById('accessibility-seizure-safe-grey-overlay');
+            const existingGreyOverlay = document.getElementById('accessbit-seizure-safe-grey-overlay');
             if (existingGreyOverlay) {
                 existingGreyOverlay.remove();
             }
@@ -29789,7 +30236,7 @@ class AccessibilityWidget {
     
             // Also ensure the shadow root host has high z-index
     
-            const shadowHost = document.querySelector('#accessibility-widget');
+            const shadowHost = document.querySelector('#accessbit-widget');
     
             if (shadowHost) {
     
@@ -30100,7 +30547,7 @@ class AccessibilityWidget {
     
             // Process headings (non-intrusive: apply outline to element itself)
             headings.forEach(heading => {
-                if (heading.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (heading.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     return;
                 }
                 if (!heading.dataset.cognitiveBoxed) {
@@ -30116,7 +30563,7 @@ class AccessibilityWidget {
     
             // Process buttons (apply outline only)
             buttons.forEach(button => {
-                if (button.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (button.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     return;
                 }
                 if (!button.dataset.cognitiveBoxed) {
@@ -30132,7 +30579,7 @@ class AccessibilityWidget {
     
             // Process links (apply outline only)
             links.forEach(link => {
-                if (link.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon')) {
+                if (link.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon')) {
                     return;
                 }
                 if (!link.dataset.cognitiveBoxed) {
@@ -30294,7 +30741,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility controls
     
-                if (element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
+                if (element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
     
                     return;
     
@@ -30344,7 +30791,7 @@ class AccessibilityWidget {
     
                 elements.forEach(element => {
     
-                    if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
+                    if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
     
                         element.style.setProperty('text-align', alignment);
     
@@ -30383,7 +30830,7 @@ class AccessibilityWidget {
     
                 // Skip accessibility controls
     
-                if (element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
+                if (element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
     
                     return;
     
@@ -30433,7 +30880,7 @@ class AccessibilityWidget {
     
                 elements.forEach(element => {
     
-                    if (!element.closest('.accessibility-panel, #accessibility-icon, .accessibility-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
+                    if (!element.closest('.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, .text-alignment-panel, #text-alignment-panel, .alignment-toggle-btn')) {
     
                         element.style.removeProperty('text-align');
     
@@ -30531,7 +30978,7 @@ class AccessibilityWidget {
         fixPanelScrolling() {
             
             
-            const panel = this.shadowRoot.querySelector('.accessibility-panel');
+            const panel = this.shadowRoot.querySelector('.accessbit-widget-panel');
             if (panel) {
                 // Force native scrolling behavior
                 panel.style.overflowY = 'auto';
@@ -30644,23 +31091,23 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements completely
     
-                if (element.closest('#accessibility-widget-container') || 
+                if (element.closest('#accessbit-widget-container') || 
     
-                    element.closest('.accessibility-panel') ||
+                    element.closest('.accessbit-widget-panel') ||
     
-                    element.closest('#accessibility-icon') ||
+                    element.closest('#accessbit-widget-icon') ||
     
-                    element.closest('.accessibility-icon') ||
+                    element.closest('.accessbit-widget-icon') ||
     
                     element.closest('.text-alignment-panel') ||
     
                     element.closest('#text-alignment-panel') ||
     
-                    element.id === 'accessibility-widget-container' ||
+                    element.id === 'accessbit-widget-container' ||
     
-                    element.id === 'accessibility-panel' ||
+                    element.id === 'accessbit-widget-panel' ||
     
-                    element.id === 'accessibility-icon' ||
+                    element.id === 'accessbit-widget-icon' ||
     
                     element.id === 'text-alignment-panel') {
     
@@ -30699,23 +31146,23 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements completely
     
-                if (element.closest('#accessibility-widget-container') || 
+                if (element.closest('#accessbit-widget-container') || 
     
-                    element.closest('.accessibility-panel') ||
+                    element.closest('.accessbit-widget-panel') ||
     
-                    element.closest('#accessibility-icon') ||
+                    element.closest('#accessbit-widget-icon') ||
     
-                    element.closest('.accessibility-icon') ||
+                    element.closest('.accessbit-widget-icon') ||
     
                     element.closest('.text-alignment-panel') ||
     
                     element.closest('#text-alignment-panel') ||
     
-                    element.id === 'accessibility-widget-container' ||
+                    element.id === 'accessbit-widget-container' ||
     
-                    element.id === 'accessibility-panel' ||
+                    element.id === 'accessbit-widget-panel' ||
     
-                    element.id === 'accessibility-icon' ||
+                    element.id === 'accessbit-widget-icon' ||
     
                     element.id === 'text-alignment-panel') {
     
@@ -30753,23 +31200,23 @@ class AccessibilityWidget {
     
                 // Skip accessibility widget elements completely
     
-                if (element.closest('#accessibility-widget-container') || 
+                if (element.closest('#accessbit-widget-container') || 
     
-                    element.closest('.accessibility-panel') ||
+                    element.closest('.accessbit-widget-panel') ||
     
-                    element.closest('#accessibility-icon') ||
+                    element.closest('#accessbit-widget-icon') ||
     
-                    element.closest('.accessibility-icon') ||
+                    element.closest('.accessbit-widget-icon') ||
     
                     element.closest('.text-alignment-panel') ||
     
                     element.closest('#text-alignment-panel') ||
     
-                    element.id === 'accessibility-widget-container' ||
+                    element.id === 'accessbit-widget-container' ||
     
-                    element.id === 'accessibility-panel' ||
+                    element.id === 'accessbit-widget-panel' ||
     
-                    element.id === 'accessibility-icon' ||
+                    element.id === 'accessbit-widget-icon' ||
     
                     element.id === 'text-alignment-panel') {
     
@@ -30839,16 +31286,16 @@ class AccessibilityWidget {
             textElements.forEach(element => {
     
                 // Skip if element is inside accessibility panel or widget
-                if (!element.closest('#accessibility-widget-container') && 
-                    !element.closest('.accessibility-panel') && 
-                    !element.closest('#accessibility-icon') && 
+                if (!element.closest('#accessbit-widget-container') && 
+                    !element.closest('.accessbit-widget-panel') && 
+                    !element.closest('#accessbit-widget-icon') && 
                     !element.closest('.text-alignment-panel') &&
-                    !element.closest('#accessibility-widget') &&
+                    !element.closest('#accessbit-widget') &&
                     !element.closest('[data-ck-widget]') &&
-                    element.id !== 'accessibility-icon' && 
-                    element.id !== 'accessibility-panel' &&
+                    element.id !== 'accessbit-widget-icon' && 
+                    element.id !== 'accessbit-widget-panel' &&
                     element.id !== 'text-alignment-panel' &&
-                    element.id !== 'accessibility-widget') {
+                    element.id !== 'accessbit-widget') {
     
                     element.style.textAlign = 'right';
     
@@ -30872,16 +31319,16 @@ class AccessibilityWidget {
             textElements.forEach(element => {
     
                 // Skip if element is inside accessibility panel or widget
-                if (!element.closest('#accessibility-widget-container') && 
-                    !element.closest('.accessibility-panel') && 
-                    !element.closest('#accessibility-icon') && 
+                if (!element.closest('#accessbit-widget-container') && 
+                    !element.closest('.accessbit-widget-panel') && 
+                    !element.closest('#accessbit-widget-icon') && 
                     !element.closest('.text-alignment-panel') &&
-                    !element.closest('#accessibility-widget') &&
+                    !element.closest('#accessbit-widget') &&
                     !element.closest('[data-ck-widget]') &&
-                    element.id !== 'accessibility-icon' && 
-                    element.id !== 'accessibility-panel' &&
+                    element.id !== 'accessbit-widget-icon' && 
+                    element.id !== 'accessbit-widget-panel' &&
                     element.id !== 'text-alignment-panel' &&
-                    element.id !== 'accessibility-widget') {
+                    element.id !== 'accessbit-widget') {
     
                     element.style.textAlign = '';
     
@@ -31119,7 +31566,7 @@ class AccessibilityWidget {
     
             if (this.shadowRoot && this.isPanelOpen) {
     
-                const panel = this.shadowRoot.getElementById('accessibility-panel');
+                const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
     
                 if (panel && panel.classList.contains('active')) {
     
@@ -31157,8 +31604,8 @@ class AccessibilityWidget {
             console.log('[PANEL TOGGLE] togglePanel() called');
             // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
             const elements = this.getCachedElements(true); // Force refresh to get current elements
-            const panel = elements.panel || this.shadowRoot?.getElementById('accessibility-panel');
-            const icon = elements.icon || this.shadowRoot?.getElementById('accessibility-icon');
+            const panel = elements.panel || this.shadowRoot?.getElementById('accessbit-widget-panel');
+            const icon = elements.icon || this.shadowRoot?.getElementById('accessbit-widget-icon');
     
             console.log('[PANEL TOGGLE] Elements found:', {
                 hasPanel: !!panel,
@@ -31220,7 +31667,7 @@ class AccessibilityWidget {
                     // Only fix panel scrolling - don't affect website scroll animations
                     const fixScrolling = () => {
                         // Only fix panel scrolling, not website animations
-                        const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                        const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
                         if (panel) {
                             // Force native scrolling behavior for panel only
                             panel.style.overflowY = 'auto';
@@ -31324,23 +31771,37 @@ class AccessibilityWidget {
             }
             
             // Check cache first (5 minute cache as per worker headers)
+            // Cache is invalidated if publishedAt changes (new customization published)
             const cacheKey = `customization_cache_${this.siteId || 'unknown'}`;
             const cached = sessionStorage.getItem(cacheKey);
+            let cachedPublishedAt = null;
+            let cachedDataObj = null;
+            
             if (cached) {
                 try {
-                    const cachedData = JSON.parse(cached);
-                    const cacheTime = cachedData.timestamp || 0;
+                    cachedDataObj = JSON.parse(cached);
+                    const cacheTime = cachedDataObj.timestamp || 0;
                     const cacheAge = Date.now() - cacheTime;
                     const cacheTTL = 5 * 60 * 1000; // 5 minutes
+                    cachedPublishedAt = cachedDataObj.data?.publishedAt || cachedDataObj.publishedAt;
                     
                     if (cacheAge < cacheTTL) {
-                        console.log('[FETCH] Returning cached data:', { cacheAge, cacheTTL });
-                        return cachedData.data;
+                        // Cache is fresh, but we'll still fetch to check if publishedAt changed
+                        // This ensures new customizations are immediately detected
+                        console.log('[FETCH] Cache found, will verify publishedAt on fetch:', { 
+                            cacheAge, 
+                            cacheTTL,
+                            cachedPublishedAt 
+                        });
                     } else {
                         sessionStorage.removeItem(cacheKey);
+                        cachedPublishedAt = null;
+                        cachedDataObj = null;
                     }
                 } catch (e) {
                     sessionStorage.removeItem(cacheKey);
+                    cachedPublishedAt = null;
+                    cachedDataObj = null;
                 }
             }
             
@@ -31423,12 +31884,31 @@ class AccessibilityWidget {
                     }
                     
                     // Cache the successful response
+                    // Check if publishedAt changed - if so, use new data (new customization published)
                     if (data && siteId) {
                         try {
+                            const newPublishedAt = data.publishedAt;
+                            
+                            // If publishedAt changed, this means new customization was published
+                            // Always use the new data and update cache
+                            if (cachedPublishedAt && newPublishedAt && cachedPublishedAt !== newPublishedAt) {
+                                console.log('[FETCH] publishedAt changed - new customization detected:', {
+                                    old: cachedPublishedAt,
+                                    new: newPublishedAt
+                                });
+                            } else if (cachedPublishedAt === newPublishedAt) {
+                                console.log('[FETCH] publishedAt unchanged, using fresh data from API:', {
+                                    publishedAt: newPublishedAt
+                                });
+                            }
+                            
+                            // Always update cache with latest data
                             sessionStorage.setItem(`customization_cache_${siteId}`, JSON.stringify({
                                 data: data,
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
+                                publishedAt: data.publishedAt
                             }));
+                            console.log('[FETCH] Updated cache with latest customization data:', { publishedAt: data.publishedAt });
                         } catch (e) {
                             // Ignore storage errors (quota exceeded, etc.)
                         }
@@ -31465,9 +31945,7 @@ class AccessibilityWidget {
             return this._fetchCustomizationPromise;
         }
     
-        // Set up periodic payment status refresh for custom domains only
-        // Staging domains don't need this (they're always free)
-        // Custom domains: Refresh every 2 minutes to catch real-time payment changes
+    
         setupPaymentStatusRefresh() {
             // Only set up refresh for custom domains (staging is always free)
             if (this.isStagingDomain()) {
@@ -31490,14 +31968,14 @@ class AccessibilityWidget {
                         // Payment status changed from invalid to valid - re-enable widget
                         this.paymentFailed = false;
                         // Re-initialize widget if it was disabled
-                        const widgetContainer = document.getElementById('accessibility-widget-container');
+                        const widgetContainer = document.getElementById('accessbit-widget-container');
                         if (widgetContainer) {
                             widgetContainer.style.display = '';
                             widgetContainer.style.visibility = '';
                             widgetContainer.style.opacity = '';
                         }
                         // Show icon if it exists
-                        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                        const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
                             this.showIcon();
                         }
@@ -31511,58 +31989,38 @@ class AccessibilityWidget {
             }, 120000); // Every 2 minutes for custom domains
         }
     
-        // Get site ID for API calls via script tag (no storage, no mapping)
-        // OPTIMIZED: Cache siteId to avoid repeated DOM queries
-        // SECURITY: siteId is public (from script URL), caching in memory is safe
-        async getSiteId() {
-          console.log('[GET_SITE_ID] getSiteId() called');
-          // Return cached siteId if available
-          if (this.siteId) {
-            console.log('[GET_SITE_ID] Returning cached siteId:', this.siteId);
-            return this.siteId;
-          }
-          
-          try {
-            const scriptEl = document.currentScript || 
-                           document.querySelector('script[src*="test.js"]') ||
-                           document.querySelector('script[src*="new.js"]') ||
-                           document.querySelector('script[src*="accessibility"]');
-            console.log('[GET_SITE_ID] Script element found:', {
-              hasScriptEl: !!scriptEl,
-              hasSrc: !!(scriptEl && scriptEl.src),
-              src: scriptEl ? scriptEl.src : 'N/A'
-            });
-            
-            if (scriptEl && scriptEl.src) {
-              const u = new URL(scriptEl.src);
-              const sid = u.searchParams.get('siteId');
-              console.log('[GET_SITE_ID] Parsed URL:', {
-                url: scriptEl.src,
-                siteId: sid
-              });
-              
-              if (sid) {
-                // SECURITY: Cache in memory only (not localStorage/cookies)
-                // This is safe because:
-                // 1. siteId is already public (in script URL)
-                // 2. Only cached for widget instance lifetime
-                // 3. Cleared on page reload
-                // 4. No cross-site leakage
-                this.siteId = sid;
-                console.log('[GET_SITE_ID] SiteId cached and returned:', sid);
+       async getSiteId() {
+    console.log('[GET_SITE_ID] getSiteId() called');
+    
+    // 1. Return cached siteId if available
+    if (this.siteId) {
+        return this.siteId;
+    }
+
+    try {
+        // 2. Try currentScript first, then fallback to the verified search term
+        const scriptEl = document.currentScript || 
+                         Array.from(document.getElementsByTagName('script')).find(s => s.src.includes('AccessBit')) ||
+                         document.querySelector('script[src*="widget.js"]');
+
+        if (scriptEl && scriptEl.src) {
+            // Use the URL constructor to handle parsing &amp; and other encoding issues
+            const u = new URL(scriptEl.src);
+            const sid = u.searchParams.get('siteId');
+
+            if (sid) {
+                this.siteId = sid; // Cache it
+                console.log('[GET_SITE_ID] Found and cached siteId:', sid);
                 return sid;
-              } else {
-                console.warn('[GET_SITE_ID] No siteId found in URL params');
-              }
-            } else {
-              console.warn('[GET_SITE_ID] No script element or src found');
             }
-          } catch (error) {
-            console.error('[GET_SITE_ID] Error getting siteId:', error);
-          }
-          console.warn('[GET_SITE_ID] Returning null - no siteId found');
-          return null;
         }
+    } catch (error) {
+        console.error('[GET_SITE_ID] Error parsing script URL:', error);
+    }
+
+    console.warn('[GET_SITE_ID] siteId not found');
+    return null;
+}
     
     applyCustomizations(customizationData) {
         
@@ -31617,7 +32075,7 @@ class AccessibilityWidget {
             // in init() after customizations are applied to avoid conflicts
             
             // Apply language - preserve user's language choice
-            const savedLanguage = localStorage.getItem('accessibility-widget-language');
+            const savedLanguage = localStorage.getItem('accessbit-widget-language');
             
             // Only apply language from customization if:
             // 1. There's a saved language AND it's different from customization (user changed it in app)
@@ -31643,14 +32101,24 @@ class AccessibilityWidget {
             }
             
             // Apply icon customizations
-            if (customizationData.selectedIcon) {
-               
-                this.updateSelectedIcon(customizationData.selectedIcon);
+            // Support both selectedIcon and triggerIcon field names (for backward compatibility)
+            const iconValue = customizationData.selectedIcon || customizationData.triggerIcon;
+            if (iconValue) {
+                console.log('[CUSTOMIZATION] Applying icon from customization data:', {
+                    selectedIcon: customizationData.selectedIcon,
+                    triggerIcon: customizationData.triggerIcon,
+                    iconValue: iconValue,
+                    allCustomizationKeys: Object.keys(customizationData)
+                });
+                this.updateSelectedIcon(iconValue);
+            } else {
+                console.warn('[CUSTOMIZATION] No icon found in customization data. Available keys:', Object.keys(customizationData));
             }
             
-            if (customizationData.selectedIconName) {
- 
-                this.updateSelectedIconName(customizationData.selectedIconName);
+            // Support both selectedIconName and triggerIconName field names
+            const iconName = customizationData.selectedIconName || customizationData.triggerIconName;
+            if (iconName) {
+                this.updateSelectedIconName(iconName);
             }
             
             // Apply mobile customizations
@@ -31688,7 +32156,7 @@ class AccessibilityWidget {
                 // Final verification for mobile shape
                 if (window.innerWidth <= 768) {
                     setTimeout(() => {
-                        const icon = this.shadowRoot?.getElementById('accessibility-icon');
+                        const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
                             const computedBorderRadius = window.getComputedStyle(icon).borderRadius;
                             
@@ -31733,7 +32201,7 @@ class AccessibilityWidget {
                 paymentFailed: this.paymentFailed,
                 customizationData: this.customizationData ? 'exists' : 'null'
             });
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (!icon) {
                 console.log('[ICON DEBUG] showIcon() - Icon element not found');
                 return;
@@ -31782,7 +32250,7 @@ class AccessibilityWidget {
             }
             
             // Additional check: if widget container is hidden due to payment issues, don't show icon
-            const widgetContainer = document.getElementById('accessibility-widget-container');
+            const widgetContainer = document.getElementById('accessbit-widget-container');
             if (widgetContainer && (widgetContainer.style.display === 'none' || 
                 widgetContainer.style.visibility === 'hidden' || 
                 widgetContainer.style.opacity === '0')) {
@@ -31828,7 +32296,25 @@ class AccessibilityWidget {
                 return;
             }
     
-            // Show icon if visibility rules pass
+            // Desktop/Tablet default: show only if hideTriggerButton is NOT 'Yes'
+            if (!isMobile && !hideTrigger) {
+                console.log('[ICON SHOW] showIcon() - Desktop default, hideTriggerButton is not Yes');
+                icon.style.display = 'flex';
+                icon.style.visibility = 'visible';
+                icon.style.opacity = '1';
+                icon.style.transition = 'opacity 0.3s ease';
+                return;
+            }
+            
+            // If we reach here, icon should be hidden (desktop with hideTriggerButton=Yes, or mobile with showOnMobile=Hide or undefined)
+            console.log('[ICON HIDE] showIcon() - Default hide case', {
+                isMobile,
+                hideTrigger,
+                mobileVisibility
+            });
+            icon.style.display = 'none';
+            icon.style.visibility = 'hidden';
+            icon.style.opacity = '0';
            
                 icon.style.display = 'flex';
                 icon.style.visibility = 'visible';
@@ -31871,8 +32357,8 @@ class AccessibilityWidget {
             const now = Date.now();
             // Refresh cache every 5 seconds or if forced
             if (forceRefresh || now - this._cachedElements.lastCacheTime > 5000) {
-                this._cachedElements.icon = this.shadowRoot?.getElementById('accessibility-icon');
-                this._cachedElements.panel = this.shadowRoot?.getElementById('accessibility-panel');
+                this._cachedElements.icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                this._cachedElements.panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
                 this._cachedElements.closeBtn = this.shadowRoot?.getElementById('close-panel');
                 this._cachedElements.lastCacheTime = now;
             }
@@ -31930,8 +32416,8 @@ class AccessibilityWidget {
                         debouncedResizeFn();
                     });
                     
-                    const panel = self.shadowRoot.getElementById('accessibility-panel');
-                    const icon = self.shadowRoot.getElementById('accessibility-icon');
+                    const panel = self.shadowRoot.getElementById('accessbit-widget-panel');
+                    const icon = self.shadowRoot.getElementById('accessbit-widget-icon');
                     if (panel) resizeObserver.observe(panel);
                     if (icon) resizeObserver.observe(icon);
                     
@@ -32033,7 +32519,7 @@ class AccessibilityWidget {
             
             // Throttled callback using requestAnimationFrame
             const throttledCallback = this.throttle(() => {
-                const panel = this._cachedElements.panel || this.shadowRoot.getElementById('accessibility-panel');
+                const panel = this._cachedElements.panel || this.shadowRoot.getElementById('accessbit-widget-panel');
                 if (panel) {
                     this.ensureBasePanelCSS();
                 }
@@ -32052,7 +32538,7 @@ class AccessibilityWidget {
                 }
             });
             
-            const panel = this.shadowRoot.getElementById('accessibility-panel');
+            const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
             if (panel) {
                 observer.observe(panel, { 
                     attributes: true, 
@@ -32066,7 +32552,7 @@ class AccessibilityWidget {
         setupPeriodicStyleCheck() {
             // Check every 3 seconds instead of 2, and use requestAnimationFrame
             setInterval(() => {
-                const panel = this._cachedElements.panel || this.shadowRoot?.getElementById('accessibility-panel');
+                const panel = this._cachedElements.panel || this.shadowRoot?.getElementById('accessbit-widget-panel');
                 if (!panel) return;
                 
                 // Use requestAnimationFrame to batch the check
@@ -32095,7 +32581,7 @@ class AccessibilityWidget {
         applyLanguage(language) {
           
             // Save language to localStorage for persistence
-            localStorage.setItem('accessibility-widget-language', language);
+            localStorage.setItem('accessbit-widget-language', language);
 
             
             const content = this.translations[language] || this.translations.en;
@@ -32110,7 +32596,7 @@ class AccessibilityWidget {
            
             
             // Update panel title
-            const titleElement = this.shadowRoot?.querySelector('.accessibility-panel h2');
+            const titleElement = this.shadowRoot?.querySelector('.accessbit-widget-panel h2');
             if (titleElement) {
                 titleElement.textContent = content.title;
                 
@@ -32203,6 +32689,7 @@ class AccessibilityWidget {
             this.updateProfileItem('reading-guide', content.readingGuide, content.readingGuideDesc);
             this.updateProfileItem('useful-links', content.usefulLinks, content.usefulLinksDesc);
             this.updateProfileItem('stop-animation', content.stopAnimation, content.stopAnimationDesc);
+            this.updateProfileItem('reduce-motion', content.reduceMotion, content.reduceMotionDesc);
             this.updateProfileItem('reading-mask', content.readingMask, content.readingMaskDesc);
             this.updateProfileItem('highlight-hover', content.highlightHover, content.highlightHoverDesc);
             this.updateProfileItem('highlight-focus', content.highlightFocus, content.highlightFocusDesc);
@@ -32404,7 +32891,7 @@ class AccessibilityWidget {
         showHideInterfaceModal() {
 
             const modal = this.shadowRoot?.querySelector('#hide-interface-modal');
-            const panel = this.shadowRoot?.querySelector('#accessibility-panel');
+            const panel = this.shadowRoot?.querySelector('#accessbit-widget-panel');
 
             
             if (modal && panel) {
@@ -32446,8 +32933,8 @@ class AccessibilityWidget {
         
         ensureIconVisible() {
 
-            const icon = this.shadowRoot?.querySelector('#accessibility-icon');
-            const panel = this.shadowRoot?.querySelector('#accessibility-panel');
+            const icon = this.shadowRoot?.querySelector('#accessbit-widget-icon');
+            const panel = this.shadowRoot?.querySelector('#accessbit-widget-panel');
             
             if (icon) {
                 icon.style.display = 'flex';
@@ -33057,12 +33544,12 @@ class AccessibilityWidget {
          
             
             // Set flag in localStorage to hide interface permanently
-            localStorage.setItem('accessibility-widget-hidden', 'true');
+            localStorage.setItem('accessbit-widget-hidden', 'true');
         
             
             // Hide the panel and icon completely
-            const panel = this.shadowRoot?.querySelector('#accessibility-panel');
-            const icon = this.shadowRoot?.querySelector('#accessibility-icon');
+            const panel = this.shadowRoot?.querySelector('#accessbit-widget-panel');
+            const icon = this.shadowRoot?.querySelector('#accessbit-widget-icon');
             
         
             
@@ -33099,7 +33586,7 @@ class AccessibilityWidget {
             const normalizedDirection = (direction || '').toLowerCase();
             const pos = (position || '').toLowerCase();
             
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 if (normalizedDirection === 'vertical') {
                     // Force remove any existing positioning
@@ -33154,7 +33641,7 @@ class AccessibilityWidget {
         // Helper methods for applying customizations with actual DOM manipulation
         updateTriggerButtonColor(color) {
          
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 icon.style.backgroundColor = color;
                 icon.style.borderColor = color;
@@ -33168,7 +33655,7 @@ class AccessibilityWidget {
         updateTriggerButtonShape(shape) {
            
             
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             
             if (icon) {
 
@@ -33271,12 +33758,12 @@ class AccessibilityWidget {
                             
                             const style = document.createElement('style');
                             style.textContent = `
-                                .accessibility-icon[data-shape="rounded"] {
+                                .accessbit-widget-icon[data-shape="rounded"] {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
                                 }
-                                .accessibility-icon.rounded {
+                                .accessbit-widget-icon.rounded {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
@@ -33362,7 +33849,7 @@ class AccessibilityWidget {
         
         // Ensure base panel CSS is always applied
         ensureBasePanelCSS() {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (panel) {
                 // Apply essential base CSS properties that should never be removed
                 panel.style.setProperty('position', 'fixed', 'important');
@@ -33395,8 +33882,8 @@ class AccessibilityWidget {
         
         // Force apply mobile responsive styles
         applyMobileResponsiveStyles() {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             
           
             
@@ -33551,8 +34038,8 @@ class AccessibilityWidget {
         
         // Remove mobile responsive styles for desktop
         removeMobileResponsiveStyles() {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             
           
             
@@ -33601,7 +34088,7 @@ class AccessibilityWidget {
         updateTriggerOffset(direction, offset) {
           
             
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
 
@@ -33700,7 +34187,7 @@ class AccessibilityWidget {
         
         updateTriggerButtonSize(size) {
          
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 if (size === 'Small') {
                     icon.style.width = '40px';
@@ -33719,7 +34206,7 @@ class AccessibilityWidget {
         }
         
         updateTriggerVisibility(hidden) {
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (!icon) return;
             
             if (hidden) {
@@ -33739,7 +34226,7 @@ class AccessibilityWidget {
         
         updateInterfaceColor(color) {
      
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (panel) {
                 panel.style.backgroundColor = color;
             }
@@ -33759,7 +34246,7 @@ class AccessibilityWidget {
                 // CSS is missing - inject it immediately
                 style = document.createElement('style');
                 style.setAttribute('data-widget-css', 'true');
-                style.setAttribute('id', 'accessibility-widget-styles');
+                style.setAttribute('id', 'accessbit-widget-styles');
                 style.textContent = this.getWidgetCSS();
                 // Insert CSS FIRST in shadowRoot to ensure it loads before any HTML
                 this.shadowRoot.insertBefore(style, this.shadowRoot.firstChild);
@@ -33772,8 +34259,8 @@ class AccessibilityWidget {
         }
         
         updateInterfacePosition() {
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             
             if (!icon || !panel) {
                 return; // Don't proceed if elements don't exist
@@ -33866,16 +34353,16 @@ class AccessibilityWidget {
     
         updateInterfaceFooter(content) {
         
-            let footer = this.shadowRoot?.getElementById('accessibility-footer');
+            let footer = this.shadowRoot?.getElementById('accessbit-widget-footer');
             if (!footer) {
                 // Create footer if it doesn't exist
                 footer = document.createElement('div');
-                footer.id = 'accessibility-footer';
+                footer.id = 'accessbit-widget-footer';
                 footer.style.padding = '10px';
                 footer.style.borderTop = '1px solid #eee';
                 footer.style.fontSize = '12px';
                 footer.style.color = '#666';
-                const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
                 if (panel) {
                     panel.appendChild(footer);
                 }
@@ -33887,11 +34374,11 @@ class AccessibilityWidget {
         
         updateAccessibilityStatementLink(link) {
            
-            let statementLink = this.shadowRoot?.getElementById('accessibility-statement-link');
+            let statementLink = this.shadowRoot?.getElementById('accessbit-statement-link');
             if (!statementLink) {
                 // Create link if it doesn't exist
                 statementLink = document.createElement('a');
-                statementLink.id = 'accessibility-statement-link';
+                statementLink.id = 'accessbit-statement-link';
                 statementLink.style.display = 'block';
                 statementLink.style.padding = '10px';
                 statementLink.style.textAlign = 'center';
@@ -33899,7 +34386,7 @@ class AccessibilityWidget {
                 statementLink.style.textDecoration = 'none';
                 statementLink.style.fontSize = '12px';
                 statementLink.target = '_blank';
-                const panel = this.shadowRoot?.getElementById('accessibility-panel');
+                const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
                 if (panel) {
                     panel.appendChild(statementLink);
                 }
@@ -33910,44 +34397,63 @@ class AccessibilityWidget {
             }
         }
         
-        updateSelectedIcon(icon) {
-           
-            const iconElement = this.shadowRoot?.getElementById('accessibility-icon');
-            if (iconElement) {
-                // Map icon names to FontAwesome classes
-                const iconMap = {
-                    'accessibility': 'fas fa-universal-access',
-                    'wheelchair': 'fas fa-wheelchair',
-                    'eye': 'fas fa-eye',
-                    'ear': 'fas fa-deaf',
-                    'brain': 'fas fa-brain',
-                    'hand': 'fas fa-hand-paper',
-                    'heart': 'fas fa-heart',
-                    'star': 'fas fa-star',
-                    'gear': 'fas fa-cog',
-                    'settings': 'fas fa-sliders-h'
-                };
-                
-                const iconClass = iconMap[icon] || 'fas fa-universal-access';
-                
-                // Clear existing content and add the new icon
-                const sanitizedIconClass = this.validateClassName(iconClass);
-                const iconInner = document.createElement('i');
-                iconInner.className = sanitizedIconClass;
-                iconElement.appendChild(iconInner);
-                
-                // Ensure proper styling
-                iconElement.style.display = 'flex';
-                iconElement.style.alignItems = 'center';
-                iconElement.style.justifyContent = 'center';
-                iconElement.style.color = '#ffffff';
-                iconElement.style.fontSize = 'inherit';
-            }
+       updateSelectedIcon(icon) {
+        console.log('[DEBUG] Applying Icon:', {
+            iconValue: icon,
+            iconType: typeof icon,
+            iconTrimmed: icon ? String(icon).trim() : null
+        });
+    const iconElement = this.shadowRoot?.getElementById('accessbit-widget-icon');
+    
+    if (iconElement) {
+        const iconMap = {
+            'accessibility': 'fas fa-universal-access',
+            'wheelchair': 'fas fa-wheelchair',
+            'eye': 'fas fa-eye',
+            'ear': 'fas fa-deaf',
+            'brain': 'fas fa-brain',
+            'hand': 'fas fa-hand-paper',
+            'heart': 'fas fa-heart',
+            'star': 'fas fa-star',
+            'gear': 'fas fa-cog',
+            'settings': 'fas fa-sliders-h'
+        };
+        
+        // Normalize icon value (trim whitespace, lowercase for comparison)
+        const normalizedIcon = icon ? String(icon).trim().toLowerCase() : '';
+        const iconClass = iconMap[normalizedIcon] || iconMap[icon] || 'fas fa-universal-access';
+        
+        console.log('[DEBUG] Icon mapping result:', {
+            originalIcon: icon,
+            normalizedIcon: normalizedIcon,
+            mappedClass: iconClass,
+            iconMapKeys: Object.keys(iconMap),
+            foundInMap: normalizedIcon in iconMap || icon in iconMap
+        });
+        
+        
+        const existingIcon = iconElement.querySelector('i');
+        if (existingIcon) {
+            existingIcon.remove();
         }
+   
+        const sanitizedIconClass = this.validateClassName(iconClass);
+        const iconInner = document.createElement('i');
+        iconInner.className = sanitizedIconClass;
+        iconElement.appendChild(iconInner); // Now it appends to a clean container
+        
+        // Ensure proper styling
+        iconElement.style.display = 'flex';
+        iconElement.style.alignItems = 'center';
+        iconElement.style.justifyContent = 'center';
+        iconElement.style.color = '#ffffff';
+        iconElement.style.fontSize = 'inherit';
+    }
+}
         
         updateSelectedIconName(name) {
           
-            const iconElement = this.shadowRoot?.getElementById('accessibility-icon');
+            const iconElement = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (iconElement) {
                 iconElement.setAttribute('aria-label', name);
                 iconElement.setAttribute('title', name);
@@ -33963,7 +34469,7 @@ class AccessibilityWidget {
           
             const normalizedDirection = (direction || '').toLowerCase();
             const pos = (position || '').toLowerCase();
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
@@ -34009,7 +34515,7 @@ class AccessibilityWidget {
         // New method to handle combined positioning (e.g., "right middle")
         updateMobileTriggerCombinedPosition(horizontalPos, verticalPos) {
            
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
        
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
@@ -34106,7 +34612,7 @@ class AccessibilityWidget {
         
         updateMobileTriggerSize(size) {
          
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
@@ -34130,7 +34636,7 @@ class AccessibilityWidget {
         updateMobileTriggerShape(shape) {
            
             
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
@@ -34212,12 +34718,12 @@ class AccessibilityWidget {
                             // Last resort: Create a new style element with maximum specificity
                             const style = document.createElement('style');
                             style.textContent = `
-                                .accessibility-icon[data-shape="rounded"] {
+                                .accessbit-widget-icon[data-shape="rounded"] {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
                                 }
-                                .accessibility-icon.rounded {
+                                .accessbit-widget-icon.rounded {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
@@ -34246,7 +34752,7 @@ class AccessibilityWidget {
         
         updateMobileTriggerOffset(direction, offset) {
             
-            const icon = this.shadowRoot?.getElementById('accessibility-icon');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
 
@@ -34325,7 +34831,7 @@ class AccessibilityWidget {
         
         // Helper function to update panel visibility based on position
         updatePanelVisibility(isOpen) {
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (panel) {
                 const currentTransform = panel.style.transform;
                 if (isOpen) {
@@ -34427,7 +34933,7 @@ class AccessibilityWidget {
 
             
             const dropdown = this.shadowRoot?.getElementById('language-dropdown');
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             
             if (!dropdown || !panel) {
                 
@@ -34463,7 +34969,7 @@ class AccessibilityWidget {
     
         positionLanguageDropdown() {
             const dropdown = this.shadowRoot?.getElementById('language-dropdown');
-            const panel = this.shadowRoot?.getElementById('accessibility-panel');
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             
             if (!dropdown || !panel) {
               
@@ -34608,13 +35114,16 @@ class AccessibilityWidget {
                 }
                 
                 // For custom domains, validate with signed token from script tag
+                // SAFETY: Using specific script filename patterns to avoid matching user content
+                // Only matches script tags with our widget filenames, not user elements
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
-                    // Try to find the script tag - check for both test.js and new.js
+                    // Try to find the script tag - check for widget-specific filenames only
                     const scriptEl = document.currentScript || 
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
-                                   document.querySelector('script[src*="accessibility"]');
+                                   document.querySelector('script[src*="accessbit"]') ||
+                                   document.querySelector('script[src*="widget.js"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteIdParam = u.searchParams.get('siteId');
@@ -34714,11 +35223,11 @@ class AccessibilityWidget {
             }
             
             // Remove any injected styles
-            const widgetStyles = document.querySelectorAll('style[id*="accessibility"], style[id*="widget"]');
+            const widgetStyles = document.querySelectorAll('style[id*="accessbit-widget"], style[id*="accessbit-"]');
             widgetStyles.forEach(style => style.remove());
             
             // Remove any injected elements
-            const widgetElements = document.querySelectorAll('[id*="accessibility"], [class*="accessibility-widget"]');
+            const widgetElements = document.querySelectorAll('[id*="accessbit-widget"], [class*="accessbit-widget"], [class*="accessbit-root"]');
             widgetElements.forEach(el => el.remove());
             
             return; // Exit early
