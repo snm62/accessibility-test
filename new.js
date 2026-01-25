@@ -6694,6 +6694,66 @@ class AccessibilityWidget {
                     padding: 20px !important;
                 }
             }
+            
+            /* Custom size classes - respect user customization while allowing CSS media queries to work */
+            /* Desktop custom sizes */
+            .accessbit-widget-icon.size-small {
+                width: var(--custom-icon-size, 40px) !important;
+                height: var(--custom-icon-size, 40px) !important;
+            }
+            
+            .accessbit-widget-icon.size-medium {
+                width: var(--custom-icon-size, 50px) !important;
+                height: var(--custom-icon-size, 50px) !important;
+            }
+            
+            .accessbit-widget-icon.size-large {
+                width: var(--custom-icon-size, 60px) !important;
+                height: var(--custom-icon-size, 60px) !important;
+            }
+            
+            .accessbit-widget-icon.size-small i {
+                font-size: var(--custom-icon-font-size, 16px) !important;
+            }
+            
+            .accessbit-widget-icon.size-medium i {
+                font-size: var(--custom-icon-font-size, 20px) !important;
+            }
+            
+            .accessbit-widget-icon.size-large i {
+                font-size: var(--custom-icon-font-size, 24px) !important;
+            }
+            
+            /* Mobile custom sizes - override default mobile sizes when custom size is set */
+            @media (max-width: 768px) {
+                .accessbit-widget-icon.mobile-size-small {
+                    width: var(--custom-mobile-icon-size, 35px) !important;
+                    height: var(--custom-mobile-icon-size, 35px) !important;
+                }
+                
+                .accessbit-widget-icon.mobile-size-medium {
+                    width: var(--custom-mobile-icon-size, 45px) !important;
+                    height: var(--custom-mobile-icon-size, 45px) !important;
+                }
+                
+                .accessbit-widget-icon.mobile-size-large {
+                    width: var(--custom-mobile-icon-size, 55px) !important;
+                    height: var(--custom-mobile-icon-size, 55px) !important;
+                }
+                
+                .accessbit-widget-icon.mobile-size-small i {
+                    font-size: var(--custom-mobile-icon-font-size, 14px) !important;
+                }
+                
+                .accessbit-widget-icon.mobile-size-medium i {
+                    font-size: var(--custom-mobile-icon-font-size, 18px) !important;
+                }
+                
+                .accessbit-widget-icon.mobile-size-large i {
+                    font-size: var(--custom-mobile-icon-font-size, 22px) !important;
+                }
+            }
+            
                 /* Accessibility Widget Styles - Shadow DOM */
     
                 :host {
@@ -6780,11 +6840,67 @@ class AccessibilityWidget {
     
     
                 .accessbit-widget-icon i {
-    
                     color: #ffffff;
-    
                     font-size: 24px;
-    
+                }
+                
+                /* Custom size classes - respect user customization while allowing CSS media queries to work */
+                /* Desktop custom sizes - only apply when not on mobile */
+                .accessbit-widget-icon.size-small:not([data-mobile-size]) {
+                    width: var(--custom-icon-size, 40px) !important;
+                    height: var(--custom-icon-size, 40px) !important;
+                }
+                
+                .accessbit-widget-icon.size-medium:not([data-mobile-size]) {
+                    width: var(--custom-icon-size, 50px) !important;
+                    height: var(--custom-icon-size, 50px) !important;
+                }
+                
+                .accessbit-widget-icon.size-large:not([data-mobile-size]) {
+                    width: var(--custom-icon-size, 60px) !important;
+                    height: var(--custom-icon-size, 60px) !important;
+                }
+                
+                .accessbit-widget-icon.size-small:not([data-mobile-size]) i {
+                    font-size: var(--custom-icon-font-size, 16px) !important;
+                }
+                
+                .accessbit-widget-icon.size-medium:not([data-mobile-size]) i {
+                    font-size: var(--custom-icon-font-size, 20px) !important;
+                }
+                
+                .accessbit-widget-icon.size-large:not([data-mobile-size]) i {
+                    font-size: var(--custom-icon-font-size, 24px) !important;
+                }
+                
+                /* Mobile custom sizes - only apply on mobile */
+                @media (max-width: 768px) {
+                    .accessbit-widget-icon[data-mobile-size="small"] {
+                        width: var(--custom-mobile-icon-size, 35px) !important;
+                        height: var(--custom-mobile-icon-size, 35px) !important;
+                    }
+                    
+                    .accessbit-widget-icon[data-mobile-size="medium"] {
+                        width: var(--custom-mobile-icon-size, 45px) !important;
+                        height: var(--custom-mobile-icon-size, 45px) !important;
+                    }
+                    
+                    .accessbit-widget-icon[data-mobile-size="large"] {
+                        width: var(--custom-mobile-icon-size, 55px) !important;
+                        height: var(--custom-mobile-icon-size, 55px) !important;
+                    }
+                    
+                    .accessbit-widget-icon[data-mobile-size="small"] i {
+                        font-size: var(--custom-mobile-icon-font-size, 14px) !important;
+                    }
+                    
+                    .accessbit-widget-icon[data-mobile-size="medium"] i {
+                        font-size: var(--custom-mobile-icon-font-size, 18px) !important;
+                    }
+                    
+                    .accessbit-widget-icon[data-mobile-size="large"] i {
+                        font-size: var(--custom-mobile-icon-font-size, 22px) !important;
+                    }
                 }
     
     
@@ -32726,6 +32842,8 @@ class AccessibilityWidget {
         }
         
         // PERFORMANCE OPTIMIZATION: Optimized resize handler
+        // NOTE: Responsive sizing is now handled 100% by CSS media queries
+        // This function only handles customization-specific styles (color, shape, position)
         handleResizeOptimized() {
             console.log('[ICON DEBUG] handleResizeOptimized() called');
             const elements = this.getCachedElements();
@@ -32742,26 +32860,25 @@ class AccessibilityWidget {
                 const screenWidth = window.innerWidth;
                 const isMobile = screenWidth <= 768;
                 
-                // Update icon visibility
+                // Update icon visibility (handles show/hide based on customization settings)
                 this.handleWindowResize();
                 
-                // Ensure base CSS is applied
+                // Ensure base CSS is applied (position, z-index, etc. - NOT sizing)
                 this.ensureBasePanelCSS();
                 
-                // Use CSS transforms instead of display toggling for better performance
-                // Only update if state actually changed
-                const currentTransform = panel.style.transform || '';
-                const needsUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
-                                 (!isMobile && panel.classList.contains('mobile-mode'));
+                // CSS media queries handle all responsive sizing automatically
+                // We only need to toggle mobile-mode class for CSS targeting
+                const needsClassUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
+                                       (!isMobile && panel.classList.contains('mobile-mode'));
                 
-                if (needsUpdate || !currentTransform) {
+                if (needsClassUpdate) {
                     if (isMobile) {
-                        // Apply mobile settings
-                        this.applyMobileResponsiveStyles();
+                        // Add mobile-mode class - CSS handles all sizing
                         panel.classList.add('mobile-mode');
                         
-                        // Reapply mobile positioning if it was set
+                        // Only reapply customization-specific styles (color, shape, position)
                         if (this.customizationData) {
+                            // Reapply mobile positioning if it was set
                             if (this.customizationData.mobileTriggerHorizontalPosition && 
                                 this.customizationData.mobileTriggerVerticalPosition) {
                                 this.updateMobileTriggerCombinedPosition(
@@ -32770,13 +32887,11 @@ class AccessibilityWidget {
                                 );
                             }
                             
-                            // Reapply mobile customizations (shape, size, color)
+                            // Reapply mobile customizations (shape, color) - NOT size (CSS handles that)
                             if (this.customizationData.mobileTriggerShape) {
                                 this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
-                            }
-                            
-                            if (this.customizationData.mobileTriggerSize) {
-                                this.updateMobileTriggerSize(this.customizationData.mobileTriggerSize);
+                            } else if (this.customizationData.triggerButtonShape) {
+                                this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
                             }
                             
                             if (this.customizationData.triggerButtonColor) {
@@ -32784,14 +32899,12 @@ class AccessibilityWidget {
                             }
                         }
                     } else {
-                        // Apply desktop settings
-                        this.removeMobileResponsiveStyles();
+                        // Remove mobile-mode class - CSS handles all sizing
                         panel.classList.remove('mobile-mode');
                         
-                        // Ensure desktop customizations are fully reapplied
-                        // removeMobileResponsiveStyles() already calls reapplyDesktopIconCustomizations(),
-                        // but we'll also ensure interface position is updated
+                        // Reapply desktop customizations (color, shape, position, offset)
                         if (this.customizationData) {
+                            this.reapplyDesktopIconCustomizations();
                             this.updateInterfacePosition();
                         }
                     }
@@ -34139,10 +34252,12 @@ class AccessibilityWidget {
         }
         
         // Ensure base panel CSS is always applied
+        // NOTE: Does NOT set width, height, font-size, or padding - CSS media queries handle those
         ensureBasePanelCSS() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (panel) {
-                // Apply essential base CSS properties that should never be removed
+                // Apply only essential non-responsive CSS properties that should never be removed
+                // DO NOT set width, height, font-size, padding - CSS media queries handle those
                 panel.style.setProperty('position', 'fixed', 'important');
                 panel.style.setProperty('z-index', '2147483646', 'important');
                 panel.style.setProperty('background', '#ffffff', 'important');
@@ -34150,23 +34265,25 @@ class AccessibilityWidget {
                 panel.style.setProperty('border-radius', '8px', 'important');
                 panel.style.setProperty('font-family', "'DM Sans', sans-serif", 'important');
                 panel.style.setProperty('pointer-events', 'auto', 'important');
-                panel.style.setProperty('overflow-y', 'auto');
-                panel.style.setProperty('overflow-x', 'hidden');
-                panel.style.setProperty('-webkit-overflow-scrolling', 'touch');
-                panel.style.setProperty('scroll-behavior', 'smooth');
-                panel.style.setProperty('overscroll-behavior', 'contain');
+                panel.style.setProperty('overflow-y', 'auto', 'important');
+                panel.style.setProperty('overflow-x', 'hidden', 'important');
+                panel.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+                panel.style.setProperty('scroll-behavior', 'smooth', 'important');
+                panel.style.setProperty('overscroll-behavior', 'contain', 'important');
                 
-                // Set panel to full viewport height
-                panel.style.setProperty('height', '100vh');
-                panel.style.setProperty('top', '0');
-                panel.style.setProperty('bottom', '0');
+                // Set panel to full viewport height (this is not responsive, always 100vh)
+                panel.style.setProperty('height', '100vh', 'important');
+                panel.style.setProperty('top', '0', 'important');
+                panel.style.setProperty('bottom', '0', 'important');
                 
                 // Add text wrapping to ensure all text is visible
-                panel.style.setProperty('word-wrap', 'break-word');
-                panel.style.setProperty('word-break', 'break-word');
-                panel.style.setProperty('overflow-wrap', 'break-word');
-                panel.style.setProperty('hyphens', 'auto');
+                panel.style.setProperty('word-wrap', 'break-word', 'important');
+                panel.style.setProperty('word-break', 'break-word', 'important');
+                panel.style.setProperty('overflow-wrap', 'break-word', 'important');
+                panel.style.setProperty('hyphens', 'auto', 'important');
                 
+                // DO NOT set width, max-width, font-size, padding here
+                // CSS media queries in getWidgetCSS() handle all responsive sizing
           
             }
         }
@@ -34419,21 +34536,39 @@ class AccessibilityWidget {
         }
         
         updateTriggerButtonSize(size) {
-         
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
+                // Use data attribute and CSS classes instead of inline styles
+                // This allows CSS media queries to work properly
+                icon.setAttribute('data-size', size.toLowerCase());
+                
+                // Remove old size classes
+                icon.classList.remove('size-small', 'size-medium', 'size-large');
+                
+                // Add new size class
                 if (size === 'Small') {
-                    icon.style.width = '40px';
-                    icon.style.height = '40px';
-                    icon.style.fontSize = '16px';
+                    icon.classList.add('size-small');
                 } else if (size === 'Medium') {
-                    icon.style.width = '50px';
-                    icon.style.height = '50px';
-                    icon.style.fontSize = '20px';
+                    icon.classList.add('size-medium');
                 } else if (size === 'Large') {
-                    icon.style.width = '60px';
-                    icon.style.height = '60px';
-                    icon.style.fontSize = '24px';
+                    icon.classList.add('size-large');
+                }
+                
+                // Only set inline styles as fallback if CSS classes don't work
+                // But use CSS custom properties so media queries can override
+                const isMobile = window.innerWidth <= 768;
+                if (!isMobile) {
+                    // Desktop: apply custom size (CSS media queries will scale on mobile)
+                    if (size === 'Small') {
+                        icon.style.setProperty('--custom-icon-size', '40px');
+                        icon.style.setProperty('--custom-icon-font-size', '16px');
+                    } else if (size === 'Medium') {
+                        icon.style.setProperty('--custom-icon-size', '50px');
+                        icon.style.setProperty('--custom-icon-font-size', '20px');
+                    } else if (size === 'Large') {
+                        icon.style.setProperty('--custom-icon-size', '60px');
+                        icon.style.setProperty('--custom-icon-font-size', '24px');
+                    }
                 }
             }
         }
@@ -34844,23 +34979,29 @@ class AccessibilityWidget {
         }
         
         updateMobileTriggerSize(size) {
-         
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
+                    // Use data attribute and CSS classes for mobile sizes
+                    icon.setAttribute('data-mobile-size', size.toLowerCase());
+                    
+                    // Remove old size classes
+                    icon.classList.remove('mobile-size-small', 'mobile-size-medium', 'mobile-size-large');
+                    
+                    // Add new size class
                     if (size === 'Small') {
-                        icon.style.setProperty('width', '35px', 'important');
-                        icon.style.setProperty('height', '35px', 'important');
-                        icon.style.setProperty('font-size', '14px');
+                        icon.classList.add('mobile-size-small');
+                        icon.style.setProperty('--custom-mobile-icon-size', '35px');
+                        icon.style.setProperty('--custom-mobile-icon-font-size', '14px');
                     } else if (size === 'Medium') {
-                        icon.style.setProperty('width', '45px', 'important');
-                        icon.style.setProperty('height', '45px', 'important');
-                        icon.style.setProperty('font-size', '18px');
+                        icon.classList.add('mobile-size-medium');
+                        icon.style.setProperty('--custom-mobile-icon-size', '45px');
+                        icon.style.setProperty('--custom-mobile-icon-font-size', '18px');
                     } else if (size === 'Large') {
-                        icon.style.setProperty('width', '55px', 'important');
-                        icon.style.setProperty('height', '55px', 'important');
-                        icon.style.setProperty('font-size', '22px');
+                        icon.classList.add('mobile-size-large');
+                        icon.style.setProperty('--custom-mobile-icon-size', '55px');
+                        icon.style.setProperty('--custom-mobile-icon-font-size', '22px');
                     }
                 }
             }
