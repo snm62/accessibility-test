@@ -1399,13 +1399,32 @@ const seizureState = {
                                     document.addEventListener('transitionstart', seizureState.onTransitionStart, true);
                                     
                                     // Continuous polling to catch animations that start without events
+                                    // More frequent polling for better coverage
                                     if (!seizureState.waapiPollInterval) {
                                         seizureState.waapiPollInterval = setInterval(function() {
                                             try {
+                                                // Stop all WAAPI animations
                                                 const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
                                                 all.forEach(stopAnimation);
+                                                
+                                                // Also directly stop CSS animations on all elements
+                                                const allElements = document.querySelectorAll('*');
+                                                allElements.forEach(el => {
+                                                    try {
+                                                        // Skip widget elements
+                                                        if (el.id && el.id.includes('accessbit')) return;
+                                                        if (el.classList && (el.classList.contains('accessbit-widget') || el.closest('.accessbit-widget'))) return;
+                                                        
+                                                        const computedStyle = window.getComputedStyle(el);
+                                                        if (computedStyle.animationName !== 'none' || computedStyle.transitionProperty !== 'none') {
+                                                            el.style.setProperty('animation', 'none', 'important');
+                                                            el.style.setProperty('transition', 'none', 'important');
+                                                            el.style.setProperty('animation-play-state', 'paused', 'important');
+                                                        }
+                                                    } catch (_) {}
+                                                });
                                             } catch(_) {}
-                                        }, 100); // Check every 100ms
+                                        }, 50); // Check every 50ms for more aggressive stopping
                                     }
                                     
                                     // MutationObserver to catch dynamically added elements with animations
@@ -6614,11 +6633,65 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel {
-                    width: 75vw !important;
-                    max-width: 320px !important;
+                    width: 100vw !important;
+                    max-width: 100vw !important;
                     /* left/right positioning handled by JavaScript based on icon position */
-                    font-size: 12px !important;
-                    padding: 12px !important;
+                    font-size: 10px !important;
+                    padding: 8px !important;
+                    box-sizing: border-box !important;
+                    overflow-x: hidden !important;
+                    margin: 0 !important;
+                }
+                
+                .accessbit-widget-panel * {
+                    box-sizing: border-box !important;
+                }
+                
+                .accessbit-widget-panel h2 {
+                    font-size: 14px !important;
+                    margin-bottom: 8px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel h3 {
+                    font-size: 11px !important;
+                    margin-bottom: 6px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel h4 {
+                    font-size: 10px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel p,
+                .accessbit-widget-panel .profile-item p {
+                    font-size: 9px !important;
+                    line-height: 1.4 !important;
+                    margin: 4px 0 !important;
+                }
+                
+                .accessbit-widget-panel button,
+                .accessbit-widget-panel .action-btn,
+                .accessbit-widget-panel .profile-item button {
+                    font-size: 9px !important;
+                    padding: 6px 10px !important;
+                    min-height: 32px !important;
+                }
+                
+                .accessbit-widget-panel .profile-item {
+                    padding: 8px !important;
+                    margin-bottom: 6px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch {
+                    width: 36px !important;
+                    height: 20px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider {
+                    width: 16px !important;
+                    height: 16px !important;
                 }
             }
             
@@ -6633,11 +6706,65 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel {
-                    width: 80vw !important;
-                    max-width: 380px !important;
+                    width: 100vw !important;
+                    max-width: 100vw !important;
                     /* left/right positioning handled by JavaScript based on icon position */
-                    font-size: 13px !important;
-                    padding: 14px !important;
+                    font-size: 11px !important;
+                    padding: 10px !important;
+                    box-sizing: border-box !important;
+                    overflow-x: hidden !important;
+                    margin: 0 !important;
+                }
+                
+                .accessbit-widget-panel * {
+                    box-sizing: border-box !important;
+                }
+                
+                .accessbit-widget-panel h2 {
+                    font-size: 16px !important;
+                    margin-bottom: 10px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel h3 {
+                    font-size: 12px !important;
+                    margin-bottom: 8px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel h4 {
+                    font-size: 11px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .accessbit-widget-panel p,
+                .accessbit-widget-panel .profile-item p {
+                    font-size: 10px !important;
+                    line-height: 1.4 !important;
+                    margin: 5px 0 !important;
+                }
+                
+                .accessbit-widget-panel button,
+                .accessbit-widget-panel .action-btn,
+                .accessbit-widget-panel .profile-item button {
+                    font-size: 10px !important;
+                    padding: 7px 12px !important;
+                    min-height: 36px !important;
+                }
+                
+                .accessbit-widget-panel .profile-item {
+                    padding: 10px !important;
+                    margin-bottom: 8px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch {
+                    width: 40px !important;
+                    height: 22px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider {
+                    width: 18px !important;
+                    height: 18px !important;
                 }
             }
             
@@ -26041,10 +26168,7 @@ class AccessibilityWidget {
             if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
                 try {
                     window.slider.disableAutoSlide();
-                   
-                } catch (e) {
-                    
-                }
+                } catch (e) {}
             }
             
             // Stop Swiper animations
@@ -26052,24 +26176,117 @@ class AccessibilityWidget {
                 try {
                     document.querySelectorAll('.swiper').forEach(swiperEl => {
                         if (swiperEl.swiper) {
-                            swiperEl.swiper.autoplay.stop();
+                            try {
+                                swiperEl.swiper.autoplay?.stop();
+                                swiperEl.swiper.allowTouchMove = false;
+                                swiperEl.swiper.allowSlideNext = false;
+                                swiperEl.swiper.allowSlidePrev = false;
+                            } catch (_) {}
                         }
                     });
-                   
-                } catch (e) {
-                    
-                }
+                } catch (e) {}
             }
             
             // Stop AOS (Animate On Scroll) animations
             if (typeof AOS !== 'undefined') {
                 try {
                     AOS.refreshHard();
-
-                } catch (e) {
-                    
-                }
+                    AOS.disable();
+                } catch (e) {}
             }
+            
+            // Stop GSAP animations (more comprehensive)
+            if (typeof window.gsap !== 'undefined') {
+                try {
+                    // Kill all GSAP animations
+                    window.gsap.globalTimeline?.clear();
+                    if (window.gsap.killTweensOf) {
+                        window.gsap.killTweensOf('*');
+                    }
+                    // Stop all timelines
+                    if (window.gsap.getAllTimelines) {
+                        window.gsap.getAllTimelines().forEach(timeline => {
+                            try {
+                                timeline.pause();
+                                timeline.kill();
+                            } catch (_) {}
+                        });
+                    }
+                } catch (e) {}
+            }
+            
+            // Stop jQuery animations
+            if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                try {
+                    const $ = window.jQuery || window.$;
+                    $('*').stop(true, true);
+                    $('*').finish();
+                } catch (e) {}
+            }
+            
+            // Stop Three.js animations
+            if (typeof window.THREE !== 'undefined') {
+                try {
+                    // Find all Three.js scenes and stop their render loops
+                    document.querySelectorAll('canvas').forEach(canvas => {
+                        if (canvas._threeScene || canvas._threeRenderer) {
+                            try {
+                                if (canvas._threeAnimationId) {
+                                    cancelAnimationFrame(canvas._threeAnimationId);
+                                }
+                            } catch (_) {}
+                        }
+                    });
+                } catch (e) {}
+            }
+            
+            // Stop Framer Motion animations (React-based)
+            if (typeof window.FramerMotion !== 'undefined') {
+                try {
+                    // Framer Motion uses React, so we'll stop via CSS
+                    document.querySelectorAll('[data-framer-name]').forEach(el => {
+                        el.style.animation = 'none';
+                        el.style.transition = 'none';
+                    });
+                } catch (e) {}
+            }
+            
+            // Stop Webflow interactions more aggressively
+            try {
+                // Stop all Webflow interactions
+                document.querySelectorAll('[data-w-id]').forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.transition = 'none';
+                    el.style.transform = 'none';
+                    el.style.opacity = '1';
+                });
+                
+                // Stop Webflow CMS animations
+                document.querySelectorAll('[data-w-id*="cms"]').forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.transition = 'none';
+                });
+            } catch (e) {}
+            
+            // Stop all CSS animations on ALL elements directly (most aggressive approach)
+            try {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(el => {
+                    try {
+                        // Skip widget elements
+                        if (el.id && el.id.includes('accessbit')) return;
+                        if (el.classList && (el.classList.contains('accessbit-widget') || el.closest('.accessbit-widget'))) return;
+                        
+                        // Direct style manipulation - no global overrides
+                        const computedStyle = window.getComputedStyle(el);
+                        if (computedStyle.animationName !== 'none' || computedStyle.transitionProperty !== 'none') {
+                            el.style.setProperty('animation', 'none', 'important');
+                            el.style.setProperty('transition', 'none', 'important');
+                            el.style.setProperty('animation-play-state', 'paused', 'important');
+                        }
+                    } catch (_) {}
+                });
+            } catch (e) {}
             
             // Stop canvas animations (requestAnimationFrame-based)
             this.stopCanvasAnimations();
@@ -26084,20 +26301,37 @@ class AccessibilityWidget {
                 const canvases = document.querySelectorAll('canvas');
                 canvases.forEach(canvas => {
                     try {
-                        // Stop CSS animations on canvas
-                        canvas.style.animation = 'none';
-                        canvas.style.transition = 'none';
+                        // Stop CSS animations on canvas with !important
+                        canvas.style.setProperty('animation', 'none', 'important');
+                        canvas.style.setProperty('transition', 'none', 'important');
+                        canvas.style.setProperty('animation-play-state', 'paused', 'important');
                         
-                        // Try to access canvas context and stop any animation loops
-                        // Note: We can't directly stop requestAnimationFrame loops without global overrides,
-                        // but we can mark canvas elements for stopping
+                        // Mark canvas for stopping
                         canvas.setAttribute('data-seizure-safe-stopped', 'true');
                         
-                        // For canvas elements with known animation libraries, try to stop them
-                        if (canvas._animationId) {
-                            // Some libraries store animation IDs
+                        // Try to stop animation loops stored in various properties
+                        const animationIdProps = ['_animationId', '_animationFrameId', '_rafId', '_loopId', 'animationId', 'rafId'];
+                        animationIdProps.forEach(prop => {
+                            if (canvas[prop]) {
+                                try {
+                                    cancelAnimationFrame(canvas[prop]);
+                                    canvas[prop] = null;
+                                } catch (_) {}
+                            }
+                        });
+                        
+                        // Stop Three.js render loops if present
+                        if (canvas._threeAnimationId) {
                             try {
-                                cancelAnimationFrame(canvas._animationId);
+                                cancelAnimationFrame(canvas._threeAnimationId);
+                                canvas._threeAnimationId = null;
+                            } catch (_) {}
+                        }
+                        
+                        // Stop p5.js animations if present
+                        if (canvas._pInst && canvas._pInst._loop) {
+                            try {
+                                canvas._pInst.noLoop();
                             } catch (_) {}
                         }
                     } catch (_) {}
@@ -28513,6 +28747,89 @@ class AccessibilityWidget {
             this.stopJavaScriptAnimations();
             // 6) Stop Webflow interactions / data-w-id transforms and hovers
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+            
+            // 7) Start aggressive periodic animation stopping (no global overrides)
+            this.startAggressiveAnimationStopping();
+        }
+        
+        // Aggressive periodic animation stopping - directly manipulates element styles
+        // This runs periodically to catch any animations that start after initial stopping
+        startAggressiveAnimationStopping() {
+            // Clear any existing interval
+            if (this._aggressiveAnimationStopperInterval) {
+                clearInterval(this._aggressiveAnimationStopperInterval);
+            }
+            
+            // Run immediately
+            this.aggressivelyStopAllAnimations();
+            
+            // Then run every 100ms to catch new animations
+            this._aggressiveAnimationStopperInterval = setInterval(() => {
+                this.aggressivelyStopAllAnimations();
+            }, 100);
+        }
+        
+        stopAggressiveAnimationStopping() {
+            if (this._aggressiveAnimationStopperInterval) {
+                clearInterval(this._aggressiveAnimationStopperInterval);
+                this._aggressiveAnimationStopperInterval = null;
+            }
+        }
+        
+        aggressivelyStopAllAnimations() {
+            try {
+                // Get all elements (excluding widget elements)
+                const allElements = document.querySelectorAll('*:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not(accessbit-widget)');
+                
+                allElements.forEach(el => {
+                    try {
+                        // Skip if element is inside widget
+                        if (el.closest('#accessbit-widget-container') || 
+                            el.closest('[id*="accessbit-widget"]') || 
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget')) {
+                            return;
+                        }
+                        
+                        // Get computed style
+                        const computedStyle = window.getComputedStyle(el);
+                        
+                        // Check if element has animations or transitions
+                        const hasAnimation = computedStyle.animationName !== 'none' && computedStyle.animationName !== '';
+                        const hasTransition = computedStyle.transitionProperty !== 'none' && computedStyle.transitionProperty !== '';
+                        
+                        // Directly stop animations/transitions with !important
+                        if (hasAnimation || hasTransition) {
+                            el.style.setProperty('animation', 'none', 'important');
+                            el.style.setProperty('transition', 'none', 'important');
+                            el.style.setProperty('animation-play-state', 'paused', 'important');
+                        }
+                        
+                        // Also stop any WAAPI animations on this element
+                        if (el.getAnimations) {
+                            try {
+                                const anims = el.getAnimations();
+                                anims.forEach(anim => {
+                                    try {
+                                        if (typeof anim.finish === 'function') {
+                                            anim.finish();
+                                        } else if (anim.effect && anim.effect.getComputedTiming) {
+                                            const timing = anim.effect.getComputedTiming();
+                                            const end = timing.endTime != null ? timing.endTime : 
+                                                       (timing.duration != null && timing.duration !== 'auto' ? timing.duration : null);
+                                            if (end != null) {
+                                                anim.currentTime = end;
+                                            }
+                                        }
+                                        if (typeof anim.pause === 'function') anim.pause();
+                                        anim.playbackRate = 0;
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
+                        }
+                    } catch (_) {}
+                });
+            } catch (e) {}
         }
     
     
@@ -28542,7 +28859,10 @@ class AccessibilityWidget {
             // 5. Stop continuous polling for Lottie and GSAP
             this.stopLottieGSAPPolling();
             
-            // 6. Restore WAAPI animations
+            // 6. Stop aggressive animation stopping
+            this.stopAggressiveAnimationStopping();
+            
+            // 7. Restore WAAPI animations
             try {
                 if (window.seizureState && window.seizureState.applyWAAPIStopMotion) {
                     window.seizureState.applyWAAPIStopMotion(false);
@@ -34680,57 +35000,85 @@ class AccessibilityWidget {
                 panel.style.display = 'none';
             }
             
-            // Determine which side of the screen the icon is on
+            // ALL SCREENS: Panel appears ABOVE the icon, fits viewport, no overflow
+            const spacing = 10; // Small spacing from icon
+            const panelMaxHeight = window.innerHeight * 0.85; // Max 85% of viewport height
+            
+            // Determine which side of the screen the icon is on (for horizontal positioning)
             const screenCenterX = window.innerWidth / 2;
             const iconCenterX = iconRect.left + (iconRect.width / 2);
             const iconIsOnLeft = iconCenterX < screenCenterX;
             
-            // Check if we're on mobile/tablet
-            const isMobileOrTablet = window.innerWidth <= 1024;
+            // Check if we're on mobile/tablet for width adjustment
+            const isMobileOrTablet = window.innerWidth <= 768;
             
             let finalLeft, finalRight, finalTop, finalBottom;
             
-            if (isMobileOrTablet) {
-                // Mobile/Tablet: Panel takes full height, positioned on same side as icon
+            // Calculate vertical position: panel should appear ABOVE the icon
+            // If icon is near bottom, panel starts from top
+            // If icon is near top, panel appears above icon
+            if (iconRect.top > window.innerHeight * 0.5) {
+                // Icon is in lower half - panel starts from top
                 finalTop = '0';
-                finalBottom = '0';
-                
-                if (iconIsOnLeft) {
-                    // Icon on left - panel on left side
-                    finalLeft = '0';
-                    finalRight = 'auto';
-                } else {
-                    // Icon on right - panel on right side
-                    finalLeft = 'auto';
-                    finalRight = '0';
-                }
-                
-                // On mobile/tablet: Full viewport height
-                panel.style.setProperty('height', '100vh', 'important');
-                panel.style.setProperty('max-height', '100vh', 'important');
-            } else {
-                // Desktop: Position panel next to icon, same side
-                const spacing = 20; // Space between icon and panel
-                
-                if (iconIsOnLeft) {
-                    // Icon on left - panel on left side, positioned to the right of icon
-                    finalLeft = `${iconRect.right + spacing}px`;
-                    finalRight = 'auto';
-                } else {
-                    // Icon on right - panel on right side, positioned to the left of icon
-                    finalLeft = 'auto';
-                    finalRight = `${window.innerWidth - iconRect.left + spacing}px`;
-                }
-                
-                // Position panel vertically - try to align top with icon, but adjust if needed
-                const topPosition = iconRect.top;
-                const maxTop = window.innerHeight - panelHeight - 20;
-                finalTop = `${Math.max(20, Math.min(topPosition, maxTop))}px`;
                 finalBottom = 'auto';
+            } else {
+                // Icon is in upper half - panel appears above icon
+                const topPosition = Math.max(0, iconRect.top - panelMaxHeight - spacing);
+                finalTop = `${topPosition}px`;
+                finalBottom = 'auto';
+            }
+            
+            // Horizontal positioning: Panel takes full width on mobile, centered/positioned on desktop
+            if (isMobileOrTablet) {
+                // Mobile/Tablet: Full width
+                finalLeft = '0';
+                finalRight = '0';
+            } else {
+                // Desktop: Position on same side as icon, but still above it
+                // Center panel horizontally relative to icon position
+                const panelCenterX = iconCenterX;
+                const panelLeftPosition = panelCenterX - (panelWidth / 2);
                 
-                // On desktop: Use calculated height
-                panel.style.setProperty('height', `${Math.min(panelHeight, window.innerHeight - 40)}px`, 'important');
-                panel.style.setProperty('max-height', `${window.innerHeight - 40}px`, 'important');
+                // Ensure panel doesn't go outside viewport
+                const minLeft = 20;
+                const maxLeft = window.innerWidth - panelWidth - 20;
+                finalLeft = `${Math.max(minLeft, Math.min(panelLeftPosition, maxLeft))}px`;
+                finalRight = 'auto';
+            }
+            
+            // ALL SCREENS: Fit within viewport, don't overflow
+            const availableHeight = window.innerHeight - parseFloat(finalTop || '0') - 10;
+            const calculatedHeight = Math.min(panelMaxHeight, availableHeight, window.innerHeight * 0.9);
+            
+            panel.style.setProperty('height', `${calculatedHeight}px`, 'important');
+            panel.style.setProperty('max-height', `${calculatedHeight}px`, 'important');
+            panel.style.setProperty('box-sizing', 'border-box', 'important');
+            panel.style.setProperty('overflow-x', 'hidden', 'important');
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            
+            // Set width based on screen size - ensure it fits viewport on ALL screens
+            if (isMobileOrTablet) {
+                // Mobile/Tablet: Full width, but ensure it doesn't overflow
+                panel.style.setProperty('width', '100vw', 'important');
+                panel.style.setProperty('max-width', '100vw', 'important');
+            } else {
+                // Desktop: Use CSS-defined width (from media queries), but ensure it fits viewport
+                const leftMargin = parseFloat(finalLeft || '0');
+                const rightMargin = 20;
+                const maxAvailableWidth = window.innerWidth - leftMargin - rightMargin;
+                const cssDefinedWidth = parseFloat(panelComputedStyle.width) || panelWidth;
+                
+                // Use the smaller of: CSS-defined width or available viewport width
+                const finalWidth = Math.min(cssDefinedWidth, maxAvailableWidth, window.innerWidth - 40);
+                
+                panel.style.setProperty('width', `${finalWidth}px`, 'important');
+                panel.style.setProperty('max-width', `${finalWidth}px`, 'important');
+                
+                // If panel would overflow, adjust left position to keep it in viewport
+                if (leftMargin + finalWidth > window.innerWidth - rightMargin) {
+                    const adjustedLeft = Math.max(20, window.innerWidth - finalWidth - rightMargin);
+                    finalLeft = `${adjustedLeft}px`;
+                }
             }
             
             // Only update positioning, don't remove transform if panel is hidden
@@ -34740,13 +35088,55 @@ class AccessibilityWidget {
                                  !panel.classList.contains('active');
             
             // Set position - use fixed positioning relative to viewport
-            // Set positioning directly without !important to avoid conflicts with CSS media queries
-            panel.style.position = 'fixed';
-            panel.style.left = finalLeft;
-            panel.style.right = finalRight;
-            panel.style.top = finalTop;
-            panel.style.bottom = finalBottom;
-            panel.style.zIndex = '2147483646';
+            // Use !important to ensure positioning overrides CSS and fits viewport
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('left', finalLeft, 'important');
+            if (finalRight !== undefined && finalRight !== 'auto') {
+                panel.style.setProperty('right', finalRight, 'important');
+            } else {
+                panel.style.removeProperty('right');
+            }
+            panel.style.setProperty('top', finalTop, 'important');
+            if (finalBottom !== undefined && finalBottom !== 'auto') {
+                panel.style.setProperty('bottom', finalBottom, 'important');
+            } else {
+                panel.style.removeProperty('bottom');
+            }
+            panel.style.setProperty('z-index', '2147483646', 'important');
+            
+            // Final check: Ensure panel doesn't overflow viewport on any screen size
+            // Wait for next frame to get accurate dimensions after positioning
+            requestAnimationFrame(() => {
+                const finalPanelRect = panel.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Check horizontal overflow
+                if (finalPanelRect.right > viewportWidth) {
+                    // Panel is overflowing right edge - adjust left position
+                    const overflow = finalPanelRect.right - viewportWidth;
+                    const currentLeft = parseFloat(finalLeft) || 0;
+                    const newLeft = Math.max(10, currentLeft - overflow - 10);
+                    panel.style.setProperty('left', `${newLeft}px`, 'important');
+                }
+                if (finalPanelRect.left < 0) {
+                    // Panel is overflowing left edge - adjust
+                    panel.style.setProperty('left', '10px', 'important');
+                }
+                
+                // Check vertical overflow
+                if (finalPanelRect.bottom > viewportHeight) {
+                    // Panel is overflowing bottom edge - adjust height
+                    const currentTop = parseFloat(finalTop || '0');
+                    const maxHeight = viewportHeight - currentTop - 10;
+                    panel.style.setProperty('height', `${Math.max(200, maxHeight)}px`, 'important');
+                    panel.style.setProperty('max-height', `${Math.max(200, maxHeight)}px`, 'important');
+                }
+                if (finalPanelRect.top < 0) {
+                    // Panel is overflowing top edge - adjust top position
+                    panel.style.setProperty('top', '10px', 'important');
+                }
+            });
             
             // Only remove transform if panel is visible, otherwise preserve it
             if (!isPanelHidden) {
