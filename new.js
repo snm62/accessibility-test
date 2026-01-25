@@ -1303,6 +1303,20 @@ const seizureState = {
                                                 currentTime: anim.currentTime || 0
                                             });
                                         }
+                                        // Finish animation to final state (not pause)
+                                        if (typeof anim.finish === 'function') { 
+                                            try { anim.finish(); } catch(_) {}
+                                        } else if (anim.effect && anim.effect.getComputedTiming) {
+                                            try {
+                                                const timing = anim.effect.getComputedTiming();
+                                                const end = timing.endTime != null ? timing.endTime : 
+                                                           (timing.duration != null && timing.duration !== 'auto' ? timing.duration : null);
+                                                if (end != null) {
+                                                    anim.currentTime = end;
+                                                }
+                                            } catch(_) {}
+                                        }
+                                        // Pause after finishing to prevent restart
                                         if (typeof anim.pause === 'function') try { anim.pause(); } catch(_) {}
                                         try { anim.playbackRate = 0; } catch(_) {}
                                     } catch(_) {}
@@ -1319,15 +1333,21 @@ const seizureState = {
                                                     currentTime: anim.currentTime || 0 
                                                 });
                                             }
-                                            // Stop/finish WAAPI animation to avoid mid-state
-                                            if (typeof anim.pause === 'function') { try { anim.pause(); } catch(_) {} }
-                                            if (typeof anim.finish === 'function') { try { anim.finish(); } catch(_) {} }
-                                            else if (anim.effect && anim.effect.getComputedTiming) {
+                                            // Finish animation to final state (not pause)
+                                            if (typeof anim.finish === 'function') { 
+                                                try { anim.finish(); } catch(_) {}
+                                            } else if (anim.effect && anim.effect.getComputedTiming) {
                                                 try {
-                                                    const end = anim.effect.getComputedTiming().endTime;
-                                                    if (end != null) anim.currentTime = end;
+                                                    const timing = anim.effect.getComputedTiming();
+                                                    const end = timing.endTime != null ? timing.endTime : 
+                                                               (timing.duration != null && timing.duration !== 'auto' ? timing.duration : null);
+                                                    if (end != null) {
+                                                        anim.currentTime = end;
+                                                    }
                                                 } catch(_) {}
                                             }
+                                            // Pause after finishing to prevent restart
+                                            if (typeof anim.pause === 'function') { try { anim.pause(); } catch(_) {} }
                                             try { anim.playbackRate = 0; } catch(_) {}
                                         } catch(_) {}
                                     };
@@ -25831,6 +25851,80 @@ class AccessibilityWidget {
                     
                 }
             }
+            
+            // Stop canvas animations (requestAnimationFrame-based)
+            this.stopCanvasAnimations();
+            
+            // Stop SVG animations (SMIL and CSS)
+            this.stopSVGAnimations();
+        }
+        
+        // Stop canvas-based animations by finding canvas elements and stopping their animation loops
+        stopCanvasAnimations() {
+            try {
+                const canvases = document.querySelectorAll('canvas');
+                canvases.forEach(canvas => {
+                    try {
+                        // Stop CSS animations on canvas
+                        canvas.style.animation = 'none';
+                        canvas.style.transition = 'none';
+                        
+                        // Try to access canvas context and stop any animation loops
+                        // Note: We can't directly stop requestAnimationFrame loops without global overrides,
+                        // but we can mark canvas elements for stopping
+                        canvas.setAttribute('data-seizure-safe-stopped', 'true');
+                        
+                        // For canvas elements with known animation libraries, try to stop them
+                        if (canvas._animationId) {
+                            // Some libraries store animation IDs
+                            try {
+                                cancelAnimationFrame(canvas._animationId);
+                            } catch (_) {}
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Stop SVG animations (SMIL animations and CSS animations on SVG elements)
+        stopSVGAnimations() {
+            try {
+                const svgs = document.querySelectorAll('svg');
+                svgs.forEach(svg => {
+                    try {
+                        // Stop CSS animations on SVG
+                        svg.style.animation = 'none';
+                        svg.style.transition = 'none';
+                        
+                        // Stop SMIL animations (animate, animateTransform, animateMotion)
+                        const smilAnimations = svg.querySelectorAll('animate, animateTransform, animateMotion, set');
+                        smilAnimations.forEach(anim => {
+                            try {
+                                // Pause SMIL animations
+                                if (anim.pauseAnimations) {
+                                    anim.pauseAnimations();
+                                }
+                                // Set end time to current time to finish animation
+                                if (anim.setAttribute) {
+                                    const begin = anim.getAttribute('begin');
+                                    const dur = anim.getAttribute('dur');
+                                    if (begin && dur) {
+                                        // Calculate end time and set to finish
+                                        try {
+                                            const beginTime = parseFloat(begin) || 0;
+                                            const duration = parseFloat(dur) || 0;
+                                            anim.setAttribute('dur', '0s'); // Stop immediately
+                                        } catch (_) {}
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                        
+                        // Mark as stopped
+                        svg.setAttribute('data-seizure-safe-stopped', 'true');
+                    } catch (_) {}
+                });
+            } catch (_) {}
         }
         
         enableReduceMotion() {
@@ -26982,7 +27076,20 @@ class AccessibilityWidget {
                                 if (inst.setSpeed) inst.setSpeed(0);
                                 if (inst.stop) inst.stop();
                                 if (inst.pause) inst.pause();
-                                if (inst.goToAndStop) inst.goToAndStop(0, true);
+                                if (inst.goToAndStop) {
+                                    // Go to final frame (finish to final state, not frame 0)
+                                    const totalFrames = inst.totalFrames || inst.frameCount || 0;
+                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                    inst.goToAndStop(finalFrame, true);
+                                } else if (inst.goToAndPlay) {
+                                    // Fallback: go to end if goToAndStop not available
+                                    const totalFrames = inst.totalFrames || inst.frameCount || 0;
+                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                    inst.goToAndPlay(finalFrame, true);
+                                    if (inst.pause) {
+                                        setTimeout(() => inst.pause(), 0);
+                                    }
+                                }
                                 if (inst.autoplay !== undefined) inst.autoplay = false;
                                 if (inst.loop !== undefined) inst.loop = false;
                             }
@@ -27076,7 +27183,10 @@ class AccessibilityWidget {
                                     player.pause();
                                 }
                                 if (typeof player.seek === 'function') {
-                                    player.seek(0);
+                                    // Go to final frame (finish to final state)
+                                    const totalFrames = player.totalFrames || player.frameCount || 0;
+                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                    player.seek(finalFrame);
                                 }
                                 if (typeof player.setMode === 'function') {
                                     player.setMode('normal');
@@ -27103,7 +27213,18 @@ class AccessibilityWidget {
                                             animation.pause();
                                         }
                                         if (typeof animation.goToAndStop === 'function') {
-                                            animation.goToAndStop(0, true);
+                                            // Go to final frame (finish to final state, not frame 0)
+                                            const totalFrames = animation.totalFrames || animation.frameCount || 0;
+                                            const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                            animation.goToAndStop(finalFrame, true);
+                                        } else if (typeof animation.goToAndPlay === 'function') {
+                                            // Fallback: go to end if goToAndStop not available
+                                            const totalFrames = animation.totalFrames || animation.frameCount || 0;
+                                            const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                            animation.goToAndPlay(finalFrame, true);
+                                            if (typeof animation.pause === 'function') {
+                                                setTimeout(() => animation.pause(), 0);
+                                            }
                                         }
                                         if (animation.autoplay !== undefined) {
                                             animation.autoplay = false;
@@ -27132,7 +27253,18 @@ class AccessibilityWidget {
                                         lottieInstance.pause();
                                     }
                                     if (typeof lottieInstance.goToAndStop === 'function') {
-                                        lottieInstance.goToAndStop(0, true);
+                                        // Go to final frame (finish to final state, not frame 0)
+                                        const totalFrames = lottieInstance.totalFrames || lottieInstance.frameCount || 0;
+                                        const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                        lottieInstance.goToAndStop(finalFrame, true);
+                                    } else if (typeof lottieInstance.goToAndPlay === 'function') {
+                                        // Fallback: go to end if goToAndStop not available
+                                        const totalFrames = lottieInstance.totalFrames || lottieInstance.frameCount || 0;
+                                        const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                        lottieInstance.goToAndPlay(finalFrame, true);
+                                        if (typeof lottieInstance.pause === 'function') {
+                                            setTimeout(() => lottieInstance.pause(), 0);
+                                        }
                                     }
                                     if (lottieInstance.autoplay !== undefined) {
                                         lottieInstance.autoplay = false;
@@ -28889,9 +29021,20 @@ class AccessibilityWidget {
                                                 anim.pause();
                                             }
                                             
-                                            // 4. Go to first frame and stop (ensures it's at frame 0)
+                                            // 4. Go to final frame and stop (finish to final state, not frame 0)
                                             if (typeof anim.goToAndStop === 'function') {
-                                                anim.goToAndStop(0, true);
+                                                // Get total frames and go to last frame
+                                                const totalFrames = anim.totalFrames || anim.frameCount || 0;
+                                                const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                                anim.goToAndStop(finalFrame, true);
+                                            } else if (typeof anim.goToAndPlay === 'function') {
+                                                // Fallback: go to end if goToAndStop not available
+                                                const totalFrames = anim.totalFrames || anim.frameCount || 0;
+                                                const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                                anim.goToAndPlay(finalFrame, true);
+                                                if (typeof anim.pause === 'function') {
+                                                    setTimeout(() => anim.pause(), 0);
+                                                }
                                             }
                                             
                                             // 5. Prevent autoplay
@@ -28948,7 +29091,18 @@ class AccessibilityWidget {
                                                 anim.pause();
                                             }
                                             if (typeof anim.goToAndStop === 'function') {
-                                                anim.goToAndStop(0, true);
+                                                // Go to final frame (finish to final state, not frame 0)
+                                                const totalFrames = anim.totalFrames || anim.frameCount || 0;
+                                                const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                                anim.goToAndStop(finalFrame, true);
+                                            } else if (typeof anim.goToAndPlay === 'function') {
+                                                // Fallback: go to end if goToAndStop not available
+                                                const totalFrames = anim.totalFrames || anim.frameCount || 0;
+                                                const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                                anim.goToAndPlay(finalFrame, true);
+                                                if (typeof anim.pause === 'function') {
+                                                    setTimeout(() => anim.pause(), 0);
+                                                }
                                             }
                                             if (anim.autoplay !== undefined) {
                                                 anim.autoplay = false;
@@ -28989,9 +29143,12 @@ class AccessibilityWidget {
                                 player.setSpeed(0);
                             }
                             
-                            // 4. Go to first frame and stop
+                            // 4. Go to final frame and stop (finish to final state)
                             if (typeof player.seek === 'function') {
-                                player.seek(0);
+                                // Get total frames and seek to last frame
+                                const totalFrames = player.totalFrames || player.frameCount || 0;
+                                const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                player.seek(finalFrame);
                             }
                             
                             // 5. Set mode to 'normal' (prevents looping)
@@ -29032,7 +29189,18 @@ class AccessibilityWidget {
                                     lottieInstance.pause();
                                 }
                                 if (typeof lottieInstance.goToAndStop === 'function') {
-                                    lottieInstance.goToAndStop(0, true);
+                                    // Go to final frame (finish to final state, not frame 0)
+                                    const totalFrames = lottieInstance.totalFrames || lottieInstance.frameCount || 0;
+                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                    lottieInstance.goToAndStop(finalFrame, true);
+                                } else if (typeof lottieInstance.goToAndPlay === 'function') {
+                                    // Fallback: go to end if goToAndStop not available
+                                    const totalFrames = lottieInstance.totalFrames || lottieInstance.frameCount || 0;
+                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                    lottieInstance.goToAndPlay(finalFrame, true);
+                                    if (typeof lottieInstance.pause === 'function') {
+                                        setTimeout(() => lottieInstance.pause(), 0);
+                                    }
                                 }
                                 if (lottieInstance.autoplay !== undefined) {
                                     lottieInstance.autoplay = false;
@@ -32499,11 +32667,31 @@ class AccessibilityWidget {
                                     this.customizationData.mobileTriggerVerticalPosition
                                 );
                             }
+                            
+                            // Reapply mobile customizations (shape, size, color)
+                            if (this.customizationData.mobileTriggerShape) {
+                                this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
+                            }
+                            
+                            if (this.customizationData.mobileTriggerSize) {
+                                this.updateMobileTriggerSize(this.customizationData.mobileTriggerSize);
+                            }
+                            
+                            if (this.customizationData.triggerButtonColor) {
+                                this.updateTriggerButtonColor(this.customizationData.triggerButtonColor);
+                            }
                         }
                     } else {
                         // Apply desktop settings
                         this.removeMobileResponsiveStyles();
                         panel.classList.remove('mobile-mode');
+                        
+                        // Ensure desktop customizations are fully reapplied
+                        // removeMobileResponsiveStyles() already calls reapplyDesktopIconCustomizations(),
+                        // but we'll also ensure interface position is updated
+                        if (this.customizationData) {
+                            this.updateInterfacePosition();
+                        }
                     }
                 }
                 
@@ -33893,6 +34081,15 @@ class AccessibilityWidget {
                 this.ensureBasePanelCSS();
                 
                 const screenWidth = window.innerWidth;
+                
+                // Store desktop icon size before applying mobile styles (if not already stored)
+                if (!this._desktopIconSize) {
+                    const iconComputed = window.getComputedStyle(icon);
+                    this._desktopIconSize = {
+                        width: iconComputed.width,
+                        height: iconComputed.height
+                    };
+                }
                
                 
                 // Log current font sizes before changes
@@ -33923,8 +34120,21 @@ class AccessibilityWidget {
                     // Debug any font-size conflicts
                     this.debugFontSizeConflicts(panel);
                     
+                    // Apply mobile icon size but preserve customization color and shape
                     icon.style.setProperty('width', '40px', 'important');
                     icon.style.setProperty('height', '40px', 'important');
+                    
+                    // Preserve customization color if set
+                    if (this.customizationData?.triggerButtonColor) {
+                        icon.style.setProperty('background-color', this.customizationData.triggerButtonColor, 'important');
+                    }
+                    
+                    // Preserve customization shape if set (mobile shape takes precedence if exists)
+                    if (this.customizationData?.mobileTriggerShape) {
+                        this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
+                    } else if (this.customizationData?.triggerButtonShape) {
+                        this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
+                    }
                     
                     const iconI = icon.querySelector('i');
                     if (iconI) {
@@ -33959,8 +34169,21 @@ class AccessibilityWidget {
                     // Debug any font-size conflicts
                     this.debugFontSizeConflicts(panel);
                     
+                    // Apply mobile icon size but preserve customization color and shape
                     icon.style.setProperty('width', '45px', 'important');
                     icon.style.setProperty('height', '45px', 'important');
+                    
+                    // Preserve customization color if set
+                    if (this.customizationData?.triggerButtonColor) {
+                        icon.style.setProperty('background-color', this.customizationData.triggerButtonColor, 'important');
+                    }
+                    
+                    // Preserve customization shape if set (mobile shape takes precedence if exists)
+                    if (this.customizationData?.mobileTriggerShape) {
+                        this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
+                    } else if (this.customizationData?.triggerButtonShape) {
+                        this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
+                    }
                     
                     const iconI = icon.querySelector('i');
                     if (iconI) {
@@ -34082,6 +34305,67 @@ class AccessibilityWidget {
                 if (iconI) {
                     iconI.style.removeProperty('font-size');
                 }
+                
+                // CRITICAL: Reapply desktop customizations after removing mobile styles
+                // This ensures icon maintains its color, shape, size, position, and offset
+                this.reapplyDesktopIconCustomizations();
+            }
+        }
+        
+        // Reapply desktop icon customizations to restore styles after mobile removal
+        reapplyDesktopIconCustomizations() {
+            if (!this.customizationData) {
+                return;
+            }
+            
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+            if (!icon) {
+                return;
+            }
+            
+            // Only reapply desktop customizations (not mobile)
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                return; // Don't reapply desktop styles on mobile
+            }
+            
+            // Reapply color
+            if (this.customizationData.triggerButtonColor) {
+                this.updateTriggerButtonColor(this.customizationData.triggerButtonColor);
+            }
+            
+            // Reapply shape
+            if (this.customizationData.triggerButtonShape) {
+                this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
+            }
+            
+            // Reapply size
+            if (this.customizationData.triggerButtonSize) {
+                this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
+            }
+            
+            // Reapply position
+            if (this.customizationData.triggerHorizontalPosition) {
+                this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
+            }
+            
+            if (this.customizationData.triggerVerticalPosition) {
+                this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
+            }
+            
+            // Reapply offsets
+            if (this.customizationData.triggerHorizontalOffset) {
+                this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
+            }
+            
+            if (this.customizationData.triggerVerticalOffset) {
+                this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
+            }
+            
+            // Reapply icon image if set
+            const iconValue = this.customizationData.selectedIcon || this.customizationData.triggerIcon;
+            if (iconValue) {
+                this.updateSelectedIcon(iconValue);
             }
         }
         
