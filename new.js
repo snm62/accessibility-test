@@ -6814,69 +6814,85 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel .toggle-switch {
-                    width: 55px !important;
-                    height: 26px !important;
-                    min-width: 55px !important;
+                    width: 42px !important;
+                    height: 22px !important;
+                    min-width: 42px !important;
                     flex-shrink: 0 !important;
                 }
                 
                 .accessbit-widget-panel .toggle-label {
-                    width: 55px !important;
-                    height: 26px !important;
+                    width: 42px !important;
+                    height: 22px !important;
                 }
                 
                 .accessbit-widget-panel .toggle-switch .slider,
                 .accessbit-widget-panel .toggle-label {
-                    width: 55px !important;
-                    height: 26px !important;
+                    width: 42px !important;
+                    height: 22px !important;
                 }
                 
                 .accessbit-widget-panel .toggle-switch .slider::before,
                 .accessbit-widget-panel .toggle-label::after {
-                    width: 22px !important;
-                    height: 22px !important;
+                    width: 18px !important;
+                    height: 18px !important;
                 }
                 
-                /* Fix toggle text to be horizontal (not vertical) on tablet */
+                /* Fix toggle text to be horizontal (not vertical) on tablet - smaller to fit */
                 .accessbit-widget-panel .toggle-off,
                 .accessbit-widget-panel .toggle-on,
                 .accessbit-widget-panel .slider::after {
                     writing-mode: horizontal-tb !important;
                     text-orientation: mixed !important;
                     white-space: nowrap !important;
-                    font-size: 9px !important;
+                    font-size: 7px !important;
                     line-height: 1 !important;
                     display: block !important;
                     width: auto !important;
                     height: auto !important;
-                    letter-spacing: 0 !important;
+                    letter-spacing: -0.5px !important;
                     word-spacing: 0 !important;
                     text-align: center !important;
+                    overflow: hidden !important;
+                    text-overflow: clip !important;
                 }
                 
                 .accessbit-widget-panel .toggle-off {
-                    left: 10px !important;
+                    left: 7px !important;
                     right: auto !important;
                     top: 50% !important;
                     transform: translateY(-50%) !important;
+                    max-width: 12px !important;
                 }
                 
                 .accessbit-widget-panel .toggle-on {
-                    right: 10px !important;
+                    right: 7px !important;
                     left: auto !important;
                     top: 50% !important;
                     transform: translateY(-50%) !important;
+                    max-width: 12px !important;
                 }
                 
                 .accessbit-widget-panel .slider::after {
-                    left: 14px !important;
-                    font-size: 9px !important;
+                    left: 11px !important;
+                    font-size: 7px !important;
+                    max-width: 10px !important;
                 }
                 
                 .accessbit-widget-panel input:checked + .slider::after {
-                    right: 14px !important;
+                    right: 11px !important;
                     left: auto !important;
-                    font-size: 9px !important;
+                    font-size: 7px !important;
+                    max-width: 10px !important;
+                }
+                
+                /* Adjust slider position for smaller size */
+                .accessbit-widget-panel .toggle-label::after {
+                    top: 2px !important;
+                    left: 2px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch input[type="checkbox"]:checked + .toggle-label::after {
+                    transform: translateX(20px) !important;
                 }
             }
             
@@ -7399,7 +7415,10 @@ class AccessibilityWidget {
     
                     width: 500px !important;
     
-                    height: 700px !important;
+                    /* Desktop: Allow panel to expand to fit content, with max-height for very tall screens */
+                    height: auto !important;
+                    min-height: 400px !important;
+                    max-height: 90vh !important;
     
                     background: #ffffff !important;
     
@@ -26221,22 +26240,46 @@ class AccessibilityWidget {
         
         
         stopAutoplayMedia() {
-            // Pause all currently playing videos
+            // Pause all currently playing videos and remove autoplay
             document.querySelectorAll('video').forEach(video => {
-                if (!video.paused) {
-                    video.pause();
-                }
+                try {
+                    // Pause if playing
+                    if (!video.paused) {
+                        video.pause();
+                    }
+                    // Remove autoplay attribute to prevent future autoplay
+                    video.removeAttribute('autoplay');
+                    video.setAttribute('data-autoplay-disabled', 'true');
+                    // Prevent autoplay via JavaScript
+                    if (video.autoplay !== undefined) {
+                        video.autoplay = false;
+                    }
+                    // Stop any looping
+                    video.loop = false;
+                } catch (_) {}
             });
             
-            // Pause all currently playing audio
+            // Pause all currently playing audio and remove autoplay
             document.querySelectorAll('audio').forEach(audio => {
-                if (!audio.paused) {
-                    audio.pause();
-                }
+                try {
+                    // Pause if playing
+                    if (!audio.paused) {
+                        audio.pause();
+                    }
+                    // Remove autoplay attribute to prevent future autoplay
+                    audio.removeAttribute('autoplay');
+                    audio.setAttribute('data-autoplay-disabled', 'true');
+                    // Prevent autoplay via JavaScript
+                    if (audio.autoplay !== undefined) {
+                        audio.autoplay = false;
+                    }
+                    // Stop any looping
+                    audio.loop = false;
+                } catch (_) {}
             });
             
             // Handle embedded media (YouTube, Vimeo, etc.)
-            document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"]').forEach(iframe => {
+            document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="youtube-nocookie"]').forEach(iframe => {
                 try {
                     // Security: Validate URL before manipulation to prevent XSS
                     const src = iframe.src;
@@ -26246,7 +26289,7 @@ class AccessibilityWidget {
                     let isValidUrl = false;
                     try {
                         const url = new URL(src);
-                        const allowedDomains = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'player.vimeo.com'];
+                        const allowedDomains = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'player.vimeo.com', 'youtube-nocookie.com'];
                         isValidUrl = allowedDomains.some(domain => url.hostname.includes(domain));
                     } catch {
                         // If URL parsing fails, skip modification
@@ -26255,33 +26298,57 @@ class AccessibilityWidget {
                     
                     if (!isValidUrl) return;
                     
+                    // Mark as disabled to prevent re-processing
+                    if (iframe.hasAttribute('data-autoplay-disabled')) return;
+                    
                     // Try to pause embedded videos by modifying src
+                    let newSrc = src;
                     if (src.includes('autoplay=1')) {
-                        const newSrc = src.replace('autoplay=1', 'autoplay=0');
-                        // Double-check the new URL is still valid
-                        try {
-                            new URL(newSrc);
-                            iframe.src = newSrc;
-                        } catch {
-                            // Invalid URL, skip
-                        }
+                        newSrc = src.replace('autoplay=1', 'autoplay=0');
+                    } else if (src.includes('autoplay=true')) {
+                        newSrc = src.replace('autoplay=true', 'autoplay=false');
                     } else if (!src.includes('autoplay=')) {
                         const separator = src.includes('?') ? '&' : '?';
-                        const newSrc = src + separator + 'autoplay=0';
-                        // Double-check the new URL is still valid
-                        try {
-                            new URL(newSrc);
-                            iframe.src = newSrc;
-                        } catch {
-                            // Invalid URL, skip
-                        }
+                        newSrc = src + separator + 'autoplay=0';
+                    }
+                    
+                    // Also remove loop if present
+                    if (newSrc.includes('loop=1')) {
+                        newSrc = newSrc.replace('loop=1', 'loop=0');
+                    } else if (newSrc.includes('loop=true')) {
+                        newSrc = newSrc.replace('loop=true', 'loop=false');
+                    }
+                    
+                    // Double-check the new URL is still valid
+                    try {
+                        new URL(newSrc);
+                        iframe.src = newSrc;
+                        iframe.setAttribute('data-autoplay-disabled', 'true');
+                    } catch {
+                        // Invalid URL, skip
                     }
                 } catch (e) {
                   
                 }
             });
             
-          
+            // Stop any elements with autoplay attribute
+            document.querySelectorAll('[autoplay], [data-autoplay], [class*="autoplay"]').forEach(el => {
+                try {
+                    el.removeAttribute('autoplay');
+                    el.removeAttribute('data-autoplay');
+                    el.setAttribute('data-autoplay-disabled', 'true');
+                    // If it's a video or audio element, pause it
+                    if (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') {
+                        if (!el.paused) {
+                            el.pause();
+                        }
+                        if (el.autoplay !== undefined) {
+                            el.autoplay = false;
+                        }
+                    }
+                } catch (_) {}
+            });
         }
         
         // 7. Stop any JavaScript-based animations (like the slider auto-slide)
@@ -28993,6 +29060,11 @@ class AccessibilityWidget {
                 // Call stopAnimationLibraries which uses the official Lottie and GSAP APIs
                 try {
                     this.stopAnimationLibraries();
+                } catch (_) {}
+                
+                // Stop autoplay media periodically to catch new media that starts autoplaying
+                try {
+                    this.stopAutoplayMedia();
                 } catch (_) {}
             } catch (e) {}
         }
@@ -35233,12 +35305,23 @@ class AccessibilityWidget {
                 finalRight = 'auto';
             }
             
-            // ALL SCREENS: Fit within viewport, don't overflow
-            const availableHeight = window.innerHeight - parseFloat(finalTop || '0') - 10;
-            const calculatedHeight = Math.min(panelMaxHeight, availableHeight, window.innerHeight * 0.9);
+            // Desktop: Allow panel to expand to fit content, only limit if it would overflow
+            // Mobile/Tablet: Limit to 85% of viewport height
+            if (isMobileOrTablet) {
+                // Mobile/Tablet: Limit height to prevent overflow
+                const availableHeight = window.innerHeight - parseFloat(finalTop || '0') - 10;
+                const calculatedHeight = Math.min(panelMaxHeight, availableHeight, window.innerHeight * 0.9);
+                panel.style.setProperty('height', `${calculatedHeight}px`, 'important');
+                panel.style.setProperty('max-height', `${calculatedHeight}px`, 'important');
+            } else {
+                // Desktop: Allow panel to expand to fit all content
+                // Only set max-height to prevent viewport overflow, but allow content to determine height
+                const availableHeight = window.innerHeight - parseFloat(finalTop || '0') - 10;
+                const maxAllowedHeight = Math.min(window.innerHeight * 0.9, availableHeight);
+                panel.style.removeProperty('height'); // Remove fixed height, let content determine it
+                panel.style.setProperty('max-height', `${maxAllowedHeight}px`, 'important');
+            }
             
-            panel.style.setProperty('height', `${calculatedHeight}px`, 'important');
-            panel.style.setProperty('max-height', `${calculatedHeight}px`, 'important');
             panel.style.setProperty('box-sizing', 'border-box', 'important');
             panel.style.setProperty('overflow-x', 'hidden', 'important');
             panel.style.setProperty('overflow-y', 'auto', 'important');
