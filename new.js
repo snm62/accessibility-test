@@ -6565,9 +6565,26 @@ class AccessibilityWidget {
             
             /* Force panel positioning */
             .accessbit-widget-panel {
-                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
-                z-index: 100001 !important;
+                position: fixed !important;
+                z-index: 2147483646 !important;
                 display: none !important; /* Hidden by default */
+                background: #ffffff !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 8px !important;
+                font-family: 'DM Sans', sans-serif !important;
+                pointer-events: auto !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                scroll-behavior: smooth !important;
+                overscroll-behavior: contain !important;
+                height: 100vh !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto !important;
             }
             
             .accessbit-widget-panel.show {
@@ -6575,21 +6592,106 @@ class AccessibilityWidget {
                 visibility: visible !important;
             }
             
+            /* Default desktop panel styles */
+            .accessbit-widget-panel {
+                width: 600px !important;
+                max-width: 600px !important;
+                font-size: 16px !important;
+                padding: 20px !important;
+            }
+            
             /* Mobile responsiveness - handled by main responsive CSS above */
             
+            /* Responsive styles using CSS media queries - handles all screen sizes automatically */
             @media (max-width: 480px) {
+                .accessbit-widget-icon {
+                    width: 40px !important;
+                    height: 40px !important;
+                }
+                
+                .accessbit-widget-icon i {
+                    font-size: 16px !important;
+                }
+                
+                .accessbit-widget-panel {
+                    width: 75vw !important;
+                    max-width: 320px !important;
+                    left: 12.5vw !important;
+                    font-size: 12px !important;
+                    padding: 12px !important;
+                }
+            }
+            
+            @media (min-width: 481px) and (max-width: 768px) {
                 .accessbit-widget-icon {
                     width: 45px !important;
                     height: 45px !important;
                 }
                 
                 .accessbit-widget-icon i {
-                    /* Font size controlled by JavaScript */
+                    font-size: 18px !important;
                 }
                 
                 .accessbit-widget-panel {
-                    width: 95vw !important;
-                    max-width: 350px !important;
+                    width: 80vw !important;
+                    max-width: 380px !important;
+                    left: 10vw !important;
+                    font-size: 13px !important;
+                    padding: 14px !important;
+                }
+            }
+            
+            @media (min-width: 769px) and (max-width: 1024px) {
+                .accessbit-widget-icon {
+                    width: 50px !important;
+                    height: 50px !important;
+                }
+                
+                .accessbit-widget-icon i {
+                    font-size: 20px !important;
+                }
+                
+                .accessbit-widget-panel {
+                    width: 75vw !important;
+                    max-width: 380px !important;
+                    font-size: 14px !important;
+                    padding: 16px !important;
+                }
+            }
+            
+            @media (min-width: 1025px) and (max-width: 1366px) {
+                .accessbit-widget-icon {
+                    width: 55px !important;
+                    height: 55px !important;
+                }
+                
+                .accessbit-widget-icon i {
+                    font-size: 22px !important;
+                }
+                
+                .accessbit-widget-panel {
+                    width: 65vw !important;
+                    max-width: 450px !important;
+                    font-size: 15px !important;
+                    padding: 18px !important;
+                }
+            }
+            
+            @media (min-width: 1367px) {
+                .accessbit-widget-icon {
+                    width: 60px !important;
+                    height: 60px !important;
+                }
+                
+                .accessbit-widget-icon i {
+                    font-size: 24px !important;
+                }
+                
+                .accessbit-widget-panel {
+                    width: 600px !important;
+                    max-width: 600px !important;
+                    font-size: 16px !important;
+                    padding: 20px !important;
                 }
             }
                 /* Accessibility Widget Styles - Shadow DOM */
@@ -34080,183 +34182,28 @@ class AccessibilityWidget {
                 // First ensure base CSS is applied
                 this.ensureBasePanelCSS();
                 
-                const screenWidth = window.innerWidth;
+                // Add mobile-mode class - CSS media queries handle all responsive sizing automatically
+                panel.classList.add('mobile-mode');
                 
-                // Store desktop icon size before applying mobile styles (if not already stored)
-                if (!this._desktopIconSize) {
-                    const iconComputed = window.getComputedStyle(icon);
-                    this._desktopIconSize = {
-                        width: iconComputed.width,
-                        height: iconComputed.height
-                    };
-                }
-               
+                // Apply mobile button stacking and size reductions (layout changes, not sizing)
+                this.applyMobileButtonStacking();
+                this.applyMobileSizeReductions();
                 
-                // Log current font sizes before changes
-                const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
-                
-                
-                if (screenWidth <= 480) {
-                   
-                    panel.style.setProperty('width', '75vw', 'important');
-                    panel.style.setProperty('max-width', '320px', 'important');
-                    panel.style.setProperty('left', '12.5vw', 'important');
-                    panel.style.setProperty('font-size', '12px', 'important');
-                    panel.style.setProperty('padding', '12px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    // Verify font-size was applied
-                    const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-    
-                    
-                    // Apply mobile button stacking
-                    this.applyMobileButtonStacking();
-                    
-                    // Apply mobile size reductions
-                    this.applyMobileSizeReductions();
-                    
-                    // Debug any font-size conflicts
-                    this.debugFontSizeConflicts(panel);
-                    
-                    // Apply mobile icon size but preserve customization color and shape
-                    icon.style.setProperty('width', '40px', 'important');
-                    icon.style.setProperty('height', '40px', 'important');
-                    
-                    // Preserve customization color if set
-                    if (this.customizationData?.triggerButtonColor) {
+                // Only apply customization-specific styles (color, shape) - NOT sizing
+                // CSS media queries handle width, height, font-size, padding automatically
+                if (this.customizationData) {
+                    // Preserve customization color
+                    if (this.customizationData.triggerButtonColor) {
                         icon.style.setProperty('background-color', this.customizationData.triggerButtonColor, 'important');
                     }
                     
-                    // Preserve customization shape if set (mobile shape takes precedence if exists)
-                    if (this.customizationData?.mobileTriggerShape) {
+                    // Preserve customization shape (mobile shape takes precedence if exists)
+                    if (this.customizationData.mobileTriggerShape) {
                         this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
-                    } else if (this.customizationData?.triggerButtonShape) {
+                    } else if (this.customizationData.triggerButtonShape) {
                         this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
-                    }
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                       
-                        iconI.style.setProperty('font-size', '16px', 'important');
-                        const newIconFontSize = window.getComputedStyle(iconI).fontSize;
-                    
-                    } else {
-                    
-                    }
-                } else if (screenWidth <= 768) {
-                    
-                    panel.style.setProperty('width', '80vw', 'important');
-                    panel.style.setProperty('max-width', '380px', 'important');
-                    panel.style.setProperty('left', '10vw', 'important');
-                    panel.style.setProperty('font-size', '13px', 'important');
-                    panel.style.setProperty('padding', '14px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    // Apply mobile button stacking
-                    this.applyMobileButtonStacking();
-                    
-                    // Apply mobile size reductions
-                    this.applyMobileSizeReductions();
-                    
-                    // Verify font-size was applied
-                    const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-                  
-                    
-                    // Debug any font-size conflicts
-                    this.debugFontSizeConflicts(panel);
-                    
-                    // Apply mobile icon size but preserve customization color and shape
-                    icon.style.setProperty('width', '45px', 'important');
-                    icon.style.setProperty('height', '45px', 'important');
-                    
-                    // Preserve customization color if set
-                    if (this.customizationData?.triggerButtonColor) {
-                        icon.style.setProperty('background-color', this.customizationData.triggerButtonColor, 'important');
-                    }
-                    
-                    // Preserve customization shape if set (mobile shape takes precedence if exists)
-                    if (this.customizationData?.mobileTriggerShape) {
-                        this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
-                    } else if (this.customizationData?.triggerButtonShape) {
-                        this.updateTriggerButtonShape(this.customizationData.triggerButtonShape);
-                    }
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                  
-                        iconI.style.setProperty('font-size', '18px', 'important');
-                        const newIconFontSize = window.getComputedStyle(iconI).fontSize;
-                        
-                    } else {
-                        
-                    }
-                } else if (screenWidth >= 1025 && screenWidth <= 1366) {
-                 
-                    panel.style.setProperty('width', '65vw', 'important');
-                    panel.style.setProperty('max-width', '450px', 'important');
-                    panel.style.setProperty('left', '0.5vw', 'important');
-                    panel.style.setProperty('font-size', '15px');
-                    panel.style.setProperty('padding', '18px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '55px', 'important');
-                    icon.style.setProperty('height', '55px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '22px');
-                    }
-                } else if (screenWidth >= 820 && screenWidth <= 1024) {
-                   
-                    panel.style.setProperty('width', '75vw', 'important');
-                    panel.style.setProperty('max-width', '380px', 'important');
-                    panel.style.setProperty('left', '1vw', 'important');
-                    panel.style.setProperty('font-size', '14px');
-                    panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '50px', 'important');
-                    icon.style.setProperty('height', '50px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '20px');
-                    }
-                } else if (screenWidth <= 1024) {
-                  
-                    panel.style.setProperty('width', '85vw', 'important');
-                    panel.style.setProperty('max-width', '450px', 'important');
-                    panel.style.setProperty('left', '5vw', 'important');
-                    panel.style.setProperty('font-size', '14px');
-                    panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '50px', 'important');
-                    icon.style.setProperty('height', '50px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '20px');
                     }
                 }
-                
-                // Common mobile styles
-                panel.style.setProperty('right', 'auto', 'important');
-                panel.style.setProperty('top', '50%', 'important');
-                panel.style.setProperty('transform', 'translateY(-50%)', 'important');
-                panel.style.setProperty('overflow-y', 'auto', 'important');
-                panel.style.setProperty('position', 'fixed', 'important');
-                panel.style.setProperty('z-index', '2147483646', 'important');
             }
         }
         
@@ -34271,25 +34218,16 @@ class AccessibilityWidget {
                 // First ensure base CSS is applied
                 this.ensureBasePanelCSS();
                 
-                // Log current font sizes before removing
-                const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
-               
-                panel.style.removeProperty('width');
-                panel.style.removeProperty('max-width');
+                // Remove mobile-mode class (CSS media queries will handle sizing automatically)
+                panel.classList.remove('mobile-mode');
+                
+                // Remove only JavaScript-applied mobile-specific styles (not CSS-controlled sizing)
+                // CSS media queries handle responsive sizing, so we don't need to remove width/height/font-size
                 panel.style.removeProperty('left');
                 panel.style.removeProperty('right');
                 panel.style.removeProperty('top');
                 panel.style.removeProperty('transform');
                 panel.style.removeProperty('max-height');
-                panel.style.removeProperty('font-size');
-                panel.style.removeProperty('padding');
-                
-                // Check font-size after removal
-                const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-             
-                
-                // Check for any CSS rules that might be overriding font-size
-                this.debugFontSizeConflicts(panel);
                 
                 // Remove mobile button stacking
                 this.removeMobileButtonStacking();
@@ -34297,13 +34235,23 @@ class AccessibilityWidget {
                 // Remove mobile size reductions
                 this.removeMobileSizeReductions();
                 
-                // Remove mobile icon styles
-                icon.style.removeProperty('width');
-                icon.style.removeProperty('height');
+                // Don't remove icon width/height - CSS media queries handle this
+                // Only remove if they were explicitly set by JavaScript (check for inline style)
+                if (icon.style.width && icon.style.width.includes('px')) {
+                    // Only remove if it was set to a mobile size (40px, 45px)
+                    const currentWidth = parseInt(icon.style.width);
+                    if (currentWidth <= 45) {
+                        icon.style.removeProperty('width');
+                        icon.style.removeProperty('height');
+                    }
+                }
                 
                 const iconI = icon.querySelector('i');
-                if (iconI) {
-                    iconI.style.removeProperty('font-size');
+                if (iconI && iconI.style.fontSize) {
+                    const currentFontSize = parseInt(iconI.style.fontSize);
+                    if (currentFontSize <= 18) {
+                        iconI.style.removeProperty('font-size');
+                    }
                 }
                 
                 // CRITICAL: Reapply desktop customizations after removing mobile styles
