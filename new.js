@@ -1424,7 +1424,7 @@ const seizureState = {
                                                     } catch (_) {}
                                                 });
                                             } catch(_) {}
-                                        }, 50); // Check every 50ms for more aggressive stopping
+                                        }, 30); // Check every 30ms for very aggressive stopping
                                     }
                                     
                                     // MutationObserver to catch dynamically added elements with animations
@@ -6633,8 +6633,8 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel {
-                    width: 100vw !important;
-                    max-width: 100vw !important;
+                    width: 85vw !important;
+                    max-width: 85vw !important;
                     /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 10px !important;
                     padding: 8px !important;
@@ -6685,13 +6685,69 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel .toggle-switch {
-                    width: 36px !important;
+                    width: 50px !important;
+                    height: 24px !important;
+                    min-width: 50px !important;
+                    flex-shrink: 0 !important;
+                }
+                
+                .accessbit-widget-panel .toggle-label {
+                    width: 50px !important;
+                    height: 24px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider,
+                .accessbit-widget-panel .toggle-label {
+                    width: 50px !important;
+                    height: 24px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider::before,
+                .accessbit-widget-panel .toggle-label::after {
+                    width: 20px !important;
                     height: 20px !important;
                 }
                 
-                .accessbit-widget-panel .toggle-switch .slider {
-                    width: 16px !important;
-                    height: 16px !important;
+                /* Fix toggle text to be horizontal (not vertical) */
+                .accessbit-widget-panel .toggle-off,
+                .accessbit-widget-panel .toggle-on,
+                .accessbit-widget-panel .slider::after {
+                    writing-mode: horizontal-tb !important;
+                    text-orientation: mixed !important;
+                    white-space: nowrap !important;
+                    font-size: 8px !important;
+                    line-height: 1 !important;
+                    display: block !important;
+                    width: auto !important;
+                    height: auto !important;
+                    letter-spacing: 0 !important;
+                    word-spacing: 0 !important;
+                    text-align: center !important;
+                }
+                
+                .accessbit-widget-panel .toggle-off {
+                    left: 8px !important;
+                    right: auto !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                }
+                
+                .accessbit-widget-panel .toggle-on {
+                    right: 8px !important;
+                    left: auto !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                }
+                
+                .accessbit-widget-panel .slider::after {
+                    left: 12px !important;
+                    font-size: 8px !important;
+                }
+                
+                .accessbit-widget-panel input:checked + .slider::after {
+                    right: 12px !important;
+                    left: auto !important;
+                    font-size: 8px !important;
                 }
             }
             
@@ -6706,14 +6762,14 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel {
-                    width: 100vw !important;
-                    max-width: 100vw !important;
+                    width: 85vw !important;
+                    max-width: 85vw !important;
                     /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 11px !important;
                     padding: 10px !important;
                     box-sizing: border-box !important;
                     overflow-x: hidden !important;
-                    margin: 0 !important;
+                    margin: 0 auto !important;
                 }
                 
                 .accessbit-widget-panel * {
@@ -6758,13 +6814,69 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel .toggle-switch {
-                    width: 40px !important;
+                    width: 55px !important;
+                    height: 26px !important;
+                    min-width: 55px !important;
+                    flex-shrink: 0 !important;
+                }
+                
+                .accessbit-widget-panel .toggle-label {
+                    width: 55px !important;
+                    height: 26px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider,
+                .accessbit-widget-panel .toggle-label {
+                    width: 55px !important;
+                    height: 26px !important;
+                }
+                
+                .accessbit-widget-panel .toggle-switch .slider::before,
+                .accessbit-widget-panel .toggle-label::after {
+                    width: 22px !important;
                     height: 22px !important;
                 }
                 
-                .accessbit-widget-panel .toggle-switch .slider {
-                    width: 18px !important;
-                    height: 18px !important;
+                /* Fix toggle text to be horizontal (not vertical) on tablet */
+                .accessbit-widget-panel .toggle-off,
+                .accessbit-widget-panel .toggle-on,
+                .accessbit-widget-panel .slider::after {
+                    writing-mode: horizontal-tb !important;
+                    text-orientation: mixed !important;
+                    white-space: nowrap !important;
+                    font-size: 9px !important;
+                    line-height: 1 !important;
+                    display: block !important;
+                    width: auto !important;
+                    height: auto !important;
+                    letter-spacing: 0 !important;
+                    word-spacing: 0 !important;
+                    text-align: center !important;
+                }
+                
+                .accessbit-widget-panel .toggle-off {
+                    left: 10px !important;
+                    right: auto !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                }
+                
+                .accessbit-widget-panel .toggle-on {
+                    right: 10px !important;
+                    left: auto !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                }
+                
+                .accessbit-widget-panel .slider::after {
+                    left: 14px !important;
+                    font-size: 9px !important;
+                }
+                
+                .accessbit-widget-panel input:checked + .slider::after {
+                    right: 14px !important;
+                    left: auto !important;
+                    font-size: 9px !important;
                 }
             }
             
@@ -8063,6 +8175,13 @@ class AccessibilityWidget {
                     transition: 0.3s;
     
                     font-family: 'DM Sans', sans-serif;
+                    
+                    /* Ensure text is always horizontal */
+                    writing-mode: horizontal-tb !important;
+                    text-orientation: mixed !important;
+                    white-space: nowrap !important;
+                    letter-spacing: 0 !important;
+                    word-spacing: 0 !important;
     
                 }
     
@@ -26025,6 +26144,9 @@ class AccessibilityWidget {
 
             // Stop Webflow interactions / data-w-id transforms and hovers
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+            
+            // Start aggressive periodic animation stopping (no global overrides)
+            this.startAggressiveAnimationStopping();
         }
         
         // 1. CSS Injection: Stop all CSS animations, transitions, and blinking text
@@ -26500,6 +26622,8 @@ class AccessibilityWidget {
             document.body.classList.remove('stop-animation');
             document.documentElement.classList.remove('stop-animation');
             this.stopLottieGSAPPolling();
+            // Stop aggressive animation stopping
+            this.stopAggressiveAnimationStopping();
             try { window.seizureState?.applyWAAPIStopMotion?.(false); } catch (_) {}
             this.settings['stop-animation'] = false;
             this.saveSettings();
@@ -27617,7 +27741,7 @@ class AccessibilityWidget {
             // Clear any existing intervals first
             this.stopLottieGSAPPolling();
             
-            // Poll for Lottie animations every 100ms
+            // Poll for Lottie animations every 50ms (more aggressive)
             if (!this.lottiePollInterval) {
                 this.lottiePollInterval = setInterval(() => {
                     try {
@@ -27772,7 +27896,7 @@ class AccessibilityWidget {
                             }
                         }
                     } catch (_) {}
-                }, 100); // Check every 100ms
+                }, 50); // Check every 50ms (more aggressive)
             }
         }
         
@@ -28763,10 +28887,10 @@ class AccessibilityWidget {
             // Run immediately
             this.aggressivelyStopAllAnimations();
             
-            // Then run every 100ms to catch new animations
+            // Then run every 30ms to catch new animations even more aggressively
             this._aggressiveAnimationStopperInterval = setInterval(() => {
                 this.aggressivelyStopAllAnimations();
-            }, 100);
+            }, 30);
         }
         
         stopAggressiveAnimationStopping() {
@@ -28778,6 +28902,39 @@ class AccessibilityWidget {
         
         aggressivelyStopAllAnimations() {
             try {
+                // Check if seizure-safe or stop-animation is active
+                const isSeizureSafe = document.body.classList.contains('seizure-safe') || 
+                                     document.documentElement.classList.contains('seizure-safe');
+                const isStopAnimation = document.body.classList.contains('stop-animation') || 
+                                       document.documentElement.classList.contains('stop-animation');
+                
+                if (!isSeizureSafe && !isStopAnimation) {
+                    return; // Don't run if neither is active
+                }
+                
+                // Stop all WAAPI animations globally first
+                try {
+                    if (document.getAnimations) {
+                        const allAnims = document.getAnimations({ subtree: true });
+                        allAnims.forEach(anim => {
+                            try {
+                                if (typeof anim.finish === 'function') {
+                                    anim.finish();
+                                } else if (anim.effect && anim.effect.getComputedTiming) {
+                                    const timing = anim.effect.getComputedTiming();
+                                    const end = timing.endTime != null ? timing.endTime : 
+                                               (timing.duration != null && timing.duration !== 'auto' ? timing.duration : null);
+                                    if (end != null) {
+                                        anim.currentTime = end;
+                                    }
+                                }
+                                if (typeof anim.pause === 'function') anim.pause();
+                                anim.playbackRate = 0;
+                            } catch (_) {}
+                        });
+                    }
+                } catch (_) {}
+                
                 // Get all elements (excluding widget elements)
                 const allElements = document.querySelectorAll('*:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not(accessbit-widget)');
                 
@@ -28803,6 +28960,8 @@ class AccessibilityWidget {
                             el.style.setProperty('animation', 'none', 'important');
                             el.style.setProperty('transition', 'none', 'important');
                             el.style.setProperty('animation-play-state', 'paused', 'important');
+                            el.style.setProperty('animation-duration', '0s', 'important');
+                            el.style.setProperty('transition-duration', '0s', 'important');
                         }
                         
                         // Also stop any WAAPI animations on this element
@@ -28829,6 +28988,12 @@ class AccessibilityWidget {
                         }
                     } catch (_) {}
                 });
+                
+                // Use existing public API functions instead of duplicating code
+                // Call stopAnimationLibraries which uses the official Lottie and GSAP APIs
+                try {
+                    this.stopAnimationLibraries();
+                } catch (_) {}
             } catch (e) {}
         }
     
@@ -35014,25 +35179,47 @@ class AccessibilityWidget {
             
             let finalLeft, finalRight, finalTop, finalBottom;
             
-            // Calculate vertical position: panel should appear ABOVE the icon
-            // If icon is near bottom, panel starts from top
-            // If icon is near top, panel appears above icon
-            if (iconRect.top > window.innerHeight * 0.5) {
-                // Icon is in lower half - panel starts from top
-                finalTop = '0';
+            // Calculate vertical position: panel should appear ABOVE the icon on ALL screens
+            // Position panel above icon with spacing
+            const spacingAbove = 15; // Space between icon and panel
+            const topPosition = Math.max(10, iconRect.top - panelMaxHeight - spacingAbove);
+            
+            // If there's not enough space above, position from top of viewport
+            if (topPosition < 10) {
+                finalTop = '10px';
                 finalBottom = 'auto';
             } else {
-                // Icon is in upper half - panel appears above icon
-                const topPosition = Math.max(0, iconRect.top - panelMaxHeight - spacing);
                 finalTop = `${topPosition}px`;
                 finalBottom = 'auto';
             }
             
-            // Horizontal positioning: Panel takes full width on mobile, centered/positioned on desktop
+            // Horizontal positioning: Panel positioned on same side as icon, above it
+            // Determine which side icon is on
+            if (iconIsOnLeft) {
+                // Icon on left - panel on left side, aligned with icon center
+                const panelLeftPosition = iconCenterX - (panelWidth / 2);
+                const minLeft = 10;
+                const maxLeft = window.innerWidth - panelWidth - 10;
+                finalLeft = `${Math.max(minLeft, Math.min(panelLeftPosition, maxLeft))}px`;
+                finalRight = 'auto';
+            } else {
+                // Icon on right - panel on right side, aligned with icon center
+                const panelLeftFromRight = iconCenterX - (panelWidth / 2);
+                const minLeft = 10;
+                const maxLeft = window.innerWidth - panelWidth - 10;
+                finalLeft = `${Math.max(minLeft, Math.min(panelLeftFromRight, maxLeft))}px`;
+                finalRight = 'auto';
+            }
+            
+            // Adjust for mobile/tablet - use smaller width but still position relative to icon
             if (isMobileOrTablet) {
-                // Mobile/Tablet: Full width
-                finalLeft = '0';
-                finalRight = '0';
+                // Mobile/Tablet: Use responsive width (85vw max), but position relative to icon
+                const mobileWidth = Math.min(window.innerWidth * 0.85, 350);
+                const adjustedLeft = iconCenterX - (mobileWidth / 2);
+                const minLeft = 10;
+                const maxLeft = window.innerWidth - mobileWidth - 10;
+                finalLeft = `${Math.max(minLeft, Math.min(adjustedLeft, maxLeft))}px`;
+                finalRight = 'auto';
             } else {
                 // Desktop: Position on same side as icon, but still above it
                 // Center panel horizontally relative to icon position
@@ -35058,9 +35245,15 @@ class AccessibilityWidget {
             
             // Set width based on screen size - ensure it fits viewport on ALL screens
             if (isMobileOrTablet) {
-                // Mobile/Tablet: Full width, but ensure it doesn't overflow
-                panel.style.setProperty('width', '100vw', 'important');
-                panel.style.setProperty('max-width', '100vw', 'important');
+                // Mobile/Tablet: Responsive width (85vw max), ensure it doesn't overflow
+                const mobileWidth = Math.min(window.innerWidth * 0.85, 350);
+                const leftMargin = parseFloat(finalLeft || '0');
+                const rightMargin = 10;
+                const maxAvailableWidth = window.innerWidth - leftMargin - rightMargin;
+                const finalMobileWidth = Math.min(mobileWidth, maxAvailableWidth);
+                
+                panel.style.setProperty('width', `${finalMobileWidth}px`, 'important');
+                panel.style.setProperty('max-width', `${finalMobileWidth}px`, 'important');
             } else {
                 // Desktop: Use CSS-defined width (from media queries), but ensure it fits viewport
                 const leftMargin = parseFloat(finalLeft || '0');
