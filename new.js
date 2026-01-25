@@ -6616,7 +6616,7 @@ class AccessibilityWidget {
                 .accessbit-widget-panel {
                     width: 75vw !important;
                     max-width: 320px !important;
-                    left: 12.5vw !important;
+                    /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 12px !important;
                     padding: 12px !important;
                 }
@@ -6635,7 +6635,7 @@ class AccessibilityWidget {
                 .accessbit-widget-panel {
                     width: 80vw !important;
                     max-width: 380px !important;
-                    left: 10vw !important;
+                    /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 13px !important;
                     padding: 14px !important;
                 }
@@ -6654,6 +6654,7 @@ class AccessibilityWidget {
                 .accessbit-widget-panel {
                     width: 75vw !important;
                     max-width: 380px !important;
+                    /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 14px !important;
                     padding: 16px !important;
                 }
@@ -32037,7 +32038,12 @@ class AccessibilityWidget {
                     // Show panel
                     this.ensureWidgetCSS(); // Ensure CSS is always present
                     this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                    this.updateInterfacePosition(); // Position panel next to icon
+                    
+                    // Position panel on same side as icon BEFORE showing it
+                    // Use requestAnimationFrame to ensure icon position is calculated correctly
+                    requestAnimationFrame(() => {
+                        this.updateInterfacePosition(); // Position panel next to icon
+                    });
                     
                     // Reset transform to show panel
                     panel.style.transform = '';
@@ -32910,9 +32916,12 @@ class AccessibilityWidget {
                     }
                 }
                 
-                // Update panel position relative to icon on resize (important for tablets)
-                if (panel.classList.contains('active') && !panel.style.transform) {
-                    this.updateInterfacePosition();
+                // Update panel position relative to icon on resize (important for tablets and mobile)
+                if (panel.classList.contains('active')) {
+                    // Reposition panel to stay on same side as icon
+                    requestAnimationFrame(() => {
+                        this.updateInterfacePosition();
+                    });
                 }
             });
         }
@@ -34671,19 +34680,58 @@ class AccessibilityWidget {
                 panel.style.display = 'none';
             }
             
-            // Position panel relative to icon (centered horizontally)
+            // Determine which side of the screen the icon is on
+            const screenCenterX = window.innerWidth / 2;
             const iconCenterX = iconRect.left + (iconRect.width / 2);
-            const panelLeft = iconCenterX - (panelWidth / 2);
+            const iconIsOnLeft = iconCenterX < screenCenterX;
             
-            // Ensure panel doesn't go outside viewport horizontally
-            const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
+            // Check if we're on mobile/tablet
+            const isMobileOrTablet = window.innerWidth <= 1024;
             
-            // Position panel vertically - try to center with icon, but adjust if needed
-            const iconCenterY = iconRect.top + (iconRect.height / 2);
-            const topPosition = iconCenterY - (panelHeight / 2);
+            let finalLeft, finalRight, finalTop, finalBottom;
             
-            // Ensure panel doesn't go above or below viewport
-            const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
+            if (isMobileOrTablet) {
+                // Mobile/Tablet: Panel takes full height, positioned on same side as icon
+                finalTop = '0';
+                finalBottom = '0';
+                
+                if (iconIsOnLeft) {
+                    // Icon on left - panel on left side
+                    finalLeft = '0';
+                    finalRight = 'auto';
+                } else {
+                    // Icon on right - panel on right side
+                    finalLeft = 'auto';
+                    finalRight = '0';
+                }
+                
+                // On mobile/tablet: Full viewport height
+                panel.style.setProperty('height', '100vh', 'important');
+                panel.style.setProperty('max-height', '100vh', 'important');
+            } else {
+                // Desktop: Position panel next to icon, same side
+                const spacing = 20; // Space between icon and panel
+                
+                if (iconIsOnLeft) {
+                    // Icon on left - panel on left side, positioned to the right of icon
+                    finalLeft = `${iconRect.right + spacing}px`;
+                    finalRight = 'auto';
+                } else {
+                    // Icon on right - panel on right side, positioned to the left of icon
+                    finalLeft = 'auto';
+                    finalRight = `${window.innerWidth - iconRect.left + spacing}px`;
+                }
+                
+                // Position panel vertically - try to align top with icon, but adjust if needed
+                const topPosition = iconRect.top;
+                const maxTop = window.innerHeight - panelHeight - 20;
+                finalTop = `${Math.max(20, Math.min(topPosition, maxTop))}px`;
+                finalBottom = 'auto';
+                
+                // On desktop: Use calculated height
+                panel.style.setProperty('height', `${Math.min(panelHeight, window.innerHeight - 40)}px`, 'important');
+                panel.style.setProperty('max-height', `${window.innerHeight - 40}px`, 'important');
+            }
             
             // Only update positioning, don't remove transform if panel is hidden
             // Preserve panel's visibility state
@@ -34692,26 +34740,13 @@ class AccessibilityWidget {
                                  !panel.classList.contains('active');
             
             // Set position - use fixed positioning relative to viewport
-            // Set positioning directly without !important to avoid conflicts
+            // Set positioning directly without !important to avoid conflicts with CSS media queries
             panel.style.position = 'fixed';
-            panel.style.left = `${finalLeft}px`;
-            panel.style.right = 'auto';
-            panel.style.top = `${finalTop}px`;
-            panel.style.bottom = 'auto';
+            panel.style.left = finalLeft;
+            panel.style.right = finalRight;
+            panel.style.top = finalTop;
+            panel.style.bottom = finalBottom;
             panel.style.zIndex = '2147483646';
-            
-            // Check if we're on mobile/tablet - adjust height to fit viewport
-            const isMobileOrTablet = window.innerWidth <= 819;
-            
-            if (isMobileOrTablet) {
-                // On mobile/tablet: Ensure panel doesn't overflow viewport
-                const maxHeight = window.innerHeight - finalTop - 20;
-                panel.style.setProperty('max-height', `${maxHeight}px`);
-                panel.style.setProperty('height', 'auto');
-            } else {
-                // On desktop: Use calculated or natural height
-                panel.style.setProperty('height', `${panelHeight}px`);
-            }
             
             // Only remove transform if panel is visible, otherwise preserve it
             if (!isPanelHidden) {
