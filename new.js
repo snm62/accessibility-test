@@ -29231,6 +29231,18 @@ class AccessibilityWidget {
             // 3) WAAPI pause/cancel running animations (no globals)
             try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             
+            // CRITICAL: Call the same early initialization functions that run on page load
+            // These do direct DOM manipulation to freeze animations immediately
+            try { 
+                window.seizureState?.applySeizureSafeDOMFreeze?.(); 
+            } catch (_) {}
+            try { 
+                window.seizureState?.seizureConsolidateSplitText?.(); 
+            } catch (_) {}
+            try { 
+                window.seizureState?.installStyleSanitizer?.(); 
+            } catch (_) {}
+            
             // CRITICAL: Stop animations IMMEDIATELY and MULTIPLE TIMES when toggled on
             // This ensures we catch animations that are already running
             // Run synchronously in a tight loop first to catch animations immediately
@@ -29241,6 +29253,8 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                // Also call DOM freeze in the loop
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             }
             
             // 4) Start polling IMMEDIATELY for continuous stopping (before any animations can restart)
@@ -29258,6 +29272,7 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             });
             
             // Run again after a tiny delay
@@ -29268,6 +29283,7 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             }, 0);
             
             // Run again after another tiny delay
@@ -29278,6 +29294,7 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             }, 10);
             
             // Run again after a slightly longer delay
@@ -29288,6 +29305,7 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             }, 50);
             
             // Run again after 100ms to catch any late starters
@@ -29298,7 +29316,18 @@ class AccessibilityWidget {
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
+                try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
             }, 100);
+            
+            // CRITICAL: Also stop jQuery animations like the early initialization does
+            try {
+                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                    const $ = window.jQuery || window.$;
+                    if ($ && $.fx) {
+                        $.fx.off = true;
+                    }
+                }
+            } catch (_) {}
         }
         
         // Aggressive periodic animation stopping - directly manipulates element styles
