@@ -1289,6 +1289,7 @@ const seizureState = {
     originalLottieLoadAnimation: null,
     lottieEventInterceptorActive: false,
     lottieAnimObserver: null,
+    lottieDOMFreezeObserver: null,
     gsapMethodsOverridden: false,
     originalGsapTo: null,
     originalGsapFrom: null,
@@ -28058,6 +28059,26 @@ class AccessibilityWidget {
                             lottieAnimations.forEach(animation => {
                                 try {
                                     if (animation) {
+                                        // CRITICAL: Cancel any requestAnimationFrame loops FIRST - this stops the render loop
+                                        if (animation.animationID !== undefined && animation.animationID !== null) {
+                                            try {
+                                                cancelAnimationFrame(animation.animationID);
+                                                animation.animationID = null;
+                                            } catch (_) {}
+                                        }
+                                        if (animation.renderer && animation.renderer.animationID !== undefined && animation.renderer.animationID !== null) {
+                                            try {
+                                                cancelAnimationFrame(animation.renderer.animationID);
+                                                animation.renderer.animationID = null;
+                                            } catch (_) {}
+                                        }
+                                        if (animation._animationID !== undefined && animation._animationID !== null) {
+                                            try {
+                                                cancelAnimationFrame(animation._animationID);
+                                                animation._animationID = null;
+                                            } catch (_) {}
+                                        }
+                                        
                                         // Use Lottie's official API in correct order
                                         if (typeof animation.setSpeed === 'function') {
                                             animation.setSpeed(0);
@@ -28090,6 +28111,26 @@ class AccessibilityWidget {
                                         }
                                         if (animation.loopCount !== undefined) {
                                             animation.loopCount = 0;
+                                        }
+                                        
+                                        // CRITICAL: Force paused state
+                                        if (animation.isPaused !== undefined) {
+                                            animation.isPaused = true;
+                                        }
+                                        if (animation._isPaused !== undefined) {
+                                            animation._isPaused = true;
+                                        }
+                                        
+                                        // CRITICAL: Stop the renderer if it exists
+                                        if (animation.renderer) {
+                                            try {
+                                                if (animation.renderer.stop) {
+                                                    animation.renderer.stop();
+                                                }
+                                                if (animation.renderer.pause) {
+                                                    animation.renderer.pause();
+                                                }
+                                            } catch (_) {}
                                         }
                                         
                                         // CRITICAL: Override play/restart methods in polling to prevent restarts
@@ -28217,7 +28258,7 @@ class AccessibilityWidget {
                         // Method 4: Also handle lottie-player web components in polling (already handled in Method 1 above)
                         // Note: lottie-player is handled at the start of this polling function
                     } catch (_) {}
-                }, 30); // Check every 30ms (more aggressive for Lottie)
+                }, 15); // Check every 15ms (very aggressive for Lottie to catch loops)
             }
             
             // Poll for GSAP animations every 50ms (more aggressive)
@@ -29433,9 +29474,28 @@ class AccessibilityWidget {
                     seizureState.lottieAnimObserver = null;
                 } catch (_) {}
             }
+            if (seizureState && seizureState.lottieDOMFreezeObserver) {
+                try {
+                    seizureState.lottieDOMFreezeObserver.disconnect();
+                    seizureState.lottieDOMFreezeObserver = null;
+                } catch (_) {}
+            }
             if (seizureState) {
                 seizureState.lottieEventInterceptorActive = false;
             }
+            
+            // 8. Restore frozen canvas/SVG elements
+            try {
+                const frozenElements = document.querySelectorAll('[data-seizure-safe-frozen]');
+                frozenElements.forEach(el => {
+                    try {
+                        el.style.removeProperty('animation');
+                        el.style.removeProperty('transition');
+                        el.style.removeProperty('pointer-events');
+                        el.removeAttribute('data-seizure-safe-frozen');
+                    } catch (_) {}
+                });
+            } catch (_) {}
             
             // 7. Restore WAAPI animations
             try {
@@ -30119,6 +30179,26 @@ class AccessibilityWidget {
                                 allAnimations.forEach(anim => {
                                     try {
                                         if (anim) {
+                                            // CRITICAL: Cancel any requestAnimationFrame loops FIRST - stops render loop immediately
+                                            if (anim.animationID !== undefined && anim.animationID !== null) {
+                                                try {
+                                                    cancelAnimationFrame(anim.animationID);
+                                                    anim.animationID = null;
+                                                } catch (_) {}
+                                            }
+                                            if (anim.renderer && anim.renderer.animationID !== undefined && anim.renderer.animationID !== null) {
+                                                try {
+                                                    cancelAnimationFrame(anim.renderer.animationID);
+                                                    anim.renderer.animationID = null;
+                                                } catch (_) {}
+                                            }
+                                            if (anim._animationID !== undefined && anim._animationID !== null) {
+                                                try {
+                                                    cancelAnimationFrame(anim._animationID);
+                                                    anim._animationID = null;
+                                                } catch (_) {}
+                                            }
+                                            
                                             // CRITICAL: Use Lottie's official API methods in the correct order
                                             // 1. Set speed to 0 first (immediately stops playback)
                                             if (typeof anim.setSpeed === 'function') {
@@ -30133,6 +30213,18 @@ class AccessibilityWidget {
                                             // 3. Pause the animation (pauses at current frame)
                                             if (typeof anim.pause === 'function') {
                                                 anim.pause();
+                                            }
+                                            
+                                            // 3.5. Stop the renderer if it exists
+                                            if (anim.renderer) {
+                                                try {
+                                                    if (anim.renderer.stop) {
+                                                        anim.renderer.stop();
+                                                    }
+                                                    if (anim.renderer.pause) {
+                                                        anim.renderer.pause();
+                                                    }
+                                                } catch (_) {}
                                             }
                                             
                                             // 4. Go to final frame and stop (finish to final state, not frame 0)
@@ -30244,6 +30336,197 @@ class AccessibilityWidget {
                                                     return anim._seizureSafeOriginalSetDirection.apply(this, arguments);
                                                 };
                                             }
+                                            
+                                            // 11. CRITICAL: Intercept the render/update loop directly to prevent loops
+                                            // This catches animations that restart through internal mechanisms
+                                            if (!anim._seizureSafeRenderIntercepted) {
+                                                anim._seizureSafeRenderIntercepted = true;
+                                                
+                                                // Override render function if it exists
+                                                if (anim.renderFrame && !anim._seizureSafeOriginalRenderFrame) {
+                                                    anim._seizureSafeOriginalRenderFrame = anim.renderFrame;
+                                                    anim.renderFrame = function(frame) {
+                                                        if (document.body.classList.contains('seizure-safe') || 
+                                                            document.documentElement.classList.contains('seizure-safe')) {
+                                                            // Stop the animation and go to final frame
+                                                            try {
+                                                                if (anim && typeof anim.goToAndStop === 'function') {
+                                                                    const totalFrames = anim.totalFrames || anim.frameCount || 0;
+                                                                    const finalFrame = totalFrames > 0 ? totalFrames - 1 : 0;
+                                                                    anim.goToAndStop(finalFrame, true);
+                                                                }
+                                                                if (anim && typeof anim.pause === 'function') {
+                                                                    anim.pause();
+                                                                }
+                                                                if (anim && typeof anim.setSpeed === 'function') {
+                                                                    anim.setSpeed(0);
+                                                                }
+                                                            } catch (_) {}
+                                                            return;
+                                                        }
+                                                        return anim._seizureSafeOriginalRenderFrame.apply(this, arguments);
+                                                    };
+                                                }
+                                                
+                                                // Override enterFrame/update function if it exists
+                                                if (anim.enterFrame && !anim._seizureSafeOriginalEnterFrame) {
+                                                    anim._seizureSafeOriginalEnterFrame = anim.enterFrame;
+                                                    anim.enterFrame = function() {
+                                                        if (document.body.classList.contains('seizure-safe') || 
+                                                            document.documentElement.classList.contains('seizure-safe')) {
+                                                            // Stop the animation
+                                                            try {
+                                                                if (anim && typeof anim.pause === 'function') {
+                                                                    anim.pause();
+                                                                }
+                                                                if (anim && typeof anim.setSpeed === 'function') {
+                                                                    anim.setSpeed(0);
+                                                                }
+                                                            } catch (_) {}
+                                                            return;
+                                                        }
+                                                        return anim._seizureSafeOriginalEnterFrame.apply(this, arguments);
+                                                    };
+                                                }
+                                                
+                                                // CRITICAL: Intercept the animation's internal update/tick function
+                                                // This is where the loop actually happens
+                                                if (anim.renderer && anim.renderer.renderFrame && !anim._seizureSafeOriginalRendererRenderFrame) {
+                                                    anim._seizureSafeOriginalRendererRenderFrame = anim.renderer.renderFrame;
+                                                    anim.renderer.renderFrame = function(frame) {
+                                                        if (document.body.classList.contains('seizure-safe') || 
+                                                            document.documentElement.classList.contains('seizure-safe')) {
+                                                            return; // Don't render anything
+                                                        }
+                                                        return anim._seizureSafeOriginalRendererRenderFrame.apply(this, arguments);
+                                                    };
+                                                }
+                                                
+                                                // Intercept the animation's update function
+                                                if (anim.update && !anim._seizureSafeOriginalUpdate) {
+                                                    anim._seizureSafeOriginalUpdate = anim.update;
+                                                    anim.update = function() {
+                                                        if (document.body.classList.contains('seizure-safe') || 
+                                                            document.documentElement.classList.contains('seizure-safe')) {
+                                                            return; // Don't update
+                                                        }
+                                                        return anim._seizureSafeOriginalUpdate.apply(this, arguments);
+                                                    };
+                                                }
+                                                
+                                                // Intercept the animation's tick function
+                                                if (anim.tick && !anim._seizureSafeOriginalTick) {
+                                                    anim._seizureSafeOriginalTick = anim.tick;
+                                                    anim.tick = function() {
+                                                        if (document.body.classList.contains('seizure-safe') || 
+                                                            document.documentElement.classList.contains('seizure-safe')) {
+                                                            return; // Don't tick
+                                                        }
+                                                        return anim._seizureSafeOriginalTick.apply(this, arguments);
+                                                    };
+                                                }
+                                                
+                                                // Override the animation's internal loop check
+                                                // Some Lottie versions use _isPaused or isPaused internally
+                                                if (anim._isPaused !== undefined) {
+                                                    Object.defineProperty(anim, '_isPaused', {
+                                                        get: function() {
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                return true; // Force paused state
+                                                            }
+                                                            return this._seizureSafeOriginalIsPaused !== undefined ? this._seizureSafeOriginalIsPaused : false;
+                                                        },
+                                                        set: function(value) {
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                this._seizureSafeOriginalIsPaused = true; // Always keep paused
+                                                                return;
+                                                            }
+                                                            this._seizureSafeOriginalIsPaused = value;
+                                                        },
+                                                        configurable: true
+                                                    });
+                                                    anim._seizureSafeOriginalIsPaused = anim._isPaused;
+                                                }
+                                                
+                                                // Override isPaused property
+                                                if (anim.isPaused !== undefined) {
+                                                    Object.defineProperty(anim, 'isPaused', {
+                                                        get: function() {
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                return true; // Force paused state
+                                                            }
+                                                            return this._seizureSafeOriginalIsPausedProp !== undefined ? this._seizureSafeOriginalIsPausedProp : false;
+                                                        },
+                                                        set: function(value) {
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                this._seizureSafeOriginalIsPausedProp = true; // Always keep paused
+                                                                return;
+                                                            }
+                                                            this._seizureSafeOriginalIsPausedProp = value;
+                                                        },
+                                                        configurable: true
+                                                    });
+                                                    anim._seizureSafeOriginalIsPausedProp = anim.isPaused;
+                                                }
+                                                
+                                                // CRITICAL: Directly manipulate the DOM element to stop rendering
+                                                // Find the canvas or SVG element associated with this animation
+                                                if (anim.renderer && anim.renderer.canvas) {
+                                                    try {
+                                                        const canvas = anim.renderer.canvas;
+                                                        if (canvas && canvas.nodeType === 1) {
+                                                            // Freeze the canvas by clearing and stopping updates
+                                                            canvas.style.setProperty('animation', 'none', 'important');
+                                                            canvas.style.setProperty('transition', 'none', 'important');
+                                                            canvas.style.setProperty('pointer-events', 'none', 'important');
+                                                            canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        }
+                                                    } catch (_) {}
+                                                }
+                                                
+                                                // Also check for SVG elements
+                                                if (anim.renderer && anim.renderer.svgElement) {
+                                                    try {
+                                                        const svg = anim.renderer.svgElement;
+                                                        if (svg && svg.nodeType === 1) {
+                                                            svg.style.setProperty('animation', 'none', 'important');
+                                                            svg.style.setProperty('transition', 'none', 'important');
+                                                            svg.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        }
+                                                    } catch (_) {}
+                                                }
+                                                
+                                                // Find the container element and freeze it
+                                                if (anim.container) {
+                                                    try {
+                                                        const container = anim.container;
+                                                        if (container && container.nodeType === 1) {
+                                                            container.style.setProperty('animation', 'none', 'important');
+                                                            container.style.setProperty('transition', 'none', 'important');
+                                                            container.setAttribute('data-seizure-safe-frozen', 'true');
+                                                            
+                                                            // Freeze all canvas and SVG children
+                                                            const canvases = container.querySelectorAll('canvas');
+                                                            canvases.forEach(canvas => {
+                                                                canvas.style.setProperty('animation', 'none', 'important');
+                                                                canvas.style.setProperty('transition', 'none', 'important');
+                                                                canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                                                            });
+                                                            
+                                                            const svgs = container.querySelectorAll('svg');
+                                                            svgs.forEach(svg => {
+                                                                svg.style.setProperty('animation', 'none', 'important');
+                                                                svg.style.setProperty('transition', 'none', 'important');
+                                                                svg.setAttribute('data-seizure-safe-frozen', 'true');
+                                                            });
+                                                        }
+                                                    } catch (_) {}
+                                                }
+                                            }
                                         }
                                     } catch (_) {}
                                 });
@@ -30303,9 +30586,86 @@ class AccessibilityWidget {
                                     } catch (_) {}
                                 });
                                 
-                                // Observe for new animations
-                                animObserver.observe(document.body, { childList: true, subtree: true });
+                                // Observe for new animations - VERY AGGRESSIVE
+                                animObserver.observe(document.body, { 
+                                    childList: true, 
+                                    subtree: true,
+                                    attributes: true,
+                                    attributeFilter: ['class', 'style']
+                                });
                                 seizureState.lottieAnimObserver = animObserver;
+                                
+                                // CRITICAL: Also set up a more aggressive observer to catch and freeze DOM elements immediately
+                                if (!seizureState.lottieDOMFreezeObserver) {
+                                    seizureState.lottieDOMFreezeObserver = new MutationObserver((mutations) => {
+                                        if (!document.body.classList.contains('seizure-safe') && 
+                                            !document.documentElement.classList.contains('seizure-safe')) {
+                                            return;
+                                        }
+                                        
+                                        mutations.forEach(mutation => {
+                                            // Check added nodes
+                                            mutation.addedNodes.forEach(node => {
+                                                if (node.nodeType === 1) { // Element node
+                                                    try {
+                                                        // Immediately freeze any canvas or SVG
+                                                        if (node.tagName === 'CANVAS') {
+                                                            node.style.setProperty('animation', 'none', 'important');
+                                                            node.style.setProperty('transition', 'none', 'important');
+                                                            node.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        }
+                                                        if (node.tagName === 'SVG') {
+                                                            node.style.setProperty('animation', 'none', 'important');
+                                                            node.style.setProperty('transition', 'none', 'important');
+                                                            node.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        }
+                                                        
+                                                        // Check children
+                                                        const canvases = node.querySelectorAll ? node.querySelectorAll('canvas') : [];
+                                                        canvases.forEach(canvas => {
+                                                            canvas.style.setProperty('animation', 'none', 'important');
+                                                            canvas.style.setProperty('transition', 'none', 'important');
+                                                            canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        });
+                                                        
+                                                        const svgs = node.querySelectorAll ? node.querySelectorAll('svg') : [];
+                                                        svgs.forEach(svg => {
+                                                            svg.style.setProperty('animation', 'none', 'important');
+                                                            svg.style.setProperty('transition', 'none', 'important');
+                                                            svg.setAttribute('data-seizure-safe-frozen', 'true');
+                                                        });
+                                                        
+                                                        // Immediately stop any Lottie animations
+                                                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                                                            const allAnims = window.lottie.getRegisteredAnimations();
+                                                            allAnims.forEach(anim => {
+                                                                try {
+                                                                    if (anim && anim.container && (anim.container === node || anim.container.contains(node))) {
+                                                                        if (typeof anim.stop === 'function') anim.stop();
+                                                                        if (typeof anim.pause === 'function') anim.pause();
+                                                                        if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                                                                        if (anim.loop !== undefined) anim.loop = false;
+                                                                        if (anim.animationID !== undefined && anim.animationID !== null) {
+                                                                            cancelAnimationFrame(anim.animationID);
+                                                                            anim.animationID = null;
+                                                                        }
+                                                                    }
+                                                                } catch (_) {}
+                                                            });
+                                                        }
+                                                    } catch (_) {}
+                                                }
+                                            });
+                                        });
+                                    });
+                                    
+                                    seizureState.lottieDOMFreezeObserver.observe(document.documentElement, {
+                                        childList: true,
+                                        subtree: true,
+                                        attributes: true,
+                                        attributeFilter: ['class']
+                                    });
+                                }
                                 
                                 // Also apply immediately to existing animations
                                 setTimeout(() => {
@@ -30383,6 +30743,20 @@ class AccessibilityWidget {
                                             }
                                             if (anim.loopCount !== undefined) {
                                                 anim.loopCount = 0;
+                                            }
+                                            
+                                            // CRITICAL: Cancel any requestAnimationFrame immediately for new animations
+                                            if (anim.animationID !== undefined && anim.animationID !== null) {
+                                                try {
+                                                    cancelAnimationFrame(anim.animationID);
+                                                    anim.animationID = null;
+                                                } catch (_) {}
+                                            }
+                                            if (anim.renderer && anim.renderer.animationID !== undefined && anim.renderer.animationID !== null) {
+                                                try {
+                                                    cancelAnimationFrame(anim.renderer.animationID);
+                                                    anim.renderer.animationID = null;
+                                                } catch (_) {}
                                             }
                                             
                                             // CRITICAL: Override play/restart methods for newly loaded animations
@@ -30575,17 +30949,82 @@ class AccessibilityWidget {
                     });
                 } catch (_) {}
                 
-                // Method 4: Make Lottie containers invisible (canvas, svg elements)
+                // Method 4: CRITICAL - Directly freeze ALL canvas and SVG elements that might be Lottie
+                // This stops rendering at the DOM level, not just the API level
                 try {
-                    const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"], canvas[data-lottie], canvas.lottie');
+                    // Find all canvas elements that might be Lottie animations
+                    const allCanvases = document.querySelectorAll('canvas');
+                    allCanvases.forEach(canvas => {
+                        try {
+                            // Skip if already frozen
+                            if (canvas.hasAttribute('data-seizure-safe-frozen')) return;
+                            
+                            // Freeze the canvas directly
+                            canvas.style.setProperty('animation', 'none', 'important');
+                            canvas.style.setProperty('transition', 'none', 'important');
+                            canvas.style.setProperty('pointer-events', 'none', 'important');
+                            canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                            
+                            // Try to stop any animation loops on this canvas
+                            if (canvas._lottie) {
+                                try {
+                                    const anim = canvas._lottie;
+                                    if (anim.animationID !== undefined && anim.animationID !== null) {
+                                        cancelAnimationFrame(anim.animationID);
+                                        anim.animationID = null;
+                                    }
+                                    if (anim.renderer && anim.renderer.animationID !== undefined && anim.renderer.animationID !== null) {
+                                        cancelAnimationFrame(anim.renderer.animationID);
+                                        anim.renderer.animationID = null;
+                                    }
+                                } catch (_) {}
+                            }
+                        } catch (_) {}
+                    });
+                    
+                    // Find all SVG elements that might be Lottie
+                    const allSvgs = document.querySelectorAll('svg');
+                    allSvgs.forEach(svg => {
+                        try {
+                            // Skip if already frozen
+                            if (svg.hasAttribute('data-seizure-safe-frozen')) return;
+                            
+                            // Freeze the SVG directly
+                            svg.style.setProperty('animation', 'none', 'important');
+                            svg.style.setProperty('transition', 'none', 'important');
+                            svg.setAttribute('data-seizure-safe-frozen', 'true');
+                            
+                            // Stop any animations on child elements
+                            const animatedElements = svg.querySelectorAll('*');
+                            animatedElements.forEach(el => {
+                                el.style.setProperty('animation', 'none', 'important');
+                                el.style.setProperty('transition', 'none', 'important');
+                            });
+                        } catch (_) {}
+                    });
+                    
+                    // Also handle Lottie containers
+                    const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"]');
                     lottieContainers.forEach(container => {
                         try {
-                            container.style.animation = 'none';
-                            container.style.transition = 'none';
-                            container.style.transform = 'none';
-                            container.style.opacity = '1';
-                            container.style.visibility = 'visible';
+                            container.style.setProperty('animation', 'none', 'important');
+                            container.style.setProperty('transition', 'none', 'important');
                             container.setAttribute('data-seizure-safe-stopped', 'true');
+                            
+                            // Freeze all canvas and SVG children
+                            const canvases = container.querySelectorAll('canvas');
+                            canvases.forEach(canvas => {
+                                canvas.style.setProperty('animation', 'none', 'important');
+                                canvas.style.setProperty('transition', 'none', 'important');
+                                canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                            });
+                            
+                            const svgs = container.querySelectorAll('svg');
+                            svgs.forEach(svg => {
+                                svg.style.setProperty('animation', 'none', 'important');
+                                svg.style.setProperty('transition', 'none', 'important');
+                                svg.setAttribute('data-seizure-safe-frozen', 'true');
+                            });
                         } catch (_) {}
                     });
                 } catch (_) {}
