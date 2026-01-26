@@ -1285,7 +1285,15 @@ const seizureState = {
     savedAnimations: new Map(),
     waapiListenersInstalled: false,
     onAnimationStart: null,
-    onTransitionRun: null
+    onTransitionRun: null,
+    originalLottieLoadAnimation: null,
+    lottieEventInterceptorActive: false,
+    lottieAnimObserver: null,
+    gsapMethodsOverridden: false,
+    originalGsapTo: null,
+    originalGsapFrom: null,
+    originalGsapFromTo: null,
+    originalGsapTimeline: null
 };
 // Universal Stop Motion helper: CSS + Lottie + GSAP + GIF/APNG handling
 
@@ -6740,7 +6748,7 @@ class AccessibilityWidget {
                     padding: 10px !important;
                     box-sizing: border-box !important;
                     overflow-x: hidden !important;
-                    margin: 0 auto !important;
+                    margin: 0 !important; /* Remove auto margin - JavaScript handles positioning */
                 }
                 
                 .accessbit-widget-panel * {
@@ -26323,15 +26331,121 @@ class AccessibilityWidget {
         }
         
         // 7. Stop any JavaScript-based animations (like the slider auto-slide)
-        stopJavaScriptAnimations() {
-            // Stop slider animations
-            if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
+        // Comprehensive slider autoplay stopping function
+        stopSliderAutoplay() {
+            try {
+                // Method 1: Generic window.slider API
+                if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
+                    try {
+                        window.slider.disableAutoSlide();
+                    } catch (_) {}
+                }
+                
+                // Method 2: Swiper.js (most common slider library)
+                if (typeof Swiper !== 'undefined') {
+                    try {
+                        document.querySelectorAll('.swiper, [class*="swiper"]').forEach(swiperEl => {
+                            try {
+                                if (swiperEl.swiper) {
+                                    // Stop autoplay
+                                    if (swiperEl.swiper.autoplay) {
+                                        if (typeof swiperEl.swiper.autoplay.stop === 'function') {
+                                            swiperEl.swiper.autoplay.stop();
+                                        }
+                                        if (swiperEl.swiper.autoplay.paused !== undefined) {
+                                            swiperEl.swiper.autoplay.paused = true;
+                                        }
+                                    }
+                                    // Disable navigation
+                                    if (swiperEl.swiper.allowTouchMove !== undefined) {
+                                        swiperEl.swiper.allowTouchMove = false;
+                                    }
+                                    if (swiperEl.swiper.allowSlideNext !== undefined) {
+                                        swiperEl.swiper.allowSlideNext = false;
+                                    }
+                                    if (swiperEl.swiper.allowSlidePrev !== undefined) {
+                                        swiperEl.swiper.allowSlidePrev = false;
+                                    }
+                                    // Stop any running transitions
+                                    if (swiperEl.swiper.setTransition) {
+                                        swiperEl.swiper.setTransition(0);
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                }
+                
+                // Method 3: Webflow sliders (data-w-id based)
                 try {
-                    window.slider.disableAutoSlide();
-                } catch (e) {}
-            }
+                    const webflowSliders = document.querySelectorAll('[data-w-id][class*="slider"], [data-w-id][class*="carousel"], .w-slider');
+                    webflowSliders.forEach(slider => {
+                        try {
+                            // Stop any GSAP animations on slider
+                            if (window.gsap && window.gsap.killTweensOf) {
+                                window.gsap.killTweensOf(slider);
+                            }
+                            // Stop CSS animations
+                            slider.style.animation = 'none';
+                            slider.style.transition = 'none';
+                            // Stop any autoplay intervals
+                            if (slider._autoplayInterval) {
+                                clearInterval(slider._autoplayInterval);
+                                slider._autoplayInterval = null;
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+                
+                // Method 4: Generic slider detection (look for common slider patterns)
+                try {
+                    const possibleSliders = document.querySelectorAll('[class*="slider"], [class*="carousel"], [id*="slider"], [id*="carousel"]');
+                    possibleSliders.forEach(slider => {
+                        try {
+                            // Stop any intervals/timeouts
+                            if (slider._autoplayInterval) {
+                                clearInterval(slider._autoplayInterval);
+                                slider._autoplayInterval = null;
+                            }
+                            if (slider._autoplayTimeout) {
+                                clearTimeout(slider._autoplayTimeout);
+                                slider._autoplayTimeout = null;
+                            }
+                            // Stop CSS animations
+                            slider.style.animation = 'none';
+                            slider.style.transition = 'none';
+                            // Stop GSAP animations
+                            if (window.gsap && window.gsap.killTweensOf) {
+                                window.gsap.killTweensOf(slider);
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+                
+                // Method 5: Stop any setInterval/setTimeout that might be running slider autoplay
+                // This is a fallback - we can't directly access all intervals, but we can stop animations
+                try {
+                    // Look for elements with data-autoplay or autoplay attributes
+                    const autoplayElements = document.querySelectorAll('[data-autoplay], [autoplay], [class*="autoplay"]');
+                    autoplayElements.forEach(el => {
+                        try {
+                            if (el._autoplayInterval) {
+                                clearInterval(el._autoplayInterval);
+                                el._autoplayInterval = null;
+                            }
+                            el.style.animation = 'none';
+                            el.style.transition = 'none';
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+            } catch (_) {}
+        }
+        
+        stopJavaScriptAnimations() {
+            // Stop slider animations (now using dedicated function)
+            this.stopSliderAutoplay();
             
-            // Stop Swiper animations
+            // Stop Swiper animations (also handled in stopSliderAutoplay, but keeping for compatibility)
             if (typeof Swiper !== 'undefined') {
                 try {
                     document.querySelectorAll('.swiper').forEach(swiperEl => {
@@ -27644,29 +27758,129 @@ class AccessibilityWidget {
                 // Lottie (official API)
                 this.stopAllLottieAnimations();
 
-                // GSAP (official API)
+                // GSAP (official API) - Comprehensive stopping with restart prevention
                 if (typeof window.gsap !== 'undefined') {
                     try {
+                        // Method 1: Kill all tweens globally
                         if (window.gsap.killTweensOf) {
                             window.gsap.killTweensOf('*');
                         }
+                        
+                        // Method 2: Kill all timelines and set to final state
                         if (window.gsap.getAllTimelines) {
                             const allTimelines = window.gsap.getAllTimelines();
                             allTimelines.forEach(tl => {
                                 try {
-                                    if (tl && tl.totalProgress) { tl.totalProgress(1); }
-                                    tl && tl.kill && tl.kill();
+                                    // Set timeline to final state (progress = 1)
+                                    if (tl && typeof tl.totalProgress === 'function') { 
+                                        tl.totalProgress(1); 
+                                    }
+                                    // Pause timeline
+                                    if (tl && typeof tl.pause === 'function') {
+                                        tl.pause();
+                                    }
+                                    // Kill timeline completely
+                                    if (tl && typeof tl.kill === 'function') {
+                                        tl.kill();
+                                    }
+                                    // Prevent restart by setting paused state
+                                    if (tl && tl.paused !== undefined) {
+                                        tl.paused(true);
+                                    }
                                 } catch (_) {}
                             });
                         }
+                        
+                        // Method 3: Kill all individual tweens
                         if (window.gsap.getAllTweens) {
                             const allTweens = window.gsap.getAllTweens();
                             allTweens.forEach(tween => {
                                 try {
-                                    if (tween && tween.totalProgress) { tween.totalProgress(1); }
-                                    tween && tween.kill && tween.kill();
+                                    // Set tween to final state
+                                    if (tween && typeof tween.totalProgress === 'function') { 
+                                        tween.totalProgress(1); 
+                                    }
+                                    // Pause tween
+                                    if (tween && typeof tween.pause === 'function') {
+                                        tween.pause();
+                                    }
+                                    // Kill tween completely
+                                    if (tween && typeof tween.kill === 'function') {
+                                        tween.kill();
+                                    }
+                                    // Prevent restart
+                                    if (tween && tween.paused !== undefined) {
+                                        tween.paused(true);
+                                    }
                                 } catch (_) {}
                             });
+                        }
+                        
+                        // Method 4: Clear global timeline
+                        if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.clear === 'function') {
+                            try {
+                                window.gsap.globalTimeline.clear();
+                            } catch (_) {}
+                        }
+                        
+                        // Method 5: Override GSAP methods to prevent new animations when seizure-safe is active
+                        if (!seizureState.gsapMethodsOverridden) {
+                            seizureState.gsapMethodsOverridden = true;
+                            
+                            // Store original methods
+                            if (!seizureState.originalGsapTo && window.gsap.to) {
+                                seizureState.originalGsapTo = window.gsap.to;
+                                window.gsap.to = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        // Return a dummy tween that does nothing
+                                        return { kill: function() {}, pause: function() {}, play: function() {} };
+                                    }
+                                    return seizureState.originalGsapTo.apply(this, arguments);
+                                };
+                            }
+                            
+                            if (!seizureState.originalGsapFrom && window.gsap.from) {
+                                seizureState.originalGsapFrom = window.gsap.from;
+                                window.gsap.from = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        return { kill: function() {}, pause: function() {}, play: function() {} };
+                                    }
+                                    return seizureState.originalGsapFrom.apply(this, arguments);
+                                };
+                            }
+                            
+                            if (!seizureState.originalGsapFromTo && window.gsap.fromTo) {
+                                seizureState.originalGsapFromTo = window.gsap.fromTo;
+                                window.gsap.fromTo = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        return { kill: function() {}, pause: function() {}, play: function() {} };
+                                    }
+                                    return seizureState.originalGsapFromTo.apply(this, arguments);
+                                };
+                            }
+                            
+                            if (!seizureState.originalGsapTimeline && window.gsap.timeline) {
+                                seizureState.originalGsapTimeline = window.gsap.timeline;
+                                window.gsap.timeline = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        // Return a dummy timeline that does nothing
+                                        const dummy = { 
+                                            kill: function() {}, 
+                                            pause: function() {}, 
+                                            play: function() {},
+                                            to: function() { return this; },
+                                            from: function() { return this; },
+                                            fromTo: function() { return this; }
+                                        };
+                                        return dummy;
+                                    }
+                                    return seizureState.originalGsapTimeline.apply(this, arguments);
+                                };
+                            }
                         }
                     } catch (_) {}
                 }
@@ -27783,6 +27997,9 @@ class AccessibilityWidget {
             if (!this.lottiePollInterval) {
                 this.lottiePollInterval = setInterval(() => {
                     try {
+                        // CRITICAL: Call stopAllLottieAnimations first to ensure all Lottie instances are stopped
+                        this.stopAllLottieAnimations();
+                        
                         // Method 1: lottie-player web component - Use official API methods
                         const lottiePlayers = document.querySelectorAll('lottie-player');
                         lottiePlayers.forEach(player => {
@@ -27808,6 +28025,30 @@ class AccessibilityWidget {
                                 }
                                 player.setAttribute('autoplay', 'false');
                                 player.removeAttribute('loop');
+                                player.setAttribute('loop', 'false');
+                                
+                                // CRITICAL: Override lottie-player's play/restart methods in polling
+                                if (!player._seizureSafeOriginalPlay && typeof player.play === 'function') {
+                                    player._seizureSafeOriginalPlay = player.play;
+                                    player.play = function() {
+                                        if (document.body.classList.contains('seizure-safe') || 
+                                            document.documentElement.classList.contains('seizure-safe')) {
+                                            return;
+                                        }
+                                        return player._seizureSafeOriginalPlay.apply(this, arguments);
+                                    };
+                                }
+                                
+                                if (!player._seizureSafeOriginalRestart && typeof player.restart === 'function') {
+                                    player._seizureSafeOriginalRestart = player.restart;
+                                    player.restart = function() {
+                                        if (document.body.classList.contains('seizure-safe') || 
+                                            document.documentElement.classList.contains('seizure-safe')) {
+                                            return;
+                                        }
+                                        return player._seizureSafeOriginalRestart.apply(this, arguments);
+                                    };
+                                }
                             } catch (_) {}
                         });
                         
@@ -27846,6 +28087,47 @@ class AccessibilityWidget {
                                         }
                                         if (animation.loop !== undefined) {
                                             animation.loop = false;
+                                        }
+                                        if (animation.loopCount !== undefined) {
+                                            animation.loopCount = 0;
+                                        }
+                                        
+                                        // CRITICAL: Override play/restart methods in polling to prevent restarts
+                                        if (!animation._seizureSafeOriginalPlay) {
+                                            animation._seizureSafeOriginalPlay = animation.play;
+                                            animation.play = function() {
+                                                if (document.body.classList.contains('seizure-safe') || 
+                                                    document.documentElement.classList.contains('seizure-safe')) {
+                                                    return;
+                                                }
+                                                return animation._seizureSafeOriginalPlay.apply(this, arguments);
+                                            };
+                                        }
+                                        
+                                        if (!animation._seizureSafeOriginalRestart) {
+                                            animation._seizureSafeOriginalRestart = animation.restart;
+                                            animation.restart = function() {
+                                                if (document.body.classList.contains('seizure-safe') || 
+                                                    document.documentElement.classList.contains('seizure-safe')) {
+                                                    return;
+                                                }
+                                                return animation._seizureSafeOriginalRestart.apply(this, arguments);
+                                            };
+                                        }
+                                        
+                                        if (!animation._seizureSafeOriginalGoToAndPlay) {
+                                            animation._seizureSafeOriginalGoToAndPlay = animation.goToAndPlay;
+                                            animation.goToAndPlay = function() {
+                                                if (document.body.classList.contains('seizure-safe') || 
+                                                    document.documentElement.classList.contains('seizure-safe')) {
+                                                    if (animation.goToAndStop) {
+                                                        const frame = arguments[0] || 0;
+                                                        animation.goToAndStop(frame, true);
+                                                    }
+                                                    return;
+                                                }
+                                                return animation._seizureSafeOriginalGoToAndPlay.apply(this, arguments);
+                                            };
                                         }
                                     }
                                 } catch (_) {}
@@ -27887,6 +28169,47 @@ class AccessibilityWidget {
                                     if (lottieInstance.loop !== undefined) {
                                         lottieInstance.loop = false;
                                     }
+                                    if (lottieInstance.loopCount !== undefined) {
+                                        lottieInstance.loopCount = 0;
+                                    }
+                                    
+                                    // CRITICAL: Override play/restart methods for element-based instances
+                                    if (!lottieInstance._seizureSafeOriginalPlay) {
+                                        lottieInstance._seizureSafeOriginalPlay = lottieInstance.play;
+                                        lottieInstance.play = function() {
+                                            if (document.body.classList.contains('seizure-safe') || 
+                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                return;
+                                            }
+                                            return lottieInstance._seizureSafeOriginalPlay.apply(this, arguments);
+                                        };
+                                    }
+                                    
+                                    if (!lottieInstance._seizureSafeOriginalRestart) {
+                                        lottieInstance._seizureSafeOriginalRestart = lottieInstance.restart;
+                                        lottieInstance.restart = function() {
+                                            if (document.body.classList.contains('seizure-safe') || 
+                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                return;
+                                            }
+                                            return lottieInstance._seizureSafeOriginalRestart.apply(this, arguments);
+                                        };
+                                    }
+                                    
+                                    if (!lottieInstance._seizureSafeOriginalGoToAndPlay) {
+                                        lottieInstance._seizureSafeOriginalGoToAndPlay = lottieInstance.goToAndPlay;
+                                        lottieInstance.goToAndPlay = function() {
+                                            if (document.body.classList.contains('seizure-safe') || 
+                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                if (lottieInstance.goToAndStop) {
+                                                    const frame = arguments[0] || 0;
+                                                    lottieInstance.goToAndStop(frame, true);
+                                                }
+                                                return;
+                                            }
+                                            return lottieInstance._seizureSafeOriginalGoToAndPlay.apply(this, arguments);
+                                        };
+                                    }
                                 }
                             } catch (_) {}
                         });
@@ -27894,10 +28217,10 @@ class AccessibilityWidget {
                         // Method 4: Also handle lottie-player web components in polling (already handled in Method 1 above)
                         // Note: lottie-player is handled at the start of this polling function
                     } catch (_) {}
-                }, 100); // Check every 100ms
+                }, 30); // Check every 30ms (more aggressive for Lottie)
             }
             
-            // Poll for GSAP animations every 100ms
+            // Poll for GSAP animations every 50ms (more aggressive)
             if (!this.gsapPollInterval) {
                 this.gsapPollInterval = setInterval(() => {
                     try {
@@ -27907,14 +28230,22 @@ class AccessibilityWidget {
                                 window.gsap.killTweensOf('*');
                             }
                             
-                            // Kill all timelines
+                            // Kill all timelines and set to final state
                             if (window.gsap.getAllTimelines) {
                                 const allTimelines = window.gsap.getAllTimelines();
                                 allTimelines.forEach(tl => {
                                     try {
-                                        if (tl && tl.totalProgress) { tl.totalProgress(1); }
+                                        if (tl && typeof tl.totalProgress === 'function') { 
+                                            tl.totalProgress(1); 
+                                        }
+                                        if (tl && typeof tl.pause === 'function') {
+                                            tl.pause();
+                                        }
                                         if (tl && typeof tl.kill === 'function') {
                                             tl.kill();
+                                        }
+                                        if (tl && tl.paused !== undefined) {
+                                            tl.paused(true);
                                         }
                                     } catch (_) {}
                                 });
@@ -27925,12 +28256,27 @@ class AccessibilityWidget {
                                 const allTweens = window.gsap.getAllTweens();
                                 allTweens.forEach(tween => {
                                     try {
-                                        if (tween && tween.totalProgress) { tween.totalProgress(1); }
+                                        if (tween && typeof tween.totalProgress === 'function') { 
+                                            tween.totalProgress(1); 
+                                        }
+                                        if (tween && typeof tween.pause === 'function') {
+                                            tween.pause();
+                                        }
                                         if (tween && typeof tween.kill === 'function') {
                                             tween.kill();
                                         }
+                                        if (tween && tween.paused !== undefined) {
+                                            tween.paused(true);
+                                        }
                                     } catch (_) {}
                                 });
+                            }
+                            
+                            // Clear global timeline
+                            if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.clear === 'function') {
+                                try {
+                                    window.gsap.globalTimeline.clear();
+                                } catch (_) {}
                             }
                         }
                     } catch (_) {}
@@ -29033,6 +29379,16 @@ class AccessibilityWidget {
                     this.stopAnimationLibraries();
                 } catch (_) {}
                 
+                // CRITICAL: Also call stopAllLottieAnimations directly to ensure Lottie is stopped
+                try {
+                    this.stopAllLottieAnimations();
+                } catch (_) {}
+                
+                // Stop slider autoplay (Swiper, Webflow sliders, etc.)
+                try {
+                    this.stopSliderAutoplay();
+                } catch (_) {}
+                
                 // Stop autoplay media periodically to catch new media that starts autoplaying
                 try {
                     this.stopAutoplayMedia();
@@ -29069,6 +29425,17 @@ class AccessibilityWidget {
             
             // 6. Stop aggressive animation stopping
             this.stopAggressiveAnimationStopping();
+            
+            // 7. Clean up Lottie event interceptor
+            if (seizureState && seizureState.lottieAnimObserver) {
+                try {
+                    seizureState.lottieAnimObserver.disconnect();
+                    seizureState.lottieAnimObserver = null;
+                } catch (_) {}
+            }
+            if (seizureState) {
+                seizureState.lottieEventInterceptorActive = false;
+            }
             
             // 7. Restore WAAPI animations
             try {
@@ -29739,8 +30106,8 @@ class AccessibilityWidget {
         // Universal Lottie Animation Stopping - Works on ALL websites
         // Uses Lottie's official API methods as recommended by Lottie documentation
         stopAllLottieAnimations() {
-            
-            
+            // CRITICAL: This function must be comprehensive and handle all Lottie instances
+            // Some Lottie animations may restart or be created dynamically, so we need to be thorough
             try {
                 // Method 1: Stop via lottie-web API (most reliable) - Using Lottie's official methods
                 if (typeof window.lottie !== 'undefined') {
@@ -29796,13 +30163,86 @@ class AccessibilityWidget {
                                             
                                             // 7. Remove all event listeners that might restart animation
                                             if (anim.removeEventListener) {
-                                                anim.removeEventListener('complete', anim.restart);
-                                                anim.removeEventListener('loopComplete', anim.restart);
+                                                // Remove all possible restart-related event listeners
+                                                const eventsToRemove = ['complete', 'loopComplete', 'enterFrame', 'segmentStart', 'destroy'];
+                                                eventsToRemove.forEach(eventName => {
+                                                    try {
+                                                        // Try to remove with common handler names
+                                                        if (anim.restart) anim.removeEventListener(eventName, anim.restart);
+                                                        if (anim.play) anim.removeEventListener(eventName, anim.play);
+                                                        if (anim.start) anim.removeEventListener(eventName, anim.start);
+                                                        // Remove all listeners for this event by cloning and re-adding (if possible)
+                                                        if (anim._listeners && anim._listeners[eventName]) {
+                                                            anim._listeners[eventName] = [];
+                                                        }
+                                                    } catch (_) {}
+                                                });
                                             }
                                             
-                                            // 8. Disable looping
+                                            // 8. Disable looping - CRITICAL: Set multiple loop-related properties
                                             if (anim.loop !== undefined) {
                                                 anim.loop = false;
+                                            }
+                                            if (anim.loopCount !== undefined) {
+                                                anim.loopCount = 0;
+                                            }
+                                            if (anim.isPaused !== undefined) {
+                                                anim.isPaused = true;
+                                            }
+                                            
+                                            // 9. CRITICAL: Override play/restart methods to prevent animations from restarting
+                                            if (!anim._seizureSafeOriginalPlay) {
+                                                anim._seizureSafeOriginalPlay = anim.play;
+                                                anim.play = function() {
+                                                    // Prevent play when seizure-safe is active
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalPlay.apply(this, arguments);
+                                                };
+                                            }
+                                            
+                                            if (!anim._seizureSafeOriginalRestart) {
+                                                anim._seizureSafeOriginalRestart = anim.restart;
+                                                anim.restart = function() {
+                                                    // Prevent restart when seizure-safe is active
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalRestart.apply(this, arguments);
+                                                };
+                                            }
+                                            
+                                            if (!anim._seizureSafeOriginalGoToAndPlay) {
+                                                anim._seizureSafeOriginalGoToAndPlay = anim.goToAndPlay;
+                                                anim.goToAndPlay = function() {
+                                                    // Prevent goToAndPlay when seizure-safe is active
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        // Just go to frame without playing
+                                                        if (anim.goToAndStop) {
+                                                            const frame = arguments[0] || 0;
+                                                            anim.goToAndStop(frame, true);
+                                                        }
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalGoToAndPlay.apply(this, arguments);
+                                                };
+                                            }
+                                            
+                                            // 10. Override setDirection to prevent reverse loops
+                                            if (!anim._seizureSafeOriginalSetDirection && typeof anim.setDirection === 'function') {
+                                                anim._seizureSafeOriginalSetDirection = anim.setDirection;
+                                                anim.setDirection = function(direction) {
+                                                    // Only allow setting direction if not seizure-safe
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalSetDirection.apply(this, arguments);
+                                                };
                                             }
                                         }
                                     } catch (_) {}
@@ -29815,6 +30255,90 @@ class AccessibilityWidget {
                             try {
                                 window.lottie.freeze();
                             } catch (_) {}
+                        }
+                        
+                        // CRITICAL: Intercept and prevent all animation completion events that trigger loops
+                        // This prevents looped animations from restarting even if they have internal loop logic
+                        if (!seizureState.lottieEventInterceptorActive) {
+                            seizureState.lottieEventInterceptorActive = true;
+                            
+                            // Override addEventListener on all animation instances to intercept completion events
+                            const originalGetRegisteredAnimations = window.lottie.getRegisteredAnimations;
+                            if (originalGetRegisteredAnimations) {
+                                const self = this;
+                                // Set up a MutationObserver to catch new animations and override their event listeners
+                                const animObserver = new MutationObserver(() => {
+                                    try {
+                                        const allAnims = window.lottie.getRegisteredAnimations();
+                                        allAnims.forEach(anim => {
+                                            if (anim && !anim._seizureSafeEventInterceptorAdded) {
+                                                anim._seizureSafeEventInterceptorAdded = true;
+                                                
+                                                // Override addEventListener to block completion events
+                                                if (anim.addEventListener && !anim._seizureSafeOriginalAddEventListener) {
+                                                    anim._seizureSafeOriginalAddEventListener = anim.addEventListener;
+                                                    anim.addEventListener = function(eventName, handler) {
+                                                        // Block completion events that might restart loops
+                                                        if (eventName === 'complete' || eventName === 'loopComplete') {
+                                                            // Only allow the handler if seizure-safe is not active
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                // Replace handler with a no-op that stops the animation
+                                                                const safeHandler = function() {
+                                                                    try {
+                                                                        if (anim && typeof anim.stop === 'function') anim.stop();
+                                                                        if (anim && typeof anim.pause === 'function') anim.pause();
+                                                                        if (anim && typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                                                                        if (anim && anim.loop !== undefined) anim.loop = false;
+                                                                    } catch (_) {}
+                                                                };
+                                                                return anim._seizureSafeOriginalAddEventListener.call(this, eventName, safeHandler);
+                                                            }
+                                                        }
+                                                        return anim._seizureSafeOriginalAddEventListener.apply(this, arguments);
+                                                    };
+                                                }
+                                            }
+                                        });
+                                    } catch (_) {}
+                                });
+                                
+                                // Observe for new animations
+                                animObserver.observe(document.body, { childList: true, subtree: true });
+                                seizureState.lottieAnimObserver = animObserver;
+                                
+                                // Also apply immediately to existing animations
+                                setTimeout(() => {
+                                    try {
+                                        const allAnims = window.lottie.getRegisteredAnimations();
+                                        allAnims.forEach(anim => {
+                                            if (anim && !anim._seizureSafeEventInterceptorAdded) {
+                                                anim._seizureSafeEventInterceptorAdded = true;
+                                                if (anim.addEventListener && !anim._seizureSafeOriginalAddEventListener) {
+                                                    anim._seizureSafeOriginalAddEventListener = anim.addEventListener;
+                                                    anim.addEventListener = function(eventName, handler) {
+                                                        if (eventName === 'complete' || eventName === 'loopComplete') {
+                                                            if (document.body.classList.contains('seizure-safe') || 
+                                                                document.documentElement.classList.contains('seizure-safe')) {
+                                                                const safeHandler = function() {
+                                                                    try {
+                                                                        if (anim && typeof anim.stop === 'function') anim.stop();
+                                                                        if (anim && typeof anim.pause === 'function') anim.pause();
+                                                                        if (anim && typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                                                                        if (anim && anim.loop !== undefined) anim.loop = false;
+                                                                    } catch (_) {}
+                                                                };
+                                                                return anim._seizureSafeOriginalAddEventListener.call(this, eventName, safeHandler);
+                                                            }
+                                                        }
+                                                        return anim._seizureSafeOriginalAddEventListener.apply(this, arguments);
+                                                    };
+                                                }
+                                            }
+                                        });
+                                    } catch (_) {}
+                                }, 0);
+                            }
                         }
                         
                         // Method 5: Override Lottie loading globally (store original for restoration)
@@ -29856,6 +30380,47 @@ class AccessibilityWidget {
                                             }
                                             if (anim.loop !== undefined) {
                                                 anim.loop = false;
+                                            }
+                                            if (anim.loopCount !== undefined) {
+                                                anim.loopCount = 0;
+                                            }
+                                            
+                                            // CRITICAL: Override play/restart methods for newly loaded animations
+                                            if (!anim._seizureSafeOriginalPlay) {
+                                                anim._seizureSafeOriginalPlay = anim.play;
+                                                anim.play = function() {
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalPlay.apply(this, arguments);
+                                                };
+                                            }
+                                            
+                                            if (!anim._seizureSafeOriginalRestart) {
+                                                anim._seizureSafeOriginalRestart = anim.restart;
+                                                anim.restart = function() {
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalRestart.apply(this, arguments);
+                                                };
+                                            }
+                                            
+                                            if (!anim._seizureSafeOriginalGoToAndPlay) {
+                                                anim._seizureSafeOriginalGoToAndPlay = anim.goToAndPlay;
+                                                anim.goToAndPlay = function() {
+                                                    if (document.body.classList.contains('seizure-safe') || 
+                                                        document.documentElement.classList.contains('seizure-safe')) {
+                                                        if (anim.goToAndStop) {
+                                                            const frame = arguments[0] || 0;
+                                                            anim.goToAndStop(frame, true);
+                                                        }
+                                                        return;
+                                                    }
+                                                    return anim._seizureSafeOriginalGoToAndPlay.apply(this, arguments);
+                                                };
                                             }
                                         } catch (_) {}
                                     }
@@ -29906,6 +30471,49 @@ class AccessibilityWidget {
                             // 6. Disable autoplay via attribute
                             player.setAttribute('autoplay', 'false');
                             player.removeAttribute('loop');
+                            player.setAttribute('loop', 'false');
+                            
+                            // 7. CRITICAL: Override lottie-player's play/restart methods
+                            if (!player._seizureSafeOriginalPlay && typeof player.play === 'function') {
+                                player._seizureSafeOriginalPlay = player.play;
+                                player.play = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        return;
+                                    }
+                                    return player._seizureSafeOriginalPlay.apply(this, arguments);
+                                };
+                            }
+                            
+                            if (!player._seizureSafeOriginalRestart && typeof player.restart === 'function') {
+                                player._seizureSafeOriginalRestart = player.restart;
+                                player.restart = function() {
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        return;
+                                    }
+                                    return player._seizureSafeOriginalRestart.apply(this, arguments);
+                                };
+                            }
+                            
+                            if (!player._seizureSafeOriginalLoad && typeof player.load === 'function') {
+                                player._seizureSafeOriginalLoad = player.load;
+                                player.load = function() {
+                                    const result = player._seizureSafeOriginalLoad.apply(this, arguments);
+                                    // Immediately stop after loading if seizure-safe is active
+                                    if (document.body.classList.contains('seizure-safe') || 
+                                        document.documentElement.classList.contains('seizure-safe')) {
+                                        setTimeout(() => {
+                                            try {
+                                                if (typeof player.stop === 'function') player.stop();
+                                                if (typeof player.pause === 'function') player.pause();
+                                                if (typeof player.setSpeed === 'function') player.setSpeed(0);
+                                            } catch (_) {}
+                                        }, 0);
+                                    }
+                                    return result;
+                                };
+                            }
                             
                             player.setAttribute('data-seizure-safe-stopped', 'true');
                             // Keep visible but stop animation - force to final state
@@ -30129,9 +30737,33 @@ class AccessibilityWidget {
                         // Restore original loadAnimation function
                         if (seizureState && seizureState.originalLottieLoadAnimation) {
                             window.lottie.loadAnimation = seizureState.originalLottieLoadAnimation;
+                            seizureState.originalLottieLoadAnimation = null;
                         }
                         
                       
+                    } catch (_) {}
+                }
+                
+                // Restore GSAP methods
+                if (typeof window.gsap !== 'undefined' && seizureState && seizureState.gsapMethodsOverridden) {
+                    try {
+                        if (seizureState.originalGsapTo) {
+                            window.gsap.to = seizureState.originalGsapTo;
+                            seizureState.originalGsapTo = null;
+                        }
+                        if (seizureState.originalGsapFrom) {
+                            window.gsap.from = seizureState.originalGsapFrom;
+                            seizureState.originalGsapFrom = null;
+                        }
+                        if (seizureState.originalGsapFromTo) {
+                            window.gsap.fromTo = seizureState.originalGsapFromTo;
+                            seizureState.originalGsapFromTo = null;
+                        }
+                        if (seizureState.originalGsapTimeline) {
+                            window.gsap.timeline = seizureState.originalGsapTimeline;
+                            seizureState.originalGsapTimeline = null;
+                        }
+                        seizureState.gsapMethodsOverridden = false;
                     } catch (_) {}
                 }
                 
@@ -31909,7 +32541,8 @@ class AccessibilityWidget {
                 });
                 
                 // Additional fixes for specific libraries
-                panel.style.position = 'fixed';
+                // DON'T set position here - let updateInterfacePosition() handle it
+                // panel.style.position = 'fixed'; // REMOVED - interferes with dynamic positioning
                 panel.style.zIndex = '2147483646';
                 
                 // Force scroll events to work
@@ -32567,18 +33200,31 @@ class AccessibilityWidget {
                     this.ensureWidgetCSS(); // Ensure CSS is always present
                     this.ensureBasePanelCSS(); // Ensure base CSS is applied
                     
-                    // Position panel on same side as icon BEFORE showing it
-                    // Use requestAnimationFrame to ensure icon position is calculated correctly
-                    requestAnimationFrame(() => {
-                        this.updateInterfacePosition(); // Position panel next to icon
-                    });
-                    
-                    // Reset transform to show panel
+                    // Make panel visible first (needed for accurate positioning)
                     panel.style.transform = '';
                     panel.style.visibility = 'visible';
                     panel.style.pointerEvents = 'auto';
                     panel.style.display = 'block'; // Keep for compatibility
                     panel.classList.add('active');
+                    
+                    // Position panel above icon AFTER making it visible
+                    // Use multiple requestAnimationFrame calls to ensure dimensions are calculated
+                    const positionPanel = () => {
+                        this.updateInterfacePosition(); // Position panel above icon
+                        // Verify position after a short delay
+                        setTimeout(() => {
+                            if (this.isPanelOpen) {
+                                this.updateInterfacePosition(); // Re-position to ensure accuracy
+                            }
+                        }, 100);
+                    };
+                    
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            positionPanel();
+                        });
+                    });
+                    
                     panel.setAttribute('aria-hidden', 'false');
                     icon.setAttribute('aria-expanded', 'true');
                     this.isPanelOpen = true;
@@ -33404,6 +34050,11 @@ class AccessibilityWidget {
                 // We only need to toggle mobile-mode class for CSS targeting
                 const needsClassUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
                                        (!isMobile && panel.classList.contains('mobile-mode'));
+                
+                // If panel is open, update its position relative to icon
+                if (this.isPanelOpen && panel.classList.contains('active')) {
+                    this.updateInterfacePosition();
+                }
                 
                 if (needsClassUpdate) {
                     if (isMobile) {
@@ -34808,10 +35459,10 @@ class AccessibilityWidget {
                 panel.style.setProperty('scroll-behavior', 'smooth', 'important');
                 panel.style.setProperty('overscroll-behavior', 'contain', 'important');
                 
-                // Set panel to full viewport height (this is not responsive, always 100vh)
-                panel.style.setProperty('height', '100vh', 'important');
-                panel.style.setProperty('top', '0', 'important');
-                panel.style.setProperty('bottom', '0', 'important');
+                // DON'T set height, top, or bottom here - let updateInterfacePosition() handle dynamic positioning
+                // panel.style.setProperty('height', '100vh', 'important'); // REMOVED - interferes with dynamic positioning
+                // panel.style.setProperty('top', '0', 'important'); // REMOVED - interferes with dynamic positioning
+                // panel.style.setProperty('bottom', '0', 'important'); // REMOVED - interferes with dynamic positioning
                 
                 // Add text wrapping to ensure all text is visible
                 panel.style.setProperty('word-wrap', 'break-word', 'important');
@@ -35369,6 +36020,13 @@ class AccessibilityWidget {
             
             // Set position - use fixed positioning relative to viewport
             // Use !important to ensure positioning overrides CSS and fits viewport
+            // CRITICAL: Remove any existing positioning that might interfere
+            panel.style.removeProperty('margin');
+            panel.style.removeProperty('margin-left');
+            panel.style.removeProperty('margin-right');
+            panel.style.removeProperty('margin-top');
+            panel.style.removeProperty('margin-bottom');
+            
             panel.style.setProperty('position', 'fixed', 'important');
             panel.style.setProperty('left', finalLeft, 'important');
             if (finalRight !== undefined && finalRight !== 'auto') {
@@ -35383,6 +36041,9 @@ class AccessibilityWidget {
                 panel.style.removeProperty('bottom');
             }
             panel.style.setProperty('z-index', '2147483646', 'important');
+            
+            // Force a reflow to ensure positioning is applied
+            void panel.offsetHeight;
             
             // Final check: Ensure panel doesn't overflow viewport on any screen size
             // Wait for next frame to get accurate dimensions after positioning
