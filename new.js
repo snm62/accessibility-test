@@ -213,8 +213,7 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                 }
                 /* Stop animations for text elements without forcing hidden animation clones to become visible */
                 body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6,
@@ -235,29 +234,18 @@
                 body.seizure-safe .slide-in,
                 body.seizure-safe .scale-in,
                 body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                 }
                 /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                 body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
-                /* HOVER ANIMATIONS: Disable all hover-triggered animations */
-                body.seizure-safe *:hover, body.seizure-safe *:focus, body.seizure-safe *:active, body.seizure-safe *[class*="hover"], body.seizure-safe *[class*="focus"], body.seizure-safe *[class*="active"], body.seizure-safe *[data-hover], body.seizure-safe *[data-focus], body.seizure-safe *[data-active] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                
                 /* CRITICAL: Exclude dropdown menus from visibility forcing - they should remain hidden until explicitly opened */
                 /* This rule must come after the hover rule above to override it for dropdowns */
                 /* Handle both normal and hover states to prevent auto-opening */
@@ -342,13 +330,10 @@
                     animation-play-state: paused !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* Force all text to be fully visible - remove any clipping or width restrictions */
+                    /* Force all text to be fully visible - remove any clipping restrictions */
                     clip-path: none !important;
                     -webkit-clip-path: none !important;
-                    width: auto !important;
-                    height: auto !important;
-                    max-width: none !important;
-                    max-height: none !important;
+                    /* REMOVED: width: auto, height: auto, max-width: none, max-height: none - these were causing extra white space at the bottom */
                 }
                 /* For text animation containers not yet processed, ensure they're visible but hide overlapping children */
                 body.seizure-safe [data-splitting]:not([data-seizure-text-processed]), 
@@ -387,14 +372,6 @@
                     position: absolute !important;
                     pointer-events: none !important;
                 }
-                /* IMAGE HOVER EFFECTS: Disable all image hover animations */
-                body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
                 /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations IMMEDIATELY */
                 body.seizure-safe *[class*="scroll"], 
                 body.seizure-safe *[class*="progress"], 
@@ -428,8 +405,7 @@
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
+                    /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                     /* Preserve transforms for slider manual navigation */
                     transform: none !important;
                     will-change: auto !important;
@@ -3086,24 +3062,22 @@ class AccessibilityWidget {
                     body.seizure-safe .word {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        display: inline !important;
+                        /* REMOVED: opacity: 1, visibility: visible, display: inline - these were causing extra white space by revealing hidden elements */
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Stop SVG animations immediately */
+                    /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                     body.seizure-safe svg,
                     body.seizure-safe svg path,
                     body.seizure-safe svg line {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
                     /* Stop scroll-triggered animations immediately */
+                    /* REMOVED: opacity: 1 and visibility: visible - these were causing extra white space by revealing hidden elements */
                     body.seizure-safe *[class*="scroll"],
                     body.seizure-safe *[class*="progress"],
                     body.seizure-safe *[class*="bar"],
@@ -3116,8 +3090,6 @@ class AccessibilityWidget {
                     body.seizure-safe [data-w-id] {
                         animation: none !important;
                         transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
                         transform: none !important;
                         will-change: auto !important;
                     }
@@ -26195,17 +26167,10 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
 
-                /* Stop hover-driven transforms on buttons/links */
+                /* Stop transforms on buttons/links (but allow hover animations) */
                 html.stop-animation a, html.stop-animation button, html.stop-animation [role="button"],
                 body.stop-animation a, body.stop-animation button, body.stop-animation [role="button"],
                 .stop-animation a, .stop-animation button, .stop-animation [role="button"] {
-                    transition: none !important;
-                    transform: none !important;
-                }
-
-                html.stop-animation a:hover, html.stop-animation button:hover, html.stop-animation [role="button"]:hover,
-                body.stop-animation a:hover, body.stop-animation button:hover, body.stop-animation [role="button"]:hover,
-                .stop-animation a:hover, .stop-animation button:hover, .stop-animation [role="button"]:hover {
                     transition: none !important;
                     transform: none !important;
                 }
@@ -27372,24 +27337,6 @@ class AccessibilityWidget {
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
-                    /* HOVER ANIMATIONS: Disable all hover-triggered animations */
-                    .stop-animation *:hover,
-                    .stop-animation *:focus,
-                    .stop-animation *:active,
-                    .stop-animation *[class*="hover"],
-                    .stop-animation *[class*="focus"],
-                    .stop-animation *[class*="active"],
-                    .stop-animation *[data-hover],
-                    .stop-animation *[data-focus],
-                    .stop-animation *[data-active] {
-                        animation: none !important;
-                        transition: none !important;
-                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
-                    }
-                    
                     /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
                     .stop-animation [data-splitting],
                     .stop-animation .split,
@@ -27416,21 +27363,6 @@ class AccessibilityWidget {
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
-                    /* IMAGE HOVER EFFECTS: Disable all image hover animations */
-                    .stop-animation img:hover,
-                    .stop-animation [class*="image"]:hover,
-                    .stop-animation [class*="img"]:hover,
-                    .stop-animation [class*="photo"]:hover,
-                    .stop-animation [class*="picture"]:hover,
-                    .stop-animation [class*="gallery"]:hover,
-                    .stop-animation [class*="portfolio"]:hover,
-                    .stop-animation [class*="card"]:hover,
-                    .stop-animation [class*="item"]:hover {
-                        animation: none !important;
-                        transition: none !important;
-                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
-                        opacity: 1 !important;
-                        visibility: visible !important;
                         /* transform: none !important; - REMOVED: This was breaking website layout */
                     }
                     
@@ -31724,13 +31656,8 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
 
-                /* Stop hover-driven transforms on buttons/links */
+                /* Stop transforms on buttons/links (but allow hover animations) */
                 .seizure-safe a, .seizure-safe button, .seizure-safe [role="button"] {
-                    transition: none !important;
-                    transform: none !important;
-                }
-
-                .seizure-safe a:hover, .seizure-safe button:hover, .seizure-safe [role="button"]:hover {
                     transition: none !important;
                     transform: none !important;
                 }
@@ -31893,16 +31820,6 @@ class AccessibilityWidget {
                     zoom: 1 !important;
                 }
                 
-                /* PREVENT HOVER EFFECTS AND INTERACTIONS */
-                body.seizure-safe *:hover,
-                body.seizure-safe *:focus,
-                body.seizure-safe *:active {
-                    transform: none !important;
-                    scale: 1 !important;
-                    zoom: 1 !important;
-                    animation: none !important;
-                    transition: none !important;
-                }
                 
                 /* Stop ALL CSS animations by name */
                 body.seizure-safe * {
