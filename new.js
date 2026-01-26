@@ -5014,10 +5014,10 @@ class AccessibilityWidget {
     }
     
     /* Landscape Phones & Smaller Portrait Tablets */
-    @media (min-width: 481px) and (max-width: 768px) {
+    @media (min-width: 481px) and (max-width: 1024px) {
         .accessbit-widget-panel {
-            width: 80vw;
-            max-width: 380px;
+            width: 90vw;
+            max-width: 450px;
             padding: 14px;
             max-height: calc(100vh - 40px);
             overflow-y: auto;
@@ -6708,50 +6708,21 @@ class AccessibilityWidget {
                     height: 20px !important;
                 }
                 
-                /* Fix toggle text to be horizontal (not vertical) */
+                /* Hide toggle text on mobile screens only */
                 .accessbit-widget-panel .toggle-off,
                 .accessbit-widget-panel .toggle-on,
                 .accessbit-widget-panel .slider::after {
-                    writing-mode: horizontal-tb !important;
-                    text-orientation: mixed !important;
-                    white-space: nowrap !important;
-                    font-size: 8px !important;
-                    line-height: 1 !important;
-                    display: block !important;
-                    width: auto !important;
-                    height: auto !important;
-                    letter-spacing: 0 !important;
-                    word-spacing: 0 !important;
-                    text-align: center !important;
-                }
-                
-                .accessbit-widget-panel .toggle-off {
-                    left: 8px !important;
-                    right: auto !important;
-                    top: 50% !important;
-                    transform: translateY(-50%) !important;
-                }
-                
-                .accessbit-widget-panel .toggle-on {
-                    right: 8px !important;
-                    left: auto !important;
-                    top: 50% !important;
-                    transform: translateY(-50%) !important;
-                }
-                
-                .accessbit-widget-panel .slider::after {
-                    left: 12px !important;
-                    font-size: 8px !important;
-                }
-                
-                .accessbit-widget-panel input:checked + .slider::after {
-                    right: 12px !important;
-                    left: auto !important;
-                    font-size: 8px !important;
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    font-size: 0 !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    overflow: hidden !important;
                 }
             }
             
-            @media (min-width: 481px) and (max-width: 768px) {
+            @media (min-width: 481px) and (max-width: 1024px) {
                 .accessbit-widget-icon {
                     width: 45px !important;
                     height: 45px !important;
@@ -6762,8 +6733,8 @@ class AccessibilityWidget {
                 }
                 
                 .accessbit-widget-panel {
-                    width: 85vw !important;
-                    max-width: 85vw !important;
+                    width: 90vw !important;
+                    max-width: 450px !important;
                     /* left/right positioning handled by JavaScript based on icon position */
                     font-size: 11px !important;
                     padding: 10px !important;
@@ -35220,22 +35191,31 @@ class AccessibilityWidget {
             
             // Get actual panel dimensions from computed styles (respects CSS media queries)
             const panelComputedStyle = window.getComputedStyle(panel);
-            // Temporarily make panel visible to get accurate dimensions
-            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none';
+            // Make panel visible to get accurate dimensions (it should be visible when positioning)
+            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none' || 
+                             !panel.classList.contains('active');
             if (wasHidden) {
                 panel.style.visibility = 'visible';
                 panel.style.display = 'block';
+                panel.classList.add('active');
             }
+            
+            // Force a reflow to ensure dimensions are accurate
+            void panel.offsetHeight;
             
             const panelRect = panel.getBoundingClientRect();
             const panelWidth = panelRect.width || parseFloat(panelComputedStyle.width) || 500;
-            const panelHeight = panelRect.height || parseFloat(panelComputedStyle.height) || 700;
-            
-            // Restore visibility state if it was hidden
-            if (wasHidden) {
-                panel.style.visibility = 'hidden';
-                panel.style.display = 'none';
+            // Get actual panel height for positioning calculation
+            // Use actual rendered height if available, otherwise estimate
+            let panelHeightForPositioning = panelRect.height;
+            if (panelHeightForPositioning === 0 || panelHeightForPositioning < 100) {
+                // Panel height not available yet - use CSS height or reasonable estimate
+                panelHeightForPositioning = parseFloat(panelComputedStyle.height) || 
+                                          parseFloat(panelComputedStyle.maxHeight) || 
+                                          (window.innerWidth <= 768 ? 400 : 600); // Different defaults for mobile vs desktop
             }
+            
+            // Keep panel visible - don't hide it again since we're positioning it
             
             // ALL SCREENS: Panel appears ABOVE the icon, fits viewport, no overflow
             const spacing = 10; // Small spacing from icon
@@ -35246,22 +35226,37 @@ class AccessibilityWidget {
             const iconCenterX = iconRect.left + (iconRect.width / 2);
             const iconIsOnLeft = iconCenterX < screenCenterX;
             
-            // Check if we're on mobile/tablet for width adjustment
-            const isMobileOrTablet = window.innerWidth <= 768;
+            // Check if we're on mobile/tablet for width adjustment (extended to 1024px for larger tablets)
+            const isMobileOrTablet = window.innerWidth <= 1024;
             
             let finalLeft, finalRight, finalTop, finalBottom;
             
-            // Calculate vertical position: panel should appear ABOVE the icon on ALL screens
-            // Position panel above icon with spacing
-            const spacingAbove = 15; // Space between icon and panel
-            const topPosition = Math.max(10, iconRect.top - panelMaxHeight - spacingAbove);
+            // Calculate vertical position: panel should appear DIRECTLY ABOVE the icon on ALL screens
+            // Position panel so its bottom edge is spacingAbove pixels above the icon's top edge
+            const spacingAbove = 15; // Space between icon top and panel bottom
             
-            // If there's not enough space above, position from top of viewport
-            if (topPosition < 10) {
-                finalTop = '10px';
-                finalBottom = 'auto';
+            // Calculate where panel top should be: icon top - spacing - panel height
+            const desiredTop = iconRect.top - spacingAbove - panelHeightForPositioning;
+            
+            // If there's not enough space above the icon, position from top of viewport
+            // But ensure panel bottom doesn't overlap the icon
+            if (desiredTop < 10) {
+                // Not enough space above - position from top (10px), but ensure panel doesn't overlap icon
+                // Calculate max height that would fit above icon
+                const maxHeightAboveIcon = iconRect.top - spacingAbove - 10;
+                if (maxHeightAboveIcon > 100) {
+                    // There's some space, position panel from top but limit its height
+                    finalTop = '10px';
+                    finalBottom = 'auto';
+                    // We'll limit the panel height later in the code
+                } else {
+                    // Very little space - position panel starting from top, it will be limited by max-height
+                    finalTop = '10px';
+                    finalBottom = 'auto';
+                }
             } else {
-                finalTop = `${topPosition}px`;
+                // Enough space - position directly above icon
+                finalTop = `${desiredTop}px`;
                 finalBottom = 'auto';
             }
             
@@ -35283,13 +35278,18 @@ class AccessibilityWidget {
                 finalRight = 'auto';
             }
             
-            // Adjust for mobile/tablet - use smaller width but still position relative to icon
+            // Adjust for mobile/tablet - use appropriate width but still position relative to icon
             if (isMobileOrTablet) {
-                // Mobile/Tablet: Use responsive width (85vw max), but position relative to icon
-                const mobileWidth = Math.min(window.innerWidth * 0.85, 350);
-                const adjustedLeft = iconCenterX - (mobileWidth / 2);
+                // Mobile (≤480px): Use smaller width
+                // Tablet (481-1024px): Use larger width
+                const isMobile = window.innerWidth <= 480;
+                const responsiveWidth = isMobile ? 
+                    Math.min(window.innerWidth * 0.85, 350) : // Mobile: 85vw, max 350px
+                    Math.min(window.innerWidth * 0.90, 450);  // Tablet: 90vw, max 450px
+                
+                const adjustedLeft = iconCenterX - (responsiveWidth / 2);
                 const minLeft = 10;
-                const maxLeft = window.innerWidth - mobileWidth - 10;
+                const maxLeft = window.innerWidth - responsiveWidth - 10;
                 finalLeft = `${Math.max(minLeft, Math.min(adjustedLeft, maxLeft))}px`;
                 finalRight = 'auto';
             } else {
@@ -35328,8 +35328,12 @@ class AccessibilityWidget {
             
             // Set width based on screen size - ensure it fits viewport on ALL screens
             if (isMobileOrTablet) {
-                // Mobile/Tablet: Responsive width (85vw max), ensure it doesn't overflow
-                const mobileWidth = Math.min(window.innerWidth * 0.85, 350);
+                // Mobile (≤480px): Smaller width
+                // Tablet (481-1024px): Larger width
+                const isMobile = window.innerWidth <= 480;
+                const mobileWidth = isMobile ? 
+                    Math.min(window.innerWidth * 0.85, 350) : // Mobile: 85vw, max 350px
+                    Math.min(window.innerWidth * 0.90, 450);  // Tablet: 90vw, max 450px
                 const leftMargin = parseFloat(finalLeft || '0');
                 const rightMargin = 10;
                 const maxAvailableWidth = window.innerWidth - leftMargin - rightMargin;
