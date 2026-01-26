@@ -29231,6 +29231,73 @@ class AccessibilityWidget {
             // 3) WAAPI pause/cancel running animations (no globals)
             try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             
+            // CRITICAL: Stop Lottie animations IMMEDIATELY like early initialization does
+            // This must happen BEFORE other stopping functions to catch looped animations
+            try {
+                // Method 1: Stop via registered animations API
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const lottieAnimations = window.lottie.getRegisteredAnimations();
+                    lottieAnimations.forEach(animation => {
+                        try {
+                            if (animation && typeof animation.stop === 'function') {
+                                animation.stop();
+                            }
+                            if (animation && typeof animation.pause === 'function') {
+                                animation.pause();
+                            }
+                            // CRITICAL: Cancel requestAnimationFrame loops immediately
+                            if (animation.animationID !== undefined && animation.animationID !== null) {
+                                try {
+                                    cancelAnimationFrame(animation.animationID);
+                                    animation.animationID = null;
+                                } catch (_) {}
+                            }
+                            if (animation.renderer && animation.renderer.animationID !== undefined && animation.renderer.animationID !== null) {
+                                try {
+                                    cancelAnimationFrame(animation.renderer.animationID);
+                                    animation.renderer.animationID = null;
+                                } catch (_) {}
+                            }
+                            if (animation._animationID !== undefined && animation._animationID !== null) {
+                                try {
+                                    cancelAnimationFrame(animation._animationID);
+                                    animation._animationID = null;
+                                } catch (_) {}
+                            }
+                            // Disable looping immediately
+                            if (animation.loop !== undefined) {
+                                animation.loop = false;
+                            }
+                            if (animation.loopCount !== undefined) {
+                                animation.loopCount = 0;
+                            }
+                            if (animation.setSpeed && typeof animation.setSpeed === 'function') {
+                                animation.setSpeed(0);
+                            }
+                        } catch (_) {}
+                    });
+                }
+                
+                // Method 2: Stop lottie-player web components directly via DOM
+                const lottiePlayers = document.querySelectorAll('lottie-player');
+                lottiePlayers.forEach(player => {
+                    try {
+                        if (typeof player.setSpeed === 'function') {
+                            player.setSpeed(0);
+                        }
+                        if (typeof player.stop === 'function') {
+                            player.stop();
+                        }
+                        if (typeof player.pause === 'function') {
+                            player.pause();
+                        }
+                        player.setAttribute('autoplay', 'false');
+                        player.removeAttribute('loop');
+                        player.setAttribute('loop', 'false');
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
             // CRITICAL: Call the same early initialization functions that run on page load
             // These do direct DOM manipulation to freeze animations immediately
             try { 
