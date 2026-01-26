@@ -28253,7 +28253,7 @@ class AccessibilityWidget {
                             }
                         }
                     } catch (_) {}
-                }, 50); // Check every 50ms (more aggressive)
+                }, 15); // Check every 15ms (very aggressive to catch loops)
             }
         }
         
@@ -29218,24 +29218,56 @@ class AccessibilityWidget {
             this.addSeizureSafeGreyOverlay();
             // 2) CSS kill switch
             this.injectSeizureSafeAnimationCSS();
+            
+            // CRITICAL: Force browser to apply CSS immediately before stopping animations
+            // This ensures CSS rules take effect before we try to stop animations
+            try {
+                // Force a reflow to ensure CSS is applied
+                void document.body.offsetHeight;
+                // Also force reflow on documentElement
+                void document.documentElement.offsetHeight;
+            } catch (_) {}
+            
             // 3) WAAPI pause/cancel running animations (no globals)
             try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             
             // CRITICAL: Stop animations IMMEDIATELY and MULTIPLE TIMES when toggled on
             // This ensures we catch animations that are already running
-            this.stopAnimationLibraries();
-            this.stopAllLottieAnimations(); // Call directly for immediate effect
-            this.stopAutoplayMedia();
-            this.stopJavaScriptAnimations();
-            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+            // Run synchronously in a tight loop first to catch animations immediately
+            for (let i = 0; i < 10; i++) {
+                this.stopAnimationLibraries();
+                this.stopAllLottieAnimations();
+                this.stopAutoplayMedia();
+                this.stopJavaScriptAnimations();
+                try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
+            }
             
-            // Run again after a tiny delay to catch any that restarted
+            // 4) Start polling IMMEDIATELY for continuous stopping (before any animations can restart)
+            this.startLottieGSAPPolling();
+            
+            // 5) Start aggressive periodic animation stopping IMMEDIATELY (no global overrides)
+            this.startAggressiveAnimationStopping();
+            
+            // CRITICAL: Run stopping functions again after micro-delays to catch any that restarted
+            // Use requestAnimationFrame to run in the next frame
+            requestAnimationFrame(() => {
+                this.stopAnimationLibraries();
+                this.stopAllLottieAnimations();
+                this.stopAutoplayMedia();
+                this.stopJavaScriptAnimations();
+                try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
+            });
+            
+            // Run again after a tiny delay
             setTimeout(() => {
                 this.stopAnimationLibraries();
                 this.stopAllLottieAnimations();
                 this.stopAutoplayMedia();
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
             }, 0);
             
             // Run again after another tiny delay
@@ -29245,6 +29277,7 @@ class AccessibilityWidget {
                 this.stopAutoplayMedia();
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
             }, 10);
             
             // Run again after a slightly longer delay
@@ -29254,13 +29287,18 @@ class AccessibilityWidget {
                 this.stopAutoplayMedia();
                 this.stopJavaScriptAnimations();
                 try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
             }, 50);
             
-            // 4) Start polling for continuous stopping
-            this.startLottieGSAPPolling();
-            
-            // 5) Start aggressive periodic animation stopping (no global overrides)
-            this.startAggressiveAnimationStopping();
+            // Run again after 100ms to catch any late starters
+            setTimeout(() => {
+                this.stopAnimationLibraries();
+                this.stopAllLottieAnimations();
+                this.stopAutoplayMedia();
+                this.stopJavaScriptAnimations();
+                try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+                this.aggressivelyStopAllAnimations();
+            }, 100);
         }
         
         // Aggressive periodic animation stopping - directly manipulates element styles
@@ -29274,10 +29312,10 @@ class AccessibilityWidget {
             // Run immediately
             this.aggressivelyStopAllAnimations();
             
-            // Then run every 30ms to catch new animations even more aggressively
+            // Then run every 15ms to catch new animations even more aggressively
             this._aggressiveAnimationStopperInterval = setInterval(() => {
                 this.aggressivelyStopAllAnimations();
-            }, 30);
+            }, 15);
         }
         
         stopAggressiveAnimationStopping() {
