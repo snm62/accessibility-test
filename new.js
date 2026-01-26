@@ -27926,7 +27926,7 @@ class AccessibilityWidget {
             // Clear any existing intervals first
             this.stopLottieGSAPPolling();
             
-            // Poll for Lottie animations every 50ms (more aggressive)
+            // Poll for Lottie animations every 5ms (VERY aggressive to catch loops)
             if (!this.lottiePollInterval) {
                 this.lottiePollInterval = setInterval(() => {
                     try {
@@ -28190,7 +28190,7 @@ class AccessibilityWidget {
                         // Method 4: Also handle lottie-player web components in polling (already handled in Method 1 above)
                         // Note: lottie-player is handled at the start of this polling function
                     } catch (_) {}
-                }, 15); // Check every 15ms (very aggressive for Lottie to catch loops)
+                }, 5); // Check every 5ms (VERY aggressive for Lottie to catch loops)
             }
             
             // Poll for GSAP animations every 50ms (more aggressive)
@@ -29231,6 +29231,66 @@ class AccessibilityWidget {
             // 3) WAAPI pause/cancel running animations (no globals)
             try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             
+            // CRITICAL: Override loadAnimation IMMEDIATELY to prevent new animations
+            try {
+                if (typeof window.lottie !== 'undefined' && typeof window.lottie.loadAnimation === 'function') {
+                    if (!window.seizureState) window.seizureState = {};
+                    if (!window.seizureState.originalLottieLoadAnimation) {
+                        window.seizureState.originalLottieLoadAnimation = window.lottie.loadAnimation;
+                    }
+                    window.lottie.loadAnimation = function(config) {
+                        const anim = window.seizureState.originalLottieLoadAnimation.call(this, config);
+                        // Immediately stop the newly loaded animation
+                        if (anim) {
+                            try {
+                                if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                                if (typeof anim.stop === 'function') anim.stop();
+                                if (typeof anim.pause === 'function') anim.pause();
+                                if (anim.loop !== undefined) anim.loop = false;
+                                if (anim.loopCount !== undefined) anim.loopCount = 0;
+                                // Cancel any requestAnimationFrame
+                                if (anim.animationID !== undefined && anim.animationID !== null) {
+                                    try { cancelAnimationFrame(anim.animationID); anim.animationID = null; } catch (_) {}
+                                }
+                                if (anim.renderer && anim.renderer.animationID !== undefined && anim.renderer.animationID !== null) {
+                                    try { cancelAnimationFrame(anim.renderer.animationID); anim.renderer.animationID = null; } catch (_) {}
+                                }
+                            } catch (_) {}
+                        }
+                        return anim;
+                    };
+                }
+            } catch (_) {}
+            
+            // CRITICAL: Freeze ALL canvas and SVG elements immediately via DOM
+            try {
+                const allCanvases = document.querySelectorAll('canvas');
+                allCanvases.forEach(canvas => {
+                    try {
+                        canvas.style.setProperty('animation', 'none', 'important');
+                        canvas.style.setProperty('transition', 'none', 'important');
+                        canvas.style.setProperty('pointer-events', 'none', 'important');
+                        canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                        // Try to get context and prevent drawing
+                        try {
+                            const ctx = canvas.getContext('2d');
+                            if (ctx && ctx.clearRect) {
+                                // Don't clear, just mark as frozen
+                            }
+                        } catch (_) {}
+                    } catch (_) {}
+                });
+                
+                const allSvgs = document.querySelectorAll('svg');
+                allSvgs.forEach(svg => {
+                    try {
+                        svg.style.setProperty('animation', 'none', 'important');
+                        svg.style.setProperty('transition', 'none', 'important');
+                        svg.setAttribute('data-seizure-safe-frozen', 'true');
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
             // CRITICAL: Stop Lottie animations IMMEDIATELY like early initialization does
             // This must happen BEFORE other stopping functions to catch looped animations
             try {
@@ -29273,6 +29333,21 @@ class AccessibilityWidget {
                             }
                             if (animation.setSpeed && typeof animation.setSpeed === 'function') {
                                 animation.setSpeed(0);
+                            }
+                            // Freeze the renderer directly
+                            if (animation.renderer) {
+                                try {
+                                    if (animation.renderer.canvas) {
+                                        animation.renderer.canvas.style.setProperty('animation', 'none', 'important');
+                                        animation.renderer.canvas.style.setProperty('transition', 'none', 'important');
+                                        animation.renderer.canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                                    }
+                                    if (animation.renderer.svgElement) {
+                                        animation.renderer.svgElement.style.setProperty('animation', 'none', 'important');
+                                        animation.renderer.svgElement.style.setProperty('transition', 'none', 'important');
+                                        animation.renderer.svgElement.setAttribute('data-seizure-safe-frozen', 'true');
+                                    }
+                                } catch (_) {}
                             }
                         } catch (_) {}
                     });
@@ -29408,10 +29483,10 @@ class AccessibilityWidget {
             // Run immediately
             this.aggressivelyStopAllAnimations();
             
-            // Then run every 15ms to catch new animations even more aggressively
+            // Then run every 5ms to catch new animations even more aggressively
             this._aggressiveAnimationStopperInterval = setInterval(() => {
                 this.aggressivelyStopAllAnimations();
-            }, 15);
+            }, 5);
         }
         
         stopAggressiveAnimationStopping() {
