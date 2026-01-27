@@ -153,6 +153,58 @@
                     scroll-behavior: auto !important;
                 }
                 
+                /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
+                /* Target all possible Lottie containers, SVG, and canvas elements */
+                body.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
+                body.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
+                body.seizure-safe [data-lottie],
+                body.seizure-safe lottie-player,
+                body.seizure-safe [class*="lottie"] svg,
+                body.seizure-safe [id*="lottie"] svg,
+                body.seizure-safe [data-lottie] svg,
+                body.seizure-safe lottie-player svg,
+                body.seizure-safe svg[data-lottie],
+                body.seizure-safe svg.lottie-animation,
+                body.seizure-safe svg[id*="lottie"],
+                body.seizure-safe svg[class*="lottie"],
+                html.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
+                html.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
+                html.seizure-safe [data-lottie],
+                html.seizure-safe lottie-player,
+                html.seizure-safe [class*="lottie"] svg,
+                html.seizure-safe [id*="lottie"] svg,
+                html.seizure-safe [data-lottie] svg,
+                html.seizure-safe lottie-player svg,
+                html.seizure-safe svg[data-lottie],
+                html.seizure-safe svg.lottie-animation,
+                html.seizure-safe svg[id*="lottie"],
+                html.seizure-safe svg[class*="lottie"] {
+                    transform: none !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* CRITICAL: Hide ALL canvas elements that are part of Lottie animations */
+                body.seizure-safe canvas[data-lottie],
+                body.seizure-safe canvas.lottie-animation,
+                body.seizure-safe canvas[id*="lottie"],
+                body.seizure-safe canvas[class*="lottie"],
+                body.seizure-safe [class*="lottie"] canvas,
+                body.seizure-safe [id*="lottie"] canvas,
+                body.seizure-safe [data-lottie] canvas,
+                body.seizure-safe lottie-player canvas,
+                html.seizure-safe canvas[data-lottie],
+                html.seizure-safe canvas.lottie-animation,
+                html.seizure-safe canvas[id*="lottie"],
+                html.seizure-safe canvas[class*="lottie"],
+                html.seizure-safe [class*="lottie"] canvas,
+                html.seizure-safe [id*="lottie"] canvas,
+                html.seizure-safe [data-lottie] canvas,
+                html.seizure-safe lottie-player canvas {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+                
                 /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
                 body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"], 
                 body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"], 
@@ -948,21 +1000,39 @@
                                     const hasAnimation = computedStyle.animationName !== 'none' && computedStyle.animationName !== '';
                                     const hasTransition = computedStyle.transitionProperty !== 'none' && computedStyle.transitionProperty !== '';
                                     
+                                    // CRITICAL: Check if element is part of Lottie animation
+                                    const isLottieElement = el.tagName === 'LOTTIE-PLAYER' ||
+                                                          el.tagName === 'CANVAS' && (el.hasAttribute('data-lottie') || el.classList.toString().match(/lottie/i) || el.id.match(/lottie/i)) ||
+                                                          el.tagName === 'SVG' && (el.hasAttribute('data-lottie') || el.classList.toString().match(/lottie/i) || el.id.match(/lottie/i)) ||
+                                                          el.hasAttribute('data-lottie') ||
+                                                          el.classList.toString().match(/lottie/i) ||
+                                                          el.id.match(/lottie/i) ||
+                                                          (el.closest && el.closest('[class*="lottie"], [id*="lottie"], [data-lottie], lottie-player'));
+                                    
                                     el.style.animation = 'none';
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
                                     
-                                    // Only neutralize transform if element is ACTUALLY being transformed by animations
-                                    // Don't break buttons or other elements that use transforms for layout
-                                    const inRotationContext = (() => {
-                                        try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
-                                    })();
-                                    const isButton = el.tagName === 'BUTTON' || el.tagName === 'A' || el.getAttribute('role') === 'button';
-                                    const hasTransformAnimation = hasAnimation || hasTransition || el.hasAttribute('data-w-id') || el.hasAttribute('data-aos') || el.hasAttribute('data-scroll');
-                                    
-                                    if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext && !isButton && hasTransformAnimation) {
+                                    // CRITICAL: Aggressively stop Lottie elements
+                                    if (isLottieElement) {
                                         el.style.transform = 'none';
+                                        if (el.tagName === 'CANVAS') {
+                                            el.style.display = 'none';
+                                            el.style.visibility = 'hidden';
+                                        }
+                                    } else {
+                                        // Only neutralize transform if element is ACTUALLY being transformed by animations
+                                        // Don't break buttons or other elements that use transforms for layout
+                                        const inRotationContext = (() => {
+                                            try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
+                                        })();
+                                        const isButton = el.tagName === 'BUTTON' || el.tagName === 'A' || el.getAttribute('role') === 'button';
+                                        const hasTransformAnimation = hasAnimation || hasTransition || el.hasAttribute('data-w-id') || el.hasAttribute('data-aos') || el.hasAttribute('data-scroll');
+                                        
+                                        if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext && !isButton && hasTransformAnimation) {
+                                            el.style.transform = 'none';
+                                        }
                                     }
                                     
                                     // Only force opacity: 1 if element is ACTUALLY fading in/out
@@ -29756,22 +29826,44 @@ class AccessibilityWidget {
                     /* REMOVED: transform: none - this was breaking button layouts */
                 }
                 
-                /* CRITICAL: Only apply transform: none to Lottie SVG elements */
-                /* This freezes Lottie animations without breaking other elements */
+                /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
+                /* Target all possible Lottie containers, SVG, and canvas elements */
+                .seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
+                .seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
+                .seizure-safe [data-lottie],
+                .seizure-safe lottie-player,
+                .seizure-safe [class*="lottie"] svg,
+                .seizure-safe [id*="lottie"] svg,
+                .seizure-safe [data-lottie] svg,
+                .seizure-safe lottie-player svg,
                 .seizure-safe svg[data-lottie],
                 .seizure-safe svg.lottie-animation,
-                .seizure-safe [class*="lottie"] svg,
-                .seizure-safe lottie-player svg {
+                .seizure-safe svg[id*="lottie"],
+                .seizure-safe svg[class*="lottie"] {
                     transform: none !important;
+                    animation: none !important;
+                    transition: none !important;
                 }
                 
-                /* CRITICAL: Only hide canvas elements that are part of Lottie animations */
-                /* Don't hide all canvas - preserve static canvas and intentionally hidden ones */
+                /* CRITICAL: Hide ALL canvas elements that are part of Lottie animations */
+                /* Be comprehensive - catch all Lottie canvas elements */
                 .seizure-safe canvas[data-lottie],
                 .seizure-safe canvas.lottie-animation,
+                .seizure-safe canvas[id*="lottie"],
+                .seizure-safe canvas[class*="lottie"],
                 .seizure-safe [class*="lottie"] canvas,
+                .seizure-safe [id*="lottie"] canvas,
+                .seizure-safe [data-lottie] canvas,
                 .seizure-safe lottie-player canvas {
                     display: none !important;
+                    visibility: hidden !important;
+                }
+                
+                /* Also hide the entire Lottie container if it contains animated content */
+                .seizure-safe [class*="lottie"]:has(canvas),
+                .seizure-safe [id*="lottie"]:has(canvas),
+                .seizure-safe [data-lottie]:has(canvas) {
+                    pointer-events: none !important;
                 }
                 `;
                 document.head.appendChild(style);
