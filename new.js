@@ -184,25 +184,31 @@
                     transition: none !important;
                 }
                 
-                /* CRITICAL: Hide ALL canvas elements that are part of Lottie animations */
+                /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
+                /* Use CSS to freeze animations while keeping elements visible */
                 body.seizure-safe canvas[data-lottie],
                 body.seizure-safe canvas.lottie-animation,
-                body.seizure-safe canvas[id*="lottie"],
-                body.seizure-safe canvas[class*="lottie"],
-                body.seizure-safe [class*="lottie"] canvas,
-                body.seizure-safe [id*="lottie"] canvas,
-                body.seizure-safe [data-lottie] canvas,
                 body.seizure-safe lottie-player canvas,
+                body.seizure-safe [data-lottie] > canvas,
+                body.seizure-safe lottie-player > canvas,
                 html.seizure-safe canvas[data-lottie],
                 html.seizure-safe canvas.lottie-animation,
-                html.seizure-safe canvas[id*="lottie"],
-                html.seizure-safe canvas[class*="lottie"],
-                html.seizure-safe [class*="lottie"] canvas,
-                html.seizure-safe [id*="lottie"] canvas,
-                html.seizure-safe [data-lottie] canvas,
-                html.seizure-safe lottie-player canvas {
-                    display: none !important;
-                    visibility: hidden !important;
+                html.seizure-safe lottie-player canvas,
+                html.seizure-safe [data-lottie] > canvas,
+                html.seizure-safe lottie-player > canvas {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    /* Keep visible - don't hide */
+                }
+                
+                /* Freeze canvas inside Lottie containers visually */
+                body.seizure-safe [data-lottie] > canvas,
+                html.seizure-safe [data-lottie] > canvas {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    /* Keep visible - don't hide */
                 }
                 
                 /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
@@ -1000,26 +1006,28 @@
                                     const hasAnimation = computedStyle.animationName !== 'none' && computedStyle.animationName !== '';
                                     const hasTransition = computedStyle.transitionProperty !== 'none' && computedStyle.transitionProperty !== '';
                                     
-                                    // CRITICAL: Check if element is part of Lottie animation
+                                    // CRITICAL: Check if element is part of Lottie animation (be very specific)
+                                    // Only match actual Lottie elements, not elements that happen to have "lottie" in class/id
                                     const isLottieElement = el.tagName === 'LOTTIE-PLAYER' ||
-                                                          el.tagName === 'CANVAS' && (el.hasAttribute('data-lottie') || el.classList.toString().match(/lottie/i) || el.id.match(/lottie/i)) ||
-                                                          el.tagName === 'SVG' && (el.hasAttribute('data-lottie') || el.classList.toString().match(/lottie/i) || el.id.match(/lottie/i)) ||
                                                           el.hasAttribute('data-lottie') ||
-                                                          el.classList.toString().match(/lottie/i) ||
-                                                          el.id.match(/lottie/i) ||
-                                                          (el.closest && el.closest('[class*="lottie"], [id*="lottie"], [data-lottie], lottie-player'));
+                                                          (el.tagName === 'CANVAS' && (el.hasAttribute('data-lottie') || el.classList.contains('lottie-animation'))) ||
+                                                          (el.tagName === 'SVG' && (el.hasAttribute('data-lottie') || el.classList.contains('lottie-animation'))) ||
+                                                          (el.closest && (el.closest('[data-lottie], lottie-player')));
                                     
                                     el.style.animation = 'none';
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
                                     el.style.filter = 'none';
                                     
-                                    // CRITICAL: Aggressively stop Lottie elements
+                                    // CRITICAL: Freeze Lottie elements visually without hiding them
                                     if (isLottieElement) {
                                         el.style.transform = 'none';
+                                        el.style.animation = 'none';
+                                        el.style.transition = 'none';
+                                        // Keep canvas visible - don't hide, just freeze visually
                                         if (el.tagName === 'CANVAS') {
-                                            el.style.display = 'none';
-                                            el.style.visibility = 'hidden';
+                                            // Don't hide - just freeze the animation
+                                            // The CSS and JavaScript APIs will handle stopping the animation
                                         }
                                     } else {
                                         // Only neutralize transform if element is ACTUALLY being transformed by animations
@@ -29229,17 +29237,46 @@ class AccessibilityWidget {
                     });
                 } catch (_) {}
                 
-                // Method 4: Make Lottie containers invisible (canvas, svg elements)
+                // Method 4: Freeze Lottie containers (be very specific to avoid hiding non-Lottie elements)
                 try {
-                    const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"], canvas[data-lottie], canvas.lottie');
+                    // Only target actual Lottie containers - be very specific
+                    const lottieContainers = document.querySelectorAll('[data-lottie], lottie-player, canvas[data-lottie], canvas.lottie-animation');
                     lottieContainers.forEach(container => {
                         try {
-                            container.style.animation = 'none';
-                            container.style.transition = 'none';
-                            container.style.transform = 'none';
-                            container.style.opacity = '1';
-                            container.style.visibility = 'visible';
-                            container.setAttribute('data-seizure-safe-stopped', 'true');
+                            // Only process if it's actually a Lottie container
+                            const isLottieContainer = container.hasAttribute('data-lottie') || 
+                                                     container.tagName === 'LOTTIE-PLAYER' ||
+                                                     (container.tagName === 'CANVAS' && (container.hasAttribute('data-lottie') || container.classList.contains('lottie-animation')));
+                            
+                            if (isLottieContainer) {
+                                container.style.animation = 'none';
+                                container.style.transition = 'none';
+                                container.style.transform = 'none';
+                                
+                                // Only set opacity/visibility if element wasn't intentionally hidden
+                                const computedStyle = window.getComputedStyle(container);
+                                const wasIntentionallyHidden = container.style.display === 'none' || 
+                                                              container.style.visibility === 'hidden' || 
+                                                              computedStyle.display === 'none' ||
+                                                              computedStyle.visibility === 'hidden';
+                                if (!wasIntentionallyHidden) {
+                                    container.style.opacity = '1';
+                                    container.style.visibility = 'visible';
+                                }
+                                
+                                // Freeze canvas elements inside Lottie containers visually (don't hide)
+                                if (container.tagName !== 'CANVAS') {
+                                    const canvas = container.querySelector('canvas');
+                                    if (canvas) {
+                                        canvas.style.animation = 'none';
+                                        canvas.style.transition = 'none';
+                                        canvas.style.transform = 'none';
+                                        // Keep visible - don't hide
+                                    }
+                                }
+                                
+                                container.setAttribute('data-seizure-safe-stopped', 'true');
+                            }
                         } catch (_) {}
                     });
                 } catch (_) {}
@@ -29908,24 +29945,23 @@ class AccessibilityWidget {
                     transition: none !important;
                 }
                 
-                /* CRITICAL: Hide ALL canvas elements that are part of Lottie animations */
-                /* Be comprehensive - catch all Lottie canvas elements */
+                /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
+                /* Use CSS to freeze animations while keeping elements visible */
                 .seizure-safe canvas[data-lottie],
                 .seizure-safe canvas.lottie-animation,
-                .seizure-safe canvas[id*="lottie"],
-                .seizure-safe canvas[class*="lottie"],
-                .seizure-safe [class*="lottie"] canvas,
-                .seizure-safe [id*="lottie"] canvas,
-                .seizure-safe [data-lottie] canvas,
-                .seizure-safe lottie-player canvas {
-                    display: none !important;
-                    visibility: hidden !important;
+                .seizure-safe lottie-player canvas,
+                .seizure-safe [data-lottie] > canvas,
+                .seizure-safe lottie-player > canvas {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    /* Keep visible - don't hide */
                 }
                 
-                /* Also hide the entire Lottie container if it contains animated content */
-                .seizure-safe [class*="lottie"]:has(canvas),
-                .seizure-safe [id*="lottie"]:has(canvas),
-                .seizure-safe [data-lottie]:has(canvas) {
+                /* Only disable pointer events on actual Lottie containers */
+                /* Don't use :has() as it's not widely supported - be more specific */
+                .seizure-safe [data-lottie],
+                .seizure-safe lottie-player {
                     pointer-events: none !important;
                 }
                 `;
