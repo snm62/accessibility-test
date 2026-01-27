@@ -179,10 +179,17 @@
                 
                 /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
                 /* Target all possible Lottie containers, SVG, and canvas elements */
+                /* NOTE: Don't apply transform: none to SVG - it causes distortion, let API handle it */
                 body.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
                 body.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
                 body.seizure-safe [data-lottie],
-                body.seizure-safe lottie-player,
+                body.seizure-safe lottie-player {
+                    animation: none !important;
+                    transition: none !important;
+                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
+                }
+                
+                /* SVG Lottie elements - don't apply transform, let API handle stopping */
                 body.seizure-safe [class*="lottie"] svg,
                 body.seizure-safe [id*="lottie"] svg,
                 body.seizure-safe [data-lottie] svg,
@@ -191,10 +198,6 @@
                 body.seizure-safe svg.lottie-animation,
                 body.seizure-safe svg[id*="lottie"],
                 body.seizure-safe svg[class*="lottie"],
-                html.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
-                html.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
-                html.seizure-safe [data-lottie],
-                html.seizure-safe lottie-player,
                 html.seizure-safe [class*="lottie"] svg,
                 html.seizure-safe [id*="lottie"] svg,
                 html.seizure-safe [data-lottie] svg,
@@ -203,9 +206,19 @@
                 html.seizure-safe svg.lottie-animation,
                 html.seizure-safe svg[id*="lottie"],
                 html.seizure-safe svg[class*="lottie"] {
-                    transform: none !important;
                     animation: none !important;
                     transition: none !important;
+                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
+                    /* The Lottie API handles stopping SVG animations properly */
+                }
+                
+                html.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
+                html.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
+                html.seizure-safe [data-lottie],
+                html.seizure-safe lottie-player {
+                    animation: none !important;
+                    transition: none !important;
+                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
                 }
                 
                 /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
@@ -29591,8 +29604,14 @@ class AccessibilityWidget {
             
             // First, find and process all parent containers that have split text
             // This must be done first to avoid processing children individually
+            // CRITICAL: Exclude buttons and their children to prevent button text from being hidden
             const splitContainers = document.querySelectorAll('[data-splitting], .split, [class*="split-text"], [class*="text-split"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
             splitContainers.forEach(container => {
+                // Skip buttons and elements inside buttons
+                if (container.tagName === 'BUTTON' || container.tagName === 'A' || container.getAttribute('role') === 'button' ||
+                    container.closest('button, a[role="button"], [role="button"]')) {
+                    return;
+                }
                 if (container.hasAttribute('data-seizure-text-processed')) return;
                 container.setAttribute('data-seizure-text-processed', 'true');
                 
@@ -29639,8 +29658,14 @@ class AccessibilityWidget {
             });
             
             // Now handle individual text elements that might be animated
+            // CRITICAL: Exclude buttons and their children to prevent button text from being hidden
             const textElements = document.querySelectorAll('.char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"]');
             textElements.forEach(element => {
+                // Skip buttons and elements inside buttons
+                if (element.tagName === 'BUTTON' || element.tagName === 'A' || element.getAttribute('role') === 'button' ||
+                    element.closest('button, a[role="button"], [role="button"]')) {
+                    return;
+                }
                 // Skip if already processed or if parent was processed
                 if (element.hasAttribute('data-seizure-text-processed')) return;
                 const parent = element.parentElement;
@@ -29671,8 +29696,11 @@ class AccessibilityWidget {
             const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="text"], [class*="title"], [class*="heading"], [class*="hero"], [class*="headline"]');
             allTextContainers.forEach(element => {
                 // Skip if already processed or if it's a nav/header element
+                // CRITICAL: Also skip buttons and elements inside buttons to prevent button text from being hidden
                 if (element.hasAttribute('data-seizure-text-processed') || 
-                    element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]')) return;
+                    element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]') ||
+                    element.tagName === 'BUTTON' || element.tagName === 'A' || element.getAttribute('role') === 'button' ||
+                    element.closest('button, a[role="button"], [role="button"]')) return;
                 
                 const computedStyle = window.getComputedStyle(element);
                 
