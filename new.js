@@ -28881,7 +28881,7 @@ class AccessibilityWidget {
                 });
                 
                 // Method 3: Find Lottie instances attached to DOM elements (Webflow, etc.)
-                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"]').forEach(el => {
+                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]').forEach(el => {
                     try {
                         // Skip widget elements
                         if (el.closest && (
@@ -28895,6 +28895,46 @@ class AccessibilityWidget {
                         }
                         
                         const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
+                        if (inst) {
+                            if (typeof inst.pause === 'function') {
+                                inst.pause();
+                            }
+                            if (typeof inst.goToAndStop === 'function') {
+                                inst.goToAndStop(0, true);
+                            }
+                        }
+                        
+                        // Also check SVG/canvas inside element
+                        const svg = el.querySelector('svg, canvas');
+                        if (svg) {
+                            const svgInst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie;
+                            if (svgInst) {
+                                if (typeof svgInst.pause === 'function') {
+                                    svgInst.pause();
+                                }
+                                if (typeof svgInst.goToAndStop === 'function') {
+                                    svgInst.goToAndStop(0, true);
+                                }
+                            }
+                        }
+                    } catch (_) {}
+                });
+                
+                // Method 4: Check all SVG elements for Lottie instances (Webflow stores them in SVG)
+                document.querySelectorAll('svg').forEach(svg => {
+                    try {
+                        // Skip widget elements
+                        if (svg.closest && (
+                            svg.closest('#accessbit-widget-container') ||
+                            svg.closest('[id*="accessbit-widget"]') ||
+                            svg.closest('[class*="accessbit-widget"]') ||
+                            svg.closest('accessbit-widget') ||
+                            svg.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        const inst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
                         if (inst) {
                             if (typeof inst.pause === 'function') {
                                 inst.pause();
