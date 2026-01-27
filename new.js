@@ -29772,6 +29772,26 @@ class AccessibilityWidget {
                     const lottieElements = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]');
                     lottieElements.forEach(element => {
                         try {
+                            // CRITICAL: Skip widget elements completely - don't clear their styles
+                            if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                                return;
+                            }
+                            if (element.className && typeof element.className === 'string' && element.className.includes('accessbit-widget')) {
+                                return;
+                            }
+                            if (element.closest && (
+                                element.closest('#accessbit-widget-container') ||
+                                element.closest('[id*="accessbit-widget"]') ||
+                                element.closest('[class*="accessbit-widget"]') ||
+                                element.closest('accessbit-widget') ||
+                                element.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            // Skip shadow DOM elements
+                            if (element.getRootNode && element.getRootNode() !== document) {
+                                return;
+                            }
                             // Try to access the Lottie instance
                             const lottieInstance = element.lottie || element._lottie || element.__lottie || element.lottieAnimation || element.__wfLottie;
                             if (lottieInstance) {
@@ -29810,6 +29830,26 @@ class AccessibilityWidget {
                     const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"], canvas[data-lottie], canvas.lottie');
                     lottieContainers.forEach(container => {
                         try {
+                            // CRITICAL: Skip widget elements completely - don't clear their styles
+                            if (container.id && (container.id.includes('accessbit-widget') || container.id === 'accessbit-widget-container')) {
+                                return;
+                            }
+                            if (container.className && typeof container.className === 'string' && container.className.includes('accessbit-widget')) {
+                                return;
+                            }
+                            if (container.closest && (
+                                container.closest('#accessbit-widget-container') ||
+                                container.closest('[id*="accessbit-widget"]') ||
+                                container.closest('[class*="accessbit-widget"]') ||
+                                container.closest('accessbit-widget') ||
+                                container.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            // Skip shadow DOM elements
+                            if (container.getRootNode && container.getRootNode() !== document) {
+                                return;
+                            }
                             container.removeAttribute('data-seizure-safe-stopped');
                             container.style.animation = '';
                             container.style.transition = '';
