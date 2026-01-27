@@ -29214,14 +29214,205 @@ class AccessibilityWidget {
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             this.saveSettings();
             
-            // CRITICAL: Inject the SAME early CSS that runs on page load
-            // This must happen FIRST, before any other operations
+            // ============================================
+            // CRITICAL: STOP ALL ANIMATIONS IMMEDIATELY AND SYNCHRONOUSLY
+            // This must happen FIRST, before anything else
+            // ============================================
+            
+            // STEP 1: Stop Lottie animations IMMEDIATELY (synchronous)
+            try {
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const lottieAnimations = window.lottie.getRegisteredAnimations();
+                    lottieAnimations.forEach(animation => {
+                        try {
+                            // CRITICAL: Override loop completion handlers FIRST to prevent restart
+                            if (animation.addEventListener && !animation._seizureSafeLoopBlocked) {
+                                animation._seizureSafeLoopBlocked = true;
+                                // Remove all existing loop completion listeners
+                                if (animation._listeners && animation._listeners.loopComplete) {
+                                    animation._listeners.loopComplete = [];
+                                }
+                                if (animation._listeners && animation._listeners.complete) {
+                                    animation._listeners.complete = [];
+                                }
+                                // Override addEventListener to block loop completion events
+                                const originalAddEventListener = animation.addEventListener;
+                                animation.addEventListener = function(eventName, handler) {
+                                    if (eventName === 'loopComplete' || eventName === 'complete') {
+                                        // Block loop completion - don't add the handler
+                                        return;
+                                    }
+                                    return originalAddEventListener.apply(this, arguments);
+                                };
+                            }
+                            
+                            // Cancel requestAnimationFrame loops FIRST
+                            if (animation.animationID !== undefined && animation.animationID !== null) {
+                                try { cancelAnimationFrame(animation.animationID); animation.animationID = null; } catch (_) {}
+                            }
+                            if (animation.renderer && animation.renderer.animationID !== undefined && animation.renderer.animationID !== null) {
+                                try { cancelAnimationFrame(animation.renderer.animationID); animation.renderer.animationID = null; } catch (_) {}
+                            }
+                            if (animation._animationID !== undefined && animation._animationID !== null) {
+                                try { cancelAnimationFrame(animation._animationID); animation._animationID = null; } catch (_) {}
+                            }
+                            
+                            // CRITICAL: Override the internal loop check
+                            if (animation.totalFrames !== undefined) {
+                                // Force animation to stay at final frame
+                                const finalFrame = animation.totalFrames - 1;
+                                if (animation.goToAndStop) {
+                                    animation.goToAndStop(finalFrame, true);
+                                } else if (animation.goToAndPlay) {
+                                    animation.goToAndPlay(finalFrame, true);
+                                    if (animation.pause) animation.pause();
+                                }
+                            }
+                            
+                            // Stop and pause
+                            if (animation.setSpeed) animation.setSpeed(0);
+                            if (animation.stop) animation.stop();
+                            if (animation.pause) animation.pause();
+                            if (animation.loop !== undefined) animation.loop = false;
+                            if (animation.loopCount !== undefined) animation.loopCount = 0;
+                            
+                            // CRITICAL: Override play/restart to prevent loops from restarting
+                            if (!animation._seizureSafeOriginalPlay) {
+                                animation._seizureSafeOriginalPlay = animation.play;
+                                animation.play = function() { return; };
+                            }
+                            if (!animation._seizureSafeOriginalRestart) {
+                                animation._seizureSafeOriginalRestart = animation.restart;
+                                animation.restart = function() { return; };
+                            }
+                            if (!animation._seizureSafeOriginalGoToAndPlay) {
+                                animation._seizureSafeOriginalGoToAndPlay = animation.goToAndPlay;
+                                animation.goToAndPlay = function() { 
+                                    if (animation.goToAndStop) {
+                                        const frame = arguments[0] || 0;
+                                        animation.goToAndStop(frame, true);
+                                    }
+                                    return; 
+                                };
+                            }
+                            
+                            // Freeze renderer
+                            if (animation.renderer && animation.renderer.canvas) {
+                                animation.renderer.canvas.style.setProperty('animation', 'none', 'important');
+                                animation.renderer.canvas.style.setProperty('transition', 'none', 'important');
+                                animation.renderer.canvas.setAttribute('data-seizure-safe-frozen', 'true');
+                            }
+                            if (animation.renderer && animation.renderer.svgElement) {
+                                animation.renderer.svgElement.style.setProperty('animation', 'none', 'important');
+                                animation.renderer.svgElement.style.setProperty('transition', 'none', 'important');
+                                animation.renderer.svgElement.setAttribute('data-seizure-safe-frozen', 'true');
+                            }
+                            
+                            // CRITICAL: Intercept render loop to prevent loops
+                            if (animation.renderer && animation.renderer.renderFrame && !animation._seizureSafeRenderBlocked) {
+                                animation._seizureSafeRenderBlocked = true;
+                                const originalRender = animation.renderer.renderFrame;
+                                animation.renderer.renderFrame = function() {
+                                    // Don't render - block the loop
+                                    return;
+                                };
+                            }
+                        } catch (_) {}
+                    });
+                }
+                // Stop lottie-player elements
+                document.querySelectorAll('lottie-player').forEach(player => {
+                    try {
+                        if (player.setSpeed) player.setSpeed(0);
+                        if (player.stop) player.stop();
+                        if (player.pause) player.pause();
+                        player.setAttribute('autoplay', 'false');
+                        player.setAttribute('loop', 'false');
+                        // Override play/restart
+                        if (!player._seizureSafeOriginalPlay && player.play) {
+                            player._seizureSafeOriginalPlay = player.play;
+                            player.play = function() { return; };
+                        }
+                        if (!player._seizureSafeOriginalRestart && player.restart) {
+                            player._seizureSafeOriginalRestart = player.restart;
+                            player.restart = function() { return; };
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
+            // STEP 2: Stop GSAP animations IMMEDIATELY (synchronous)
+            try {
+                if (typeof window.gsap !== 'undefined') {
+                    window.gsap.killTweensOf('*');
+                    if (window.gsap.getAllTimelines) {
+                        window.gsap.getAllTimelines().forEach(tl => { try { tl.kill(); } catch (_) {} });
+                    }
+                    if (window.gsap.getAllTweens) {
+                        window.gsap.getAllTweens().forEach(tween => { try { tween.kill(); } catch (_) {} });
+                    }
+                }
+            } catch (_) {}
+            
+            // STEP 3: Stop WAAPI animations IMMEDIATELY (synchronous)
+            try {
+                if (document.getAnimations) {
+                    const allAnims = document.getAnimations({ subtree: true });
+                    allAnims.forEach(anim => {
+                        try {
+                            if (anim.finish) anim.finish();
+                            if (anim.pause) anim.pause();
+                            anim.playbackRate = 0;
+                        } catch (_) {}
+                    });
+                }
+                if (window.seizureState?.applyWAAPIStopMotion) {
+                    window.seizureState.applyWAAPIStopMotion(true);
+                }
+            } catch (_) {}
+            
+            // STEP 4: Stop jQuery animations IMMEDIATELY (synchronous)
+            try {
+                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
+                    const $ = window.jQuery || window.$;
+                    if ($ && $.fx) $.fx.off = true;
+                    if ($) $('*').stop(true, true);
+                }
+            } catch (_) {}
+            
+            // STEP 5: Apply animation: none to ALL elements IMMEDIATELY (synchronous)
+            try {
+                const allElements = document.querySelectorAll('*');
+                for (let i = 0; i < Math.min(allElements.length, 10000); i++) {
+                    try {
+                        const el = allElements[i];
+                        if (el.closest('#accessbit-widget-container') || el.closest('[id*="accessbit-widget"]') || el.closest('[class*="accessbit-widget"]')) continue;
+                        if (el.closest('nav') || el.closest('header') || el.closest('.navbar') || el.closest('[class*="nav"]') || el.closest('[class*="header"]')) continue;
+                        el.style.setProperty('animation', 'none', 'important');
+                        el.style.setProperty('transition', 'none', 'important');
+                        el.style.setProperty('animation-play-state', 'paused', 'important');
+                    } catch (_) {}
+                }
+                // Freeze all canvas and SVG
+                document.querySelectorAll('canvas, svg').forEach(el => {
+                    try {
+                        el.style.setProperty('animation', 'none', 'important');
+                        el.style.setProperty('transition', 'none', 'important');
+                        el.setAttribute('data-seizure-safe-frozen', 'true');
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
+            // ============================================
+            // NOW inject CSS and do other setup
+            // ============================================
+            
+            // Inject the SAME early CSS that runs on page load
             try {
                 if (!document.getElementById('accessbit-seizure-immediate-early')) {
                     const immediateStyle = document.createElement('style');
                     immediateStyle.id = 'accessbit-seizure-immediate-early';
                     immediateStyle.textContent = `
-                        /* Per Webflow Security recommendations: Global CSS kill switch for seizure-safe mode */
                         body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
                         html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
                             animation: none !important;
@@ -29233,49 +29424,12 @@ class AccessibilityWidget {
                 }
             } catch (_) {}
             
-            // 1) Grey overlay (light, non-sticky-breaking)
+            // 1) Grey overlay
             this.addSeizureSafeGreyOverlay();
-            // 2) CSS kill switch (additional comprehensive rules)
+            // 2) CSS kill switch
             this.injectSeizureSafeAnimationCSS();
             
-            // CRITICAL: Force browser to apply CSS immediately before stopping animations
-            // This ensures CSS rules take effect before we try to stop animations
-            try {
-                // Force a reflow to ensure CSS is applied
-                void document.body.offsetHeight;
-                // Also force reflow on documentElement
-                void document.documentElement.offsetHeight;
-                // Force style recalculation
-                getComputedStyle(document.body);
-                
-                // CRITICAL: Also apply animation: none directly to ALL elements via JavaScript
-                // This ensures CSS takes effect even if stylesheet hasn't fully loaded
-                const allElements = document.querySelectorAll('*');
-                for (let i = 0; i < Math.min(allElements.length, 10000); i++) {
-                    try {
-                        const el = allElements[i];
-                        // Skip widget elements
-                        if (el.closest('#accessbit-widget-container') || 
-                            el.closest('[id*="accessbit-widget"]') || 
-                            el.closest('[class*="accessbit-widget"]')) {
-                            continue;
-                        }
-                        // Skip nav/header elements
-                        if (el.closest('nav') || el.closest('header') || 
-                            el.closest('.navbar') || el.closest('[class*="nav"]') || 
-                            el.closest('[class*="header"]')) {
-                            continue;
-                        }
-                        el.style.setProperty('animation', 'none', 'important');
-                        el.style.setProperty('transition', 'none', 'important');
-                    } catch (_) {}
-                }
-            } catch (_) {}
-            
-            // 3) WAAPI pause/cancel running animations (no globals)
-            try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
-            
-            // CRITICAL: Override loadAnimation IMMEDIATELY to prevent new animations
+            // Override loadAnimation to prevent new animations
             try {
                 if (typeof window.lottie !== 'undefined' && typeof window.lottie.loadAnimation === 'function') {
                     if (!window.seizureState) window.seizureState = {};
@@ -29284,15 +29438,13 @@ class AccessibilityWidget {
                     }
                     window.lottie.loadAnimation = function(config) {
                         const anim = window.seizureState.originalLottieLoadAnimation.call(this, config);
-                        // Immediately stop the newly loaded animation
                         if (anim) {
                             try {
-                                if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
-                                if (typeof anim.stop === 'function') anim.stop();
-                                if (typeof anim.pause === 'function') anim.pause();
+                                if (anim.setSpeed) anim.setSpeed(0);
+                                if (anim.stop) anim.stop();
+                                if (anim.pause) anim.pause();
                                 if (anim.loop !== undefined) anim.loop = false;
                                 if (anim.loopCount !== undefined) anim.loopCount = 0;
-                                // Cancel any requestAnimationFrame
                                 if (anim.animationID !== undefined && anim.animationID !== null) {
                                     try { cancelAnimationFrame(anim.animationID); anim.animationID = null; } catch (_) {}
                                 }
@@ -29304,117 +29456,6 @@ class AccessibilityWidget {
                         return anim;
                     };
                 }
-            } catch (_) {}
-            
-            // CRITICAL: Freeze ALL canvas and SVG elements immediately via DOM
-            try {
-                const allCanvases = document.querySelectorAll('canvas');
-                allCanvases.forEach(canvas => {
-                    try {
-                        canvas.style.setProperty('animation', 'none', 'important');
-                        canvas.style.setProperty('transition', 'none', 'important');
-                        canvas.style.setProperty('pointer-events', 'none', 'important');
-                        canvas.setAttribute('data-seizure-safe-frozen', 'true');
-                        // Try to get context and prevent drawing
-                        try {
-                            const ctx = canvas.getContext('2d');
-                            if (ctx && ctx.clearRect) {
-                                // Don't clear, just mark as frozen
-                            }
-                        } catch (_) {}
-                    } catch (_) {}
-                });
-                
-                const allSvgs = document.querySelectorAll('svg');
-                allSvgs.forEach(svg => {
-                    try {
-                        svg.style.setProperty('animation', 'none', 'important');
-                        svg.style.setProperty('transition', 'none', 'important');
-                        svg.setAttribute('data-seizure-safe-frozen', 'true');
-                    } catch (_) {}
-                });
-            } catch (_) {}
-            
-            // CRITICAL: Stop Lottie animations IMMEDIATELY like early initialization does
-            // This must happen BEFORE other stopping functions to catch looped animations
-            try {
-                // Method 1: Stop via registered animations API
-                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                    const lottieAnimations = window.lottie.getRegisteredAnimations();
-                    lottieAnimations.forEach(animation => {
-                        try {
-                            if (animation && typeof animation.stop === 'function') {
-                                animation.stop();
-                            }
-                            if (animation && typeof animation.pause === 'function') {
-                                animation.pause();
-                            }
-                            // CRITICAL: Cancel requestAnimationFrame loops immediately
-                            if (animation.animationID !== undefined && animation.animationID !== null) {
-                                try {
-                                    cancelAnimationFrame(animation.animationID);
-                                    animation.animationID = null;
-                                } catch (_) {}
-                            }
-                            if (animation.renderer && animation.renderer.animationID !== undefined && animation.renderer.animationID !== null) {
-                                try {
-                                    cancelAnimationFrame(animation.renderer.animationID);
-                                    animation.renderer.animationID = null;
-                                } catch (_) {}
-                            }
-                            if (animation._animationID !== undefined && animation._animationID !== null) {
-                                try {
-                                    cancelAnimationFrame(animation._animationID);
-                                    animation._animationID = null;
-                                } catch (_) {}
-                            }
-                            // Disable looping immediately
-                            if (animation.loop !== undefined) {
-                                animation.loop = false;
-                            }
-                            if (animation.loopCount !== undefined) {
-                                animation.loopCount = 0;
-                            }
-                            if (animation.setSpeed && typeof animation.setSpeed === 'function') {
-                                animation.setSpeed(0);
-                            }
-                            // Freeze the renderer directly
-                            if (animation.renderer) {
-                                try {
-                                    if (animation.renderer.canvas) {
-                                        animation.renderer.canvas.style.setProperty('animation', 'none', 'important');
-                                        animation.renderer.canvas.style.setProperty('transition', 'none', 'important');
-                                        animation.renderer.canvas.setAttribute('data-seizure-safe-frozen', 'true');
-                                    }
-                                    if (animation.renderer.svgElement) {
-                                        animation.renderer.svgElement.style.setProperty('animation', 'none', 'important');
-                                        animation.renderer.svgElement.style.setProperty('transition', 'none', 'important');
-                                        animation.renderer.svgElement.setAttribute('data-seizure-safe-frozen', 'true');
-                                    }
-                                } catch (_) {}
-                            }
-                        } catch (_) {}
-                    });
-                }
-                
-                // Method 2: Stop lottie-player web components directly via DOM
-                const lottiePlayers = document.querySelectorAll('lottie-player');
-                lottiePlayers.forEach(player => {
-                    try {
-                        if (typeof player.setSpeed === 'function') {
-                            player.setSpeed(0);
-                        }
-                        if (typeof player.stop === 'function') {
-                            player.stop();
-                        }
-                        if (typeof player.pause === 'function') {
-                            player.pause();
-                        }
-                        player.setAttribute('autoplay', 'false');
-                        player.removeAttribute('loop');
-                        player.setAttribute('loop', 'false');
-                    } catch (_) {}
-                });
             } catch (_) {}
             
             // CRITICAL: Call the same early initialization functions that run on page load
