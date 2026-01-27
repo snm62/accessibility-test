@@ -148,9 +148,22 @@
                 /* This provides stricter controls than prefers-reduced-motion for photosensitive seizure safety */
                 body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
                 html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
+                    /* 1. Kills CSS transitions and keyframes */
                     animation: none !important;
                     transition: none !important;
+                    /* 2. Kills JS-driven 'transform' movements (CRITICAL for Lottie SVG animations) */
+                    transform: none !important;
+                    /* 3. Kills JS-driven 'opacity' fades */
+                    opacity: 1 !important;
+                    /* 4. Stops smooth scrolling */
                     scroll-behavior: auto !important;
+                }
+                
+                /* CRITICAL: Hide canvas elements - CSS cannot stop internal canvas drawing */
+                /* Canvas is a bitmap updated by pixels, so we hide it for user safety */
+                body.seizure-safe canvas:not(#accessbit-widget-container canvas):not([id*="accessbit-widget"] canvas):not([class*="accessbit-widget"] canvas),
+                html.seizure-safe canvas:not(#accessbit-widget-container canvas):not([id*="accessbit-widget"] canvas):not([class*="accessbit-widget"] canvas) {
+                    display: none !important;
                 }
                 
                 /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
@@ -28012,14 +28025,27 @@ class AccessibilityWidget {
                                         }
                                         
                                         // Use Lottie's official API in correct order
+                                        // 1. setLoop(false) FIRST - prevents it from starting over
+                                        if (typeof animation.setLoop === 'function') {
+                                            animation.setLoop(false);
+                                        }
+                                        if (animation.loop !== undefined) {
+                                            animation.loop = false;
+                                        }
+                                        if (animation.loopCount !== undefined) {
+                                            animation.loopCount = 0;
+                                        }
+                                        // 2. setSpeed(0) - freezes animations in place
                                         if (typeof animation.setSpeed === 'function') {
                                             animation.setSpeed(0);
                                         }
-                                        if (typeof animation.stop === 'function') {
-                                            animation.stop();
-                                        }
+                                        // 3. pause() - freezes on current frame (better UX)
                                         if (typeof animation.pause === 'function') {
                                             animation.pause();
+                                        }
+                                        // 4. stop() - stops playback
+                                        if (typeof animation.stop === 'function') {
+                                            animation.stop();
                                         }
                                         if (typeof animation.goToAndStop === 'function') {
                                             // Go to final frame (finish to final state, not frame 0)
@@ -28038,12 +28064,6 @@ class AccessibilityWidget {
                                         if (animation.autoplay !== undefined) {
                                             animation.autoplay = false;
                                         }
-                                        if (animation.loop !== undefined) {
-                                            animation.loop = false;
-                                        }
-                                        if (animation.loopCount !== undefined) {
-                                            animation.loopCount = 0;
-                                        }
                                         
                                         // CRITICAL: Force paused state
                                         if (animation.isPaused !== undefined) {
@@ -28061,8 +28081,8 @@ class AccessibilityWidget {
                                                 }
                                                 if (animation.renderer.pause) {
                                                     animation.renderer.pause();
-                                                }
-                                            } catch (_) {}
+                                    }
+                                } catch (_) {}
                                         }
                                         
                                         // CRITICAL: Block loop completion handlers in polling
@@ -29294,10 +29314,39 @@ class AccessibilityWidget {
             
             // STEP 1: Stop Lottie animations IMMEDIATELY (synchronous)
             try {
+                // CRITICAL: Use global Lottie methods FIRST (if available) - stops ALL animations at once
+                if (typeof window.lottie !== 'undefined') {
+                    // Global pause() - pauses all active Lottie animations on the page
+                    if (typeof window.lottie.pause === 'function') {
+                        try { window.lottie.pause(); } catch (_) {}
+                    }
+                    // Global stop() - stops all and resets them to the first frame
+                    if (typeof window.lottie.stop === 'function') {
+                        try { window.lottie.stop(); } catch (_) {}
+                    }
+                    // Global setSpeed(0) - freezes animations in place (situations where pause() might be overridden)
+                    if (typeof window.lottie.setSpeed === 'function') {
+                        try { window.lottie.setSpeed(0); } catch (_) {}
+                    }
+                }
+                
+                // Then stop individual animations with comprehensive methods
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const lottieAnimations = window.lottie.getRegisteredAnimations();
                     lottieAnimations.forEach(animation => {
                         try {
+                            // CRITICAL: Use setLoop(false) FIRST - prevents it from starting over
+                            if (typeof animation.setLoop === 'function') {
+                                animation.setLoop(false);
+                            }
+                            // Also set loop property directly
+                            if (animation.loop !== undefined) {
+                                animation.loop = false;
+                            }
+                            if (animation.loopCount !== undefined) {
+                                animation.loopCount = 0;
+                            }
+                            
                             // CRITICAL: Override loop completion handlers FIRST to prevent restart
                             if (animation.addEventListener && !animation._seizureSafeLoopBlocked) {
                                 animation._seizureSafeLoopBlocked = true;
@@ -29339,6 +29388,20 @@ class AccessibilityWidget {
                                 try { cancelAnimationFrame(animation._animationID); animation._animationID = null; } catch (_) {}
                             }
                             
+                            // CRITICAL: Use Lottie's official API methods in correct order
+                            // 1. setSpeed(0) - freezes animations in place
+                            if (typeof animation.setSpeed === 'function') {
+                                animation.setSpeed(0);
+                            }
+                            // 2. pause() - freezes on current frame (better UX than stop which goes to frame 0)
+                            if (typeof animation.pause === 'function') {
+                                animation.pause();
+                            }
+                            // 3. stop() - stops playback and returns to frame 0
+                            if (typeof animation.stop === 'function') {
+                                animation.stop();
+                            }
+                            
                             // CRITICAL: Override the internal loop check
                             if (animation.totalFrames !== undefined) {
                                 // Force animation to stay at final frame
@@ -29350,13 +29413,6 @@ class AccessibilityWidget {
                                     if (animation.pause) animation.pause();
                                 }
                             }
-                            
-                            // Stop and pause
-                            if (animation.setSpeed) animation.setSpeed(0);
-                            if (animation.stop) animation.stop();
-                            if (animation.pause) animation.pause();
-                            if (animation.loop !== undefined) animation.loop = false;
-                            if (animation.loopCount !== undefined) animation.loopCount = 0;
                             
                             // CRITICAL: Override play/restart to prevent loops from restarting
                             if (!animation._seizureSafeOriginalPlay) {
@@ -29512,7 +29568,8 @@ class AccessibilityWidget {
                 }
             } catch (_) {}
             
-            // STEP 5: Apply animation: none to ALL elements IMMEDIATELY (synchronous)
+            // STEP 5: Apply "Visual Freeze" CSS to ALL elements IMMEDIATELY (synchronous)
+            // This visually freezes animations even if JS is still running
             try {
                 const allElements = document.querySelectorAll('*');
                 for (let i = 0; i < Math.min(allElements.length, 10000); i++) {
@@ -29520,19 +29577,49 @@ class AccessibilityWidget {
                         const el = allElements[i];
                         if (el.closest('#accessbit-widget-container') || el.closest('[id*="accessbit-widget"]') || el.closest('[class*="accessbit-widget"]')) continue;
                         if (el.closest('nav') || el.closest('header') || el.closest('.navbar') || el.closest('[class*="nav"]') || el.closest('[class*="header"]')) continue;
+                        // 1. Kills CSS transitions and keyframes
                         el.style.setProperty('animation', 'none', 'important');
                         el.style.setProperty('transition', 'none', 'important');
                         el.style.setProperty('animation-play-state', 'paused', 'important');
+                        // 2. Kills JS-driven 'transform' movements (CRITICAL for Lottie SVG animations)
+                        el.style.setProperty('transform', 'none', 'important');
+                        // 3. Kills JS-driven 'opacity' fades
+                        el.style.setProperty('opacity', '1', 'important');
                     } catch (_) {}
                 }
-                // Freeze all canvas and SVG
-                document.querySelectorAll('canvas, svg').forEach(el => {
+                // CRITICAL: Hide canvas elements - CSS cannot stop internal canvas drawing
+                // Canvas is a bitmap updated by pixels, so we hide it for user safety
+                document.querySelectorAll('canvas').forEach(canvas => {
                     try {
-                        el.style.setProperty('animation', 'none', 'important');
-                        el.style.setProperty('transition', 'none', 'important');
-                        el.setAttribute('data-seizure-safe-frozen', 'true');
+                        if (canvas.closest('#accessbit-widget-container') || canvas.closest('[id*="accessbit-widget"]') || canvas.closest('[class*="accessbit-widget"]')) return;
+                        canvas.style.setProperty('display', 'none', 'important');
+                        canvas.setAttribute('data-seizure-safe-frozen', 'true');
                     } catch (_) {}
                 });
+                // Freeze SVG elements (can use transform: none)
+                document.querySelectorAll('svg').forEach(svg => {
+                    try {
+                        if (svg.closest('#accessbit-widget-container') || svg.closest('[id*="accessbit-widget"]') || svg.closest('[class*="accessbit-widget"]')) return;
+                        svg.style.setProperty('animation', 'none', 'important');
+                        svg.style.setProperty('transition', 'none', 'important');
+                        svg.style.setProperty('transform', 'none', 'important');
+                        svg.setAttribute('data-seizure-safe-frozen', 'true');
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
+            // ============================================
+            // CRITICAL: Call early initialization functions IMMEDIATELY
+            // These do direct DOM manipulation that stops animations
+            // ============================================
+            try { 
+                window.seizureState?.applySeizureSafeDOMFreeze?.(); 
+            } catch (_) {}
+            try { 
+                window.seizureState?.seizureConsolidateSplitText?.(); 
+            } catch (_) {}
+            try { 
+                window.seizureState?.installStyleSanitizer?.(); 
             } catch (_) {}
             
             // ============================================
@@ -29590,27 +29677,15 @@ class AccessibilityWidget {
                 }
             } catch (_) {}
             
-            // CRITICAL: Call the same early initialization functions that run on page load
-            // These do direct DOM manipulation to freeze animations immediately
-            try { 
-                window.seizureState?.applySeizureSafeDOMFreeze?.(); 
-            } catch (_) {}
-            try { 
-                window.seizureState?.seizureConsolidateSplitText?.(); 
-            } catch (_) {}
-            try { 
-                window.seizureState?.installStyleSanitizer?.(); 
-            } catch (_) {}
-            
             // CRITICAL: Stop animations IMMEDIATELY and MULTIPLE TIMES when toggled on
             // This ensures we catch animations that are already running
             // Run synchronously in a tight loop first to catch animations immediately
-            for (let i = 0; i < 10; i++) {
-                this.stopAnimationLibraries();
+            for (let i = 0; i < 20; i++) {
+            this.stopAnimationLibraries();
                 this.stopAllLottieAnimations();
-                this.stopAutoplayMedia();
-                this.stopJavaScriptAnimations();
-                try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+            this.stopAutoplayMedia();
+            this.stopJavaScriptAnimations();
+            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
                 this.aggressivelyStopAllAnimations();
                 // Also call DOM freeze in the loop
                 try { window.seizureState?.applySeizureSafeDOMFreeze?.(); } catch (_) {}
@@ -30594,19 +30669,24 @@ class AccessibilityWidget {
                                             }
                                             
                                             // CRITICAL: Use Lottie's official API methods in the correct order
-                                            // 1. Set speed to 0 first (immediately stops playback)
+                                            // 1. Use setLoop(false) FIRST to prevent it from starting over
+                                            if (typeof anim.setLoop === 'function') {
+                                                anim.setLoop(false);
+                                            }
+                                            
+                                            // 2. Set speed to 0 (freezes animations in place)
                                             if (typeof anim.setSpeed === 'function') {
                                                 anim.setSpeed(0);
                                             }
                                             
-                                            // 2. Stop the animation (stops playback)
-                                            if (typeof anim.stop === 'function') {
-                                                anim.stop();
-                                            }
-                                            
-                                            // 3. Pause the animation (pauses at current frame)
+                                            // 3. Pause the animation (freezes on current frame - better UX)
                                             if (typeof anim.pause === 'function') {
                                                 anim.pause();
+                                            }
+                                            
+                                            // 4. Stop the animation (stops playback and returns to frame 0)
+                                            if (typeof anim.stop === 'function') {
+                                                anim.stop();
                                             }
                                             
                                             // 3.5. Stop the renderer if it exists
@@ -30754,8 +30834,8 @@ class AccessibilityWidget {
                                                                 }
                                                                 if (anim && typeof anim.setSpeed === 'function') {
                                                                     anim.setSpeed(0);
-                                                                }
-                                                            } catch (_) {}
+                                        }
+                                    } catch (_) {}
                                                             return;
                                                         }
                                                         return anim._seizureSafeOriginalRenderFrame.apply(this, arguments);
@@ -32056,12 +32136,25 @@ class AccessibilityWidget {
                 const style = document.createElement('style');
                 style.id = 'seizure-safe-animation-css';
                 style.textContent = `
-                    /* Seizure-safe animation kill switch */
+                    /* Seizure-safe animation kill switch - "Visual Freeze" Strategy */
+                    /* This visually freezes animations even if JS is still running */
                     .seizure-safe *, .seizure-safe *::before, .seizure-safe *::after {
+                        /* 1. Kills CSS transitions and keyframes */
                         animation: none !important;
                         transition: none !important;
-                        scroll-behavior: auto !important;
                         animation-play-state: paused !important;
+                        /* 2. Kills JS-driven 'transform' movements (CRITICAL for Lottie SVG animations) */
+                        transform: none !important;
+                        /* 3. Kills JS-driven 'opacity' fades */
+                        opacity: 1 !important;
+                        /* 4. Stops smooth scrolling */
+                        scroll-behavior: auto !important;
+                    }
+                    
+                    /* CRITICAL: Hide canvas elements - CSS cannot stop internal canvas drawing */
+                    /* Canvas is a bitmap updated by pixels, so we hide it for user safety */
+                    .seizure-safe canvas:not(#accessbit-widget-container canvas):not([id*="accessbit-widget"] canvas):not([class*="accessbit-widget"] canvas) {
+                        display: none !important;
                     }
 
                     /* Remove common flash triggers */
