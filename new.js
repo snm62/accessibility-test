@@ -28381,6 +28381,40 @@ class AccessibilityWidget {
                 }
             } catch (_) {}
             
+            // 7. Restore hidden elements that were hidden by seizure-safe mode
+            try {
+                // Restore elements with data-seizure-text-processed attribute
+                const processedElements = document.querySelectorAll('[data-seizure-text-processed]');
+                processedElements.forEach(el => {
+                    try {
+                        // Remove the attribute - CSS will no longer hide it
+                        el.removeAttribute('data-seizure-text-processed');
+                    } catch (_) {}
+                });
+                
+                // Restore duplicate hidden elements
+                const duplicateElements = document.querySelectorAll('[data-seizure-duplicate-hidden]');
+                duplicateElements.forEach(el => {
+                    try {
+                        el.removeAttribute('data-seizure-duplicate-hidden');
+                    } catch (_) {}
+                });
+                
+                // Force a reflow to ensure CSS changes take effect
+                // This helps elements that were hidden by CSS become visible again
+                if (document.body) {
+                    document.body.offsetHeight; // Trigger reflow
+                }
+            } catch (_) {}
+            
+            // 8. Restore animation libraries and media
+            try {
+                this.restoreAllMediaAndAnimations();
+                this.restoreAnimationLibraries();
+                this.restoreLottieAnimations();
+                this.restorePortfolioAnimations();
+            } catch (_) {}
+            
             this.settings['seizure-safe'] = false;
             this.saveSettings();
             
@@ -29044,35 +29078,104 @@ class AccessibilityWidget {
         // Uses the clean "Pause All" method - maintains state, keeps structure intact
         stopAllLottieAnimations() {
             try {
-                // Method 1: "Pause All" - Cleanest way to stop every Lottie animation instantly
-                // This is safe, official, and won't break the page structure
-                // It doesn't delete the SVGs; it simply tells the engine to stop updating the frames
-                const pauseAllLotties = () => {
-                    // 1. Try the Global API first (Most reliable)
-                    const player = window.lottie || window.bodymovin;
-                    if (player && typeof player.pause === 'function') {
-                        try {
-                            player.pause(); // Pauses all active Lottie animations globally
-                        } catch (_) {}
-                    }
+                // Method 1: Stop all individual Lottie instances at frame 0 to prevent loop distortion
+                // This ensures loop animations show a clean first frame instead of overlapping frames
+                const stopAllLottieInstances = () => {
+                    try {
+                        // Get all registered Lottie animations
+                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                            const allAnimations = window.lottie.getRegisteredAnimations();
+                            if (allAnimations && allAnimations.length > 0) {
+                                allAnimations.forEach(anim => {
+                                    try {
+                                        // Stop at frame 0 to prevent loop distortion
+                                        if (typeof anim.goToAndStop === 'function') {
+                                            anim.goToAndStop(0, true);
+                                        }
+                                        // Disable loop to prevent restart
+                                        if (anim.loop !== undefined) {
+                                            anim.loop = false;
+                                        }
+                                        // Pause the animation
+                                        if (typeof anim.pause === 'function') {
+                                            anim.pause();
+                                        }
+                                        // Set speed to 0 as additional safety
+                                        if (typeof anim.setSpeed === 'function') {
+                                            anim.setSpeed(0);
+                                        }
+                                    } catch (_) {}
+                                });
+                            }
+                        }
+                    } catch (_) {}
                     
-                    // 2. Fallback: Search for custom elements/web components
-                    const dotLotties = document.querySelectorAll('dotlottie-player, lottie-player');
-                    dotLotties.forEach(player => {
-                        try {
-                            if (player.pause) player.pause();
-                        } catch (_) {}
-                    });
+                    // Handle lottie-player web components
+                    try {
+                        const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
+                        lottiePlayers.forEach(player => {
+                            try {
+                                // Stop at first frame
+                                if (typeof player.seek === 'function') {
+                                    player.seek(0);
+                                }
+                                // Disable loop
+                                if (player.loop !== undefined) {
+                                    player.loop = false;
+                                }
+                                // Pause
+                                if (typeof player.pause === 'function') {
+                                    player.pause();
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                    
+                    // Handle DOM elements with Lottie data attributes
+                    try {
+                        const lottieElements = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]');
+                        lottieElements.forEach(el => {
+                            try {
+                                // Try to access the Lottie instance
+                                const lottieInstance = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
+                                if (lottieInstance) {
+                                    // Stop at frame 0
+                                    if (typeof lottieInstance.goToAndStop === 'function') {
+                                        lottieInstance.goToAndStop(0, true);
+                                    }
+                                    // Disable loop
+                                    if (lottieInstance.loop !== undefined) {
+                                        lottieInstance.loop = false;
+                                    }
+                                    // Pause
+                                    if (typeof lottieInstance.pause === 'function') {
+                                        lottieInstance.pause();
+                                    }
+                                    // Set speed to 0
+                                    if (typeof lottieInstance.setSpeed === 'function') {
+                                        lottieInstance.setSpeed(0);
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
                 };
                 
-                // Execute the pause all function
-                pauseAllLotties();
+                // Execute the stop function
+                stopAllLottieInstances();
+                
+                // Method 2: Global API pause (backup)
+                const player = window.lottie || window.bodymovin;
+                if (player && typeof player.pause === 'function') {
+                    try {
+                        player.pause(); // Pauses all active Lottie animations globally
+                    } catch (_) {}
+                }
                 
                 // Call CSS injection for visual freeze
                 this.injectLottieVisualFreezeCSS();
                 
                 // Additional safety: Prevent restart with setSpeed(0)
-                const player = window.lottie || window.bodymovin;
                 if (player && typeof player.setSpeed === 'function') {
                     try {
                         player.setSpeed(0); // Safety net if another script tries to .play()
@@ -29086,7 +29189,7 @@ class AccessibilityWidget {
                     } catch (_) {}
                 }
                 
-                // Method 2: Override Lottie loading globally (store original for restoration)
+                // Method 3: Override Lottie loading globally (store original for restoration)
                 // Prevents new animations from starting when seizure-safe is active
                 if (player && typeof player.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
                     seizureState.originalLottieLoadAnimation = player.loadAnimation;
@@ -29094,10 +29197,17 @@ class AccessibilityWidget {
                     player.loadAnimation = function(config) {
                         try {
                             const anim = seizureState.originalLottieLoadAnimation.call(this, config);
-                            if (anim && typeof anim.pause === 'function') {
-                                try {
+                            if (anim) {
+                                // Stop at frame 0 and disable loop for new animations
+                                if (typeof anim.goToAndStop === 'function') {
+                                    anim.goToAndStop(0, true);
+                                }
+                                if (anim.loop !== undefined) {
+                                    anim.loop = false;
+                                }
+                                if (typeof anim.pause === 'function') {
                                     anim.pause(); // Immediately pause new animations
-                                } catch (_) {}
+                                }
                             }
                             return anim;
                         } catch (_) {
@@ -29767,6 +29877,17 @@ class AccessibilityWidget {
                     /* REMOVED: transform: none - this was breaking button layouts */
                 }
                 
+                /* Allow button text animations to work even in seizure-safe mode */
+                /* This enables text hover effects like text moving from down to up */
+                .seizure-safe button > *,
+                .seizure-safe a > *,
+                .seizure-safe [role="button"] > *,
+                .seizure-safe button span,
+                .seizure-safe a span,
+                .seizure-safe [role="button"] span {
+                    transition: unset !important;
+                }
+                
                 /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
                 /* GSAP uses transform and opacity - CSS !important pins elements in place */
                 /* CRITICAL: Exclude scroll containers AND slider containers to prevent breaking layouts */
@@ -29983,6 +30104,20 @@ class AccessibilityWidget {
                     zoom: 1 !important;
                 }
                 
+                /* Allow button text animations to work even in seizure-safe mode */
+                /* This enables text hover effects like text moving from down to up */
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span {
+                    transform: unset !important;
+                    transform-origin: unset !important;
+                    scale: unset !important;
+                    zoom: unset !important;
+                }
+                
                 /* PREVENT HOVER EFFECTS AND INTERACTIONS */
                 body.seizure-safe *:hover,
                 body.seizure-safe *:focus,
@@ -29992,6 +30127,18 @@ class AccessibilityWidget {
                     zoom: 1 !important;
                     animation: none !important;
                     transition: none !important;
+                }
+                
+                /* Allow button text hover animations to work */
+                body.seizure-safe button:hover > *,
+                body.seizure-safe a:hover > *,
+                body.seizure-safe [role="button"]:hover > *,
+                body.seizure-safe button:hover span,
+                body.seizure-safe a:hover span,
+                body.seizure-safe [role="button"]:hover span {
+                    transform: unset !important;
+                    transition: unset !important;
+                    animation: unset !important;
                 }
                 
                 /* Stop ALL CSS animations by name */
