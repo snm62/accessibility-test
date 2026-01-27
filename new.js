@@ -3096,8 +3096,7 @@ class AccessibilityWidget {
                 if (seizureSafeFromStorage === 'true') {
                     // Use safe class toggle (Designer-compliant)
                     this.safeBodyClassToggle('seizure-safe', true);
-                    this.applyImmediateSeizureCSS();
-                    this.forceCompleteTextAnimations();
+                    this.injectSeizureSafeCSS();
                 }
             } catch (e) {
                 
@@ -3300,10 +3299,6 @@ class AccessibilityWidget {
                 try {
                     // Add class immediately to enable CSS guards before any library re-inits (Designer-safe)
                     this.safeBodyClassToggle('seizure-safe', true);
-                    // Apply immediate minimal CSS to halt motion until full styles are added
-                    this.applyImmediateSeizureCSS();
-                    // Force complete any text animations immediately
-                    this.forceCompleteTextAnimations();
                     // Proceed with full enable without delay
                     this.enableSeizureSafe(true /* immediate */);
                 } catch (e) {
@@ -3320,8 +3315,6 @@ class AccessibilityWidget {
                 if (!document.body.classList.contains('seizure-safe')) {
                     this.safeBodyClassToggle('seizure-safe', true);
                 }
-                // Force complete any text animations immediately
-                this.forceCompleteTextAnimations();
                 this.enableSeizureSafe(true /* immediate */);
             }
     
@@ -28445,7 +28438,7 @@ class AccessibilityWidget {
     
     
     
-        // Seizure Safe Profile Methods
+        // Seizure Safe Profile Methods - Rewritten without global overrides
     
         enableSeizureSafe(immediate = false) {
             // Disable other mutually exclusive features
@@ -28454,258 +28447,425 @@ class AccessibilityWidget {
             if (this.settings['cognitive-disability']) { this.disableCognitiveDisability(); this.updateToggleSwitch('cognitive-disability', false); }
             
             this.settings['seizure-safe'] = true;
-            document.body.classList.add('seizure-safe');
+            this.safeBodyClassToggle('seizure-safe', true);
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             this.saveSettings();
             
-            // 1) Grey overlay (light, non-sticky-breaking)
-            this.addSeizureSafeGreyOverlay();
-            // 2) CSS kill switch
-            this.injectSeizureSafeAnimationCSS();
-            // 3) CSS visual freeze for Lottie SVG animations
-            this.injectLottieVisualFreezeCSS();
-            // 4) WAAPI pause/cancel running animations (no globals)
-            try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
-            // 4) Library APIs + polling
-            this.stopAnimationLibraries();
-            this.startLottieGSAPPolling();
-            // 5) Stop autoplay media and JS-driven sliders
+            // 1) Inject CSS kill switch (no global overrides)
+            this.injectSeizureSafeCSS();
+            // 2) Stop WAAPI animations using public API
+            this.stopWAAPIAnimations();
+            // 3) Stop GSAP animations using public API
+            this.stopGSAPAnimations();
+            // 4) Stop Lottie animations using public API
+            this.stopLottieAnimations();
+            // 5) Stop autoplay media
             this.stopAutoplayMedia();
-            this.stopJavaScriptAnimations();
-            // 6) Stop Webflow interactions / data-w-id transforms and hovers
+            // 6) Stop Webflow interactions
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
         }
     
-    
-    
-        // REMOVED: enforceNativeScroll function that was blocking scroll
-    
         disableSeizureSafe() {
-            // 1. Remove CSS rules for seizure-safe animation stopping FIRST
-            const existingAnimationStyle = document.getElementById('seizure-safe-animation-css');
-            if (existingAnimationStyle) {
-                existingAnimationStyle.remove();
+            // 1. Remove CSS stylesheet
+            const existingStyle = document.getElementById('seizure-safe-css');
+            if (existingStyle) {
+                existingStyle.remove();
             }
             
-            // 2. Remove grey overlay
-            const existingGreyOverlay = document.getElementById('accessbit-seizure-safe-grey-overlay');
-            if (existingGreyOverlay) {
-                existingGreyOverlay.remove();
-            }
-            
-            // 3. Remove old styles if they exist (backward compatibility)
-            this.removeSeizureSafeStyles();
-            
-            // 4. Remove seizure-safe class from body and html
+            // 2. Remove seizure-safe class from body and html
             this.safeBodyClassToggle('seizure-safe', false);
-            document.documentElement.classList.remove('seizure-safe');
+            try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             
-            // 5. Stop continuous polling for Lottie and GSAP
-            this.stopLottieGSAPPolling();
+            // 3. Restore WAAPI animations
+            this.restoreWAAPIAnimations();
             
-            // 6. Restore WAAPI animations
-            try {
-                if (window.seizureState && window.seizureState.applyWAAPIStopMotion) {
-                    window.seizureState.applyWAAPIStopMotion(false);
-                }
-            } catch (_) {}
+            // 4. Restore GSAP animations
+            this.restoreGSAPAnimations();
             
-            // 7. Restore hidden elements that were hidden by seizure-safe mode
-            try {
-                // First, collect all elements with seizure attributes BEFORE removing them
-                const processedElements = document.querySelectorAll('[data-seizure-text-processed]');
-                const duplicateElements = document.querySelectorAll('[data-seizure-duplicate-hidden]');
-                
-                // Restore elements with data-seizure-text-processed attribute
-                processedElements.forEach(el => {
-                    try {
-                        // CRITICAL: Skip widget elements completely
-                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
-                            return;
-                        }
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (el.getRootNode && el.getRootNode() !== document) {
-                            return;
-                        }
-                        // Clear inline styles that were set by forceCompleteTextAnimations BEFORE removing attribute
-                        el.style.opacity = '';
-                        el.style.visibility = '';
-                        el.style.display = '';
-                        el.style.animation = '';
-                        el.style.transition = '';
-                        el.style.transform = '';
-                        el.style.clipPath = '';
-                        el.style.webkitClipPath = '';
-                        el.style.position = '';
-                        el.style.pointerEvents = '';
-                        el.style.width = '';
-                        el.style.height = '';
-                        el.style.maxWidth = '';
-                        el.style.maxHeight = '';
-                        // Now remove the attribute
-                        el.removeAttribute('data-seizure-text-processed');
-                    } catch (_) {}
-                });
-                
-                // Restore duplicate hidden elements
-                duplicateElements.forEach(el => {
-                    try {
-                        // CRITICAL: Skip widget elements completely
-                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
-                            return;
-                        }
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (el.getRootNode && el.getRootNode() !== document) {
-                            return;
-                        }
-                        // Clear inline styles that were set to hide duplicates BEFORE removing attribute
-                        el.style.display = '';
-                        el.style.visibility = '';
-                        el.style.opacity = '';
-                        el.style.position = '';
-                        el.style.pointerEvents = '';
-                        // Now remove the attribute
-                        el.removeAttribute('data-seizure-duplicate-hidden');
-                    } catch (_) {}
-                });
-                
-                // Restore all child elements (char, word spans) that were hidden
-                // These are the individual character/word elements that were hidden by seizure-safe
-                const hiddenChars = document.querySelectorAll('.char, .word, [class*="char"]:not([class*="character"]):not([class*="chart"]), [class*="word"]:not([class*="wording"]), .letter, [class*="letter"]');
-                hiddenChars.forEach(el => {
-                    try {
-                        // CRITICAL: Skip widget elements completely
-                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
-                            return;
-                        }
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (el.getRootNode && el.getRootNode() !== document) {
-                            return;
-                        }
-                        // Check if element has inline styles that look like they were set by seizure-safe
-                        const style = el.style;
-                        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-                            // Clear the styles - these were likely set by seizure-safe mode
-                            el.style.display = '';
-                            el.style.visibility = '';
-                            el.style.opacity = '';
-                            el.style.position = '';
-                            el.style.pointerEvents = '';
-                        }
-                    } catch (_) {}
-                });
-                
-                // Reset the text animations completed flag so it can run again if needed
-                this._textAnimationsCompleted = false;
-                
-                // Force a reflow to ensure CSS changes take effect
-                // This helps elements that were hidden by CSS become visible again
-                if (document.body) {
-                    document.body.offsetHeight; // Trigger reflow
-                }
-            } catch (_) {}
+            // 5. Restore Lottie animations
+            this.restoreLottieAnimations();
             
-            // 8. Restore animation libraries and media
-            try {
-                this.restoreAllMediaAndAnimations();
-                this.restoreAnimationLibraries();
-                this.restoreLottieAnimations();
-                this.restorePortfolioAnimations();
-            } catch (_) {}
-            
-            // 9. Restore all elements that might have been hidden or have inline styles
-            // REMOVED: This was clearing styles on widget elements
-            // The widget should never have its styles cleared
-            // try {
-            //     // Restore all elements with inline styles that might be from seizure-safe
-            //     // CRITICAL: Exclude widget and shadow DOM elements completely
-            //     const allElements = document.querySelectorAll('*');
-            //     allElements.forEach(el => {
-            //         try {
-            //             // Skip widget elements - check multiple ways to be safe
-            //             if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
-            //                 return;
-            //             }
-            //             if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
-            //                 return;
-            //             }
-            //             if (el.closest && (
-            //                 el.closest('#accessbit-widget-container') ||
-            //                 el.closest('[id*="accessbit-widget"]') ||
-            //                 el.closest('[class*="accessbit-widget"]') ||
-            //                 el.closest('accessbit-widget') ||
-            //                 el.closest('[data-ck-widget]')
-            //             )) {
-            //                 return;
-            //             }
-            //             // Skip shadow DOM elements
-            //             if (el.getRootNode && el.getRootNode() !== document) {
-            //                 return;
-            //             }
-            //             
-            //             const style = el.style;
-            //             // If element has inline styles that look like they were set by seizure-safe
-            //             // Only clear if it's clearly from seizure-safe, not widget styles
-            //             if ((style.animation === 'none' || style.transition === 'none') && 
-            //                 !el.hasAttribute('data-widget-style')) {
-            //                 // Clear styles but be careful - only clear if likely from seizure-safe
-            //                 if (style.animation === 'none') style.animation = '';
-            //                 if (style.transition === 'none') style.transition = '';
-            //                 if (style.transform === 'none') style.transform = '';
-            //             }
-            //         } catch (_) {}
-            //     });
-            // } catch (_) {}
-            
-            // 10. Force a page refresh of animations by triggering a resize event
-            // This helps some animation libraries reinitialize
-            try {
-                window.dispatchEvent(new Event('resize'));
-                // Also trigger a custom event for animation libraries
-                window.dispatchEvent(new Event('seizure-safe-disabled'));
-            } catch (_) {}
+            // 6. Restore autoplay media
+            this.restoreAllMediaAndAnimations();
             
             this.settings['seizure-safe'] = false;
             this.saveSettings();
             
             // Update widget appearance to sync Shadow DOM host classes
             this.updateWidgetAppearance();
+        }
+        
+        // Inject CSS kill switch - no global overrides, CSS-only approach
+        injectSeizureSafeCSS() {
+            if (document.getElementById('seizure-safe-css')) {
+                return; // Already injected
+            }
+            
+            const style = document.createElement('style');
+            style.id = 'seizure-safe-css';
+            
+            // Use textContent instead of innerHTML (security requirement)
+            const cssText = `
+                /* Global CSS kill switch - per Webflow Security recommendations */
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after,
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after {
+                    animation: none !important;
+                    transition: none !important;
+                    scroll-behavior: auto !important;
+                }
+                
+                /* Remove common flash triggers - blinking caret, shimmer, pulsing, etc. */
+                body.seizure-safe *[class*="blink"],
+                body.seizure-safe *[class*="shimmer"],
+                body.seizure-safe *[class*="pulse"],
+                body.seizure-safe *[class*="caret"],
+                body.seizure-safe *[class*="cursor-blink"],
+                body.seizure-safe *[class*="skeleton"],
+                body.seizure-safe *[class*="pulsing"],
+                body.seizure-safe *[class*="flashing"],
+                html.seizure-safe *[class*="blink"],
+                html.seizure-safe *[class*="shimmer"],
+                html.seizure-safe *[class*="pulse"],
+                html.seizure-safe *[class*="caret"],
+                html.seizure-safe *[class*="cursor-blink"],
+                html.seizure-safe *[class*="skeleton"],
+                html.seizure-safe *[class*="pulsing"],
+                html.seizure-safe *[class*="flashing"] {
+                    animation: none !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                
+                /* Apply grey color filter to content elements only (not body/html to preserve sticky nav) */
+                body.seizure-safe main,
+                body.seizure-safe main *,
+                body.seizure-safe section,
+                body.seizure-safe section *,
+                body.seizure-safe article,
+                body.seizure-safe article *,
+                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                body.seizure-safe p:not(nav p):not(header p),
+                body.seizure-safe span:not(nav span):not(header span),
+                html.seizure-safe main,
+                html.seizure-safe main *,
+                html.seizure-safe section,
+                html.seizure-safe section *,
+                html.seizure-safe article,
+                html.seizure-safe article *,
+                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe p:not(nav p):not(header p),
+                html.seizure-safe span:not(nav span):not(header span) {
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                }
+                
+                /* Exclude widget from color filter */
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
+                body.seizure-safe [data-ck-widget],
+                body.seizure-safe accessbit-widget,
+                html.seizure-safe #accessbit-widget-container,
+                html.seizure-safe [id*="accessbit-widget"],
+                html.seizure-safe [class*="accessbit-widget"],
+                html.seizure-safe [data-ck-widget],
+                html.seizure-safe accessbit-widget {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
+            
+            style.textContent = cssText;
+            document.head.appendChild(style);
+        }
+        
+        // Stop WAAPI animations using public API (cancel, playbackRate)
+        stopWAAPIAnimations() {
+            try {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    try {
+                        // Skip widget elements
+                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (element.closest && (
+                            element.closest('#accessbit-widget-container') ||
+                            element.closest('[id*="accessbit-widget"]') ||
+                            element.closest('[class*="accessbit-widget"]') ||
+                            element.closest('accessbit-widget') ||
+                            element.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (element.getRootNode && element.getRootNode() !== document) {
+                            return;
+                        }
+                        
+                        // Get all animations for this element
+                        const animations = element.getAnimations();
+                        animations.forEach(animation => {
+                            try {
+                                // Use public WAAPI methods
+                                if (typeof animation.cancel === 'function') {
+                                    animation.cancel();
+                                } else if (typeof animation.pause === 'function') {
+                                    animation.pause();
+                                }
+                                if (typeof animation.playbackRate !== 'undefined') {
+                                    animation.playbackRate = 0;
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Restore WAAPI animations
+        restoreWAAPIAnimations() {
+            try {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    try {
+                        // Skip widget elements
+                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (element.closest && (
+                            element.closest('#accessbit-widget-container') ||
+                            element.closest('[id*="accessbit-widget"]') ||
+                            element.closest('[class*="accessbit-widget"]') ||
+                            element.closest('accessbit-widget') ||
+                            element.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (element.getRootNode && element.getRootNode() !== document) {
+                            return;
+                        }
+                        
+                        const animations = element.getAnimations();
+                        animations.forEach(animation => {
+                            try {
+                                if (typeof animation.playbackRate !== 'undefined') {
+                                    animation.playbackRate = 1;
+                                }
+                                if (typeof animation.play === 'function') {
+                                    animation.play();
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Stop GSAP animations using public API (pause, not kill)
+        stopGSAPAnimations() {
+            try {
+                if (typeof window.gsap === 'undefined') {
+                    return;
+                }
+                
+                // Use GSAP public API - pause animations, don't kill them
+                if (window.gsap.exportRoot) {
+                    try {
+                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
+                        allAnimations.forEach(anim => {
+                            try {
+                                // Only pause non-scroll animations (preserve ScrollTrigger)
+                                if (!anim.scrollTrigger && typeof anim.pause === 'function') {
+                                    anim.pause();
+                                    
+                                    // Restore visibility if GSAP hid the element
+                                    if (anim.targets) {
+                                        const targets = Array.isArray(anim.targets) ? anim.targets : [anim.targets];
+                                        targets.forEach(target => {
+                                            try {
+                                                if (target && target.style) {
+                                                    const computed = window.getComputedStyle(target);
+                                                    if (computed.opacity === '0' && 
+                                                        computed.display !== 'none' && 
+                                                        computed.visibility !== 'hidden') {
+                                                        target.style.opacity = '1';
+                                                        target.style.visibility = 'visible';
+                                                    }
+                                                }
+                                            } catch (_) {}
+                                        });
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                }
+                
+                // Pause global timeline (safe for ScrollTrigger)
+                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                    try {
+                        window.gsap.globalTimeline.pause();
+                    } catch (_) {}
+                }
+            } catch (_) {}
+        }
+        
+        // Restore GSAP animations
+        restoreGSAPAnimations() {
+            try {
+                if (typeof window.gsap === 'undefined') {
+                    return;
+                }
+                
+                // Resume global timeline
+                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.resume === 'function') {
+                    try {
+                        window.gsap.globalTimeline.resume();
+                    } catch (_) {}
+                }
+                
+                // Resume all paused animations
+                if (window.gsap.exportRoot) {
+                    try {
+                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
+                        allAnimations.forEach(anim => {
+                            try {
+                                if (!anim.scrollTrigger && typeof anim.resume === 'function') {
+                                    anim.resume();
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
+                }
+            } catch (_) {}
+        }
+        
+        // Stop Lottie animations using public API
+        stopLottieAnimations() {
+            try {
+                // Method 1: lottie-web library
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const animations = window.lottie.getRegisteredAnimations();
+                    animations.forEach(anim => {
+                        try {
+                            if (anim) {
+                                if (typeof anim.stop === 'function') {
+                                    anim.stop();
+                                }
+                                if (typeof anim.pause === 'function') {
+                                    anim.pause();
+                                }
+                                if (typeof anim.goToAndStop === 'function') {
+                                    anim.goToAndStop(0, true);
+                                }
+                                if (typeof anim.setSpeed === 'function') {
+                                    anim.setSpeed(0);
+                                }
+                                if (anim.loop !== undefined) {
+                                    anim.loop = false;
+                                }
+                                if (anim.loopCount !== undefined) {
+                                    anim.loopCount = 0;
+                                }
+                            }
+                        } catch (_) {}
+                    });
+                }
+                
+                // Method 2: lottie-player web components
+                const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
+                lottiePlayers.forEach(player => {
+                    try {
+                        // Skip widget elements
+                        if (player.closest && (
+                            player.closest('#accessbit-widget-container') ||
+                            player.closest('[id*="accessbit-widget"]') ||
+                            player.closest('[class*="accessbit-widget"]') ||
+                            player.closest('accessbit-widget') ||
+                            player.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        if (typeof player.stop === 'function') {
+                            player.stop();
+                        }
+                        if (typeof player.pause === 'function') {
+                            player.pause();
+                        }
+                        if (typeof player.seek === 'function') {
+                            player.seek(0);
+                        }
+                        if (typeof player.setSpeed === 'function') {
+                            player.setSpeed(0);
+                        }
+                        if (typeof player.setLooping === 'function') {
+                            player.setLooping(false);
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Restore Lottie animations
+        restoreLottieAnimations() {
+            try {
+                // Method 1: lottie-web library
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const animations = window.lottie.getRegisteredAnimations();
+                    animations.forEach(anim => {
+                        try {
+                            if (anim) {
+                                if (anim.loop !== undefined) {
+                                    anim.loop = true;
+                                }
+                                if (anim.loopCount !== undefined) {
+                                    anim.loopCount = -1;
+                                }
+                                if (typeof anim.setSpeed === 'function') {
+                                    anim.setSpeed(1);
+                                }
+                                if (typeof anim.play === 'function') {
+                                    anim.play();
+                                }
+                            }
+                        } catch (_) {}
+                    });
+                }
+                
+                // Method 2: lottie-player web components
+                const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
+                lottiePlayers.forEach(player => {
+                    try {
+                        // Skip widget elements
+                        if (player.closest && (
+                            player.closest('#accessbit-widget-container') ||
+                            player.closest('[id*="accessbit-widget"]') ||
+                            player.closest('[class*="accessbit-widget"]') ||
+                            player.closest('accessbit-widget') ||
+                            player.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        if (typeof player.setLooping === 'function') {
+                            player.setLooping(true);
+                        }
+                        if (typeof player.setSpeed === 'function') {
+                            player.setSpeed(1);
+                        }
+                        if (typeof player.play === 'function') {
+                            player.play();
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
