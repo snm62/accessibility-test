@@ -28612,16 +28612,27 @@ class AccessibilityWidget {
                         animations.forEach(animation => {
                             try {
                                 // Use public WAAPI methods
-                                if (typeof animation.cancel === 'function') {
+                                if (typeof animation.pause === 'function') {
+                                    animation.pause(); // Pause instead of cancel to preserve state
+                                } else if (typeof animation.cancel === 'function') {
                                     animation.cancel();
-                                } else if (typeof animation.pause === 'function') {
-                                    animation.pause();
                                 }
                                 if (typeof animation.playbackRate !== 'undefined') {
                                     animation.playbackRate = 0;
                                 }
                             } catch (_) {}
                         });
+                        
+                        // Ensure element is visible after stopping animations
+                        const computed = window.getComputedStyle(element);
+                        if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
+                            computed.display !== 'none' && 
+                            computed.visibility !== 'hidden' &&
+                            computed.position !== 'absolute' &&
+                            !element.hasAttribute('aria-hidden')) {
+                            element.style.opacity = '1';
+                            element.style.visibility = 'visible';
+                        }
                     } catch (_) {}
                 });
             } catch (_) {}
@@ -28682,16 +28693,27 @@ class AccessibilityWidget {
                             try {
                                 // Only pause non-scroll animations (preserve ScrollTrigger)
                                 if (!anim.scrollTrigger && typeof anim.pause === 'function') {
-                                    anim.pause();
-                                    
-                                    // Restore visibility if GSAP hid the element
+                                    // Restore visibility BEFORE pausing to ensure elements are visible
                                     if (anim.targets) {
                                         const targets = Array.isArray(anim.targets) ? anim.targets : [anim.targets];
                                         targets.forEach(target => {
                                             try {
+                                                // Skip widget elements
+                                                if (target && target.closest && (
+                                                    target.closest('#accessbit-widget-container') ||
+                                                    target.closest('[id*="accessbit-widget"]') ||
+                                                    target.closest('[class*="accessbit-widget"]') ||
+                                                    target.closest('accessbit-widget') ||
+                                                    target.closest('[data-ck-widget]')
+                                                )) {
+                                                    return;
+                                                }
+                                                
                                                 if (target && target.style) {
                                                     const computed = window.getComputedStyle(target);
-                                                    if (computed.opacity === '0' && 
+                                                    // Force visibility if element is hidden (opacity 0 or very low)
+                                                    // This ensures animated content remains visible when paused
+                                                    if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
                                                         computed.display !== 'none' && 
                                                         computed.visibility !== 'hidden') {
                                                         target.style.opacity = '1';
@@ -28701,6 +28723,9 @@ class AccessibilityWidget {
                                             } catch (_) {}
                                         });
                                     }
+                                    
+                                    // Now pause the animation
+                                    anim.pause();
                                 }
                             } catch (_) {}
                         });
@@ -28713,6 +28738,44 @@ class AccessibilityWidget {
                         window.gsap.globalTimeline.pause();
                     } catch (_) {}
                 }
+                
+                // Additional safety: Find all elements that might be hidden by GSAP and make them visible
+                // This catches elements that might not be in exportRoot
+                try {
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        try {
+                            // Skip widget elements
+                            if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                                return;
+                            }
+                            if (element.closest && (
+                                element.closest('#accessbit-widget-container') ||
+                                element.closest('[id*="accessbit-widget"]') ||
+                                element.closest('[class*="accessbit-widget"]') ||
+                                element.closest('accessbit-widget') ||
+                                element.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            // Skip shadow DOM elements
+                            if (element.getRootNode && element.getRootNode() !== document) {
+                                return;
+                            }
+                            
+                            const computed = window.getComputedStyle(element);
+                            // If element is invisible but not intentionally hidden, make it visible
+                            if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
+                                computed.display !== 'none' && 
+                                computed.visibility !== 'hidden' &&
+                                computed.position !== 'absolute' && // Don't reveal absolutely positioned hidden elements
+                                !element.hasAttribute('aria-hidden')) {
+                                element.style.opacity = '1';
+                                element.style.visibility = 'visible';
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
             } catch (_) {}
         }
         
@@ -28755,14 +28818,25 @@ class AccessibilityWidget {
                     animations.forEach(anim => {
                         try {
                             if (anim) {
-                                if (typeof anim.stop === 'function') {
-                                    anim.stop();
+                                // First, ensure the animation container is visible
+                                if (anim.renderer && anim.renderer.svgElement) {
+                                    const container = anim.renderer.svgElement.parentElement || anim.renderer.svgElement;
+                                    if (container) {
+                                        container.style.opacity = '1';
+                                        container.style.visibility = 'visible';
+                                        container.style.display = '';
+                                    }
                                 }
+                                
+                                // Stop the animation
                                 if (typeof anim.pause === 'function') {
                                     anim.pause();
                                 }
                                 if (typeof anim.goToAndStop === 'function') {
                                     anim.goToAndStop(0, true);
+                                }
+                                if (typeof anim.stop === 'function') {
+                                    anim.stop();
                                 }
                                 if (typeof anim.setSpeed === 'function') {
                                     anim.setSpeed(0);
@@ -28793,20 +28867,51 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        if (typeof player.stop === 'function') {
-                            player.stop();
-                        }
+                        // Ensure player is visible
+                        player.style.opacity = '1';
+                        player.style.visibility = 'visible';
+                        player.style.display = '';
+                        
+                        // Stop the animation
                         if (typeof player.pause === 'function') {
                             player.pause();
                         }
                         if (typeof player.seek === 'function') {
                             player.seek(0);
                         }
+                        if (typeof player.stop === 'function') {
+                            player.stop();
+                        }
                         if (typeof player.setSpeed === 'function') {
                             player.setSpeed(0);
                         }
                         if (typeof player.setLooping === 'function') {
                             player.setLooping(false);
+                        }
+                    } catch (_) {}
+                });
+                
+                // Method 3: Ensure all Lottie containers (canvas, svg) are visible
+                const lottieContainers = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], lottie-player, svg[data-lottie], canvas[data-lottie]');
+                lottieContainers.forEach(container => {
+                    try {
+                        // Skip widget elements
+                        if (container.closest && (
+                            container.closest('#accessbit-widget-container') ||
+                            container.closest('[id*="accessbit-widget"]') ||
+                            container.closest('[class*="accessbit-widget"]') ||
+                            container.closest('accessbit-widget') ||
+                            container.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        const computed = window.getComputedStyle(container);
+                        if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
+                            computed.display !== 'none' && 
+                            computed.visibility !== 'hidden') {
+                            container.style.opacity = '1';
+                            container.style.visibility = 'visible';
                         }
                     } catch (_) {}
                 });
