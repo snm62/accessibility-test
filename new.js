@@ -28879,6 +28879,32 @@ class AccessibilityWidget {
                         }
                     } catch (_) {}
                 });
+                
+                // Method 3: Find Lottie instances attached to DOM elements (Webflow, etc.)
+                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"]').forEach(el => {
+                    try {
+                        // Skip widget elements
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
+                        if (inst) {
+                            if (typeof inst.pause === 'function') {
+                                inst.pause();
+                            }
+                            if (typeof inst.goToAndStop === 'function') {
+                                inst.goToAndStop(0, true);
+                            }
+                        }
+                    } catch (_) {}
+                });
             } catch (_) {}
         }
         
