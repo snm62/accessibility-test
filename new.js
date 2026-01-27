@@ -28410,6 +28410,26 @@ class AccessibilityWidget {
                 // Restore elements with data-seizure-text-processed attribute
                 processedElements.forEach(el => {
                     try {
+                        // CRITICAL: Skip widget elements completely
+                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
+                            return;
+                        }
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (el.getRootNode && el.getRootNode() !== document) {
+                            return;
+                        }
                         // Clear inline styles that were set by forceCompleteTextAnimations BEFORE removing attribute
                         el.style.opacity = '';
                         el.style.visibility = '';
@@ -28433,6 +28453,26 @@ class AccessibilityWidget {
                 // Restore duplicate hidden elements
                 duplicateElements.forEach(el => {
                     try {
+                        // CRITICAL: Skip widget elements completely
+                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
+                            return;
+                        }
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (el.getRootNode && el.getRootNode() !== document) {
+                            return;
+                        }
                         // Clear inline styles that were set to hide duplicates BEFORE removing attribute
                         el.style.display = '';
                         el.style.visibility = '';
@@ -28449,6 +28489,26 @@ class AccessibilityWidget {
                 const hiddenChars = document.querySelectorAll('.char, .word, [class*="char"]:not([class*="character"]):not([class*="chart"]), [class*="word"]:not([class*="wording"]), .letter, [class*="letter"]');
                 hiddenChars.forEach(el => {
                     try {
+                        // CRITICAL: Skip widget elements completely
+                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
+                            return;
+                        }
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (el.getRootNode && el.getRootNode() !== document) {
+                            return;
+                        }
                         // Check if element has inline styles that look like they were set by seizure-safe
                         const style = el.style;
                         if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
@@ -28483,19 +28543,36 @@ class AccessibilityWidget {
             // 9. Restore all elements that might have been hidden or have inline styles
             try {
                 // Restore all elements with inline styles that might be from seizure-safe
+                // CRITICAL: Exclude widget and shadow DOM elements completely
                 const allElements = document.querySelectorAll('*');
                 allElements.forEach(el => {
                     try {
-                        // Skip widget elements
-                        if (el.closest && el.closest('#accessbit-widget-container, [id*="accessbit-widget"], [class*="accessbit-widget"]')) {
+                        // Skip widget elements - check multiple ways to be safe
+                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
+                            return;
+                        }
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (el.getRootNode && el.getRootNode() !== document) {
                             return;
                         }
                         
                         const style = el.style;
                         // If element has inline styles that look like they were set by seizure-safe
-                        if (style.animation === 'none' || style.transition === 'none' || 
-                            (style.opacity === '0' && !el.hasAttribute('data-original-opacity')) ||
-                            (style.visibility === 'hidden' && !el.hasAttribute('data-original-visibility'))) {
+                        // Only clear if it's clearly from seizure-safe, not widget styles
+                        if ((style.animation === 'none' || style.transition === 'none') && 
+                            !el.hasAttribute('data-widget-style')) {
                             // Clear styles but be careful - only clear if likely from seizure-safe
                             if (style.animation === 'none') style.animation = '';
                             if (style.transition === 'none') style.transition = '';
@@ -30645,10 +30722,33 @@ class AccessibilityWidget {
             }
             
             // Reset cursor styles that were applied by seizure-safe mode
+            // CRITICAL: Exclude widget elements to preserve widget styling
             document.body.style.cursor = '';
             const allElements = document.querySelectorAll('*');
             allElements.forEach(element => {
-                element.style.cursor = '';
+                try {
+                    // Skip widget elements completely
+                    if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                        return;
+                    }
+                    if (element.className && typeof element.className === 'string' && element.className.includes('accessbit-widget')) {
+                        return;
+                    }
+                    if (element.closest && (
+                        element.closest('#accessbit-widget-container') ||
+                        element.closest('[id*="accessbit-widget"]') ||
+                        element.closest('[class*="accessbit-widget"]') ||
+                        element.closest('accessbit-widget') ||
+                        element.closest('[data-ck-widget]')
+                    )) {
+                        return;
+                    }
+                    // Skip shadow DOM elements
+                    if (element.getRootNode && element.getRootNode() !== document) {
+                        return;
+                    }
+                    element.style.cursor = '';
+                } catch (_) {}
             });
             
             // Also reset cursor on Shadow DOM host
