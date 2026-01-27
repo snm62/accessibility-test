@@ -28517,8 +28517,15 @@ class AccessibilityWidget {
                         if (computed.opacity === '0' && 
                             computed.display !== 'none' && 
                             computed.visibility !== 'hidden') {
-                            element.style.opacity = '1';
-                            element.style.visibility = 'visible';
+                            // Handle both HTML elements (style) and SVG elements (attributes)
+                            if (element.style) {
+                                element.style.opacity = '1';
+                                element.style.visibility = 'visible';
+                            }
+                            if (element.setAttribute) {
+                                element.setAttribute('opacity', '1');
+                                element.setAttribute('visibility', 'visible');
+                            }
                         }
                     } catch (_) {}
                 });
@@ -28775,15 +28782,20 @@ class AccessibilityWidget {
                                                     return;
                                                 }
                                                 
-                                                if (target && target.style) {
+                                                if (target) {
                                                     const computed = window.getComputedStyle(target);
                                                     // Force visibility if element is hidden (opacity 0)
                                                     // This ensures animated content remains visible when paused
                                                     if (computed.opacity === '0' && 
                                                         computed.display !== 'none' && 
                                                         computed.visibility !== 'hidden') {
-                                                        target.style.opacity = '1';
-                                                        target.style.visibility = 'visible';
+                                                        if (target.style) {
+                                                            target.style.opacity = '1';
+                                                            target.style.visibility = 'visible';
+                                                        } else if (target.setAttribute) {
+                                                            target.setAttribute('opacity', '1');
+                                                            target.setAttribute('visibility', 'visible');
+                                                        }
                                                     }
                                                 }
                                             } catch (_) {}
@@ -28841,12 +28853,15 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: lottie-web library - use pause() and goToAndStop()
+                // Method 1: lottie-web library
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const animations = window.lottie.getRegisteredAnimations();
                     animations.forEach(anim => {
                         try {
                             if (anim) {
+                                if (typeof anim.stop === 'function') {
+                                    anim.stop();
+                                }
                                 if (typeof anim.pause === 'function') {
                                     anim.pause();
                                 }
@@ -28858,10 +28873,9 @@ class AccessibilityWidget {
                     });
                 }
                 
-                // Method 2: lottie-player web components - use pause() or stop()
+                // Method 2: lottie-player web components
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
-                        // Skip widget elements
                         if (player.closest && (
                             player.closest('#accessbit-widget-container') ||
                             player.closest('[id*="accessbit-widget"]') ||
@@ -28872,18 +28886,18 @@ class AccessibilityWidget {
                             return;
                         }
                         
+                        if (typeof player.stop === 'function') {
+                            player.stop();
+                        }
                         if (typeof player.pause === 'function') {
                             player.pause();
-                        } else if (typeof player.stop === 'function') {
-                            player.stop();
                         }
                     } catch (_) {}
                 });
                 
-                // Method 3: Find Lottie instances attached to DOM elements (Webflow, etc.)
+                // Method 3: Find Lottie instances on DOM elements
                 document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]').forEach(el => {
                     try {
-                        // Skip widget elements
                         if (el.closest && (
                             el.closest('#accessbit-widget-container') ||
                             el.closest('[id*="accessbit-widget"]') ||
@@ -28896,46 +28910,9 @@ class AccessibilityWidget {
                         
                         const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
                         if (inst) {
-                            if (typeof inst.pause === 'function') {
-                                inst.pause();
+                            if (typeof inst.stop === 'function') {
+                                inst.stop();
                             }
-                            if (typeof inst.goToAndStop === 'function') {
-                                inst.goToAndStop(0, true);
-                            }
-                        }
-                        
-                        // Also check SVG/canvas inside element
-                        const svg = el.querySelector('svg, canvas');
-                        if (svg) {
-                            const svgInst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie;
-                            if (svgInst) {
-                                if (typeof svgInst.pause === 'function') {
-                                    svgInst.pause();
-                                }
-                                if (typeof svgInst.goToAndStop === 'function') {
-                                    svgInst.goToAndStop(0, true);
-                                }
-                            }
-                        }
-                    } catch (_) {}
-                });
-                
-                // Method 4: Check all SVG elements for Lottie instances (Webflow stores them in SVG)
-                document.querySelectorAll('svg').forEach(svg => {
-                    try {
-                        // Skip widget elements
-                        if (svg.closest && (
-                            svg.closest('#accessbit-widget-container') ||
-                            svg.closest('[id*="accessbit-widget"]') ||
-                            svg.closest('[class*="accessbit-widget"]') ||
-                            svg.closest('accessbit-widget') ||
-                            svg.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        const inst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
-                        if (inst) {
                             if (typeof inst.pause === 'function') {
                                 inst.pause();
                             }
