@@ -153,13 +153,26 @@
                     scroll-behavior: auto !important;
                 }
                 
-                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll */
-                /* GSAP uses transform and opacity - CSS !important pins elements in place */
-                /* CRITICAL: Exclude scroll containers to prevent breaking ScrollSmoother/ScrollTrigger */
-                body.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
+                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
+                /* GSAP uses transform - CSS !important pins elements in place */
+                /* CRITICAL: Exclude scroll containers AND slider containers to prevent breaking layouts */
+                body.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
                     /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
                     transform: none !important;
+                }
+                
+                /* Only apply opacity/filter resets to elements that are ACTUALLY animating */
+                /* Don't force opacity: 1 or filter: none on all elements - this changes colors/shapes */
+                body.seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                html.seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                html.seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                html.seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                html.seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]) {
+                    /* Only reset opacity/filter on elements that are actually animating */
                     opacity: 1 !important;
                     filter: none !important;
                 }
@@ -247,8 +260,9 @@
                 body.seizure-safe [data-sticky],
                 body.seizure-safe [data-fixed],
                 body.seizure-safe [style*="position: sticky"],
-                body.seizure-safe [style*="position:fixed"],
-                body.seizure-safe [style*="position: fixed"] {
+                /* Exclude slider containers from filter removal to preserve colors */
+                body.seizure-safe [style*="position:fixed"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe [style*="position: fixed"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]) {
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
@@ -491,15 +505,15 @@
                 body.seizure-safe *[class*="orbit"],
                 body.seizure-safe [data-scroll],
                 body.seizure-safe [data-aos],
-                body.seizure-safe [data-animate],
-                body.seizure-safe [data-wf-page],
-                body.seizure-safe [data-w-id] {
+                body.seizure-safe [data-animate]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe [data-wf-page]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
+                body.seizure-safe [data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]) {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    /* Preserve transforms for slider manual navigation */
+                    /* Preserve transforms for slider manual navigation - exclude slider containers */
                     transform: none !important;
                     will-change: auto !important;
                 }
@@ -996,7 +1010,8 @@
                     try {
                         if (!seizureState.animationBlockerInstalled) {
                             seizureState.animationBlockerInstalled = true;
-                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform]';
+                            // CRITICAL: Exclude slider/carousel containers to prevent breaking layouts
+                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform], [class*="swiper"], [class*="carousel"], [class*="slider"], [class*="wb-swiper"], [data-slider], [data-carousel]';
                             // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
                             const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
                             // Also respect common accordion/FAQ toggle contexts that rotate arrows
@@ -1012,6 +1027,20 @@
                             const neutralizeElement = (el) => {
                                 if (!el || isExempt(el)) return;
                                 try {
+                                    // CRITICAL: Check if element is part of slider/carousel - exclude from all transforms
+                                    const isSliderElement = el.closest && (
+                                        el.closest('[class*="swiper"]') ||
+                                        el.closest('[class*="carousel"]') ||
+                                        el.closest('[class*="slider"]') ||
+                                        el.closest('[class*="wb-swiper"]') ||
+                                        el.closest('[data-slider]') ||
+                                        el.closest('[data-carousel]')
+                                    );
+                                    if (isSliderElement) {
+                                        // Don't apply any transforms/filters to slider elements - preserve their layout
+                                        return;
+                                    }
+                                    
                                     // Get computed style to check if element is actually animating
                                     const computedStyle = window.getComputedStyle(el);
                                     const hasAnimation = computedStyle.animationName !== 'none' && computedStyle.animationName !== '';
@@ -1028,7 +1057,11 @@
                                     el.style.animation = 'none';
                                     el.style.transition = 'none';
                                     el.style.willChange = 'auto';
-                                    el.style.filter = 'none';
+                                    // REMOVED: filter: none - don't apply to all elements, only animating ones
+                                    // Only apply filter: none if element is actually animating
+                                    if (hasAnimation || hasTransition) {
+                                        el.style.filter = 'none';
+                                    }
                                     
                                     // CRITICAL: Freeze Lottie elements visually without hiding them
                                     if (isLottieElement) {
@@ -27112,7 +27145,8 @@ class AccessibilityWidget {
                                 if (inst.pause) inst.pause();
                                 if (inst.goToAndStop) inst.goToAndStop(0, true);
                                 if (inst.autoplay !== undefined) inst.autoplay = false;
-                                if (inst.loop !== undefined) inst.loop = false;
+                                // REMOVED: Don't set loop = false - just pause, don't break the loop property
+                                // The pause() call above stops the animation without breaking its loop configuration
                             }
                             // Fallback: pause inner svg/canvas
                             const svg = el.querySelector('svg, canvas');
@@ -27236,7 +27270,7 @@ class AccessibilityWidget {
                                     player.setMode('normal');
                                 }
                                 player.setAttribute('autoplay', 'false');
-                                player.removeAttribute('loop');
+                                // REMOVED: removeAttribute('loop') - don't break loop configuration, just pause
                             } catch (_) {}
                         });
                         
@@ -27262,9 +27296,8 @@ class AccessibilityWidget {
                                         if (animation.autoplay !== undefined) {
                                             animation.autoplay = false;
                                         }
-                                        if (animation.loop !== undefined) {
-                                            animation.loop = false;
-                                        }
+                                        // REMOVED: Don't set loop = false - just pause, don't break the loop property
+                                        // The pause() call above stops the animation without breaking its loop configuration
                                     }
                                 } catch (_) {}
                             });
@@ -27291,9 +27324,8 @@ class AccessibilityWidget {
                                     if (lottieInstance.autoplay !== undefined) {
                                         lottieInstance.autoplay = false;
                                     }
-                                    if (lottieInstance.loop !== undefined) {
-                                        lottieInstance.loop = false;
-                                    }
+                                    // REMOVED: Don't set loop = false - just pause, don't break the loop property
+                                    // The pause() call above stops the animation without breaking its loop configuration
                                 }
                             } catch (_) {}
                         });
@@ -29735,12 +29767,21 @@ class AccessibilityWidget {
                     /* REMOVED: transform: none - this was breaking button layouts */
                 }
                 
-                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll */
+                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
                 /* GSAP uses transform and opacity - CSS !important pins elements in place */
-                /* CRITICAL: Exclude scroll containers to prevent breaking ScrollSmoother/ScrollTrigger */
-                .seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]) {
+                /* CRITICAL: Exclude scroll containers AND slider containers to prevent breaking layouts */
+                .seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([class*="wb-swiper"]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]) {
                     /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
                     transform: none !important;
+                }
+                
+                /* Only apply opacity/filter resets to elements that are ACTUALLY animating */
+                /* Don't force opacity: 1 or filter: none on all elements - this changes colors/shapes */
+                .seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]) {
+                    /* Only reset opacity/filter on elements that are actually animating */
                     opacity: 1 !important;
                     filter: none !important;
                 }
