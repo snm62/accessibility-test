@@ -210,6 +210,7 @@
                 
                 /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
                 /* Use CSS to freeze animations while keeping elements visible */
+                /* NOTE: Don't apply transform: none to canvas - let the API handle stopping */
                 body.seizure-safe canvas[data-lottie],
                 body.seizure-safe canvas.lottie-animation,
                 body.seizure-safe lottie-player canvas,
@@ -222,8 +223,8 @@
                 html.seizure-safe lottie-player > canvas {
                     animation: none !important;
                     transition: none !important;
-                    transform: none !important;
-                    /* Keep visible - don't hide */
+                    /* REMOVED: transform: none - this was causing distortion */
+                    /* The Lottie API handles stopping the animation properly */
                 }
                 
                 /* Freeze canvas inside Lottie containers visually */
@@ -231,8 +232,7 @@
                 html.seizure-safe [data-lottie] > canvas {
                     animation: none !important;
                     transition: none !important;
-                    transform: none !important;
-                    /* Keep visible - don't hide */
+                    /* REMOVED: transform: none - this was causing distortion */
                 }
                 
                 /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
@@ -28383,22 +28383,67 @@ class AccessibilityWidget {
             
             // 7. Restore hidden elements that were hidden by seizure-safe mode
             try {
-                // Restore elements with data-seizure-text-processed attribute
+                // First, collect all elements with seizure attributes BEFORE removing them
                 const processedElements = document.querySelectorAll('[data-seizure-text-processed]');
+                const duplicateElements = document.querySelectorAll('[data-seizure-duplicate-hidden]');
+                
+                // Restore elements with data-seizure-text-processed attribute
                 processedElements.forEach(el => {
                     try {
-                        // Remove the attribute - CSS will no longer hide it
+                        // Clear inline styles that were set by forceCompleteTextAnimations BEFORE removing attribute
+                        el.style.opacity = '';
+                        el.style.visibility = '';
+                        el.style.display = '';
+                        el.style.animation = '';
+                        el.style.transition = '';
+                        el.style.transform = '';
+                        el.style.clipPath = '';
+                        el.style.webkitClipPath = '';
+                        el.style.position = '';
+                        el.style.pointerEvents = '';
+                        el.style.width = '';
+                        el.style.height = '';
+                        el.style.maxWidth = '';
+                        el.style.maxHeight = '';
+                        // Now remove the attribute
                         el.removeAttribute('data-seizure-text-processed');
                     } catch (_) {}
                 });
                 
                 // Restore duplicate hidden elements
-                const duplicateElements = document.querySelectorAll('[data-seizure-duplicate-hidden]');
                 duplicateElements.forEach(el => {
                     try {
+                        // Clear inline styles that were set to hide duplicates BEFORE removing attribute
+                        el.style.display = '';
+                        el.style.visibility = '';
+                        el.style.opacity = '';
+                        el.style.position = '';
+                        el.style.pointerEvents = '';
+                        // Now remove the attribute
                         el.removeAttribute('data-seizure-duplicate-hidden');
                     } catch (_) {}
                 });
+                
+                // Restore all child elements (char, word spans) that were hidden
+                // These are the individual character/word elements that were hidden by seizure-safe
+                const hiddenChars = document.querySelectorAll('.char, .word, [class*="char"]:not([class*="character"]):not([class*="chart"]), [class*="word"]:not([class*="wording"]), .letter, [class*="letter"]');
+                hiddenChars.forEach(el => {
+                    try {
+                        // Check if element has inline styles that look like they were set by seizure-safe
+                        const style = el.style;
+                        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+                            // Clear the styles - these were likely set by seizure-safe mode
+                            el.style.display = '';
+                            el.style.visibility = '';
+                            el.style.opacity = '';
+                            el.style.position = '';
+                            el.style.pointerEvents = '';
+                        }
+                    } catch (_) {}
+                });
+                
+                // Reset the text animations completed flag so it can run again if needed
+                this._textAnimationsCompleted = false;
                 
                 // Force a reflow to ensure CSS changes take effect
                 // This helps elements that were hidden by CSS become visible again
@@ -29088,13 +29133,21 @@ class AccessibilityWidget {
                             if (allAnimations && allAnimations.length > 0) {
                                 allAnimations.forEach(anim => {
                                     try {
-                                        // Stop at frame 0 to prevent loop distortion
+                                        // CRITICAL: Stop the animation completely first
+                                        if (typeof anim.stop === 'function') {
+                                            anim.stop();
+                                        }
+                                        // Stop at frame 0 to prevent loop distortion - use frame 0, not current frame
                                         if (typeof anim.goToAndStop === 'function') {
                                             anim.goToAndStop(0, true);
                                         }
-                                        // Disable loop to prevent restart
+                                        // Disable loop to prevent restart - do this BEFORE pausing
                                         if (anim.loop !== undefined) {
                                             anim.loop = false;
+                                        }
+                                        // Also try to set loopCount to 0 if available
+                                        if (anim.loopCount !== undefined) {
+                                            anim.loopCount = 0;
                                         }
                                         // Pause the animation
                                         if (typeof anim.pause === 'function') {
@@ -29103,6 +29156,12 @@ class AccessibilityWidget {
                                         // Set speed to 0 as additional safety
                                         if (typeof anim.setSpeed === 'function') {
                                             anim.setSpeed(0);
+                                        }
+                                        // Force render at frame 0 to ensure clean state
+                                        if (typeof anim.renderer !== 'undefined' && anim.renderer && typeof anim.renderer.renderFrame === 'function') {
+                                            try {
+                                                anim.renderer.renderFrame(0);
+                                            } catch (_) {}
                                         }
                                     } catch (_) {}
                                 });
@@ -29115,13 +29174,21 @@ class AccessibilityWidget {
                         const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
                         lottiePlayers.forEach(player => {
                             try {
-                                // Stop at first frame
+                                // Stop completely first
+                                if (typeof player.stop === 'function') {
+                                    player.stop();
+                                }
+                                // Stop at first frame (frame 0)
                                 if (typeof player.seek === 'function') {
                                     player.seek(0);
                                 }
                                 // Disable loop
                                 if (player.loop !== undefined) {
                                     player.loop = false;
+                                }
+                                // Also try setLooping
+                                if (typeof player.setLooping === 'function') {
+                                    player.setLooping(false);
                                 }
                                 // Pause
                                 if (typeof player.pause === 'function') {
@@ -29139,6 +29206,10 @@ class AccessibilityWidget {
                                 // Try to access the Lottie instance
                                 const lottieInstance = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
                                 if (lottieInstance) {
+                                    // Stop completely first
+                                    if (typeof lottieInstance.stop === 'function') {
+                                        lottieInstance.stop();
+                                    }
                                     // Stop at frame 0
                                     if (typeof lottieInstance.goToAndStop === 'function') {
                                         lottieInstance.goToAndStop(0, true);
@@ -29146,6 +29217,9 @@ class AccessibilityWidget {
                                     // Disable loop
                                     if (lottieInstance.loop !== undefined) {
                                         lottieInstance.loop = false;
+                                    }
+                                    if (lottieInstance.loopCount !== undefined) {
+                                        lottieInstance.loopCount = 0;
                                     }
                                     // Pause
                                     if (typeof lottieInstance.pause === 'function') {
@@ -29161,8 +29235,13 @@ class AccessibilityWidget {
                     } catch (_) {}
                 };
                 
-                // Execute the stop function
+                // Execute the stop function immediately
                 stopAllLottieInstances();
+                
+                // Run again after a short delay to catch any animations that were loading
+                setTimeout(() => {
+                    stopAllLottieInstances();
+                }, 100);
                 
                 // Method 2: Global API pause (backup)
                 const player = window.lottie || window.bodymovin;
@@ -29198,6 +29277,10 @@ class AccessibilityWidget {
                         try {
                             const anim = seizureState.originalLottieLoadAnimation.call(this, config);
                             if (anim) {
+                                // Stop completely first
+                                if (typeof anim.stop === 'function') {
+                                    anim.stop();
+                                }
                                 // Stop at frame 0 and disable loop for new animations
                                 if (typeof anim.goToAndStop === 'function') {
                                     anim.goToAndStop(0, true);
@@ -29205,8 +29288,14 @@ class AccessibilityWidget {
                                 if (anim.loop !== undefined) {
                                     anim.loop = false;
                                 }
+                                if (anim.loopCount !== undefined) {
+                                    anim.loopCount = 0;
+                                }
                                 if (typeof anim.pause === 'function') {
                                     anim.pause(); // Immediately pause new animations
+                                }
+                                if (typeof anim.setSpeed === 'function') {
+                                    anim.setSpeed(0);
                                 }
                             }
                             return anim;
@@ -29879,13 +29968,37 @@ class AccessibilityWidget {
                 
                 /* Allow button text animations to work even in seizure-safe mode */
                 /* This enables text hover effects like text moving from down to up */
-                .seizure-safe button > *,
-                .seizure-safe a > *,
-                .seizure-safe [role="button"] > *,
-                .seizure-safe button span,
-                .seizure-safe a span,
-                .seizure-safe [role="button"] span {
-                    transition: unset !important;
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span,
+                html.seizure-safe button > *,
+                html.seizure-safe a > *,
+                html.seizure-safe [role="button"] > *,
+                html.seizure-safe button span,
+                html.seizure-safe a span,
+                html.seizure-safe [role="button"] span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                }
+                
+                /* Allow button text hover animations */
+                body.seizure-safe button:hover > *,
+                body.seizure-safe a:hover > *,
+                body.seizure-safe [role="button"]:hover > *,
+                body.seizure-safe button:hover span,
+                body.seizure-safe a:hover span,
+                body.seizure-safe [role="button"]:hover span,
+                html.seizure-safe button:hover > *,
+                html.seizure-safe a:hover > *,
+                html.seizure-safe [role="button"]:hover > *,
+                html.seizure-safe button:hover span,
+                html.seizure-safe a:hover span,
+                html.seizure-safe [role="button"]:hover span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
                 }
                 
                 /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
@@ -30119,6 +30232,7 @@ class AccessibilityWidget {
                 }
                 
                 /* PREVENT HOVER EFFECTS AND INTERACTIONS */
+                /* PREVENT HOVER EFFECTS AND INTERACTIONS */
                 body.seizure-safe *:hover,
                 body.seizure-safe *:focus,
                 body.seizure-safe *:active {
@@ -30129,15 +30243,40 @@ class AccessibilityWidget {
                     transition: none !important;
                 }
                 
+                /* CRITICAL: Allow button text animations to work - must come AFTER the general rules */
+                /* This enables text hover effects like text moving from down to up */
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span,
+                html.seizure-safe button > *,
+                html.seizure-safe a > *,
+                html.seizure-safe [role="button"] > *,
+                html.seizure-safe button span,
+                html.seizure-safe a span,
+                html.seizure-safe [role="button"] span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                    animation: unset !important;
+                }
+                
                 /* Allow button text hover animations to work */
                 body.seizure-safe button:hover > *,
                 body.seizure-safe a:hover > *,
                 body.seizure-safe [role="button"]:hover > *,
                 body.seizure-safe button:hover span,
                 body.seizure-safe a:hover span,
-                body.seizure-safe [role="button"]:hover span {
+                body.seizure-safe [role="button"]:hover span,
+                html.seizure-safe button:hover > *,
+                html.seizure-safe a:hover > *,
+                html.seizure-safe [role="button"]:hover > *,
+                html.seizure-safe button:hover span,
+                html.seizure-safe a:hover span,
+                html.seizure-safe [role="button"]:hover span {
+                    transition: all 0.3s ease !important;
                     transform: unset !important;
-                    transition: unset !important;
                     animation: unset !important;
                 }
                 
