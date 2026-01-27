@@ -29214,9 +29214,28 @@ class AccessibilityWidget {
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             this.saveSettings();
             
+            // CRITICAL: Inject the SAME early CSS that runs on page load
+            // This must happen FIRST, before any other operations
+            try {
+                if (!document.getElementById('accessbit-seizure-immediate-early')) {
+                    const immediateStyle = document.createElement('style');
+                    immediateStyle.id = 'accessbit-seizure-immediate-early';
+                    immediateStyle.textContent = `
+                        /* Per Webflow Security recommendations: Global CSS kill switch for seizure-safe mode */
+                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                        html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
+                            animation: none !important;
+                            transition: none !important;
+                            scroll-behavior: auto !important;
+                        }
+                    `;
+                    document.head.appendChild(immediateStyle);
+                }
+            } catch (_) {}
+            
             // 1) Grey overlay (light, non-sticky-breaking)
             this.addSeizureSafeGreyOverlay();
-            // 2) CSS kill switch
+            // 2) CSS kill switch (additional comprehensive rules)
             this.injectSeizureSafeAnimationCSS();
             
             // CRITICAL: Force browser to apply CSS immediately before stopping animations
@@ -29226,6 +29245,31 @@ class AccessibilityWidget {
                 void document.body.offsetHeight;
                 // Also force reflow on documentElement
                 void document.documentElement.offsetHeight;
+                // Force style recalculation
+                getComputedStyle(document.body);
+                
+                // CRITICAL: Also apply animation: none directly to ALL elements via JavaScript
+                // This ensures CSS takes effect even if stylesheet hasn't fully loaded
+                const allElements = document.querySelectorAll('*');
+                for (let i = 0; i < Math.min(allElements.length, 10000); i++) {
+                    try {
+                        const el = allElements[i];
+                        // Skip widget elements
+                        if (el.closest('#accessbit-widget-container') || 
+                            el.closest('[id*="accessbit-widget"]') || 
+                            el.closest('[class*="accessbit-widget"]')) {
+                            continue;
+                        }
+                        // Skip nav/header elements
+                        if (el.closest('nav') || el.closest('header') || 
+                            el.closest('.navbar') || el.closest('[class*="nav"]') || 
+                            el.closest('[class*="header"]')) {
+                            continue;
+                        }
+                        el.style.setProperty('animation', 'none', 'important');
+                        el.style.setProperty('transition', 'none', 'important');
+                    } catch (_) {}
+                }
             } catch (_) {}
             
             // 3) WAAPI pause/cancel running animations (no globals)
