@@ -28977,61 +28977,28 @@ class AccessibilityWidget {
             
             
             try {
-                // Method 1: Stop via lottie-web API (most reliable) - Using Lottie's official methods
+                // Method 1: Global Kill Switch - Stop ALL Lottie animations globally first
+                // This is the most effective approach for accessibility widgets
                 if (typeof window.lottie !== 'undefined') {
                     try {
-                        // Get all registered animations
-                        if (typeof window.lottie.getRegisteredAnimations === 'function') {
-                            const allAnimations = window.lottie.getRegisteredAnimations();
-                            if (allAnimations && allAnimations.length > 0) {
-                                allAnimations.forEach(anim => {
-                                    try {
-                                        if (anim) {
-                                            // CRITICAL: Use Lottie's official API methods in the correct order
-                                            // 1. Set speed to 0 first (immediately stops playback)
-                                            if (typeof anim.setSpeed === 'function') {
-                                                anim.setSpeed(0);
-                                            }
-                                            
-                                            // 2. Stop the animation (stops playback)
-                                            if (typeof anim.stop === 'function') {
-                                                anim.stop();
-                                            }
-                                            
-                                            // 3. Pause the animation (pauses at current frame)
-                                            if (typeof anim.pause === 'function') {
-                                                anim.pause();
-                                            }
-                                            
-                                            // 4. Go to first frame and stop (ensures it's at frame 0)
-                                            if (typeof anim.goToAndStop === 'function') {
-                                                anim.goToAndStop(0, true);
-                                            }
-                                            
-                                            // 5. Prevent autoplay
-                                            if (anim.autoplay !== undefined) {
-                                                anim.autoplay = false;
-                                            }
-                                            
-                                            // 6. Set direction to normal (prevents reverse)
-                                            if (typeof anim.setDirection === 'function') {
-                                                anim.setDirection(1);
-                                            }
-                                            
-                                            // 7. Remove all event listeners that might restart animation
-                                            if (anim.removeEventListener) {
-                                                anim.removeEventListener('complete', anim.restart);
-                                                anim.removeEventListener('loopComplete', anim.restart);
-                                            }
-                                            
-                                            // 8. Disable looping
-                                            if (anim.loop !== undefined) {
-                                                anim.loop = false;
-                                            }
-                                        }
-                                    } catch (_) {}
-                                });
-                            }
+                        // CRITICAL: Use global methods first (affects all animations)
+                        // These are the "Global Kill Switch" methods recommended for accessibility widgets
+                        if (typeof window.lottie.pause === 'function') {
+                            try {
+                                window.lottie.pause(); // Pauses all active Lottie animations globally
+                            } catch (_) {}
+                        }
+                        
+                        if (typeof window.lottie.stop === 'function') {
+                            try {
+                                window.lottie.stop(); // Stops all and resets to first frame globally
+                            } catch (_) {}
+                        }
+                        
+                        if (typeof window.lottie.setSpeed === 'function') {
+                            try {
+                                window.lottie.setSpeed(0); // Freezes all animations in place globally
+                            } catch (_) {}
                         }
                         
                         // Freeze all future animations (prevents new animations from starting)
@@ -29041,8 +29008,69 @@ class AccessibilityWidget {
                             } catch (_) {}
                         }
                         
-                        // Method 5: Override Lottie loading globally (store original for restoration)
+                        // Method 2: Stop individual registered animations with correct order
+                        // Following the recommended pattern: setLoop(false) → stop() → pause()
+                        if (typeof window.lottie.getRegisteredAnimations === 'function') {
+                            const allAnimations = window.lottie.getRegisteredAnimations();
+                            if (allAnimations && allAnimations.length > 0) {
+                                allAnimations.forEach(anim => {
+                                    try {
+                                        if (anim) {
+                                            // CRITICAL: Correct order per Lottie best practices for accessibility
+                                            // 1. setLoop(false) FIRST - Prevents it from starting over
+                                            if (typeof anim.setLoop === 'function') {
+                                                anim.setLoop(false);
+                                            } else if (anim.loop !== undefined) {
+                                                anim.loop = false;
+                                            }
+                                            
+                                            // 2. stop() - Immediately returns to frame 0
+                                            if (typeof anim.stop === 'function') {
+                                                anim.stop();
+                                            }
+                                            
+                                            // 3. pause() - Freezes it on the current frame (backup)
+                                            if (typeof anim.pause === 'function') {
+                                                anim.pause();
+                                            }
+                                            
+                                            // 4. setSpeed(0) - Additional freeze mechanism
+                                            if (typeof anim.setSpeed === 'function') {
+                                                anim.setSpeed(0);
+                                            }
+                                            
+                                            // 5. Go to first frame and stop (ensures it's at frame 0)
+                                            if (typeof anim.goToAndStop === 'function') {
+                                                anim.goToAndStop(0, true);
+                                            }
+                                            
+                                            // 6. Prevent autoplay
+                                            if (anim.autoplay !== undefined) {
+                                                anim.autoplay = false;
+                                            }
+                                            
+                                            // 7. Set direction to normal (prevents reverse)
+                                            if (typeof anim.setDirection === 'function') {
+                                                anim.setDirection(1);
+                                            }
+                                            
+                                            // 8. Remove all event listeners that might restart animation
+                                            if (anim.removeEventListener) {
+                                                try {
+                                                    anim.removeEventListener('complete', anim.restart);
+                                                    anim.removeEventListener('loopComplete', anim.restart);
+                                                    anim.removeEventListener('enterFrame', anim.restart);
+                                                } catch (_) {}
+                                            }
+                                        }
+                                    } catch (_) {}
+                                });
+                            }
+                        }
+                        
+                        // Method 3: Override Lottie loading globally (store original for restoration)
                         // Prevents new animations from starting when seizure-safe is active
+                        // Use correct order: setLoop(false) → stop() → pause()
                         if (typeof window.lottie.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
                             seizureState.originalLottieLoadAnimation = window.lottie.loadAnimation;
                             const self = this;
@@ -29051,24 +29079,37 @@ class AccessibilityWidget {
                                     const anim = seizureState.originalLottieLoadAnimation.call(this, config);
                                     if (anim) {
                                         try {
-                                            // Immediately stop new animations using comprehensive API methods
-                                            if (typeof anim.setSpeed === 'function') {
-                                                anim.setSpeed(0);
+                                            // Immediately stop new animations using correct order
+                                            // 1. setLoop(false) FIRST - Prevents it from starting over
+                                            if (typeof anim.setLoop === 'function') {
+                                                anim.setLoop(false);
+                                            } else if (anim.loop !== undefined) {
+                                                anim.loop = false;
                                             }
+                                            
+                                            // 2. stop() - Immediately returns to frame 0
                                             if (typeof anim.stop === 'function') {
                                                 anim.stop();
                                             }
+                                            
+                                            // 3. pause() - Freezes it on the current frame
                                             if (typeof anim.pause === 'function') {
                                                 anim.pause();
                                             }
+                                            
+                                            // 4. setSpeed(0) - Additional freeze
+                                            if (typeof anim.setSpeed === 'function') {
+                                                anim.setSpeed(0);
+                                            }
+                                            
+                                            // 5. Go to first frame and stop
                                             if (typeof anim.goToAndStop === 'function') {
                                                 anim.goToAndStop(0, true);
                                             }
+                                            
+                                            // 6. Prevent autoplay
                                             if (anim.autoplay !== undefined) {
                                                 anim.autoplay = false;
-                                            }
-                                            if (anim.loop !== undefined) {
-                                                anim.loop = false;
                                             }
                                         } catch (_) {}
                                     }
@@ -29126,8 +29167,9 @@ class AccessibilityWidget {
                 } catch (_) {}
                 
                 // Method 3: Stop via DOM elements with Lottie data attributes (using element.lottie reference)
+                // Use correct order: setLoop(false) → stop() → pause()
                 try {
-                    const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
+                    const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation, [class*="lottie"], [id*="lottie"]');
                     lottieElements.forEach(element => {
                         try {
                             // Try to find and stop any Lottie instance on this element
@@ -29135,33 +29177,54 @@ class AccessibilityWidget {
                             const lottieInstance = element.lottie || element._lottie || element.__lottie;
                             
                             if (lottieInstance) {
-                                // Use Lottie's official API methods
-                                if (typeof lottieInstance.setSpeed === 'function') {
-                                    lottieInstance.setSpeed(0);
+                                // Use Lottie's official API methods in correct order
+                                // 1. setLoop(false) FIRST - Prevents it from starting over
+                                if (typeof lottieInstance.setLoop === 'function') {
+                                    lottieInstance.setLoop(false);
+                                } else if (lottieInstance.loop !== undefined) {
+                                    lottieInstance.loop = false;
                                 }
+                                
+                                // 2. stop() - Immediately returns to frame 0
                                 if (typeof lottieInstance.stop === 'function') {
                                     lottieInstance.stop();
                                 }
+                                
+                                // 3. pause() - Freezes it on the current frame
                                 if (typeof lottieInstance.pause === 'function') {
                                     lottieInstance.pause();
                                 }
+                                
+                                // 4. setSpeed(0) - Additional freeze
+                                if (typeof lottieInstance.setSpeed === 'function') {
+                                    lottieInstance.setSpeed(0);
+                                }
+                                
+                                // 5. Go to first frame and stop
                                 if (typeof lottieInstance.goToAndStop === 'function') {
                                     lottieInstance.goToAndStop(0, true);
                                 }
+                                
+                                // 6. Prevent autoplay
                                 if (lottieInstance.autoplay !== undefined) {
                                     lottieInstance.autoplay = false;
                                 }
-                                if (lottieInstance.loop !== undefined) {
-                                    lottieInstance.loop = false;
-                                }
                             }
                             
-                            // Mark as stopped but keep visible - force to final state
+                            // Mark as stopped but preserve original visibility
                             element.setAttribute('data-seizure-safe-stopped', 'true');
                             element.style.animation = 'none';
                             element.style.transition = 'none';
-                            element.style.opacity = '1';
-                            element.style.visibility = 'visible';
+                            // Only set opacity/visibility if element wasn't intentionally hidden
+                            const computedStyle = window.getComputedStyle(element);
+                            const wasIntentionallyHidden = element.style.display === 'none' || 
+                                                          element.style.visibility === 'hidden' || 
+                                                          computedStyle.display === 'none' ||
+                                                          computedStyle.visibility === 'hidden';
+                            if (!wasIntentionallyHidden) {
+                                element.style.opacity = '1';
+                                element.style.visibility = 'visible';
+                            }
                         } catch (_) {}
                     });
                 } catch (_) {}
