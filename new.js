@@ -28463,6 +28463,45 @@ class AccessibilityWidget {
             this.stopAutoplayMedia();
             // 6) Stop Webflow interactions
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+            // 7) Final pass: Restore visibility for any hidden animated elements
+            this.restoreHiddenAnimatedElements();
+        }
+        
+        // Restore visibility for elements hidden by animations
+        restoreHiddenAnimatedElements() {
+            try {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    try {
+                        // Skip widget elements
+                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+                            return;
+                        }
+                        if (element.closest && (
+                            element.closest('#accessbit-widget-container') ||
+                            element.closest('[id*="accessbit-widget"]') ||
+                            element.closest('[class*="accessbit-widget"]') ||
+                            element.closest('accessbit-widget') ||
+                            element.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        // Skip shadow DOM elements
+                        if (element.getRootNode && element.getRootNode() !== document) {
+                            return;
+                        }
+                        
+                        const computed = window.getComputedStyle(element);
+                        // If element is invisible but not intentionally hidden, make it visible
+                        if (computed.opacity === '0' && 
+                            computed.display !== 'none' && 
+                            computed.visibility !== 'hidden') {
+                            element.style.opacity = '1';
+                            element.style.visibility = 'visible';
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
         }
     
         disableSeizureSafe() {
@@ -28627,9 +28666,7 @@ class AccessibilityWidget {
                         const computed = window.getComputedStyle(element);
                         if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
                             computed.display !== 'none' && 
-                            computed.visibility !== 'hidden' &&
-                            computed.position !== 'absolute' &&
-                            !element.hasAttribute('aria-hidden')) {
+                            computed.visibility !== 'hidden') {
                             element.style.opacity = '1';
                             element.style.visibility = 'visible';
                         }
@@ -28711,9 +28748,9 @@ class AccessibilityWidget {
                                                 
                                                 if (target && target.style) {
                                                     const computed = window.getComputedStyle(target);
-                                                    // Force visibility if element is hidden (opacity 0 or very low)
+                                                    // Force visibility if element is hidden (opacity 0)
                                                     // This ensures animated content remains visible when paused
-                                                    if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
+                                                    if (computed.opacity === '0' && 
                                                         computed.display !== 'none' && 
                                                         computed.visibility !== 'hidden') {
                                                         target.style.opacity = '1';
@@ -28739,43 +28776,6 @@ class AccessibilityWidget {
                     } catch (_) {}
                 }
                 
-                // Additional safety: Find all elements that might be hidden by GSAP and make them visible
-                // This catches elements that might not be in exportRoot
-                try {
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(element => {
-                        try {
-                            // Skip widget elements
-                            if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-                                return;
-                            }
-                            if (element.closest && (
-                                element.closest('#accessbit-widget-container') ||
-                                element.closest('[id*="accessbit-widget"]') ||
-                                element.closest('[class*="accessbit-widget"]') ||
-                                element.closest('accessbit-widget') ||
-                                element.closest('[data-ck-widget]')
-                            )) {
-                                return;
-                            }
-                            // Skip shadow DOM elements
-                            if (element.getRootNode && element.getRootNode() !== document) {
-                                return;
-                            }
-                            
-                            const computed = window.getComputedStyle(element);
-                            // If element is invisible but not intentionally hidden, make it visible
-                            if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
-                                computed.display !== 'none' && 
-                                computed.visibility !== 'hidden' &&
-                                computed.position !== 'absolute' && // Don't reveal absolutely positioned hidden elements
-                                !element.hasAttribute('aria-hidden')) {
-                                element.style.opacity = '1';
-                                element.style.visibility = 'visible';
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
             } catch (_) {}
         }
         
@@ -28867,11 +28867,6 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        // Ensure player is visible
-                        player.style.opacity = '1';
-                        player.style.visibility = 'visible';
-                        player.style.display = '';
-                        
                         // Stop the animation
                         if (typeof player.pause === 'function') {
                             player.pause();
@@ -28907,7 +28902,7 @@ class AccessibilityWidget {
                         }
                         
                         const computed = window.getComputedStyle(container);
-                        if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
+                        if (computed.opacity === '0' && 
                             computed.display !== 'none' && 
                             computed.visibility !== 'hidden') {
                             container.style.opacity = '1';
