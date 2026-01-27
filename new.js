@@ -27096,6 +27096,38 @@ class AccessibilityWidget {
                                         // ScrollTrigger animations should continue to allow scrolling
                                         if (!anim.scrollTrigger) {
                                             anim.pause(); // Safe pause - doesn't break scroll
+                                            
+                                            // CRITICAL: Restore elements to visible state if they're hidden by GSAP
+                                            // GSAP animations often start at opacity: 0, so we need to restore visibility
+                                            if (anim.targets && Array.isArray(anim.targets)) {
+                                                anim.targets.forEach(target => {
+                                                    try {
+                                                        if (target && target.style) {
+                                                            const computedStyle = window.getComputedStyle(target);
+                                                            // If element is hidden (opacity 0) and not intentionally hidden
+                                                            if (computedStyle.opacity === '0' && 
+                                                                computedStyle.display !== 'none' && 
+                                                                computedStyle.visibility !== 'hidden') {
+                                                                // Restore to visible - GSAP was animating it
+                                                                target.style.opacity = '1';
+                                                                target.style.visibility = 'visible';
+                                                            }
+                                                        }
+                                                    } catch (_) {}
+                                                });
+                                            } else if (anim.targets && anim.targets.style) {
+                                                // Single target
+                                                try {
+                                                    const target = anim.targets;
+                                                    const computedStyle = window.getComputedStyle(target);
+                                                    if (computedStyle.opacity === '0' && 
+                                                        computedStyle.display !== 'none' && 
+                                                        computedStyle.visibility !== 'hidden') {
+                                                        target.style.opacity = '1';
+                                                        target.style.visibility = 'visible';
+                                                    }
+                                                } catch (_) {}
+                                            }
                                         }
                                     } catch (_) {}
                                 });
@@ -27125,6 +27157,51 @@ class AccessibilityWidget {
                         // REMOVED: killTweensOf('*') and kill() - these break scroll functionality
                         // REMOVED: getAllTimelines().forEach(tl => tl.kill()) - dangerous
                         // REMOVED: getAllTweens().forEach(tween => tween.kill()) - dangerous
+                        
+                        // CRITICAL: Restore all GSAP-animated elements to visible state
+                        // GSAP animations often start at opacity: 0, so when paused they become invisible
+                        try {
+                            // Get all active tweens to find their targets
+                            if (window.gsap.getAllTweens) {
+                                const allTweens = window.gsap.getAllTweens();
+                                allTweens.forEach(tween => {
+                                    try {
+                                        if (tween && !tween.scrollTrigger) {
+                                            // Get the target element(s)
+                                            if (tween.targets && Array.isArray(tween.targets)) {
+                                                tween.targets.forEach(target => {
+                                                    try {
+                                                        if (target && target.style) {
+                                                            const computedStyle = window.getComputedStyle(target);
+                                                            // If element is hidden (opacity 0) and not intentionally hidden
+                                                            if (computedStyle.opacity === '0' && 
+                                                                computedStyle.display !== 'none' && 
+                                                                computedStyle.visibility !== 'hidden') {
+                                                                // Restore to visible - GSAP was animating it
+                                                                target.style.opacity = '1';
+                                                                target.style.visibility = 'visible';
+                                                            }
+                                                        }
+                                                    } catch (_) {}
+                                                });
+                                            } else if (tween.targets && tween.targets.style) {
+                                                // Single target
+                                                try {
+                                                    const target = tween.targets;
+                                                    const computedStyle = window.getComputedStyle(target);
+                                                    if (computedStyle.opacity === '0' && 
+                                                        computedStyle.display !== 'none' && 
+                                                        computedStyle.visibility !== 'hidden') {
+                                                        target.style.opacity = '1';
+                                                        target.style.visibility = 'visible';
+                                                    }
+                                                } catch (_) {}
+                                            }
+                                        }
+                                    } catch (_) {}
+                                });
+                            }
+                        } catch (_) {}
                     } catch (_) {}
                 }
 
@@ -27355,6 +27432,38 @@ class AccessibilityWidget {
                                             // CRITICAL: Exclude ScrollTrigger animations to preserve scroll functionality
                                             if (!anim.scrollTrigger) {
                                                 anim.pause(); // Safe pause
+                                                
+                                                // CRITICAL: Restore elements to visible state if they're hidden by GSAP
+                                                // GSAP animations often start at opacity: 0, so we need to restore visibility
+                                                if (anim.targets && Array.isArray(anim.targets)) {
+                                                    anim.targets.forEach(target => {
+                                                        try {
+                                                            if (target && target.style) {
+                                                                const computedStyle = window.getComputedStyle(target);
+                                                                // If element is hidden (opacity 0) and not intentionally hidden
+                                                                if (computedStyle.opacity === '0' && 
+                                                                    computedStyle.display !== 'none' && 
+                                                                    computedStyle.visibility !== 'hidden') {
+                                                                    // Restore to visible - GSAP was animating it
+                                                                    target.style.opacity = '1';
+                                                                    target.style.visibility = 'visible';
+                                                                }
+                                                            }
+                                                        } catch (_) {}
+                                                    });
+                                                } else if (anim.targets && anim.targets.style) {
+                                                    // Single target
+                                                    try {
+                                                        const target = anim.targets;
+                                                        const computedStyle = window.getComputedStyle(target);
+                                                        if (computedStyle.opacity === '0' && 
+                                                            computedStyle.display !== 'none' && 
+                                                            computedStyle.visibility !== 'hidden') {
+                                                            target.style.opacity = '1';
+                                                            target.style.visibility = 'visible';
+                                                        }
+                                                    } catch (_) {}
+                                                }
                                             }
                                         } catch (_) {}
                                     });
@@ -28541,46 +28650,48 @@ class AccessibilityWidget {
             } catch (_) {}
             
             // 9. Restore all elements that might have been hidden or have inline styles
-            try {
-                // Restore all elements with inline styles that might be from seizure-safe
-                // CRITICAL: Exclude widget and shadow DOM elements completely
-                const allElements = document.querySelectorAll('*');
-                allElements.forEach(el => {
-                    try {
-                        // Skip widget elements - check multiple ways to be safe
-                        if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
-                            return;
-                        }
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (el.getRootNode && el.getRootNode() !== document) {
-                            return;
-                        }
-                        
-                        const style = el.style;
-                        // If element has inline styles that look like they were set by seizure-safe
-                        // Only clear if it's clearly from seizure-safe, not widget styles
-                        if ((style.animation === 'none' || style.transition === 'none') && 
-                            !el.hasAttribute('data-widget-style')) {
-                            // Clear styles but be careful - only clear if likely from seizure-safe
-                            if (style.animation === 'none') style.animation = '';
-                            if (style.transition === 'none') style.transition = '';
-                            if (style.transform === 'none') style.transform = '';
-                        }
-                    } catch (_) {}
-                });
-            } catch (_) {}
+            // REMOVED: This was clearing styles on widget elements
+            // The widget should never have its styles cleared
+            // try {
+            //     // Restore all elements with inline styles that might be from seizure-safe
+            //     // CRITICAL: Exclude widget and shadow DOM elements completely
+            //     const allElements = document.querySelectorAll('*');
+            //     allElements.forEach(el => {
+            //         try {
+            //             // Skip widget elements - check multiple ways to be safe
+            //             if (el.id && (el.id.includes('accessbit-widget') || el.id === 'accessbit-widget-container')) {
+            //                 return;
+            //             }
+            //             if (el.className && typeof el.className === 'string' && el.className.includes('accessbit-widget')) {
+            //                 return;
+            //             }
+            //             if (el.closest && (
+            //                 el.closest('#accessbit-widget-container') ||
+            //                 el.closest('[id*="accessbit-widget"]') ||
+            //                 el.closest('[class*="accessbit-widget"]') ||
+            //                 el.closest('accessbit-widget') ||
+            //                 el.closest('[data-ck-widget]')
+            //             )) {
+            //                 return;
+            //             }
+            //             // Skip shadow DOM elements
+            //             if (el.getRootNode && el.getRootNode() !== document) {
+            //                 return;
+            //             }
+            //             
+            //             const style = el.style;
+            //             // If element has inline styles that look like they were set by seizure-safe
+            //             // Only clear if it's clearly from seizure-safe, not widget styles
+            //             if ((style.animation === 'none' || style.transition === 'none') && 
+            //                 !el.hasAttribute('data-widget-style')) {
+            //                 // Clear styles but be careful - only clear if likely from seizure-safe
+            //                 if (style.animation === 'none') style.animation = '';
+            //                 if (style.transition === 'none') style.transition = '';
+            //                 if (style.transform === 'none') style.transform = '';
+            //             }
+            //         } catch (_) {}
+            //     });
+            // } catch (_) {}
             
             // 10. Force a page refresh of animations by triggering a resize event
             // This helps some animation libraries reinitialize
@@ -30724,37 +30835,39 @@ class AccessibilityWidget {
             // Reset cursor styles that were applied by seizure-safe mode
             // CRITICAL: Exclude widget elements to preserve widget styling
             document.body.style.cursor = '';
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(element => {
-                try {
-                    // Skip widget elements completely
-                    if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-                        return;
-                    }
-                    if (element.className && typeof element.className === 'string' && element.className.includes('accessbit-widget')) {
-                        return;
-                    }
-                    if (element.closest && (
-                        element.closest('#accessbit-widget-container') ||
-                        element.closest('[id*="accessbit-widget"]') ||
-                        element.closest('[class*="accessbit-widget"]') ||
-                        element.closest('accessbit-widget') ||
-                        element.closest('[data-ck-widget]')
-                    )) {
-                        return;
-                    }
-                    // Skip shadow DOM elements
-                    if (element.getRootNode && element.getRootNode() !== document) {
-                        return;
-                    }
-                    element.style.cursor = '';
-                } catch (_) {}
-            });
+            // REMOVED: Clearing cursor on all elements - this was affecting widget
+            // Only clear cursor on body, not on all elements
+            // const allElements = document.querySelectorAll('*');
+            // allElements.forEach(element => {
+            //     try {
+            //         // Skip widget elements completely
+            //         if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
+            //             return;
+            //         }
+            //         if (element.className && typeof element.className === 'string' && element.className.includes('accessbit-widget')) {
+            //             return;
+            //         }
+            //         if (element.closest && (
+            //             element.closest('#accessbit-widget-container') ||
+            //             element.closest('[id*="accessbit-widget"]') ||
+            //             element.closest('[class*="accessbit-widget"]') ||
+            //             element.closest('accessbit-widget') ||
+            //             element.closest('[data-ck-widget]')
+            //         )) {
+            //             return;
+            //         }
+            //         // Skip shadow DOM elements
+            //         if (element.getRootNode && element.getRootNode() !== document) {
+            //             return;
+            //         }
+            //         element.style.cursor = '';
+            //     } catch (_) {}
+            // });
             
-            // Also reset cursor on Shadow DOM host
-            if (this.shadowRoot && this.shadowRoot.host) {
-                this.shadowRoot.host.style.cursor = '';
-            }
+            // REMOVED: Reset cursor on Shadow DOM host - this was affecting widget
+            // if (this.shadowRoot && this.shadowRoot.host) {
+            //     this.shadowRoot.host.style.cursor = '';
+            // }
         }
     
     
