@@ -412,14 +412,7 @@
                 body.seizure-safe [class*="text-effect"][data-seizure-text-processed] .word {
                     animation: none !important;
                     transition: none !important;
-                    opacity: 0 !important;
-                    visibility: hidden !important;
-                    position: absolute !important;
-                    transform: none !important;
-                    clip-path: none !important;
-                    -webkit-clip-path: none !important;
-                    display: none !important;
-                    pointer-events: none !important;
+                    /* REMOVED: opacity, visibility, display hiding - causes blank animations when disabled */
                 }
                 /* Show parent containers after JS processes them - these will have the consolidated text */
                 body.seizure-safe [data-splitting][data-seizure-text-processed], 
@@ -463,17 +456,16 @@
                     animation-play-state: paused !important;
                     /* Don't force opacity/visibility here - let JS handle consolidation first */
                 }
-                /* Hide duplicate text elements detected by JS (like Webflow's h1 + animated h2) */
-                body.seizure-safe [data-seizure-duplicate-hidden] {
+                /* REMOVED: Hide duplicate text elements - causes blank animations when disabled */
+                /* body.seizure-safe [data-seizure-duplicate-hidden] {
                     display: none !important;
                     visibility: hidden !important;
                     opacity: 0 !important;
                     position: absolute !important;
                     pointer-events: none !important;
-                }
-                /* Hide per-letter spans in Webflow-style elements that have been consolidated.
-                   Only hide spans in elements that have many child spans (likely per-letter animation) */
-                body.seizure-safe [data-seizure-text-processed][class*="fade-up"] > span,
+                } */
+                /* REMOVED: Hide per-letter spans - causes blank animations when disabled */
+                /* body.seizure-safe [data-seizure-text-processed][class*="fade-up"] > span,
                 body.seizure-safe [data-seizure-text-processed][class*="fade-in"] > span,
                 body.seizure-safe [data-seizure-text-processed][class*="multi-text"] > span,
                 body.seizure-safe [data-seizure-text-processed].hero-heading > span {
@@ -482,7 +474,7 @@
                     opacity: 0 !important;
                     position: absolute !important;
                     pointer-events: none !important;
-                }
+                } */
                 /* IMAGE HOVER EFFECTS: Disable all image hover animations */
                 body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
                     animation: none !important;
@@ -1001,15 +993,15 @@
                                     }
                                 });
                                 
-                                // Hide all duplicates except the cleanest one
-                                elements.forEach(el => {
-                                    if (el !== cleanest && !el.hasAttribute('data-seizure-duplicate-hidden')) {
-                                        el.style.display = 'none';
-                                        el.style.visibility = 'hidden';
-                                        el.style.opacity = '0';
-                                        el.setAttribute('data-seizure-duplicate-hidden', 'true');
-                                    }
-                                });
+                                // REMOVED: Hide all duplicates - causes blank animations when disabled
+                                // elements.forEach(el => {
+                                //     if (el !== cleanest && !el.hasAttribute('data-seizure-duplicate-hidden')) {
+                                //         el.style.display = 'none';
+                                //         el.style.visibility = 'hidden';
+                                //         el.style.opacity = '0';
+                                //         el.setAttribute('data-seizure-duplicate-hidden', 'true');
+                                //     }
+                                // });
                             });
                         } catch (_) { /* ignore top-level errors */ }
                     };
@@ -1611,12 +1603,12 @@ const seizureState = {
                                                                     } catch(_) {}
                                                                 }
                                                                 
-                                                                // Stop GSAP on children
-                                                                if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
-                                                                    try {
-                                                                        window.gsap.killTweensOf(child);
-                                                                    } catch(_) {}
-                                                                }
+                                                                // REMOVED: Stop GSAP on children - causes blank animations when disabled
+                                                                // if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
+                                                                //     try {
+                                                                //         window.gsap.killTweensOf(child);
+                                                                //     } catch(_) {}
+                                                                // }
                                                             });
                                                         } catch(_) {}
                                                     }
@@ -27534,9 +27526,24 @@ class AccessibilityWidget {
                     const lottieAnimations = window.lottie.getRegisteredAnimations();
                     lottieAnimations.forEach(animation => {
                         try {
-                            if (animation && typeof animation.play === 'function') {
-                                animation.play();
-                             
+                            if (animation) {
+                                // Restore loop property (we may have set it to false)
+                                // Try to restore to original if stored, otherwise set to true for looped animations
+                                if (animation.loop !== undefined && animation.loop === false) {
+                                    // Check if this was originally a looped animation by checking totalFrames
+                                    // If it has many frames and was looping, restore loop
+                                    if (animation.totalFrames && animation.totalFrames > 1) {
+                                        animation.loop = true;
+                                    }
+                                }
+                                // Restore speed
+                                if (typeof animation.setSpeed === 'function' && animation.speed === 0) {
+                                    animation.setSpeed(1);
+                                }
+                                // Play the animation
+                                if (typeof animation.play === 'function') {
+                                    animation.play();
+                                }
                             }
                         } catch (error) {
                             
@@ -28473,6 +28480,39 @@ class AccessibilityWidget {
                 this.restorePortfolioAnimations();
             } catch (_) {}
             
+            // 9. Restore all elements that might have been hidden or have inline styles
+            try {
+                // Restore all elements with inline styles that might be from seizure-safe
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(el => {
+                    try {
+                        // Skip widget elements
+                        if (el.closest && el.closest('#accessbit-widget-container, [id*="accessbit-widget"], [class*="accessbit-widget"]')) {
+                            return;
+                        }
+                        
+                        const style = el.style;
+                        // If element has inline styles that look like they were set by seizure-safe
+                        if (style.animation === 'none' || style.transition === 'none' || 
+                            (style.opacity === '0' && !el.hasAttribute('data-original-opacity')) ||
+                            (style.visibility === 'hidden' && !el.hasAttribute('data-original-visibility'))) {
+                            // Clear styles but be careful - only clear if likely from seizure-safe
+                            if (style.animation === 'none') style.animation = '';
+                            if (style.transition === 'none') style.transition = '';
+                            if (style.transform === 'none') style.transform = '';
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            
+            // 10. Force a page refresh of animations by triggering a resize event
+            // This helps some animation libraries reinitialize
+            try {
+                window.dispatchEvent(new Event('resize'));
+                // Also trigger a custom event for animation libraries
+                window.dispatchEvent(new Event('seizure-safe-disabled'));
+            } catch (_) {}
+            
             this.settings['seizure-safe'] = false;
             this.saveSettings();
             
@@ -29006,87 +29046,86 @@ class AccessibilityWidget {
                     } catch (_) {}
                 }
                 
+                // REMOVED: GSAP killTweensOf calls - causes blank animations when disabled
                 // GSAP: Stop all animations including motionPath (orbit), progress bars, and pointer animations
-                if (typeof window.gsap !== 'undefined') {
-                    try {
-                        // Kill all active GSAP tweens and timelines
-                        if (window.gsap.killTweensOf) {
-                            // Stop motionPath animations (orbit animations) - target elements with motionPath animations
-                            // BUT ensure they remain visible in their final position
-                            const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
-                            orbitElements.forEach(el => {
-                                try {
-                                    // Kill the animation but preserve final state
-                                    const currentTransform = window.getComputedStyle(el).transform;
-                                    const currentOpacity = window.getComputedStyle(el).opacity;
-                                    window.gsap.killTweensOf(el);
-                                    // Ensure element remains visible
-                                    el.style.opacity = currentOpacity !== '0' ? '1' : '1';
-                                    el.style.visibility = 'visible';
-                                    el.style.display = '';
-                                    // Preserve final transform position
-                                    if (currentTransform && currentTransform !== 'none' && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)') {
-                                        el.style.transform = currentTransform;
-                                    }
-                                } catch (_) {}
-                            });
-                            
-                            // Stop progress bar animations
-                            const progressElements = document.querySelectorAll('[class*="progress"], [role="progressbar"], .progress, .slider-progress, .progress-bar');
-                            progressElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
-                            
-                            // Stop pointer animations (click simulation with expanding overlays)
-                            const pointerElements = document.querySelectorAll('.pointer, .color-overlay, .color-overlay-2, [class*="pointer"], [class*="overlay"]');
-                            pointerElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
-                            
-                            // Stop floating image animations
-                            const floatingElements = document.querySelectorAll('.floating-image, [class*="floating"]');
-                            floatingElements.forEach(el => {
-                                try {
-                                    window.gsap.killTweensOf(el);
-                                } catch (_) {}
-                            });
-                        }
+                // if (typeof window.gsap !== 'undefined') {
+                //     try {
+                //         // Kill all active GSAP tweens and timelines
+                //         if (window.gsap.killTweensOf) {
+                //             // Stop motionPath animations (orbit animations) - target elements with motionPath animations
+                //             // BUT ensure they remain visible in their final position
+                //             const orbitElements = document.querySelectorAll('[class*="orbit"], [class*="dot"], .dot-1a, .dot-1b, .dot-1c, .dot-1d, .dot-2a, .dot-2b, .dot-2c, .dot-2d, .dot-3a, .dot-3b, .dot-3c, .dot-3d');
+                //             orbitElements.forEach(el => {
+                //                 try {
+                //                     // Kill the animation but preserve final state
+                //                     const currentTransform = window.getComputedStyle(el).transform;
+                //                     const currentOpacity = window.getComputedStyle(el).opacity;
+                //                     window.gsap.killTweensOf(el);
+                //                     // Ensure element remains visible
+                //                     el.style.opacity = currentOpacity !== '0' ? '1' : '1';
+                //                     el.style.visibility = 'visible';
+                //                     el.style.display = '';
+                //                     // Preserve final transform position
+                //                     if (currentTransform && currentTransform !== 'none' && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)') {
+                //                         el.style.transform = currentTransform;
+                //                     }
+                //                 } catch (_) {}
+                //             });
+                //             
+                //             // Stop progress bar animations
+                //             const progressElements = document.querySelectorAll('[class*="progress"], [role="progressbar"], .progress, .slider-progress, .progress-bar');
+                //             progressElements.forEach(el => {
+                //                 try {
+                //                     window.gsap.killTweensOf(el);
+                //                 } catch (_) {}
+                //             });
+                //             
+                //             // Stop pointer animations (click simulation with expanding overlays)
+                //             const pointerElements = document.querySelectorAll('.pointer, .color-overlay, .color-overlay-2, [class*="pointer"], [class*="overlay"]');
+                //             pointerElements.forEach(el => {
+                //                 try {
+                //                     window.gsap.killTweensOf(el);
+                //                 } catch (_) {}
+                //             });
+                //             
+                //             // Stop floating image animations
+                //             const floatingElements = document.querySelectorAll('.floating-image, [class*="floating"]');
+                //             floatingElements.forEach(el => {
+                //                 try {
+                //                     window.gsap.killTweensOf(el);
+                //                 } catch (_) {}
+                //             });
+                //         }
+                //     } catch (_) {}
+                // }
                         
-                        // Kill all timelines that might contain these animations
-                        if (window.gsap.globals && window.gsap.globals.timeline) {
-                            try {
-                                const timelines = window.gsap.globals.timeline.getAll ? window.gsap.globals.timeline.getAll() : [];
-                                timelines.forEach(tl => {
-                                    try {
-                                        if (tl && typeof tl.kill === 'function') {
-                                            tl.kill();
-                                        }
-                                    } catch (_) {}
-                                });
-                            } catch (_) {}
-                        }
-                        
-                        // Get all active tweens and kill motionPath-related ones
-                        if (window.gsap.getAllTweens) {
-                            try {
-                                const allTweens = window.gsap.getAllTweens();
-                                allTweens.forEach(tween => {
-                                    try {
-                                        if (tween && tween.vars && (tween.vars.motionPath || tween.vars.motionPath)) {
-                                            tween.kill();
-                                        }
-                                    } catch (_) {}
-                                });
-                            } catch (_) {}
-                        }
-                    } catch (error) {
-                        // Silent fail
-                    }
-                }
+                // REMOVED: All GSAP kill code - causes blank animations when disabled
+                // if (window.gsap.globals && window.gsap.globals.timeline) {
+                //     try {
+                //         const timelines = window.gsap.globals.timeline.getAll ? window.gsap.globals.timeline.getAll() : [];
+                //         timelines.forEach(tl => {
+                //             try {
+                //                 if (tl && typeof tl.kill === 'function') {
+                //                     tl.kill();
+                //                 }
+                //             } catch (_) {}
+                //         });
+                //     } catch (_) {}
+                // }
+                // 
+                // // Get all active tweens and kill motionPath-related ones
+                // if (window.gsap.getAllTweens) {
+                //     try {
+                //         const allTweens = window.gsap.getAllTweens();
+                //         allTweens.forEach(tween => {
+                //             try {
+                //                 if (tween && tween.vars && (tween.vars.motionPath || tween.vars.motionPath)) {
+                //                     tween.kill();
+                //                 }
+                //             } catch (_) {}
+                //         });
+                //     } catch (_) {}
+                // }
                 
           
             } catch (e) {
@@ -29483,18 +29522,55 @@ class AccessibilityWidget {
                             window.lottie.loadAnimation = seizureState.originalLottieLoadAnimation;
                         }
                         
+                        // Restore all registered Lottie animations
+                        if (window.lottie.getRegisteredAnimations) {
+                            const allAnimations = window.lottie.getRegisteredAnimations();
+                            if (allAnimations && allAnimations.length > 0) {
+                                allAnimations.forEach(anim => {
+                                    try {
+                                        // Restore loop property
+                                        if (anim.loop !== undefined && anim.loop === false) {
+                                            // Restore loop for animations that were originally looping
+                                            if (anim.totalFrames && anim.totalFrames > 1) {
+                                                anim.loop = true;
+                                            }
+                                        }
+                                        if (anim.loopCount !== undefined && anim.loopCount === 0) {
+                                            anim.loopCount = -1; // -1 means infinite loop
+                                        }
+                                        // Restore speed
+                                        if (typeof anim.setSpeed === 'function') {
+                                            anim.setSpeed(1);
+                                        }
+                                        // Play the animation
+                                        if (typeof anim.play === 'function') {
+                                            anim.play();
+                                        }
+                                    } catch (_) {}
+                                });
+                            }
+                        }
                       
                     } catch (_) {}
                 }
                 
-                // Restore lottie-player web components
+                // Restore ALL lottie-player web components (not just ones with data attribute)
                 try {
-                    const lottiePlayers = document.querySelectorAll('lottie-player[data-seizure-safe-stopped]');
+                    const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
                     lottiePlayers.forEach(player => {
                         try {
+                            // Restore loop
+                            if (player.loop !== undefined && player.loop === false) {
+                                player.loop = true;
+                            }
+                            if (typeof player.setLooping === 'function') {
+                                player.setLooping(true);
+                            }
+                            // Play
                             if (typeof player.play === 'function') {
                                 player.play();
                             }
+                            // Remove any data attributes
                             player.removeAttribute('data-seizure-safe-stopped');
                             // Restore visibility
                             player.style.opacity = '';
@@ -29503,32 +29579,53 @@ class AccessibilityWidget {
                     });
                 } catch (_) {}
                 
-                // Restore DOM elements with Lottie data attributes
+                // Restore ALL DOM elements with Lottie (not just ones with data attribute)
                 try {
-                    const lottieElements = document.querySelectorAll('[data-seizure-safe-stopped]');
+                    const lottieElements = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]');
                     lottieElements.forEach(element => {
                         try {
+                            // Try to access the Lottie instance
+                            const lottieInstance = element.lottie || element._lottie || element.__lottie || element.lottieAnimation || element.__wfLottie;
+                            if (lottieInstance) {
+                                // Restore loop
+                                if (lottieInstance.loop !== undefined && lottieInstance.loop === false) {
+                                    if (lottieInstance.totalFrames && lottieInstance.totalFrames > 1) {
+                                        lottieInstance.loop = true;
+                                    }
+                                }
+                                if (lottieInstance.loopCount !== undefined && lottieInstance.loopCount === 0) {
+                                    lottieInstance.loopCount = -1;
+                                }
+                                // Restore speed
+                                if (typeof lottieInstance.setSpeed === 'function') {
+                                    lottieInstance.setSpeed(1);
+                                }
+                                // Play
+                                if (typeof lottieInstance.play === 'function') {
+                                    lottieInstance.play();
+                                }
+                            }
+                            // Remove data attributes
                             element.removeAttribute('data-seizure-safe-stopped');
+                            // Restore styles
                             element.style.animation = '';
                             element.style.transition = '';
                             element.style.transform = '';
-                            // Restore visibility
                             element.style.opacity = '';
                             element.style.visibility = '';
                         } catch (_) {}
                     });
                 } catch (_) {}
                 
-                // Restore Lottie containers (canvas, svg, div)
+                // Restore Lottie containers (canvas, svg, div) - ALL of them
                 try {
-                    const lottieContainers = document.querySelectorAll('div[id*="lottie"][data-seizure-safe-stopped], div[class*="lottie"][data-seizure-safe-stopped], svg[class*="lottie"][data-seizure-safe-stopped], canvas[data-lottie][data-seizure-safe-stopped], canvas.lottie[data-seizure-safe-stopped]');
+                    const lottieContainers = document.querySelectorAll('div[id*="lottie"], div[class*="lottie"], svg[class*="lottie"], canvas[data-lottie], canvas.lottie');
                     lottieContainers.forEach(container => {
                         try {
                             container.removeAttribute('data-seizure-safe-stopped');
                             container.style.animation = '';
                             container.style.transition = '';
                             container.style.transform = '';
-                            // Restore visibility
                             container.style.opacity = '';
                             container.style.visibility = '';
                         } catch (_) {}
@@ -29632,14 +29729,14 @@ class AccessibilityWidget {
                     if (fullText.trim()) {
                             // Store original structure clone if needed, but replace with clean text
                             const originalClone = container.cloneNode(true);
-                        // Hide all child elements to prevent layering
-                        charElements.forEach(char => {
-                            char.style.display = 'none';
-                            char.style.visibility = 'hidden';
-                            char.style.opacity = '0';
-                            char.style.position = 'absolute';
-                            char.style.pointerEvents = 'none';
-                        });
+                        // REMOVED: Hide all child elements - causes blank animations when disabled
+                        // charElements.forEach(char => {
+                        //     char.style.display = 'none';
+                        //     char.style.visibility = 'hidden';
+                        //     char.style.opacity = '0';
+                        //     char.style.position = 'absolute';
+                        //     char.style.pointerEvents = 'none';
+                        // });
                     }
                     
                     // Ensure container is visible and in final state
@@ -29735,18 +29832,19 @@ class AccessibilityWidget {
                     siblings.forEach(sibling => {
                         if (sibling === element) return;
                         const siblingText = (sibling.textContent || '').trim();
+                        // REMOVED: Hide siblings - causes blank animations when disabled
                         // If sibling has same or very similar text, hide it (it's an overlapping layer)
-                        if (siblingText && elementText && (
-                            siblingText === elementText || 
-                            (siblingText.length > 10 && elementText.length > 10 && 
-                             (siblingText.includes(elementText.substring(0, 20)) || elementText.includes(siblingText.substring(0, 20))))
-                        )) {
-                            sibling.style.display = 'none';
-                            sibling.style.visibility = 'hidden';
-                            sibling.style.opacity = '0';
-                            sibling.style.position = 'absolute';
-                            sibling.style.pointerEvents = 'none';
-                        }
+                        // if (siblingText && elementText && (
+                        //     siblingText === elementText || 
+                        //     (siblingText.length > 10 && elementText.length > 10 && 
+                        //      (siblingText.includes(elementText.substring(0, 20)) || elementText.includes(siblingText.substring(0, 20))))
+                        // )) {
+                        //     sibling.style.display = 'none';
+                        //     sibling.style.visibility = 'hidden';
+                        //     sibling.style.opacity = '0';
+                        //     sibling.style.position = 'absolute';
+                        //     sibling.style.pointerEvents = 'none';
+                        // }
                     });
                 }
                 
