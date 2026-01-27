@@ -28478,7 +28478,7 @@ class AccessibilityWidget {
                     return;
                 }
                 this.stopLottieAnimations();
-            }, 500);
+            }, 200);
         }
         
         stopLottiePolling() {
@@ -28849,172 +28849,23 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie animations using public API
+        // Stop Lottie animations using native API methods
         stopLottieAnimations() {
-            const stopAllLottie = () => {
-                try {
-                    // Method 1: lottie-web library (bodymovin)
-                    if (typeof window.lottie !== 'undefined') {
-                        if (window.lottie.getRegisteredAnimations) {
-                            const animations = window.lottie.getRegisteredAnimations();
-                            animations.forEach(anim => {
-                                try {
-                                    if (anim) {
-                                        // Stop completely
-                                        if (typeof anim.stop === 'function') {
-                                            anim.stop();
-                                        }
-                                        if (typeof anim.pause === 'function') {
-                                            anim.pause();
-                                        }
-                                        if (typeof anim.goToAndStop === 'function') {
-                                            anim.goToAndStop(0, true);
-                                        }
-                                        if (typeof anim.setSpeed === 'function') {
-                                            anim.setSpeed(0);
-                                        }
-                                        if (anim.loop !== undefined) {
-                                            anim.loop = false;
-                                        }
-                                        if (anim.loopCount !== undefined) {
-                                            anim.loopCount = 0;
-                                        }
-                                        if (anim.autoplay !== undefined) {
-                                            anim.autoplay = false;
-                                        }
-                                    }
-                                } catch (_) {}
-                            });
-                        }
-                        
-                        // Also check for global pause
-                        if (typeof window.lottie.pause === 'function') {
-                            window.lottie.pause();
-                        }
-                    }
-                    
-                    // Method 2: bodymovin (older API)
-                    if (typeof window.bodymovin !== 'undefined') {
-                        if (window.bodymovin.getRegisteredAnimations) {
-                            const animations = window.bodymovin.getRegisteredAnimations();
-                            animations.forEach(anim => {
-                                try {
-                                    if (anim) {
-                                        if (typeof anim.stop === 'function') anim.stop();
-                                        if (typeof anim.pause === 'function') anim.pause();
-                                        if (typeof anim.goToAndStop === 'function') anim.goToAndStop(0, true);
-                                        if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
-                                        if (anim.loop !== undefined) anim.loop = false;
-                                        if (anim.autoplay !== undefined) anim.autoplay = false;
-                                    }
-                                } catch (_) {}
-                            });
-                        }
-                    }
-                    
-                    // Method 3: lottie-player web components
-                    document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
-                        try {
-                            // Skip widget elements
-                            if (player.closest && (
-                                player.closest('#accessbit-widget-container') ||
-                                player.closest('[id*="accessbit-widget"]') ||
-                                player.closest('[class*="accessbit-widget"]') ||
-                                player.closest('accessbit-widget') ||
-                                player.closest('[data-ck-widget]')
-                            )) {
-                                return;
-                            }
-                            
-                            // Stop the animation
-                            if (typeof player.stop === 'function') {
-                                player.stop();
-                            }
-                            if (typeof player.pause === 'function') {
-                                player.pause();
-                            }
-                            if (typeof player.seek === 'function') {
-                                player.seek(0);
-                            }
-                            if (typeof player.setSpeed === 'function') {
-                                player.setSpeed(0);
-                            }
-                            if (typeof player.setLooping === 'function') {
-                                player.setLooping(false);
-                            }
-                            if (typeof player.setAutoplay === 'function') {
-                                player.setAutoplay(false);
-                            }
-                            player.setAttribute('autoplay', 'false');
-                        } catch (_) {}
-                    });
-                    
-                    // Method 4: Find Lottie instances attached to DOM elements
-                    document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]').forEach(element => {
-                        try {
-                            // Skip widget elements
-                            if (element.closest && (
-                                element.closest('#accessbit-widget-container') ||
-                                element.closest('[id*="accessbit-widget"]') ||
-                                element.closest('[class*="accessbit-widget"]') ||
-                                element.closest('accessbit-widget') ||
-                                element.closest('[data-ck-widget]')
-                            )) {
-                                return;
-                            }
-                            
-                            // Try to find Lottie instance on element
-                            const lottieInstance = element._lottie || element.lottie || element.__lottie || element.lottieAnimation || element.__wfLottie;
-                            if (lottieInstance) {
-                                if (typeof lottieInstance.stop === 'function') lottieInstance.stop();
-                                if (typeof lottieInstance.pause === 'function') lottieInstance.pause();
-                                if (typeof lottieInstance.goToAndStop === 'function') lottieInstance.goToAndStop(0, true);
-                                if (typeof lottieInstance.setSpeed === 'function') lottieInstance.setSpeed(0);
-                                if (lottieInstance.loop !== undefined) lottieInstance.loop = false;
-                                if (lottieInstance.autoplay !== undefined) lottieInstance.autoplay = false;
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
-            };
-            
-            // Stop immediately
-            stopAllLottie();
-            
-            // Also stop after a short delay to catch dynamically loaded animations
-            setTimeout(stopAllLottie, 100);
-            setTimeout(stopAllLottie, 500);
-        }
-        
-        // Restore Lottie animations
-        restoreLottieAnimations() {
             try {
-                // Method 1: lottie-web library
+                // Method 1: lottie-web library - use getRegisteredAnimations()
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const animations = window.lottie.getRegisteredAnimations();
                     animations.forEach(anim => {
                         try {
-                            if (anim) {
-                                if (anim.loop !== undefined) {
-                                    anim.loop = true;
-                                }
-                                if (anim.loopCount !== undefined) {
-                                    anim.loopCount = -1;
-                                }
-                                if (typeof anim.setSpeed === 'function') {
-                                    anim.setSpeed(1);
-                                }
-                                if (typeof anim.play === 'function') {
-                                    anim.play();
-                                }
+                            if (anim && typeof anim.pause === 'function') {
+                                anim.pause();
                             }
                         } catch (_) {}
                     });
                 }
                 
-                // Method 2: lottie-player web components
-                const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
-                lottiePlayers.forEach(player => {
+                // Method 2: lottie-player web components - use .pause() or .stop()
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         // Skip widget elements
                         if (player.closest && (
@@ -29027,12 +28878,45 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        if (typeof player.setLooping === 'function') {
-                            player.setLooping(true);
+                        if (typeof player.pause === 'function') {
+                            player.pause();
+                        } else if (typeof player.stop === 'function') {
+                            player.stop();
                         }
-                        if (typeof player.setSpeed === 'function') {
-                            player.setSpeed(1);
+                    } catch (_) {}
+                });
+            } catch (_) {}
+        }
+        
+        // Restore Lottie animations
+        restoreLottieAnimations() {
+            try {
+                // Method 1: lottie-web library - use .play()
+                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
+                    const animations = window.lottie.getRegisteredAnimations();
+                    animations.forEach(anim => {
+                        try {
+                            if (anim && typeof anim.play === 'function') {
+                                anim.play();
+                            }
+                        } catch (_) {}
+                    });
+                }
+                
+                // Method 2: lottie-player web components - use .play()
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                    try {
+                        // Skip widget elements
+                        if (player.closest && (
+                            player.closest('#accessbit-widget-container') ||
+                            player.closest('[id*="accessbit-widget"]') ||
+                            player.closest('[class*="accessbit-widget"]') ||
+                            player.closest('accessbit-widget') ||
+                            player.closest('[data-ck-widget]')
+                        )) {
+                            return;
                         }
+                        
                         if (typeof player.play === 'function') {
                             player.play();
                         }
