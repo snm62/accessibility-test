@@ -28065,42 +28065,115 @@ class AccessibilityWidget {
                                             } catch (_) {}
                                         }
                                         
+                                        // CRITICAL: Block loop completion handlers in polling
+                                        if (animation.addEventListener && !animation._seizureSafeLoopBlockedPolling) {
+                                            animation._seizureSafeLoopBlockedPolling = true;
+                                            // Clear loop completion listeners AND enterFrame
+                                            if (animation._listeners) {
+                                                if (animation._listeners.loopComplete) animation._listeners.loopComplete = [];
+                                                if (animation._listeners.complete) animation._listeners.complete = [];
+                                                if (animation._listeners.enterFrame) animation._listeners.enterFrame = [];
+                                            }
+                                            // Override addEventListener to block loop events AND enterFrame
+                                            if (!animation._seizureSafeOriginalAddEventListenerPolling) {
+                                                animation._seizureSafeOriginalAddEventListenerPolling = animation.addEventListener;
+                                                animation.addEventListener = function(eventName, handler) {
+                                                    if (eventName === 'loopComplete' || eventName === 'complete' || eventName === 'enterFrame') {
+                                                        return; // Block loop completion handlers and enterFrame
+                                                    }
+                                                    return animation._seizureSafeOriginalAddEventListenerPolling.apply(this, arguments);
+                                                };
+                                            }
+                                        }
+                                        
+                                        // CRITICAL: Block enterFrame method in polling
+                                        if (animation.enterFrame && !animation._seizureSafeEnterFrameBlockedPolling) {
+                                            animation._seizureSafeEnterFrameBlockedPolling = true;
+                                            animation._seizureSafeOriginalEnterFramePolling = animation.enterFrame;
+                                            animation.enterFrame = function() {
+                                                // Block enterFrame - don't process frame updates
+                                                return;
+                                            };
+                                        }
+                                        
+                                        // CRITICAL: Block render loop in polling
+                                        if (animation.renderer && animation.renderer.renderFrame && !animation._seizureSafeRenderBlockedPolling) {
+                                            animation._seizureSafeRenderBlockedPolling = true;
+                                            animation.renderer._seizureSafeOriginalRenderFramePolling = animation.renderer.renderFrame;
+                                            animation.renderer.renderFrame = function() {
+                                                // Don't render - block the loop
+                                                return;
+                                            };
+                                        }
+                                        
                                         // CRITICAL: Override play/restart methods in polling to prevent restarts
                                         if (!animation._seizureSafeOriginalPlay) {
                                             animation._seizureSafeOriginalPlay = animation.play;
                                             animation.play = function() {
-                                                if (document.body.classList.contains('seizure-safe') || 
-                                                    document.documentElement.classList.contains('seizure-safe')) {
-                                                    return;
-                                                }
-                                                return animation._seizureSafeOriginalPlay.apply(this, arguments);
+                                                // Force stop immediately
+                                                if (animation.setSpeed) animation.setSpeed(0);
+                                                if (animation.stop) animation.stop();
+                                                if (animation.pause) animation.pause();
+                                                if (animation.loop !== undefined) animation.loop = false;
+                                                return;
                                             };
                                         }
                                         
                                         if (!animation._seizureSafeOriginalRestart) {
                                             animation._seizureSafeOriginalRestart = animation.restart;
                                             animation.restart = function() {
-                                                if (document.body.classList.contains('seizure-safe') || 
-                                                    document.documentElement.classList.contains('seizure-safe')) {
-                                                    return;
-                                                }
-                                                return animation._seizureSafeOriginalRestart.apply(this, arguments);
+                                                // Force stop immediately
+                                                if (animation.setSpeed) animation.setSpeed(0);
+                                                if (animation.stop) animation.stop();
+                                                if (animation.pause) animation.pause();
+                                                if (animation.loop !== undefined) animation.loop = false;
+                                                return;
                                             };
                                         }
                                         
                                         if (!animation._seizureSafeOriginalGoToAndPlay) {
                                             animation._seizureSafeOriginalGoToAndPlay = animation.goToAndPlay;
                                             animation.goToAndPlay = function() {
-                                                if (document.body.classList.contains('seizure-safe') || 
-                                                    document.documentElement.classList.contains('seizure-safe')) {
-                                                    if (animation.goToAndStop) {
-                                                        const frame = arguments[0] || 0;
-                                                        animation.goToAndStop(frame, true);
-                                                    }
-                                                    return;
+                                                // Go to frame and stop, don't play
+                                                if (animation.goToAndStop) {
+                                                    const frame = arguments[0] || 0;
+                                                    animation.goToAndStop(frame, true);
                                                 }
-                                                return animation._seizureSafeOriginalGoToAndPlay.apply(this, arguments);
+                                                if (animation.setSpeed) animation.setSpeed(0);
+                                                if (animation.pause) animation.pause();
+                                                if (animation.loop !== undefined) animation.loop = false;
+                                                return;
                                             };
+                                        }
+                                        
+                                        // CRITICAL: Force currentFrame to final frame to prevent loops
+                                        if (animation.totalFrames && animation.currentFrame !== undefined) {
+                                            const finalFrame = animation.totalFrames - 1;
+                                            try {
+                                                if (animation.goToAndStop) {
+                                                    animation.goToAndStop(finalFrame, true);
+                                                }
+                                            } catch (_) {}
+                                        }
+                                        
+                                        // CRITICAL: Force isPaused to true
+                                        if (animation.isPaused !== undefined) {
+                                            try {
+                                                Object.defineProperty(animation, 'isPaused', {
+                                                    get: function() { return true; },
+                                                    set: function(value) { /* ignore */ },
+                                                    configurable: true
+                                                });
+                                            } catch (_) {}
+                                        }
+                                        if (animation._isPaused !== undefined) {
+                                            try {
+                                                Object.defineProperty(animation, '_isPaused', {
+                                                    get: function() { return true; },
+                                                    set: function(value) { /* ignore */ },
+                                                    configurable: true
+                                                });
+                                            } catch (_) {}
                                         }
                                     }
                                 } catch (_) {}
@@ -29229,20 +29302,29 @@ class AccessibilityWidget {
                             if (animation.addEventListener && !animation._seizureSafeLoopBlocked) {
                                 animation._seizureSafeLoopBlocked = true;
                                 // Remove all existing loop completion listeners
-                                if (animation._listeners && animation._listeners.loopComplete) {
-                                    animation._listeners.loopComplete = [];
+                                if (animation._listeners) {
+                                    if (animation._listeners.loopComplete) animation._listeners.loopComplete = [];
+                                    if (animation._listeners.complete) animation._listeners.complete = [];
+                                    if (animation._listeners.enterFrame) animation._listeners.enterFrame = [];
                                 }
-                                if (animation._listeners && animation._listeners.complete) {
-                                    animation._listeners.complete = [];
-                                }
-                                // Override addEventListener to block loop completion events
+                                // Override addEventListener to block loop completion events AND enterFrame
                                 const originalAddEventListener = animation.addEventListener;
                                 animation.addEventListener = function(eventName, handler) {
-                                    if (eventName === 'loopComplete' || eventName === 'complete') {
-                                        // Block loop completion - don't add the handler
+                                    if (eventName === 'loopComplete' || eventName === 'complete' || eventName === 'enterFrame') {
+                                        // Block loop completion and enterFrame - don't add the handler
                                         return;
                                     }
                                     return originalAddEventListener.apply(this, arguments);
+                                };
+                            }
+                            
+                            // CRITICAL: Override enterFrame method if it exists (some Lottie versions use this)
+                            if (animation.enterFrame && !animation._seizureSafeEnterFrameBlocked) {
+                                animation._seizureSafeEnterFrameBlocked = true;
+                                animation._seizureSafeOriginalEnterFrame = animation.enterFrame;
+                                animation.enterFrame = function() {
+                                    // Block enterFrame - don't process frame updates
+                                    return;
                                 };
                             }
                             
@@ -29279,21 +29361,71 @@ class AccessibilityWidget {
                             // CRITICAL: Override play/restart to prevent loops from restarting
                             if (!animation._seizureSafeOriginalPlay) {
                                 animation._seizureSafeOriginalPlay = animation.play;
-                                animation.play = function() { return; };
+                                animation.play = function() { 
+                                    // Force stop immediately if it tries to play
+                                    if (animation.setSpeed) animation.setSpeed(0);
+                                    if (animation.stop) animation.stop();
+                                    if (animation.pause) animation.pause();
+                                    if (animation.loop !== undefined) animation.loop = false;
+                                    return; 
+                                };
                             }
                             if (!animation._seizureSafeOriginalRestart) {
                                 animation._seizureSafeOriginalRestart = animation.restart;
-                                animation.restart = function() { return; };
+                                animation.restart = function() { 
+                                    // Force stop immediately if it tries to restart
+                                    if (animation.setSpeed) animation.setSpeed(0);
+                                    if (animation.stop) animation.stop();
+                                    if (animation.pause) animation.pause();
+                                    if (animation.loop !== undefined) animation.loop = false;
+                                    return; 
+                                };
                             }
                             if (!animation._seizureSafeOriginalGoToAndPlay) {
                                 animation._seizureSafeOriginalGoToAndPlay = animation.goToAndPlay;
                                 animation.goToAndPlay = function() { 
+                                    // Go to frame and stop, don't play
                                     if (animation.goToAndStop) {
                                         const frame = arguments[0] || 0;
                                         animation.goToAndStop(frame, true);
                                     }
+                                    if (animation.setSpeed) animation.setSpeed(0);
+                                    if (animation.pause) animation.pause();
+                                    if (animation.loop !== undefined) animation.loop = false;
                                     return; 
                                 };
+                            }
+                            
+                            // CRITICAL: Override the internal currentFrame property to prevent loops
+                            // Some Lottie versions use currentFrame to check if loop should restart
+                            if (animation.currentFrame !== undefined) {
+                                const finalFrame = animation.totalFrames ? animation.totalFrames - 1 : 0;
+                                Object.defineProperty(animation, 'currentFrame', {
+                                    get: function() { return finalFrame; },
+                                    set: function(value) {
+                                        // Always keep at final frame to prevent loop
+                                        this._seizureSafeCurrentFrame = finalFrame;
+                                    },
+                                    configurable: true
+                                });
+                                animation._seizureSafeCurrentFrame = finalFrame;
+                            }
+                            
+                            // CRITICAL: Override the internal loop checking mechanism
+                            // Force isPaused to always be true
+                            if (animation.isPaused !== undefined) {
+                                Object.defineProperty(animation, 'isPaused', {
+                                    get: function() { return true; },
+                                    set: function(value) { /* ignore */ },
+                                    configurable: true
+                                });
+                            }
+                            if (animation._isPaused !== undefined) {
+                                Object.defineProperty(animation, '_isPaused', {
+                                    get: function() { return true; },
+                                    set: function(value) { /* ignore */ },
+                                    configurable: true
+                                });
                             }
                             
                             // Freeze renderer
