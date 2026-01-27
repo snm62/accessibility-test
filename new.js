@@ -28465,6 +28465,27 @@ class AccessibilityWidget {
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
             // 7) Final pass: Restore visibility for any hidden animated elements
             this.restoreHiddenAnimatedElements();
+            // 8) Start polling to catch new Lottie animations
+            this.startLottiePolling();
+        }
+        
+        // Poll for new Lottie animations and stop them
+        startLottiePolling() {
+            this.stopLottiePolling();
+            this.lottiePollInterval = setInterval(() => {
+                if (!document.body.classList.contains('seizure-safe')) {
+                    this.stopLottiePolling();
+                    return;
+                }
+                this.stopLottieAnimations();
+            }, 500);
+        }
+        
+        stopLottiePolling() {
+            if (this.lottiePollInterval) {
+                clearInterval(this.lottiePollInterval);
+                this.lottiePollInterval = null;
+            }
         }
         
         // Restore visibility for elements hidden by animations
@@ -28505,26 +28526,29 @@ class AccessibilityWidget {
         }
     
         disableSeizureSafe() {
-            // 1. Remove CSS stylesheet
+            // 1. Stop polling
+            this.stopLottiePolling();
+            
+            // 2. Remove CSS stylesheet
             const existingStyle = document.getElementById('seizure-safe-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // 2. Remove seizure-safe class from body and html
+            // 3. Remove seizure-safe class from body and html
             this.safeBodyClassToggle('seizure-safe', false);
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             
-            // 3. Restore WAAPI animations
+            // 4. Restore WAAPI animations
             this.restoreWAAPIAnimations();
             
-            // 4. Restore GSAP animations
+            // 5. Restore GSAP animations
             this.restoreGSAPAnimations();
             
-            // 5. Restore Lottie animations
+            // 6. Restore Lottie animations
             this.restoreLottieAnimations();
             
-            // 6. Restore autoplay media
+            // 7. Restore autoplay media
             this.restoreAllMediaAndAnimations();
             
             this.settings['seizure-safe'] = false;
@@ -28615,6 +28639,22 @@ class AccessibilityWidget {
                 html.seizure-safe accessbit-widget {
                     filter: none !important;
                     -webkit-filter: none !important;
+                }
+                
+                /* Stop all Lottie animations - CSS kill switch */
+                body.seizure-safe [data-lottie],
+                body.seizure-safe [class*="lottie"],
+                body.seizure-safe [id*="lottie"],
+                body.seizure-safe lottie-player,
+                body.seizure-safe dotlottie-player,
+                html.seizure-safe [data-lottie],
+                html.seizure-safe [class*="lottie"],
+                html.seizure-safe [id*="lottie"],
+                html.seizure-safe lottie-player,
+                html.seizure-safe dotlottie-player {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
                 }
             `;
             
@@ -28811,106 +28851,139 @@ class AccessibilityWidget {
         
         // Stop Lottie animations using public API
         stopLottieAnimations() {
-            try {
-                // Method 1: lottie-web library
-                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                    const animations = window.lottie.getRegisteredAnimations();
-                    animations.forEach(anim => {
-                        try {
-                            if (anim) {
-                                // First, ensure the animation container is visible
-                                if (anim.renderer && anim.renderer.svgElement) {
-                                    const container = anim.renderer.svgElement.parentElement || anim.renderer.svgElement;
-                                    if (container) {
-                                        container.style.opacity = '1';
-                                        container.style.visibility = 'visible';
-                                        container.style.display = '';
+            const stopAllLottie = () => {
+                try {
+                    // Method 1: lottie-web library (bodymovin)
+                    if (typeof window.lottie !== 'undefined') {
+                        if (window.lottie.getRegisteredAnimations) {
+                            const animations = window.lottie.getRegisteredAnimations();
+                            animations.forEach(anim => {
+                                try {
+                                    if (anim) {
+                                        // Stop completely
+                                        if (typeof anim.stop === 'function') {
+                                            anim.stop();
+                                        }
+                                        if (typeof anim.pause === 'function') {
+                                            anim.pause();
+                                        }
+                                        if (typeof anim.goToAndStop === 'function') {
+                                            anim.goToAndStop(0, true);
+                                        }
+                                        if (typeof anim.setSpeed === 'function') {
+                                            anim.setSpeed(0);
+                                        }
+                                        if (anim.loop !== undefined) {
+                                            anim.loop = false;
+                                        }
+                                        if (anim.loopCount !== undefined) {
+                                            anim.loopCount = 0;
+                                        }
+                                        if (anim.autoplay !== undefined) {
+                                            anim.autoplay = false;
+                                        }
                                     }
-                                }
-                                
-                                // Stop the animation
-                                if (typeof anim.pause === 'function') {
-                                    anim.pause();
-                                }
-                                if (typeof anim.goToAndStop === 'function') {
-                                    anim.goToAndStop(0, true);
-                                }
-                                if (typeof anim.stop === 'function') {
-                                    anim.stop();
-                                }
-                                if (typeof anim.setSpeed === 'function') {
-                                    anim.setSpeed(0);
-                                }
-                                if (anim.loop !== undefined) {
-                                    anim.loop = false;
-                                }
-                                if (anim.loopCount !== undefined) {
-                                    anim.loopCount = 0;
-                                }
+                                } catch (_) {}
+                            });
+                        }
+                        
+                        // Also check for global pause
+                        if (typeof window.lottie.pause === 'function') {
+                            window.lottie.pause();
+                        }
+                    }
+                    
+                    // Method 2: bodymovin (older API)
+                    if (typeof window.bodymovin !== 'undefined') {
+                        if (window.bodymovin.getRegisteredAnimations) {
+                            const animations = window.bodymovin.getRegisteredAnimations();
+                            animations.forEach(anim => {
+                                try {
+                                    if (anim) {
+                                        if (typeof anim.stop === 'function') anim.stop();
+                                        if (typeof anim.pause === 'function') anim.pause();
+                                        if (typeof anim.goToAndStop === 'function') anim.goToAndStop(0, true);
+                                        if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                                        if (anim.loop !== undefined) anim.loop = false;
+                                        if (anim.autoplay !== undefined) anim.autoplay = false;
+                                    }
+                                } catch (_) {}
+                            });
+                        }
+                    }
+                    
+                    // Method 3: lottie-player web components
+                    document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                        try {
+                            // Skip widget elements
+                            if (player.closest && (
+                                player.closest('#accessbit-widget-container') ||
+                                player.closest('[id*="accessbit-widget"]') ||
+                                player.closest('[class*="accessbit-widget"]') ||
+                                player.closest('accessbit-widget') ||
+                                player.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            // Stop the animation
+                            if (typeof player.stop === 'function') {
+                                player.stop();
+                            }
+                            if (typeof player.pause === 'function') {
+                                player.pause();
+                            }
+                            if (typeof player.seek === 'function') {
+                                player.seek(0);
+                            }
+                            if (typeof player.setSpeed === 'function') {
+                                player.setSpeed(0);
+                            }
+                            if (typeof player.setLooping === 'function') {
+                                player.setLooping(false);
+                            }
+                            if (typeof player.setAutoplay === 'function') {
+                                player.setAutoplay(false);
+                            }
+                            player.setAttribute('autoplay', 'false');
+                        } catch (_) {}
+                    });
+                    
+                    // Method 4: Find Lottie instances attached to DOM elements
+                    document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]').forEach(element => {
+                        try {
+                            // Skip widget elements
+                            if (element.closest && (
+                                element.closest('#accessbit-widget-container') ||
+                                element.closest('[id*="accessbit-widget"]') ||
+                                element.closest('[class*="accessbit-widget"]') ||
+                                element.closest('accessbit-widget') ||
+                                element.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            // Try to find Lottie instance on element
+                            const lottieInstance = element._lottie || element.lottie || element.__lottie || element.lottieAnimation || element.__wfLottie;
+                            if (lottieInstance) {
+                                if (typeof lottieInstance.stop === 'function') lottieInstance.stop();
+                                if (typeof lottieInstance.pause === 'function') lottieInstance.pause();
+                                if (typeof lottieInstance.goToAndStop === 'function') lottieInstance.goToAndStop(0, true);
+                                if (typeof lottieInstance.setSpeed === 'function') lottieInstance.setSpeed(0);
+                                if (lottieInstance.loop !== undefined) lottieInstance.loop = false;
+                                if (lottieInstance.autoplay !== undefined) lottieInstance.autoplay = false;
                             }
                         } catch (_) {}
                     });
-                }
-                
-                // Method 2: lottie-player web components
-                const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
-                lottiePlayers.forEach(player => {
-                    try {
-                        // Skip widget elements
-                        if (player.closest && (
-                            player.closest('#accessbit-widget-container') ||
-                            player.closest('[id*="accessbit-widget"]') ||
-                            player.closest('[class*="accessbit-widget"]') ||
-                            player.closest('accessbit-widget') ||
-                            player.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        // Stop the animation
-                        if (typeof player.pause === 'function') {
-                            player.pause();
-                        }
-                        if (typeof player.seek === 'function') {
-                            player.seek(0);
-                        }
-                        if (typeof player.stop === 'function') {
-                            player.stop();
-                        }
-                        if (typeof player.setSpeed === 'function') {
-                            player.setSpeed(0);
-                        }
-                        if (typeof player.setLooping === 'function') {
-                            player.setLooping(false);
-                        }
-                    } catch (_) {}
-                });
-                
-                // Method 3: Ensure all Lottie containers (canvas, svg) are visible
-                const lottieContainers = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], lottie-player, svg[data-lottie], canvas[data-lottie]');
-                lottieContainers.forEach(container => {
-                    try {
-                        // Skip widget elements
-                        if (container.closest && (
-                            container.closest('#accessbit-widget-container') ||
-                            container.closest('[id*="accessbit-widget"]') ||
-                            container.closest('[class*="accessbit-widget"]') ||
-                            container.closest('accessbit-widget') ||
-                            container.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        const computed = window.getComputedStyle(container);
-                        if (computed.opacity === '0' && 
-                            computed.display !== 'none' && 
-                            computed.visibility !== 'hidden') {
-                            container.style.opacity = '1';
-                            container.style.visibility = 'visible';
-                        }
-                    } catch (_) {}
-                });
-            } catch (_) {}
+                } catch (_) {}
+            };
+            
+            // Stop immediately
+            stopAllLottie();
+            
+            // Also stop after a short delay to catch dynamically loaded animations
+            setTimeout(stopAllLottie, 100);
+            setTimeout(stopAllLottie, 500);
         }
         
         // Restore Lottie animations
