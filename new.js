@@ -153,6 +153,17 @@
                     scroll-behavior: auto !important;
                 }
                 
+                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll */
+                /* GSAP uses transform and opacity - CSS !important pins elements in place */
+                /* CRITICAL: Exclude scroll containers to prevent breaking ScrollSmoother/ScrollTrigger */
+                body.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
+                    /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
+                    transform: none !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                }
+                
                 /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
                 /* Target all possible Lottie containers, SVG, and canvas elements */
                 body.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
@@ -27031,30 +27042,51 @@ class AccessibilityWidget {
                 // Lottie (official API)
                 this.stopAllLottieAnimations();
 
-                // GSAP (official API)
+                // GSAP (Safe API - doesn't break scroll)
+                // CRITICAL: Don't kill GSAP globally - it breaks ScrollTrigger and ScrollSmoother
+                // Use safe pause methods that exclude scroll-linked animations
                 if (typeof window.gsap !== 'undefined') {
                     try {
-                        if (window.gsap.killTweensOf) {
-                            window.gsap.killTweensOf('*');
+                        // Method 1: Safe Global Pause (excludes ScrollTrigger)
+                        // This pauses timed animations but leaves ScrollTrigger intact
+                        if (window.gsap.exportRoot) {
+                            try {
+                                const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
+                                allAnimations.forEach(anim => {
+                                    try {
+                                        // CRITICAL: Check if animation is NOT attached to ScrollTrigger
+                                        // ScrollTrigger animations should continue to allow scrolling
+                                        if (!anim.scrollTrigger) {
+                                            anim.pause(); // Safe pause - doesn't break scroll
+                                        }
+                                    } catch (_) {}
+                                });
+                            } catch (_) {}
                         }
-                        if (window.gsap.getAllTimelines) {
-                            const allTimelines = window.gsap.getAllTimelines();
-                            allTimelines.forEach(tl => {
-                                try {
-                                    if (tl && tl.totalProgress) { tl.totalProgress(1); }
-                                    tl && tl.kill && tl.kill();
-                                } catch (_) {}
-                            });
+                        
+                        // Method 2: Global Timeline Pause (safe for ScrollTrigger)
+                        // ScrollTrigger manually updates based on scroll position, not global clock
+                        if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                            try {
+                                window.gsap.globalTimeline.pause(); // Safe - doesn't break scroll
+                            } catch (_) {}
                         }
-                        if (window.gsap.getAllTweens) {
-                            const allTweens = window.gsap.getAllTweens();
-                            allTweens.forEach(tween => {
-                                try {
-                                    if (tween && tween.totalProgress) { tween.totalProgress(1); }
-                                    tween && tween.kill && tween.kill();
-                                } catch (_) {}
-                            });
-                        }
+                        
+                        // Method 3: Check for ScrollSmoother and avoid breaking it
+                        // ScrollSmoother wraps the page body - don't target it
+                        try {
+                            if (window.ScrollTrigger && typeof window.ScrollTrigger.isScrolling === 'function') {
+                                const isScrolling = window.ScrollTrigger.isScrolling();
+                                if (isScrolling) {
+                                    // Site uses ScrollTrigger - be extra careful
+                                    // Only pause non-scroll animations
+                                }
+                            }
+                        } catch (_) {}
+                        
+                        // REMOVED: killTweensOf('*') and kill() - these break scroll functionality
+                        // REMOVED: getAllTimelines().forEach(tl => tl.kill()) - dangerous
+                        // REMOVED: getAllTweens().forEach(tween => tween.kill()) - dangerous
                     } catch (_) {}
                 }
 
@@ -27272,41 +27304,36 @@ class AccessibilityWidget {
                 }, 100); // Check every 100ms
             }
             
-            // Poll for GSAP animations every 100ms
+            // Poll for GSAP animations - Safe pause (doesn't break scroll)
             if (!this.gsapPollInterval) {
                 this.gsapPollInterval = setInterval(() => {
                     try {
                         if (typeof window.gsap !== 'undefined') {
-                            // Kill all active tweens globally
-                            if (window.gsap.killTweensOf) {
-                                window.gsap.killTweensOf('*');
+                            // Safe Method: Pause animations excluding ScrollTrigger
+                            if (window.gsap.exportRoot) {
+                                try {
+                                    const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
+                                    allAnimations.forEach(anim => {
+                                        try {
+                                            // CRITICAL: Exclude ScrollTrigger animations to preserve scroll functionality
+                                            if (!anim.scrollTrigger) {
+                                                anim.pause(); // Safe pause
+                                            }
+                                        } catch (_) {}
+                                    });
+                                } catch (_) {}
                             }
                             
-                            // Kill all timelines
-                            if (window.gsap.getAllTimelines) {
-                                const allTimelines = window.gsap.getAllTimelines();
-                                allTimelines.forEach(tl => {
-                                    try {
-                                        if (tl && tl.totalProgress) { tl.totalProgress(1); }
-                                        if (tl && typeof tl.kill === 'function') {
-                                            tl.kill();
-                                        }
-                                    } catch (_) {}
-                                });
+                            // Safe Global Timeline Pause
+                            if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                                try {
+                                    window.gsap.globalTimeline.pause(); // Safe - ScrollTrigger still works
+                                } catch (_) {}
                             }
                             
-                            // Kill all active tweens (alternative method)
-                            if (window.gsap.getAllTweens) {
-                                const allTweens = window.gsap.getAllTweens();
-                                allTweens.forEach(tween => {
-                                    try {
-                                        if (tween && tween.totalProgress) { tween.totalProgress(1); }
-                                        if (tween && typeof tween.kill === 'function') {
-                                            tween.kill();
-                                        }
-                                    } catch (_) {}
-                                });
-                            }
+                            // REMOVED: killTweensOf('*') - dangerous, breaks scroll
+                            // REMOVED: getAllTimelines().forEach(tl => tl.kill()) - dangerous
+                            // REMOVED: getAllTweens().forEach(tween => tween.kill()) - dangerous
                         }
                     } catch (_) {}
                 }, 100); // Check every 100ms
@@ -28274,7 +28301,9 @@ class AccessibilityWidget {
             this.addSeizureSafeGreyOverlay();
             // 2) CSS kill switch
             this.injectSeizureSafeAnimationCSS();
-            // 3) WAAPI pause/cancel running animations (no globals)
+            // 3) CSS visual freeze for Lottie SVG animations
+            this.injectLottieVisualFreezeCSS();
+            // 4) WAAPI pause/cancel running animations (no globals)
             try { window.seizureState?.applyWAAPIStopMotion?.(true); } catch (_) {}
             // 4) Library APIs + polling
             this.stopAnimationLibraries();
@@ -28980,310 +29009,90 @@ class AccessibilityWidget {
         }
         
         // Universal Lottie Animation Stopping - Works on ALL websites
-        // Uses Lottie's official API methods as recommended by Lottie documentation
+        // Uses the clean "Pause All" method - maintains state, keeps structure intact
         stopAllLottieAnimations() {
-            
-            
             try {
-                // Method 1: Global Kill Switch - Stop ALL Lottie animations globally first
-                // This is the most effective approach for accessibility widgets
-                if (typeof window.lottie !== 'undefined') {
+                // Method 1: "Pause All" - Cleanest way to stop every Lottie animation instantly
+                // This is safe, official, and won't break the page structure
+                // It doesn't delete the SVGs; it simply tells the engine to stop updating the frames
+                const pauseAllLotties = () => {
+                    // 1. Try the Global API first (Most reliable)
+                    const player = window.lottie || window.bodymovin;
+                    if (player && typeof player.pause === 'function') {
+                        try {
+                            player.pause(); // Pauses all active Lottie animations globally
+                        } catch (_) {}
+                    }
+                    
+                    // 2. Fallback: Search for custom elements/web components
+                    const dotLotties = document.querySelectorAll('dotlottie-player, lottie-player');
+                    dotLotties.forEach(player => {
+                        try {
+                            if (player.pause) player.pause();
+                        } catch (_) {}
+                    });
+                };
+                
+                // Execute the pause all function
+                pauseAllLotties();
+                
+                // Call CSS injection for visual freeze
+                this.injectLottieVisualFreezeCSS();
+                
+                // Additional safety: Prevent restart with setSpeed(0)
+                const player = window.lottie || window.bodymovin;
+                if (player && typeof player.setSpeed === 'function') {
                     try {
-                        // CRITICAL: Use global methods first (affects all animations)
-                        // These are the "Global Kill Switch" methods recommended for accessibility widgets
-                        if (typeof window.lottie.pause === 'function') {
-                            try {
-                                window.lottie.pause(); // Pauses all active Lottie animations globally
-                            } catch (_) {}
-                        }
-                        
-                        if (typeof window.lottie.stop === 'function') {
-                            try {
-                                window.lottie.stop(); // Stops all and resets to first frame globally
-                            } catch (_) {}
-                        }
-                        
-                        if (typeof window.lottie.setSpeed === 'function') {
-                            try {
-                                window.lottie.setSpeed(0); // Freezes all animations in place globally
-                            } catch (_) {}
-                        }
-                        
-                        // Freeze all future animations (prevents new animations from starting)
-                        if (typeof window.lottie.freeze === 'function') {
-                            try {
-                                window.lottie.freeze();
-                            } catch (_) {}
-                        }
-                        
-                        // Method 2: Stop individual registered animations with correct order
-                        // Following the recommended pattern: setLoop(false) → stop() → pause()
-                        if (typeof window.lottie.getRegisteredAnimations === 'function') {
-                            const allAnimations = window.lottie.getRegisteredAnimations();
-                            if (allAnimations && allAnimations.length > 0) {
-                                allAnimations.forEach(anim => {
-                                    try {
-                                        if (anim) {
-                                            // CRITICAL: Correct order per Lottie best practices for accessibility
-                                            // 1. setLoop(false) FIRST - Prevents it from starting over
-                                            if (typeof anim.setLoop === 'function') {
-                                                anim.setLoop(false);
-                                            } else if (anim.loop !== undefined) {
-                                                anim.loop = false;
-                                            }
-                                            
-                                            // 2. stop() - Immediately returns to frame 0
-                                            if (typeof anim.stop === 'function') {
-                                                anim.stop();
-                                            }
-                                            
-                                            // 3. pause() - Freezes it on the current frame (backup)
-                                            if (typeof anim.pause === 'function') {
-                                                anim.pause();
-                                            }
-                                            
-                                            // 4. setSpeed(0) - Additional freeze mechanism
-                                            if (typeof anim.setSpeed === 'function') {
-                                                anim.setSpeed(0);
-                                            }
-                                            
-                                            // 5. Go to first frame and stop (ensures it's at frame 0)
-                                            if (typeof anim.goToAndStop === 'function') {
-                                                anim.goToAndStop(0, true);
-                                            }
-                                            
-                                            // 6. Prevent autoplay
-                                            if (anim.autoplay !== undefined) {
-                                                anim.autoplay = false;
-                                            }
-                                            
-                                            // 7. Set direction to normal (prevents reverse)
-                                            if (typeof anim.setDirection === 'function') {
-                                                anim.setDirection(1);
-                                            }
-                                            
-                                            // 8. Remove all event listeners that might restart animation
-                                            if (anim.removeEventListener) {
-                                                try {
-                                                    anim.removeEventListener('complete', anim.restart);
-                                                    anim.removeEventListener('loopComplete', anim.restart);
-                                                    anim.removeEventListener('enterFrame', anim.restart);
-                                                } catch (_) {}
-                                            }
-                                        }
-                                    } catch (_) {}
-                                });
-                            }
-                        }
-                        
-                        // Method 3: Override Lottie loading globally (store original for restoration)
-                        // Prevents new animations from starting when seizure-safe is active
-                        // Use correct order: setLoop(false) → stop() → pause()
-                        if (typeof window.lottie.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
-                            seizureState.originalLottieLoadAnimation = window.lottie.loadAnimation;
-                            const self = this;
-                            window.lottie.loadAnimation = function(config) {
-                                try {
-                                    const anim = seizureState.originalLottieLoadAnimation.call(this, config);
-                                    if (anim) {
-                                        try {
-                                            // Immediately stop new animations using correct order
-                                            // 1. setLoop(false) FIRST - Prevents it from starting over
-                                            if (typeof anim.setLoop === 'function') {
-                                                anim.setLoop(false);
-                                            } else if (anim.loop !== undefined) {
-                                                anim.loop = false;
-                                            }
-                                            
-                                            // 2. stop() - Immediately returns to frame 0
-                                            if (typeof anim.stop === 'function') {
-                                                anim.stop();
-                                            }
-                                            
-                                            // 3. pause() - Freezes it on the current frame
-                                            if (typeof anim.pause === 'function') {
-                                                anim.pause();
-                                            }
-                                            
-                                            // 4. setSpeed(0) - Additional freeze
-                                            if (typeof anim.setSpeed === 'function') {
-                                                anim.setSpeed(0);
-                                            }
-                                            
-                                            // 5. Go to first frame and stop
-                                            if (typeof anim.goToAndStop === 'function') {
-                                                anim.goToAndStop(0, true);
-                                            }
-                                            
-                                            // 6. Prevent autoplay
-                                            if (anim.autoplay !== undefined) {
-                                                anim.autoplay = false;
-                                            }
-                                        } catch (_) {}
-                                    }
-                                    return anim;
-                                } catch (_) {
-                                    return seizureState.originalLottieLoadAnimation.call(this, config);
-                                }
-                            };
-                        }
-                        
+                        player.setSpeed(0); // Safety net if another script tries to .play()
                     } catch (_) {}
                 }
                 
-                // Method 2: Stop via lottie-player web components (using official lottie-player API)
-                try {
-                    const lottiePlayers = document.querySelectorAll('lottie-player');
-                    lottiePlayers.forEach(player => {
-                        try {
-                            // Use lottie-player's official API methods
-                            // 1. Stop the animation
-                            if (typeof player.stop === 'function') {
-                                player.stop();
-                            }
-                            
-                            // 2. Pause the animation
-                            if (typeof player.pause === 'function') {
-                                player.pause();
-                            }
-                            
-                            // 3. Set speed to 0
-                            if (typeof player.setSpeed === 'function') {
-                                player.setSpeed(0);
-                            }
-                            
-                            // 4. Go to first frame and stop
-                            if (typeof player.seek === 'function') {
-                                player.seek(0);
-                            }
-                            
-                            // 5. Set mode to 'normal' (prevents looping)
-                            if (typeof player.setMode === 'function') {
-                                player.setMode('normal');
-                            }
-                            
-                            // 6. Disable autoplay via attribute
-                            player.setAttribute('autoplay', 'false');
-                            player.removeAttribute('loop');
-                            
-                            player.setAttribute('data-seizure-safe-stopped', 'true');
-                            // Keep visible but stop animation - force to final state
-                            player.style.opacity = '1';
-                            player.style.visibility = 'visible';
-                        } catch (_) {}
-                    });
-                } catch (_) {}
+                // Freeze all future animations (prevents new animations from starting)
+                if (player && typeof player.freeze === 'function') {
+                    try {
+                        player.freeze();
+                    } catch (_) {}
+                }
                 
-                // Method 3: Stop via DOM elements with Lottie data attributes (using element.lottie reference)
-                // Use correct order: setLoop(false) → stop() → pause()
-                try {
-                    const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation, [class*="lottie"], [id*="lottie"]');
-                    lottieElements.forEach(element => {
+                // Method 2: Override Lottie loading globally (store original for restoration)
+                // Prevents new animations from starting when seizure-safe is active
+                if (player && typeof player.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
+                    seizureState.originalLottieLoadAnimation = player.loadAnimation;
+                    const self = this;
+                    player.loadAnimation = function(config) {
                         try {
-                            // Try to find and stop any Lottie instance on this element
-                            // Check both element.lottie and element._lottie (different implementations store it differently)
-                            const lottieInstance = element.lottie || element._lottie || element.__lottie;
-                            
-                            if (lottieInstance) {
-                                // Use Lottie's official API methods in correct order
-                                // 1. setLoop(false) FIRST - Prevents it from starting over
-                                if (typeof lottieInstance.setLoop === 'function') {
-                                    lottieInstance.setLoop(false);
-                                } else if (lottieInstance.loop !== undefined) {
-                                    lottieInstance.loop = false;
-                                }
-                                
-                                // 2. stop() - Immediately returns to frame 0
-                                if (typeof lottieInstance.stop === 'function') {
-                                    lottieInstance.stop();
-                                }
-                                
-                                // 3. pause() - Freezes it on the current frame
-                                if (typeof lottieInstance.pause === 'function') {
-                                    lottieInstance.pause();
-                                }
-                                
-                                // 4. setSpeed(0) - Additional freeze
-                                if (typeof lottieInstance.setSpeed === 'function') {
-                                    lottieInstance.setSpeed(0);
-                                }
-                                
-                                // 5. Go to first frame and stop
-                                if (typeof lottieInstance.goToAndStop === 'function') {
-                                    lottieInstance.goToAndStop(0, true);
-                                }
-                                
-                                // 6. Prevent autoplay
-                                if (lottieInstance.autoplay !== undefined) {
-                                    lottieInstance.autoplay = false;
-                                }
+                            const anim = seizureState.originalLottieLoadAnimation.call(this, config);
+                            if (anim && typeof anim.pause === 'function') {
+                                try {
+                                    anim.pause(); // Immediately pause new animations
+                                } catch (_) {}
                             }
-                            
-                            // Mark as stopped but preserve original visibility
-                            element.setAttribute('data-seizure-safe-stopped', 'true');
-                            element.style.animation = 'none';
-                            element.style.transition = 'none';
-                            // Only set opacity/visibility if element wasn't intentionally hidden
-                            const computedStyle = window.getComputedStyle(element);
-                            const wasIntentionallyHidden = element.style.display === 'none' || 
-                                                          element.style.visibility === 'hidden' || 
-                                                          computedStyle.display === 'none' ||
-                                                          computedStyle.visibility === 'hidden';
-                            if (!wasIntentionallyHidden) {
-                                element.style.opacity = '1';
-                                element.style.visibility = 'visible';
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
+                            return anim;
+                        } catch (_) {
+                            return seizureState.originalLottieLoadAnimation.call(this, config);
+                        }
+                    };
+                }
                 
-                // Method 4: Freeze Lottie containers (be very specific to avoid hiding non-Lottie elements)
-                try {
-                    // Only target actual Lottie containers - be very specific
-                    const lottieContainers = document.querySelectorAll('[data-lottie], lottie-player, canvas[data-lottie], canvas.lottie-animation');
-                    lottieContainers.forEach(container => {
-                        try {
-                            // Only process if it's actually a Lottie container
-                            const isLottieContainer = container.hasAttribute('data-lottie') || 
-                                                     container.tagName === 'LOTTIE-PLAYER' ||
-                                                     (container.tagName === 'CANVAS' && (container.hasAttribute('data-lottie') || container.classList.contains('lottie-animation')));
-                            
-                            if (isLottieContainer) {
-                                container.style.animation = 'none';
-                                container.style.transition = 'none';
-                                container.style.transform = 'none';
-                                
-                                // Only set opacity/visibility if element wasn't intentionally hidden
-                                const computedStyle = window.getComputedStyle(container);
-                                const wasIntentionallyHidden = container.style.display === 'none' || 
-                                                              container.style.visibility === 'hidden' || 
-                                                              computedStyle.display === 'none' ||
-                                                              computedStyle.visibility === 'hidden';
-                                if (!wasIntentionallyHidden) {
-                                    container.style.opacity = '1';
-                                    container.style.visibility = 'visible';
-                                }
-                                
-                                // Freeze canvas elements inside Lottie containers visually (don't hide)
-                                if (container.tagName !== 'CANVAS') {
-                                    const canvas = container.querySelector('canvas');
-                                    if (canvas) {
-                                        canvas.style.animation = 'none';
-                                        canvas.style.transition = 'none';
-                                        canvas.style.transform = 'none';
-                                        // Keep visible - don't hide
-                                    }
-                                }
-                                
-                                container.setAttribute('data-seizure-safe-stopped', 'true');
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
-                
-               
-            } catch (e) {
-                // Silent fail - don't crash the website
+            } catch (_) {}
+        }
+        
+        // Add CSS for visual freeze - freezes SVG animations visually without removing them
+        injectLottieVisualFreezeCSS() {
+            if (!document.getElementById('lottie-visual-freeze-css')) {
+                const style = document.createElement('style');
+                style.id = 'lottie-visual-freeze-css';
+                style.textContent = `
+                    /* Freeze Lottie SVG animations visually - maintains state, keeps structure intact */
+                    .seizure-safe svg[data-lottie],
+                    .seizure-safe [data-lottie] svg,
+                    .seizure-safe lottie-player svg,
+                    .seizure-safe [class*="lottie"] svg {
+                        animation-play-state: paused !important;
+                        pointer-events: none !important; /* Prevents hover-triggered restarts */
+                    }
+                `;
+                document.head.appendChild(style);
             }
         }
         
@@ -29924,6 +29733,16 @@ class AccessibilityWidget {
                 .seizure-safe a:hover, .seizure-safe button:hover, .seizure-safe [role="button"]:hover {
                     transition: none !important;
                     /* REMOVED: transform: none - this was breaking button layouts */
+                }
+                
+                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll */
+                /* GSAP uses transform and opacity - CSS !important pins elements in place */
+                /* CRITICAL: Exclude scroll containers to prevent breaking ScrollSmoother/ScrollTrigger */
+                .seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]) {
+                    /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
+                    transform: none !important;
+                    opacity: 1 !important;
+                    filter: none !important;
                 }
                 
                 /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
