@@ -28690,26 +28690,15 @@ class AccessibilityWidget {
                         const animations = element.getAnimations();
                         animations.forEach(animation => {
                             try {
-                                // Use public WAAPI methods
+                                // Use public WAAPI methods - only pause, never cancel (cancel resets to initial state)
                                 if (typeof animation.pause === 'function') {
-                                    animation.pause(); // Pause instead of cancel to preserve state
-                                } else if (typeof animation.cancel === 'function') {
-                                    animation.cancel();
+                                    animation.pause();
                                 }
                                 if (typeof animation.playbackRate !== 'undefined') {
                                     animation.playbackRate = 0;
                                 }
                             } catch (_) {}
                         });
-                        
-                        // Ensure element is visible after stopping animations
-                        const computed = window.getComputedStyle(element);
-                        if ((computed.opacity === '0' || parseFloat(computed.opacity) < 0.1) && 
-                            computed.display !== 'none' && 
-                            computed.visibility !== 'hidden') {
-                            element.style.opacity = '1';
-                            element.style.visibility = 'visible';
-                        }
                     } catch (_) {}
                 });
             } catch (_) {}
@@ -28852,19 +28841,24 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: lottie-web library - use getRegisteredAnimations()
+                // Method 1: lottie-web library - use pause() and goToAndStop()
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const animations = window.lottie.getRegisteredAnimations();
                     animations.forEach(anim => {
                         try {
-                            if (anim && typeof anim.pause === 'function') {
-                                anim.pause();
+                            if (anim) {
+                                if (typeof anim.pause === 'function') {
+                                    anim.pause();
+                                }
+                                if (typeof anim.goToAndStop === 'function') {
+                                    anim.goToAndStop(0, true);
+                                }
                             }
                         } catch (_) {}
                     });
                 }
                 
-                // Method 2: lottie-player web components - use .pause() or .stop()
+                // Method 2: lottie-player web components - use pause() or stop()
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         // Skip widget elements
