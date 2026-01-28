@@ -1,5 +1,71 @@
 // CRITICAL: Immediate seizure-safe check - runs before any animations can start
 (function() {
+    // CRITICAL: Immediately force curtain animations to complete to prevent black screen
+    // This runs before any other code to ensure curtains don't block the page
+    function forceCurtainAnimationsComplete() {
+        try {
+            // Function to force curtain elements to final state
+            const forceCurtains = function() {
+                try {
+                    const curtains = document.querySelectorAll('.curtain-page-loader, [class*="curtain"], [id*="curtain"], .color-overlay, .color-overlay-2, [class*="overlay"]');
+                    curtains.forEach(curtain => {
+                        // Skip portfolio overlays
+                        if (curtain.classList && curtain.classList.toString().includes('portfolio-overlay')) {
+                            return;
+                        }
+                        try {
+                            // Skip widget elements
+                            if (curtain.closest && (
+                                curtain.closest('#accessbit-widget-container') ||
+                                curtain.closest('[id*="accessbit-widget"]') ||
+                                curtain.closest('[class*="accessbit-widget"]') ||
+                                curtain.closest('accessbit-widget') ||
+                                curtain.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            // Force to final state immediately
+                            curtain.style.opacity = '0';
+                            curtain.style.visibility = 'hidden';
+                            curtain.style.transform = 'scale(100)';
+                            curtain.style.display = 'none';
+                            
+                            // Complete any running animations
+                            if (curtain.getAnimations) {
+                                curtain.getAnimations().forEach(anim => {
+                                    try {
+                                        anim.finish();
+                                    } catch (_) {}
+                                });
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+            };
+            
+            // Run immediately if DOM is ready
+            if (document.body) {
+                forceCurtains();
+            }
+            
+            // Also run when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceCurtains, { once: true });
+            } else {
+                forceCurtains();
+            }
+            
+            // Run again after a short delay to catch late-loading curtains
+            setTimeout(forceCurtains, 100);
+            setTimeout(forceCurtains, 500);
+            setTimeout(forceCurtains, 1000);
+        } catch (_) {}
+    }
+    
+    // Run curtain fix immediately
+    forceCurtainAnimationsComplete();
+    
     function isDesignerModeStandalone() {
         try {
             return (
@@ -28700,12 +28766,21 @@ class AccessibilityWidget {
                 body.seizure-safe .color-overlay,
                 body.seizure-safe .color-overlay-2,
                 body.seizure-safe [class*="overlay"]:not([class*="portfolio-overlay"]),
+                body.seizure-safe .curtain-page-loader,
+                body.seizure-safe [class*="curtain"],
+                body.seizure-safe [id*="curtain"],
                 html.seizure-safe .color-overlay,
                 html.seizure-safe .color-overlay-2,
-                html.seizure-safe [class*="overlay"]:not([class*="portfolio-overlay"]) {
+                html.seizure-safe [class*="overlay"]:not([class*="portfolio-overlay"]),
+                html.seizure-safe .curtain-page-loader,
+                html.seizure-safe [class*="curtain"],
+                html.seizure-safe [id*="curtain"] {
                     opacity: 0 !important;
                     visibility: hidden !important;
                     transform: scale(100) !important;
+                    display: none !important;
+                    animation: none !important;
+                    transition: none !important;
                 }
                 
                 /* Ensure bg-image is visible when seizure mode is on */
@@ -28996,7 +29071,7 @@ class AccessibilityWidget {
                 // This prevents black curtain from blocking the page when seizure mode is enabled
                 try {
                     // Find overlay elements that create curtain effect
-                    const overlays = document.querySelectorAll('.color-overlay, .color-overlay-2, [class*="overlay"]');
+                    const overlays = document.querySelectorAll('.color-overlay, .color-overlay-2, [class*="overlay"], .curtain-page-loader, [class*="curtain"], [id*="curtain"]');
                     overlays.forEach(overlay => {
                         try {
                             // Skip widget elements
@@ -29010,14 +29085,24 @@ class AccessibilityWidget {
                                 return;
                             }
                             
-                            // Force overlays to fully expanded state (scale: 80+) and hidden (opacity: 0)
+                            // Force overlays to fully expanded state (scale: 100) and hidden (opacity: 0)
                             // This reveals the content behind the curtain
-                            if (gsap && typeof gsap.set === 'function') {
-                                gsap.set(overlay, { scale: 100, opacity: 0, clearProps: 'all' });
+                            if (typeof window.gsap !== 'undefined' && window.gsap.set) {
+                                window.gsap.set(overlay, { scale: 100, opacity: 0, clearProps: 'all' });
                             } else {
                                 overlay.style.transform = 'scale(100)';
                                 overlay.style.opacity = '0';
                                 overlay.style.visibility = 'hidden';
+                                overlay.style.display = 'none';
+                            }
+                            
+                            // Stop any running animations on this element
+                            if (overlay.getAnimations) {
+                                overlay.getAnimations().forEach(anim => {
+                                    try {
+                                        anim.finish(); // Complete animation immediately
+                                    } catch (_) {}
+                                });
                             }
                         } catch (_) {}
                     });
@@ -29638,10 +29723,21 @@ class AccessibilityWidget {
                 bg.style.visibility = 'visible';
             });
             
-            // Hide curtain loader to prevent black screen
-            const curtainLoader = document.querySelector('.curtain-page-loader');
+            // Hide curtain loader to prevent black screen - force complete removal
+            const curtainLoader = document.querySelector('.curtain-page-loader, [class*="curtain"], [id*="curtain"]');
             if (curtainLoader) {
                 curtainLoader.style.display = 'none';
+                curtainLoader.style.opacity = '0';
+                curtainLoader.style.visibility = 'hidden';
+                curtainLoader.style.transform = 'scale(100)';
+                // Stop any running animations
+                if (curtainLoader.getAnimations) {
+                    curtainLoader.getAnimations().forEach(anim => {
+                        try {
+                            anim.finish(); // Complete animation immediately
+                        } catch (_) {}
+                    });
+                }
             }
             
             // Ensure page content is visible
