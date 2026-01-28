@@ -28980,30 +28980,29 @@ class AccessibilityWidget {
                     });
                 } catch (_) {}
                 
-                    // Force background color to final state immediately
-                    // The animation normally changes body background to #130b32
-                    try {
-                        const body = document.body;
-                        const computedBg = window.getComputedStyle(body).backgroundColor;
-                        // If body doesn't have the final background color yet, set it immediately
-                        if (body && (!computedBg.includes('19, 11, 50') && !computedBg.includes('#130b32'))) {
-                            body.style.backgroundColor = '#130b32';
-                        }
-                    } catch (_) {}
-                    
-                    // Force bg-image opacity to final state (opacity: 1)
-                    try {
-                        const bgImages = document.querySelectorAll('.bg-image');
-                        bgImages.forEach(bgImg => {
-                            try {
-                                if (gsap && typeof gsap.set === 'function') {
-                                    gsap.set(bgImg, { opacity: 1, clearProps: 'opacity' });
-                                } else {
-                                    bgImg.style.opacity = '1';
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
+                // Force background color to final state immediately
+                // The animation normally changes body background to #130b32
+                try {
+                    const body = document.body;
+                    const computedBg = window.getComputedStyle(body).backgroundColor;
+                    // If body doesn't have the final background color yet, set it immediately
+                    if (body && (!computedBg.includes('19, 11, 50') && !computedBg.includes('#130b32'))) {
+                        body.style.backgroundColor = '#130b32';
+                    }
+                } catch (_) {}
+                
+                // Force bg-image opacity to final state (opacity: 1)
+                try {
+                    const bgImages = document.querySelectorAll('.bg-image');
+                    bgImages.forEach(bgImg => {
+                        try {
+                            if (gsap && typeof gsap.set === 'function') {
+                                gsap.set(bgImg, { opacity: 1, clearProps: 'opacity' });
+                            } else {
+                                bgImg.style.opacity = '1';
+                            }
+                        } catch (_) {}
+                    });
                 } catch (_) {}
                 
                 // Pause global timeline (freezes all GSAP animations instantly)
@@ -33141,37 +33140,37 @@ class AccessibilityWidget {
             }, 120000); // Every 2 minutes for custom domains
         }
     
-       async getSiteId() {
-    console.log('[GET_SITE_ID] getSiteId() called');
-    
-    // 1. Return cached siteId if available
-    if (this.siteId) {
-        return this.siteId;
-    }
-
-    try {
-        // 2. Try currentScript first, then fallback to the verified search term
-        const scriptEl = document.currentScript || 
-                         Array.from(document.getElementsByTagName('script')).find(s => s.src.includes('AccessBit')) ||
-                         document.querySelector('script[src*="new.js"]')||
-                         document.querySelector('script[src*="widget.js"]');
-
-        if (scriptEl && scriptEl.src) {
-            // Use the URL constructor to handle parsing &amp; and other encoding issues
-            const u = new URL(scriptEl.src);
-            const sid = u.searchParams.get('siteId');
-
-            if (sid) {
-                this.siteId = sid; // Cache it
-                console.log('[GET_SITE_ID] Found and cached siteId:', sid);
-                return sid;
+        async getSiteId() {
+            console.log('[GET_SITE_ID] getSiteId() called');
+            
+            // 1. Return cached siteId if available
+            if (this.siteId) {
+                return this.siteId;
             }
-        }
-    } catch (error) {
-        console.error('[GET_SITE_ID] Error parsing script URL:', error);
-    }
 
-    console.warn('[GET_SITE_ID] siteId not found');
+            try {
+                // 2. Try currentScript first, then fallback to the verified search term
+                const scriptEl = document.currentScript || 
+                                 Array.from(document.getElementsByTagName('script')).find(s => s.src.includes('AccessBit')) ||
+                                 document.querySelector('script[src*="new.js"]')||
+                                 document.querySelector('script[src*="widget.js"]');
+
+                if (scriptEl && scriptEl.src) {
+                    // Use the URL constructor to handle parsing &amp; and other encoding issues
+                    const u = new URL(scriptEl.src);
+                    const sid = u.searchParams.get('siteId');
+
+                    if (sid) {
+                        this.siteId = sid; // Cache it
+                        console.log('[GET_SITE_ID] Found and cached siteId:', sid);
+                        return sid;
+                    }
+                }
+            } catch (error) {
+                console.error('[GET_SITE_ID] Error parsing script URL:', error);
+            }
+
+            console.warn('[GET_SITE_ID] siteId not found');
     return null;
 }
     
