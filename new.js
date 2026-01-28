@@ -28667,6 +28667,24 @@ class AccessibilityWidget {
                     visibility: visible !important;
                 }
                 
+                /* Force overlay/curtain animations to final state - prevent black curtain blocking page */
+                body.seizure-safe .color-overlay,
+                body.seizure-safe .color-overlay-2,
+                body.seizure-safe [class*="overlay"]:not([class*="portfolio-overlay"]),
+                html.seizure-safe .color-overlay,
+                html.seizure-safe .color-overlay-2,
+                html.seizure-safe [class*="overlay"]:not([class*="portfolio-overlay"]) {
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                    transform: scale(100) !important;
+                }
+                
+                /* Ensure bg-image is visible when seizure mode is on */
+                body.seizure-safe .bg-image,
+                html.seizure-safe .bg-image {
+                    opacity: 1 !important;
+                }
+                
                 /* Exclude widget from kill switch */
                 .seizure-safe #accessbit-widget-container,
                 .seizure-safe [id*="accessbit-widget"],
@@ -28957,6 +28975,62 @@ class AccessibilityWidget {
                             }
                         } catch (_) {}
                     });
+                } catch (_) {}
+                
+                // CRITICAL: Force overlay/curtain animations to final state (fully expanded/hidden)
+                // This prevents black curtain from blocking the page when seizure mode is enabled
+                try {
+                    // Find overlay elements that create curtain effect
+                    const overlays = document.querySelectorAll('.color-overlay, .color-overlay-2, [class*="overlay"]');
+                    overlays.forEach(overlay => {
+                        try {
+                            // Skip widget elements
+                            if (overlay.closest && (
+                                overlay.closest('#accessbit-widget-container') ||
+                                overlay.closest('[id*="accessbit-widget"]') ||
+                                overlay.closest('[class*="accessbit-widget"]') ||
+                                overlay.closest('accessbit-widget') ||
+                                overlay.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            // Force overlays to fully expanded state (scale: 80+) and hidden (opacity: 0)
+                            // This reveals the content behind the curtain
+                            if (gsap && typeof gsap.set === 'function') {
+                                gsap.set(overlay, { scale: 100, opacity: 0, clearProps: 'all' });
+                            } else {
+                                overlay.style.transform = 'scale(100)';
+                                overlay.style.opacity = '0';
+                                overlay.style.visibility = 'hidden';
+                            }
+                        } catch (_) {}
+                    });
+                    
+                    // Force background color to final state immediately
+                    // The animation normally changes body background to #130b32
+                    try {
+                        const body = document.body;
+                        const computedBg = window.getComputedStyle(body).backgroundColor;
+                        // If body doesn't have the final background color yet, set it immediately
+                        if (body && (!computedBg.includes('19, 11, 50') && !computedBg.includes('#130b32'))) {
+                            body.style.backgroundColor = '#130b32';
+                        }
+                    } catch (_) {}
+                    
+                    // Force bg-image opacity to final state (opacity: 1)
+                    try {
+                        const bgImages = document.querySelectorAll('.bg-image');
+                        bgImages.forEach(bgImg => {
+                            try {
+                                if (gsap && typeof gsap.set === 'function') {
+                                    gsap.set(bgImg, { opacity: 1, clearProps: 'opacity' });
+                                } else {
+                                    bgImg.style.opacity = '1';
+                                }
+                            } catch (_) {}
+                        });
+                    } catch (_) {}
                 } catch (_) {}
                 
                 // Pause global timeline (freezes all GSAP animations instantly)
