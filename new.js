@@ -118,31 +118,8 @@
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessbit-seizure-immediate-early';
             immediateStyle.textContent = `
-                /* APPLY GREYISH COLOR FILTER IMMEDIATELY - Reduce color intensity to prevent seizures */
-                /* CRITICAL: Apply filters to content containers, NOT to body/html, to preserve sticky nav */
-                /* Filters create stacking contexts that break sticky positioning - so we avoid them on body/html */
-                /* Apply to main content areas and their children to get the grey muted color effect throughout the page */
-                body.seizure-safe main,
-                body.seizure-safe main *,
-                body.seizure-safe section,
-                body.seizure-safe section *,
-                body.seizure-safe article,
-                body.seizure-safe article *,
-                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
-                body.seizure-safe p:not(nav p):not(header p),
-                body.seizure-safe span:not(nav span):not(header span),
-                html.seizure-safe main,
-                html.seizure-safe main *,
-                html.seizure-safe section,
-                html.seizure-safe section *,
-                html.seizure-safe article,
-                html.seizure-safe article *,
-                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
-                html.seizure-safe p:not(nav p):not(header p),
-                html.seizure-safe span:not(nav span):not(header span) {
-                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
-                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
-                }
+                /* REMOVED: Greyish color filter - was causing dark blue appearance */
+                /* Color filters removed per user request - seizure mode now only stops animations */
                 
                 /* Per Webflow Security recommendations: Global CSS kill switch for seizure-safe mode */
                 /* This provides stricter controls than prefers-reduced-motion for photosensitive seizure safety */
@@ -26070,41 +26047,73 @@ class AccessibilityWidget {
                 style.textContent = `
                     /* Per Webflow Security recommendations: Global CSS kill switch for Reduce Motion */
                     /* This provides stricter controls than prefers-reduced-motion for users who need it */
-                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
-                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
-                    html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
-                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
-                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
-                    body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                    /* Simplified selector - let layout system do its job, just kill motion */
+                    html.reduce-motion *, 
+                    html.reduce-motion *::before, 
+                    html.reduce-motion *::after,
+                    body.reduce-motion *, 
+                    body.reduce-motion *::before, 
+                    body.reduce-motion *::after {
                         animation: none !important;
                         transition: none !important;
                         scroll-behavior: auto !important;
                     }
                     
-                    /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
-                    body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
-                    body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
-                    body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
-                    body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
-                    html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
-                    html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
-                    html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
-                    html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                    /* Stop common flash triggers (blinking, shimmer, pulsing) - but don't force visibility */
+                    /* This prevents animations without breaking modals, tabs, sliders, or skeleton loaders */
+                    body.reduce-motion *[class*="blink"], 
+                    body.reduce-motion *[class*="shimmer"], 
+                    body.reduce-motion *[class*="pulse"], 
+                    body.reduce-motion *[class*="caret"], 
+                    body.reduce-motion *[class*="cursor-blink"], 
+                    body.reduce-motion *[class*="skeleton"],
+                    body.reduce-motion *[class*="pulsing"], 
+                    body.reduce-motion *[class*="flashing"],
+                    html.reduce-motion *[class*="blink"], 
+                    html.reduce-motion *[class*="shimmer"], 
+                    html.reduce-motion *[class*="pulse"], 
+                    html.reduce-motion *[class*="caret"], 
+                    html.reduce-motion *[class*="cursor-blink"], 
+                    html.reduce-motion *[class*="skeleton"],
+                    html.reduce-motion *[class*="pulsing"], 
+                    html.reduce-motion *[class*="flashing"] {
                         animation: none !important;
-                        visibility: visible !important;
-                        opacity: 1 !important;
+                        /* Removed visibility: visible and opacity: 1 to prevent breaking modals/tabs/sliders */
                     }
                     
                     /* Remove blinking caret effects */
-                    body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
-                    body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
-                    body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
-                    body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
-                    html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
-                    html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
-                    html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
-                    html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                    body.reduce-motion input[type="text"], 
+                    body.reduce-motion input[type="email"], 
+                    body.reduce-motion input[type="search"], 
+                    body.reduce-motion input[type="tel"], 
+                    body.reduce-motion input[type="url"], 
+                    body.reduce-motion input[type="password"], 
+                    body.reduce-motion textarea, 
+                    body.reduce-motion [contenteditable="true"],
+                    html.reduce-motion input[type="text"], 
+                    html.reduce-motion input[type="email"], 
+                    html.reduce-motion input[type="search"], 
+                    html.reduce-motion input[type="tel"], 
+                    html.reduce-motion input[type="url"], 
+                    html.reduce-motion input[type="password"], 
+                    html.reduce-motion textarea, 
+                    html.reduce-motion [contenteditable="true"] {
                         caret-color: transparent !important;
+                    }
+                    
+                    /* Exclude widget from kill switch */
+                    html.reduce-motion #accessbit-widget-container,
+                    html.reduce-motion [id*="accessbit-widget"],
+                    html.reduce-motion [class*="accessbit-widget"],
+                    html.reduce-motion [data-ck-widget],
+                    html.reduce-motion accessbit-widget,
+                    body.reduce-motion #accessbit-widget-container,
+                    body.reduce-motion [id*="accessbit-widget"],
+                    body.reduce-motion [class*="accessbit-widget"],
+                    body.reduce-motion [data-ck-widget],
+                    body.reduce-motion accessbit-widget {
+                        animation: revert !important;
+                        transition: revert !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -26114,33 +26123,53 @@ class AccessibilityWidget {
         applyWAAPIReduceMotion(enabled) {
             // Use WAAPI controls where we own the animations
             // Per Webflow Security recommendations: Use WAAPI for explicit control
+            // Track which animations we paused so we only restore those we paused
             try {
-                if (enabled) {
-                    const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-                    all.forEach(anim => {
-                        try {
+                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
+                all.forEach(anim => {
+                    try {
+                        if (enabled) {
+                            // Skip widget animations
+                            const target = anim.effect && anim.effect.target;
+                            if (target) {
+                                if (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container')) {
+                                    return;
+                                }
+                                if (target.closest && (
+                                    target.closest('#accessbit-widget-container') ||
+                                    target.closest('[id*="accessbit-widget"]') ||
+                                    target.closest('[class*="accessbit-widget"]') ||
+                                    target.closest('accessbit-widget') ||
+                                    target.closest('[data-ck-widget]')
+                                )) {
+                                    return;
+                                }
+                            }
+                            
+                            // Pause and mark as paused by us
                             if (typeof anim.pause === 'function') {
                                 anim.pause();
                             }
                             if (typeof anim.playbackRate !== 'undefined') {
                                 anim.playbackRate = 0;
                             }
-                        } catch (_) {}
-                    });
-                } else {
-                    // Restore animations when disabled
-                    const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-                    all.forEach(anim => {
-                        try {
-                            if (typeof anim.playbackRate !== 'undefined') {
-                                anim.playbackRate = 1;
+                            // Mark this animation as paused by reduce motion
+                            anim.__reducedByAccessBit = true;
+                        } else {
+                            // Only restore animations we paused (marked with __reducedByAccessBit)
+                            if (anim.__reducedByAccessBit) {
+                                if (typeof anim.playbackRate !== 'undefined') {
+                                    anim.playbackRate = 1;
+                                }
+                                if (typeof anim.play === 'function') {
+                                    anim.play();
+                                }
+                                // Remove the marker
+                                delete anim.__reducedByAccessBit;
                             }
-                            if (typeof anim.play === 'function' && anim.playState === 'paused') {
-                                anim.play();
-                            }
-                        } catch (_) {}
-                    });
-                }
+                        }
+                    } catch (_) {}
+                });
             } catch (_) {}
         }
         
@@ -28727,22 +28756,8 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
                 
-                /* Apply grey color filter to content containers only (not UI/layout elements) */
-                body.seizure-safe main,
-                body.seizure-safe main *,
-                body.seizure-safe section,
-                body.seizure-safe section *,
-                body.seizure-safe article,
-                body.seizure-safe article *,
-                html.seizure-safe main,
-                html.seizure-safe main *,
-                html.seizure-safe section,
-                html.seizure-safe section *,
-                html.seizure-safe article,
-                html.seizure-safe article * {
-                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
-                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
-                }
+                /* REMOVED: Grey color filter - was causing dark blue appearance */
+                /* Color filters removed per user request - seizure mode now only stops animations */
                 
                 /* Exclude widget from color filter */
                 body.seizure-safe #accessbit-widget-container,
