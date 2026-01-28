@@ -25871,18 +25871,29 @@ class AccessibilityWidget {
         
         
         stopAutoplayMedia() {
-            // Pause all currently playing videos
+            // Pause all currently playing videos and mark them
             document.querySelectorAll('video').forEach(video => {
-                if (!video.paused) {
-                    video.pause();
-                }
+                try {
+                    if (!video.paused) {
+                        video.pause();
+                        video.currentTime = 0; // Ensure static frame
+                        video.setAttribute('data-seizure-safe-paused', 'true');
+                    }
+                    // Disable autoplay
+                    video.autoplay = false;
+                } catch (_) {}
             });
             
-            // Pause all currently playing audio
+            // Pause all currently playing audio and mark them
             document.querySelectorAll('audio').forEach(audio => {
-                if (!audio.paused) {
-                    audio.pause();
-                }
+                try {
+                    if (!audio.paused) {
+                        audio.pause();
+                        audio.setAttribute('data-seizure-safe-paused', 'true');
+                    }
+                    // Disable autoplay
+                    audio.autoplay = false;
+                } catch (_) {}
             });
             
             // Handle embedded media (YouTube, Vimeo, etc.)
@@ -28447,8 +28458,10 @@ class AccessibilityWidget {
             if (this.settings['cognitive-disability']) { this.disableCognitiveDisability(); this.updateToggleSwitch('cognitive-disability', false); }
             
             this.settings['seizure-safe'] = true;
-            this.safeBodyClassToggle('seizure-safe', true);
+            // Explicitly add class to both body and html to ensure CSS activates
+            try { document.body.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
+            this.safeBodyClassToggle('seizure-safe', true);
             this.saveSettings();
             
             // 1) Inject CSS kill switch (no global overrides)
@@ -28542,9 +28555,10 @@ class AccessibilityWidget {
                 existingStyle.remove();
             }
             
-            // 3. Remove seizure-safe class from body and html
-            this.safeBodyClassToggle('seizure-safe', false);
+            // 3. Remove seizure-safe class from body and html (explicit)
+            try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
+            this.safeBodyClassToggle('seizure-safe', false);
             
             // 4. Restore WAAPI animations
             this.restoreWAAPIAnimations();
@@ -28576,16 +28590,41 @@ class AccessibilityWidget {
             
             // Use textContent instead of innerHTML (security requirement)
             const cssText = `
-                /* Global CSS kill switch - per Webflow Security recommendations */
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after,
-                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
-                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after {
+                /* Global CSS kill switch - absolute seizure-safe mode */
+                .seizure-safe *,
+                .seizure-safe *::before,
+                .seizure-safe *::after,
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after,
+                html.seizure-safe *,
+                html.seizure-safe *::before,
+                html.seizure-safe *::after {
                     animation: none !important;
                     transition: none !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
                     scroll-behavior: auto !important;
+                }
+                
+                /* Exclude widget from kill switch */
+                .seizure-safe #accessbit-widget-container,
+                .seizure-safe [id*="accessbit-widget"],
+                .seizure-safe [class*="accessbit-widget"],
+                .seizure-safe [data-ck-widget],
+                .seizure-safe accessbit-widget,
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
+                body.seizure-safe [data-ck-widget],
+                body.seizure-safe accessbit-widget,
+                html.seizure-safe #accessbit-widget-container,
+                html.seizure-safe [id*="accessbit-widget"],
+                html.seizure-safe [class*="accessbit-widget"],
+                html.seizure-safe [data-ck-widget],
+                html.seizure-safe accessbit-widget {
+                    animation: revert !important;
+                    transition: revert !important;
                 }
                 
                 /* Remove common flash triggers - blinking caret, shimmer, pulsing, etc. */
@@ -28669,154 +28708,161 @@ class AccessibilityWidget {
             document.head.appendChild(style);
         }
         
-        // Stop WAAPI animations using public API (cancel, playbackRate)
+        // Stop WAAPI animations using public API (global method)
         stopWAAPIAnimations() {
             try {
-                const allElements = document.querySelectorAll('*');
-                allElements.forEach(element => {
-                    try {
-                        // Skip widget elements
-                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (element.closest && (
-                            element.closest('#accessbit-widget-container') ||
-                            element.closest('[id*="accessbit-widget"]') ||
-                            element.closest('[class*="accessbit-widget"]') ||
-                            element.closest('accessbit-widget') ||
-                            element.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (element.getRootNode && element.getRootNode() !== document) {
-                            return;
-                        }
-                        
-                        // Get all animations for this element
-                        const animations = element.getAnimations();
-                        animations.forEach(animation => {
-                            try {
-                                // Use public WAAPI methods - only pause, never cancel (cancel resets to initial state)
-                                if (typeof animation.pause === 'function') {
-                                    animation.pause();
+                // Use global document.getAnimations() to catch all animations
+                if (typeof document.getAnimations === 'function') {
+                    document.getAnimations().forEach(animation => {
+                        try {
+                            // Skip widget animations by checking target
+                            const target = animation.effect && animation.effect.target;
+                            if (target) {
+                                if (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container')) {
+                                    return;
                                 }
-                                if (typeof animation.playbackRate !== 'undefined') {
-                                    animation.playbackRate = 0;
+                                if (target.closest && (
+                                    target.closest('#accessbit-widget-container') ||
+                                    target.closest('[id*="accessbit-widget"]') ||
+                                    target.closest('[class*="accessbit-widget"]') ||
+                                    target.closest('accessbit-widget') ||
+                                    target.closest('[data-ck-widget]')
+                                )) {
+                                    return;
                                 }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
-                });
+                            }
+                            
+                            // Pause and set playback rate to 0
+                            if (typeof animation.pause === 'function') {
+                                animation.pause();
+                            }
+                            if (typeof animation.playbackRate !== 'undefined') {
+                                animation.playbackRate = 0;
+                            }
+                        } catch (_) {}
+                    });
+                }
             } catch (_) {}
         }
         
         // Restore WAAPI animations
         restoreWAAPIAnimations() {
             try {
-                const allElements = document.querySelectorAll('*');
-                allElements.forEach(element => {
-                    try {
-                        // Skip widget elements
-                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (element.closest && (
-                            element.closest('#accessbit-widget-container') ||
-                            element.closest('[id*="accessbit-widget"]') ||
-                            element.closest('[class*="accessbit-widget"]') ||
-                            element.closest('accessbit-widget') ||
-                            element.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (element.getRootNode && element.getRootNode() !== document) {
-                            return;
-                        }
-                        
-                        const animations = element.getAnimations();
-                        animations.forEach(animation => {
-                            try {
-                                if (typeof animation.playbackRate !== 'undefined') {
-                                    animation.playbackRate = 1;
+                // Use global document.getAnimations() to restore all animations
+                if (typeof document.getAnimations === 'function') {
+                    document.getAnimations().forEach(animation => {
+                        try {
+                            // Skip widget animations by checking target
+                            const target = animation.effect && animation.effect.target;
+                            if (target) {
+                                if (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container')) {
+                                    return;
                                 }
-                                if (typeof animation.play === 'function') {
-                                    animation.play();
+                                if (target.closest && (
+                                    target.closest('#accessbit-widget-container') ||
+                                    target.closest('[id*="accessbit-widget"]') ||
+                                    target.closest('[class*="accessbit-widget"]') ||
+                                    target.closest('accessbit-widget') ||
+                                    target.closest('[data-ck-widget]')
+                                )) {
+                                    return;
                                 }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
-                });
+                            }
+                            
+                            // Restore playback rate and play
+                            if (typeof animation.playbackRate !== 'undefined') {
+                                animation.playbackRate = 1;
+                            }
+                            if (typeof animation.play === 'function') {
+                                animation.play();
+                            }
+                        } catch (_) {}
+                    });
+                }
             } catch (_) {}
         }
         
-        // Stop GSAP animations using public API (pause, not kill)
+        // Stop GSAP animations using public API
         stopGSAPAnimations() {
             try {
                 if (typeof window.gsap === 'undefined') {
                     return;
                 }
                 
-                // Use GSAP public API - pause animations, don't kill them
+                // Method 1: Pause global timeline (freezes all GSAP animations instantly)
+                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                    window.gsap.globalTimeline.pause();
+                }
+                
+                // Method 2: Pause global ticker (stops the engine entirely)
+                if (window.gsap.ticker && typeof window.gsap.ticker.pause === 'function') {
+                    window.gsap.ticker.pause();
+                }
+                
+                // Method 3: Pause global timeline via exportRoot (with true parameter to grab everything)
                 if (window.gsap.exportRoot) {
                     try {
-                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
-                        allAnimations.forEach(anim => {
+                        const allTweens = window.gsap.exportRoot(true);
+                        if (allTweens && typeof allTweens.pause === 'function') {
+                            allTweens.pause();
+                        }
+                    } catch (_) {}
+                }
+                
+                // Method 4: Disable ScrollTrigger animations
+                if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                    try {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => {
                             try {
-                                // Only pause non-scroll animations (preserve ScrollTrigger)
-                                if (!anim.scrollTrigger && typeof anim.pause === 'function') {
-                                    // Restore visibility BEFORE pausing to ensure elements are visible
-                                    if (anim.targets) {
-                                        const targets = Array.isArray(anim.targets) ? anim.targets : [anim.targets];
-                                        targets.forEach(target => {
-                                            try {
-                                                // Skip widget elements
-                                                if (target && target.closest && (
-                                                    target.closest('#accessbit-widget-container') ||
-                                                    target.closest('[id*="accessbit-widget"]') ||
-                                                    target.closest('[class*="accessbit-widget"]') ||
-                                                    target.closest('accessbit-widget') ||
-                                                    target.closest('[data-ck-widget]')
-                                                )) {
-                                                    return;
-                                                }
-                                                
-                                                if (target) {
-                                                    const computed = window.getComputedStyle(target);
-                                                    // Force visibility if element is hidden (opacity 0)
-                                                    // This ensures animated content remains visible when paused
-                                                    if (computed.opacity === '0' && 
-                                                        computed.display !== 'none' && 
-                                                        computed.visibility !== 'hidden') {
-                                                        if (target.style) {
-                                                            target.style.opacity = '1';
-                                                            target.style.visibility = 'visible';
-                                                        } else if (target.setAttribute) {
-                                                            target.setAttribute('opacity', '1');
-                                                            target.setAttribute('visibility', 'visible');
-                                                        }
-                                                    }
-                                                }
-                                            } catch (_) {}
-                                        });
-                                    }
-                                    
-                                    // Now pause the animation
-                                    anim.pause();
+                                if (typeof st.disable === 'function') {
+                                    st.disable();
                                 }
                             } catch (_) {}
                         });
                     } catch (_) {}
                 }
                 
-                // Pause global timeline (safe for ScrollTrigger)
-                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                // Restore visibility for elements hidden by animations
+                if (window.gsap.exportRoot) {
                     try {
-                        window.gsap.globalTimeline.pause();
+                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
+                        allAnimations.forEach(anim => {
+                            try {
+                                if (anim.targets) {
+                                    const targets = Array.isArray(anim.targets) ? anim.targets : [anim.targets];
+                                    targets.forEach(target => {
+                                        try {
+                                            if (target && target.closest && (
+                                                target.closest('#accessbit-widget-container') ||
+                                                target.closest('[id*="accessbit-widget"]') ||
+                                                target.closest('[class*="accessbit-widget"]') ||
+                                                target.closest('accessbit-widget') ||
+                                                target.closest('[data-ck-widget]')
+                                            )) {
+                                                return;
+                                            }
+                                            
+                                            if (target) {
+                                                const computed = window.getComputedStyle(target);
+                                                if (computed.opacity === '0' && 
+                                                    computed.display !== 'none' && 
+                                                    computed.visibility !== 'hidden') {
+                                                    if (target.style) {
+                                                        target.style.opacity = '1';
+                                                        target.style.visibility = 'visible';
+                                                    } else if (target.setAttribute) {
+                                                        target.setAttribute('opacity', '1');
+                                                        target.setAttribute('visibility', 'visible');
+                                                    }
+                                                }
+                                            }
+                                        } catch (_) {}
+                                    });
+                                }
+                            } catch (_) {}
+                        });
                     } catch (_) {}
                 }
-                
             } catch (_) {}
         }
         
@@ -28827,21 +28873,33 @@ class AccessibilityWidget {
                     return;
                 }
                 
-                // Resume global timeline
-                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.resume === 'function') {
+                // Resume global timeline via exportRoot (with true parameter)
+                if (window.gsap.exportRoot) {
                     try {
-                        window.gsap.globalTimeline.resume();
+                        const allTweens = window.gsap.exportRoot(true);
+                        if (allTweens && typeof allTweens.resume === 'function') {
+                            allTweens.resume();
+                        }
                     } catch (_) {}
                 }
                 
-                // Resume all paused animations
-                if (window.gsap.exportRoot) {
+                // Resume global timeline
+                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.resume === 'function') {
+                    window.gsap.globalTimeline.resume();
+                }
+                
+                // Resume global ticker
+                if (window.gsap.ticker && typeof window.gsap.ticker.resume === 'function') {
+                    window.gsap.ticker.resume();
+                }
+                
+                // Re-enable ScrollTrigger animations
+                if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
                     try {
-                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
-                        allAnimations.forEach(anim => {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => {
                             try {
-                                if (!anim.scrollTrigger && typeof anim.resume === 'function') {
-                                    anim.resume();
+                                if (typeof st.enable === 'function') {
+                                    st.enable();
                                 }
                             } catch (_) {}
                         });
@@ -28853,7 +28911,23 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: lottie-web library
+                // Method 1: Global freeze (stops animations from even starting - most effective)
+                if (typeof window.lottie !== 'undefined') {
+                    if (typeof window.lottie.freeze === 'function') {
+                        window.lottie.freeze();
+                    }
+                }
+                
+                // Method 2: Global pause/stop (pauses all current animations)
+                if (typeof window.lottie !== 'undefined') {
+                    if (typeof window.lottie.pause === 'function') {
+                        window.lottie.pause();
+                    } else if (typeof window.lottie.stop === 'function') {
+                        window.lottie.stop();
+                    }
+                }
+                
+                // Method 2: Individual registered animations
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const animations = window.lottie.getRegisteredAnimations();
                     animations.forEach(anim => {
@@ -28861,19 +28935,15 @@ class AccessibilityWidget {
                             if (anim) {
                                 if (typeof anim.stop === 'function') {
                                     anim.stop();
-                                }
-                                if (typeof anim.pause === 'function') {
+                                } else if (typeof anim.pause === 'function') {
                                     anim.pause();
-                                }
-                                if (typeof anim.goToAndStop === 'function') {
-                                    anim.goToAndStop(0, true);
                                 }
                             }
                         } catch (_) {}
                     });
                 }
                 
-                // Method 2: lottie-player web components
+                // Method 3: lottie-player web components
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         if (player.closest && (
@@ -28888,37 +28958,8 @@ class AccessibilityWidget {
                         
                         if (typeof player.stop === 'function') {
                             player.stop();
-                        }
-                        if (typeof player.pause === 'function') {
+                        } else if (typeof player.pause === 'function') {
                             player.pause();
-                        }
-                    } catch (_) {}
-                });
-                
-                // Method 3: Find Lottie instances on DOM elements
-                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]').forEach(el => {
-                    try {
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
-                        if (inst) {
-                            if (typeof inst.stop === 'function') {
-                                inst.stop();
-                            }
-                            if (typeof inst.pause === 'function') {
-                                inst.pause();
-                            }
-                            if (typeof inst.goToAndStop === 'function') {
-                                inst.goToAndStop(0, true);
-                            }
                         }
                     } catch (_) {}
                 });
@@ -28928,7 +28969,21 @@ class AccessibilityWidget {
         // Restore Lottie animations
         restoreLottieAnimations() {
             try {
-                // Method 1: lottie-web library - use .play()
+                // Method 1: Unfreeze (if freeze was used)
+                if (typeof window.lottie !== 'undefined') {
+                    if (typeof window.lottie.unfreeze === 'function') {
+                        window.lottie.unfreeze();
+                    }
+                }
+                
+                // Method 2: Global play (most effective)
+                if (typeof window.lottie !== 'undefined') {
+                    if (typeof window.lottie.play === 'function') {
+                        window.lottie.play();
+                    }
+                }
+                
+                // Method 2: Individual registered animations
                 if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
                     const animations = window.lottie.getRegisteredAnimations();
                     animations.forEach(anim => {
@@ -28940,10 +28995,9 @@ class AccessibilityWidget {
                     });
                 }
                 
-                // Method 2: lottie-player web components - use .play()
+                // Method 3: lottie-player web components
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
-                        // Skip widget elements
                         if (player.closest && (
                             player.closest('#accessbit-widget-container') ||
                             player.closest('[id*="accessbit-widget"]') ||
