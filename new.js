@@ -28573,49 +28573,11 @@ class AccessibilityWidget {
         }
         
         // Restore visibility for elements hidden by animations
+        // NOTE: We rely on CSS only - don't set inline styles that persist
         restoreHiddenAnimatedElements() {
-            try {
-                const allElements = document.querySelectorAll('*');
-                allElements.forEach(element => {
-                    try {
-                        // Skip widget elements
-                        if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-                            return;
-                        }
-                        if (element.closest && (
-                            element.closest('#accessbit-widget-container') ||
-                            element.closest('[id*="accessbit-widget"]') ||
-                            element.closest('[class*="accessbit-widget"]') ||
-                            element.closest('accessbit-widget') ||
-                            element.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        // Skip shadow DOM elements
-                        if (element.getRootNode && element.getRootNode() !== document) {
-                            return;
-                        }
-                        
-                        const computed = window.getComputedStyle(element);
-                        // If element is invisible but not intentionally hidden, make it visible
-                        // Add aria-hidden check to preserve modals, tabs, accordions, etc.
-                        if (computed.opacity === '0' && 
-                            computed.display !== 'none' && 
-                            computed.visibility !== 'hidden' &&
-                            !element.hasAttribute('aria-hidden')) {
-                            // Handle both HTML elements (style) and SVG elements (attributes)
-                            if (element.style) {
-                                element.style.opacity = '1';
-                                element.style.visibility = 'visible';
-                            }
-                            if (element.setAttribute) {
-                                element.setAttribute('opacity', '1');
-                                element.setAttribute('visibility', 'visible');
-                            }
-                        }
-                    } catch (_) {}
-                });
-            } catch (_) {}
+            // CSS handles visibility restoration via the injected stylesheet
+            // This function is kept for potential future use but doesn't modify DOM
+            // to prevent inline styles from persisting after disabling seizure mode
         }
     
         disableSeizureSafe() {
@@ -28632,6 +28594,7 @@ class AccessibilityWidget {
             try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', false);
+            
             
             // 4. Restore WAAPI animations
             this.restoreWAAPIAnimations();
@@ -28794,6 +28757,23 @@ class AccessibilityWidget {
                     animation-play-state: paused !important;
                 }
                 
+                /* Force GSAP text character animations to final visible state */
+                /* This ensures text split into spans (like fadeUpTextAnimation) shows correctly */
+                body.seizure-safe .fade-up-multi-text span,
+                body.seizure-safe .fade-up-multi-text-fast span,
+                body.seizure-safe [class*="fade-up"] span,
+                body.seizure-safe [class*="text-animation"] span,
+                body.seizure-safe [class*="split-text"] span,
+                html.seizure-safe .fade-up-multi-text span,
+                html.seizure-safe .fade-up-multi-text-fast span,
+                html.seizure-safe [class*="fade-up"] span,
+                html.seizure-safe [class*="text-animation"] span,
+                html.seizure-safe [class*="split-text"] span {
+                    opacity: 1 !important;
+                    transform: translateY(0px) !important;
+                    visibility: visible !important;
+                }
+                
                 /* Only stop animated SVG/canvas (preserve static icons, charts, UI graphics) */
                 .seizure-safe svg[style*="animation"],
                 .seizure-safe svg[style*="transition"],
@@ -28894,20 +28874,115 @@ class AccessibilityWidget {
         stopGSAPAnimations() {
             try {
                 // GSAP might not be on window.gsap in Webflow (bundled in IX2)
-                // Try window.gsap first, then check if GSAP exists elsewhere
-                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap) || (typeof gsap !== 'undefined' ? gsap : null);
+                // Try multiple ways to find GSAP
+                let gsap = null;
+                if (typeof window !== 'undefined') {
+                    gsap = window.gsap || (window.GSAP && window.GSAP.gsap);
+                }
+                if (!gsap && typeof gsap !== 'undefined') {
+                    gsap = gsap;
+                }
+                
                 if (!gsap) {
                     return;
                 }
                 
+                // CRITICAL: Before pausing, force all text character animations to final state
+                // This ensures text split into spans (like fadeUpTextAnimation) shows correctly
+                try {
+                    // Find all elements that likely contain split text animations
+                    const textContainers = document.querySelectorAll('.fade-up-multi-text, .fade-up-multi-text-fast, [class*="fade-up"], [class*="text-animation"], [class*="split-text"]');
+                    textContainers.forEach(container => {
+                        try {
+                            // Skip widget elements
+                            if (container.closest && (
+                                container.closest('#accessbit-widget-container') ||
+                                container.closest('[id*="accessbit-widget"]') ||
+                                container.closest('[class*="accessbit-widget"]') ||
+                                container.closest('accessbit-widget') ||
+                                container.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            // Find all character spans inside this container
+                            const charSpans = container.querySelectorAll('span');
+                            charSpans.forEach(span => {
+                                try {
+                                    // Force to final visible state (opacity: 1, y: 0)
+                                    // Use GSAP to set final state immediately, then pause
+                                    if (gsap && typeof gsap.set === 'function') {
+                                        gsap.set(span, { opacity: 1, y: 0, clearProps: 'all' });
+                                    } else {
+                                        // Fallback: use inline styles if GSAP.set not available
+                                        span.style.opacity = '1';
+                                        span.style.transform = 'translateY(0px)';
+                                        span.style.visibility = 'visible';
+                                    }
+                                } catch (_) {}
+                            });
+                        } catch (_) {}
+                    });
+                    
+                    // Also check for any span elements with low opacity or transform that might be animated text
+                    const allSpans = document.querySelectorAll('span');
+                    allSpans.forEach(span => {
+                        try {
+                            // Skip widget elements
+                            if (span.closest && (
+                                span.closest('#accessbit-widget-container') ||
+                                span.closest('[id*="accessbit-widget"]') ||
+                                span.closest('[class*="accessbit-widget"]') ||
+                                span.closest('accessbit-widget') ||
+                                span.closest('[data-ck-widget]')
+                            )) {
+                                return;
+                            }
+                            
+                            const computed = window.getComputedStyle(span);
+                            const isHidden = parseFloat(computed.opacity) < 0.1 || computed.transform !== 'none';
+                            
+                            // If span is hidden or transformed and is likely part of text animation
+                            if (isHidden && span.parentElement && 
+                                (span.parentElement.classList.toString().match(/(fade|text|animation|split|char)/i) ||
+                                 span.parentElement.querySelectorAll('span').length > 3)) {
+                                // Force to final state
+                                if (gsap && typeof gsap.set === 'function') {
+                                    gsap.set(span, { opacity: 1, y: 0, clearProps: 'all' });
+                                } else {
+                                    span.style.opacity = '1';
+                                    span.style.transform = 'translateY(0px)';
+                                    span.style.visibility = 'visible';
+                                }
+                            }
+                        } catch (_) {}
+                    });
+                } catch (_) {}
+                
                 // Pause global timeline (freezes all GSAP animations instantly)
                 if (gsap.globalTimeline && typeof gsap.globalTimeline.pause === 'function') {
-                    gsap.globalTimeline.pause();
+                    try {
+                        gsap.globalTimeline.pause();
+                    } catch (_) {}
                 }
                 
                 // Pause global ticker (stops the engine entirely - prevents inline style updates)
                 if (gsap.ticker && typeof gsap.ticker.pause === 'function') {
-                    gsap.ticker.pause();
+                    try {
+                        gsap.ticker.pause();
+                    } catch (_) {}
+                }
+                
+                // Also pause all ScrollTriggers if available
+                if (gsap.ScrollTrigger && typeof gsap.ScrollTrigger.getAll === 'function') {
+                    try {
+                        const triggers = gsap.ScrollTrigger.getAll();
+                        triggers.forEach(trigger => {
+                            if (trigger && typeof trigger.disable === 'function') {
+                                trigger.disable();
+                            }
+                        });
+                    } catch (_) {}
                 }
             } catch (_) {}
         }
@@ -28916,21 +28991,46 @@ class AccessibilityWidget {
         restoreGSAPAnimations() {
             try {
                 // GSAP might not be on window.gsap in Webflow (bundled in IX2)
-                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap) || (typeof gsap !== 'undefined' ? gsap : null);
+                let gsap = null;
+                if (typeof window !== 'undefined') {
+                    gsap = window.gsap || (window.GSAP && window.GSAP.gsap);
+                }
+                if (!gsap && typeof gsap !== 'undefined') {
+                    gsap = gsap;
+                }
+                
                 if (!gsap) {
                     return;
                 }
                 
                 // Resume global timeline
                 if (gsap.globalTimeline && typeof gsap.globalTimeline.resume === 'function') {
-                    gsap.globalTimeline.resume();
+                    try {
+                        gsap.globalTimeline.resume();
+                    } catch (_) {}
                 }
                 
                 // Resume global ticker (use play() not resume())
                 if (gsap.ticker && typeof gsap.ticker.play === 'function') {
-                    gsap.ticker.play();
+                    try {
+                        gsap.ticker.play();
+                    } catch (_) {}
                 } else if (gsap.ticker && typeof gsap.ticker.resume === 'function') {
-                    gsap.ticker.resume();
+                    try {
+                        gsap.ticker.resume();
+                    } catch (_) {}
+                }
+                
+                // Re-enable ScrollTriggers if available
+                if (gsap.ScrollTrigger && typeof gsap.ScrollTrigger.getAll === 'function') {
+                    try {
+                        const triggers = gsap.ScrollTrigger.getAll();
+                        triggers.forEach(trigger => {
+                            if (trigger && typeof trigger.enable === 'function') {
+                                trigger.enable();
+                            }
+                        });
+                    } catch (_) {}
                 }
             } catch (_) {}
         }
@@ -28938,19 +29038,8 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: Global lottie/bodymovin pause (if available)
-                if (window.lottie && typeof window.lottie.pause === 'function') {
-                    try {
-                        window.lottie.pause();
-                    } catch (_) {}
-                }
-                if (window.bodymovin && typeof window.bodymovin.pause === 'function') {
-                    try {
-                        window.bodymovin.pause();
-                    } catch (_) {}
-                }
-                
-                // Method 2: Individual registered animations (most reliable - MUST use this)
+                // Method 1: Individual registered animations (most reliable - MUST use this first)
+                // NOTE: window.lottie.pause() doesn't exist - only individual animation methods work
                 if (window.lottie && window.lottie.getRegisteredAnimations) {
                     window.lottie.getRegisteredAnimations().forEach(anim => {
                         try {
@@ -36257,4 +36346,5 @@ class AccessibilityWidget {
         }
         
     })();
+    
     
