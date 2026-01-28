@@ -25951,34 +25951,82 @@ class AccessibilityWidget {
             if (window.slider && typeof window.slider.disableAutoSlide === 'function') {
                 try {
                     window.slider.disableAutoSlide();
-                   
-                } catch (e) {
-                    
-                }
+                } catch (e) {}
             }
             
-            // Stop Swiper animations
+            // Stop Swiper animations and disable navigation
             if (typeof Swiper !== 'undefined') {
                 try {
                     document.querySelectorAll('.swiper').forEach(swiperEl => {
                         if (swiperEl.swiper) {
-                            swiperEl.swiper.autoplay.stop();
+                            // Stop autoplay
+                            if (swiperEl.swiper.autoplay && typeof swiperEl.swiper.autoplay.stop === 'function') {
+                                swiperEl.swiper.autoplay.stop();
+                            }
+                            // Disable manual navigation (swipe, touch, keyboard)
+                            if (typeof swiperEl.swiper.disable === 'function') {
+                                swiperEl.swiper.disable();
+                            }
+                            // Disable touch/swipe
+                            if (swiperEl.swiper.allowTouchMove !== undefined) {
+                                swiperEl.swiper.allowTouchMove = false;
+                            }
+                            // Disable keyboard navigation
+                            if (swiperEl.swiper.allowSlideNext !== undefined) {
+                                swiperEl.swiper.allowSlideNext = false;
+                            }
+                            if (swiperEl.swiper.allowSlidePrev !== undefined) {
+                                swiperEl.swiper.allowSlidePrev = false;
+                            }
                         }
                     });
-                   
-                } catch (e) {
-                    
-                }
+                } catch (e) {}
             }
+            
+            // Stop Slick slider and disable navigation
+            const jq = window.jQuery || window.$;
+            if (jq) {
+                try {
+                    jq('.slick-slider').each(function() {
+                        try {
+                            if (jq(this).slick) {
+                                jq(this).slick('slickPause');
+                                jq(this).slick('unslick'); // Completely disable
+                            }
+                        } catch (e) {}
+                    });
+                } catch (e) {}
+            }
+            
+            // Stop Splide slider and disable navigation
+            try {
+                document.querySelectorAll('.splide').forEach(el => {
+                    const inst = el.splide || el._splide || null;
+                    if (inst) {
+                        if (inst.Components && inst.Components.Autoplay && typeof inst.Components.Autoplay.pause === 'function') {
+                            inst.Components.Autoplay.pause();
+                        }
+                        // Disable navigation
+                        if (inst.options) {
+                            inst.options = Object.assign({}, inst.options, { 
+                                autoplay: false,
+                                keyboard: false,
+                                wheel: false,
+                                swipe: false
+                            });
+                        }
+                        if (typeof inst.destroy === 'function') {
+                            inst.destroy();
+                        }
+                    }
+                });
+            } catch (e) {}
             
             // Stop AOS (Animate On Scroll) animations
             if (typeof AOS !== 'undefined') {
                 try {
                     AOS.refreshHard();
-
-                } catch (e) {
-                    
-                }
+                } catch (e) {}
             }
         }
         
@@ -28495,11 +28543,13 @@ class AccessibilityWidget {
             this.stopLottieAnimations();
             // 5) Stop autoplay media
             this.stopAutoplayMedia();
-            // 6) Stop Webflow interactions
+            // 6) Stop JavaScript animations (sliders, etc.)
+            try { this.stopJavaScriptAnimations && this.stopJavaScriptAnimations(); } catch (_) {}
+            // 7) Stop Webflow interactions
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
-            // 7) Final pass: Restore visibility for any hidden animated elements
+            // 8) Final pass: Restore visibility for any hidden animated elements
             this.restoreHiddenAnimatedElements();
-            // 8) Start polling to catch new Lottie animations
+            // 9) Start polling to catch new Lottie animations
             this.startLottiePolling();
         }
         
@@ -28888,25 +28938,38 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: Global pause (targets the global lottie/bodymovin object)
-                const lottieObj = window.lottie || window.bodymovin;
-                if (lottieObj && typeof lottieObj.pause === 'function') {
-                    lottieObj.pause();
-                }
-                
-                // Method 2: Individual registered animations
+                // Method 1: Individual registered animations (most reliable)
                 if (window.lottie && window.lottie.getRegisteredAnimations) {
                     window.lottie.getRegisteredAnimations().forEach(anim => {
                         try {
-                            if (anim && typeof anim.stop === 'function') {
-                                anim.stop();
+                            if (anim) {
+                                // Stop and freeze at frame 0
+                                if (typeof anim.stop === 'function') {
+                                    anim.stop();
+                                }
+                                if (typeof anim.goToAndStop === 'function') {
+                                    anim.goToAndStop(0, true);
+                                }
+                                if (typeof anim.pause === 'function') {
+                                    anim.pause();
+                                }
+                                // Disable loop and autoplay
+                                if (anim.loop !== undefined) {
+                                    anim.loop = false;
+                                }
+                                if (anim.autoplay !== undefined) {
+                                    anim.autoplay = false;
+                                }
+                                if (typeof anim.setSpeed === 'function') {
+                                    anim.setSpeed(0);
+                                }
                             }
                         } catch (_) {}
                     });
                 }
                 
-                // Method 3: lottie-player web components and Webflow-specific Lottie instances
-                document.querySelectorAll('lottie-player, dotlottie-player, [data-animation-type="lottie"]').forEach(player => {
+                // Method 2: lottie-player web components
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         if (player.closest && (
                             player.closest('#accessbit-widget-container') ||
@@ -28918,8 +28981,88 @@ class AccessibilityWidget {
                             return;
                         }
                         
+                        if (typeof player.stop === 'function') {
+                            player.stop();
+                        }
                         if (typeof player.pause === 'function') {
                             player.pause();
+                        }
+                        if (typeof player.seek === 'function') {
+                            player.seek(0);
+                        }
+                    } catch (_) {}
+                });
+                
+                // Method 3: Find Lottie instances attached to DOM elements (Webflow, custom implementations)
+                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]').forEach(el => {
+                    try {
+                        if (el.closest && (
+                            el.closest('#accessbit-widget-container') ||
+                            el.closest('[id*="accessbit-widget"]') ||
+                            el.closest('[class*="accessbit-widget"]') ||
+                            el.closest('accessbit-widget') ||
+                            el.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        // Check for Lottie instance on element
+                        const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
+                        if (inst) {
+                            if (typeof inst.stop === 'function') {
+                                inst.stop();
+                            }
+                            if (typeof inst.goToAndStop === 'function') {
+                                inst.goToAndStop(0, true);
+                            }
+                            if (typeof inst.pause === 'function') {
+                                inst.pause();
+                            }
+                        }
+                        
+                        // Check SVG/canvas inside element for Lottie instances
+                        const svg = el.querySelector('svg, canvas');
+                        if (svg) {
+                            const svgInst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
+                            if (svgInst) {
+                                if (typeof svgInst.stop === 'function') {
+                                    svgInst.stop();
+                                }
+                                if (typeof svgInst.goToAndStop === 'function') {
+                                    svgInst.goToAndStop(0, true);
+                                }
+                                if (typeof svgInst.pause === 'function') {
+                                    svgInst.pause();
+                                }
+                            }
+                        }
+                    } catch (_) {}
+                });
+                
+                // Method 4: Check all SVG elements directly for Lottie instances (Webflow stores them in SVG)
+                document.querySelectorAll('svg').forEach(svg => {
+                    try {
+                        if (svg.closest && (
+                            svg.closest('#accessbit-widget-container') ||
+                            svg.closest('[id*="accessbit-widget"]') ||
+                            svg.closest('[class*="accessbit-widget"]') ||
+                            svg.closest('accessbit-widget') ||
+                            svg.closest('[data-ck-widget]')
+                        )) {
+                            return;
+                        }
+                        
+                        const inst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
+                        if (inst) {
+                            if (typeof inst.stop === 'function') {
+                                inst.stop();
+                            }
+                            if (typeof inst.goToAndStop === 'function') {
+                                inst.goToAndStop(0, true);
+                            }
+                            if (typeof inst.pause === 'function') {
+                                inst.pause();
+                            }
                         }
                     } catch (_) {}
                 });
