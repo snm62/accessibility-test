@@ -28548,9 +28548,11 @@ class AccessibilityWidget {
                         
                         const computed = window.getComputedStyle(element);
                         // If element is invisible but not intentionally hidden, make it visible
+                        // Add aria-hidden check to preserve modals, tabs, accordions, etc.
                         if (computed.opacity === '0' && 
                             computed.display !== 'none' && 
-                            computed.visibility !== 'hidden') {
+                            computed.visibility !== 'hidden' &&
+                            !element.hasAttribute('aria-hidden')) {
                             // Handle both HTML elements (style) and SVG elements (attributes)
                             if (element.style) {
                                 element.style.opacity = '1';
@@ -28629,19 +28631,25 @@ class AccessibilityWidget {
                     animation-duration: 0s !important;
                     transition-duration: 0s !important;
                     transition-property: none !important;
-                    transform: none !important;
                     scroll-behavior: auto !important;
                 }
                 
-                /* Force visibility for elements stuck at opacity: 0 (GSAP/Lottie issue) */
-                body.seizure-safe [style*="opacity: 0"],
-                body.seizure-safe [style*="opacity:0"],
-                body.seizure-safe [style*="visibility: hidden"],
-                body.seizure-safe [style*="visibility:hidden"],
-                html.seizure-safe [style*="opacity: 0"],
-                html.seizure-safe [style*="opacity:0"],
-                html.seizure-safe [style*="visibility: hidden"],
-                html.seizure-safe [style*="visibility:hidden"] {
+                /* Only kill transforms that are animated (preserve layout transforms) */
+                .seizure-safe *[style*="transform"],
+                body.seizure-safe *[style*="transform"],
+                html.seizure-safe *[style*="transform"] {
+                    transform: none !important;
+                }
+                
+                /* Force visibility for elements stuck at opacity: 0 (GSAP/Lottie issue) - but respect aria-hidden */
+                body.seizure-safe [style*="opacity: 0"]:not([aria-hidden]),
+                body.seizure-safe [style*="opacity:0"]:not([aria-hidden]),
+                body.seizure-safe [style*="visibility: hidden"]:not([aria-hidden]),
+                body.seizure-safe [style*="visibility:hidden"]:not([aria-hidden]),
+                html.seizure-safe [style*="opacity: 0"]:not([aria-hidden]),
+                html.seizure-safe [style*="opacity:0"]:not([aria-hidden]),
+                html.seizure-safe [style*="visibility: hidden"]:not([aria-hidden]),
+                html.seizure-safe [style*="visibility:hidden"]:not([aria-hidden]) {
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
@@ -28688,25 +28696,19 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
                 
-                /* Apply grey color filter to content elements only (not body/html to preserve sticky nav) */
+                /* Apply grey color filter to content containers only (not UI/layout elements) */
                 body.seizure-safe main,
                 body.seizure-safe main *,
                 body.seizure-safe section,
                 body.seizure-safe section *,
                 body.seizure-safe article,
                 body.seizure-safe article *,
-                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                body.seizure-safe p:not(nav p):not(header p),
-                body.seizure-safe span:not(nav span):not(header span),
                 html.seizure-safe main,
                 html.seizure-safe main *,
                 html.seizure-safe section,
                 html.seizure-safe section *,
                 html.seizure-safe article,
-                html.seizure-safe article *,
-                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe p:not(nav p):not(header p),
-                html.seizure-safe span:not(nav span):not(header span) {
+                html.seizure-safe article * {
                     filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
                     -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
                 }
@@ -28726,7 +28728,7 @@ class AccessibilityWidget {
                     -webkit-filter: none !important;
                 }
                 
-                /* Stop all Lottie animations - CSS kill switch */
+                /* Stop Lottie animations only - CSS kill switch (don't affect static SVG/canvas) */
                 body.seizure-safe [data-lottie],
                 body.seizure-safe [class*="lottie"],
                 body.seizure-safe [id*="lottie"],
@@ -28742,13 +28744,19 @@ class AccessibilityWidget {
                     animation-play-state: paused !important;
                 }
                 
-                /* Stop Lottie canvas/SVG rendering */
-                .seizure-safe svg,
-                .seizure-safe canvas,
-                body.seizure-safe svg,
-                body.seizure-safe canvas,
-                html.seizure-safe svg,
-                html.seizure-safe canvas {
+                /* Only stop animated SVG/canvas (preserve static icons, charts, UI graphics) */
+                .seizure-safe svg[style*="animation"],
+                .seizure-safe svg[style*="transition"],
+                .seizure-safe canvas[style*="animation"],
+                .seizure-safe canvas[style*="transition"],
+                body.seizure-safe svg[style*="animation"],
+                body.seizure-safe svg[style*="transition"],
+                body.seizure-safe canvas[style*="animation"],
+                body.seizure-safe canvas[style*="transition"],
+                html.seizure-safe svg[style*="animation"],
+                html.seizure-safe svg[style*="transition"],
+                html.seizure-safe canvas[style*="animation"],
+                html.seizure-safe canvas[style*="transition"] {
                     animation: none !important;
                     transition: none !important;
                 }
