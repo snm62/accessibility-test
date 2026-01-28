@@ -27283,14 +27283,23 @@ class AccessibilityWidget {
         stopWebflowInteractions() {
             // IX2 official API stop
             try {
-                if (window.Webflow && typeof window.Webflow.require === 'function') {
+                if (window.Webflow && window.Webflow.require) {
                     const ix2 = window.Webflow.require('ix2');
-                    if (ix2) {
-                        if (typeof ix2.stop === 'function') ix2.stop();
-                        // destroy is heavier; call if available to fully halt interactions
-                        if (typeof ix2.destroy === 'function') ix2.destroy();
+                    if (ix2 && typeof ix2.stop === 'function') {
+                        ix2.stop();
                     }
                 }
+            } catch (_) {}
+            
+            // Pause SVG animations (Webflow uses SVG animations)
+            try {
+                document.querySelectorAll('svg').forEach(svg => {
+                    try {
+                        if (svg.pauseAnimations && typeof svg.pauseAnimations === 'function') {
+                            svg.pauseAnimations();
+                        }
+                    } catch (_) {}
+                });
             } catch (_) {}
 
             // Fallback: neutralize data-w-id elements
@@ -27322,6 +27331,18 @@ class AccessibilityWidget {
                         }
                     } catch (_) {}
                 });
+            } catch (_) {}
+        }
+        
+        // Restore Webflow interactions
+        restoreWebflowInteractions() {
+            try {
+                if (window.Webflow && window.Webflow.require) {
+                    const ix2 = window.Webflow.require('ix2');
+                    if (ix2 && typeof ix2.init === 'function') {
+                        ix2.init();
+                    }
+                }
             } catch (_) {}
         }
         
@@ -28569,7 +28590,10 @@ class AccessibilityWidget {
             // 6. Restore Lottie animations
             this.restoreLottieAnimations();
             
-            // 7. Restore autoplay media
+            // 7. Restore Webflow interactions
+            this.restoreWebflowInteractions();
+            
+            // 8. Restore autoplay media
             this.restoreAllMediaAndAnimations();
             
             this.settings['seizure-safe'] = false;
@@ -28604,7 +28628,22 @@ class AccessibilityWidget {
                     transition: none !important;
                     animation-duration: 0s !important;
                     transition-duration: 0s !important;
+                    transition-property: none !important;
+                    transform: none !important;
                     scroll-behavior: auto !important;
+                }
+                
+                /* Force visibility for elements stuck at opacity: 0 (GSAP/Lottie issue) */
+                body.seizure-safe [style*="opacity: 0"],
+                body.seizure-safe [style*="opacity:0"],
+                body.seizure-safe [style*="visibility: hidden"],
+                body.seizure-safe [style*="visibility:hidden"],
+                html.seizure-safe [style*="opacity: 0"],
+                html.seizure-safe [style*="opacity:0"],
+                html.seizure-safe [style*="visibility: hidden"],
+                html.seizure-safe [style*="visibility:hidden"] {
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 /* Exclude widget from kill switch */
@@ -28702,6 +28741,17 @@ class AccessibilityWidget {
                     transition: none !important;
                     animation-play-state: paused !important;
                 }
+                
+                /* Stop Lottie canvas/SVG rendering */
+                .seizure-safe svg,
+                .seizure-safe canvas,
+                body.seizure-safe svg,
+                body.seizure-safe canvas,
+                html.seizure-safe svg,
+                html.seizure-safe canvas {
+                    animation: none !important;
+                    transition: none !important;
+                }
             `;
             
             style.textContent = cssText;
@@ -28785,83 +28835,21 @@ class AccessibilityWidget {
         // Stop GSAP animations using public API
         stopGSAPAnimations() {
             try {
-                if (typeof window.gsap === 'undefined') {
+                // GSAP might not be on window.gsap in Webflow (bundled in IX2)
+                // Try window.gsap first, then check if GSAP exists elsewhere
+                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap) || (typeof gsap !== 'undefined' ? gsap : null);
+                if (!gsap) {
                     return;
                 }
                 
-                // Method 1: Pause global timeline (freezes all GSAP animations instantly)
-                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
-                    window.gsap.globalTimeline.pause();
+                // Pause global timeline (freezes all GSAP animations instantly)
+                if (gsap.globalTimeline && typeof gsap.globalTimeline.pause === 'function') {
+                    gsap.globalTimeline.pause();
                 }
                 
-                // Method 2: Pause global ticker (stops the engine entirely)
-                if (window.gsap.ticker && typeof window.gsap.ticker.pause === 'function') {
-                    window.gsap.ticker.pause();
-                }
-                
-                // Method 3: Pause global timeline via exportRoot (with true parameter to grab everything)
-                if (window.gsap.exportRoot) {
-                    try {
-                        const allTweens = window.gsap.exportRoot(true);
-                        if (allTweens && typeof allTweens.pause === 'function') {
-                            allTweens.pause();
-                        }
-                    } catch (_) {}
-                }
-                
-                // Method 4: Disable ScrollTrigger animations
-                if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                    try {
-                        window.gsap.ScrollTrigger.getAll().forEach(st => {
-                            try {
-                                if (typeof st.disable === 'function') {
-                                    st.disable();
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
-                }
-                
-                // Restore visibility for elements hidden by animations
-                if (window.gsap.exportRoot) {
-                    try {
-                        const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
-                        allAnimations.forEach(anim => {
-                            try {
-                                if (anim.targets) {
-                                    const targets = Array.isArray(anim.targets) ? anim.targets : [anim.targets];
-                                    targets.forEach(target => {
-                                        try {
-                                            if (target && target.closest && (
-                                                target.closest('#accessbit-widget-container') ||
-                                                target.closest('[id*="accessbit-widget"]') ||
-                                                target.closest('[class*="accessbit-widget"]') ||
-                                                target.closest('accessbit-widget') ||
-                                                target.closest('[data-ck-widget]')
-                                            )) {
-                                                return;
-                                            }
-                                            
-                                            if (target) {
-                                                const computed = window.getComputedStyle(target);
-                                                if (computed.opacity === '0' && 
-                                                    computed.display !== 'none' && 
-                                                    computed.visibility !== 'hidden') {
-                                                    if (target.style) {
-                                                        target.style.opacity = '1';
-                                                        target.style.visibility = 'visible';
-                                                    } else if (target.setAttribute) {
-                                                        target.setAttribute('opacity', '1');
-                                                        target.setAttribute('visibility', 'visible');
-                                                    }
-                                                }
-                                            }
-                                        } catch (_) {}
-                                    });
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
+                // Pause global ticker (stops the engine entirely - prevents inline style updates)
+                if (gsap.ticker && typeof gsap.ticker.pause === 'function') {
+                    gsap.ticker.pause();
                 }
             } catch (_) {}
         }
@@ -28869,41 +28857,22 @@ class AccessibilityWidget {
         // Restore GSAP animations
         restoreGSAPAnimations() {
             try {
-                if (typeof window.gsap === 'undefined') {
+                // GSAP might not be on window.gsap in Webflow (bundled in IX2)
+                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap) || (typeof gsap !== 'undefined' ? gsap : null);
+                if (!gsap) {
                     return;
                 }
                 
-                // Resume global timeline via exportRoot (with true parameter)
-                if (window.gsap.exportRoot) {
-                    try {
-                        const allTweens = window.gsap.exportRoot(true);
-                        if (allTweens && typeof allTweens.resume === 'function') {
-                            allTweens.resume();
-                        }
-                    } catch (_) {}
-                }
-                
                 // Resume global timeline
-                if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.resume === 'function') {
-                    window.gsap.globalTimeline.resume();
+                if (gsap.globalTimeline && typeof gsap.globalTimeline.resume === 'function') {
+                    gsap.globalTimeline.resume();
                 }
                 
-                // Resume global ticker
-                if (window.gsap.ticker && typeof window.gsap.ticker.resume === 'function') {
-                    window.gsap.ticker.resume();
-                }
-                
-                // Re-enable ScrollTrigger animations
-                if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                    try {
-                        window.gsap.ScrollTrigger.getAll().forEach(st => {
-                            try {
-                                if (typeof st.enable === 'function') {
-                                    st.enable();
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
+                // Resume global ticker (use play() not resume())
+                if (gsap.ticker && typeof gsap.ticker.play === 'function') {
+                    gsap.ticker.play();
+                } else if (gsap.ticker && typeof gsap.ticker.resume === 'function') {
+                    gsap.ticker.resume();
                 }
             } catch (_) {}
         }
@@ -28911,40 +28880,25 @@ class AccessibilityWidget {
         // Stop Lottie animations using native API methods
         stopLottieAnimations() {
             try {
-                // Method 1: Global freeze (stops animations from even starting - most effective)
-                if (typeof window.lottie !== 'undefined') {
-                    if (typeof window.lottie.freeze === 'function') {
-                        window.lottie.freeze();
-                    }
-                }
-                
-                // Method 2: Global pause/stop (pauses all current animations)
-                if (typeof window.lottie !== 'undefined') {
-                    if (typeof window.lottie.pause === 'function') {
-                        window.lottie.pause();
-                    } else if (typeof window.lottie.stop === 'function') {
-                        window.lottie.stop();
-                    }
+                // Method 1: Global pause (targets the global lottie/bodymovin object)
+                const lottieObj = window.lottie || window.bodymovin;
+                if (lottieObj && typeof lottieObj.pause === 'function') {
+                    lottieObj.pause();
                 }
                 
                 // Method 2: Individual registered animations
-                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                    const animations = window.lottie.getRegisteredAnimations();
-                    animations.forEach(anim => {
+                if (window.lottie && window.lottie.getRegisteredAnimations) {
+                    window.lottie.getRegisteredAnimations().forEach(anim => {
                         try {
-                            if (anim) {
-                                if (typeof anim.stop === 'function') {
-                                    anim.stop();
-                                } else if (typeof anim.pause === 'function') {
-                                    anim.pause();
-                                }
+                            if (anim && typeof anim.stop === 'function') {
+                                anim.stop();
                             }
                         } catch (_) {}
                     });
                 }
                 
-                // Method 3: lottie-player web components
-                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                // Method 3: lottie-player web components and Webflow-specific Lottie instances
+                document.querySelectorAll('lottie-player, dotlottie-player, [data-animation-type="lottie"]').forEach(player => {
                     try {
                         if (player.closest && (
                             player.closest('#accessbit-widget-container') ||
@@ -28956,9 +28910,7 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        if (typeof player.stop === 'function') {
-                            player.stop();
-                        } else if (typeof player.pause === 'function') {
+                        if (typeof player.pause === 'function') {
                             player.pause();
                         }
                     } catch (_) {}
