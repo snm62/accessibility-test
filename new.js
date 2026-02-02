@@ -5074,32 +5074,12 @@ class AccessibilityWidget {
                 display: none !important; /* Hidden by default */
             }
             
-            .accessbit-widget-panel.show {
-                display: block !important;
+            .accessbit-widget-panel.show,
+            .accessbit-widget-panel.active {
+                display: flex !important;
                 visibility: visible !important;
             }
             
-            /* Single breakpoint (832px) – iPad/tablet: panel covers full viewport height, no overflow */
-            @media (max-width: 768px) {
-                .accessbit-widget-icon {
-                    width: 50px !important;
-                    height: 50px !important;
-                }
-                .accessbit-widget-panel {
-                    left: 2.5vw !important;
-                    right: 2.5vw !important;
-                    margin-left: auto !important;
-                    margin-right: auto !important;
-                    top: 0 !important;
-                    bottom: 0 !important;
-                    width: 95vw !important;
-                    max-width: 400px !important;
-                    height: 100vh !important;
-                    min-height: 100vh !important;
-                    max-height: 100vh !important;
-                    overflow-y: auto !important;
-                }
-            }
                 /* Accessibility Widget Styles - Shadow DOM */
     
                 :host {
@@ -5441,57 +5421,96 @@ class AccessibilityWidget {
     
     
     
-                /* Panel: always fits viewport (no overflow); size/layout from CSS so resize doesn't break */
+                /* --- Desktop Base Panel (Side-Aware CSS) --- */
+                /* visibility controlled by .accessbit-widget-panel.show / .active above */
                 .accessbit-widget-panel {
                     position: fixed !important;
-                    width: 500px !important;
-                    max-width: 90vw !important;
-                    height: auto !important;
-                    min-height: 280px !important;
-                    max-height: calc(100vh - 40px) !important;
+                    width: 400px !important;
+                    max-width: 95vw !important;
+                    flex-direction: column !important;
+                    z-index: 2147483647 !important;
                     background: #ffffff !important;
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-                    overflow-y: auto !important;
-                    overflow-x: hidden !important;
-                    scroll-behavior: smooth !important;
-                    -webkit-overflow-scrolling: touch !important;
-                    overscroll-behavior: contain !important;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+                    overflow: hidden !important;
+                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
                 }
                 
                 .accessbit-widget-panel * {
                     scroll-behavior: auto !important;
                 }
                 
-                .accessbit-widget-panel .panel-content {
+                .accessbit-widget-panel .panel-content,
+                .accessbit-widget-panel .accessbit-widget-content {
                     overflow-y: auto !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
     
-                .accessbit-widget-panel.active {
-                    display: block !important;
+                .accessbit-widget-panel.active,
+                .accessbit-widget-panel.show {
+                    display: flex !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
     
-                /* Mobile/tablet (≤832px): panel covers full viewport height (top to bottom), no overflow */
+                /* --- Mobile / Tablet Responsiveness (768px and below) - Side-Aware --- */
                 @media (max-width: 768px) {
                     .accessbit-widget-icon {
                         width: 50px !important;
                         height: 50px !important;
                     }
-                    .accessbit-widget-panel {
-                        left: 2.5vw !important;
-                        right: 2.5vw !important;
-                        margin-left: auto !important;
-                        margin-right: auto !important;
+                    .accessbit-widget-panel.mobile-mode {
+                        width: 100vw !important;
+                        max-width: 100% !important;
+                        height: 100vh !important;
+                        max-height: 100vh !important;
                         top: 0 !important;
                         bottom: 0 !important;
-                        width: 95vw !important;
-                        max-width: 400px !important;
-                        height: 100vh !important;
-                        min-height: 100vh !important;
-                        max-height: 100vh !important;
+                        margin: 0 !important;
+                        border-radius: 0 !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.side-left {
+                        left: 0 !important;
+                        right: auto !important;
+                        transform: translateX(-100%);
+                    }
+                    .accessbit-widget-panel.mobile-mode.side-right {
+                        right: 0 !important;
+                        left: auto !important;
+                        transform: translateX(100%);
+                    }
+                    .accessbit-widget-panel.mobile-mode.active {
+                        transform: translateX(0) !important;
+                    }
+                    /* --- Structure Protector: any screen injected into the panel --- */
+                    .accessbit-widget-panel.mobile-mode .accessbit-widget-content,
+                    .accessbit-widget-panel.mobile-mode .panel-content,
+                    .accessbit-widget-panel.mobile-mode .white-content-section {
+                        flex: 1 !important;
                         overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        padding: 15px !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode .button-row,
+                    .accessbit-widget-panel.mobile-mode .action-buttons,
+                    .accessbit-widget-panel.mobile-mode .settings-grid {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        width: 100% !important;
+                        gap: 10px !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode .action-btn,
+                    .accessbit-widget-panel.mobile-mode .feature-card {
+                        width: 100% !important;
+                        min-height: 50px !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode .panel-header,
+                    .accessbit-widget-panel.mobile-mode .widget-header {
+                        padding: 20px 15px !important;
+                        font-size: 1.2rem !important;
+                        flex-shrink: 0 !important;
                     }
                 }
     
@@ -30959,88 +30978,73 @@ class AccessibilityWidget {
             }
         }
         
-        // PERFORMANCE OPTIMIZATION: Optimized resize handler
+        /**
+         * Core Responsiveness & Side Detection (Side-Aware CSS).
+         * Identifies which side the icon is on and adds the corresponding CSS class.
+         */
         handleResizeOptimized() {
-            console.log('[ICON DEBUG] handleResizeOptimized() called');
-            const elements = this.getCachedElements();
-            const icon = elements.icon;
-            const panel = elements.panel;
-            
-            if (!icon || !panel) {
-                console.log('[ICON DEBUG] handleResizeOptimized() - Icon or panel not found');
-                return;
-            }
-            
-            // Use requestAnimationFrame for DOM updates
-            requestAnimationFrame(() => {
-                const screenWidth = window.innerWidth;
-                const isMobile = screenWidth <= 768;
-                
-                // Update icon visibility
-                this.handleWindowResize();
-                
-                // Ensure base CSS is applied
-                this.ensureBasePanelCSS();
-                
-                // Use CSS transforms instead of display toggling for better performance
-                // Only update if state actually changed
-                const currentTransform = panel.style.transform || '';
-                const needsUpdate = (isMobile && !panel.classList.contains('mobile-mode')) ||
-                                 (!isMobile && panel.classList.contains('mobile-mode'));
-                
-                if (needsUpdate || !currentTransform) {
-                    if (isMobile) {
-                        // Apply mobile settings
-                        this.applyMobileResponsiveStyles();
-                        panel.classList.add('mobile-mode');
-                        
-                        // Reapply mobile positioning if it was set
+            const screenWidth = window.innerWidth;
+            const isMobile = screenWidth <= 768;
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+
+            if (!panel || !icon) return;
+
+            this.handleWindowResize();
+            this.ensureBasePanelCSS();
+
+            if (isMobile) {
+                panel.classList.add('mobile-mode');
+
+                // 1. Determine if icon is on Left or Right half of screen
+                const iconRect = icon.getBoundingClientRect();
+                const centerX = screenWidth / 2;
+                const iconCenterX = iconRect.left + (iconRect.width / 2);
+
+                if (iconCenterX > centerX) {
+                    panel.classList.add('side-right');
+                    panel.classList.remove('side-left');
+                } else {
+                    panel.classList.add('side-left');
+                    panel.classList.remove('side-right');
+                }
+
+                // 2. Clear inline desktop positioning so CSS can take over
+                ['left', 'right', 'top', 'bottom', 'transform'].forEach(prop => {
+                    panel.style.removeProperty(prop);
+                });
+
+                // 3. Optional: Trigger specific mobile element adjustments
+                this.applyMobileSizeReductions();
+            } else {
+                // Desktop Mode Cleanup
+                panel.classList.remove('mobile-mode', 'side-left', 'side-right');
+                this.removeMobileSizeReductions();
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        void panel.offsetHeight;
+                        void icon.offsetHeight;
                         if (this.customizationData) {
-                            if (this.customizationData.mobileTriggerHorizontalPosition && 
-                                this.customizationData.mobileTriggerVerticalPosition) {
-                                this.updateMobileTriggerCombinedPosition(
-                                    this.customizationData.mobileTriggerHorizontalPosition, 
-                                    this.customizationData.mobileTriggerVerticalPosition
-                                );
+                            if (this.customizationData.triggerHorizontalPosition) {
+                                this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
+                            }
+                            if (this.customizationData.triggerVerticalPosition) {
+                                this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
+                            }
+                            if (this.customizationData.triggerHorizontalOffset) {
+                                this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
+                            }
+                            if (this.customizationData.triggerVerticalOffset) {
+                                this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
+                            }
+                            if (this.customizationData.triggerButtonSize) {
+                                this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
                             }
                         }
-                    } else {
-                        // Apply desktop settings – restore desktop layout so styling/structure is not lost
-                        this.removeMobileResponsiveStyles();
-                        panel.classList.remove('mobile-mode');
-                        // Double rAF so desktop CSS is applied before we read dimensions and set position (fixes break at tablet sizes)
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                void panel.offsetHeight;
-                                void icon.offsetHeight;
-                                if (this.customizationData) {
-                                    if (this.customizationData.triggerHorizontalPosition) {
-                                        this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
-                                    }
-                                    if (this.customizationData.triggerVerticalPosition) {
-                                        this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
-                                    }
-                                    if (this.customizationData.triggerHorizontalOffset) {
-                                        this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
-                                    }
-                                    if (this.customizationData.triggerVerticalOffset) {
-                                        this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
-                                    }
-                                    if (this.customizationData.triggerButtonSize) {
-                                        this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
-                                    }
-                                }
-                                this.updateInterfacePosition();
-                            });
-                        });
-                    }
-                }
-                
-                // Update panel position relative to icon on resize (important for tablets and when panel is open)
-                if (panel.classList.contains('active') && !panel.style.transform) {
-                    this.updateInterfacePosition();
-                }
-            });
+                        this.updateInterfacePosition();
+                    });
+                });
+            }
         }
         
         // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
@@ -32415,30 +32419,32 @@ class AccessibilityWidget {
             this.applyMobileSizeReductions();
         }
         
-        // Remove mobile responsive styles so desktop CSS media queries take over
+        // Remove mobile responsive styles so desktop CSS takes over (Side-Aware)
         removeMobileResponsiveStyles() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (!panel || !icon) return;
             this.ensureBasePanelCSS();
-            panel.classList.remove('mobile-mode');
-            panel.style.removeProperty('width');
-            panel.style.removeProperty('max-width');
-            panel.style.removeProperty('left');
-            panel.style.removeProperty('right');
-            panel.style.removeProperty('top');
-            panel.style.removeProperty('bottom');
-            if (panel.classList.contains('active')) panel.style.removeProperty('transform');
-            panel.style.removeProperty('height');
-            panel.style.removeProperty('max-height');
-            panel.style.removeProperty('font-size');
-            panel.style.removeProperty('padding');
-            this.removeMobileButtonStacking();
+            panel.classList.remove('mobile-mode', 'side-left', 'side-right');
+            ['left', 'right', 'top', 'bottom', 'transform', 'width', 'max-width', 'height', 'max-height'].forEach(prop => panel.style.removeProperty(prop));
             this.removeMobileSizeReductions();
             icon.style.removeProperty('width');
             icon.style.removeProperty('height');
             const iconI = icon.querySelector('i');
             if (iconI) iconI.style.removeProperty('font-size');
+        }
+
+        /**
+         * Ensures responsiveness persists when switching internal screens.
+         * If we are on mobile, the CSS classes already on the panel format new HTML correctly.
+         */
+        renderNewScreen(html) {
+            const contentArea = this.shadowRoot?.querySelector('.accessbit-widget-content') ||
+                this.shadowRoot?.querySelector('.panel-content') ||
+                this.shadowRoot?.querySelector('.white-content-section');
+            if (contentArea) {
+                contentArea.innerHTML = html;
+            }
         }
         
         
