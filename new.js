@@ -124,12 +124,10 @@
                     transition: none !important;
                     scroll-behavior: auto !important;
                 }
-                /* Remove common flash triggers: blinking caret, shimmer, pulsing, etc. */
+                /* Remove common flash triggers: blinking caret, shimmer, pulsing, etc. (animation only; no opacity/visibility overrides) */
                 body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"], body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"], body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
                 html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"], html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"], html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"], html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
                     animation: none !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
                 }
                 body.seizure-safe [data-lottie], body.seizure-safe [class*="lottie"], body.seizure-safe lottie-player,
                 html.seizure-safe [data-lottie], html.seizure-safe [class*="lottie"], html.seizure-safe lottie-player {
@@ -5334,21 +5332,18 @@ class AccessibilityWidget {
                 visibility: visible !important;
             }
             
-            /* Mobile responsiveness - handled by main responsive CSS above */
-            
-            @media (max-width: 480px) {
+            /* Single breakpoint for widget responsiveness (matches handleResizeOptimized 768px) */
+            @media (max-width: 768px) {
                 .accessbit-widget-icon {
-                    width: 45px !important;
-                    height: 45px !important;
+                    width: 50px !important;
+                    height: 50px !important;
                 }
-                
-                .accessbit-widget-icon i {
-                    /* Font size controlled by JavaScript */
-                }
-                
                 .accessbit-widget-panel {
                     width: 95vw !important;
-                    max-width: 350px !important;
+                    max-width: 400px !important;
+                    height: auto !important;
+                    min-height: 280px !important;
+                    max-height: calc(100vh - 40px) !important;
                 }
             }
                 /* Accessibility Widget Styles - Shadow DOM */
@@ -5692,21 +5687,15 @@ class AccessibilityWidget {
     
     
     
-                /* Accessibility Panel - Fixed position on right side */
-    
+                /* Accessibility Panel - size/layout from CSS so resize doesn't break (position from JS) */
                 .accessbit-widget-panel {
-    
-                    /* REMOVED: position: fixed; - This was preventing widget from scrolling with viewport */
-    
+                    position: fixed !important;
                     width: 500px !important;
-    
+                    max-width: 90vw !important;
                     height: 700px !important;
-    
+                    max-height: calc(100vh - 40px) !important;
                     background: #ffffff !important;
-    
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-                    
-                    /* Fix scrolling conflicts with GSAP/Lenis libraries */
                     overflow-y: auto !important;
                     overflow-x: hidden !important;
                     scroll-behavior: smooth !important;
@@ -5714,73 +5703,34 @@ class AccessibilityWidget {
                     overscroll-behavior: contain !important;
                 }
                 
-                /* Override GSAP/Lenis smooth scrolling for accessibility panel */
                 .accessbit-widget-panel * {
                     scroll-behavior: auto !important;
                 }
                 
-                /* Ensure panel content is always scrollable */
                 .accessbit-widget-panel .panel-content {
                     overflow-y: auto !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
     
                 .accessbit-widget-panel.active {
-    
                     display: block !important;
-    
                     visibility: visible !important;
-    
                     opacity: 1 !important;
-    
                 }
     
-                
-    
-                /* Responsive Design - handled by main responsive CSS above */
-                    /* Position controlled by JavaScript - removed hardcoded left positioning */
-                }
-    
-                
-    
-                @media (max-width: 480px) {
-    
+                /* Mobile: same breakpoint as JS (768px) – structure and style from CSS only */
+                @media (max-width: 768px) {
                     .accessbit-widget-icon {
-    
-                        width: 45px !important;
-    
-                        height: 45px !important;
-    
-                        /* Position controlled by JS; do not force a corner here */
-    
+                        width: 50px !important;
+                        height: 50px !important;
                     }
-    
-                    
-    
-                    .accessbit-widget-icon i {
-    
-                        /* Font size controlled by JavaScript */
-    
-                    }
-    
-                    
-    
                     .accessbit-widget-panel {
-    
-                        width: 500px !important;
-    
-                        margin: 0 10px !important;
-    
-                        height: 700px !important;
-    
+                        width: 95vw !important;
+                        max-width: 400px !important;
+                        height: auto !important;
+                        min-height: 280px !important;
+                        max-height: calc(100vh - 40px) !important;
                     }
-    
-                    
-    
-                    .accessbit-widget-panel.active {
-                        /* Position controlled by JavaScript - removed hardcoded left positioning */
-                    }
-    
                 }
     
     
@@ -27310,51 +27260,30 @@ class AccessibilityWidget {
             this.stopLottiePolling();
             this._patchLottieLoadAnimation(false);
             
-            // 2. BEFORE removing CSS: clear inline opacity:0 and visibility:hidden on elements that seizure-safe made visible,
-            //    so they don't stay invisible when the override is removed (animations, images, bg-image, etc.)
-            try {
-                const widgetSelector = '#accessbit-widget-container, [id*="accessbit-widget"], [class*="accessbit-widget"], accessbit-widget, [data-ck-widget]';
-                const clearInvisible = (el) => {
-                    try {
-                        if (el.closest && el.closest(widgetSelector)) return;
-                        if (!el.style) return;
-                        if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') return;
-                        const opacity = (el.style.opacity || '').trim();
-                        const visibility = (el.style.visibility || '').trim();
-                        if (opacity === '0' || parseFloat(opacity) === 0) el.style.removeProperty('opacity');
-                        if (visibility === 'hidden') el.style.removeProperty('visibility');
-                    } catch (_) {}
-                };
-                const animationSelectors = '[data-w-id], [data-aos], [data-scroll], [data-animate], [class*="fade"], [class*="animate"], [class*="slide"], [class*="fade-up"], [class*="fade-in"], [class*="fade-left"], [class*="fade-right"]';
-                document.querySelectorAll(animationSelectors).forEach(clearInvisible);
-                document.querySelectorAll('img, video, .bg-image, [class*="bg-image"]').forEach(clearInvisible);
-            } catch (_) {}
-            
-            // 3. Remove CSS stylesheet
+            // 2. Remove CSS stylesheet (no opacity/visibility clearing – CSS no longer forces visibility)
             const existingStyle = document.getElementById('seizure-safe-css');
             if (existingStyle) {
                 existingStyle.remove();
             }
             
-            // 4. Remove seizure-safe class from body and html (explicit)
+            // 3. Remove seizure-safe class from body and html (explicit)
             try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', false);
             
-            
-            // 5. Restore WAAPI animations
+            // 4. Restore WAAPI animations
             this.restoreWAAPIAnimations();
             
-            // 6. Restore GSAP animations
+            // 5. Restore GSAP animations
             this.restoreGSAPAnimations();
             
-            // 7. Restore Lottie animations
+            // 6. Restore Lottie animations
             this.restoreLottieAnimations();
             
-            // 8. Restore Webflow interactions
+            // 7. Restore Webflow interactions
             this.restoreWebflowInteractions();
             
-            // 9. Restore autoplay media
+            // 8. Restore autoplay media
             this.restoreAllMediaAndAnimations();
             
             this.settings['seizure-safe'] = false;
@@ -27372,7 +27301,7 @@ class AccessibilityWidget {
             const style = document.createElement('style');
             style.id = 'seizure-safe-css';
             const cssText = `
-                /* Global CSS kill switch (animation/transition/scroll-behavior; exclude widget) */
+                /* Global CSS kill switch: animation/transition/scroll only (no transform, no opacity/visibility overrides) */
                 .seizure-safe *,
                 .seizure-safe *::before,
                 .seizure-safe *::after,
@@ -27388,32 +27317,6 @@ class AccessibilityWidget {
                     transition-duration: 0s !important;
                     transition-property: none !important;
                     scroll-behavior: auto !important;
-                }
-                
-                /* Only kill transforms that are animated (preserve layout transforms) */
-                .seizure-safe *[style*="transform"],
-                body.seizure-safe *[style*="transform"],
-                html.seizure-safe *[style*="transform"] {
-                    transform: none !important;
-                }
-                
-                /* Force visibility for elements stuck at opacity: 0 (GSAP/Lottie issue) - but respect aria-hidden */
-                body.seizure-safe [style*="opacity: 0"]:not([aria-hidden]),
-                body.seizure-safe [style*="opacity:0"]:not([aria-hidden]),
-                body.seizure-safe [style*="visibility: hidden"]:not([aria-hidden]),
-                body.seizure-safe [style*="visibility:hidden"]:not([aria-hidden]),
-                html.seizure-safe [style*="opacity: 0"]:not([aria-hidden]),
-                html.seizure-safe [style*="opacity:0"]:not([aria-hidden]),
-                html.seizure-safe [style*="visibility: hidden"]:not([aria-hidden]),
-                html.seizure-safe [style*="visibility:hidden"]:not([aria-hidden]) {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                
-                /* Ensure bg-image is visible when seizure mode is on */
-                body.seizure-safe .bg-image,
-                html.seizure-safe .bg-image {
-                    opacity: 1 !important;
                 }
                 
                 /* Exclude widget from kill switch */
@@ -27436,7 +27339,7 @@ class AccessibilityWidget {
                     transition: revert !important;
                 }
                 
-                /* Remove common flash triggers - blinking caret, shimmer, pulsing, etc. */
+                /* Remove common flash triggers - blinking caret, shimmer, pulsing, etc. (animation only) */
                 body.seizure-safe *[class*="blink"],
                 body.seizure-safe *[class*="shimmer"],
                 body.seizure-safe *[class*="pulse"],
@@ -27454,8 +27357,6 @@ class AccessibilityWidget {
                 html.seizure-safe *[class*="pulsing"],
                 html.seizure-safe *[class*="flashing"] {
                     animation: none !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
                 }
                 
                 /* REMOVED: Grey color filter - was causing dark blue appearance */
@@ -27490,23 +27391,6 @@ class AccessibilityWidget {
                     animation: none !important;
                     transition: none !important;
                     animation-play-state: paused !important;
-                }
-                
-                /* Force GSAP text character animations to final visible state */
-                /* This ensures text split into spans (like fadeUpTextAnimation) shows correctly */
-                body.seizure-safe .fade-up-multi-text span,
-                body.seizure-safe .fade-up-multi-text-fast span,
-                body.seizure-safe [class*="fade-up"] span,
-                body.seizure-safe [class*="text-animation"] span,
-                body.seizure-safe [class*="split-text"] span,
-                html.seizure-safe .fade-up-multi-text span,
-                html.seizure-safe .fade-up-multi-text-fast span,
-                html.seizure-safe [class*="fade-up"] span,
-                html.seizure-safe [class*="text-animation"] span,
-                html.seizure-safe [class*="split-text"] span {
-                    opacity: 1 !important;
-                    transform: translateY(0px) !important;
-                    visibility: visible !important;
                 }
                 
                 /* Only stop animated SVG/canvas (preserve static icons, charts, UI graphics) */
@@ -32012,6 +31896,9 @@ class AccessibilityWidget {
                                 this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
                             }
                         }
+                        if (this.customizationData.triggerButtonSize) {
+                            this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
+                        }
                         this.updateInterfacePosition();
                     }
                 }
@@ -33656,27 +33543,13 @@ class AccessibilityWidget {
                                  panel.style.visibility === 'hidden' ||
                                  !panel.classList.contains('active');
             
-            // Set position - use fixed positioning relative to viewport
-            // Set positioning directly without !important to avoid conflicts
+            // Set position only – size/height come from CSS (responsive) so resize keeps style/structure
             panel.style.position = 'fixed';
             panel.style.left = `${finalLeft}px`;
             panel.style.right = 'auto';
             panel.style.top = `${finalTop}px`;
             panel.style.bottom = 'auto';
             panel.style.zIndex = '2147483646';
-            
-            // Check if we're on mobile/tablet - adjust height to fit viewport
-            const isMobileOrTablet = window.innerWidth <= 819;
-            
-            if (isMobileOrTablet) {
-                // On mobile/tablet: Ensure panel doesn't overflow viewport
-                const maxHeight = window.innerHeight - finalTop - 20;
-                panel.style.setProperty('max-height', `${maxHeight}px`);
-                panel.style.setProperty('height', 'auto');
-            } else {
-                // On desktop: Use calculated or natural height
-                panel.style.setProperty('height', `${panelHeight}px`);
-            }
             
             // Only remove transform if panel is visible, otherwise preserve it
             if (!isPanelHidden) {
