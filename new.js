@@ -5429,14 +5429,26 @@ class AccessibilityWidget {
                     max-width: 95vw !important;
                     display: flex !important;
                     flex-direction: column !important;
-                    height: 600px !important;
-                    max-height: 90vh !important;
                     overflow: hidden !important;
                     z-index: 2147483647 !important;
                     background: #ffffff !important;
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
                     border-radius: 12px !important;
                     transition: transform 0.3s ease, opacity 0.2s ease !important;
+                }
+                /* 1440px+: full viewport height so panel spans screen and content area scrolls */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel {
+                        height: calc(100vh - 40px) !important;
+                        max-height: calc(100vh - 40px) !important;
+                        min-height: 400px !important;
+                    }
+                }
+                @media (max-width: 1280px) {
+                    .accessbit-widget-panel {
+                        height: 600px !important;
+                        max-height: 90vh !important;
+                    }
                 }
                 
                 .accessbit-widget-panel * {
@@ -5548,6 +5560,25 @@ class AccessibilityWidget {
                         display: none !important;
                         visibility: hidden !important;
                         opacity: 0 !important;
+                    }
+                    /* Smaller toggles for Nest Hub (1024x600), Nest Hub Max (1280x800) and tablets */
+                    .accessbit-widget-panel .toggle-switch {
+                        width: 32px !important;
+                        height: 18px !important;
+                        min-width: 32px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider {
+                        height: 18px !important;
+                        border-radius: 18px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider:before {
+                        width: 14px !important;
+                        height: 14px !important;
+                        left: 2px !important;
+                        bottom: 2px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        transform: translateX(14px) !important;
                     }
                 }
     
@@ -31654,35 +31685,42 @@ class AccessibilityWidget {
                 });
             }
             
-            // Reduce toggle switch sizes (label.toggle-switch contains input + span.slider)
+            // Reduce toggle switch sizes for Nest Hub / tablet (1024–1280px) – smaller than previous 38x22
             const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
             if (toggles && toggles.length > 0) {
-                toggles.forEach((toggle, index) => {
-                    toggle.style.setProperty('width', '38px', 'important');
-                    toggle.style.setProperty('height', '22px', 'important');
-                    
+                toggles.forEach((toggle) => {
+                    toggle.style.setProperty('width', '32px', 'important');
+                    toggle.style.setProperty('height', '18px', 'important');
                 });
             }
             
-            // Reduce toggle slider knob (.slider and its pseudo knob)
             const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
             if (sliders && sliders.length > 0) {
-                sliders.forEach((slider, index) => {
-                    // Track and bar
-                    slider.style.setProperty('height', '22px', 'important');
-                    slider.style.setProperty('border-radius', '22px', 'important');
+                sliders.forEach((slider) => {
+                    slider.style.setProperty('height', '18px', 'important');
+                    slider.style.setProperty('border-radius', '18px', 'important');
                     slider.style.setProperty('padding', '0', 'important');
                     slider.style.setProperty('box-sizing', 'border-box', 'important');
-                    // Inject a tiny stylesheet to shrink the knob (:before)
+                });
+                // Single injected style for knob at 1280px and below (Nest Hub, Nest Hub Max, tablets)
+                if (!this.shadowRoot.querySelector('#accessbit-toggle-knob-1280')) {
                     const style = document.createElement('style');
+                    style.id = 'accessbit-toggle-knob-1280';
                     style.textContent = `
-                        @media (max-width: 768px) {
-                            .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
+                        @media (max-width: 1280px) {
+                            .accessbit-widget-panel .toggle-switch .slider:before {
+                                width: 14px !important;
+                                height: 14px !important;
+                                left: 2px !important;
+                                bottom: 2px !important;
+                            }
+                            .accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                                transform: translateX(14px) !important;
+                            }
                         }
                     `;
-                    this.shadowRoot?.appendChild(style);
-                 
-                });
+                    this.shadowRoot.appendChild(style);
+                }
             }
             
             // Reduce profile item sizes
@@ -32747,14 +32785,15 @@ class AccessibilityWidget {
                 top: '20px',
                 left: `${finalLeft}px`,
                 width: '400px',
-                height: `${dynamicHeight}px`,
-                maxHeight: `${dynamicHeight}px`,
                 bottom: 'auto',
                 right: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 zIndex: '2147483646'
             });
+            panel.style.setProperty('height', `${dynamicHeight}px`, 'important');
+            panel.style.setProperty('max-height', `${dynamicHeight}px`, 'important');
+            panel.style.setProperty('min-height', '400px', 'important');
             if (panel.classList.contains('active')) panel.style.transform = 'none';
         }
     
