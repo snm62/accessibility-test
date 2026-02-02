@@ -1743,7 +1743,7 @@ class AccessibilityWidget {
                 
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = window.innerWidth <= 768;
+                    const isMobile = window.innerWidth <= 1024;
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     console.log('[INIT] Icon visibility settings:', {
@@ -1974,7 +1974,7 @@ class AccessibilityWidget {
                 this.setupOptimizedResizeHandlers();
                 
                 // Apply mobile responsive styles on load if mobile
-                if (window.innerWidth <= 768) {
+                if (window.innerWidth <= 1024) {
                     this.applyMobileResponsiveStyles();
                 }
                 
@@ -5421,12 +5421,15 @@ class AccessibilityWidget {
     
     
     
-                /* --- Desktop Base Panel (Side-Aware CSS) --- */
+                /* --- Desktop Base Panel (Responsive Drawer) --- */
                 /* visibility controlled by .accessbit-widget-panel.show / .active above */
                 .accessbit-widget-panel {
                     position: fixed !important;
                     width: 400px !important;
                     max-width: 95vw !important;
+                    height: 600px !important;
+                    max-height: 80vh !important;
+                    display: flex !important;
                     flex-direction: column !important;
                     z-index: 2147483647 !important;
                     background: #ffffff !important;
@@ -5452,21 +5455,26 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
     
-                /* --- Mobile / Tablet Responsiveness (768px and below) - Side-Aware --- */
-                @media (max-width: 768px) {
+                /* --- Responsive Drawer: iPad Pro / Surface Pro / phones (max-width: 1024px) --- */
+                @media (max-width: 1024px) {
                     .accessbit-widget-icon {
                         width: 50px !important;
                         height: 50px !important;
                     }
                     .accessbit-widget-panel.mobile-mode {
-                        width: 100vw !important;
-                        max-width: 100% !important;
                         height: 100vh !important;
                         max-height: 100vh !important;
                         top: 0 !important;
                         bottom: 0 !important;
                         margin: 0 !important;
                         border-radius: 0 !important;
+                        width: 100% !important;
+                        max-width: 420px !important;
+                    }
+                    @media (max-width: 480px) {
+                        .accessbit-widget-panel.mobile-mode {
+                            max-width: 100vw !important;
+                        }
                     }
                     .accessbit-widget-panel.mobile-mode.side-left {
                         left: 0 !important;
@@ -5481,16 +5489,20 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode.active {
                         transform: translateX(0) !important;
                     }
-                    /* --- Structure Protector: any screen injected into the panel --- */
+                    /* NEST HUB & SCROLL FIX */
                     .accessbit-widget-panel.mobile-mode .accessbit-widget-content,
                     .accessbit-widget-panel.mobile-mode .panel-content,
                     .accessbit-widget-panel.mobile-mode .white-content-section {
-                        flex: 1 !important;
+                        flex: 1 1 auto !important;
+                        height: auto !important;
                         overflow-y: auto !important;
                         overflow-x: hidden !important;
+                        display: block !important;
                         -webkit-overflow-scrolling: touch !important;
                         padding: 15px !important;
+                        padding-bottom: 40px !important;
                     }
+                    /* Structure Protector */
                     .accessbit-widget-panel.mobile-mode .button-row,
                     .accessbit-widget-panel.mobile-mode .action-buttons,
                     .accessbit-widget-panel.mobile-mode .settings-grid {
@@ -26796,6 +26808,23 @@ class AccessibilityWidget {
             this.safeBodyClassToggle('seizure-safe', true);
 
             this.injectSeizureSafeCSS();
+
+            // 1. Force kill the Curtain Loader (so page doesn't stay black when GSAP is paused)
+            try {
+                document.documentElement.classList.remove('page-locked');
+                document.body.classList.remove('page-with-loader');
+                const loader = document.querySelector('.page-loader, .curtain-page-loader');
+                if (loader) loader.style.display = 'none';
+            } catch (_) {}
+
+            // 2. Force GSAP to jump to end of all timelines (curtains snap to scaleY: 0)
+            try {
+                if (window.gsap && typeof gsap.globalTimeline !== 'undefined') {
+                    gsap.globalTimeline.progress(1);
+                    gsap.globalTimeline.pause();
+                }
+            } catch (_) {}
+
             this.stopLottieAnimations();
             this.stopAutoplayMedia();
             this.saveSettings();
@@ -26910,6 +26939,21 @@ class AccessibilityWidget {
                 body.seizure-safe [style*="opacity:0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *) {
                     opacity: 1 !important;
                     transition: none !important;
+                }
+                /* If Seizure Safe is active, force curtains to hide instantly (GSAP may be paused mid-animation) */
+                html.seizure-safe .curtain-page-loader,
+                html.seizure-safe .page-loader,
+                html.seizure-safe .curtain {
+                    display: none !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                }
+                /* Force unlock the body so the user can scroll */
+                html.seizure-safe,
+                html.seizure-safe body {
+                    overflow: auto !important;
+                    height: auto !important;
                 }
             `;
         }
@@ -30678,7 +30722,7 @@ class AccessibilityWidget {
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if (window.innerWidth <= 768) {
+                if (window.innerWidth <= 1024) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -30736,7 +30780,7 @@ class AccessibilityWidget {
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -30786,7 +30830,7 @@ class AccessibilityWidget {
             }
             
             // Check device type
-            const isMobile = window.innerWidth <= 768;
+            const isMobile = window.innerWidth <= 1024;
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -30949,9 +30993,9 @@ class AccessibilityWidget {
                 }, 200);
             }
             
-            // Listen to media query changes for breakpoints
+            // Listen to media query changes for breakpoints (1024 = iPad Pro / Surface)
             if (window.matchMedia) {
-                const mobileQuery = window.matchMedia('(max-width: 768px)');
+                const mobileQuery = window.matchMedia('(max-width: 1024px)');
                 const handleMediaChange = (e) => {
                     this.handleResizeOptimized();
                 };
@@ -30979,12 +31023,12 @@ class AccessibilityWidget {
         }
         
         /**
-         * Core Responsiveness & Side Detection (Side-Aware CSS).
-         * Identifies which side the icon is on and adds the corresponding CSS class.
+         * Core Responsiveness & Side Detection (Responsive Drawer).
+         * Threshold 1024px to include iPad Air/Pro and Surface in mobile-mode (side drawer).
          */
         handleResizeOptimized() {
             const screenWidth = window.innerWidth;
-            const isMobile = screenWidth <= 768;
+            const isMobileLogic = screenWidth <= 1024;
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
 
@@ -30993,15 +31037,12 @@ class AccessibilityWidget {
             this.handleWindowResize();
             this.ensureBasePanelCSS();
 
-            if (isMobile) {
+            if (isMobileLogic) {
                 panel.classList.add('mobile-mode');
 
-                // 1. Determine if icon is on Left or Right half of screen
                 const iconRect = icon.getBoundingClientRect();
-                const centerX = screenWidth / 2;
-                const iconCenterX = iconRect.left + (iconRect.width / 2);
-
-                if (iconCenterX > centerX) {
+                const isRightSide = (iconRect.left + iconRect.width / 2) > (screenWidth / 2);
+                if (isRightSide) {
                     panel.classList.add('side-right');
                     panel.classList.remove('side-left');
                 } else {
@@ -31009,15 +31050,12 @@ class AccessibilityWidget {
                     panel.classList.remove('side-right');
                 }
 
-                // 2. Clear inline desktop positioning so CSS can take over
-                ['left', 'right', 'top', 'bottom', 'transform'].forEach(prop => {
-                    panel.style.removeProperty(prop);
+                ['left', 'right', 'top', 'bottom', 'transform', 'width', 'height'].forEach(p => {
+                    panel.style.removeProperty(p);
                 });
 
-                // 3. Optional: Trigger specific mobile element adjustments
                 this.applyMobileSizeReductions();
             } else {
-                // Desktop Mode Cleanup
                 panel.classList.remove('mobile-mode', 'side-left', 'side-right');
                 this.removeMobileSizeReductions();
                 requestAnimationFrame(() => {
@@ -32195,7 +32233,7 @@ class AccessibilityWidget {
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -32453,7 +32491,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -32647,8 +32685,8 @@ class AccessibilityWidget {
                 return; // Don't update position if icon isn't rendered
             }
             
-            // On mobile (≤768px) panel position comes from CSS; don't overwrite with desktop pixel position
-            if (window.innerWidth <= 768) return;
+            // Match CSS media query: don't run desktop positioning on tablet/mobile (≤1024px)
+            if (window.innerWidth <= 1024) return;
             
             // Get actual panel dimensions from computed styles (respects CSS media queries)
             const panelComputedStyle = window.getComputedStyle(panel);
@@ -32823,7 +32861,7 @@ class AccessibilityWidget {
             const pos = (position || '').toLowerCase();
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                 if (isMobile) {
                     // First, clear all existing positioning
                     icon.style.removeProperty('top');
@@ -32870,7 +32908,7 @@ class AccessibilityWidget {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
        
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                
                 if (isMobile) {
                    
@@ -32966,7 +33004,7 @@ class AccessibilityWidget {
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -32990,7 +33028,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
                 if (isMobile) {
                   
                     
@@ -33106,7 +33144,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 768;
+                const isMobile = window.innerWidth <= 1024;
 
                 
                 if (isMobile) {
