@@ -93,17 +93,7 @@
             try {
                 if (document.head) document.head.appendChild(immediateReduceMotionStyle);
             } catch (_) {}
-            
-            // Use WAAPI to pause/cancel running animations immediately
-            try {
-                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-                all.forEach(anim => {
-                    try {
-                        if (typeof anim.pause === 'function') anim.pause();
-                        if (typeof anim.playbackRate !== 'undefined') anim.playbackRate = 0;
-                    } catch (_) {}
-                });
-            } catch (_) {}
+            // REMOVED: WAAPI pause – was making user GSAP/Lottie animations invisible
         }
         
         // Seizure Safe: explicit in-product toggle (stricter than prefers-reduced-motion).
@@ -195,233 +185,10 @@ const seizureState = {
 };
 // Universal Stop Motion helper: CSS + Lottie + GSAP + GIF/APNG handling
 
-                    const applyWAAPIStopMotion = function(enabled) {
+                    // No-op: do not pause WAAPI or stop Lottie/GSAP – keeps user animations visible
+                    const applyWAAPIStopMotion = function(_enabled) {
                         if (isDesignerModeStandalone()) return;
-                        try {
-                            if (enabled) {
-                                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-                                all.forEach(anim => {
-                                    try {
-                                        if (!seizureState.savedAnimations.has(anim)) {
-                                            seizureState.savedAnimations.set(anim, {
-                                                playbackRate: anim.playbackRate || 1,
-                                                playState: anim.playState || null,
-                                                currentTime: anim.currentTime || 0
-                                            });
-                                        }
-                                        if (typeof anim.pause === 'function') try { anim.pause(); } catch(_) {}
-                                        try { anim.playbackRate = 0; } catch(_) {}
-                                    } catch(_) {}
-                                });
-
-                                if (!seizureState.waapiListenersInstalled) {
-                                    // Function to stop any animation
-                                    const stopAnimation = function(anim) {
-                                        try {
-                                            if (!seizureState.savedAnimations.has(anim)) {
-                                                seizureState.savedAnimations.set(anim, { 
-                                                    playbackRate: anim.playbackRate || 1, 
-                                                    playState: anim.playState || null, 
-                                                    currentTime: anim.currentTime || 0 
-                                                });
-                                            }
-                                            // Stop/finish WAAPI animation to avoid mid-state
-                                            if (typeof anim.pause === 'function') { try { anim.pause(); } catch(_) {} }
-                                            if (typeof anim.finish === 'function') { try { anim.finish(); } catch(_) {} }
-                                            else if (anim.effect && anim.effect.getComputedTiming) {
-                                                try {
-                                                    const end = anim.effect.getComputedTiming().endTime;
-                                                    if (end != null) anim.currentTime = end;
-                                                } catch(_) {}
-                                            }
-                                            try { anim.playbackRate = 0; } catch(_) {}
-                                        } catch(_) {}
-                                    };
-                                    
-                                    // Function to stop all animations on an element
-                                    const stopElementAnimations = function(target) {
-                                        try {
-                                            const anims = target.getAnimations ? target.getAnimations() : [];
-                                            anims.forEach(stopAnimation);
-                                        } catch(_) {}
-                                    };
-                                    
-                                    // animationstart - catch new animations as they start
-                                    seizureState.onAnimationStart = function(e) {
-                                        stopElementAnimations(e.target);
-                                    };
-                                    document.addEventListener('animationstart', seizureState.onAnimationStart, true);
-                                    
-                                    // animationiteration - catch animations that continue
-                                    seizureState.onAnimationIteration = function(e) {
-                                        stopElementAnimations(e.target);
-                                    };
-                                    document.addEventListener('animationiteration', seizureState.onAnimationIteration, true);
-                                    
-                                    // transitionrun - catch transitions
-                                    seizureState.onTransitionRun = function(e) {
-                                        try {
-                                            const t = e.target;
-                                            if (t && t.style) {
-                                                t.style.transition = 'none';
-                                                t.style.animation = 'none';
-                                            }
-                                            stopElementAnimations(t);
-                                        } catch(_) {}
-                                    };
-                                    document.addEventListener('transitionrun', seizureState.onTransitionRun, true);
-                                    
-                                    // transitionstart - catch transitions early
-                                    seizureState.onTransitionStart = function(e) {
-                                        try {
-                                            const t = e.target;
-                                            if (t && t.style) {
-                                                t.style.transition = 'none';
-                                                t.style.animation = 'none';
-                                            }
-                                            stopElementAnimations(t);
-                                        } catch(_) {}
-                                    };
-                                    document.addEventListener('transitionstart', seizureState.onTransitionStart, true);
-                                    
-                                    // Continuous polling to catch animations that start without events
-                                    if (!seizureState.waapiPollInterval) {
-                                        seizureState.waapiPollInterval = setInterval(function() {
-                                            try {
-                                                const all = (document.getAnimations && document.getAnimations({ subtree: true })) || [];
-                                                all.forEach(stopAnimation);
-                                            } catch(_) {}
-                                        }, 100); // Check every 100ms
-                                    }
-                                    
-                                    // MutationObserver to catch dynamically added elements with animations
-                                    if (!seizureState.waapiMutationObserver) {
-                                        seizureState.waapiMutationObserver = new MutationObserver(function(mutations) {
-                                            mutations.forEach(function(mutation) {
-                                                mutation.addedNodes.forEach(function(node) {
-                                                    if (node.nodeType === 1) { // Element node
-                                                        try {
-                                                            stopElementAnimations(node);
-                                                            
-                                                            // Also stop Lottie animations on new elements
-                                                            if (node.tagName === 'LOTTIE-PLAYER' || node.classList.contains('lottie') || node.classList.contains('lottie-animation') || node.hasAttribute('data-lottie') || node.hasAttribute('data-animation')) {
-                                                                try {
-                                                                    if (node.stop) node.stop();
-                                                                    if (node.pause) node.pause();
-                                                                    if (node.setSpeed) node.setSpeed(0);
-                                                                } catch(_) {}
-                                                                try {
-                                                                    if (node._lottie) {
-                                                                        if (node._lottie.stop) node._lottie.stop();
-                                                                        if (node._lottie.pause) node._lottie.pause();
-                                                                        if (node._lottie.setSpeed) node._lottie.setSpeed(0);
-                                                                    }
-                                                                    if (node.lottie) {
-                                                                        if (node.lottie.stop) node.lottie.stop();
-                                                                        if (node.lottie.pause) node.lottie.pause();
-                                                                        if (node.lottie.setSpeed) node.lottie.setSpeed(0);
-                                                                    }
-                                                                } catch(_) {}
-                                                            }
-                                                            
-                                                            // Also stop GSAP animations on new elements
-                                                            if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
-                                                                try {
-                                                                    window.gsap.killTweensOf(node);
-                                                                    // Also check children for GSAP animations
-                                                                    const children = node.querySelectorAll ? node.querySelectorAll('*') : [];
-                                                                    children.forEach(function(child) {
-                                                                        try {
-                                                                            window.gsap.killTweensOf(child);
-                                                                        } catch(_) {}
-                                                                    });
-                                                                } catch(_) {}
-                                                            }
-                                                            
-                                                            // Also check children
-                                                            const children = node.querySelectorAll ? node.querySelectorAll('*') : [];
-                                                            children.forEach(function(child) {
-                                                                stopElementAnimations(child);
-                                                                
-                                                                // Stop Lottie on children
-                                                                if (child.tagName === 'LOTTIE-PLAYER' || child.classList.contains('lottie') || child.classList.contains('lottie-animation') || child.hasAttribute('data-lottie') || child.hasAttribute('data-animation')) {
-                                                                    try {
-                                                                        if (child.stop) child.stop();
-                                                                        if (child.pause) child.pause();
-                                                                        if (child.setSpeed) child.setSpeed(0);
-                                                                    } catch(_) {}
-                                                                    try {
-                                                                        if (child._lottie) {
-                                                                            if (child._lottie.stop) child._lottie.stop();
-                                                                            if (child._lottie.pause) child._lottie.pause();
-                                                                            if (child._lottie.setSpeed) child._lottie.setSpeed(0);
-                                                                        }
-                                                                        if (child.lottie) {
-                                                                            if (child.lottie.stop) child.lottie.stop();
-                                                                            if (child.lottie.pause) child.lottie.pause();
-                                                                            if (child.lottie.setSpeed) child.lottie.setSpeed(0);
-                                                                        }
-                                                                    } catch(_) {}
-                                                                }
-                                                                
-                                                                // REMOVED: Stop GSAP on children - causes blank animations when disabled
-                                                                // if (typeof window.gsap !== 'undefined' && window.gsap.killTweensOf) {
-                                                                //     try {
-                                                                //         window.gsap.killTweensOf(child);
-                                                                //     } catch(_) {}
-                                                                // }
-                                                            });
-                                                        } catch(_) {}
-                                                    }
-                                                });
-                                            });
-                                        });
-                                        seizureState.waapiMutationObserver.observe(document.body, {
-                                            childList: true,
-                                            subtree: true
-                                        });
-                                    }
-                                    
-                                    seizureState.waapiListenersInstalled = true;
-                                }
-                            } else {
-                                if (seizureState.savedAnimations) {
-                                    for (const [a, meta] of seizureState.savedAnimations.entries()) {
-                                        try {
-                                            if (typeof a.play === 'function') {
-                                                try { a.playbackRate = (meta.playbackRate != null ? meta.playbackRate : 1); } catch(_) {}
-                                                if (meta.playState === 'running') try { a.play(); } catch(_) {}
-                                            }
-                                        } catch(_) {}
-                                    }
-                                    seizureState.savedAnimations.clear();
-                                }
-                                if (seizureState.waapiListenersInstalled) {
-                                    try { document.removeEventListener('animationstart', seizureState.onAnimationStart, true); } catch(_) {}
-                                    try { document.removeEventListener('animationiteration', seizureState.onAnimationIteration, true); } catch(_) {}
-                                    try { document.removeEventListener('transitionrun', seizureState.onTransitionRun, true); } catch(_) {}
-                                    try { document.removeEventListener('transitionstart', seizureState.onTransitionStart, true); } catch(_) {}
-                                    seizureState.onAnimationStart = null;
-                                    seizureState.onAnimationIteration = null;
-                                    seizureState.onTransitionRun = null;
-                                    seizureState.onTransitionStart = null;
-                                    
-                                    // Clear polling interval
-                                    if (seizureState.waapiPollInterval) {
-                                        clearInterval(seizureState.waapiPollInterval);
-                                        seizureState.waapiPollInterval = null;
-                                    }
-                                    
-                                    // Disconnect MutationObserver
-                                    if (seizureState.waapiMutationObserver) {
-                                        seizureState.waapiMutationObserver.disconnect();
-                                        seizureState.waapiMutationObserver = null;
-                                    }
-                                    
-                                    seizureState.waapiListenersInstalled = false;
-                                }
-                            }
-                        } catch(_) {}
+                        /* REMOVED: WAAPI pause, Lottie stop, GSAP kill – was making animations invisible */
                     };
                     
                     seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
@@ -470,17 +237,8 @@ function applyUniversalStopMotion(enabled) {
             css.remove();
         }
 
-        // WAAPI: pause/cancel running WAAPI animations where possible
+        // REMOVED: WAAPI/Lottie stop – keeps user GSAP/Lottie animations visible
         try { applyWAAPIStopMotion && applyWAAPIStopMotion(enabled); } catch (_) {}
-
-        // Lottie: stop all registered animations
-        try {
-            if (enabled && typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                const all = window.lottie.getRegisteredAnimations();
-                all && all.forEach(anim => { try { anim.stop && anim.stop(); } catch (_) {} });
-                try { window.lottie.freeze && window.lottie.freeze(); } catch (_) {}
-            }
-        } catch (_) {}
 
 
         // GIF/APNG replacement (one-frame transparent pixel by default) - Designer-safe
@@ -531,12 +289,7 @@ function applyUniversalStopMotion(enabled) {
                 const obs = new MutationObserver(mutations => {
                     const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
                     if (!active) return;
-                    try {
-                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                            const all = window.lottie.getRegisteredAnimations();
-                            all && all.forEach(anim => { try { anim.stop && anim.stop(); } catch (_) {} });
-                        }
-                    } catch (_) {}
+                    // REMOVED: Lottie stop on new nodes – keeps user animations visible
                     try {
                         mutations.forEach(m => m.addedNodes && m.addedNodes.forEach(node => {
                             if (node && node.tagName === 'IMG') {
@@ -5332,13 +5085,19 @@ class AccessibilityWidget {
                 visibility: visible !important;
             }
             
-            /* Single breakpoint for widget responsiveness (matches handleResizeOptimized 768px) */
+            /* Single breakpoint (768px) – panel fits viewport, no overflow */
             @media (max-width: 768px) {
                 .accessbit-widget-icon {
                     width: 50px !important;
                     height: 50px !important;
                 }
                 .accessbit-widget-panel {
+                    left: 2.5vw !important;
+                    right: 2.5vw !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    top: 20px !important;
+                    bottom: auto !important;
                     width: 95vw !important;
                     max-width: 400px !important;
                     height: auto !important;
@@ -5687,12 +5446,13 @@ class AccessibilityWidget {
     
     
     
-                /* Accessibility Panel - size/layout from CSS so resize doesn't break (position from JS) */
+                /* Panel: always fits viewport (no overflow); size/layout from CSS so resize doesn't break */
                 .accessbit-widget-panel {
                     position: fixed !important;
                     width: 500px !important;
                     max-width: 90vw !important;
-                    height: 700px !important;
+                    height: auto !important;
+                    min-height: 280px !important;
                     max-height: calc(100vh - 40px) !important;
                     background: #ffffff !important;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
@@ -5718,13 +5478,19 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
     
-                /* Mobile: same breakpoint as JS (768px) – structure and style from CSS only */
+                /* Mobile (≤768px): panel fits viewport, centered; position from CSS so structure holds */
                 @media (max-width: 768px) {
                     .accessbit-widget-icon {
                         width: 50px !important;
                         height: 50px !important;
                     }
                     .accessbit-widget-panel {
+                        left: 2.5vw !important;
+                        right: 2.5vw !important;
+                        margin-left: auto !important;
+                        margin-right: auto !important;
+                        top: 20px !important;
+                        bottom: auto !important;
                         width: 95vw !important;
                         max-width: 400px !important;
                         height: auto !important;
@@ -26037,169 +25803,10 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Start continuous polling for Lottie and GSAP animations
-        // This catches animations that start AFTER seizure mode is enabled
+        // No-op: do not poll to stop Lottie/GSAP – keeps user animations visible
         startLottieGSAPPolling() {
-            // Clear any existing intervals first
             this.stopLottieGSAPPolling();
-            
-            // Poll for Lottie animations every 100ms
-            if (!this.lottiePollInterval) {
-                this.lottiePollInterval = setInterval(() => {
-                    try {
-                        // Method 1: lottie-player web component - Use official API methods
-                        const lottiePlayers = document.querySelectorAll('lottie-player');
-                        lottiePlayers.forEach(player => {
-                            try {
-                                // Use lottie-player's official API methods in correct order
-                                if (typeof player.setSpeed === 'function') {
-                                    player.setSpeed(0);
-                                }
-                                if (typeof player.stop === 'function') {
-                                    player.stop();
-                                }
-                                if (typeof player.pause === 'function') {
-                                    player.pause();
-                                }
-                                if (typeof player.seek === 'function') {
-                                    player.seek(0);
-                                }
-                                if (typeof player.setMode === 'function') {
-                                    player.setMode('normal');
-                                }
-                                player.setAttribute('autoplay', 'false');
-                                // REMOVED: removeAttribute('loop') - don't break loop configuration, just pause
-                            } catch (_) {}
-                        });
-                        
-                        // Method 2: bodymovin/lottie library - Use official API methods
-                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                            const lottieAnimations = window.lottie.getRegisteredAnimations();
-                            lottieAnimations.forEach(animation => {
-                                try {
-                                    if (animation) {
-                                        // Use Lottie's official API in correct order
-                                        if (typeof animation.setSpeed === 'function') {
-                                            animation.setSpeed(0);
-                                        }
-                                        if (typeof animation.stop === 'function') {
-                                            animation.stop();
-                                        }
-                                        if (typeof animation.pause === 'function') {
-                                            animation.pause();
-                                        }
-                                        if (typeof animation.goToAndStop === 'function') {
-                                            animation.goToAndStop(0, true);
-                                        }
-                                        if (animation.autoplay !== undefined) {
-                                            animation.autoplay = false;
-                                        }
-                                        // REMOVED: Don't set loop = false - just pause, don't break the loop property
-                                        // The pause() call above stops the animation without breaking its loop configuration
-                                    }
-                                } catch (_) {}
-                            });
-                        }
-                        
-                        // Method 3: lottie-web (newer API) - check element instances with comprehensive API calls
-                        const lottieElements = document.querySelectorAll('[data-lottie], [data-animation], .lottie, .lottie-animation');
-                        lottieElements.forEach(el => {
-                            try {
-                                const lottieInstance = el._lottie || el.lottie || el.__lottie;
-                                if (lottieInstance) {
-                                    if (typeof lottieInstance.setSpeed === 'function') {
-                                        lottieInstance.setSpeed(0);
-                                    }
-                                    if (typeof lottieInstance.stop === 'function') {
-                                        lottieInstance.stop();
-                                    }
-                                    if (typeof lottieInstance.pause === 'function') {
-                                        lottieInstance.pause();
-                                    }
-                                    if (typeof lottieInstance.goToAndStop === 'function') {
-                                        lottieInstance.goToAndStop(0, true);
-                                    }
-                                    if (lottieInstance.autoplay !== undefined) {
-                                        lottieInstance.autoplay = false;
-                                    }
-                                    // REMOVED: Don't set loop = false - just pause, don't break the loop property
-                                    // The pause() call above stops the animation without breaking its loop configuration
-                                }
-                            } catch (_) {}
-                        });
-                        
-                        // Method 4: Also handle lottie-player web components in polling (already handled in Method 1 above)
-                        // Note: lottie-player is handled at the start of this polling function
-                    } catch (_) {}
-                }, 100); // Check every 100ms
-            }
-            
-            // Poll for GSAP animations - Safe pause (doesn't break scroll)
-            if (!this.gsapPollInterval) {
-                this.gsapPollInterval = setInterval(() => {
-                    try {
-                        if (typeof window.gsap !== 'undefined') {
-                            // Safe Method: Pause animations excluding ScrollTrigger
-                            if (window.gsap.exportRoot) {
-                                try {
-                                    const allAnimations = window.gsap.exportRoot().getChildren(true, true, true);
-                                    allAnimations.forEach(anim => {
-                                        try {
-                                            // CRITICAL: Exclude ScrollTrigger animations to preserve scroll functionality
-                                            if (!anim.scrollTrigger) {
-                                                anim.pause(); // Safe pause
-                                                
-                                                // CRITICAL: Restore elements to visible state if they're hidden by GSAP
-                                                // GSAP animations often start at opacity: 0, so we need to restore visibility
-                                                if (anim.targets && Array.isArray(anim.targets)) {
-                                                    anim.targets.forEach(target => {
-                                                        try {
-                                                            if (target && target.style) {
-                                                                const computedStyle = window.getComputedStyle(target);
-                                                                // If element is hidden (opacity 0) and not intentionally hidden
-                                                                if (computedStyle.opacity === '0' && 
-                                                                    computedStyle.display !== 'none' && 
-                                                                    computedStyle.visibility !== 'hidden') {
-                                                                    // Restore to visible - GSAP was animating it
-                                                                    target.style.opacity = '1';
-                                                                    target.style.visibility = 'visible';
-                                                                }
-                                                            }
-                                                        } catch (_) {}
-                                                    });
-                                                } else if (anim.targets && anim.targets.style) {
-                                                    // Single target
-                                                    try {
-                                                        const target = anim.targets;
-                                                        const computedStyle = window.getComputedStyle(target);
-                                                        if (computedStyle.opacity === '0' && 
-                                                            computedStyle.display !== 'none' && 
-                                                            computedStyle.visibility !== 'hidden') {
-                                                            target.style.opacity = '1';
-                                                            target.style.visibility = 'visible';
-                                                        }
-                                                    } catch (_) {}
-                                                }
-                                            }
-                                        } catch (_) {}
-                                    });
-                                } catch (_) {}
-                            }
-                            
-                            // Safe Global Timeline Pause
-                            if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
-                                try {
-                                    window.gsap.globalTimeline.pause(); // Safe - ScrollTrigger still works
-                                } catch (_) {}
-                            }
-                            
-                            // REMOVED: killTweensOf('*') - dangerous, breaks scroll
-                            // REMOVED: getAllTimelines().forEach(tl => tl.kill()) - dangerous
-                            // REMOVED: getAllTweens().forEach(tween => tween.kill()) - dangerous
-                        }
-                    } catch (_) {}
-                }, 100); // Check every 100ms
-            }
+            /* REMOVED: Lottie/GSAP polling – was making animations invisible */
         }
         
         // Stop continuous polling for Lottie and GSAP animations
@@ -27198,16 +26805,10 @@ class AccessibilityWidget {
             this._patchLottieLoadAnimation(true);
         }
         
-        // Poll for new Lottie animations and stop them
+        // No-op: do not poll to stop Lottie – keeps user Lottie animations visible
         startLottiePolling() {
             this.stopLottiePolling();
-            this.lottiePollInterval = setInterval(() => {
-                if (!document.body.classList.contains('seizure-safe')) {
-                    this.stopLottiePolling();
-                    return;
-                }
-                this.stopLottieAnimations();
-            }, 200);
+            /* REMOVED: interval that called stopLottieAnimations – was making animations invisible */
         }
         
         stopLottiePolling() {
@@ -27217,32 +26818,17 @@ class AccessibilityWidget {
             }
         }
         
-        // Intercept lottie.loadAnimation so late-loaded Lottie is stopped immediately when seizure-safe is on
+        // No-op when enable=true: do not intercept loadAnimation – keeps user Lottie animations visible
         _patchLottieLoadAnimation(enable) {
             try {
-                const lottie = window.lottie && (window.lottie.default || window.lottie);
-                if (!lottie || typeof lottie.loadAnimation !== 'function') return;
                 if (enable) {
-                    if (this._originalLottieLoadAnimation) return;
-                    const self = this;
-                    this._originalLottieLoadAnimation = lottie.loadAnimation.bind(lottie);
-                    lottie.loadAnimation = function(options) {
-                        const anim = self._originalLottieLoadAnimation(options);
-                        if (anim && document.body.classList.contains('seizure-safe')) {
-                            try {
-                                if (typeof anim.stop === 'function') anim.stop();
-                                if (typeof anim.goToAndStop === 'function') anim.goToAndStop(0, true);
-                                if (typeof anim.pause === 'function') anim.pause();
-                                if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
-                            } catch (_) {}
-                        }
-                        return anim;
-                    };
-                } else {
-                    if (this._originalLottieLoadAnimation) {
-                        lottie.loadAnimation = this._originalLottieLoadAnimation;
-                        this._originalLottieLoadAnimation = null;
-                    }
+                    /* REMOVED: patching loadAnimation to stop new Lottie – was making animations invisible */
+                    return;
+                }
+                const lottie = window.lottie && (window.lottie.default || window.lottie);
+                if (lottie && this._originalLottieLoadAnimation) {
+                    lottie.loadAnimation = this._originalLottieLoadAnimation;
+                    this._originalLottieLoadAnimation = null;
                 }
             } catch (_) {}
         }
@@ -27415,22 +27001,9 @@ class AccessibilityWidget {
             document.head.appendChild(style);
         }
         
-        // WAAPI: pause + playbackRate = 0 (Security: use WAAPI controls, no global hijacking)
+        // No-op: do not pause WAAPI – keeps user animations visible
         stopWAAPIAnimations() {
-            try {
-                if (typeof document.getAnimations !== 'function') return;
-                document.getAnimations().forEach(animation => {
-                    try {
-                        const target = animation.effect && animation.effect.target;
-                        if (target && (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container') ||
-                            target.closest && (target.closest('#accessbit-widget-container') || target.closest('[id*="accessbit-widget"]') || target.closest('[class*="accessbit-widget"]') || target.closest('accessbit-widget') || target.closest('[data-ck-widget]')))) {
-                            return;
-                        }
-                        if (typeof animation.pause === 'function') animation.pause();
-                        if (typeof animation.playbackRate !== 'undefined') animation.playbackRate = 0;
-                    } catch (_) {}
-                });
-            } catch (_) {}
+            /* REMOVED: was making GSAP/Lottie and other animations invisible */
         }
         
         // Restore WAAPI animations
@@ -27470,48 +27043,9 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop GSAP animations using public API
+        // No-op: do not pause GSAP – keeps user GSAP animations visible
         stopGSAPAnimations() {
-            try {
-                // GSAP might not be on window.gsap in Webflow (bundled in IX2)
-                // Try multiple ways to find GSAP
-                let gsap = null;
-                if (typeof window !== 'undefined') {
-                    gsap = window.gsap || (window.GSAP && window.GSAP.gsap);
-                }
-                if (!gsap && typeof gsap !== 'undefined') {
-                    gsap = gsap;
-                }
-                
-                if (!gsap) {
-                    return;
-                }
-                // Pause global timeline (freezes all GSAP animations instantly)
-                if (gsap.globalTimeline && typeof gsap.globalTimeline.pause === 'function') {
-                    try {
-                        gsap.globalTimeline.pause();
-                    } catch (_) {}
-                }
-                
-                // Pause global ticker (stops the engine entirely - prevents inline style updates)
-                if (gsap.ticker && typeof gsap.ticker.pause === 'function') {
-                    try {
-                        gsap.ticker.pause();
-                    } catch (_) {}
-                }
-                
-                // Also pause all ScrollTriggers if available
-                if (gsap.ScrollTrigger && typeof gsap.ScrollTrigger.getAll === 'function') {
-                    try {
-                        const triggers = gsap.ScrollTrigger.getAll();
-                        triggers.forEach(trigger => {
-                            if (trigger && typeof trigger.disable === 'function') {
-                                trigger.disable();
-                            }
-                        });
-                    } catch (_) {}
-                }
-            } catch (_) {}
+            /* REMOVED: globalTimeline/ticker/ScrollTrigger pause was making animations invisible */
         }
         
         // Restore GSAP animations
@@ -27562,121 +27096,9 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie animations using Lottie API: stop(), pause(), goToAndStop(), setSpeed(0) (platform equivalents supported)
+        // No-op: do not stop Lottie – keeps user Lottie animations visible
         stopLottieAnimations() {
-            try {
-                const lottie = window.lottie && (window.lottie.default || window.lottie);
-                if (!lottie) {
-                    // Still try DOM-based stop (lottie-player, [data-lottie], etc.) below
-                } else {
-                    if (typeof lottie.freeze === 'function') {
-                        try { lottie.freeze(); } catch (_) {}
-                    }
-                    if (typeof lottie.getRegisteredAnimations === 'function') {
-                        (lottie.getRegisteredAnimations() || []).forEach(anim => {
-                        try {
-                            if (anim) {
-                                // Stop and freeze at frame 0
-                                if (typeof anim.stop === 'function') {
-                                    anim.stop();
-                                }
-                                if (typeof anim.goToAndStop === 'function') {
-                                    anim.goToAndStop(0, true);
-                                }
-                                if (typeof anim.pause === 'function') {
-                                    anim.pause();
-                                }
-                                // Disable loop and autoplay
-                                if (anim.loop !== undefined) {
-                                    anim.loop = false;
-                                }
-                                if (anim.autoplay !== undefined) {
-                                    anim.autoplay = false;
-                                }
-                                if (typeof anim.setSpeed === 'function') {
-                                    anim.setSpeed(0);
-                                }
-                            }
-                        } catch (_) {}
-                    });
-                    }
-                }
-                
-                // Method 3: lottie-player web components
-                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
-                    try {
-                        if (player.closest && (
-                            player.closest('#accessbit-widget-container') ||
-                            player.closest('[id*="accessbit-widget"]') ||
-                            player.closest('[class*="accessbit-widget"]') ||
-                            player.closest('accessbit-widget') ||
-                            player.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        if (typeof player.stop === 'function') player.stop();
-                        else if (typeof player.pause === 'function') player.pause();
-                        if (typeof player.seek === 'function') player.seek(0);
-                        if (typeof player.setSpeed === 'function') player.setSpeed(0);
-                    } catch (_) {}
-                });
-                
-                // Method 4: Find Lottie instances attached to DOM elements (Webflow, custom implementations)
-                document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"], [data-animation-type="lottie"], [data-w-id][data-animation-type="lottie"]').forEach(el => {
-                    try {
-                        if (el.closest && (
-                            el.closest('#accessbit-widget-container') ||
-                            el.closest('[id*="accessbit-widget"]') ||
-                            el.closest('[class*="accessbit-widget"]') ||
-                            el.closest('accessbit-widget') ||
-                            el.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        // Check for Lottie instance on element
-                        const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
-                        if (inst) {
-                            if (typeof inst.stop === 'function') inst.stop();
-                            if (typeof inst.goToAndStop === 'function') inst.goToAndStop(0, true);
-                            if (typeof inst.pause === 'function') inst.pause();
-                            if (typeof inst.setSpeed === 'function') inst.setSpeed(0);
-                        }
-                        
-                        const svg = el.querySelector('svg, canvas');
-                        if (svg) {
-                            const svgInst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
-                            if (svgInst) {
-                                if (typeof svgInst.stop === 'function') svgInst.stop();
-                                if (typeof svgInst.goToAndStop === 'function') svgInst.goToAndStop(0, true);
-                                if (typeof svgInst.pause === 'function') svgInst.pause();
-                                if (typeof svgInst.setSpeed === 'function') svgInst.setSpeed(0);
-                            }
-                        }
-                    } catch (_) {}
-                });
-                
-                // Method 5: SVG elements with Lottie instances (e.g. Webflow)
-                document.querySelectorAll('svg').forEach(svg => {
-                    try {
-                        if (svg.closest && (
-                            svg.closest('#accessbit-widget-container') ||
-                            svg.closest('[id*="accessbit-widget"]') ||
-                            svg.closest('[class*="accessbit-widget"]') ||
-                            svg.closest('accessbit-widget') ||
-                            svg.closest('[data-ck-widget]')
-                        )) return;
-                        const inst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
-                        if (inst) {
-                            if (typeof inst.stop === 'function') inst.stop();
-                            if (typeof inst.goToAndStop === 'function') inst.goToAndStop(0, true);
-                            if (typeof inst.pause === 'function') inst.pause();
-                            if (typeof inst.setSpeed === 'function') inst.setSpeed(0);
-                        }
-                    } catch (_) {}
-                });
-            } catch (_) {}
+            /* REMOVED: was making Lottie animations invisible */
         }
         
         // Restore Lottie animations using Lottie API: play(), setSpeed(1)
@@ -28372,193 +27794,9 @@ class AccessibilityWidget {
             return;
         }
         
-        // Universal Lottie Animation Stopping - Works on ALL websites
-        // Uses the clean "Pause All" method - maintains state, keeps structure intact
+        // No-op: do not stop Lottie – keeps user Lottie animations visible
         stopAllLottieAnimations() {
-            try {
-                // Method 1: Stop all individual Lottie instances at frame 0 to prevent loop distortion
-                // This ensures loop animations show a clean first frame instead of overlapping frames
-                const stopAllLottieInstances = () => {
-                    try {
-                        // Get all registered Lottie animations
-                        if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                            const allAnimations = window.lottie.getRegisteredAnimations();
-                            if (allAnimations && allAnimations.length > 0) {
-                                allAnimations.forEach(anim => {
-                                    try {
-                                        // CRITICAL: Stop the animation completely first
-                                        if (typeof anim.stop === 'function') {
-                                            anim.stop();
-                                        }
-                                        // Stop at frame 0 to prevent loop distortion - use frame 0, not current frame
-                                        if (typeof anim.goToAndStop === 'function') {
-                                            anim.goToAndStop(0, true);
-                                        }
-                                        // Disable loop to prevent restart - do this BEFORE pausing
-                                        if (anim.loop !== undefined) {
-                                            anim.loop = false;
-                                        }
-                                        // Also try to set loopCount to 0 if available
-                                        if (anim.loopCount !== undefined) {
-                                            anim.loopCount = 0;
-                                        }
-                                        // Pause the animation
-                                        if (typeof anim.pause === 'function') {
-                                            anim.pause();
-                                        }
-                                        // Set speed to 0 as additional safety
-                                        if (typeof anim.setSpeed === 'function') {
-                                            anim.setSpeed(0);
-                                        }
-                                        // Force render at frame 0 to ensure clean state
-                                        if (typeof anim.renderer !== 'undefined' && anim.renderer && typeof anim.renderer.renderFrame === 'function') {
-                                            try {
-                                                anim.renderer.renderFrame(0);
-                                            } catch (_) {}
-                                        }
-                                    } catch (_) {}
-                                });
-                            }
-                        }
-                    } catch (_) {}
-                    
-                    // Handle lottie-player web components
-                    try {
-                        const lottiePlayers = document.querySelectorAll('lottie-player, dotlottie-player');
-                        lottiePlayers.forEach(player => {
-                            try {
-                                // Stop completely first
-                                if (typeof player.stop === 'function') {
-                                    player.stop();
-                                }
-                                // Stop at first frame (frame 0)
-                                if (typeof player.seek === 'function') {
-                                    player.seek(0);
-                                }
-                                // Disable loop
-                                if (player.loop !== undefined) {
-                                    player.loop = false;
-                                }
-                                // Also try setLooping
-                                if (typeof player.setLooping === 'function') {
-                                    player.setLooping(false);
-                                }
-                                // Pause
-                                if (typeof player.pause === 'function') {
-                                    player.pause();
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
-                    
-                    // Handle DOM elements with Lottie data attributes
-                    try {
-                        const lottieElements = document.querySelectorAll('[data-lottie], [class*="lottie"], [id*="lottie"]');
-                        lottieElements.forEach(el => {
-                            try {
-                                // Try to access the Lottie instance
-                                const lottieInstance = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
-                                if (lottieInstance) {
-                                    // Stop completely first
-                                    if (typeof lottieInstance.stop === 'function') {
-                                        lottieInstance.stop();
-                                    }
-                                    // Stop at frame 0
-                                    if (typeof lottieInstance.goToAndStop === 'function') {
-                                        lottieInstance.goToAndStop(0, true);
-                                    }
-                                    // Disable loop
-                                    if (lottieInstance.loop !== undefined) {
-                                        lottieInstance.loop = false;
-                                    }
-                                    if (lottieInstance.loopCount !== undefined) {
-                                        lottieInstance.loopCount = 0;
-                                    }
-                                    // Pause
-                                    if (typeof lottieInstance.pause === 'function') {
-                                        lottieInstance.pause();
-                                    }
-                                    // Set speed to 0
-                                    if (typeof lottieInstance.setSpeed === 'function') {
-                                        lottieInstance.setSpeed(0);
-                                    }
-                                }
-                            } catch (_) {}
-                        });
-                    } catch (_) {}
-                };
-                
-                // Execute the stop function immediately
-                stopAllLottieInstances();
-                
-                // Run again after a short delay to catch any animations that were loading
-                setTimeout(() => {
-                    stopAllLottieInstances();
-                }, 100);
-                
-                // Method 2: Global API pause (backup)
-                const player = window.lottie || window.bodymovin;
-                if (player && typeof player.pause === 'function') {
-                    try {
-                        player.pause(); // Pauses all active Lottie animations globally
-                    } catch (_) {}
-                }
-                
-                // Call CSS injection for visual freeze
-                this.injectLottieVisualFreezeCSS();
-                
-                // Additional safety: Prevent restart with setSpeed(0)
-                if (player && typeof player.setSpeed === 'function') {
-                    try {
-                        player.setSpeed(0); // Safety net if another script tries to .play()
-                    } catch (_) {}
-                }
-                
-                // Freeze all future animations (prevents new animations from starting)
-                if (player && typeof player.freeze === 'function') {
-                    try {
-                        player.freeze();
-                    } catch (_) {}
-                }
-                
-                // Method 3: Override Lottie loading globally (store original for restoration)
-                // Prevents new animations from starting when seizure-safe is active
-                if (player && typeof player.loadAnimation === 'function' && !seizureState.originalLottieLoadAnimation) {
-                    seizureState.originalLottieLoadAnimation = player.loadAnimation;
-                    const self = this;
-                    player.loadAnimation = function(config) {
-                        try {
-                            const anim = seizureState.originalLottieLoadAnimation.call(this, config);
-                            if (anim) {
-                                // Stop completely first
-                                if (typeof anim.stop === 'function') {
-                                    anim.stop();
-                                }
-                                // Stop at frame 0 and disable loop for new animations
-                                if (typeof anim.goToAndStop === 'function') {
-                                    anim.goToAndStop(0, true);
-                                }
-                                if (anim.loop !== undefined) {
-                                    anim.loop = false;
-                                }
-                                if (anim.loopCount !== undefined) {
-                                    anim.loopCount = 0;
-                                }
-                                if (typeof anim.pause === 'function') {
-                                    anim.pause(); // Immediately pause new animations
-                                }
-                                if (typeof anim.setSpeed === 'function') {
-                                    anim.setSpeed(0);
-                                }
-                            }
-                            return anim;
-                        } catch (_) {
-                            return seizureState.originalLottieLoadAnimation.call(this, config);
-                        }
-                    };
-                }
-                
-            } catch (_) {}
+            /* REMOVED: was making Lottie animations invisible */
         }
         
         // Add CSS for visual freeze - freezes SVG animations visually without removing them
@@ -31877,29 +31115,31 @@ class AccessibilityWidget {
                         // Apply desktop settings – restore desktop layout so styling/structure is not lost
                         this.removeMobileResponsiveStyles();
                         panel.classList.remove('mobile-mode');
-                        // Force reflow so desktop CSS (min-width: 769px) is applied before we read dimensions.
-                        // Without this, small→big resize reads panel/icon before layout updates and loses styling.
-                        void panel.offsetHeight;
-                        void icon.offsetHeight;
-                        // Re-apply desktop trigger position from customization
-                        if (this.customizationData) {
-                            if (this.customizationData.triggerHorizontalPosition) {
-                                this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
-                            }
-                            if (this.customizationData.triggerVerticalPosition) {
-                                this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
-                            }
-                            if (this.customizationData.triggerHorizontalOffset) {
-                                this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
-                            }
-                            if (this.customizationData.triggerVerticalOffset) {
-                                this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
-                            }
-                        }
-                        if (this.customizationData.triggerButtonSize) {
-                            this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
-                        }
-                        this.updateInterfacePosition();
+                        // Double rAF so desktop CSS is applied before we read dimensions and set position (fixes break at ~768px)
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                void panel.offsetHeight;
+                                void icon.offsetHeight;
+                                if (this.customizationData) {
+                                    if (this.customizationData.triggerHorizontalPosition) {
+                                        this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
+                                    }
+                                    if (this.customizationData.triggerVerticalPosition) {
+                                        this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
+                                    }
+                                    if (this.customizationData.triggerHorizontalOffset) {
+                                        this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
+                                    }
+                                    if (this.customizationData.triggerVerticalOffset) {
+                                        this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
+                                    }
+                                    if (this.customizationData.triggerButtonSize) {
+                                        this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
+                                    }
+                                }
+                                this.updateInterfacePosition();
+                            });
+                        });
                     }
                 }
                 
@@ -33267,13 +32507,17 @@ class AccessibilityWidget {
             }
         }
         
-        // Apply mobile responsive behavior: CSS media queries handle panel/icon layout; JS only adds class and inner tweaks
+        // Apply mobile responsive behavior: CSS media queries handle panel/icon layout; clear inline position so CSS applies
         applyMobileResponsiveStyles() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (!panel || !icon) return;
             this.ensureBasePanelCSS();
             panel.classList.add('mobile-mode');
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('bottom');
             this.applyMobileButtonStacking();
             this.applyMobileSizeReductions();
         }
@@ -33503,6 +32747,9 @@ class AccessibilityWidget {
             if (iconRect.width === 0 || iconRect.height === 0) {
                 return; // Don't update position if icon isn't rendered
             }
+            
+            // On mobile (≤768px) panel position comes from CSS; don't overwrite with desktop pixel position
+            if (window.innerWidth <= 768) return;
             
             // Get actual panel dimensions from computed styles (respects CSS media queries)
             const panelComputedStyle = window.getComputedStyle(panel);
