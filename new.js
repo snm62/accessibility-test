@@ -27244,6 +27244,8 @@ class AccessibilityWidget {
             this.restoreHiddenAnimatedElements();
             // 9) Start polling to catch new Lottie animations
             this.startLottiePolling();
+            // 10) Intercept loadAnimation so late-loaded Lottie is stopped immediately
+            this._patchLottieLoadAnimation(true);
         }
         
         // Poll for new Lottie animations and stop them
@@ -27265,6 +27267,36 @@ class AccessibilityWidget {
             }
         }
         
+        // Intercept lottie.loadAnimation so late-loaded Lottie is stopped immediately when seizure-safe is on
+        _patchLottieLoadAnimation(enable) {
+            try {
+                const lottie = window.lottie && (window.lottie.default || window.lottie);
+                if (!lottie || typeof lottie.loadAnimation !== 'function') return;
+                if (enable) {
+                    if (this._originalLottieLoadAnimation) return;
+                    const self = this;
+                    this._originalLottieLoadAnimation = lottie.loadAnimation.bind(lottie);
+                    lottie.loadAnimation = function(options) {
+                        const anim = self._originalLottieLoadAnimation(options);
+                        if (anim && document.body.classList.contains('seizure-safe')) {
+                            try {
+                                if (typeof anim.stop === 'function') anim.stop();
+                                if (typeof anim.goToAndStop === 'function') anim.goToAndStop(0, true);
+                                if (typeof anim.pause === 'function') anim.pause();
+                                if (typeof anim.setSpeed === 'function') anim.setSpeed(0);
+                            } catch (_) {}
+                        }
+                        return anim;
+                    };
+                } else {
+                    if (this._originalLottieLoadAnimation) {
+                        lottie.loadAnimation = this._originalLottieLoadAnimation;
+                        this._originalLottieLoadAnimation = null;
+                    }
+                }
+            } catch (_) {}
+        }
+        
         // Restore visibility for elements hidden by animations
         // NOTE: We rely on CSS only - don't set inline styles that persist
         restoreHiddenAnimatedElements() {
@@ -27274,26 +27306,28 @@ class AccessibilityWidget {
         }
     
         disableSeizureSafe() {
-            // 1. Stop polling
+            // 1. Stop polling and restore Lottie loadAnimation
             this.stopLottiePolling();
+            this._patchLottieLoadAnimation(false);
             
-            // 2. BEFORE removing CSS: clear inline opacity:0 and visibility:hidden on animation-related elements
-            //    so they revert to stylesheet (visible) instead of staying invisible when seizure-safe override is removed
+            // 2. BEFORE removing CSS: clear inline opacity:0 and visibility:hidden on elements that seizure-safe made visible,
+            //    so they don't stay invisible when the override is removed (animations, images, bg-image, etc.)
             try {
-                const animationSelectors = '[data-w-id], [data-aos], [data-scroll], [data-animate], [class*="fade"], [class*="animate"], [class*="slide"], [class*="fade-up"], [class*="fade-in"], [class*="fade-left"], [class*="fade-right"]';
-                const elements = document.querySelectorAll(animationSelectors);
                 const widgetSelector = '#accessbit-widget-container, [id*="accessbit-widget"], [class*="accessbit-widget"], accessbit-widget, [data-ck-widget]';
-                elements.forEach(el => {
+                const clearInvisible = (el) => {
                     try {
                         if (el.closest && el.closest(widgetSelector)) return;
                         if (!el.style) return;
+                        if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') return;
                         const opacity = (el.style.opacity || '').trim();
                         const visibility = (el.style.visibility || '').trim();
-                        // Only clear when element is stuck invisible so it can revert to stylesheet (visible)
                         if (opacity === '0' || parseFloat(opacity) === 0) el.style.removeProperty('opacity');
                         if (visibility === 'hidden') el.style.removeProperty('visibility');
                     } catch (_) {}
-                });
+                };
+                const animationSelectors = '[data-w-id], [data-aos], [data-scroll], [data-animate], [class*="fade"], [class*="animate"], [class*="slide"], [class*="fade-up"], [class*="fade-in"], [class*="fade-left"], [class*="fade-right"]';
+                document.querySelectorAll(animationSelectors).forEach(clearInvisible);
+                document.querySelectorAll('img, video, .bg-image, [class*="bg-image"]').forEach(clearInvisible);
             } catch (_) {}
             
             // 3. Remove CSS stylesheet
@@ -27647,9 +27681,15 @@ class AccessibilityWidget {
         // Stop Lottie animations using Lottie API: stop(), pause(), goToAndStop(), setSpeed(0) (platform equivalents supported)
         stopLottieAnimations() {
             try {
-                // Method 1: Registered animations – stop(), pause(), goToAndStop(0), setSpeed(0)
-                if (window.lottie && window.lottie.getRegisteredAnimations) {
-                    window.lottie.getRegisteredAnimations().forEach(anim => {
+                const lottie = window.lottie && (window.lottie.default || window.lottie);
+                if (!lottie) {
+                    // Still try DOM-based stop (lottie-player, [data-lottie], etc.) below
+                } else {
+                    if (typeof lottie.freeze === 'function') {
+                        try { lottie.freeze(); } catch (_) {}
+                    }
+                    if (typeof lottie.getRegisteredAnimations === 'function') {
+                        (lottie.getRegisteredAnimations() || []).forEach(anim => {
                         try {
                             if (anim) {
                                 // Stop and freeze at frame 0
@@ -27675,6 +27715,7 @@ class AccessibilityWidget {
                             }
                         } catch (_) {}
                     });
+                    }
                 }
                 
                 // Method 3: lottie-player web components
@@ -27757,8 +27798,12 @@ class AccessibilityWidget {
         // Restore Lottie animations using Lottie API: play(), setSpeed(1)
         restoreLottieAnimations() {
             try {
-                if (window.lottie && window.lottie.getRegisteredAnimations) {
-                    window.lottie.getRegisteredAnimations().forEach(anim => {
+                const lottie = window.lottie && (window.lottie.default || window.lottie);
+                if (lottie && typeof lottie.unfreeze === 'function') {
+                    try { lottie.unfreeze(); } catch (_) {}
+                }
+                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
+                    (lottie.getRegisteredAnimations() || []).forEach(anim => {
                         try {
                             if (anim) {
                                 // Restore loop
@@ -31948,7 +31993,11 @@ class AccessibilityWidget {
                         // Apply desktop settings – restore desktop layout so styling/structure is not lost
                         this.removeMobileResponsiveStyles();
                         panel.classList.remove('mobile-mode');
-                        // Re-apply desktop trigger position from customization so icon and panel layout restore correctly
+                        // Force reflow so desktop CSS (min-width: 769px) is applied before we read dimensions.
+                        // Without this, small→big resize reads panel/icon before layout updates and loses styling.
+                        void panel.offsetHeight;
+                        void icon.offsetHeight;
+                        // Re-apply desktop trigger position from customization
                         if (this.customizationData) {
                             if (this.customizationData.triggerHorizontalPosition) {
                                 this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
@@ -31963,7 +32012,6 @@ class AccessibilityWidget {
                                 this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
                             }
                         }
-                        // Always update panel position when switching to desktop so panel has correct size/position
                         this.updateInterfacePosition();
                     }
                 }
