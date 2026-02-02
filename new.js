@@ -5436,12 +5436,18 @@ class AccessibilityWidget {
                     border-radius: 12px !important;
                     transition: transform 0.3s ease, opacity 0.2s ease !important;
                 }
-                /* 1440px+: full viewport height so panel spans screen and content area scrolls */
+                /* 1440px+: full viewport height and wider panel */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel {
                         height: calc(100vh - 40px) !important;
                         max-height: calc(100vh - 40px) !important;
                         min-height: 400px !important;
+                    }
+                }
+                @media (min-width: 1440px) {
+                    .accessbit-widget-panel {
+                        width: 480px !important;
+                        max-width: 480px !important;
                     }
                 }
                 @media (max-width: 1280px) {
@@ -5491,18 +5497,29 @@ class AccessibilityWidget {
                         height: 50px !important;
                     }
                     .accessbit-widget-panel.mobile-mode {
-                        width: 100% !important;
+                        width: calc(100% - 24px) !important;
                         max-width: 420px !important;
                         height: 100vh !important;
                         max-height: 100vh !important;
                         top: 0 !important;
                         bottom: 0 !important;
-                        margin: 0 !important;
-                        border-radius: 0 !important;
+                        margin: 0 12px !important;
+                        border-radius: 12px !important;
+                        box-sizing: border-box !important;
                     }
                     @media (max-width: 480px) {
                         .accessbit-widget-panel.mobile-mode {
-                            max-width: 100vw !important;
+                            width: calc(100vw - 24px) !important;
+                            max-width: calc(100vw - 24px) !important;
+                            margin: 0 12px !important;
+                        }
+                        .accessbit-widget-panel.mobile-mode.side-left {
+                            left: 12px !important;
+                            right: auto !important;
+                        }
+                        .accessbit-widget-panel.mobile-mode.side-right {
+                            right: 12px !important;
+                            left: auto !important;
                         }
                     }
                     .accessbit-widget-panel.mobile-mode.side-left {
@@ -26883,6 +26900,16 @@ class AccessibilityWidget {
 
             this.stopLottieAnimations();
             this.stopAutoplayMedia();
+            if (this.seizureObserver) {
+                try { this.seizureObserver.disconnect(); } catch (_) {}
+                this.seizureObserver = null;
+            }
+            this.seizureObserver = new MutationObserver(() => {
+                this.stopLottieAnimations();
+            });
+            try {
+                this.seizureObserver.observe(document.body, { childList: true, subtree: true });
+            } catch (_) {}
             this.saveSettings();
         }
         
@@ -26938,6 +26965,10 @@ class AccessibilityWidget {
             const styleEl = document.getElementById('seizure-safe-css');
             if (styleEl) styleEl.remove();
 
+            if (this.seizureObserver) {
+                try { this.seizureObserver.disconnect(); } catch (_) {}
+                this.seizureObserver = null;
+            }
             this.restoreLottieAnimations();
             this.saveSettings();
             this.updateWidgetAppearance();
@@ -27017,6 +27048,21 @@ class AccessibilityWidget {
                 html.seizure-safe body {
                     overflow: auto !important;
                     height: auto !important;
+                }
+                /* Hide Lottie players entirely to ensure 0Hz flicker */
+                html.seizure-safe lottie-player:not(#accessbit-widget-container *),
+                html.seizure-safe dotlottie-player:not(#accessbit-widget-container *),
+                html.seizure-safe [data-lottie-path]:not(#accessbit-widget-container *),
+                body.seizure-safe lottie-player:not(#accessbit-widget-container *),
+                body.seizure-safe dotlottie-player:not(#accessbit-widget-container *),
+                body.seizure-safe [data-lottie-path]:not(#accessbit-widget-container *) {
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                }
+                /* Fallback for canvas-based animations */
+                html.seizure-safe canvas:not(#accessbit-widget-container *),
+                body.seizure-safe canvas:not(#accessbit-widget-container *) {
+                    display: none !important;
                 }
             `;
         }
@@ -27116,46 +27162,47 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – brute-force: pause APIs + hide canvas + GSAP clear + CSS fallback
+        // Stop Lottie/GSAP – global library + Shadow DOM penetration + GSAP ticker sleep
         stopLottieAnimations() {
             try {
-                const lottie = window.lottie || window.bodymovin;
-                if (lottie && lottie.pause) lottie.pause();
+                const lottie = window.lottie || (window.bodymovin && window.bodymovin.lottie);
+                if (lottie && typeof lottie.pause === 'function') {
+                    lottie.pause();
+                }
 
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
-                        if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
-                        player.pause();
-                        const canvas = player.shadowRoot?.querySelector('canvas');
-                        if (canvas) canvas.style.display = 'none';
+                        if (player.closest('#accessbit-widget-container')) return;
+                        if (player.pause) player.pause();
+                        if (player.stop) player.stop();
+                        if (player.shadowRoot) {
+                            const renderer = player.shadowRoot.querySelector('svg, canvas, .animation');
+                            if (renderer) {
+                                renderer.style.display = 'none';
+                                renderer.style.visibility = 'hidden';
+                            }
+                        }
                     } catch (_) {}
                 });
 
                 if (window.gsap) {
-                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.clear === 'function') {
-                        window.gsap.globalTimeline.clear();
+                    if (window.gsap.ticker && typeof window.gsap.ticker.sleep === 'function') {
+                        window.gsap.ticker.sleep();
                     }
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
                         window.gsap.globalTimeline.pause();
                     }
                 }
-
-                document.querySelectorAll('.lottie-animation-container').forEach(el => {
-                    try {
-                        el.style.pointerEvents = 'none';
-                        el.style.visibility = 'hidden';
-                    } catch (_) {}
-                });
             } catch (e) {
-                console.error('Error stopping JS animations:', e);
+                console.error('Seizure Safe Error:', e);
             }
         }
         
-        // Restore Lottie and GSAP (undo stopLottieAnimations: canvas display + .lottie-animation-container)
+        // Restore Lottie and GSAP (undo stopLottieAnimations: Shadow DOM renderer + ticker)
         restoreLottieAnimations() {
             try {
-                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || window.bodymovin;
+                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie) || window.bodymovin;
                 if (lottie) {
                     if (typeof lottie.play === 'function') lottie.play();
                     if (typeof lottie.getRegisteredAnimations === 'function') {
@@ -27167,19 +27214,21 @@ class AccessibilityWidget {
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
-                        if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
-                        const canvas = player.shadowRoot?.querySelector('canvas');
-                        if (canvas) canvas.style.display = '';
+                        if (player.closest('#accessbit-widget-container')) return;
+                        if (player.shadowRoot) {
+                            const renderer = player.shadowRoot.querySelector('svg, canvas, .animation');
+                            if (renderer) {
+                                renderer.style.display = '';
+                                renderer.style.visibility = '';
+                            }
+                        }
                         if (player.play) player.play();
                     } catch (_) {}
                 });
-                document.querySelectorAll('.lottie-animation-container').forEach(el => {
-                    try {
-                        el.style.pointerEvents = '';
-                        el.style.visibility = '';
-                    } catch (_) {}
-                });
                 if (window.gsap) {
+                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') {
+                        window.gsap.ticker.wake();
+                    }
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') {
                         window.gsap.globalTimeline.play();
                     }
@@ -32773,9 +32822,10 @@ class AccessibilityWidget {
             const maxTop = window.innerHeight - panelRect.height - 20;
             const finalTop = Math.max(20, Math.min(topPos, maxTop));
 
+            const panelWidth = window.innerWidth >= 1440 ? 480 : 400;
             const iconCenterX = iconRect.left + (iconRect.width / 2);
-            let leftPos = iconCenterX - (panelRect.width / 2);
-            const maxLeft = window.innerWidth - panelRect.width - 20;
+            let leftPos = iconCenterX - (panelWidth / 2);
+            const maxLeft = window.innerWidth - panelWidth - 20;
             const finalLeft = Math.max(20, Math.min(leftPos, maxLeft));
 
             const margin = 40;
@@ -32784,7 +32834,7 @@ class AccessibilityWidget {
                 position: 'fixed',
                 top: '20px',
                 left: `${finalLeft}px`,
-                width: '400px',
+                width: `${panelWidth}px`,
                 bottom: 'auto',
                 right: 'auto',
                 display: 'flex',
@@ -32794,6 +32844,8 @@ class AccessibilityWidget {
             panel.style.setProperty('height', `${dynamicHeight}px`, 'important');
             panel.style.setProperty('max-height', `${dynamicHeight}px`, 'important');
             panel.style.setProperty('min-height', '400px', 'important');
+            panel.style.setProperty('width', `${panelWidth}px`, 'important');
+            panel.style.setProperty('max-width', `${panelWidth}px`, 'important');
             if (panel.classList.contains('active')) panel.style.transform = 'none';
         }
     
