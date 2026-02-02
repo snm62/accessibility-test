@@ -1743,7 +1743,7 @@ class AccessibilityWidget {
                 
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = window.innerWidth <= 1024;
+                    const isMobile = window.innerWidth <= 1280;
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     console.log('[INIT] Icon visibility settings:', {
@@ -1974,7 +1974,7 @@ class AccessibilityWidget {
                 this.setupOptimizedResizeHandlers();
                 
                 // Apply mobile responsive styles on load if mobile
-                if (window.innerWidth <= 1024) {
+                if (window.innerWidth <= 1280) {
                     this.applyMobileResponsiveStyles();
                 }
                 
@@ -3588,7 +3588,7 @@ class AccessibilityWidget {
     }
     
     /* Tablets (Portrait & Landscape) & Laptops */
-    @media (min-width: 769px) and (max-width: 1024px) {
+    @media (min-width: 769px) and (max-width: 1280px) {
         .accessbit-widget-panel {
             width: 75vw;
             max-width: 520px;
@@ -5421,31 +5421,41 @@ class AccessibilityWidget {
     
     
     
-                /* --- Desktop Base Panel (Responsive Drawer) --- */
+                /* --- Desktop Base Panel (flex column so content area can scroll) --- */
                 /* visibility controlled by .accessbit-widget-panel.show / .active above */
                 .accessbit-widget-panel {
                     position: fixed !important;
                     width: 400px !important;
                     max-width: 95vw !important;
-                    height: 600px !important;
-                    max-height: 80vh !important;
                     display: flex !important;
                     flex-direction: column !important;
+                    height: 600px !important;
+                    max-height: 90vh !important;
+                    overflow: hidden !important;
                     z-index: 2147483647 !important;
                     background: #ffffff !important;
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
-                    overflow: hidden !important;
-                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+                    border-radius: 12px !important;
+                    transition: transform 0.3s ease, opacity 0.2s ease !important;
                 }
                 
                 .accessbit-widget-panel * {
                     scroll-behavior: auto !important;
                 }
                 
-                .accessbit-widget-panel .panel-content,
-                .accessbit-widget-panel .accessbit-widget-content {
+                /* Scrollable area: take remaining space and scroll (fixes flexbox collapse on 1440px / Nest Hub) */
+                .accessbit-widget-panel .accessbit-widget-content,
+                .accessbit-widget-panel .panel-content {
+                    flex: 1 1 auto !important;
                     overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    min-height: 0 !important;
                     -webkit-overflow-scrolling: touch !important;
+                }
+                
+                .accessbit-widget-content *,
+                .accessbit-widget-panel .panel-content * {
+                    max-width: 100% !important;
                 }
     
                 .accessbit-widget-panel.active,
@@ -5455,21 +5465,21 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                 }
     
-                /* --- Responsive Drawer: iPad Pro / Surface Pro / phones (max-width: 1024px) --- */
-                @media (max-width: 1024px) {
+                /* --- Nest Hub & large tablet (≤1280px) – drawer mode --- */
+                @media (max-width: 1280px) {
                     .accessbit-widget-icon {
                         width: 50px !important;
                         height: 50px !important;
                     }
                     .accessbit-widget-panel.mobile-mode {
+                        width: 100% !important;
+                        max-width: 420px !important;
                         height: 100vh !important;
                         max-height: 100vh !important;
                         top: 0 !important;
                         bottom: 0 !important;
                         margin: 0 !important;
                         border-radius: 0 !important;
-                        width: 100% !important;
-                        max-width: 420px !important;
                     }
                     @media (max-width: 480px) {
                         .accessbit-widget-panel.mobile-mode {
@@ -5500,7 +5510,7 @@ class AccessibilityWidget {
                         display: block !important;
                         -webkit-overflow-scrolling: touch !important;
                         padding: 15px !important;
-                        padding-bottom: 40px !important;
+                        padding-bottom: 60px !important;
                     }
                     /* Structure Protector */
                     .accessbit-widget-panel.mobile-mode .button-row,
@@ -5523,6 +5533,14 @@ class AccessibilityWidget {
                         padding: 20px 15px !important;
                         font-size: 1.2rem !important;
                         flex-shrink: 0 !important;
+                    }
+                    /* Hide OFF/ON text on toggle at tablet/mobile (iPad Air/Pro, Surface Pro, Nest Hub, phones) */
+                    .toggle-switch > input + .slider::after,
+                    .toggle-switch > input:checked + .slider::after {
+                        content: "" !important;
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
                     }
                 }
     
@@ -30722,7 +30740,7 @@ class AccessibilityWidget {
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if (window.innerWidth <= 1024) {
+                if (window.innerWidth <= 1280) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -30780,7 +30798,7 @@ class AccessibilityWidget {
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -30830,7 +30848,7 @@ class AccessibilityWidget {
             }
             
             // Check device type
-            const isMobile = window.innerWidth <= 1024;
+            const isMobile = window.innerWidth <= 1280;
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -30993,9 +31011,9 @@ class AccessibilityWidget {
                 }, 200);
             }
             
-            // Listen to media query changes for breakpoints (1024 = iPad Pro / Surface)
+            // Listen to media query changes for breakpoints (1280 = Nest Hub Max / iPad Pro landscape)
             if (window.matchMedia) {
-                const mobileQuery = window.matchMedia('(max-width: 1024px)');
+                const mobileQuery = window.matchMedia('(max-width: 1280px)');
                 const handleMediaChange = (e) => {
                     this.handleResizeOptimized();
                 };
@@ -31024,60 +31042,54 @@ class AccessibilityWidget {
         
         /**
          * Core Responsiveness & Side Detection (Responsive Drawer).
-         * Threshold 1024px to include iPad Air/Pro and Surface in mobile-mode (side drawer).
+         * Threshold 1280px to catch Nest Hub Max and iPad Pro landscape; clear inline styles on mode switch.
          */
         handleResizeOptimized() {
             const screenWidth = window.innerWidth;
-            const isMobileLogic = screenWidth <= 1024;
+            const isDrawerMode = screenWidth <= 1280;
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
 
-            if (!panel || !icon) return;
+            if (!panel) return;
 
             this.handleWindowResize();
             this.ensureBasePanelCSS();
 
-            if (isMobileLogic) {
+            if (isDrawerMode) {
                 panel.classList.add('mobile-mode');
-
-                const iconRect = icon.getBoundingClientRect();
-                const isRightSide = (iconRect.left + iconRect.width / 2) > (screenWidth / 2);
-                if (isRightSide) {
-                    panel.classList.add('side-right');
-                    panel.classList.remove('side-left');
-                } else {
-                    panel.classList.add('side-left');
-                    panel.classList.remove('side-right');
+                if (icon) {
+                    const iconRect = icon.getBoundingClientRect();
+                    const isRightSide = (iconRect.left + iconRect.width / 2) > (screenWidth / 2);
+                    if (isRightSide) {
+                        panel.classList.add('side-right');
+                        panel.classList.remove('side-left');
+                    } else {
+                        panel.classList.add('side-left');
+                        panel.classList.remove('side-right');
+                    }
                 }
-
-                ['left', 'right', 'top', 'bottom', 'transform', 'width', 'height'].forEach(p => {
-                    panel.style.removeProperty(p);
-                });
-
-                this.applyMobileSizeReductions();
+                panel.style.removeProperty('left');
+                panel.style.removeProperty('right');
+                panel.style.removeProperty('top');
+                panel.style.removeProperty('bottom');
+                panel.style.removeProperty('transform');
+                panel.style.removeProperty('width');
+                panel.style.removeProperty('height');
+                this.applyMobileResponsiveStyles();
             } else {
                 panel.classList.remove('mobile-mode', 'side-left', 'side-right');
                 this.removeMobileSizeReductions();
+                panel.style.setProperty('transform', 'none');
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        void panel.offsetHeight;
-                        void icon.offsetHeight;
+                        if (panel) void panel.offsetHeight;
+                        if (icon) void icon.offsetHeight;
                         if (this.customizationData) {
-                            if (this.customizationData.triggerHorizontalPosition) {
-                                this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
-                            }
-                            if (this.customizationData.triggerVerticalPosition) {
-                                this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
-                            }
-                            if (this.customizationData.triggerHorizontalOffset) {
-                                this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
-                            }
-                            if (this.customizationData.triggerVerticalOffset) {
-                                this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
-                            }
-                            if (this.customizationData.triggerButtonSize) {
-                                this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
-                            }
+                            if (this.customizationData.triggerHorizontalPosition) this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
+                            if (this.customizationData.triggerVerticalPosition) this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
+                            if (this.customizationData.triggerHorizontalOffset) this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
+                            if (this.customizationData.triggerVerticalOffset) this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
+                            if (this.customizationData.triggerButtonSize) this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
                         }
                         this.updateInterfacePosition();
                     });
@@ -31898,8 +31910,8 @@ class AccessibilityWidget {
                     transform: translateX(26px) !important;
                 }
                 
-                /* Hide ON/OFF text on mobile screens */
-                @media (max-width: 768px) {
+                /* Hide ON/OFF text on tablet and mobile (iPad Air/Pro, Surface Pro, Nest Hub, phones) */
+                @media (max-width: 1280px) {
                     .toggle-switch > input + .slider::after {
                         content: "" !important;
                         display: none !important;
@@ -32233,7 +32245,7 @@ class AccessibilityWidget {
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -32491,7 +32503,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -32662,83 +32674,49 @@ class AccessibilityWidget {
         updateInterfacePosition() {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
-            
-            if (!icon || !panel) {
-                return; // Don't proceed if elements don't exist
-            }
-            
-            // CRITICAL: Only update position if icon is visible
-            // If icon is hidden, getBoundingClientRect() returns zeros and breaks positioning
+            if (!icon || !panel || window.innerWidth <= 1280) return;
+
             const iconComputedStyle = window.getComputedStyle(icon);
-            const iconIsVisible = iconComputedStyle.display !== 'none' && 
-                                 iconComputedStyle.visibility !== 'hidden' &&
-                                 iconComputedStyle.opacity !== '0';
-            
-            if (!iconIsVisible) {
-                return; // Don't update position if icon is hidden
-            }
-            
+            const iconIsVisible = iconComputedStyle.display !== 'none' && iconComputedStyle.visibility !== 'hidden' && iconComputedStyle.opacity !== '0';
+            if (!iconIsVisible) return;
+
             const iconRect = icon.getBoundingClientRect();
-            
-            // If icon has zero dimensions, it's not properly rendered yet
-            if (iconRect.width === 0 || iconRect.height === 0) {
-                return; // Don't update position if icon isn't rendered
-            }
-            
-            // Match CSS media query: don't run desktop positioning on tablet/mobile (≤1024px)
-            if (window.innerWidth <= 1024) return;
-            
-            // Get actual panel dimensions from computed styles (respects CSS media queries)
-            const panelComputedStyle = window.getComputedStyle(panel);
-            // Temporarily make panel visible to get accurate dimensions
+            if (iconRect.width === 0 || iconRect.height === 0) return;
+
             const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none';
             if (wasHidden) {
                 panel.style.visibility = 'visible';
                 panel.style.display = 'block';
             }
-            
             const panelRect = panel.getBoundingClientRect();
-            const panelWidth = panelRect.width || parseFloat(panelComputedStyle.width) || 500;
-            const panelHeight = panelRect.height || parseFloat(panelComputedStyle.height) || 700;
-            
-            // Restore visibility state if it was hidden
             if (wasHidden) {
                 panel.style.visibility = 'hidden';
                 panel.style.display = 'none';
             }
-            
-            // Position panel relative to icon (centered horizontally)
-            const iconCenterX = iconRect.left + (iconRect.width / 2);
-            const panelLeft = iconCenterX - (panelWidth / 2);
-            
-            // Ensure panel doesn't go outside viewport horizontally
-            const finalLeft = Math.max(20, Math.min(panelLeft, window.innerWidth - panelWidth - 20));
-            
-            // Position panel vertically - try to center with icon, but adjust if needed
+
             const iconCenterY = iconRect.top + (iconRect.height / 2);
-            const topPosition = iconCenterY - (panelHeight / 2);
-            
-            // Ensure panel doesn't go above or below viewport
-            const finalTop = Math.max(20, Math.min(topPosition, window.innerHeight - panelHeight - 20));
-            
-            // Only update positioning, don't remove transform if panel is hidden
-            // Preserve panel's visibility state
-            const isPanelHidden = panel.style.transform === 'translateX(-100%)' || 
-                                 panel.style.visibility === 'hidden' ||
-                                 !panel.classList.contains('active');
-            
-            // Set position only – size/height come from CSS (responsive) so resize keeps style/structure
-            panel.style.position = 'fixed';
-            panel.style.left = `${finalLeft}px`;
-            panel.style.right = 'auto';
-            panel.style.top = `${finalTop}px`;
-            panel.style.bottom = 'auto';
-            panel.style.zIndex = '2147483646';
-            
-            // Only remove transform if panel is visible, otherwise preserve it
-            if (!isPanelHidden) {
-                panel.style.setProperty('transform', 'none');
-            }
+            let topPos = iconCenterY - (panelRect.height / 2);
+            const maxTop = window.innerHeight - panelRect.height - 20;
+            const finalTop = Math.max(20, Math.min(topPos, maxTop));
+
+            const iconCenterX = iconRect.left + (iconRect.width / 2);
+            let leftPos = iconCenterX - (panelRect.width / 2);
+            const maxLeft = window.innerWidth - panelRect.width - 20;
+            const finalLeft = Math.max(20, Math.min(leftPos, maxLeft));
+
+            const availableHeight = window.innerHeight - 40;
+            panel.style.maxHeight = `${availableHeight}px`;
+
+            Object.assign(panel.style, {
+                position: 'fixed',
+                top: `${finalTop}px`,
+                left: `${finalLeft}px`,
+                height: 'auto',
+                bottom: 'auto',
+                right: 'auto',
+                zIndex: '2147483646'
+            });
+            if (panel.classList.contains('active')) panel.style.transform = 'none';
         }
     
         updateInterfaceFooter(content) {
@@ -32861,7 +32839,7 @@ class AccessibilityWidget {
             const pos = (position || '').toLowerCase();
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                 if (isMobile) {
                     // First, clear all existing positioning
                     icon.style.removeProperty('top');
@@ -32908,7 +32886,7 @@ class AccessibilityWidget {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
        
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                
                 if (isMobile) {
                    
@@ -33004,7 +32982,7 @@ class AccessibilityWidget {
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -33028,7 +33006,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
                 if (isMobile) {
                   
                     
@@ -33144,7 +33122,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1024;
+                const isMobile = window.innerWidth <= 1280;
 
                 
                 if (isMobile) {
