@@ -107,22 +107,16 @@
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessbit-seizure-immediate-early';
             immediateStyle.textContent = `
-                /* Global CSS kill switch: animation: none; transition: none; scroll-behavior: auto (Security: no global overrides) */
+                /* Freeze animations (paused = keep current frame visible; avoid animation: none snapping to 0% keyframe) */
                 body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
-                    animation: none !important;
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
+                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after,
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after {
+                    animation-play-state: paused !important;
                     transition: none !important;
                     scroll-behavior: auto !important;
-                }
-                /* Remove common flash triggers: blinking caret, shimmer, pulsing, etc. (animation only; no opacity/visibility overrides) */
-                body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"], body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"], body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
-                html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"], html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"], html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"], html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
-                    animation: none !important;
-                }
-                body.seizure-safe [data-lottie], body.seizure-safe [class*="lottie"], body.seizure-safe lottie-player,
-                html.seizure-safe [data-lottie], html.seizure-safe [class*="lottie"], html.seizure-safe lottie-player {
-                    animation: none !important;
-                    transition: none !important;
                 }
             `;
             try {
@@ -1749,7 +1743,7 @@ class AccessibilityWidget {
                 
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = window.innerWidth <= 832;
+                    const isMobile = window.innerWidth <= 768;
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     console.log('[INIT] Icon visibility settings:', {
@@ -1980,7 +1974,7 @@ class AccessibilityWidget {
                 this.setupOptimizedResizeHandlers();
                 
                 // Apply mobile responsive styles on load if mobile
-                if (window.innerWidth <= 832) {
+                if (window.innerWidth <= 768) {
                     this.applyMobileResponsiveStyles();
                 }
                 
@@ -5086,7 +5080,7 @@ class AccessibilityWidget {
             }
             
             /* Single breakpoint (832px) – iPad/tablet: panel covers full viewport height, no overflow */
-            @media (max-width: 832px) {
+            @media (max-width: 768px) {
                 .accessbit-widget-icon {
                     width: 50px !important;
                     height: 50px !important;
@@ -5480,7 +5474,7 @@ class AccessibilityWidget {
                 }
     
                 /* Mobile/tablet (≤832px): panel covers full viewport height (top to bottom), no overflow */
-                @media (max-width: 832px) {
+                @media (max-width: 768px) {
                     .accessbit-widget-icon {
                         width: 50px !important;
                         height: 50px !important;
@@ -26773,38 +26767,19 @@ class AccessibilityWidget {
         // Seizure Safe Profile Methods - Rewritten without global overrides
     
         enableSeizureSafe(immediate = false) {
-            // Disable other mutually exclusive features
             if (this.settings['vision-impaired']) { this.disableVisionImpaired(); this.updateToggleSwitch('vision-impaired', false); }
             if (this.settings['adhd-friendly']) { this.disableADHDFriendly(); this.updateToggleSwitch('adhd-friendly', false); }
             if (this.settings['cognitive-disability']) { this.disableCognitiveDisability(); this.updateToggleSwitch('cognitive-disability', false); }
-            
+
             this.settings['seizure-safe'] = true;
-            // Explicitly add class to both body and html to ensure CSS activates
             try { document.body.classList.add('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', true);
-            this.saveSettings();
-            
-            // 1) Inject CSS kill switch (no global overrides)
+
             this.injectSeizureSafeCSS();
-            // 2) Stop WAAPI animations using public API
-            this.stopWAAPIAnimations();
-            // 3) Stop GSAP animations using public API
-            this.stopGSAPAnimations();
-            // 4) Stop Lottie animations using public API
             this.stopLottieAnimations();
-            // 5) Stop autoplay media
             this.stopAutoplayMedia();
-            // 6) Stop JavaScript animations (sliders, etc.)
-            try { this.stopJavaScriptAnimations && this.stopJavaScriptAnimations(); } catch (_) {}
-            // 7) Stop Webflow interactions
-            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
-            // 8) Final pass: Restore visibility for any hidden animated elements
-            this.restoreHiddenAnimatedElements();
-            // 9) Start polling to catch new Lottie animations
-            this.startLottiePolling();
-            // 10) Intercept loadAnimation so late-loaded Lottie is stopped immediately
-            this._patchLottieLoadAnimation(true);
+            this.saveSettings();
         }
         
         // No-op: do not poll to stop Lottie – keeps user Lottie animations visible
@@ -26844,163 +26819,80 @@ class AccessibilityWidget {
         }
     
         disableSeizureSafe() {
-            // 1. Stop polling and restore Lottie loadAnimation
-            this.stopLottiePolling();
-            this._patchLottieLoadAnimation(false);
-            
-            // 2. Remove CSS stylesheet (no opacity/visibility clearing – CSS no longer forces visibility)
-            const existingStyle = document.getElementById('seizure-safe-css');
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-            
-            // 3. Remove seizure-safe class from body and html (explicit)
+            this.settings['seizure-safe'] = false;
             try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', false);
-            
-            // 4. Restore WAAPI animations
-            this.restoreWAAPIAnimations();
-            
-            // 5. Restore GSAP animations
-            this.restoreGSAPAnimations();
-            
-            // 6. Restore Lottie animations
+
+            const styleEl = document.getElementById('seizure-safe-css');
+            if (styleEl) styleEl.remove();
+
             this.restoreLottieAnimations();
-            
-            // 7. Restore Webflow interactions
-            this.restoreWebflowInteractions();
-            
-            // 8. Restore autoplay media
-            this.restoreAllMediaAndAnimations();
-            
-            this.settings['seizure-safe'] = false;
             this.saveSettings();
-            
-            // Update widget appearance to sync Shadow DOM host classes
             this.updateWidgetAppearance();
         }
         
-        // Inject CSS kill switch – Security: no global prototype overwriting; explicit toggle applies CSS kill switch + flash-trigger removal; WAAPI used for animation control (pause/playbackRate).
+        // Freeze animations with animation-play-state: paused (keeps current frame visible; animation: none would snap to 0% keyframe and hide content)
         injectSeizureSafeCSS() {
-            if (document.getElementById('seizure-safe-css')) {
-                return;
+            let styleEl = document.getElementById('seizure-safe-css');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'seizure-safe-css';
+                document.head.appendChild(styleEl);
             }
-            const style = document.createElement('style');
-            style.id = 'seizure-safe-css';
-            const cssText = `
-                /* Global CSS kill switch: animation/transition/scroll only (no transform, no opacity/visibility overrides) */
-                .seizure-safe *,
-                .seizure-safe *::before,
-                .seizure-safe *::after,
-                body.seizure-safe *,
-                body.seizure-safe *::before,
-                body.seizure-safe *::after,
+            styleEl.textContent = `
+                /* Freeze CSS animations and transitions – paused = freeze where it is, no snap to 0% */
                 html.seizure-safe *,
                 html.seizure-safe *::before,
-                html.seizure-safe *::after {
-                    animation: none !important;
+                html.seizure-safe *::after,
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    animation-play-state: paused !important;
                     transition: none !important;
-                    animation-duration: 0s !important;
-                    transition-duration: 0s !important;
-                    transition-property: none !important;
                     scroll-behavior: auto !important;
                 }
-                
-                /* Exclude widget from kill switch */
+                /* Prevent GIF/video motion hint */
+                html.seizure-safe img[src$=".gif"],
+                body.seizure-safe img[src$=".gif"],
+                html.seizure-safe canvas,
+                body.seizure-safe canvas,
+                html.seizure-safe video,
+                body.seizure-safe video {
+                    filter: grayscale(0.5);
+                    -webkit-filter: grayscale(0.5);
+                }
+                /* EXCLUDE WIDGET – keep accessibility menu functional */
+                #accessbit-widget-container,
+                #accessbit-widget-container *,
+                [id*="accessbit-widget"],
+                [id*="accessbit-widget"] *,
                 .seizure-safe #accessbit-widget-container,
+                .seizure-safe #accessbit-widget-container *,
                 .seizure-safe [id*="accessbit-widget"],
-                .seizure-safe [class*="accessbit-widget"],
-                .seizure-safe [data-ck-widget],
-                .seizure-safe accessbit-widget,
+                .seizure-safe [id*="accessbit-widget"] *,
                 body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe #accessbit-widget-container *,
                 body.seizure-safe [id*="accessbit-widget"],
-                body.seizure-safe [class*="accessbit-widget"],
-                body.seizure-safe [data-ck-widget],
-                body.seizure-safe accessbit-widget,
+                body.seizure-safe [id*="accessbit-widget"] *,
                 html.seizure-safe #accessbit-widget-container,
+                html.seizure-safe #accessbit-widget-container *,
                 html.seizure-safe [id*="accessbit-widget"],
-                html.seizure-safe [class*="accessbit-widget"],
-                html.seizure-safe [data-ck-widget],
-                html.seizure-safe accessbit-widget {
-                    animation: revert !important;
-                    transition: revert !important;
-                }
-                
-                /* Remove common flash triggers - blinking caret, shimmer, pulsing, etc. (animation only) */
-                body.seizure-safe *[class*="blink"],
-                body.seizure-safe *[class*="shimmer"],
-                body.seizure-safe *[class*="pulse"],
-                body.seizure-safe *[class*="caret"],
-                body.seizure-safe *[class*="cursor-blink"],
-                body.seizure-safe *[class*="skeleton"],
-                body.seizure-safe *[class*="pulsing"],
-                body.seizure-safe *[class*="flashing"],
-                html.seizure-safe *[class*="blink"],
-                html.seizure-safe *[class*="shimmer"],
-                html.seizure-safe *[class*="pulse"],
-                html.seizure-safe *[class*="caret"],
-                html.seizure-safe *[class*="cursor-blink"],
-                html.seizure-safe *[class*="skeleton"],
-                html.seizure-safe *[class*="pulsing"],
-                html.seizure-safe *[class*="flashing"] {
-                    animation: none !important;
-                }
-                
-                /* REMOVED: Grey color filter - was causing dark blue appearance */
-                /* Color filters removed per user request - seizure mode now only stops animations */
-                
-                /* Exclude widget from color filter */
-                body.seizure-safe #accessbit-widget-container,
-                body.seizure-safe [id*="accessbit-widget"],
-                body.seizure-safe [class*="accessbit-widget"],
-                body.seizure-safe [data-ck-widget],
-                body.seizure-safe accessbit-widget,
-                html.seizure-safe #accessbit-widget-container,
-                html.seizure-safe [id*="accessbit-widget"],
-                html.seizure-safe [class*="accessbit-widget"],
-                html.seizure-safe [data-ck-widget],
-                html.seizure-safe accessbit-widget {
+                html.seizure-safe [id*="accessbit-widget"] * {
+                    animation-play-state: running !important;
+                    transition: all 0.2s ease !important;
                     filter: none !important;
                     -webkit-filter: none !important;
                 }
-                
-                /* Stop Lottie animations only - CSS kill switch (don't affect static SVG/canvas) */
-                body.seizure-safe [data-lottie],
-                body.seizure-safe [class*="lottie"],
-                body.seizure-safe [id*="lottie"],
-                body.seizure-safe lottie-player,
-                body.seizure-safe dotlottie-player,
-                html.seizure-safe [data-lottie],
-                html.seizure-safe [class*="lottie"],
-                html.seizure-safe [id*="lottie"],
-                html.seizure-safe lottie-player,
-                html.seizure-safe dotlottie-player {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-play-state: paused !important;
-                }
-                
-                /* Only stop animated SVG/canvas (preserve static icons, charts, UI graphics) */
-                .seizure-safe svg[style*="animation"],
-                .seizure-safe svg[style*="transition"],
-                .seizure-safe canvas[style*="animation"],
-                .seizure-safe canvas[style*="transition"],
-                body.seizure-safe svg[style*="animation"],
-                body.seizure-safe svg[style*="transition"],
-                body.seizure-safe canvas[style*="animation"],
-                body.seizure-safe canvas[style*="transition"],
-                html.seizure-safe svg[style*="animation"],
-                html.seizure-safe svg[style*="transition"],
-                html.seizure-safe canvas[style*="animation"],
-                html.seizure-safe canvas[style*="transition"] {
-                    animation: none !important;
+                /* Fix for hidden reveal elements – keep content visible when animation hadn't started */
+                html.seizure-safe [style*="opacity: 0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
+                html.seizure-safe [style*="opacity:0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
+                body.seizure-safe [style*="opacity: 0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
+                body.seizure-safe [style*="opacity:0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *) {
+                    opacity: 1 !important;
                     transition: none !important;
                 }
             `;
-            
-            style.textContent = cssText;
-            document.head.appendChild(style);
         }
         
         // No-op: do not pause WAAPI – keeps user animations visible
@@ -27098,57 +26990,56 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // No-op: do not stop Lottie – keeps user Lottie animations visible
+        // Stop Lottie/GSAP via library APIs – Lottie runs on JS loop, not CSS
         stopLottieAnimations() {
-            /* REMOVED: was making Lottie animations invisible */
-        }
-        
-        // Restore Lottie animations using Lottie API: play(), setSpeed(1)
-        restoreLottieAnimations() {
             try {
-                const lottie = window.lottie && (window.lottie.default || window.lottie);
-                if (lottie && typeof lottie.unfreeze === 'function') {
-                    try { lottie.unfreeze(); } catch (_) {}
+                const lottie = window.lottie || window.bodymovin;
+                if (lottie && typeof lottie.pause === 'function') {
+                    lottie.pause();
                 }
-                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
-                    (lottie.getRegisteredAnimations() || []).forEach(anim => {
-                        try {
-                            if (anim) {
-                                // Restore loop
-                                if (anim.loop !== undefined && anim.loop === false) {
-                                    anim.loop = true;
-                                }
-                                // Restore speed
-                                if (typeof anim.setSpeed === 'function') {
-                                    anim.setSpeed(1);
-                                }
-                                // Play
-                                if (typeof anim.play === 'function') {
-                                    anim.play();
-                                }
-                            }
-                        } catch (_) {}
-                    });
-                }
-                
-                // Method 2: lottie-player web components
-                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                const players = document.querySelectorAll('lottie-player, dotlottie-player');
+                players.forEach(player => {
                     try {
-                        if (player.closest && (
-                            player.closest('#accessbit-widget-container') ||
-                            player.closest('[id*="accessbit-widget"]') ||
-                            player.closest('[class*="accessbit-widget"]') ||
-                            player.closest('accessbit-widget') ||
-                            player.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
-                        if (typeof player.setSpeed === 'function') player.setSpeed(1);
-                        if (typeof player.play === 'function') player.play();
+                        if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
+                        if (player.pause) player.pause();
                     } catch (_) {}
                 });
-            } catch (_) {}
+                if (window.gsap) {
+                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
+                        window.gsap.globalTimeline.pause();
+                    }
+                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.disable === 'function') st.disable(); });
+                    }
+                }
+            } catch (e) {
+                console.error('Error stopping JS animations:', e);
+            }
+        }
+        
+        // Restore Lottie and GSAP
+        restoreLottieAnimations() {
+            try {
+                const lottie = window.lottie || window.bodymovin;
+                if (lottie && typeof lottie.play === 'function') {
+                    lottie.play();
+                }
+                const players = document.querySelectorAll('lottie-player, dotlottie-player');
+                players.forEach(player => {
+                    try {
+                        if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
+                        if (player.play) player.play();
+                    } catch (_) {}
+                });
+                if (window.gsap) {
+                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') {
+                        window.gsap.globalTimeline.play();
+                    }
+                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
+                    }
+                }
+            } catch (e) {}
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
@@ -30768,7 +30659,7 @@ class AccessibilityWidget {
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if (window.innerWidth <= 832) {
+                if (window.innerWidth <= 768) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -30826,7 +30717,7 @@ class AccessibilityWidget {
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -30876,7 +30767,7 @@ class AccessibilityWidget {
             }
             
             // Check device type
-            const isMobile = window.innerWidth <= 832;
+            const isMobile = window.innerWidth <= 768;
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -31041,7 +30932,7 @@ class AccessibilityWidget {
             
             // Listen to media query changes for breakpoints
             if (window.matchMedia) {
-                const mobileQuery = window.matchMedia('(max-width: 832px)');
+                const mobileQuery = window.matchMedia('(max-width: 768px)');
                 const handleMediaChange = (e) => {
                     this.handleResizeOptimized();
                 };
@@ -31083,7 +30974,7 @@ class AccessibilityWidget {
             // Use requestAnimationFrame for DOM updates
             requestAnimationFrame(() => {
                 const screenWidth = window.innerWidth;
-                const isMobile = screenWidth <= 832;
+                const isMobile = screenWidth <= 768;
                 
                 // Update icon visibility
                 this.handleWindowResize();
@@ -31695,7 +31586,7 @@ class AccessibilityWidget {
                     // Inject a tiny stylesheet to shrink the knob (:before)
                     const style = document.createElement('style');
                     style.textContent = `
-                        @media (max-width: 832px) {
+                        @media (max-width: 768px) {
                             .toggle-switch > input + .slider:before { width: 18px !important; height: 18px !important; top: 2px !important; left: 2px !important; }
                         }
                     `;
@@ -31809,7 +31700,7 @@ class AccessibilityWidget {
             // Add mobile-specific CSS for all control buttons
             const mobileControlStyle = document.createElement('style');
             mobileControlStyle.textContent = `
-                @media (max-width: 832px) {
+                @media (max-width: 768px) {
                     .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
                         height: 20px !important;
                         min-height: 20px !important;
@@ -31889,7 +31780,7 @@ class AccessibilityWidget {
             // Add mobile-specific CSS for Useful Links dropdown
             const mobileUsefulLinksStyle = document.createElement('style');
             mobileUsefulLinksStyle.textContent = `
-                @media (max-width: 832px) {
+                @media (max-width: 768px) {
                     .useful-links-dropdown {
                         font-size: 10px !important;
                         padding: 4px 6px !important;
@@ -31941,7 +31832,7 @@ class AccessibilityWidget {
             // Increase toggle width when ON to fit text properly and fix text sliding
             const style = document.createElement('style');
             style.textContent = `
-                @media (max-width: 832px) {
+                @media (max-width: 768px) {
                     .toggle-switch > input:checked + .slider { width: 100% !important; }
                 }
                 .profile-item .profile-info { 
@@ -31966,7 +31857,7 @@ class AccessibilityWidget {
                 }
                 
                 /* Hide ON/OFF text on mobile screens */
-                @media (max-width: 832px) {
+                @media (max-width: 768px) {
                     .toggle-switch > input + .slider::after {
                         content: "" !important;
                         display: none !important;
@@ -32300,7 +32191,7 @@ class AccessibilityWidget {
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -32556,7 +32447,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -32750,8 +32641,8 @@ class AccessibilityWidget {
                 return; // Don't update position if icon isn't rendered
             }
             
-            // On mobile/tablet (≤832px) panel position comes from CSS; don't overwrite (keeps iPad Air layout)
-            if (window.innerWidth <= 832) return;
+            // On mobile (≤768px) panel position comes from CSS; don't overwrite with desktop pixel position
+            if (window.innerWidth <= 768) return;
             
             // Get actual panel dimensions from computed styles (respects CSS media queries)
             const panelComputedStyle = window.getComputedStyle(panel);
@@ -32926,7 +32817,7 @@ class AccessibilityWidget {
             const pos = (position || '').toLowerCase();
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
                     // First, clear all existing positioning
                     icon.style.removeProperty('top');
@@ -32973,7 +32864,7 @@ class AccessibilityWidget {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
        
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                
                 if (isMobile) {
                    
@@ -33069,7 +32960,7 @@ class AccessibilityWidget {
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -33093,7 +32984,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
                   
                     
@@ -33209,7 +33100,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 832;
+                const isMobile = window.innerWidth <= 768;
 
                 
                 if (isMobile) {
