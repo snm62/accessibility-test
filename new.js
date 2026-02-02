@@ -1,4 +1,4 @@
-// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+// Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
         try {
@@ -106,1254 +106,40 @@
             } catch (_) {}
         }
         
-        // Check localStorage immediately for seizure-safe mode
+        // Seizure Safe: explicit in-product toggle (stricter than prefers-reduced-motion).
+        // Security: no global prototype overwriting. Use CSS kill switch + remove flash triggers; WAAPI (pause/playbackRate) for animation control per recommendations.
         const seizureSafeFromStorage = localStorage.getItem('accessbit-widget-seizure-safe');
         if (seizureSafeFromStorage === 'true') {
-            // SECURITY: Protected by Designer mode check at line 20
             try {
                 if (document.body) document.body.classList.add('seizure-safe');
+                if (document.documentElement) document.documentElement.classList.add('seizure-safe');
             } catch (_) {}
-            
-            // Apply immediate CSS to stop all animations
             const immediateStyle = document.createElement('style');
             immediateStyle.id = 'accessbit-seizure-immediate-early';
             immediateStyle.textContent = `
-                /* REMOVED: Greyish color filter - was causing dark blue appearance */
-                /* Color filters removed per user request - seizure mode now only stops animations */
-                
-                /* Per Webflow Security recommendations: Global CSS kill switch for seizure-safe mode */
-                /* This provides stricter controls than prefers-reduced-motion for photosensitive seizure safety */
-                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
+                /* Global CSS kill switch: animation: none; transition: none; scroll-behavior: auto (Security: no global overrides) */
+                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
                     animation: none !important;
                     transition: none !important;
                     scroll-behavior: auto !important;
                 }
-                
-                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
-                /* GSAP uses transform - CSS !important pins elements in place */
-                /* CRITICAL: Exclude scroll containers AND slider containers to prevent breaking layouts */
-                body.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget) {
-                    /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
-                    transform: none !important;
-                }
-                
-                /* Only apply opacity/filter resets to elements that are ACTUALLY animating */
-                /* Don't force opacity: 1 or filter: none on all elements - this changes colors/shapes */
-                body.seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                html.seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                html.seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                html.seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
-                html.seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]) {
-                    /* Only reset opacity/filter on elements that are actually animating */
-                    opacity: 1 !important;
-                    filter: none !important;
-                }
-                
-                /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
-                /* Target all possible Lottie containers, SVG, and canvas elements */
-                /* NOTE: Don't apply transform: none to SVG - it causes distortion, let API handle it */
-                body.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
-                body.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
-                body.seizure-safe [data-lottie],
-                body.seizure-safe lottie-player {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
-                }
-                
-                /* SVG Lottie elements - don't apply transform, let API handle stopping */
-                body.seizure-safe [class*="lottie"] svg,
-                body.seizure-safe [id*="lottie"] svg,
-                body.seizure-safe [data-lottie] svg,
-                body.seizure-safe lottie-player svg,
-                body.seizure-safe svg[data-lottie],
-                body.seizure-safe svg.lottie-animation,
-                body.seizure-safe svg[id*="lottie"],
-                body.seizure-safe svg[class*="lottie"],
-                html.seizure-safe [class*="lottie"] svg,
-                html.seizure-safe [id*="lottie"] svg,
-                html.seizure-safe [data-lottie] svg,
-                html.seizure-safe lottie-player svg,
-                html.seizure-safe svg[data-lottie],
-                html.seizure-safe svg.lottie-animation,
-                html.seizure-safe svg[id*="lottie"],
-                html.seizure-safe svg[class*="lottie"] {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
-                    /* The Lottie API handles stopping SVG animations properly */
-                }
-                
-                html.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
-                html.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
-                html.seizure-safe [data-lottie],
-                html.seizure-safe lottie-player {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: transform: none - causes distortion on SVG Lottie animations */
-                }
-                
-                /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
-                /* Use CSS to freeze animations while keeping elements visible */
-                /* NOTE: Don't apply transform: none to canvas - let the API handle stopping */
-                body.seizure-safe canvas[data-lottie],
-                body.seizure-safe canvas.lottie-animation,
-                body.seizure-safe lottie-player canvas,
-                body.seizure-safe [data-lottie] > canvas,
-                body.seizure-safe lottie-player > canvas,
-                html.seizure-safe canvas[data-lottie],
-                html.seizure-safe canvas.lottie-animation,
-                html.seizure-safe lottie-player canvas,
-                html.seizure-safe [data-lottie] > canvas,
-                html.seizure-safe lottie-player > canvas {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: transform: none - this was causing distortion */
-                    /* The Lottie API handles stopping the animation properly */
-                }
-                
-                /* Freeze canvas inside Lottie containers visually */
-                body.seizure-safe [data-lottie] > canvas,
-                html.seizure-safe [data-lottie] > canvas {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: transform: none - this was causing distortion */
-                }
-                
-                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
-                body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"], 
-                body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"], 
-                body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"],
-                body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
-                html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"], 
-                html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"], 
-                html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"],
-                html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
+                /* Remove common flash triggers: blinking caret, shimmer, pulsing, etc. */
+                body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"], body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"], body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"], body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
+                html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"], html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"], html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"], html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
                     animation: none !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
-                
-                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
-                body.seizure-safe nav,
-                body.seizure-safe header,
-                body.seizure-safe .navbar,
-                body.seizure-safe [role="navigation"],
-                body.seizure-safe [class*="nav"],
-                body.seizure-safe [class*="header"],
-                body.seizure-safe [class*="navbar"],
-                body.seizure-safe [data-sticky],
-                body.seizure-safe [data-fixed],
-                body.seizure-safe [style*="position: sticky"],
-                /* Exclude slider containers from filter removal to preserve colors */
-                body.seizure-safe [style*="position:fixed"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe [style*="position: fixed"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]) {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-                
-                /* Exclude widget container and all its contents from color filter */
-                body.seizure-safe #accessbit-widget-container,
-                body.seizure-safe [id*="accessbit-widget"],
-                body.seizure-safe [class*="accessbit-widget"],
-                body.seizure-safe [data-ck-widget] {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-                
-                /* Also exclude any shadow DOM content by targeting the host element */
-                body.seizure-safe accessbit-widget {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-                
-                /* NOTE: Global animation-kill rules removed per configuration change to allow more motion */
-                /* Ensure interactive elements still show pointer cursor in seizure-safe mode */
-                body.seizure-safe a[href], body.seizure-safe button, body.seizure-safe [role="button"], body.seizure-safe [onclick], body.seizure-safe input[type="button"], body.seizure-safe input[type="submit"], body.seizure-safe input[type="reset"], body.seizure-safe .btn, body.seizure-safe .button, body.seizure-safe [class*="btn"], body.seizure-safe [class*="button"], body.seizure-safe [tabindex]:not([tabindex="-1"]) {
-                    cursor: pointer !important;
-                }
-                /* Keep text cursor for text-editable fields */
-                body.seizure-safe input[type="text"], body.seizure-safe input[type="email"], body.seizure-safe input[type="search"], body.seizure-safe input[type="tel"], body.seizure-safe input[type="url"], body.seizure-safe input[type="password"], body.seizure-safe textarea, body.seizure-safe [contenteditable="true"] {
-                    cursor: text !important;
-                }
-                /* Stop animations for media elements without changing their layout */
-                body.seizure-safe img, body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object {
+                body.seizure-safe [data-lottie], body.seizure-safe [class*="lottie"], body.seizure-safe lottie-player,
+                html.seizure-safe [data-lottie], html.seizure-safe [class*="lottie"], html.seizure-safe lottie-player {
                     animation: none !important;
                     transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
                 }
-                /* Stop animations for text elements without forcing hidden animation clones to become visible */
-                body.seizure-safe h1, body.seizure-safe h2, body.seizure-safe h3, body.seizure-safe h4, body.seizure-safe h5, body.seizure-safe h6,
-                body.seizure-safe p, body.seizure-safe span, body.seizure-safe div, body.seizure-safe a,
-                body.seizure-safe li, body.seizure-safe td, body.seizure-safe th, body.seizure-safe label {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    /* Do NOT override opacity/visibility here: many animation libraries keep
-                       duplicate text elements hidden with opacity:0; forcing them visible
-                       causes overlapping/ghost text behind the main heading. */
-                }
-                /* Force GSAP and other library fade/slide utilities to final, static state */
-                body.seizure-safe .fade-up,
-                body.seizure-safe .fade-left,
-                body.seizure-safe .fade-right,
-                body.seizure-safe .fade-in,
-                body.seizure-safe .slide-in,
-                body.seizure-safe .scale-in,
-                body.seizure-safe .zoom-in {
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                }
-                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
-                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                /* HOVER ANIMATIONS: Disable all hover-triggered animations */
-                body.seizure-safe *:hover, body.seizure-safe *:focus, body.seizure-safe *:active, body.seizure-safe *[class*="hover"], body.seizure-safe *[class*="focus"], body.seizure-safe *[class*="active"], body.seizure-safe *[data-hover], body.seizure-safe *[data-focus], body.seizure-safe *[data-active] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                
-                /* CRITICAL: Exclude dropdown menus from visibility forcing - they should remain hidden until explicitly opened */
-                /* This rule must come after the hover rule above to override it for dropdowns */
-                /* Handle both normal and hover states to prevent auto-opening */
-                body.seizure-safe [class*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [class*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [id*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [id*="dropdown"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [class*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header),
-                body.seizure-safe [class*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header):hover,
-                body.seizure-safe [id*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header),
-                body.seizure-safe [id*="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):not(nav):not(header):hover,
-                body.seizure-safe [role="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [role="menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [role="menubar"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [role="menubar"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                /* Also handle common dropdown patterns like ul/ol inside nav items */
-                body.seizure-safe nav ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe nav ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe header ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe header ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [class*="nav"] ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [class*="nav"] ul:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [class*="submenu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [class*="submenu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover,
-                body.seizure-safe [class*="sub-menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]),
-                body.seizure-safe [class*="sub-menu"]:not([class*="open"]):not([class*="active"]):not([class*="show"]):not([aria-expanded="true"]):hover {
-                    /* Allow dropdowns to maintain their original visibility state - override the hover rule */
-                    opacity: inherit !important;
-                    visibility: inherit !important;
-                    display: inherit !important;
-                }
-                /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
-                /* Hide per-character/word spans ONLY after JS has consolidated text on the container.
-                   This prevents overlap on processed elements, without breaking sites where JS fails. */
-                body.seizure-safe [data-splitting][data-seizure-text-processed] .char, 
-                body.seizure-safe [data-splitting][data-seizure-text-processed] .word,
-                body.seizure-safe .split[data-seizure-text-processed] .char, 
-                body.seizure-safe .split[data-seizure-text-processed] .word,
-                body.seizure-safe [class*="split"][data-seizure-text-processed] [class*="char"]:not([class*="character"]):not([class*="chart"]), 
-                body.seizure-safe [class*="split"][data-seizure-text-processed] [class*="word"]:not([class*="wording"]),
-                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] [class*="char"]:not([class*="character"]):not([class*="chart"]),
-                body.seizure-safe [class*="text-animation"][data-seizure-text-processed] [class*="word"]:not([class*="wording"]),
-                body.seizure-safe [class*="typing"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="typing"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="typewriter"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="typewriter"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="reveal"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="reveal"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="unveil"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="unveil"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="show-text"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="show-text"][data-seizure-text-processed] .word,
-                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] .char,
-                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] .word {
-                    animation: none !important;
-                    transition: none !important;
-                    /* REMOVED: opacity, visibility, display hiding - causes blank animations when disabled */
-                }
-                /* Show parent containers after JS processes them - these will have the consolidated text */
-                body.seizure-safe [data-splitting][data-seizure-text-processed], 
-                body.seizure-safe .split[data-seizure-text-processed], 
-                body.seizure-safe [class*="split"][data-seizure-text-processed], 
-                body.seizure-safe [class*="text-animation"][data-seizure-text-processed], 
-                body.seizure-safe [class*="typing"][data-seizure-text-processed], 
-                body.seizure-safe [class*="typewriter"][data-seizure-text-processed], 
-                body.seizure-safe [class*="reveal"][data-seizure-text-processed], 
-                body.seizure-safe [class*="unveil"][data-seizure-text-processed], 
-                body.seizure-safe [class*="show-text"][data-seizure-text-processed], 
-                body.seizure-safe [class*="text-effect"][data-seizure-text-processed] {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    animation-play-state: paused !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* Force all text to be fully visible - remove any clipping or width restrictions */
-                    clip-path: none !important;
-                    -webkit-clip-path: none !important;
-                    width: auto !important;
-                    height: auto !important;
-                    max-width: none !important;
-                    max-height: none !important;
-                }
-                /* For text animation containers not yet processed, ensure they're visible but hide overlapping children */
-                body.seizure-safe [data-splitting]:not([data-seizure-text-processed]), 
-                body.seizure-safe .split:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="split"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="text-animation"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="typing"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="typewriter"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="reveal"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="unveil"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="show-text"]:not([data-seizure-text-processed]), 
-                body.seizure-safe [class*="text-effect"]:not([data-seizure-text-processed]) {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    animation-play-state: paused !important;
-                    /* Don't force opacity/visibility here - let JS handle consolidation first */
-                }
-                /* REMOVED: Hide duplicate text elements - causes blank animations when disabled */
-                /* body.seizure-safe [data-seizure-duplicate-hidden] {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                    position: absolute !important;
-                    pointer-events: none !important;
-                } */
-                /* REMOVED: Hide per-letter spans - causes blank animations when disabled */
-                /* body.seizure-safe [data-seizure-text-processed][class*="fade-up"] > span,
-                body.seizure-safe [data-seizure-text-processed][class*="fade-in"] > span,
-                body.seizure-safe [data-seizure-text-processed][class*="multi-text"] > span,
-                body.seizure-safe [data-seizure-text-processed].hero-heading > span {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                    position: absolute !important;
-                    pointer-events: none !important;
-                } */
-                /* IMAGE HOVER EFFECTS: Disable all image hover animations */
-                body.seizure-safe img:hover, body.seizure-safe [class*="image"]:hover, body.seizure-safe [class*="img"]:hover, body.seizure-safe [class*="photo"]:hover, body.seizure-safe [class*="picture"]:hover, body.seizure-safe [class*="gallery"]:hover, body.seizure-safe [class*="portfolio"]:hover, body.seizure-safe [class*="card"]:hover, body.seizure-safe [class*="item"]:hover {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-                /* SCROLL-TRIGGERED ANIMATIONS: Stop all scroll-based animations IMMEDIATELY */
-                body.seizure-safe *[class*="scroll"], 
-                body.seizure-safe *[class*="progress"], 
-                body.seizure-safe *[class*="bar"], 
-                body.seizure-safe *[class*="line"], 
-                body.seizure-safe *[class*="timeline"], 
-                body.seizure-safe *[class*="track"], 
-                body.seizure-safe *[class*="path"], 
-                body.seizure-safe *[class*="stroke"], 
-                body.seizure-safe *[class*="fill"], 
-                body.seizure-safe *[class*="gradient"], 
-                body.seizure-safe *[class*="wave"], 
-                body.seizure-safe *[class*="flow"], 
-                body.seizure-safe *[class*="stream"], 
-                body.seizure-safe *[class*="runner"], 
-                body.seizure-safe *[class*="mover"], 
-                body.seizure-safe *[class*="indicator"], 
-                body.seizure-safe *[class*="stopper"], 
-                body.seizure-safe *[class*="marker"], 
-                body.seizure-safe *[class*="pointer"], 
-                body.seizure-safe *[class*="cursor"], 
-                body.seizure-safe *[class*="dot"], 
-                body.seizure-safe *[class*="circle"], 
-                body.seizure-safe *[class*="ring"], 
-                body.seizure-safe *[class*="orbit"],
-                body.seizure-safe [data-scroll],
-                body.seizure-safe [data-aos],
-                body.seizure-safe [data-animate]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe [data-wf-page]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]),
-                body.seizure-safe [data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([class*="wb-swiper"]):not([data-slider]):not([data-carousel]) {
-                    animation: none !important;
-                    transition: none !important;
-                    animation-fill-mode: forwards !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    /* Preserve transforms for slider manual navigation - exclude slider containers */
-                    transform: none !important;
-                    will-change: auto !important;
-                }
-                
-                /* SLIDERS: Block auto-play animations but allow manual navigation - preserve transforms */
-                body.seizure-safe .swiper-slide,
-                body.seizure-safe .slick-slide,
-                body.seizure-safe .carousel-item,
-                body.seizure-safe [class*="swiper"] *,
-                body.seizure-safe [class*="slick"] *,
-                body.seizure-safe [class*="carousel"] *,
-                body.seizure-safe [data-slider] *,
-                body.seizure-safe [data-carousel] * {
-                    /* Allow transforms for manual slide navigation */
-                    transform: unset !important;
-                }
-                
-                /* SLIDERS: Block auto-play animations but allow manual navigation */
-                body.seizure-safe .swiper,
-                body.seizure-safe .swiper-container,
-                body.seizure-safe .slick-slider,
-                body.seizure-safe .carousel,
-                body.seizure-safe [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
-                body.seizure-safe [class*="carousel"],
-                body.seizure-safe [data-slider],
-                body.seizure-safe [data-carousel] {
-                    /* Block auto-play animations */
-                    animation: none !important;
-                    /* Allow pointer events for manual navigation */
-                    pointer-events: auto !important;
-                    cursor: default !important;
-                    /* Allow slide transitions for manual navigation */
-                    transition: transform 0.3s ease !important;
-                }
-                
-                /* Slider slides: block auto-animations but allow manual slide changes */
-                body.seizure-safe .swiper-slide,
-                body.seizure-safe .slick-slide,
-                body.seizure-safe .carousel-item {
-                    animation: none !important;
-                    /* Allow transform for manual slide navigation */
-                    transition: transform 0.3s ease !important;
-                    pointer-events: auto !important;
-                }
-                /* REMOVED: Duplicate rule - already covered by scroll-triggered animations section */
-                /* REMOVED: Duplicate data-splitting rules - already covered by letter-by-letter animations section */
-                    `;
-                    // SECURITY: Protected by Designer mode check at line 20
-                    try {
-                        if (document.head) document.head.appendChild(immediateStyle);
-                    } catch (_) {}
-            
-            // Reinforce at root: cover both html.seizure-safe and body.seizure-safe
+            `;
             try {
-                if (!document.getElementById('accessbit-seizure-reinforce')) {
-                    const reinforce = document.createElement('style');
-                    reinforce.id = 'accessbit-seizure-reinforce';
-                    reinforce.textContent = `
-                        /* Exclude nav/header to preserve sticky positioning */
-                        html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
-                            /* Complete animations to final state instead of stopping mid-way */
-                            animation-play-state: paused !important;
-                            animation-fill-mode: forwards !important;
-                            animation: none !important;
-                            animation-name: none !important;
-                            transition: none !important;
-                            transition-property: none !important;
-                        }
-                        /* Keep cursors intact */
-                        html.seizure-safe a[href], html.seizure-safe button, html.seizure-safe [role="button"], html.seizure-safe [onclick],
-                        html.seizure-safe input[type="button"], html.seizure-safe input[type="submit"], html.seizure-safe input[type="reset"],
-                        html.seizure-safe .btn, html.seizure-safe .button, html.seizure-safe [class*="btn"], html.seizure-safe [class*="button"],
-                        html.seizure-safe [tabindex]:not([tabindex="-1"]) { cursor: pointer !important; }
-                        html.seizure-safe input[type="text"], html.seizure-safe input[type="email"], html.seizure-safe input[type="search"],
-                        html.seizure-safe input[type="tel"], html.seizure-safe input[type="url"], html.seizure-safe input[type="password"],
-                        html.seizure-safe textarea, html.seizure-safe [contenteditable="true"] { cursor: text !important; }
-                    `;
-                    document.head.appendChild(reinforce);
-                }
+                if (document.head) document.head.appendChild(immediateStyle);
             } catch (_) {}
-            
-            // Master layer: globally disable CSS animations/transitions without altering layout
-            try {
-                if (!document.getElementById('accessbit-seizure-master')) {
-                    const master = document.createElement('style');
-                    master.id = 'accessbit-seizure-master';
-                    master.textContent = `
-                        /* Hard stop for CSS animations and transitions */
-                        /* Force animations to final state immediately - either prevent from starting or jump to final state */
-                        /* Exclude nav/header to preserve sticky positioning and layout */
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
-                            /* Set duration to 0s so animations complete instantly (jump to final state) */
-                            animation-duration: 0s !important;
-                            animation-delay: 0s !important;
-                            animation-fill-mode: forwards !important;
-                            animation-iteration-count: 1 !important;
-                            /* Prevent new animations from starting */
-                            animation-play-state: paused !important;
-                            transition: none !important;
-                            transition-property: none !important;
-                            transition-duration: 0s !important;
-                            transition-delay: 0s !important;
-                            /* REMOVED: scroll-behavior: auto !important; - This was blocking Lenis smooth scrolling */
-                        }
-                        /* Do not affect cursor appearance */
-                        body.seizure-safe * { cursor: inherit; }
-                    `;
-                    document.head.appendChild(master);
-                }
-                
-                // Correction layer: preserve site layout styles while keeping animations disabled
-                if (!document.getElementById('accessbit-seizure-correction')) {
-                    const correction = document.createElement('style');
-                    correction.id = 'accessbit-seizure-correction';
-                    correction.textContent = `
-                        /* Keep animations disabled - exclude nav/header to preserve sticky positioning */
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]) {
-                            animation: none !important;
-                            transition: none !important;
-                        }
-                        /* Restore layout-affecting properties to stylesheet values - exclude nav/header */
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
-                        body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
-                            transform: unset !important;
-                            translate: unset !important;
-                            scale: unset !important;
-                            rotate: unset !important;
-                            opacity: unset !important;
-                            visibility: unset !important;
-                            /* CRITICAL: Do NOT unset position - this breaks sticky/fixed navigation */
-                            /* REMOVED: position: unset !important; */
-                            top: unset !important;
-                            left: unset !important;
-                            right: unset !important;
-                            bottom: unset !important;
-                            width: unset !important;
-                            height: unset !important;
-                        }
-                        
-                        /* CRITICAL: Preserve positioning for nav elements and ensure their positioning is not affected */
-                        body.seizure-safe nav,
-                        body.seizure-safe header,
-                        body.seizure-safe .navbar,
-                        body.seizure-safe [role="navigation"],
-                        body.seizure-safe [class*="nav"],
-                        body.seizure-safe [class*="header"],
-                        body.seizure-safe [class*="navbar"],
-                        body.seizure-safe [data-sticky],
-                        body.seizure-safe [data-fixed],
-                        body.seizure-safe [style*="position: sticky"],
-                        body.seizure-safe [style*="position:fixed"],
-                        body.seizure-safe [style*="position: fixed"] {
-                            position: inherit !important;
-                            transform: inherit !important;
-                            /* Preserve opacity and visibility for nav elements to maintain their appearance */
-                            opacity: inherit !important;
-                            visibility: inherit !important;
-                        }
-                        /* Preserve only genuine navigation/header and explicit opt-outs */
-                        body.seizure-safe nav, body.seizure-safe header, body.seizure-safe .navbar,
-                        body.seizure-safe [role="navigation"], body.seizure-safe [data-allow-transform] {
-                            /* Do not touch nav/header positioning to preserve sticky/fixed behavior */
-                            /* REMOVED: transform: unset !important; - This was conflicting with transform: inherit above and breaking sticky navigation */
-                            opacity: inherit !important;
-                            visibility: inherit !important;
-                        }
-                    `;
-                    document.head.appendChild(correction);
-                }
-            } catch (_) {}
-            
-            // Enforce no-scroll-animations for known libraries/selectors with high specificity
-            try {
-                if (!document.getElementById('accessbit-seizure-animation-enforcer')) {
-                    const enforce = document.createElement('style');
-                    enforce.id = 'accessbit-seizure-animation-enforcer';
-                    enforce.textContent = `
-                        /* Target common scroll animation libs without affecting layout of others */
-                        body.seizure-safe [data-aos], body.seizure-safe .aos-init, body.seizure-safe .aos-animate,
-                        body.seizure-safe [data-scroll], body.seizure-safe [data-animate], body.seizure-safe .wow,
-                        body.seizure-safe .animate__animated, body.seizure-safe .fade-up, body.seizure-safe .fade-in,
-                        body.seizure-safe .slide-in, body.seizure-safe .reveal, body.seizure-safe [class*="fade-"],
-                        body.seizure-safe [class*="slide-"], body.seizure-safe [class*="reveal"], body.seizure-safe [class*="animate"] {
-                            animation: none !important;
-                            transition: none !important;
-                            opacity: 1 !important;
-                            /* transform: none !important; - REMOVED: This was breaking website layout */
-                            will-change: auto !important;
-                        }
-                    `;
-                    document.head.appendChild(enforce);
-                }
-            } catch (_) {}
-            
-            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
-            try { document.documentElement.setAttribute('data-seizure-safe', 'true'); } catch (_) {}
-            
-            const seizureState = {
-                guardsApplied: false,
-                animationBlockerInstalled: false,
-                styleObserver: null,
-                classWatcher: null,
-                seizureObserver: null,
-                savedAnimations: new Map(),
-                waapiListenersInstalled: false,
-                onAnimationStart: null,
-                onTransitionRun: null,
-                universalMotionObserver: null,
-                originalLottieLoadAnimation: null,
-                styleSanitizerObserver: null
-            };
-            
-            let applySeizureSafeDOMFreeze, seizureConsolidateSplitText, applyWAAPIStopMotion, installStyleSanitizer, stopStyleSanitizer;
-            
-            try {
-                
-                if (!seizureState.guardsApplied) {
-                    seizureState.guardsApplied = true;
-                    
-                    const applySeizureSafeDOMFreeze = function() {
-                        try {
-                            // Check Designer mode first
-                            // Use standalone Designer mode check
-                            if (isDesignerModeStandalone()) return; // Exit early in Designer
-                            
-                            // Reveal typewriter/typing effects by consolidating text
-                            const typeSelectors = [
-                                '[class*="typewriter"]', '[class*="typing"]', '[data-typing]', '[data-typewriter]'
-                            ];
-                            // Use scoped query that excludes Designer elements
-                            const widget = window.AccessibilityWidgetInstance;
-                            const queryFn = widget && typeof widget.scopedQuerySelectorAll === 'function' 
-                                ? (sel) => widget.scopedQuerySelectorAll(sel)
-                                : (sel) => document.querySelectorAll(sel);
-                            
-                            queryFn(typeSelectors.join(',')).forEach(el => {
-                                try {
-                                    // Skip if already processed to prevent duplication
-                                    if (el.hasAttribute('data-seizure-processed')) return;
-                                    el.setAttribute('data-seizure-processed', 'true');
-                                    
-                                    const datasetText = el.getAttribute('data-full-text') || el.getAttribute('data-text') || '';
-                                    if (datasetText) { 
-                                        el.textContent = datasetText; 
-                                        return; 
-                                    }
-                                    // If split into character spans, join them (but preserve original structure)
-                                    const charSpans = el.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"]');
-                                    if (charSpans && charSpans.length > 0) {
-                                        // Only consolidate if the element doesn't already have complete text
-                                        const currentText = el.textContent.trim();
-                                        if (!currentText || currentText.length < charSpans.length) {
-                                            let joined = '';
-                                            charSpans.forEach(n => { joined += n.textContent || ''; });
-                                            if (joined && joined.trim()) {
-                                                el.textContent = joined;
-                                            }
-                                        }
-                                    }
-                                } catch (_) { /* ignore per-element errors */ }
-                            });
-                            
-                            // Freeze progress bars and indicators (keep current visual state)
-                            const progressSelectors = [
-                                'progress', '[role="progressbar"]', '[class*="progress"]', '[class*="indicator"]', '[class*="bar"]'
-                            ];
-                            queryFn(progressSelectors.join(',')).forEach(el => {
-                                try {
-                                    // Skip if already processed or in Designer
-                                    if (el.hasAttribute('data-webflow-design') || 
-                                        el.closest('[data-webflow-design-mode]')) {
-                                        return;
-                                    }
-                                    
-                                    // Mark as widget-managed
-                                    el.setAttribute('data-accessbit-widget-managed', 'true');
-                                    
-                                    const cs = window.getComputedStyle(el);
-                                    // Lock width/transform/transition to current (prefer CSS class, fallback to inline)
-                                    el.style.transition = 'none';
-                                    el.style.animation = 'none';
-                                    if (cs.width && cs.width !== 'auto') el.style.width = cs.width;
-                                    if (cs.transform && cs.transform !== 'none') el.style.transform = 'none';
-                                    // For ARIA progressbar, keep the current value and stop changing
-                                    if (el.getAttribute && el.getAttribute('role') === 'progressbar') {
-                                        const now = el.getAttribute('aria-valuenow');
-                                        if (now) el.setAttribute('aria-valuenow', now);
-                                    }
-                                } catch (_) { /* ignore per-element errors */ }
-                            });
-                            
-                            // Preserve manual slider navigation controls: arrows and dots must remain functional
-                            const sliderControlSelectors = [
-                                '.swiper-button-next', '.swiper-button-prev', '.swiper-pagination-bullet', '.swiper-pagination-clickable',
-                                '.slick-next', '.slick-prev', '.slick-dots li', '.slick-dots button',
-                                '.glide__arrow', '.glide__bullet', '.splide__arrow', '.splide__pagination__page',
-                                '.carousel-control-next', '.carousel-control-prev', '.carousel-indicators li', '.carousel-indicators button',
-                                '[data-slide]', '[data-bs-slide]', '[data-glide-dir]'
-                            ];
-                            queryFn(sliderControlSelectors.join(',')).forEach(ctrl => {
-                                try {
-                                    ctrl.style.pointerEvents = 'auto';
-                                    ctrl.style.cursor = 'pointer';
-                                    // Ensure visibility and opacity aren't suppressed
-                                    ctrl.style.visibility = '';
-                                    ctrl.style.opacity = '';
-                                } catch (_) {}
-                            });
-                            
-                            // Pause autoplay for common slider libraries while keeping navigation enabled
-                            try {
-                                // Swiper
-                                const swipers = queryFn('.swiper, .swiper-container');
-                                swipers.forEach(el => {
-                                    const inst = el.swiper || el.__swiper || (el._swiper || null);
-                                    if (inst && inst.autoplay && typeof inst.autoplay.stop === 'function') {
-                                        inst.autoplay.stop();
-                                    }
-                                });
-                            } catch (_) {}
-                            try {
-                                // Slick (requires jQuery)
-                                const jq = window.jQuery || window.$;
-                                if (jq) {
-                                    jq('.slick-slider').each(function() {
-                                        try { jq(this).slick && jq(this).slick('slickPause'); } catch (e) {}
-                                    });
-                                }
-                            } catch (_) {}
-                            try {
-                                // Splide
-                                queryFn('.splide').forEach(el => {
-                                    const inst = el.splide || el._splide || null;
-                                    if (inst && typeof inst.options === 'object') {
-                                        try { inst.options = Object.assign({}, inst.options, { autoplay: false }); } catch (e) {}
-                                        if (inst.Components && inst.Components.Autoplay && typeof inst.Components.Autoplay.pause === 'function') {
-                                            inst.Components.Autoplay.pause();
-                                        }
-                                    }
-                                });
-                            } catch (_) {}
-                            try {
-                                // Glide.js
-                                document.querySelectorAll('.glide').forEach(el => {
-                                    const inst = el._glide || null;
-                                    if (inst && typeof inst.pause === 'function') {
-                                        inst.pause();
-                                    }
-                                });
-                            } catch (_) {}
-                            
-                            // Do NOT alter nav/header elements so sticky/navbars continue working normally
-                            // This function intentionally skips any changes to nav/header; CSS exceptions added below
-                        } catch (err) {
-                            
-                        }
-                    };
-                    
-                    const seizureConsolidateSplitText = function() {
-                        try {
-                            // First pass: Handle standard split-text containers
-                            const containers = document.querySelectorAll(
-                                '[data-splitting], .split, [class*="split-text"], [class*="text-split"], ' +
-                                '[class*="text-animation"], [class*="typing"], [class*="typewriter"], ' +
-                                '[class*="reveal"], [class*="unveil"], [class*="show-text"], [class*="text-effect"]'
-                            );
-                            
-                            containers.forEach(container => {
-                                try {
-                                    if (!container || container.hasAttribute('data-seizure-text-processed')) return;
-                                    
-                                    const charElements = container.querySelectorAll(
-                                        '.char, [class*="char"], .letter, [class*="letter"], .word, [class*="word"]'
-                                    );
-                                    
-                                    if (!charElements || charElements.length === 0) return;
-                                    
-                                    let fullText = '';
-                                    charElements.forEach(char => {
-                                        fullText += char.textContent || '';
-                                    });
-                                    
-                                    if (fullText && fullText.trim()) {
-                                        container.textContent = fullText.trim();
-                                        container.setAttribute('data-seizure-text-processed', 'true');
-                                        container.style.opacity = '1';
-                                        container.style.visibility = 'visible';
-                                        container.style.animation = 'none';
-                                        container.style.transition = 'none';
-                                        container.style.transform = 'none';
-                                    }
-                                } catch (_) { /* ignore per-container errors */ }
-                            });
-                            
-                            // Second pass: Handle Webflow-style per-letter spans (plain <span> elements, not .char/.word)
-                            // Look for elements with many child spans that likely contain per-letter text
-                            const webflowContainers = document.querySelectorAll(
-                                '[class*="fade-up"], [class*="fade-in"], [class*="multi-text"], h1, h2, h3, h4, h5, h6'
-                            );
-                            
-                            webflowContainers.forEach(container => {
-                                try {
-                                    if (!container || container.hasAttribute('data-seizure-text-processed')) return;
-                                    
-                                    // Check if this element has many child spans (likely per-letter animation)
-                                    const childSpans = container.querySelectorAll(':scope > span');
-                                    if (childSpans.length < 5) return; // Not enough to be per-letter
-                                    
-                                    // Check if spans contain single characters or very short text
-                                    let isPerLetter = true;
-                                    let fullText = '';
-                                    childSpans.forEach(span => {
-                                        const text = (span.textContent || '').trim();
-                                        fullText += text;
-                                        // If any span has more than 2 characters, it's probably not per-letter
-                                        if (text.length > 2) {
-                                            isPerLetter = false;
-                                        }
-                                    });
-                                    
-                                    if (isPerLetter && fullText && fullText.trim()) {
-                                        container.textContent = fullText.trim();
-                                        container.setAttribute('data-seizure-text-processed', 'true');
-                                        container.style.opacity = '1';
-                                        container.style.visibility = 'visible';
-                                        container.style.animation = 'none';
-                                        container.style.transition = 'none';
-                                        container.style.transform = 'none';
-                                    }
-                                } catch (_) { /* ignore per-container errors */ }
-                            });
-                            
-                            // Third pass: Detect and hide duplicate text elements (like Webflow's h1 + animated h2)
-                            // If we find multiple headings/blocks with similar text content, hide the animated ones
-                            const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="heading"]');
-                            const textMap = new Map();
-                            
-                            textElements.forEach(el => {
-                                try {
-                                    const text = (el.textContent || '').trim().toLowerCase().replace(/\s+/g, ' ');
-                                    if (!text || text.length < 10) return; // Skip very short text
-                                    
-                                    if (!textMap.has(text)) {
-                                        textMap.set(text, []);
-                                    }
-                                    textMap.get(text).push(el);
-                                } catch (_) {}
-                            });
-                            
-                            // For each duplicate text, keep the cleanest version and hide the animated ones
-                            textMap.forEach((elements, text) => {
-                                if (elements.length < 2) return; // No duplicates
-                                
-                                // Find the cleanest version (no per-letter spans, no animation classes)
-                                let cleanest = null;
-                                let cleanestScore = -1;
-                                
-                                elements.forEach(el => {
-                                    const hasSpans = el.querySelectorAll(':scope > span').length > 0;
-                                    const hasAnimClass = el.className.includes('fade') || 
-                                                         el.className.includes('animate') ||
-                                                         el.className.includes('multi-text');
-                                    const score = (hasSpans ? 0 : 10) + (hasAnimClass ? 0 : 5);
-                                    
-                                    if (score > cleanestScore) {
-                                        cleanestScore = score;
-                                        cleanest = el;
-                                    }
-                                });
-                                
-                                // REMOVED: Hide all duplicates - causes blank animations when disabled
-                                // elements.forEach(el => {
-                                //     if (el !== cleanest && !el.hasAttribute('data-seizure-duplicate-hidden')) {
-                                //         el.style.display = 'none';
-                                //         el.style.visibility = 'hidden';
-                                //         el.style.opacity = '0';
-                                //         el.setAttribute('data-seizure-duplicate-hidden', 'true');
-                                //     }
-                                // });
-                            });
-                        } catch (_) { /* ignore top-level errors */ }
-                    };
-                    
-                    seizureState.applySeizureSafeDOMFreeze = applySeizureSafeDOMFreeze;
-                    seizureState.seizureConsolidateSplitText = seizureConsolidateSplitText;
-                    seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
-                    
-                    applySeizureSafeDOMFreeze();
-                    
-                    try {
-                        if (!seizureState.animationBlockerInstalled) {
-                            seizureState.animationBlockerInstalled = true;
-                            // CRITICAL: Exclude slider/carousel containers to prevent breaking layouts
-                            const EXEMPT_SELECTOR = 'nav, header, .navbar, [role="navigation"], [data-allow-transform], [class*="swiper"], [class*="carousel"], [class*="slider"], [class*="wb-swiper"], [data-slider], [data-carousel]';
-                            // Do not neutralize transforms on icons/arrows; many sites rotate these via CSS
-                            const ICON_SELECTOR = '.icon, [class*="icon"], [class*="arrow"], [class*="chevron"], [class*="caret"], svg, i, [data-icon]';
-                            // Also respect common accordion/FAQ toggle contexts that rotate arrows
-                            const ROTATION_CONTEXT_SELECTOR = '[aria-expanded], [data-accordion], .accordion, [data-toggle], [data-collapse]';
-                            
-                            const isExempt = (el) => {
-                                try {
-                                    if (el.matches && el.matches(ICON_SELECTOR)) return true;
-                                    return !!el.closest(EXEMPT_SELECTOR);
-                                } catch (_) { return false; }
-                            };
-                            
-                            const neutralizeElement = (el) => {
-                                if (!el || isExempt(el)) return;
-                                try {
-                                    // CRITICAL: Check if element is part of slider/carousel - exclude from all transforms
-                                    const isSliderElement = el.closest && (
-                                        el.closest('[class*="swiper"]') ||
-                                        el.closest('[class*="carousel"]') ||
-                                        el.closest('[class*="slider"]') ||
-                                        el.closest('[class*="wb-swiper"]') ||
-                                        el.closest('[data-slider]') ||
-                                        el.closest('[data-carousel]')
-                                    );
-                                    if (isSliderElement) {
-                                        // Don't apply any transforms/filters to slider elements - preserve their layout
-                                        return;
-                                    }
-                                    
-                                    // Get computed style to check if element is actually animating
-                                    const computedStyle = window.getComputedStyle(el);
-                                    const hasAnimation = computedStyle.animationName !== 'none' && computedStyle.animationName !== '';
-                                    const hasTransition = computedStyle.transitionProperty !== 'none' && computedStyle.transitionProperty !== '';
-                                    
-                                    // CRITICAL: Check if element is part of Lottie animation (be very specific)
-                                    // Only match actual Lottie elements, not elements that happen to have "lottie" in class/id
-                                    const isLottieElement = el.tagName === 'LOTTIE-PLAYER' ||
-                                                          el.hasAttribute('data-lottie') ||
-                                                          (el.tagName === 'CANVAS' && (el.hasAttribute('data-lottie') || el.classList.contains('lottie-animation'))) ||
-                                                          (el.tagName === 'SVG' && (el.hasAttribute('data-lottie') || el.classList.contains('lottie-animation'))) ||
-                                                          (el.closest && (el.closest('[data-lottie], lottie-player')));
-                                    
-                                    el.style.animation = 'none';
-                                    el.style.transition = 'none';
-                                    el.style.willChange = 'auto';
-                                    // REMOVED: filter: none - don't apply to all elements, only animating ones
-                                    // Only apply filter: none if element is actually animating
-                                    if (hasAnimation || hasTransition) {
-                                        el.style.filter = 'none';
-                                    }
-                                    
-                                    // CRITICAL: Freeze Lottie elements visually without hiding them
-                                    if (isLottieElement) {
-                                        el.style.transform = 'none';
-                                        el.style.animation = 'none';
-                                        el.style.transition = 'none';
-                                        // Keep canvas visible - don't hide, just freeze visually
-                                        if (el.tagName === 'CANVAS') {
-                                            // Don't hide - just freeze the animation
-                                            // The CSS and JavaScript APIs will handle stopping the animation
-                                        }
-                                    } else {
-                                        // Only neutralize transform if element is ACTUALLY being transformed by animations
-                                        // Don't break buttons or other elements that use transforms for layout
-                                        const inRotationContext = (() => {
-                                            try { return !!el.closest(ROTATION_CONTEXT_SELECTOR); } catch (_) { return false; }
-                                        })();
-                                        const isButton = el.tagName === 'BUTTON' || el.tagName === 'A' || el.getAttribute('role') === 'button';
-                                        const hasTransformAnimation = hasAnimation || hasTransition || el.hasAttribute('data-w-id') || el.hasAttribute('data-aos') || el.hasAttribute('data-scroll');
-                                        
-                                        if (!(el.matches && el.matches(ICON_SELECTOR)) && !inRotationContext && !isButton && hasTransformAnimation) {
-                                            el.style.transform = 'none';
-                                        }
-                                    }
-                                    
-                                    // Only force opacity: 1 if element is ACTUALLY fading in/out
-                                    // Don't reveal hidden elements that were intentionally hidden
-                                    const wasIntentionallyHidden = el.style.display === 'none' || 
-                                                                  el.style.visibility === 'hidden' || 
-                                                                  computedStyle.display === 'none' ||
-                                                                  computedStyle.visibility === 'hidden';
-                                    if ((hasAnimation || hasTransition) && !wasIntentionallyHidden && computedStyle.opacity !== '1') {
-                                        el.style.opacity = '1';
-                                    }
-                                } catch (_) {}
-                            };
-                            
-                            // Initial sweep - limit to first 5000 elements for safety
-                            try {
-                                const all = document.querySelectorAll('*');
-                                let count = 0;
-                                for (const el of all) {
-                                    neutralizeElement(el);
-                                    count++;
-                                    if (count > 5000) break;
-                                }
-                            } catch (_) {}
-                            
-                            // Observe future changes to styles/classes and neutralize
-                            try {
-                                const styleObserver = new MutationObserver((mutations) => {
-                                    if (!(document.body && document.body.classList.contains('seizure-safe'))) return;
-                                    for (const m of mutations) {
-                                        const target = m.target;
-                                        if (!(target instanceof Element)) continue;
-                                        if (isExempt(target)) continue;
-                                        try {
-                                            const inline = (target.getAttribute && target.getAttribute('style')) || '';
-                                            if (/animation|transition|transform|opacity|filter/i.test(inline)) {
-                                                neutralizeElement(target);
-                                            }
-                                            // Common animation class keywords
-                                            const cls = target.className ? String(target.className) : '';
-                                            if (/(animate|fade|slide|zoom|parallax|reveal|scroll|marquee)/i.test(cls)) {
-                                                neutralizeElement(target);
-                                            }
-                                        } catch (_) {}
-                                    }
-                                });
-                                styleObserver.observe(document.documentElement, {
-                                    subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']
-                                });
-                                seizureState.styleObserver = styleObserver;
-                            } catch (_) {}
-                            
-                            // Ensure native scroll behavior on the main document only (avoid breaking custom scrollers)
-                            try {
-                                document.documentElement.style.scrollBehavior = 'auto';
-                                document.body && (document.body.style.scrollBehavior = 'auto');
-                                // Do not touch scrollSnapType on arbitrary containers to avoid locking scroll
-                            } catch (_) {}
-                        }
-                    } catch (_) {}
-                    
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const isActive = document.body && (document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation'));
-                        if (isActive) {
-                            applySeizureSafeDOMFreeze();
-                            // Disable scroll-trigger libraries when seizure-safe or stop-animation is active
-                            try {
-                                // AOS
-                                if (window.AOS && typeof window.AOS.refreshHard === 'function') {
-                                    try { window.AOS.refreshHard(); } catch (_) {}
-                                    try { window.AOS.init && window.AOS.init({ disable: true }); } catch (_) {}
-                                }
-                            } catch (_) {}
-                        }
-                    }, { once: true });
-                    
-                    // Watch for seizure-safe class being toggled later and (re)install hard blockers
-                    try {
-                        if (!seizureState.classWatcher) {
-                            const classWatcher = new MutationObserver(() => {
-                                const active = document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation');
-                                if (active) {
-                                    try { applySeizureSafeDOMFreeze(); } catch (_) {}
-                                    try { seizureState.installStyleSanitizer && seizureState.installStyleSanitizer(); } catch (_) {}
-                                    try { applyUniversalStopMotion(true); } catch (_) {}
-                                } else {
-                                    try { applyUniversalStopMotion(false); } catch (_) {}
-                                }
-                            });
-                            classWatcher.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-                            seizureState.classWatcher = classWatcher;
-                            
-                            seizureState.installStyleSanitizer = function() {
-                                    try {
-                                        const isActive = () => document.body && (document.body.classList.contains('seizure-safe') || document.body.classList.contains('stop-animation') || document.body.classList.contains('reduced-motion'));
-                                        const sanitizeStyleString = (s) => String(s || '')
-                                            .replace(/(?:^|;\s*)(animation-[^:]+|animation)\s*:[^;]*;?/gi, '')
-                                            .replace(/(?:^|;\s*)(transition-[^:]+|transition)\s*:[^;]*;?/gi, '')
-                                            .replace(/(?:^|;\s*)animation-play-state\s*:[^;]*;?/gi, '')
-                                            .replace(/(?:^|;\s*)scroll-behavior\s*:[^;]*;?/gi, '')
-                                            .replace(/(?:^|;\s*)filter\s*:[^;]*;?/gi, '')
-                                            .replace(/(?:^|;\s*)opacity\s*:[^;]*;?/gi, '');
-
-                                        if (!seizureState.styleSanitizerObserver) {
-                                            const obs = new MutationObserver(mutations => {
-                                                if (!isActive()) return;
-                                                for (const m of mutations) {
-                                                    try {
-                                                        if (m.type === 'attributes' && m.attributeName === 'style' && m.target instanceof Element) {
-                                                            const el = m.target;
-                                                            const original = el.getAttribute('style') || '';
-                                                            const cleaned = sanitizeStyleString(original);
-                                                            if (cleaned !== original) try { el.setAttribute('style', cleaned); } catch (_) {}
-                                                        }
-                                                        if (m.type === 'childList' && m.addedNodes) {
-                                                            m.addedNodes.forEach(node => {
-                                                                if (!(node instanceof Element)) return;
-                                                                try {
-                                                                    const s = node.getAttribute('style') || '';
-                                                                    const cleaned = sanitizeStyleString(s);
-                                                                    if (cleaned !== s) try { node.setAttribute('style', cleaned); } catch (_) {}
-                                                                } catch (_) {}
-                                                                try {
-                                                                    node.querySelectorAll && node.querySelectorAll('[style]').forEach(desc => {
-                                                                        try {
-                                                                            const ds = desc.getAttribute('style') || '';
-                                                                            const dclean = sanitizeStyleString(ds);
-                                                                            if (dclean !== ds) try { desc.setAttribute('style', dclean); } catch (_) {}
-                                                                        } catch (_) {}
-                                                                    });
-                                                                } catch (_) {}
-                                                            });
-                                                        }
-                                                    } catch (_) {}
-                                                }
-                                            });
-                                            obs.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
-                                            seizureState.styleSanitizerObserver = obs;
-                                        }
-                                    } catch (_) {}
-                                };
-                            seizureState.stopStyleSanitizer = function() {
-                                    try { if (seizureState.styleSanitizerObserver) { try { seizureState.styleSanitizerObserver.disconnect(); } catch (_) {} seizureState.styleSanitizerObserver = null; } } catch (_) {}
-                                };
-                        }
-                    } catch (_) {}
-                    
-                    seizureState.installStyleSanitizer && seizureState.installStyleSanitizer();
-                    
-                    try {
-                        const observer = new MutationObserver(() => {
-                            if (document.body && document.body.classList.contains('seizure-safe')) {
-                                applySeizureSafeDOMFreeze();
-                            }
-                        });
-                        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-                        seizureState.seizureObserver = observer;
-                    } catch (obsErr) {
-                      
-                    }
-                }
-            } catch (guardErr) {
-                
-            }
-        }
-        
-        // Install reduced-motion @media default and an in-product Seizure Safe toggle (non-designer only)
-        try {
-            if (!isDesignerModeStandalone()) {
-                // Default to system preference using @media (prefers-reduced-motion: reduce)
-                if (!document.getElementById('accessbit-reduced-motion-default')) {
-                    const rm = document.createElement('style');
-                    rm.id = 'accessbit-reduced-motion-default';
-                    rm.textContent = `
-@media (prefers-reduced-motion: reduce) {
-  /* Reduce nonessential motion for users who request it at OS level */
-  /* Per Webflow Security recommendations: use animation: none instead of duration reduction */
-  :root, html, body, :root *:not(nav):not(header):not(.navbar):not([class*="nav"]) {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-  /* Remove common flash triggers for prefers-reduced-motion users */
-  *[class*="blink"], *[class*="shimmer"], *[class*="pulse"], 
-  *[class*="caret"], *[class*="cursor-blink"], *[class*="skeleton"] {
-    animation: none !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-}`;
-                    document.head.appendChild(rm);
-                }
-
-               
-
-                // Create accessible floating toggle for strict Seizure Safe mode
-                if (!document.getElementById('a11y-seizure-toggle')) {
-                    const btn = document.createElement('button');
-                    btn.id = 'a11y-seizure-toggle';
-                    btn.setAttribute('role','switch');
-                    btn.setAttribute('aria-checked', seizureSafeFromStorage === 'true' ? 'true' : 'false');
-                    btn.setAttribute('aria-label','Toggle Seizure Safe mode (stop flashing/animated content)');
-                    btn.title = 'Seizure Safe: stop flashing/animated content';
-                    btn.style.position = 'fixed';
-                    btn.style.left = '120px';
-                    btn.style.bottom = '12px';
-                    btn.style.zIndex = '2147483647';
-                    btn.style.background = '#000';
-                    btn.style.color = '#fff';
-                    btn.style.border = '1px solid rgba(255,255,255,0.15)';
-                    btn.style.padding = '8px 10px';
-                    btn.style.borderRadius = '6px';
-                    btn.style.fontSize = '12px';
-                    btn.style.cursor = 'pointer';
-                    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-                    btn.textContent = 'Seizure Safe';
-
-                    const toggleHandler = function() {
-                        const currently = document.body.classList.contains('seizure-safe');
-                        const next = !currently;
-                        if (next) {
-                            localStorage.setItem('accessbit-widget-seizure-safe','true');
-                            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
-                            try { document.body.classList.add('seizure-safe'); } catch (_) {}
-                            try { seizureState.installStyleSanitizer && seizureState.installStyleSanitizer(); } catch (_) {}
-                            try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(true); } catch (_) {}
-                            try { btn.setAttribute('aria-checked','true'); } catch (_) {}
-                        } else {
-                            try { seizureState.stopStyleSanitizer && seizureState.stopStyleSanitizer(); } catch (_) {}
-                            try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(false); } catch (_) {}
-                            try { btn.setAttribute('aria-checked','false'); } catch (_) {}
-                        }
-                    };
-
-                    btn.addEventListener('click', toggleHandler, true);
-                    btn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHandler(); } }, true);
-                    // SECURITY: Protected by Designer mode check at line 20
-                    try {
-                        if (document.body) document.body.appendChild(btn);
-                    } catch (_) {}
-                }
-            }
-        } catch(_) {}
-
-        // CRITICAL: Stop JavaScript animations immediately ONLY for seizure-safe mode
-        if (seizureSafeFromStorage === 'true') {
-            try {
-                // SECURITY FIX: Removed global requestAnimationFrame override per Webflow Marketplace security requirements
-                // Animation blocking is now handled via CSS classes only
-                
-                // WAAPI: pause/cancel running WAAPI animations when seizure-safe is active
-                try { seizureState.applyWAAPIStopMotion && seizureState.applyWAAPIStopMotion(true); } catch (_) {}
-                
-                // Stop Lottie animations immediately
-                if (typeof window.lottie !== 'undefined' && window.lottie.getRegisteredAnimations) {
-                    const lottieAnimations = window.lottie.getRegisteredAnimations();
-                    lottieAnimations.forEach(animation => {
-                        try {
-                            if (animation && typeof animation.stop === 'function') {
-                                animation.stop();
-                            }
-                            if (animation && typeof animation.pause === 'function') {
-                                animation.pause();
-                            }
-                        } catch (error) {
-                            
-                        }
-                    });
-                }
-                
-                // Stop jQuery animations immediately
-                if (typeof window.jQuery !== 'undefined' || typeof window.$ !== 'undefined') {
-                    try {
-                        const $ = window.jQuery || window.$;
-                        if ($ && $.fx) {
-                            $.fx.off = true;
-                        }
-                    } catch (error) {
-                       
-                    }
-                }
-                
-                
-                
-            } catch (jsError) {
-               
-            }
         }
         
     } catch (e) {
@@ -3083,146 +1869,14 @@ class AccessibilityWidget {
         // Set up aggressive monitoring for any text animations that might start
         // REMOVED: Duplicate setupSeizureSafeMonitoring() - using more comprehensive version below
         
-        // Set up aggressive monitoring for text animations when seizure-safe mode is active
+        // No-op: CSS-only seizure-safe mode - no inline style monitoring
         setupSeizureSafeMonitoring() {
-            try {
-                // Only set up monitoring if seizure-safe mode is active
-                if (!document.body.classList.contains('seizure-safe')) {
-                    return;
-                }
-                
-                
-                
-                // Use MutationObserver to catch any text animations that start
-                const observer = new MutationObserver((mutations) => {
-                    mutations.forEach((mutation) => {
-                        if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                            // Check for any new text animation elements
-                            const textElements = document.querySelectorAll('[data-splitting], .split, .char, .word');
-                            textElements.forEach(element => {
-                                if (element.style.animation || element.style.transition || element.style.opacity !== '1') {
-                                    // Force complete the animation immediately
-                                    element.style.animation = 'none';
-                                    element.style.transition = 'none';
-                                    element.style.opacity = '1';
-                                    element.style.visibility = 'visible';
-                                    element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
-                                    element.style.transform = 'none';
-                                }
-                            });
-                        }
-                    });
-                });
-                
-                // Start observing
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ['style', 'class']
-                });
-                
-                // Also run a periodic check every 100ms for the first 5 seconds
-                let checkCount = 0;
-                const interval = setInterval(() => {
-                    if (checkCount >= 50 || !document.body.classList.contains('seizure-safe')) {
-                        clearInterval(interval);
-                        return;
-                    }
-                    
-                    this.forceCompleteTextAnimations();
-                    checkCount++;
-                }, 100);
-                
-            } catch (e) {
-                
-            }
+            // Seizure-safe is handled by class + injected CSS only; no DOM observers
         }
         
-        // Minimal early CSS to pause motion before full seizure-safe styles load
+        // No-op: early + injectSeizureSafeCSS handle all seizure-safe styles
         applyImmediateSeizureCSS() {
-            try {
-                if (document.getElementById('accessbit-seizure-immediate')) return;
-                const style = document.createElement('style');
-                style.id = 'accessbit-seizure-immediate';
-                style.textContent = `
-                    /* IMMEDIATE SEIZURE-SAFE CSS - Minimal approach */
-                    body.seizure-safe * {
-                        animation-play-state: paused !important;
-                        transition: none !important;
-                    }
-                    
-                    /* Stop letter-by-letter animations immediately */
-                    body.seizure-safe [data-splitting],
-                    body.seizure-safe .split,
-                    body.seizure-safe .char,
-                    body.seizure-safe .word {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        display: inline !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
-                    }
-                    
-                    /* Stop SVG animations immediately */
-                    body.seizure-safe svg,
-                    body.seizure-safe svg path,
-                    body.seizure-safe svg line {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        /* transform: none !important; - REMOVED: This was breaking website layout */
-                    }
-                    
-                    /* Stop scroll-triggered animations immediately */
-                    body.seizure-safe *[class*="scroll"],
-                    body.seizure-safe *[class*="progress"],
-                    body.seizure-safe *[class*="bar"],
-                    body.seizure-safe *[class*="line"],
-                    body.seizure-safe *[class*="timeline"],
-                    body.seizure-safe [data-scroll],
-                    body.seizure-safe [data-aos],
-                    body.seizure-safe [data-animate],
-                    body.seizure-safe [data-wf-page],
-                    body.seizure-safe [data-w-id] {
-                        animation: none !important;
-                        transition: none !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: none !important;
-                        will-change: auto !important;
-                    }
-                    
-                    /* Allow slider manual navigation - preserve pointer events and allow slide transitions */
-                    body.seizure-safe .swiper,
-                    body.seizure-safe .swiper-container,
-                    body.seizure-safe .slick-slider,
-                    body.seizure-safe .carousel,
-                    body.seizure-safe [class*="slider"]:not([class*="toggle"]),
-                    body.seizure-safe [class*="carousel"],
-                    body.seizure-safe [data-slider],
-                    body.seizure-safe [data-carousel] {
-                        pointer-events: auto !important;
-                        cursor: default !important;
-                        /* Allow slide transitions for manual navigation */
-                        transition: transform 0.3s ease !important;
-                    }
-                    
-                    /* Block auto-slide animations but allow manual slide changes */
-                    body.seizure-safe .swiper-slide,
-                    body.seizure-safe .slick-slide,
-                    body.seizure-safe .carousel-item {
-                        animation: none !important;
-                        /* Allow transform for manual slide navigation */
-                        transition: transform 0.3s ease !important;
-                    }
-                `;
-                document.head.appendChild(style);
-            } catch (e) {
-                
-            }
+            // Single early style (accessbit-seizure-immediate-early) and seizure-safe-css are used
         }
     
     
@@ -5008,14 +3662,19 @@ class AccessibilityWidget {
         }
     }
     
-    /* Mobile Devices (Small Screens) - Base styles */
+    /* Mobile Devices (Small Screens) - Base styles (CSS-only layout) */
     @media (max-width: 480px) {
         .accessbit-widget-panel {
-            width: 90vw;
-            max-width: 350px;
+            width: 75vw;
+            max-width: 320px;
+            left: 12.5vw;
+            right: auto;
+            top: 0;
+            bottom: 0;
+            height: 100vh;
             padding: 12px;
-            font-size: 14px;
-            max-height: calc(100vh - 40px);
+            font-size: 12px;
+            max-height: 100vh;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -5089,18 +3748,23 @@ class AccessibilityWidget {
         }
     }
     
-    /* Landscape Phones & Smaller Portrait Tablets */
+    /* Landscape Phones & Smaller Portrait Tablets (CSS-only layout) */
     @media (min-width: 481px) and (max-width: 768px) {
         .accessbit-widget-panel {
             width: 80vw;
             max-width: 380px;
+            left: 10vw;
+            right: auto;
+            top: 0;
+            bottom: 0;
+            height: 100vh;
             padding: 14px;
-            max-height: calc(100vh - 40px);
+            font-size: 13px;
+            max-height: 100vh;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            /* Font size controlled by JavaScript */
         }
         
         .accessbit-widget-panel h2 {
@@ -28666,18 +27330,15 @@ class AccessibilityWidget {
             this.updateWidgetAppearance();
         }
         
-        // Inject CSS kill switch - no global overrides, CSS-only approach
+        // Inject CSS kill switch – Security: no global prototype overwriting; explicit toggle applies CSS kill switch + flash-trigger removal; WAAPI used for animation control (pause/playbackRate).
         injectSeizureSafeCSS() {
             if (document.getElementById('seizure-safe-css')) {
-                return; // Already injected
+                return;
             }
-            
             const style = document.createElement('style');
             style.id = 'seizure-safe-css';
-            
-            // Use textContent instead of innerHTML (security requirement)
             const cssText = `
-                /* Global CSS kill switch - absolute seizure-safe mode */
+                /* Global CSS kill switch (animation/transition/scroll-behavior; exclude widget) */
                 .seizure-safe *,
                 .seizure-safe *::before,
                 .seizure-safe *::after,
@@ -28836,40 +27497,21 @@ class AccessibilityWidget {
             document.head.appendChild(style);
         }
         
-        // Stop WAAPI animations using public API (global method)
+        // WAAPI: pause + playbackRate = 0 (Security: use WAAPI controls, no global hijacking)
         stopWAAPIAnimations() {
             try {
-                // Use global document.getAnimations() to catch all animations
-                if (typeof document.getAnimations === 'function') {
-                    document.getAnimations().forEach(animation => {
-                        try {
-                            // Skip widget animations by checking target
-                            const target = animation.effect && animation.effect.target;
-                            if (target) {
-                                if (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container')) {
-                                    return;
-                                }
-                                if (target.closest && (
-                                    target.closest('#accessbit-widget-container') ||
-                                    target.closest('[id*="accessbit-widget"]') ||
-                                    target.closest('[class*="accessbit-widget"]') ||
-                                    target.closest('accessbit-widget') ||
-                                    target.closest('[data-ck-widget]')
-                                )) {
-                                    return;
-                                }
-                            }
-                            
-                            // Pause and set playback rate to 0
-                            if (typeof animation.pause === 'function') {
-                                animation.pause();
-                            }
-                            if (typeof animation.playbackRate !== 'undefined') {
-                                animation.playbackRate = 0;
-                            }
-                        } catch (_) {}
-                    });
-                }
+                if (typeof document.getAnimations !== 'function') return;
+                document.getAnimations().forEach(animation => {
+                    try {
+                        const target = animation.effect && animation.effect.target;
+                        if (target && (target.id && (target.id.includes('accessbit-widget') || target.id === 'accessbit-widget-container') ||
+                            target.closest && (target.closest('#accessbit-widget-container') || target.closest('[id*="accessbit-widget"]') || target.closest('[class*="accessbit-widget"]') || target.closest('accessbit-widget') || target.closest('[data-ck-widget]')))) {
+                            return;
+                        }
+                        if (typeof animation.pause === 'function') animation.pause();
+                        if (typeof animation.playbackRate !== 'undefined') animation.playbackRate = 0;
+                    } catch (_) {}
+                });
             } catch (_) {}
         }
         
@@ -28926,104 +27568,6 @@ class AccessibilityWidget {
                 if (!gsap) {
                     return;
                 }
-                
-                // CRITICAL: Before pausing, force all text character animations to final state
-                // This ensures text split into spans (like fadeUpTextAnimation) shows correctly
-                try {
-                    // Find all elements that likely contain split text animations
-                    const textContainers = document.querySelectorAll('.fade-up-multi-text, .fade-up-multi-text-fast, [class*="fade-up"], [class*="text-animation"], [class*="split-text"]');
-                    textContainers.forEach(container => {
-                        try {
-                            // Skip widget elements
-                            if (container.closest && (
-                                container.closest('#accessbit-widget-container') ||
-                                container.closest('[id*="accessbit-widget"]') ||
-                                container.closest('[class*="accessbit-widget"]') ||
-                                container.closest('accessbit-widget') ||
-                                container.closest('[data-ck-widget]')
-                            )) {
-                                return;
-                            }
-                            
-                            // Find all character spans inside this container
-                            const charSpans = container.querySelectorAll('span');
-                            charSpans.forEach(span => {
-                                try {
-                                    // Force to final visible state (opacity: 1, y: 0)
-                                    // Use GSAP to set final state immediately, then pause
-                                    if (gsap && typeof gsap.set === 'function') {
-                                        gsap.set(span, { opacity: 1, y: 0, clearProps: 'all' });
-                                    } else {
-                                        // Fallback: use inline styles if GSAP.set not available
-                                        span.style.opacity = '1';
-                                        span.style.transform = 'translateY(0px)';
-                                        span.style.visibility = 'visible';
-                                    }
-                                } catch (_) {}
-                            });
-                        } catch (_) {}
-                    });
-                    
-                    // Also check for any span elements with low opacity or transform that might be animated text
-                    const allSpans = document.querySelectorAll('span');
-                    allSpans.forEach(span => {
-                        try {
-                            // Skip widget elements
-                            if (span.closest && (
-                                span.closest('#accessbit-widget-container') ||
-                                span.closest('[id*="accessbit-widget"]') ||
-                                span.closest('[class*="accessbit-widget"]') ||
-                                span.closest('accessbit-widget') ||
-                                span.closest('[data-ck-widget]')
-                            )) {
-                                return;
-                            }
-                            
-                            const computed = window.getComputedStyle(span);
-                            const isHidden = parseFloat(computed.opacity) < 0.1 || computed.transform !== 'none';
-                            
-                            // If span is hidden or transformed and is likely part of text animation
-                            if (isHidden && span.parentElement && 
-                                (span.parentElement.classList.toString().match(/(fade|text|animation|split|char)/i) ||
-                                 span.parentElement.querySelectorAll('span').length > 3)) {
-                                // Force to final state
-                                if (gsap && typeof gsap.set === 'function') {
-                                    gsap.set(span, { opacity: 1, y: 0, clearProps: 'all' });
-                                } else {
-                                    span.style.opacity = '1';
-                                    span.style.transform = 'translateY(0px)';
-                                    span.style.visibility = 'visible';
-                                }
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
-                
-                // Force background color to final state immediately
-                // The animation normally changes body background to #130b32
-                try {
-                    const body = document.body;
-                    const computedBg = window.getComputedStyle(body).backgroundColor;
-                    // If body doesn't have the final background color yet, set it immediately
-                    if (body && (!computedBg.includes('19, 11, 50') && !computedBg.includes('#130b32'))) {
-                        body.style.backgroundColor = '#130b32';
-                    }
-                } catch (_) {}
-                
-                // Force bg-image opacity to final state (opacity: 1)
-                try {
-                    const bgImages = document.querySelectorAll('.bg-image');
-                    bgImages.forEach(bgImg => {
-                        try {
-                            if (gsap && typeof gsap.set === 'function') {
-                                gsap.set(bgImg, { opacity: 1, clearProps: 'opacity' });
-                            } else {
-                                bgImg.style.opacity = '1';
-                            }
-                        } catch (_) {}
-                    });
-                } catch (_) {}
-                
                 // Pause global timeline (freezes all GSAP animations instantly)
                 if (gsap.globalTimeline && typeof gsap.globalTimeline.pause === 'function') {
                     try {
@@ -29100,11 +27644,10 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie animations using native API methods
+        // Stop Lottie animations using Lottie API: stop(), pause(), goToAndStop(), setSpeed(0) (platform equivalents supported)
         stopLottieAnimations() {
             try {
-                // Method 1: Individual registered animations (most reliable - MUST use this first)
-                // NOTE: window.lottie.pause() doesn't exist - only individual animation methods work
+                // Method 1: Registered animations – stop(), pause(), goToAndStop(0), setSpeed(0)
                 if (window.lottie && window.lottie.getRegisteredAnimations) {
                     window.lottie.getRegisteredAnimations().forEach(anim => {
                         try {
@@ -29147,14 +27690,10 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        if (typeof player.stop === 'function') {
-                            player.stop();
-                        } else if (typeof player.pause === 'function') {
-                            player.pause();
-                        }
-                        if (typeof player.seek === 'function') {
-                            player.seek(0);
-                        }
+                        if (typeof player.stop === 'function') player.stop();
+                        else if (typeof player.pause === 'function') player.pause();
+                        if (typeof player.seek === 'function') player.seek(0);
+                        if (typeof player.setSpeed === 'function') player.setSpeed(0);
                     } catch (_) {}
                 });
                 
@@ -29174,37 +27713,26 @@ class AccessibilityWidget {
                         // Check for Lottie instance on element
                         const inst = el.lottie || el._lottie || el.__lottie || el.lottieAnimation || el.__wfLottie;
                         if (inst) {
-                            if (typeof inst.stop === 'function') {
-                                inst.stop();
-                            }
-                            if (typeof inst.goToAndStop === 'function') {
-                                inst.goToAndStop(0, true);
-                            }
-                            if (typeof inst.pause === 'function') {
-                                inst.pause();
-                            }
+                            if (typeof inst.stop === 'function') inst.stop();
+                            if (typeof inst.goToAndStop === 'function') inst.goToAndStop(0, true);
+                            if (typeof inst.pause === 'function') inst.pause();
+                            if (typeof inst.setSpeed === 'function') inst.setSpeed(0);
                         }
                         
-                        // Check SVG/canvas inside element for Lottie instances
                         const svg = el.querySelector('svg, canvas');
                         if (svg) {
                             const svgInst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
                             if (svgInst) {
-                                if (typeof svgInst.stop === 'function') {
-                                    svgInst.stop();
-                                }
-                                if (typeof svgInst.goToAndStop === 'function') {
-                                    svgInst.goToAndStop(0, true);
-                                }
-                                if (typeof svgInst.pause === 'function') {
-                                    svgInst.pause();
-                                }
+                                if (typeof svgInst.stop === 'function') svgInst.stop();
+                                if (typeof svgInst.goToAndStop === 'function') svgInst.goToAndStop(0, true);
+                                if (typeof svgInst.pause === 'function') svgInst.pause();
+                                if (typeof svgInst.setSpeed === 'function') svgInst.setSpeed(0);
                             }
                         }
                     } catch (_) {}
                 });
                 
-                // Method 5: Check all SVG elements directly for Lottie instances (Webflow stores them in SVG)
+                // Method 5: SVG elements with Lottie instances (e.g. Webflow)
                 document.querySelectorAll('svg').forEach(svg => {
                     try {
                         if (svg.closest && (
@@ -29213,31 +27741,22 @@ class AccessibilityWidget {
                             svg.closest('[class*="accessbit-widget"]') ||
                             svg.closest('accessbit-widget') ||
                             svg.closest('[data-ck-widget]')
-                        )) {
-                            return;
-                        }
-                        
+                        )) return;
                         const inst = svg.lottie || svg._lottie || svg.__lottie || svg.lottieAnimation || svg.__wfLottie || svg.parentElement?.lottie || svg.parentElement?._lottie || svg.parentElement?.__wfLottie;
                         if (inst) {
-                            if (typeof inst.stop === 'function') {
-                                inst.stop();
-                            }
-                            if (typeof inst.goToAndStop === 'function') {
-                                inst.goToAndStop(0, true);
-                            }
-                            if (typeof inst.pause === 'function') {
-                                inst.pause();
-                            }
+                            if (typeof inst.stop === 'function') inst.stop();
+                            if (typeof inst.goToAndStop === 'function') inst.goToAndStop(0, true);
+                            if (typeof inst.pause === 'function') inst.pause();
+                            if (typeof inst.setSpeed === 'function') inst.setSpeed(0);
                         }
                     } catch (_) {}
                 });
             } catch (_) {}
         }
         
-        // Restore Lottie animations
+        // Restore Lottie animations using Lottie API: play(), setSpeed(1)
         restoreLottieAnimations() {
             try {
-                // Method 1: Individual registered animations - restore loop and speed
                 if (window.lottie && window.lottie.getRegisteredAnimations) {
                     window.lottie.getRegisteredAnimations().forEach(anim => {
                         try {
@@ -29272,9 +27791,8 @@ class AccessibilityWidget {
                             return;
                         }
                         
-                        if (typeof player.play === 'function') {
-                            player.play();
-                        }
+                        if (typeof player.setSpeed === 'function') player.setSpeed(1);
+                        if (typeof player.play === 'function') player.play();
                     } catch (_) {}
                 });
             } catch (_) {}
@@ -30312,220 +28830,9 @@ class AccessibilityWidget {
             }
         }
         
-        // Force complete letter-by-letter text animations for seizure safety
-        // This ensures all text is immediately visible in its final state
-        // Prevents duplication by checking if already processed
+        // No-op: CSS-only seizure-safe - no inline styles so disable restores visibility correctly
         forceCompleteTextAnimations() {
-            // Use a flag to prevent multiple executions from duplicating content
-            if (this._textAnimationsCompleted) return;
-            this._textAnimationsCompleted = true;
-            
-            // First, find and process all parent containers that have split text
-            // This must be done first to avoid processing children individually
-            // CRITICAL: Exclude buttons and their children to prevent button text from being hidden
-            const splitContainers = document.querySelectorAll('[data-splitting], .split, [class*="split-text"], [class*="text-split"], [class*="text-animation"], [class*="typing"], [class*="typewriter"]');
-            splitContainers.forEach(container => {
-                // Skip buttons and elements inside buttons
-                if (container.tagName === 'BUTTON' || container.tagName === 'A' || container.getAttribute('role') === 'button' ||
-                    container.closest('button, a[role="button"], [role="button"]')) {
-                    return;
-                }
-                if (container.hasAttribute('data-seizure-text-processed')) return;
-                container.setAttribute('data-seizure-text-processed', 'true');
-                
-                // Find all character/word elements within this container
-                const charElements = container.querySelectorAll('.char, [class*="char"], .letter, [class*="letter"], .word, [class*="word"]');
-                if (charElements.length > 0) {
-                    // Collect all text from character elements
-                    let fullText = '';
-                    charElements.forEach(char => {
-                        const charText = char.textContent || char.innerText || '';
-                        // Get text even if it's just a single character
-                        if (charText) {
-                            fullText += charText;
-                        }
-                    });
-                    
-                    // If we collected text, consolidate it
-                    if (fullText.trim()) {
-                            // Store original structure clone if needed, but replace with clean text
-                            const originalClone = container.cloneNode(true);
-                        // REMOVED: Hide all child elements - causes blank animations when disabled
-                        // charElements.forEach(char => {
-                        //     char.style.display = 'none';
-                        //     char.style.visibility = 'hidden';
-                        //     char.style.opacity = '0';
-                        //     char.style.position = 'absolute';
-                        //     char.style.pointerEvents = 'none';
-                        // });
-                    }
-                    
-                    // Ensure container is visible and in final state
-                    container.style.opacity = '1';
-                    container.style.visibility = 'visible';
-                    container.style.animation = 'none';
-                    container.style.transition = 'none';
-                    container.style.transform = 'none';
-                    container.style.clipPath = 'none';
-                    container.style.webkitClipPath = 'none';
-                    container.style.width = '';
-                    container.style.height = '';
-                    container.style.maxWidth = '';
-                    container.style.maxHeight = '';
-                }
-            });
-            
-            // Now handle individual text elements that might be animated
-            // CRITICAL: Exclude buttons and their children to prevent button text from being hidden
-            const textElements = document.querySelectorAll('.char, .word, [class*="char"], [class*="word"], [class*="letter"], [class*="text-animation"]');
-            textElements.forEach(element => {
-                // Skip buttons and elements inside buttons
-                if (element.tagName === 'BUTTON' || element.tagName === 'A' || element.getAttribute('role') === 'button' ||
-                    element.closest('button, a[role="button"], [role="button"]')) {
-                    return;
-                }
-                // Skip if already processed or if parent was processed
-                if (element.hasAttribute('data-seizure-text-processed')) return;
-                const parent = element.parentElement;
-                if (parent && parent.hasAttribute('data-seizure-text-processed')) return;
-                
-                element.setAttribute('data-seizure-text-processed', 'true');
-                
-                // Force animation to final state immediately
-                element.style.animation = 'none';
-                element.style.transition = 'none';
-                element.style.opacity = '1';
-                element.style.visibility = 'visible';
-                if (element.style.display === 'none') {
-                    element.style.display = element.tagName === 'SPAN' ? 'inline' : 'block';
-                }
-                element.style.transform = 'none';
-                element.style.clipPath = 'none';
-                element.style.webkitClipPath = 'none';
-                element.style.width = '';
-                element.style.height = '';
-                element.style.maxWidth = '';
-                element.style.maxHeight = '';
-            });
-            
-            // Also handle any text that might be using GSAP TextPlugin or similar
-            // Look for elements with multiple overlapping text layers (common in GSAP text animations)
-            // Only process elements that are likely part of text animations, not all paragraphs/divs
-            const allTextContainers = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="text"], [class*="title"], [class*="heading"], [class*="hero"], [class*="headline"]');
-            allTextContainers.forEach(element => {
-                // Skip if already processed or if it's a nav/header element
-                // CRITICAL: Also skip buttons and elements inside buttons to prevent button text from being hidden
-                if (element.hasAttribute('data-seizure-text-processed') || 
-                    element.closest('nav, header, .navbar, [class*="nav"], [class*="header"]') ||
-                    element.tagName === 'BUTTON' || element.tagName === 'A' || element.getAttribute('role') === 'button' ||
-                    element.closest('button, a[role="button"], [role="button"]')) return;
-                
-                const computedStyle = window.getComputedStyle(element);
-                
-                // Only process if element has animation-related classes or is part of a text animation
-                const hasAnimationClass = element.classList.toString().match(/(animate|fade|slide|typing|typewriter|split|char|letter|text-animation|reveal|unveil)/i);
-                const hasAnimationStyle = computedStyle.animation !== 'none' || computedStyle.transition !== 'none';
-                const hasHiddenChildren = element.querySelectorAll('.char, .word, [class*="char"], [class*="letter"]').length > 0;
-                
-                // Check for overlapping sibling elements (common in GSAP text animations where multiple divs with same text are siblings)
-                const parent = element.parentElement;
-                const hasOverlappingSiblings = parent && Array.from(parent.children).filter(child => {
-                    if (child === element) return false;
-                    const childText = (child.textContent || '').trim();
-                    const elementText = (element.textContent || '').trim();
-                    // Check if sibling has similar or same text (overlapping layers)
-                    return childText && elementText && (
-                        childText === elementText || 
-                        (childText.length > 10 && elementText.length > 10 && 
-                         (childText.includes(elementText.substring(0, 20)) || elementText.includes(childText.substring(0, 20))))
-                    );
-                }).length > 0;
-                
-                // Skip if element doesn't appear to be part of a text animation
-                if (!hasAnimationClass && !hasAnimationStyle && !hasHiddenChildren && !hasOverlappingSiblings) {
-                    return;
-                }
-                
-                // Handle overlapping siblings - hide siblings with same text (they're overlapping layers)
-                if (hasOverlappingSiblings && parent) {
-                    const siblings = Array.from(parent.children);
-                    const elementText = (element.textContent || '').trim();
-                    siblings.forEach(sibling => {
-                        if (sibling === element) return;
-                        const siblingText = (sibling.textContent || '').trim();
-                        // REMOVED: Hide siblings - causes blank animations when disabled
-                        // If sibling has same or very similar text, hide it (it's an overlapping layer)
-                        // if (siblingText && elementText && (
-                        //     siblingText === elementText || 
-                        //     (siblingText.length > 10 && elementText.length > 10 && 
-                        //      (siblingText.includes(elementText.substring(0, 20)) || elementText.includes(siblingText.substring(0, 20))))
-                        // )) {
-                        //     sibling.style.display = 'none';
-                        //     sibling.style.visibility = 'hidden';
-                        //     sibling.style.opacity = '0';
-                        //     sibling.style.position = 'absolute';
-                        //     sibling.style.pointerEvents = 'none';
-                        // }
-                    });
-                }
-                
-                // Check if this element has multiple text layers (indicated by multiple children with same text)
-                const children = Array.from(element.children);
-                if (children.length > 0) {
-                    // Check if children contain overlapping text
-                    const childTexts = children.map(child => (child.textContent || '').trim()).filter(t => t);
-                    const uniqueTexts = [...new Set(childTexts)];
-                    
-                    // If we have multiple children with text, consolidate
-                    if (childTexts.length > 1 && uniqueTexts.length === 1) {
-                        // All children have the same text - this is likely a layered animation
-                        element.textContent = uniqueTexts[0];
-                        children.forEach(child => {
-                            child.style.display = 'none';
-                            child.style.visibility = 'hidden';
-                            child.style.opacity = '0';
-                            child.style.position = 'absolute';
-                            child.style.pointerEvents = 'none';
-                        });
-                    } else if (childTexts.length > 0 && hasHiddenChildren) {
-                        // Different texts - concatenate them (only if has hidden children indicating animation)
-                        const fullText = childTexts.join('');
-                        if (fullText.trim() && fullText.trim() !== element.textContent.trim()) {
-                            element.textContent = fullText.trim();
-                            children.forEach(child => {
-                                child.style.display = 'none';
-                                child.style.visibility = 'hidden';
-                                child.style.opacity = '0';
-                            });
-                        }
-                    }
-                }
-                
-                element.setAttribute('data-seizure-text-processed', 'true');
-                
-                // Only force visibility if element was actually hidden due to animation
-                if (hasAnimationStyle || hasHiddenChildren || hasOverlappingSiblings) {
-                    if (computedStyle.opacity !== '1' || computedStyle.visibility === 'hidden') {
-                        element.style.opacity = '1';
-                        element.style.visibility = 'visible';
-                    }
-                    if (computedStyle.animation !== 'none' || computedStyle.transition !== 'none') {
-                        element.style.animation = 'none';
-                        element.style.transition = 'none';
-                        if (computedStyle.transform !== 'none') {
-                            element.style.transform = 'none';
-                        }
-                    }
-                    element.style.clipPath = 'none';
-                    element.style.webkitClipPath = 'none';
-                }
-            });
-            
-            // Run again after a short delay to catch any dynamically added text
-            setTimeout(() => {
-                this._textAnimationsCompleted = false;
-                this.forceCompleteTextAnimations();
-            }, 100);
+            // Visibility is handled by injected CSS only; no DOM writes
         }
     
         // Lock current button visual state to prevent hover color changes during seizure-safe
@@ -31247,60 +29554,27 @@ class AccessibilityWidget {
     
     
         removeSeizureSafeStyles() {
-            // Remove old style if it exists (backward compatibility)
-            const existingStyle = document.getElementById('accessbit-seizure-safe-styles');
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-            
-            // Remove new animation CSS
-            const existingAnimationStyle = document.getElementById('seizure-safe-animation-css');
-            if (existingAnimationStyle) {
-                existingAnimationStyle.remove();
-            }
-            
-            // Remove grey overlay
-            const existingGreyOverlay = document.getElementById('accessbit-seizure-safe-grey-overlay');
-            if (existingGreyOverlay) {
-                existingGreyOverlay.remove();
-            }
-            
-            // Reset cursor styles that were applied by seizure-safe mode
-            // CRITICAL: Exclude widget elements to preserve widget styling
-            document.body.style.cursor = '';
-            // REMOVED: Clearing cursor on all elements - this was affecting widget
-            // Only clear cursor on body, not on all elements
-            // const allElements = document.querySelectorAll('*');
-            // allElements.forEach(element => {
-            //     try {
-            //         // Skip widget elements completely
-            //         if (element.id && (element.id.includes('accessbit-widget') || element.id === 'accessbit-widget-container')) {
-            //             return;
-            //         }
-            //         if (element.className && typeof element.className === 'string' && element.className.includes('accessbit-widget')) {
-            //             return;
-            //         }
-            //         if (element.closest && (
-            //             element.closest('#accessbit-widget-container') ||
-            //             element.closest('[id*="accessbit-widget"]') ||
-            //             element.closest('[class*="accessbit-widget"]') ||
-            //             element.closest('accessbit-widget') ||
-            //             element.closest('[data-ck-widget]')
-            //         )) {
-            //             return;
-            //         }
-            //         // Skip shadow DOM elements
-            //         if (element.getRootNode && element.getRootNode() !== document) {
-            //             return;
-            //         }
-            //         element.style.cursor = '';
-            //     } catch (_) {}
-            // });
-            
-            // REMOVED: Reset cursor on Shadow DOM host - this was affecting widget
-            // if (this.shadowRoot && this.shadowRoot.host) {
-            //     this.shadowRoot.host.style.cursor = '';
-            // }
+            const ids = [
+                'accessbit-seizure-immediate-early',
+                'accessbit-seizure-reinforce',
+                'accessbit-seizure-master',
+                'accessbit-seizure-correction',
+                'accessbit-seizure-animation-enforcer',
+                'seizure-safe-css',
+                'accessbit-seizure-safe-styles',
+                'seizure-safe-animation-css',
+                'accessbit-seizure-safe-grey-overlay',
+                'accessbit-seizure-immediate'
+            ];
+            ids.forEach(id => {
+                try {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                } catch (_) {}
+            });
+            try {
+                document.body.style.cursor = '';
+            } catch (_) {}
         }
     
     
@@ -35035,11 +33309,10 @@ class AccessibilityWidget {
             }
         }
         
-        // Ensure base panel CSS is always applied
+        // Ensure base panel CSS is always applied (no height/top/bottom – let CSS media queries control layout)
         ensureBasePanelCSS() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (panel) {
-                // Apply essential base CSS properties that should never be removed
                 panel.style.setProperty('position', 'fixed', 'important');
                 panel.style.setProperty('z-index', '2147483646', 'important');
                 panel.style.setProperty('background', '#ffffff', 'important');
@@ -35052,224 +33325,48 @@ class AccessibilityWidget {
                 panel.style.setProperty('-webkit-overflow-scrolling', 'touch');
                 panel.style.setProperty('scroll-behavior', 'smooth');
                 panel.style.setProperty('overscroll-behavior', 'contain');
-                
-                // Set panel to full viewport height
-                panel.style.setProperty('height', '100vh');
-                panel.style.setProperty('top', '0');
-                panel.style.setProperty('bottom', '0');
-                
-                // Add text wrapping to ensure all text is visible
                 panel.style.setProperty('word-wrap', 'break-word');
                 panel.style.setProperty('word-break', 'break-word');
                 panel.style.setProperty('overflow-wrap', 'break-word');
                 panel.style.setProperty('hyphens', 'auto');
-                
-          
             }
         }
         
-        // Force apply mobile responsive styles
+        // Apply mobile responsive behavior: CSS media queries handle panel/icon layout; JS only adds class and inner tweaks
         applyMobileResponsiveStyles() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-            
-          
-            
-            if (panel && icon) {
-                // First ensure base CSS is applied
-                this.ensureBasePanelCSS();
-                
-                const screenWidth = window.innerWidth;
-               
-                
-                // Log current font sizes before changes
-                const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
-                
-                
-                if (screenWidth <= 480) {
-                   
-                    panel.style.setProperty('width', '75vw', 'important');
-                    panel.style.setProperty('max-width', '320px', 'important');
-                    panel.style.setProperty('left', '12.5vw', 'important');
-                    panel.style.setProperty('font-size', '12px', 'important');
-                    panel.style.setProperty('padding', '12px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    // Verify font-size was applied
-                    const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-    
-                    
-                    // Apply mobile button stacking
-                    this.applyMobileButtonStacking();
-                    
-                    // Apply mobile size reductions
-                    this.applyMobileSizeReductions();
-                    
-                    // Debug any font-size conflicts
-                    this.debugFontSizeConflicts(panel);
-                    
-                    icon.style.setProperty('width', '40px', 'important');
-                    icon.style.setProperty('height', '40px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                       
-                        iconI.style.setProperty('font-size', '16px', 'important');
-                        const newIconFontSize = window.getComputedStyle(iconI).fontSize;
-                    
-                    } else {
-                    
-                    }
-                } else if (screenWidth <= 768) {
-                    
-                    panel.style.setProperty('width', '80vw', 'important');
-                    panel.style.setProperty('max-width', '380px', 'important');
-                    panel.style.setProperty('left', '10vw', 'important');
-                    panel.style.setProperty('font-size', '13px', 'important');
-                    panel.style.setProperty('padding', '14px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    // Apply mobile button stacking
-                    this.applyMobileButtonStacking();
-                    
-                    // Apply mobile size reductions
-                    this.applyMobileSizeReductions();
-                    
-                    // Verify font-size was applied
-                    const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-                  
-                    
-                    // Debug any font-size conflicts
-                    this.debugFontSizeConflicts(panel);
-                    
-                    icon.style.setProperty('width', '45px', 'important');
-                    icon.style.setProperty('height', '45px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                  
-                        iconI.style.setProperty('font-size', '18px', 'important');
-                        const newIconFontSize = window.getComputedStyle(iconI).fontSize;
-                        
-                    } else {
-                        
-                    }
-                } else if (screenWidth >= 1025 && screenWidth <= 1366) {
-                 
-                    panel.style.setProperty('width', '65vw', 'important');
-                    panel.style.setProperty('max-width', '450px', 'important');
-                    panel.style.setProperty('left', '0.5vw', 'important');
-                    panel.style.setProperty('font-size', '15px');
-                    panel.style.setProperty('padding', '18px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '55px', 'important');
-                    icon.style.setProperty('height', '55px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '22px');
-                    }
-                } else if (screenWidth >= 820 && screenWidth <= 1024) {
-                   
-                    panel.style.setProperty('width', '75vw', 'important');
-                    panel.style.setProperty('max-width', '380px', 'important');
-                    panel.style.setProperty('left', '1vw', 'important');
-                    panel.style.setProperty('font-size', '14px');
-                    panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '50px', 'important');
-                    icon.style.setProperty('height', '50px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '20px');
-                    }
-                } else if (screenWidth <= 1024) {
-                  
-                    panel.style.setProperty('width', '85vw', 'important');
-                    panel.style.setProperty('max-width', '450px', 'important');
-                    panel.style.setProperty('left', '5vw', 'important');
-                    panel.style.setProperty('font-size', '14px');
-                    panel.style.setProperty('padding', '16px', 'important');
-                    panel.style.setProperty('height', '100vh', 'important');
-                    panel.style.setProperty('top', '0', 'important');
-                    panel.style.setProperty('bottom', '0', 'important');
-                    
-                    icon.style.setProperty('width', '50px', 'important');
-                    icon.style.setProperty('height', '50px', 'important');
-                    
-                    const iconI = icon.querySelector('i');
-                    if (iconI) {
-                        iconI.style.setProperty('font-size', '20px');
-                    }
-                }
-                
-                // Common mobile styles
-                panel.style.setProperty('right', 'auto', 'important');
-                panel.style.setProperty('top', '50%', 'important');
-                panel.style.setProperty('transform', 'translateY(-50%)', 'important');
-                panel.style.setProperty('overflow-y', 'auto', 'important');
-                panel.style.setProperty('position', 'fixed', 'important');
-                panel.style.setProperty('z-index', '2147483646', 'important');
-            }
+            if (!panel || !icon) return;
+            this.ensureBasePanelCSS();
+            panel.classList.add('mobile-mode');
+            this.applyMobileButtonStacking();
+            this.applyMobileSizeReductions();
         }
         
-        // Remove mobile responsive styles for desktop
+        // Remove mobile responsive styles so desktop CSS media queries take over
         removeMobileResponsiveStyles() {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-            
-          
-            
-            if (panel && icon) {
-                // First ensure base CSS is applied
-                this.ensureBasePanelCSS();
-                
-                // Log current font sizes before removing
-                const currentPanelFontSize = window.getComputedStyle(panel).fontSize;
-               
-                panel.style.removeProperty('width');
-                panel.style.removeProperty('max-width');
-                panel.style.removeProperty('left');
-                panel.style.removeProperty('right');
-                panel.style.removeProperty('top');
-                panel.style.removeProperty('transform');
-                panel.style.removeProperty('max-height');
-                panel.style.removeProperty('font-size');
-                panel.style.removeProperty('padding');
-                
-                // Check font-size after removal
-                const newPanelFontSize = window.getComputedStyle(panel).fontSize;
-             
-                
-                // Check for any CSS rules that might be overriding font-size
-                this.debugFontSizeConflicts(panel);
-                
-                // Remove mobile button stacking
-                this.removeMobileButtonStacking();
-                
-                // Remove mobile size reductions
-                this.removeMobileSizeReductions();
-                
-                // Remove mobile icon styles
-                icon.style.removeProperty('width');
-                icon.style.removeProperty('height');
-                
-                const iconI = icon.querySelector('i');
-                if (iconI) {
-                    iconI.style.removeProperty('font-size');
-                }
-            }
+            if (!panel || !icon) return;
+            this.ensureBasePanelCSS();
+            panel.classList.remove('mobile-mode');
+            panel.style.removeProperty('width');
+            panel.style.removeProperty('max-width');
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('bottom');
+            if (panel.classList.contains('active')) panel.style.removeProperty('transform');
+            panel.style.removeProperty('height');
+            panel.style.removeProperty('max-height');
+            panel.style.removeProperty('font-size');
+            panel.style.removeProperty('padding');
+            this.removeMobileButtonStacking();
+            this.removeMobileSizeReductions();
+            icon.style.removeProperty('width');
+            icon.style.removeProperty('height');
+            const iconI = icon.querySelector('i');
+            if (iconI) iconI.style.removeProperty('font-size');
         }
         
         
