@@ -5452,6 +5452,13 @@ class AccessibilityWidget {
                     min-height: 0 !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
+                .accessbit-widget-panel .accessbit-widget-content {
+                    display: block !important;
+                    flex: 1 1 auto !important;
+                    overflow-y: auto !important;
+                    height: 100% !important;
+                    min-height: 0 !important;
+                }
                 
                 .accessbit-widget-content *,
                 .accessbit-widget-panel .panel-content * {
@@ -26886,6 +26893,13 @@ class AccessibilityWidget {
     
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
+            // Force GSAP to end state BEFORE removing our CSS so page content stays visible (no invisible-on-disable)
+            try {
+                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap);
+                if (gsap && gsap.globalTimeline && typeof gsap.globalTimeline.progress === 'function') {
+                    gsap.globalTimeline.progress(1);
+                }
+            } catch (_) {}
             try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', false);
@@ -27071,45 +27085,67 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP via library APIs – Lottie runs on JS loop, not CSS
+        // Stop Lottie/GSAP – brute-force: pause APIs + hide canvas + GSAP clear + CSS fallback
         stopLottieAnimations() {
             try {
                 const lottie = window.lottie || window.bodymovin;
-                if (lottie && typeof lottie.pause === 'function') {
-                    lottie.pause();
-                }
+                if (lottie && lottie.pause) lottie.pause();
+
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
                         if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
-                        if (player.pause) player.pause();
+                        player.pause();
+                        const canvas = player.shadowRoot?.querySelector('canvas');
+                        if (canvas) canvas.style.display = 'none';
                     } catch (_) {}
                 });
+
                 if (window.gsap) {
+                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.clear === 'function') {
+                        window.gsap.globalTimeline.clear();
+                    }
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
                         window.gsap.globalTimeline.pause();
                     }
-                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.disable === 'function') st.disable(); });
-                    }
                 }
+
+                document.querySelectorAll('.lottie-animation-container').forEach(el => {
+                    try {
+                        el.style.pointerEvents = 'none';
+                        el.style.visibility = 'hidden';
+                    } catch (_) {}
+                });
             } catch (e) {
                 console.error('Error stopping JS animations:', e);
             }
         }
         
-        // Restore Lottie and GSAP
+        // Restore Lottie and GSAP (undo stopLottieAnimations: canvas display + .lottie-animation-container)
         restoreLottieAnimations() {
             try {
-                const lottie = window.lottie || window.bodymovin;
-                if (lottie && typeof lottie.play === 'function') {
-                    lottie.play();
+                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || window.bodymovin;
+                if (lottie) {
+                    if (typeof lottie.play === 'function') lottie.play();
+                    if (typeof lottie.getRegisteredAnimations === 'function') {
+                        try {
+                            (lottie.getRegisteredAnimations() || []).forEach(anim => { if (anim && typeof anim.play === 'function') anim.play(); });
+                        } catch (_) {}
+                    }
                 }
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
                         if (player.closest && (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]'))) return;
+                        const canvas = player.shadowRoot?.querySelector('canvas');
+                        if (canvas) canvas.style.display = '';
                         if (player.play) player.play();
+                    } catch (_) {}
+                });
+                document.querySelectorAll('.lottie-animation-container').forEach(el => {
+                    try {
+                        el.style.pointerEvents = '';
+                        el.style.visibility = '';
                     } catch (_) {}
                 });
                 if (window.gsap) {
@@ -32704,16 +32740,19 @@ class AccessibilityWidget {
             const maxLeft = window.innerWidth - panelRect.width - 20;
             const finalLeft = Math.max(20, Math.min(leftPos, maxLeft));
 
-            const availableHeight = window.innerHeight - 40;
-            panel.style.maxHeight = `${availableHeight}px`;
-
+            const margin = 40;
+            const dynamicHeight = window.innerHeight - margin;
             Object.assign(panel.style, {
                 position: 'fixed',
-                top: `${finalTop}px`,
+                top: '20px',
                 left: `${finalLeft}px`,
-                height: 'auto',
+                width: '400px',
+                height: `${dynamicHeight}px`,
+                maxHeight: `${dynamicHeight}px`,
                 bottom: 'auto',
                 right: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
                 zIndex: '2147483646'
             });
             if (panel.classList.contains('active')) panel.style.transform = 'none';
