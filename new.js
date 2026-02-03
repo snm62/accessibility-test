@@ -5535,6 +5535,10 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode.active {
                         transform: translateX(0) !important;
                     }
+                    /* No slide-out when closing: hide instantly */
+                    .accessbit-widget-panel.mobile-mode:not(.active) {
+                        transition: none !important;
+                    }
                     /* NEST HUB & SCROLL FIX */
                     .accessbit-widget-panel.mobile-mode .accessbit-widget-content,
                     .accessbit-widget-panel.mobile-mode .panel-content,
@@ -27049,15 +27053,19 @@ class AccessibilityWidget {
                     overflow: auto !important;
                     height: auto !important;
                 }
-                /* Hide Lottie players entirely to ensure 0Hz flicker */
+                /* Hide Lottie players entirely to prevent frame-flicker (double-lock with JS) */
                 html.seizure-safe lottie-player:not(#accessbit-widget-container *),
                 html.seizure-safe dotlottie-player:not(#accessbit-widget-container *),
-                html.seizure-safe [data-lottie-path]:not(#accessbit-widget-container *),
                 body.seizure-safe lottie-player:not(#accessbit-widget-container *),
-                body.seizure-safe dotlottie-player:not(#accessbit-widget-container *),
-                body.seizure-safe [data-lottie-path]:not(#accessbit-widget-container *) {
+                body.seizure-safe dotlottie-player:not(#accessbit-widget-container *) {
                     visibility: hidden !important;
                     pointer-events: none !important;
+                    opacity: 0 !important;
+                }
+                /* Pause any CSS-based Lottie containers */
+                html.seizure-safe .lottie-animation-container,
+                body.seizure-safe .lottie-animation-container {
+                    display: none !important;
                 }
                 /* Fallback for canvas-based animations */
                 html.seizure-safe canvas:not(#accessbit-widget-container *),
@@ -27162,7 +27170,7 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – global library + Shadow DOM penetration + GSAP ticker sleep
+        // Stop Lottie/GSAP – library pause + player autoplay/loop off + Shadow DOM hide + GSAP ticker sleep
         stopLottieAnimations() {
             try {
                 const lottie = window.lottie || (window.bodymovin && window.bodymovin.lottie);
@@ -27173,14 +27181,16 @@ class AccessibilityWidget {
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
-                        if (player.closest('#accessbit-widget-container')) return;
+                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
                         if (player.pause) player.pause();
                         if (player.stop) player.stop();
+                        player.autoplay = false;
+                        player.loop = false;
                         if (player.shadowRoot) {
-                            const renderer = player.shadowRoot.querySelector('svg, canvas, .animation');
-                            if (renderer) {
-                                renderer.style.display = 'none';
-                                renderer.style.visibility = 'hidden';
+                            const innerContainer = player.shadowRoot.querySelector('.animation, svg, canvas');
+                            if (innerContainer) {
+                                innerContainer.style.display = 'none';
+                                innerContainer.style.visibility = 'hidden';
                             }
                         }
                     } catch (_) {}
@@ -27195,31 +27205,29 @@ class AccessibilityWidget {
                     }
                 }
             } catch (e) {
-                console.error('Seizure Safe Error:', e);
+                console.error('Seizure Safe Lottie Error:', e);
             }
         }
         
-        // Restore Lottie and GSAP (undo stopLottieAnimations: Shadow DOM renderer + ticker)
+        // Restore Lottie and GSAP (Shadow DOM visibility + play + ticker/ScrollTrigger)
         restoreLottieAnimations() {
             try {
-                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie) || window.bodymovin;
-                if (lottie) {
-                    if (typeof lottie.play === 'function') lottie.play();
-                    if (typeof lottie.getRegisteredAnimations === 'function') {
-                        try {
-                            (lottie.getRegisteredAnimations() || []).forEach(anim => { if (anim && typeof anim.play === 'function') anim.play(); });
-                        } catch (_) {}
-                    }
+                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
+                if (lottie && typeof lottie.play === 'function') lottie.play();
+                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
+                    try {
+                        (lottie.getRegisteredAnimations() || []).forEach(anim => { if (anim && typeof anim.play === 'function') anim.play(); });
+                    } catch (_) {}
                 }
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
-                        if (player.closest('#accessbit-widget-container')) return;
+                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
                         if (player.shadowRoot) {
-                            const renderer = player.shadowRoot.querySelector('svg, canvas, .animation');
-                            if (renderer) {
-                                renderer.style.display = '';
-                                renderer.style.visibility = '';
+                            const innerContainer = player.shadowRoot.querySelector('.animation, svg, canvas');
+                            if (innerContainer) {
+                                innerContainer.style.display = '';
+                                innerContainer.style.visibility = '';
                             }
                         }
                         if (player.play) player.play();
