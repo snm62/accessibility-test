@@ -26984,6 +26984,7 @@ class AccessibilityWidget {
             }
 
             this.saveSettings();
+            this.updateWidgetAppearance();
         }
         
         // Freeze animations – keep Lottie visible but static (goToAndStop); no display:none so layout stays intact
@@ -27232,14 +27233,11 @@ class AccessibilityWidget {
                     // 4. THE 100MS SETTLE (Prevents Widget Breakdown)
                     setTimeout(() => {
                         if (window.gsap && window.gsap.ScrollTrigger) {
-                            const allTriggers = window.gsap.ScrollTrigger.getAll();
-                            if (allTriggers && allTriggers.forEach) {
-                                allTriggers.forEach(st => {
-                                    const trigger = st.vars && st.vars.trigger;
-                                    if (trigger && typeof trigger.closest === 'function' && trigger.closest('#accessbit-widget-container')) return;
-                                    if (st && typeof st.enable === 'function') st.enable();
-                                });
-                            }
+                            window.gsap.ScrollTrigger.getAll().forEach(st => {
+                                const trigger = st.vars && st.vars.trigger;
+                                if (trigger && typeof trigger.closest === 'function' && trigger.closest('#accessbit-widget-container')) return;
+                                if (st && typeof st.enable === 'function') st.enable();
+                            });
                             if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
                         }
                         window.dispatchEvent(new Event('resize'));
