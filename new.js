@@ -27180,6 +27180,23 @@ class AccessibilityWidget {
                     });
                 }
 
+                // Pause Webflow Lottie elements (Webflow.require('lottie').lottie.animations)
+                try {
+                    if (window.Webflow && Webflow.require) {
+                        const lottieAPI = Webflow.require('lottie');
+                        if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
+                            lottieAPI.lottie.animations.forEach(anim => {
+                                if (!anim) return;
+                                try {
+                                    anim.loop = false;
+                                    anim.autoplay = false;
+                                    anim.pause();
+                                } catch (_) {}
+                            });
+                        }
+                    }
+                } catch (_) {}
+
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
@@ -27209,6 +27226,16 @@ class AccessibilityWidget {
                         window.gsap.globalTimeline.pause();
                     }
                 }
+
+                // Stop Webflow IX2 interactions so Lotties don't restart via interactions / page load
+                try {
+                    if (window.Webflow && Webflow.require) {
+                        const ix2 = Webflow.require('ix2');
+                        if (ix2 && ix2.store && ix2.store.dispatch) {
+                            ix2.store.dispatch({ type: 'IX2_STOP_REQUESTED' });
+                        }
+                    }
+                } catch (_) {}
             } catch (e) {
                 console.error('Seizure Safe Lottie Error:', e);
             }
