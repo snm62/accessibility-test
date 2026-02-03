@@ -26963,19 +26963,29 @@ class AccessibilityWidget {
     
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
-            // Force GSAP to end state BEFORE removing our CSS so page content stays visible (no invisible-on-disable)
-            try {
-                const gsap = window.gsap || (window.GSAP && window.GSAP.gsap);
-                if (gsap && gsap.globalTimeline && typeof gsap.globalTimeline.progress === 'function') {
-                    gsap.globalTimeline.progress(1);
-                }
-            } catch (_) {}
+
             try { document.body.classList.remove('seizure-safe'); } catch (_) {}
             try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
             this.safeBodyClassToggle('seizure-safe', false);
 
             const styleEl = document.getElementById('seizure-safe-css');
             if (styleEl) styleEl.remove();
+
+            this.restoreLottieAnimations();
+
+            // MANDATORY CLEANUP: force everything Webflow might have hidden to show immediately
+            document.querySelectorAll('.w-lottie, [data-animation-type="lottie"], .w-ix-cap').forEach(el => {
+                el.style.removeProperty('opacity');
+                el.style.removeProperty('visibility');
+                el.style.removeProperty('transform');
+                el.style.removeProperty('display');
+                el.style.filter = 'none';
+                const svg = el.querySelector('svg');
+                if (svg) {
+                    svg.style.removeProperty('opacity');
+                    svg.style.removeProperty('transform');
+                }
+            });
 
             if (this.seizureObserver) {
                 try { this.seizureObserver.disconnect(); } catch (_) {}
@@ -26985,12 +26995,7 @@ class AccessibilityWidget {
                 clearInterval(this._seizureLottieBootInterval);
                 this._seizureLottieBootInterval = null;
             }
-            this.restoreLottieAnimations();
-            // Clean up: pop .w-lottie back into view if IX2 left transform/translate (e.g. translateY(100px)) from initial state
-            document.querySelectorAll('.w-lottie').forEach(el => {
-                el.style.filter = 'none';
-                el.style.transform = 'none';
-            });
+
             this.saveSettings();
             this.updateWidgetAppearance();
         }
@@ -27200,34 +27205,31 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (unfreeze elements + force visibility so IX2 initial state doesn't leave them hidden)
+        // Restore Lottie and GSAP (unfreeze + force visibility; resize event so Webflow re-checks scroll/visibility)
         restoreLottieAnimations() {
             try {
+                // 1. Unfreeze and restore attributes
                 document.querySelectorAll('[data-is-frozen="true"]').forEach(el => {
                     try {
                         const backup = el.getAttribute('data-seizure-safe-lottie-backup');
                         if (backup) el.setAttribute('data-animation-type', backup);
-                        // Force visibility before Webflow takes over so they don't stay in "Initial State" (opacity 0)
                         el.style.setProperty('opacity', '1', 'important');
                         el.style.setProperty('visibility', 'visible', 'important');
-                        el.style.setProperty('display', 'block', 'important');
-                        const svg = el.querySelector('svg');
-                        if (svg) {
-                            svg.style.removeProperty('animation');
-                            svg.style.removeProperty('transition');
-                            svg.style.setProperty('opacity', '1', 'important');
-                        }
                         delete el.dataset.isFrozen;
                         el.removeAttribute('data-seizure-safe-lottie-backup');
                     } catch (_) {}
                 });
 
+                // 2. Re-initialize Webflow
                 if (window.Webflow && Webflow.require) {
                     try {
                         const lottie = Webflow.require('lottie');
                         if (lottie && lottie.init) lottie.init();
                         const ix2 = Webflow.require('ix2');
-                        if (ix2 && ix2.init) ix2.init();
+                        if (ix2 && ix2.init) {
+                            ix2.init();
+                            window.dispatchEvent(new Event('resize'));
+                        }
                     } catch (_) {}
                 }
 
@@ -27247,9 +27249,15 @@ class AccessibilityWidget {
                     } catch (_) {}
                 });
 
+                // 3. GSAP restoration (enable ScrollTriggers then refresh)
                 if (window.gsap) {
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
-                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
+                    if (window.gsap.ScrollTrigger) {
+                        if (typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                            window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
+                        }
+                        if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
+                    }
                 }
             } catch (e) {
                 console.error('Restore Error:', e);
