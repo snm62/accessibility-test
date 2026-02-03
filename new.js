@@ -26964,28 +26964,15 @@ class AccessibilityWidget {
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
 
-            try { document.body.classList.remove('seizure-safe'); } catch (_) {}
-            try { document.documentElement.classList.remove('seizure-safe'); } catch (_) {}
-            this.safeBodyClassToggle('seizure-safe', false);
-
-            const styleEl = document.getElementById('seizure-safe-css');
-            if (styleEl) styleEl.remove();
+            try {
+                document.body.classList.remove('seizure-safe');
+                document.documentElement.classList.remove('seizure-safe');
+                this.safeBodyClassToggle('seizure-safe', false);
+                const styleEl = document.getElementById('seizure-safe-css');
+                if (styleEl) styleEl.remove();
+            } catch (_) {}
 
             this.restoreLottieAnimations();
-
-            // MANDATORY CLEANUP: force everything Webflow might have hidden to show immediately
-            document.querySelectorAll('.w-lottie, [data-animation-type="lottie"], .w-ix-cap').forEach(el => {
-                el.style.removeProperty('opacity');
-                el.style.removeProperty('visibility');
-                el.style.removeProperty('transform');
-                el.style.removeProperty('display');
-                el.style.filter = 'none';
-                const svg = el.querySelector('svg');
-                if (svg) {
-                    svg.style.removeProperty('opacity');
-                    svg.style.removeProperty('transform');
-                }
-            });
 
             if (this.seizureObserver) {
                 try { this.seizureObserver.disconnect(); } catch (_) {}
@@ -27205,60 +27192,57 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (unfreeze + force visibility; resize event so Webflow re-checks scroll/visibility)
+        // Restore Lottie and GSAP (widget-safe: never touch #accessbit-widget-container; no IX2.init to avoid hidden states)
         restoreLottieAnimations() {
             try {
-                // 1. Unfreeze and restore attributes
+                // 1. Restore Lottie elements that were frozen
                 document.querySelectorAll('[data-is-frozen="true"]').forEach(el => {
                     try {
                         const backup = el.getAttribute('data-seizure-safe-lottie-backup');
                         if (backup) el.setAttribute('data-animation-type', backup);
-                        el.style.setProperty('opacity', '1', 'important');
-                        el.style.setProperty('visibility', 'visible', 'important');
+                        if (!el.closest('#accessbit-widget-container')) {
+                            el.style.removeProperty('opacity');
+                            el.style.removeProperty('visibility');
+                            el.style.removeProperty('display');
+                            el.style.removeProperty('transform');
+                        }
                         delete el.dataset.isFrozen;
                         el.removeAttribute('data-seizure-safe-lottie-backup');
                     } catch (_) {}
                 });
 
-                // 2. Re-initialize Webflow
+                // 2. Re-trigger Webflow Lottie (Skip IX2.init to prevent hidden states)
                 if (window.Webflow && Webflow.require) {
                     try {
                         const lottie = Webflow.require('lottie');
                         if (lottie && lottie.init) lottie.init();
-                        const ix2 = Webflow.require('ix2');
-                        if (ix2 && ix2.init) {
-                            ix2.init();
-                            window.dispatchEvent(new Event('resize'));
-                        }
+                        window.dispatchEvent(new Event('resize'));
                     } catch (_) {}
                 }
 
-                const lottieObj = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
-                if (lottieObj && typeof lottieObj.play === 'function') lottieObj.play();
-                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
-                    try {
-                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
-                        if (player.shadowRoot) {
-                            const innerContainer = player.shadowRoot.querySelector('.animation, svg, canvas');
-                            if (innerContainer) {
-                                innerContainer.style.display = '';
-                                innerContainer.style.visibility = '';
+                // 3. GSAP & Content Force-Reveal (inside rAF, excluding widget)
+                requestAnimationFrame(() => {
+                    const elementsToCheck = document.querySelectorAll('.w-lottie, [data-animation-type], .w-ix-cap, [data-scroll]');
+                    elementsToCheck.forEach(el => {
+                        if (el.closest('#accessbit-widget-container')) return;
+                        const style = window.getComputedStyle(el);
+                        if (style.opacity === '0' || style.visibility === 'hidden') {
+                            el.style.setProperty('opacity', '1', 'important');
+                            el.style.setProperty('visibility', 'visible', 'important');
+                            el.style.setProperty('transform', 'none');
+                        }
+                    });
+
+                    if (window.gsap) {
+                        if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
+                        if (window.gsap.ScrollTrigger) {
+                            if (typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                                window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
                             }
+                            if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh(true);
                         }
-                        if (player.play) player.play();
-                    } catch (_) {}
-                });
-
-                // 3. GSAP restoration (enable ScrollTriggers then refresh)
-                if (window.gsap) {
-                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
-                    if (window.gsap.ScrollTrigger) {
-                        if (typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                            window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
-                        }
-                        if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
                     }
-                }
+                });
             } catch (e) {
                 console.error('Restore Error:', e);
             }
