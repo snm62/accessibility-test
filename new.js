@@ -26983,13 +26983,18 @@ class AccessibilityWidget {
                 this._seizureLottieBootInterval = null;
             }
 
-            if (window.gsap && window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') {
-                window.gsap.ScrollTrigger.refresh();
-            }
-            window.dispatchEvent(new Event('resize'));
-
             this.saveSettings();
             this.updateWidgetAppearance();
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (window.gsap && window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') {
+                        window.gsap.ScrollTrigger.refresh();
+                    }
+                    window.dispatchEvent(new Event('resize'));
+                    if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+                });
+            });
         }
         
         // Freeze animations – grayscale on html with widget exemption; animation pause except widget
