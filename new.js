@@ -5421,7 +5421,7 @@ class AccessibilityWidget {
                     background: #ffffff !important;
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
                     border-radius: 12px !important;
-                    transition: none !important; /* No open/close animation – close is instant */
+                    transition: transform 0.3s ease, opacity 0.2s ease !important;
                 }
                 /* 1440px+: full viewport height and wider panel */
                 @media (min-width: 1281px) {
@@ -26990,7 +26990,7 @@ class AccessibilityWidget {
             this.updateWidgetAppearance();
         }
         
-        // Freeze animations with animation-play-state: paused (keeps current frame visible; animation: none would snap to 0% keyframe and hide content)
+        // Freeze animations – keep Lottie visible but static (goToAndStop); no display:none so layout stays intact
         injectSeizureSafeCSS() {
             let styleEl = document.getElementById('seizure-safe-css');
             if (!styleEl) {
@@ -26999,112 +26999,29 @@ class AccessibilityWidget {
                 document.head.appendChild(styleEl);
             }
             styleEl.textContent = `
-                /* Freeze CSS animations and transitions – paused = freeze where it is, no snap to 0% */
-                html.seizure-safe *,
-                html.seizure-safe *::before,
-                html.seizure-safe *::after,
-                body.seizure-safe *,
-                body.seizure-safe *::before,
-                body.seizure-safe *::after {
+                html.seizure-safe *:not(#accessbit-widget-container):not(#accessbit-widget-container *):not([id*="accessbit-widget"]):not([id*="accessbit-widget"] *),
+                body.seizure-safe *:not(#accessbit-widget-container):not(#accessbit-widget-container *):not([id*="accessbit-widget"]):not([id*="accessbit-widget"] *) {
                     animation-play-state: paused !important;
                     transition: none !important;
-                    scroll-behavior: auto !important;
                 }
-                /* Prevent GIF/video motion hint */
-                html.seizure-safe img[src$=".gif"],
-                body.seizure-safe img[src$=".gif"],
-                html.seizure-safe canvas,
-                body.seizure-safe canvas,
-                html.seizure-safe video,
-                body.seizure-safe video {
-                    filter: grayscale(0.5);
-                    -webkit-filter: grayscale(0.5);
-                }
-                /* EXCLUDE WIDGET – keep accessibility menu functional */
-                #accessbit-widget-container,
-                #accessbit-widget-container *,
-                [id*="accessbit-widget"],
-                [id*="accessbit-widget"] *,
-                .seizure-safe #accessbit-widget-container,
-                .seizure-safe #accessbit-widget-container *,
-                .seizure-safe [id*="accessbit-widget"],
-                .seizure-safe [id*="accessbit-widget"] *,
-                body.seizure-safe #accessbit-widget-container,
-                body.seizure-safe #accessbit-widget-container *,
-                body.seizure-safe [id*="accessbit-widget"],
-                body.seizure-safe [id*="accessbit-widget"] *,
-                html.seizure-safe #accessbit-widget-container,
-                html.seizure-safe #accessbit-widget-container *,
-                html.seizure-safe [id*="accessbit-widget"],
-                html.seizure-safe [id*="accessbit-widget"] * {
-                    animation-play-state: running !important;
-                    transition: all 0.2s ease !important;
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-                /* Fix for hidden reveal elements – keep content visible when animation hadn't started */
-                html.seizure-safe [style*="opacity: 0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
-                html.seizure-safe [style*="opacity:0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
-                body.seizure-safe [style*="opacity: 0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *),
-                body.seizure-safe [style*="opacity:0"]:not(#accessbit-widget-container *):not([id*="accessbit-widget"] *) {
-                    opacity: 1 !important;
-                    transition: none !important;
-                }
-                /* If Seizure Safe is active, force curtains to hide instantly (GSAP may be paused mid-animation) */
-                html.seizure-safe .curtain-page-loader,
-                html.seizure-safe .page-loader,
-                html.seizure-safe .curtain {
-                    display: none !important;
-                    opacity: 0 !important;
-                    visibility: hidden !important;
-                    pointer-events: none !important;
-                }
-                /* Force unlock the body so the user can scroll */
-                html.seizure-safe,
-                html.seizure-safe body {
-                    overflow: auto !important;
-                    height: auto !important;
-                }
-                /* Hide Lottie players entirely to prevent frame-flicker (double-lock with JS) */
-                html.seizure-safe lottie-player:not(#accessbit-widget-container *),
-                html.seizure-safe dotlottie-player:not(#accessbit-widget-container *),
-                body.seizure-safe lottie-player:not(#accessbit-widget-container *),
-                body.seizure-safe dotlottie-player:not(#accessbit-widget-container *) {
-                    visibility: hidden !important;
-                    pointer-events: none !important;
-                    opacity: 0 !important;
-                }
-                /* Pause any CSS-based Lottie containers */
-                html.seizure-safe .lottie-animation-container,
-                body.seizure-safe .lottie-animation-container {
-                    display: none !important;
-                }
-                /* Fallback for canvas-based animations */
-                html.seizure-safe canvas:not(#accessbit-widget-container *),
-                body.seizure-safe canvas:not(#accessbit-widget-container *) {
-                    display: none !important;
-                }
-                /* CSS Hard Kill (Visual Stop) – Lottie SVG/canvas invisible even if Webflow JS restarts */
-                html.seizure-safe [data-animation-type="lottie"] svg,
-                html.seizure-safe [data-animation-type="lottie"] canvas,
-                html.seizure-safe .w-lottie svg,
-                html.seizure-safe .w-lottie canvas,
-                body.seizure-safe [data-animation-type="lottie"] svg,
-                body.seizure-safe [data-animation-type="lottie"] canvas,
-                body.seizure-safe .w-lottie svg,
-                body.seizure-safe .w-lottie canvas {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                }
-                /* Zero layout shift – collapse Lottie containers so they take no space */
+                /* Keep Lotties visible but non-interactive (freeze frame via JS goToAndStop) */
                 html.seizure-safe [data-animation-type="lottie"],
                 html.seizure-safe .w-lottie,
                 body.seizure-safe [data-animation-type="lottie"],
                 body.seizure-safe .w-lottie {
-                    height: 0 !important;
-                    min-height: 0 !important;
-                    overflow: hidden !important;
+                    pointer-events: none !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                /* Grey out moving elements slightly to indicate they are disabled */
+                html.seizure-safe canvas:not(#accessbit-widget-container *),
+                html.seizure-safe video:not(#accessbit-widget-container *),
+                html.seizure-safe img[src$=".gif"]:not(#accessbit-widget-container *),
+                body.seizure-safe canvas:not(#accessbit-widget-container *),
+                body.seizure-safe video:not(#accessbit-widget-container *),
+                body.seizure-safe img[src$=".gif"]:not(#accessbit-widget-container *) {
+                    filter: grayscale(0.4) !important;
                 }
             `;
         }
@@ -27204,93 +27121,67 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – HARD KILL .w-lottie bindings first, then Webflow API + IX2 + rest
+        // Stop Lottie/GSAP – freeze frame (goToAndStop) instead of hiding; strip data-animation-type so Webflow loses track
         stopLottieAnimations() {
             try {
-                // HARD KILL Webflow Lottie bindings (remove data-w-id so IX2 can't re-trigger; hide element)
-                try {
-                    document.querySelectorAll('.w-lottie').forEach(el => {
-                        el.removeAttribute('data-w-id');
-                        el.style.display = 'none';
-                        el.style.visibility = 'hidden';
-                        el.style.pointerEvents = 'none';
-                    });
-                } catch (_) {}
-
-                // HARD STOP Webflow Lottie + IX2 (at top so Webflow can't restart after we pause others)
-                try {
-                    if (window.Webflow && Webflow.require) {
-                        const lottieAPI = Webflow.require('lottie');
-                        const ix2 = Webflow.require('ix2');
-
-                        if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
-                            lottieAPI.lottie.animations.forEach(anim => {
-                                try {
-                                    anim.loop = false;
-                                    anim.autoplay = false;
-                                    if (anim.pause) anim.pause();
-                                    if (anim.goToAndStop) anim.goToAndStop(0, true);
-                                    else if (anim.stop) anim.stop();
-                                } catch (_) {}
-                            });
-                        }
-
-                        if (ix2 && ix2.store && ix2.store.dispatch) {
-                            ix2.store.dispatch({ type: 'IX2_STOP_REQUESTED' });
-                        }
-                    }
-                } catch (_) {}
-
-                const lottie = window.lottie || window.bodymovin;
-                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
-                    (lottie.getRegisteredAnimations() || []).forEach(anim => {
-                        try {
-                            if (!anim) return;
-                            if (anim.pause) anim.pause();
-                            if (anim.goToAndStop) anim.goToAndStop(0, true);
-                            anim.loop = false;
-                            anim.autoplay = false;
-                        } catch (_) {}
-                    });
-                }
-
-                const players = document.querySelectorAll('lottie-player, dotlottie-player');
-                players.forEach(player => {
+                // Attribute stripping: disable data-animation-type so Webflow engine stops trying to play it
+                document.querySelectorAll('.w-lottie, [data-animation-type="lottie"]').forEach(el => {
                     try {
-                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
-                        player.autoplay = false;
-                        player.loop = false;
-                        if (player.pause) player.pause();
-                        if (player.stop) player.stop();
-                        if (player.shadowRoot) {
-                            const renderer = player.shadowRoot.querySelector('svg, canvas');
-                            if (renderer) {
-                                renderer.style.display = 'none';
-                                renderer.style.visibility = 'hidden';
-                            }
+                        if (el.getAttribute('data-animation-type') === 'lottie') {
+                            el.setAttribute('data-seizure-safe-lottie-backup', 'lottie');
+                            el.removeAttribute('data-animation-type');
                         }
                     } catch (_) {}
                 });
 
+                // 1. Target Webflow's internal Lottie instance
+                if (window.Webflow && Webflow.require) {
+                    const lottieAPI = Webflow.require('lottie');
+                    if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
+                        lottieAPI.lottie.animations.forEach(anim => {
+                            try {
+                                anim.pause();
+                                if (anim.goToAndStop) anim.goToAndStop(0, true);
+                            } catch (_) {}
+                        });
+                    }
+                }
+
+                // 2. Target standalone players (dotLottie / Lottie-Player)
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                    try {
+                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
+                        player.pause();
+                        if (player.seek) player.seek(0);
+                    } catch (_) {}
+                });
+
+                // 3. GSAP kill
                 if (window.gsap) {
-                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.kill === 'function') st.kill(true); });
-                    }
-                    if (window.gsap.ticker && typeof window.gsap.ticker.sleep === 'function') {
-                        window.gsap.ticker.sleep();
-                    }
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
                         window.gsap.globalTimeline.pause();
                     }
+                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.disable === 'function') st.disable(); });
+                    }
                 }
             } catch (e) {
-                console.error('Seizure Safe Lottie Error:', e);
+                console.error('Seizure Safe Freeze Error:', e);
             }
         }
         
-        // Restore Lottie and GSAP (Shadow DOM visibility + play + ticker/ScrollTrigger)
+        // Restore Lottie and GSAP (restore data-animation-type so Webflow can track again; play + ticker/ScrollTrigger)
         restoreLottieAnimations() {
             try {
+                // Restore data-animation-type so Webflow engine can track Lottie again
+                document.querySelectorAll('[data-seizure-safe-lottie-backup]').forEach(el => {
+                    try {
+                        const backup = el.getAttribute('data-seizure-safe-lottie-backup');
+                        if (backup) el.setAttribute('data-animation-type', backup);
+                        el.removeAttribute('data-seizure-safe-lottie-backup');
+                    } catch (_) {}
+                });
+
                 const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
                 if (lottie && typeof lottie.play === 'function') lottie.play();
                 if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
