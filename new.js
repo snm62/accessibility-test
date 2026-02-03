@@ -5463,17 +5463,21 @@ class AccessibilityWidget {
                 
                 /* Scrollable area: take remaining space and scroll (fixes flexbox collapse on 1440px / Nest Hub) */
                 .accessbit-widget-panel .accessbit-widget-content,
-                .accessbit-widget-panel .panel-content {
+                .accessbit-widget-panel .panel-content,
+                .accessbit-widget-panel .white-content-section {
                     flex: 1 1 auto !important;
-                    overflow-y: auto !important;
+                    overflow-y: scroll !important;
                     overflow-x: hidden !important;
                     min-height: 0 !important;
                     -webkit-overflow-scrolling: touch !important;
+                    scrollbar-gutter: stable !important;
                 }
-                .accessbit-widget-panel .accessbit-widget-content {
+                .accessbit-widget-panel .accessbit-widget-content,
+                .accessbit-widget-panel .white-content-section {
                     display: block !important;
                     flex: 1 1 auto !important;
-                    overflow-y: auto !important;
+                    overflow-y: scroll !important;
+                    overflow-x: hidden !important;
                     height: 100% !important;
                     min-height: 0 !important;
                 }
@@ -18516,8 +18520,8 @@ class AccessibilityWidget {
                 body.high-contrast article picture,
                 body.high-contrast article canvas,
                 body.high-contrast article svg {
-                    filter: contrast(1.1) brightness(1.05) !important;
-                    -webkit-filter: contrast(1.1) brightness(1.05) !important;
+                    filter: contrast(1.4) brightness(1.1) !important;
+                    -webkit-filter: contrast(1.4) brightness(1.1) !important;
                 }
                 
                 /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
@@ -18925,8 +18929,8 @@ class AccessibilityWidget {
                 body.high-saturation article picture,
                 body.high-saturation article canvas,
                 body.high-saturation article svg {
-                    filter: saturate(1.2) !important;
-                    -webkit-filter: saturate(1.2) !important;
+                    filter: saturate(1.6) !important;
+                    -webkit-filter: saturate(1.6) !important;
                 }
                 
                 /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
@@ -26914,6 +26918,13 @@ class AccessibilityWidget {
             try {
                 this.seizureObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
             } catch (_) {}
+            if (window.Webflow && Webflow.push) {
+                try {
+                    Webflow.push(() => {
+                        this.stopLottieAnimations();
+                    });
+                } catch (_) {}
+            }
             this.saveSettings();
         }
         
@@ -27170,32 +27181,38 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – pause all registered instances + player stop/autoplay/loop off + Shadow DOM hide + GSAP ticker + ScrollTrigger kill
+        // Stop Lottie/GSAP – HARD STOP Webflow first, then registered instances + players + GSAP + IX2
         stopLottieAnimations() {
             try {
+                // HARD STOP Webflow Lottie + IX2 (at top so Webflow can't restart after we pause others)
+                try {
+                    if (window.Webflow && Webflow.require) {
+                        const lottieAPI = Webflow.require('lottie');
+                        const ix2 = Webflow.require('ix2');
+
+                        if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
+                            lottieAPI.lottie.animations.forEach(anim => {
+                                try {
+                                    anim.loop = false;
+                                    anim.autoplay = false;
+                                    if (anim.stop) anim.stop();
+                                    else if (anim.pause) anim.pause();
+                                } catch (_) {}
+                            });
+                        }
+
+                        if (ix2 && ix2.store && ix2.store.dispatch) {
+                            ix2.store.dispatch({ type: 'IX2_STOP_REQUESTED' });
+                        }
+                    }
+                } catch (_) {}
+
                 const lottie = window.lottie || window.bodymovin;
                 if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
                     (lottie.getRegisteredAnimations() || []).forEach(anim => {
                         if (anim && typeof anim.pause === 'function') anim.pause();
                     });
                 }
-
-                // Pause Webflow Lottie elements (Webflow.require('lottie').lottie.animations)
-                try {
-                    if (window.Webflow && Webflow.require) {
-                        const lottieAPI = Webflow.require('lottie');
-                        if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
-                            lottieAPI.lottie.animations.forEach(anim => {
-                                if (!anim) return;
-                                try {
-                                    anim.loop = false;
-                                    anim.autoplay = false;
-                                    anim.pause();
-                                } catch (_) {}
-                            });
-                        }
-                    }
-                } catch (_) {}
 
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
@@ -27226,16 +27243,6 @@ class AccessibilityWidget {
                         window.gsap.globalTimeline.pause();
                     }
                 }
-
-                // Stop Webflow IX2 interactions so Lotties don't restart via interactions / page load
-                try {
-                    if (window.Webflow && Webflow.require) {
-                        const ix2 = Webflow.require('ix2');
-                        if (ix2 && ix2.store && ix2.store.dispatch) {
-                            ix2.store.dispatch({ type: 'IX2_STOP_REQUESTED' });
-                        }
-                    }
-                } catch (_) {}
             } catch (e) {
                 console.error('Seizure Safe Lottie Error:', e);
             }
@@ -32605,9 +32612,9 @@ class AccessibilityWidget {
                 panel.style.setProperty('border-radius', '8px', 'important');
                 panel.style.setProperty('font-family', "'DM Sans', sans-serif", 'important');
                 panel.style.setProperty('pointer-events', 'auto', 'important');
-                panel.style.setProperty('overflow-y', 'auto');
-                panel.style.setProperty('overflow-x', 'hidden');
-                panel.style.setProperty('-webkit-overflow-scrolling', 'touch');
+                /* Do not set overflow on panel – let CSS keep overflow: hidden so the content area (.white-content-section) is the scroll container */
+                panel.style.removeProperty('overflow-y');
+                panel.style.removeProperty('overflow-x');
                 panel.style.setProperty('scroll-behavior', 'smooth');
                 panel.style.setProperty('overscroll-behavior', 'contain');
                 panel.style.setProperty('word-wrap', 'break-word');
