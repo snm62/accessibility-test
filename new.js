@@ -1670,19 +1670,6 @@ class AccessibilityWidget {
                 }
             }
             
-            // If seizure-safe was previously enabled, apply it ASAP so it persists on refresh
-            if (this.settings && this.settings['seizure-safe']) {
-                try {
-                    // Add class immediately to enable CSS guards before any library re-inits (Designer-safe)
-                    this.safeBodyClassToggle('seizure-safe', true);
-                    // Proceed with full enable without delay
-                    this.enableSeizureSafe(true /* immediate */);
-                } catch (e) {
-                    
-                }
-            }
-    
-            
             // Load user settings from KV storage
             await this.loadSettingsFromKV();
             // If KV indicates seizure-safe, ensure it is enabled immediately
@@ -5434,7 +5421,7 @@ class AccessibilityWidget {
                     background: #ffffff !important;
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
                     border-radius: 12px !important;
-                    transition: transform 0.3s ease, opacity 0.2s ease !important;
+                    transition: none !important; /* No open/close animation – close is instant */
                 }
                 /* 1440px+: full viewport height and wider panel */
                 @media (min-width: 1281px) {
@@ -26918,9 +26905,9 @@ class AccessibilityWidget {
             try {
                 this.seizureObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
             } catch (_) {}
-            if (window.Webflow && Webflow.push) {
+            if (window.Webflow && Webflow.ready) {
                 try {
-                    Webflow.push(() => {
+                    Webflow.ready(() => {
                         this.stopLottieAnimations();
                     });
                 } catch (_) {}
@@ -27181,9 +27168,19 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – HARD STOP Webflow first, then registered instances + players + GSAP + IX2
+        // Stop Lottie/GSAP – HARD KILL .w-lottie bindings first, then Webflow API + IX2 + rest
         stopLottieAnimations() {
             try {
+                // HARD KILL Webflow Lottie bindings (remove data-w-id so IX2 can't re-trigger; hide element)
+                try {
+                    document.querySelectorAll('.w-lottie').forEach(el => {
+                        el.removeAttribute('data-w-id');
+                        el.style.display = 'none';
+                        el.style.visibility = 'hidden';
+                        el.style.pointerEvents = 'none';
+                    });
+                } catch (_) {}
+
                 // HARD STOP Webflow Lottie + IX2 (at top so Webflow can't restart after we pause others)
                 try {
                     if (window.Webflow && Webflow.require) {
