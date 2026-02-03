@@ -26905,12 +26905,22 @@ class AccessibilityWidget {
             try {
                 this.seizureObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
             } catch (_) {}
-            if (window.Webflow && Webflow.ready) {
+            /* Webflow boot race: run now, after Webflow loads (push + ready), and poll for late/CMS Lotties */
+            if (window.Webflow) {
                 try {
-                    Webflow.ready(() => {
-                        this.stopLottieAnimations();
-                    });
+                    if (typeof Webflow.push === 'function') Webflow.push(() => this.stopLottieAnimations());
+                    if (Webflow.ready) Webflow.ready(() => this.stopLottieAnimations());
                 } catch (_) {}
+                if (this._seizureLottieBootInterval) clearInterval(this._seizureLottieBootInterval);
+                let checkCount = 0;
+                this._seizureLottieBootInterval = setInterval(() => {
+                    this.stopLottieAnimations();
+                    checkCount++;
+                    if (checkCount > 4) {
+                        clearInterval(this._seizureLottieBootInterval);
+                        this._seizureLottieBootInterval = null;
+                    }
+                }, 500);
             }
             this.saveSettings();
         }
@@ -26970,6 +26980,10 @@ class AccessibilityWidget {
             if (this.seizureObserver) {
                 try { this.seizureObserver.disconnect(); } catch (_) {}
                 this.seizureObserver = null;
+            }
+            if (this._seizureLottieBootInterval) {
+                clearInterval(this._seizureLottieBootInterval);
+                this._seizureLottieBootInterval = null;
             }
             this.restoreLottieAnimations();
             this.saveSettings();
@@ -27069,6 +27083,28 @@ class AccessibilityWidget {
                 html.seizure-safe canvas:not(#accessbit-widget-container *),
                 body.seizure-safe canvas:not(#accessbit-widget-container *) {
                     display: none !important;
+                }
+                /* CSS Hard Kill (Visual Stop) – Lottie SVG/canvas invisible even if Webflow JS restarts */
+                html.seizure-safe [data-animation-type="lottie"] svg,
+                html.seizure-safe [data-animation-type="lottie"] canvas,
+                html.seizure-safe .w-lottie svg,
+                html.seizure-safe .w-lottie canvas,
+                body.seizure-safe [data-animation-type="lottie"] svg,
+                body.seizure-safe [data-animation-type="lottie"] canvas,
+                body.seizure-safe .w-lottie svg,
+                body.seizure-safe .w-lottie canvas {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                /* Zero layout shift – collapse Lottie containers so they take no space */
+                html.seizure-safe [data-animation-type="lottie"],
+                html.seizure-safe .w-lottie,
+                body.seizure-safe [data-animation-type="lottie"],
+                body.seizure-safe .w-lottie {
+                    height: 0 !important;
+                    min-height: 0 !important;
+                    overflow: hidden !important;
                 }
             `;
         }
@@ -27192,8 +27228,9 @@ class AccessibilityWidget {
                                 try {
                                     anim.loop = false;
                                     anim.autoplay = false;
-                                    if (anim.stop) anim.stop();
-                                    else if (anim.pause) anim.pause();
+                                    if (anim.pause) anim.pause();
+                                    if (anim.goToAndStop) anim.goToAndStop(0, true);
+                                    else if (anim.stop) anim.stop();
                                 } catch (_) {}
                             });
                         }
@@ -27207,7 +27244,13 @@ class AccessibilityWidget {
                 const lottie = window.lottie || window.bodymovin;
                 if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
                     (lottie.getRegisteredAnimations() || []).forEach(anim => {
-                        if (anim && typeof anim.pause === 'function') anim.pause();
+                        try {
+                            if (!anim) return;
+                            if (anim.pause) anim.pause();
+                            if (anim.goToAndStop) anim.goToAndStop(0, true);
+                            anim.loop = false;
+                            anim.autoplay = false;
+                        } catch (_) {}
                     });
                 }
 
@@ -32850,30 +32893,36 @@ class AccessibilityWidget {
             const iconRect = icon.getBoundingClientRect();
             if (iconRect.width === 0 || iconRect.height === 0) return;
 
-            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none';
-            if (wasHidden) {
-                panel.style.visibility = 'visible';
-                panel.style.display = 'block';
-            }
-            const panelRect = panel.getBoundingClientRect();
-            if (wasHidden) {
-                panel.style.visibility = 'hidden';
-                panel.style.display = 'none';
-            }
-
-            const iconCenterY = iconRect.top + (iconRect.height / 2);
-            let topPos = iconCenterY - (panelRect.height / 2);
-            const maxTop = window.innerHeight - panelRect.height - 20;
-            const finalTop = Math.max(20, Math.min(topPos, maxTop));
-
+            const margin = 40;
+            const dynamicHeight = window.innerHeight - margin;
             const panelWidth = window.innerWidth >= 1440 ? 480 : 400;
             const iconCenterX = iconRect.left + (iconRect.width / 2);
             let leftPos = iconCenterX - (panelWidth / 2);
             const maxLeft = window.innerWidth - panelWidth - 20;
             const finalLeft = Math.max(20, Math.min(leftPos, maxLeft));
 
-            const margin = 40;
-            const dynamicHeight = window.innerHeight - margin;
+            /* Do NOT temporarily show the panel to measure when it is closed – that caused the "skeleton" flash in the middle of the page. Use estimated height when closed. */
+            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none' || !panel.classList.contains('active');
+            const panelHeight = wasHidden ? Math.min(dynamicHeight, 600) : panel.getBoundingClientRect().height;
+
+            const iconCenterY = iconRect.top + (iconRect.height / 2);
+            let topPos = iconCenterY - (panelHeight / 2);
+            const maxTop = window.innerHeight - panelHeight - 20;
+            const finalTop = Math.max(20, Math.min(topPos, maxTop));
+
+            if (wasHidden) {
+                /* Update position/size only; do not set visibility or display – panel stays hidden, no skeleton flash. */
+                panel.style.setProperty('position', 'fixed', 'important');
+                panel.style.setProperty('top', `${finalTop}px`, 'important');
+                panel.style.setProperty('left', `${finalLeft}px`, 'important');
+                panel.style.setProperty('width', `${panelWidth}px`, 'important');
+                panel.style.setProperty('height', `${dynamicHeight}px`, 'important');
+                panel.style.setProperty('max-height', `${dynamicHeight}px`, 'important');
+                panel.style.setProperty('min-height', '400px', 'important');
+                panel.style.setProperty('max-width', `${panelWidth}px`, 'important');
+                return;
+            }
+
             Object.assign(panel.style, {
                 position: 'fixed',
                 top: '20px',
