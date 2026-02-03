@@ -26983,6 +26983,11 @@ class AccessibilityWidget {
                 this._seizureLottieBootInterval = null;
             }
 
+            if (window.gsap && window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') {
+                window.gsap.ScrollTrigger.refresh();
+            }
+            window.dispatchEvent(new Event('resize'));
+
             this.saveSettings();
             this.updateWidgetAppearance();
         }
