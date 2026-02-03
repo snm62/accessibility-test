@@ -5408,52 +5408,68 @@ class AccessibilityWidget {
     
     
     
-                /* --- Desktop Base Panel (flex column so content area can scroll) --- */
-                /* visibility controlled by .accessbit-widget-panel.show / .active above */
+                /* --- Desktop Base Panel: no transform transition (prevents skeleton slide on close) --- */
                 .accessbit-widget-panel {
                     position: fixed !important;
-                    width: 400px !important;
-                    max-width: 95vw !important;
-                    display: flex !important;
+                    display: none !important;
                     flex-direction: column !important;
                     overflow: hidden !important;
                     z-index: 2147483647 !important;
                     background: #ffffff !important;
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
                     border-radius: 12px !important;
-                    transition: transform 0.3s ease, opacity 0.2s ease !important;
+                    transition: opacity 0.2s ease !important;
                 }
-                /* 1440px+: full viewport height and wider panel */
+                .accessbit-widget-panel.active,
+                .accessbit-widget-panel.show {
+                    display: flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel {
+                        width: 400px !important;
+                        max-width: 95vw !important;
                         height: calc(100vh - 40px) !important;
-                        max-height: calc(100vh - 40px) !important;
-                        min-height: 400px !important;
+                        top: 20px !important;
                     }
                 }
                 @media (min-width: 1440px) {
                     .accessbit-widget-panel {
                         width: 480px !important;
                         max-width: 480px !important;
+                        height: calc(100vh - 40px) !important;
+                        max-height: calc(100vh - 40px) !important;
                     }
                 }
-                @media (max-width: 1280px) {
-                    .accessbit-widget-panel {
-                        height: 600px !important;
-                        max-height: 90vh !important;
-                    }
+                /* Sleek custom scrollbar */
+                .accessbit-widget-content::-webkit-scrollbar,
+                .panel-content::-webkit-scrollbar,
+                .white-content-section::-webkit-scrollbar {
+                    width: 6px !important;
                 }
-                
-                .accessbit-widget-panel * {
-                    scroll-behavior: auto !important;
+                .accessbit-widget-content::-webkit-scrollbar-track,
+                .panel-content::-webkit-scrollbar-track,
+                .white-content-section::-webkit-scrollbar-track {
+                    background: transparent !important;
                 }
-                
-                /* Scrollable area: take remaining space and scroll (fixes flexbox collapse on 1440px / Nest Hub) */
+                .accessbit-widget-content::-webkit-scrollbar-thumb,
+                .panel-content::-webkit-scrollbar-thumb,
+                .white-content-section::-webkit-scrollbar-thumb {
+                    background: #e2e8f0 !important;
+                    border-radius: 10px !important;
+                }
+                .accessbit-widget-content::-webkit-scrollbar-thumb:hover,
+                .panel-content::-webkit-scrollbar-thumb:hover,
+                .white-content-section::-webkit-scrollbar-thumb:hover {
+                    background: #cbd5e1 !important;
+                }
+                .accessbit-widget-panel * { scroll-behavior: auto !important; }
                 .accessbit-widget-panel .accessbit-widget-content,
                 .accessbit-widget-panel .panel-content,
                 .accessbit-widget-panel .white-content-section {
                     flex: 1 1 auto !important;
-                    overflow-y: scroll !important;
+                    overflow-y: auto !important;
                     overflow-x: hidden !important;
                     min-height: 0 !important;
                     -webkit-overflow-scrolling: touch !important;
@@ -5462,25 +5478,10 @@ class AccessibilityWidget {
                 .accessbit-widget-panel .accessbit-widget-content,
                 .accessbit-widget-panel .white-content-section {
                     display: block !important;
-                    flex: 1 1 auto !important;
-                    overflow-y: scroll !important;
-                    overflow-x: hidden !important;
-                    height: 100% !important;
-                    min-height: 0 !important;
+                    padding: 20px !important;
                 }
-                
                 .accessbit-widget-content *,
-                .accessbit-widget-panel .panel-content * {
-                    max-width: 100% !important;
-                }
-    
-                .accessbit-widget-panel.active,
-                .accessbit-widget-panel.show {
-                    display: flex !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                }
-    
+                .accessbit-widget-panel .panel-content * { max-width: 100% !important; }
                 /* --- Nest Hub & large tablet (≤1280px) – drawer mode --- */
                 @media (max-width: 1280px) {
                     .accessbit-widget-icon {
@@ -5490,13 +5491,29 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode {
                         width: calc(100% - 24px) !important;
                         max-width: 420px !important;
-                        height: 100vh !important;
-                        max-height: 100vh !important;
-                        top: 0 !important;
-                        bottom: 0 !important;
+                        height: calc(100vh - 24px) !important;
+                        top: 12px !important;
+                        bottom: 12px !important;
                         margin: 0 12px !important;
                         border-radius: 12px !important;
                         box-sizing: border-box !important;
+                        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.side-left {
+                        left: 0 !important;
+                        right: auto !important;
+                        transform: translateX(-110%);
+                    }
+                    .accessbit-widget-panel.mobile-mode.side-right {
+                        right: 0 !important;
+                        left: auto !important;
+                        transform: translateX(110%);
+                    }
+                    .accessbit-widget-panel.mobile-mode.active {
+                        transform: translateX(0) !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode:not(.active) {
+                        transition: none !important;
                     }
                     @media (max-width: 480px) {
                         .accessbit-widget-panel.mobile-mode {
@@ -5512,23 +5529,6 @@ class AccessibilityWidget {
                             right: 12px !important;
                             left: auto !important;
                         }
-                    }
-                    .accessbit-widget-panel.mobile-mode.side-left {
-                        left: 0 !important;
-                        right: auto !important;
-                        transform: translateX(-100%);
-                    }
-                    .accessbit-widget-panel.mobile-mode.side-right {
-                        right: 0 !important;
-                        left: auto !important;
-                        transform: translateX(100%);
-                    }
-                    .accessbit-widget-panel.mobile-mode.active {
-                        transform: translateX(0) !important;
-                    }
-                    /* No slide-out when closing: hide instantly */
-                    .accessbit-widget-panel.mobile-mode:not(.active) {
-                        transition: none !important;
                     }
                     /* NEST HUB & SCROLL FIX */
                     .accessbit-widget-panel.mobile-mode .accessbit-widget-content,
@@ -27023,6 +27023,14 @@ class AccessibilityWidget {
                 body.seizure-safe img[src$=".gif"]:not(#accessbit-widget-container *) {
                     filter: grayscale(0.4) !important;
                 }
+                /* Prevent Webflow condition-invisible and Lottie SVG from animating */
+                html.seizure-safe .w-condition-invisible,
+                html.seizure-safe .w-lottie svg,
+                body.seizure-safe .w-condition-invisible,
+                body.seizure-safe .w-lottie svg {
+                    animation: none !important;
+                    transform: none !important;
+                }
             `;
         }
         
@@ -27121,33 +27129,50 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – freeze frame (goToAndStop) instead of hiding; strip data-animation-type so Webflow loses track
+        // Stop Lottie/GSAP – IX2 dispatch + hard freeze (stub element so Webflow loses control)
         stopLottieAnimations() {
             try {
-                // Attribute stripping: disable data-animation-type so Webflow engine stops trying to play it
-                document.querySelectorAll('.w-lottie, [data-animation-type="lottie"]').forEach(el => {
+                // 1. Force Webflow IX2 to stop processing
+                if (window.Webflow && Webflow.require) {
                     try {
-                        if (el.getAttribute('data-animation-type') === 'lottie') {
-                            el.setAttribute('data-seizure-safe-lottie-backup', 'lottie');
-                            el.removeAttribute('data-animation-type');
+                        const ix2 = Webflow.require('ix2');
+                        if (ix2 && ix2.store) {
+                            ix2.store.dispatch({ type: 'IX2_STOP_REQUESTED' });
+                            ix2.store.dispatch({ type: 'IX2_CLEAR_CONTROLS' });
                         }
+                        const lottieAPI = Webflow.require('lottie');
+                        if (lottieAPI && lottieAPI.lottie) {
+                            if (lottieAPI.lottie.pause) lottieAPI.lottie.pause();
+                            if (Array.isArray(lottieAPI.lottie.animations)) {
+                                lottieAPI.lottie.animations.forEach(a => {
+                                    try {
+                                        a.pause?.();
+                                        a.goToAndStop?.(0, true);
+                                        a.loop = false;
+                                        a.autoplay = false;
+                                    } catch (_) {}
+                                });
+                            }
+                        }
+                    } catch (_) {}
+                }
+
+                // 2. Hard freeze: remove hook so Webflow JS can't find element to play it
+                document.querySelectorAll('.w-lottie, [data-animation-type="lottie"]').forEach(el => {
+                    if (el.dataset.isFrozen) return;
+                    try {
+                        el.setAttribute('data-seizure-safe-lottie-backup', el.getAttribute('data-animation-type') || 'lottie');
+                        const svg = el.querySelector('svg');
+                        if (svg) {
+                            svg.style.setProperty('animation', 'none', 'important');
+                            svg.style.setProperty('transition', 'none', 'important');
+                        }
+                        el.removeAttribute('data-animation-type');
+                        el.dataset.isFrozen = 'true';
                     } catch (_) {}
                 });
 
-                // 1. Target Webflow's internal Lottie instance
-                if (window.Webflow && Webflow.require) {
-                    const lottieAPI = Webflow.require('lottie');
-                    if (lottieAPI && lottieAPI.lottie && Array.isArray(lottieAPI.lottie.animations)) {
-                        lottieAPI.lottie.animations.forEach(anim => {
-                            try {
-                                anim.pause();
-                                if (anim.goToAndStop) anim.goToAndStop(0, true);
-                            } catch (_) {}
-                        });
-                    }
-                }
-
-                // 2. Target standalone players (dotLottie / Lottie-Player)
+                // 3. Standalone players (lottie-player / dotlottie-player)
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
@@ -27156,7 +27181,7 @@ class AccessibilityWidget {
                     } catch (_) {}
                 });
 
-                // 3. GSAP kill
+                // 4. GSAP
                 if (window.gsap) {
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.pause === 'function') {
                         window.gsap.globalTimeline.pause();
@@ -27170,17 +27195,26 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (restore data-animation-type so Webflow can track again; play + ticker/ScrollTrigger)
+        // Restore Lottie and GSAP (unfreeze elements + re-init Webflow IX2/lottie so control returns)
         restoreLottieAnimations() {
             try {
-                // Restore data-animation-type so Webflow engine can track Lottie again
-                document.querySelectorAll('[data-seizure-safe-lottie-backup]').forEach(el => {
+                document.querySelectorAll('[data-is-frozen="true"]').forEach(el => {
                     try {
                         const backup = el.getAttribute('data-seizure-safe-lottie-backup');
                         if (backup) el.setAttribute('data-animation-type', backup);
+                        delete el.dataset.isFrozen;
                         el.removeAttribute('data-seizure-safe-lottie-backup');
                     } catch (_) {}
                 });
+
+                if (window.Webflow && Webflow.require) {
+                    try {
+                        const ix2 = Webflow.require('ix2');
+                        if (ix2 && ix2.init) ix2.init();
+                        const lottie = Webflow.require('lottie');
+                        if (lottie && lottie.init) lottie.init();
+                    } catch (_) {}
+                }
 
                 const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
                 if (lottie && typeof lottie.play === 'function') lottie.play();
@@ -27189,8 +27223,7 @@ class AccessibilityWidget {
                         (lottie.getRegisteredAnimations() || []).forEach(anim => { if (anim && typeof anim.play === 'function') anim.play(); });
                     } catch (_) {}
                 }
-                const players = document.querySelectorAll('lottie-player, dotlottie-player');
-                players.forEach(player => {
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
                         if (player.shadowRoot) {
@@ -27203,13 +27236,10 @@ class AccessibilityWidget {
                         if (player.play) player.play();
                     } catch (_) {}
                 });
+
                 if (window.gsap) {
-                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') {
-                        window.gsap.ticker.wake();
-                    }
-                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') {
-                        window.gsap.globalTimeline.play();
-                    }
+                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') window.gsap.ticker.wake();
+                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
                     if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
                         window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
                     }
@@ -30308,13 +30338,15 @@ class AccessibilityWidget {
             // Execute panel toggle - use requestAnimationFrame if available, otherwise execute immediately
             const executePanelToggle = () => {
                 if (isCurrentlyOpen || !isHidden) {
-                    // Hide panel using transform (better performance than display)
-                    panel.style.transform = 'translateX(-100%)';
+                    panel.style.transform = '';
                     panel.style.visibility = 'hidden';
                     panel.style.pointerEvents = 'none';
                     panel.classList.remove('active');
-                    
-                    // CRITICAL: Ensure icon stays visible when panel closes
+                    setTimeout(() => {
+                        if (!panel.classList.contains('active')) {
+                            panel.style.setProperty('display', 'none', 'important');
+                        }
+                    }, 200);
                     if (icon) {
                         icon.style.display = '';
                         icon.style.visibility = 'visible';
@@ -30323,20 +30355,16 @@ class AccessibilityWidget {
                     panel.setAttribute('aria-hidden', 'true');
                     icon.setAttribute('aria-expanded', 'false');
                     this.isPanelOpen = false;
-                    
-                    // Re-enable smooth scrolling libraries when panel is closed
                     this.enableSmoothScrollingLibraries();
                 } else {
                     // Show panel
-                    this.ensureWidgetCSS(); // Ensure CSS is always present
-                    this.ensureBasePanelCSS(); // Ensure base CSS is applied
-                    this.updateInterfacePosition(); // Position panel next to icon
-                    
-                    // Reset transform to show panel
+                    this.ensureWidgetCSS();
+                    this.ensureBasePanelCSS();
+                    this.updateInterfacePosition();
+                    panel.style.removeProperty('display');
                     panel.style.transform = '';
                     panel.style.visibility = 'visible';
                     panel.style.pointerEvents = 'auto';
-                    panel.style.display = 'block'; // Keep for compatibility
                     panel.classList.add('active');
                     panel.setAttribute('aria-hidden', 'false');
                     icon.setAttribute('aria-expanded', 'true');
@@ -31136,11 +31164,11 @@ class AccessibilityWidget {
         
         /**
          * Core Responsiveness & Side Detection (Responsive Drawer).
-         * Threshold 1280px to catch Nest Hub Max and iPad Pro landscape; clear inline styles on mode switch.
+         * Threshold 1280px; clear transform at start to prevent panel stuck in middle when resizing.
          */
         handleResizeOptimized() {
             const screenWidth = window.innerWidth;
-            const isDrawerMode = screenWidth <= 1280;
+            const isMobile = screenWidth <= 1280;
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
 
@@ -31148,25 +31176,19 @@ class AccessibilityWidget {
 
             this.handleWindowResize();
             this.ensureBasePanelCSS();
+            panel.style.removeProperty('transform');
 
-            if (isDrawerMode) {
+            if (isMobile) {
                 panel.classList.add('mobile-mode');
                 if (icon) {
-                    const iconRect = icon.getBoundingClientRect();
-                    const isRightSide = (iconRect.left + iconRect.width / 2) > (screenWidth / 2);
-                    if (isRightSide) {
-                        panel.classList.add('side-right');
-                        panel.classList.remove('side-left');
-                    } else {
-                        panel.classList.add('side-left');
-                        panel.classList.remove('side-right');
-                    }
+                    const isRightSide = (icon.getBoundingClientRect().left + icon.offsetWidth / 2) > (screenWidth / 2);
+                    panel.classList.toggle('side-right', isRightSide);
+                    panel.classList.toggle('side-left', !isRightSide);
                 }
                 panel.style.removeProperty('left');
                 panel.style.removeProperty('right');
                 panel.style.removeProperty('top');
                 panel.style.removeProperty('bottom');
-                panel.style.removeProperty('transform');
                 panel.style.removeProperty('width');
                 panel.style.removeProperty('height');
                 this.applyMobileResponsiveStyles();
@@ -32777,60 +32799,22 @@ class AccessibilityWidget {
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (!icon || !panel || window.innerWidth <= 1280) return;
 
-            const iconComputedStyle = window.getComputedStyle(icon);
-            const iconIsVisible = iconComputedStyle.display !== 'none' && iconComputedStyle.visibility !== 'hidden' && iconComputedStyle.opacity !== '0';
-            if (!iconIsVisible) return;
-
             const iconRect = icon.getBoundingClientRect();
-            if (iconRect.width === 0 || iconRect.height === 0) return;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const panelWidth = screenWidth >= 1440 ? 480 : 400;
+            const panelHeight = screenHeight - 40;
 
-            const margin = 40;
-            const dynamicHeight = window.innerHeight - margin;
-            const panelWidth = window.innerWidth >= 1440 ? 480 : 400;
-            const iconCenterX = iconRect.left + (iconRect.width / 2);
-            let leftPos = iconCenterX - (panelWidth / 2);
-            const maxLeft = window.innerWidth - panelWidth - 20;
-            const finalLeft = Math.max(20, Math.min(leftPos, maxLeft));
-
-            /* Do NOT temporarily show the panel to measure when it is closed – that caused the "skeleton" flash in the middle of the page. Use estimated height when closed. */
-            const wasHidden = panel.style.visibility === 'hidden' || panel.style.display === 'none' || !panel.classList.contains('active');
-            const panelHeight = wasHidden ? Math.min(dynamicHeight, 600) : panel.getBoundingClientRect().height;
-
-            const iconCenterY = iconRect.top + (iconRect.height / 2);
-            let topPos = iconCenterY - (panelHeight / 2);
-            const maxTop = window.innerHeight - panelHeight - 20;
-            const finalTop = Math.max(20, Math.min(topPos, maxTop));
-
-            if (wasHidden) {
-                /* Update position/size only; do not set visibility or display – panel stays hidden, no skeleton flash. */
-                panel.style.setProperty('position', 'fixed', 'important');
-                panel.style.setProperty('top', `${finalTop}px`, 'important');
-                panel.style.setProperty('left', `${finalLeft}px`, 'important');
-                panel.style.setProperty('width', `${panelWidth}px`, 'important');
-                panel.style.setProperty('height', `${dynamicHeight}px`, 'important');
-                panel.style.setProperty('max-height', `${dynamicHeight}px`, 'important');
-                panel.style.setProperty('min-height', '400px', 'important');
-                panel.style.setProperty('max-width', `${panelWidth}px`, 'important');
-                return;
-            }
+            let leftPos = (iconRect.left + iconRect.width / 2) - (panelWidth / 2);
+            leftPos = Math.max(20, Math.min(leftPos, screenWidth - panelWidth - 20));
 
             Object.assign(panel.style, {
-                position: 'fixed',
                 top: '20px',
-                left: `${finalLeft}px`,
+                left: `${leftPos}px`,
                 width: `${panelWidth}px`,
-                bottom: 'auto',
-                right: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                zIndex: '2147483646'
+                height: `${panelHeight}px`,
+                maxHeight: `${panelHeight}px`
             });
-            panel.style.setProperty('height', `${dynamicHeight}px`, 'important');
-            panel.style.setProperty('max-height', `${dynamicHeight}px`, 'important');
-            panel.style.setProperty('min-height', '400px', 'important');
-            panel.style.setProperty('width', `${panelWidth}px`, 'important');
-            panel.style.setProperty('max-width', `${panelWidth}px`, 'important');
-            if (panel.classList.contains('active')) panel.style.transform = 'none';
         }
     
         updateInterfaceFooter(content) {
