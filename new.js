@@ -26912,7 +26912,7 @@ class AccessibilityWidget {
                 this.stopLottieAnimations();
             });
             try {
-                this.seizureObserver.observe(document.body, { childList: true, subtree: true });
+                this.seizureObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
             } catch (_) {}
             this.saveSettings();
         }
@@ -27170,33 +27170,38 @@ class AccessibilityWidget {
             } catch (_) {}
         }
         
-        // Stop Lottie/GSAP – library pause + player autoplay/loop off + Shadow DOM hide + GSAP ticker sleep
+        // Stop Lottie/GSAP – pause all registered instances + player stop/autoplay/loop off + Shadow DOM hide + GSAP ticker + ScrollTrigger kill
         stopLottieAnimations() {
             try {
-                const lottie = window.lottie || (window.bodymovin && window.bodymovin.lottie);
-                if (lottie && typeof lottie.pause === 'function') {
-                    lottie.pause();
+                const lottie = window.lottie || window.bodymovin;
+                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
+                    (lottie.getRegisteredAnimations() || []).forEach(anim => {
+                        if (anim && typeof anim.pause === 'function') anim.pause();
+                    });
                 }
 
                 const players = document.querySelectorAll('lottie-player, dotlottie-player');
                 players.forEach(player => {
                     try {
                         if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
-                        if (player.pause) player.pause();
-                        if (player.stop) player.stop();
                         player.autoplay = false;
                         player.loop = false;
+                        if (player.pause) player.pause();
+                        if (player.stop) player.stop();
                         if (player.shadowRoot) {
-                            const innerContainer = player.shadowRoot.querySelector('.animation, svg, canvas');
-                            if (innerContainer) {
-                                innerContainer.style.display = 'none';
-                                innerContainer.style.visibility = 'hidden';
+                            const renderer = player.shadowRoot.querySelector('svg, canvas');
+                            if (renderer) {
+                                renderer.style.display = 'none';
+                                renderer.style.visibility = 'hidden';
                             }
                         }
                     } catch (_) {}
                 });
 
                 if (window.gsap) {
+                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
+                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.kill === 'function') st.kill(true); });
+                    }
                     if (window.gsap.ticker && typeof window.gsap.ticker.sleep === 'function') {
                         window.gsap.ticker.sleep();
                     }
