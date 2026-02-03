@@ -27192,38 +27192,34 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (Widget Protector: never touch accessbit container/classes; removeProperty transform to avoid breaking widget layout)
+        // Restore Lottie and GSAP (Safe-Sync: clean site content first, then 200ms delayed refresh so widget sees stable page)
         restoreLottieAnimations() {
             try {
-                // 1. Unfreeze Lottie attributes
-                document.querySelectorAll('[data-is-frozen="true"]').forEach(el => {
+                // 1. SURGICAL RESTORE (Targeted classes only)
+                const frozenElements = document.querySelectorAll('[data-is-frozen="true"]');
+                frozenElements.forEach(el => {
                     if (el.closest('#accessbit-widget-container') || (el.id && el.id.includes('accessbit'))) return;
-                    try {
-                        const backup = el.getAttribute('data-seizure-safe-lottie-backup');
-                        if (backup) el.setAttribute('data-animation-type', backup);
-                        el.style.removeProperty('opacity');
-                        el.style.removeProperty('visibility');
-                        el.style.removeProperty('display');
-                        el.style.removeProperty('transform');
-                        delete el.dataset.isFrozen;
-                        el.removeAttribute('data-seizure-safe-lottie-backup');
-                    } catch (_) {}
+                    const backup = el.getAttribute('data-seizure-safe-lottie-backup');
+                    if (backup) el.setAttribute('data-animation-type', backup);
+                    el.style.removeProperty('opacity');
+                    el.style.removeProperty('visibility');
+                    el.style.removeProperty('display');
+                    el.style.removeProperty('transform');
+                    delete el.dataset.isFrozen;
+                    el.removeAttribute('data-seizure-safe-lottie-backup');
                 });
 
-                // 2. Re-trigger Webflow Lottie (Gentle reload)
+                // 2. RE-TRIGGER WEBFLOW LOTTIE
                 if (window.Webflow && Webflow.require) {
-                    try {
-                        const lottie = Webflow.require('lottie');
-                        if (lottie && lottie.init) lottie.init();
-                        window.dispatchEvent(new Event('resize'));
-                    } catch (_) {}
+                    const lottie = Webflow.require('lottie');
+                    if (lottie && lottie.init) lottie.init();
                 }
 
-                // 3. Surgical Force-Reveal for Stuck Content (exclude widget)
+                // 3. THE "SAFE-SYNC" REVEAL
                 requestAnimationFrame(() => {
-                    const targets = document.querySelectorAll('.w-lottie, [data-animation-type], .w-ix-cap, [data-scroll]');
+                    const targets = document.querySelectorAll('.w-lottie, [data-animation-type], .w-ix-cap');
                     targets.forEach(el => {
-                        if (el.closest('#accessbit-widget-container') || el.closest('[class*="accessbit-widget"]') || (el.id && el.id.includes('accessbit'))) return;
+                        if (el.closest('#accessbit-widget-container')) return;
                         const style = window.getComputedStyle(el);
                         if (style.opacity === '0' || style.visibility === 'hidden') {
                             el.style.setProperty('opacity', '1', 'important');
@@ -27232,14 +27228,15 @@ class AccessibilityWidget {
                         }
                     });
 
-                    if (window.gsap) {
-                        if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
-                        if (window.gsap.ScrollTrigger) {
+                    // 4. DELAYED REFRESH (200ms so DOM/layout is settled before resize)
+                    setTimeout(() => {
+                        if (window.gsap && window.gsap.ScrollTrigger) {
                             const allTriggers = window.gsap.ScrollTrigger.getAll();
                             if (allTriggers && allTriggers.forEach) allTriggers.forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
                             if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh(true);
                         }
-                    }
+                        window.dispatchEvent(new Event('resize'));
+                    }, 200);
                 });
             } catch (e) {
                 console.error('Restore Error:', e);
