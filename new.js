@@ -26984,7 +26984,6 @@ class AccessibilityWidget {
             }
 
             this.saveSettings();
-            this.updateWidgetAppearance();
         }
         
         // Freeze animations – keep Lottie visible but static (goToAndStop); no display:none so layout stays intact
@@ -27192,10 +27191,10 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (Safe-Sync: clean site content first, then 200ms delayed refresh so widget sees stable page)
+        // Restore Lottie and GSAP (Widget Shield & Sequenced Recovery: 100ms settle, skip widget ScrollTriggers, then resize + updateWidgetAppearance)
         restoreLottieAnimations() {
             try {
-                // 1. SURGICAL RESTORE (Targeted classes only)
+                // 1. REVEAL FROZEN CONTENT (Targeted Exclusion)
                 const frozenElements = document.querySelectorAll('[data-is-frozen="true"]');
                 frozenElements.forEach(el => {
                     if (el.closest('#accessbit-widget-container') || (el.id && el.id.includes('accessbit'))) return;
@@ -27209,17 +27208,19 @@ class AccessibilityWidget {
                     el.removeAttribute('data-seizure-safe-lottie-backup');
                 });
 
-                // 2. RE-TRIGGER WEBFLOW LOTTIE
+                // 2. RE-TRIGGER WEBFLOW ENGINE (Surgical)
                 if (window.Webflow && Webflow.require) {
-                    const lottie = Webflow.require('lottie');
-                    if (lottie && lottie.init) lottie.init();
+                    try {
+                        const lottie = Webflow.require('lottie');
+                        if (lottie && lottie.init) lottie.init();
+                    } catch (_) {}
                 }
 
-                // 3. THE "SAFE-SYNC" REVEAL
+                // 3. THE SEQUENCED RECOVERY
                 requestAnimationFrame(() => {
                     const targets = document.querySelectorAll('.w-lottie, [data-animation-type], .w-ix-cap');
                     targets.forEach(el => {
-                        if (el.closest('#accessbit-widget-container')) return;
+                        if (el.closest('#accessbit-widget-container') || (el.id && el.id.includes('accessbit'))) return;
                         const style = window.getComputedStyle(el);
                         if (style.opacity === '0' || style.visibility === 'hidden') {
                             el.style.setProperty('opacity', '1', 'important');
@@ -27228,15 +27229,22 @@ class AccessibilityWidget {
                         }
                     });
 
-                    // 4. DELAYED REFRESH (200ms so DOM/layout is settled before resize)
+                    // 4. THE 100MS SETTLE (Prevents Widget Breakdown)
                     setTimeout(() => {
                         if (window.gsap && window.gsap.ScrollTrigger) {
                             const allTriggers = window.gsap.ScrollTrigger.getAll();
-                            if (allTriggers && allTriggers.forEach) allTriggers.forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
-                            if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh(true);
+                            if (allTriggers && allTriggers.forEach) {
+                                allTriggers.forEach(st => {
+                                    const trigger = st.vars && st.vars.trigger;
+                                    if (trigger && typeof trigger.closest === 'function' && trigger.closest('#accessbit-widget-container')) return;
+                                    if (st && typeof st.enable === 'function') st.enable();
+                                });
+                            }
+                            if (typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
                         }
                         window.dispatchEvent(new Event('resize'));
-                    }, 200);
+                        if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+                    }, 100);
                 });
             } catch (e) {
                 console.error('Restore Error:', e);
