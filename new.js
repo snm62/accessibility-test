@@ -26986,6 +26986,11 @@ class AccessibilityWidget {
                 this._seizureLottieBootInterval = null;
             }
             this.restoreLottieAnimations();
+            // Clean up: pop .w-lottie back into view if IX2 left transform/translate (e.g. translateY(100px)) from initial state
+            document.querySelectorAll('.w-lottie').forEach(el => {
+                el.style.filter = 'none';
+                el.style.transform = 'none';
+            });
             this.saveSettings();
             this.updateWidgetAppearance();
         }
@@ -27195,13 +27200,23 @@ class AccessibilityWidget {
             }
         }
         
-        // Restore Lottie and GSAP (unfreeze elements + re-init Webflow IX2/lottie so control returns)
+        // Restore Lottie and GSAP (unfreeze elements + force visibility so IX2 initial state doesn't leave them hidden)
         restoreLottieAnimations() {
             try {
                 document.querySelectorAll('[data-is-frozen="true"]').forEach(el => {
                     try {
                         const backup = el.getAttribute('data-seizure-safe-lottie-backup');
                         if (backup) el.setAttribute('data-animation-type', backup);
+                        // Force visibility before Webflow takes over so they don't stay in "Initial State" (opacity 0)
+                        el.style.setProperty('opacity', '1', 'important');
+                        el.style.setProperty('visibility', 'visible', 'important');
+                        el.style.setProperty('display', 'block', 'important');
+                        const svg = el.querySelector('svg');
+                        if (svg) {
+                            svg.style.removeProperty('animation');
+                            svg.style.removeProperty('transition');
+                            svg.style.setProperty('opacity', '1', 'important');
+                        }
                         delete el.dataset.isFrozen;
                         el.removeAttribute('data-seizure-safe-lottie-backup');
                     } catch (_) {}
@@ -27209,20 +27224,15 @@ class AccessibilityWidget {
 
                 if (window.Webflow && Webflow.require) {
                     try {
-                        const ix2 = Webflow.require('ix2');
-                        if (ix2 && ix2.init) ix2.init();
                         const lottie = Webflow.require('lottie');
                         if (lottie && lottie.init) lottie.init();
+                        const ix2 = Webflow.require('ix2');
+                        if (ix2 && ix2.init) ix2.init();
                     } catch (_) {}
                 }
 
-                const lottie = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
-                if (lottie && typeof lottie.play === 'function') lottie.play();
-                if (lottie && typeof lottie.getRegisteredAnimations === 'function') {
-                    try {
-                        (lottie.getRegisteredAnimations() || []).forEach(anim => { if (anim && typeof anim.play === 'function') anim.play(); });
-                    } catch (_) {}
-                }
+                const lottieObj = (window.lottie && (window.lottie.default || window.lottie)) || (window.bodymovin && window.bodymovin.lottie);
+                if (lottieObj && typeof lottieObj.play === 'function') lottieObj.play();
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
                         if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
@@ -27238,13 +27248,12 @@ class AccessibilityWidget {
                 });
 
                 if (window.gsap) {
-                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') window.gsap.ticker.wake();
                     if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
-                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.getAll === 'function') {
-                        window.gsap.ScrollTrigger.getAll().forEach(st => { if (st && typeof st.enable === 'function') st.enable(); });
-                    }
+                    if (window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') window.gsap.ScrollTrigger.refresh();
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error('Restore Error:', e);
+            }
         }
     
         // Vision Impaired - comprehensive scaling and contrast enhancement
