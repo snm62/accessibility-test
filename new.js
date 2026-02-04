@@ -510,15 +510,11 @@ function applyVisionImpaired(on) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
                     localStorage.setItem('accessbit-widget-seizure-safe', on ? 'true' : 'false');
-                    if (window.accessbitWidget) {
-                        on ? window.accessbitWidget.enableSeizureSafe() : window.accessbitWidget.disableSeizureSafe();
-                    } else {
-                        try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
-                        try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
-                        if (on) {
-                            try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
-                            try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
-                        }
+                    try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
+                    try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
+                    if (on) {
+                        try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
+                        try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
                     }
                 });
                 input.__seizureBound = true;
@@ -26967,7 +26963,6 @@ class AccessibilityWidget {
     
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
-            this._iconExplicitlyShown = false;
 
             try {
                 document.documentElement.classList.remove('seizure-safe');
@@ -26975,30 +26970,31 @@ class AccessibilityWidget {
                 this.safeBodyClassToggle('seizure-safe', false);
                 const styleEl = document.getElementById('seizure-safe-css');
                 if (styleEl) styleEl.remove();
-                const earlyStyle = document.getElementById('accessbit-seizure-immediate-early');
-                if (earlyStyle) earlyStyle.remove();
-                if (this.seizureObserver) {
-                    this.seizureObserver.disconnect();
-                    this.seizureObserver = null;
-                }
-                if (this._seizureLottieBootInterval) {
-                    clearInterval(this._seizureLottieBootInterval);
-                    this._seizureLottieBootInterval = null;
-                }
-            } catch (e) { console.warn("Seizure cleanup error:", e); }
+            } catch (_) {}
 
             this.restoreLottieAnimations();
 
-            setTimeout(() => {
-                console.log("Fixing widget appearance...");
-                if (this.panel) {
-                    this.panel.style.display = '';
-                    this.panel.style.visibility = '';
-                }
-                if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
-                window.dispatchEvent(new Event('resize'));
-                this.saveSettings();
-            }, 100);
+            if (this.seizureObserver) {
+                try { this.seizureObserver.disconnect(); } catch (_) {}
+                this.seizureObserver = null;
+            }
+            if (this._seizureLottieBootInterval) {
+                clearInterval(this._seizureLottieBootInterval);
+                this._seizureLottieBootInterval = null;
+            }
+
+            this.saveSettings();
+            this.updateWidgetAppearance();
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (window.gsap && window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') {
+                        window.gsap.ScrollTrigger.refresh();
+                    }
+                    window.dispatchEvent(new Event('resize'));
+                    if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+                });
+            });
         }
         
         // Freeze animations – grayscale on html with widget exemption; animation pause except widget
@@ -27173,7 +27169,7 @@ class AccessibilityWidget {
                 // 3. Standalone players (lottie-player / dotlottie-player)
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
-                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit"]')) return;
+                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
                         player.pause();
                         if (player.seek) player.seek(0);
                     } catch (_) {}
@@ -27199,7 +27195,7 @@ class AccessibilityWidget {
                 // 1. RE-ENABLE CSS ANIMATIONS (Site-wide except widget)
                 const frozenElements = document.querySelectorAll('[data-is-frozen="true"]');
                 frozenElements.forEach(el => {
-                    if (el.closest('#accessbit-widget-container') || el.closest('[id*="accessbit"]') || (el.id && el.id.includes('accessbit'))) return;
+                    if (el.closest('#accessbit-widget-container') || (el.id && el.id.includes('accessbit'))) return;
                     const backup = el.getAttribute('data-seizure-safe-lottie-backup');
                     if (backup) el.setAttribute('data-animation-type', backup);
                     el.style.removeProperty('opacity');
