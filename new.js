@@ -96,31 +96,28 @@
             // REMOVED: WAAPI pause – was making user GSAP/Lottie animations invisible
         }
         
-        // Seizure Safe: explicit in-product toggle (stricter than prefers-reduced-motion).
-        // Security: no global prototype overwriting. Use CSS kill switch + remove flash triggers; WAAPI (pause/playbackRate) for animation control per recommendations.
+        // Seizure Safe: explicit in-product toggle with Transition Protection for widget
         const seizureSafeFromStorage = localStorage.getItem('accessbit-widget-seizure-safe');
         if (seizureSafeFromStorage === 'true') {
-            try {
-                if (document.body) document.body.classList.add('seizure-safe');
-                if (document.documentElement) document.documentElement.classList.add('seizure-safe');
-            } catch (_) {}
-            const immediateStyle = document.createElement('style');
-            immediateStyle.id = 'accessbit-seizure-immediate-early';
-            immediateStyle.textContent = `
-                /* Freeze animations (paused = keep current frame visible; avoid animation: none snapping to 0% keyframe) */
-                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget),
-                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
-                body.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after,
-                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::before,
-                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]):not(accessbit-widget)::after {
+            const doc = document.documentElement;
+            doc.classList.add('seizure-safe');
+            if (document.body) document.body.classList.add('seizure-safe');
+            const style = document.createElement('style');
+            style.id = 'accessbit-seizure-immediate-early';
+            style.textContent = `
+                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]):not([data-ck-widget]) {
                     animation-play-state: paused !important;
                     transition: none !important;
                     scroll-behavior: auto !important;
                 }
+                [id*="accessbit-widget"], [class*="accessbit-widget"] {
+                    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    animation-play-state: running !important;
+                    visibility: visible;
+                }
             `;
             try {
-                if (document.head) document.head.appendChild(immediateStyle);
+                if (document.head) document.head.appendChild(style);
             } catch (_) {}
         }
         
@@ -26974,51 +26971,47 @@ class AccessibilityWidget {
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
 
-            try {
-                document.documentElement.classList.remove('seizure-safe');
-                document.body.classList.remove('seizure-safe');
-                if (typeof this.safeBodyClassToggle === 'function') {
-                    this.safeBodyClassToggle('seizure-safe', false);
-                }
-                ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.remove();
-                });
+            document.documentElement.classList.remove('seizure-safe');
+            document.body.classList.remove('seizure-safe');
+
+            if (window.gsap) {
+                try {
+                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') window.gsap.ticker.wake();
+                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
+                } catch (_) {}
+            }
+
+            requestAnimationFrame(() => {
                 if (this.seizureObserver) {
-                    this.seizureObserver.disconnect();
+                    try { this.seizureObserver.disconnect(); } catch (_) {}
                     this.seizureObserver = null;
                 }
                 if (this._seizureLottieBootInterval) {
                     clearInterval(this._seizureLottieBootInterval);
                     this._seizureLottieBootInterval = null;
                 }
-            } catch (e) {
-                console.warn("Seizure cleanup error:", e);
-            }
+                ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
 
-            this.restoreLottieAnimations();
-            this.restoreGSAPAnimations();
-            this.restoreWAAPIAnimations();
+                this.restoreLottieAnimations();
 
-            setTimeout(() => {
-                if (typeof this.updateWidgetAppearance === 'function') {
-                    this.updateWidgetAppearance();
+                const panel = document.querySelector('.accessbit-widget-panel') || (this.shadowRoot && this.shadowRoot.querySelector('.accessbit-widget-panel'));
+                if (panel && panel.classList.contains('active')) {
+                    panel.style.display = 'flex';
+                    panel.style.opacity = '1';
                 }
-                const container = document.getElementById('accessbit-widget-container');
-                if (container) {
-                    container.style.opacity = "1";
-                    container.style.visibility = "visible";
-                    container.style.display = "block";
-                }
-                window.dispatchEvent(new Event('resize'));
-                this.saveSettings();
-                if (window.gsap && window.gsap.ScrollTrigger) {
-                    window.gsap.ScrollTrigger.refresh();
-                }
-            }, 50);
+
+                setTimeout(() => {
+                    if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
+                    window.dispatchEvent(new Event('resize'));
+                }, 150);
+            });
+
+            this.saveSettings();
         }
-        
-        // Freeze animations – grayscale on html with widget exemption; animation pause except widget
+
         injectSeizureSafeCSS() {
             let styleEl = document.getElementById('seizure-safe-css');
             if (!styleEl) {
@@ -27027,24 +27020,22 @@ class AccessibilityWidget {
                 document.head.appendChild(styleEl);
             }
             styleEl.textContent = `
-                html.seizure-safe {
-                    filter: grayscale(0.8) !important;
-                    transition: filter 0.3s ease;
-                }
-                html.seizure-safe #accessbit-widget-container,
-                html.seizure-safe [id*="accessbit-widget"] {
-                    filter: grayscale(0) !important;
-                }
-                html.seizure-safe *:not(#accessbit-widget-container):not(#accessbit-widget-container *):not([id*="accessbit-widget"]):not([id*="accessbit-widget"] *) {
+                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]),
+                body.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
                     animation-play-state: paused !important;
-                    transition-property: none !important;
+                    transition: none !important;
                 }
-                html.seizure-safe [data-animation-type="lottie"],
-                html.seizure-safe .w-lottie {
-                    pointer-events: none !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
+                html.seizure-safe canvas:not([id*="accessbit"]),
+                html.seizure-safe lottie-player:not([id*="accessbit"]) {
+                    display: none !important;
+                }
+                #accessbit-widget-container,
+                [id*="accessbit-widget-icon"],
+                .accessbit-widget-panel {
+                    animation-play-state: running !important;
+                    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    filter: none !important;
+                    opacity: 1;
                 }
             `;
         }
