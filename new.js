@@ -510,11 +510,21 @@ function applyVisionImpaired(on) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
                     localStorage.setItem('accessbit-widget-seizure-safe', on ? 'true' : 'false');
-                    try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
-                    try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
-                    if (on) {
-                        try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
-                        try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
+                    var widget = window.accessbitWidgetInstance || window.accessbitWidget;
+                    if (widget) {
+                        on ? widget.enableSeizureSafe() : widget.disableSeizureSafe();
+                    } else {
+                        try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
+                        try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
+                        if (on) {
+                            try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
+                            try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
+                        } else {
+                            ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(function(id) {
+                                var el = document.getElementById(id);
+                                if (el) el.remove();
+                            });
+                        }
                     }
                 });
                 input.__seizureBound = true;
@@ -26967,34 +26977,45 @@ class AccessibilityWidget {
             try {
                 document.documentElement.classList.remove('seizure-safe');
                 document.body.classList.remove('seizure-safe');
-                this.safeBodyClassToggle('seizure-safe', false);
-                const styleEl = document.getElementById('seizure-safe-css');
-                if (styleEl) styleEl.remove();
-            } catch (_) {}
+                if (typeof this.safeBodyClassToggle === 'function') {
+                    this.safeBodyClassToggle('seizure-safe', false);
+                }
+                ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+                if (this.seizureObserver) {
+                    this.seizureObserver.disconnect();
+                    this.seizureObserver = null;
+                }
+                if (this._seizureLottieBootInterval) {
+                    clearInterval(this._seizureLottieBootInterval);
+                    this._seizureLottieBootInterval = null;
+                }
+            } catch (e) {
+                console.warn("Seizure cleanup error:", e);
+            }
 
             this.restoreLottieAnimations();
+            this.restoreGSAPAnimations();
+            this.restoreWAAPIAnimations();
 
-            if (this.seizureObserver) {
-                try { this.seizureObserver.disconnect(); } catch (_) {}
-                this.seizureObserver = null;
-            }
-            if (this._seizureLottieBootInterval) {
-                clearInterval(this._seizureLottieBootInterval);
-                this._seizureLottieBootInterval = null;
-            }
-
-            this.saveSettings();
-            this.updateWidgetAppearance();
-
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (window.gsap && window.gsap.ScrollTrigger && typeof window.gsap.ScrollTrigger.refresh === 'function') {
-                        window.gsap.ScrollTrigger.refresh();
-                    }
-                    window.dispatchEvent(new Event('resize'));
-                    if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
-                });
-            });
+            setTimeout(() => {
+                if (typeof this.updateWidgetAppearance === 'function') {
+                    this.updateWidgetAppearance();
+                }
+                const container = document.getElementById('accessbit-widget-container');
+                if (container) {
+                    container.style.opacity = "1";
+                    container.style.visibility = "visible";
+                    container.style.display = "block";
+                }
+                window.dispatchEvent(new Event('resize'));
+                this.saveSettings();
+                if (window.gsap && window.gsap.ScrollTrigger) {
+                    window.gsap.ScrollTrigger.refresh();
+                }
+            }, 50);
         }
         
         // Freeze animations – grayscale on html with widget exemption; animation pause except widget
