@@ -26947,7 +26947,10 @@ class AccessibilityWidget {
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
 
-            // 1. Stop the Observer
+            // Guard: prevent Observer from re-freezing during restore
+            this._isRecovering = true;
+
+            // 1. Kill the Observer immediately
             if (this.seizureObserver) {
                 this.seizureObserver.disconnect();
                 this.seizureObserver = null;
@@ -26957,36 +26960,36 @@ class AccessibilityWidget {
                 this._seizureLottieBootInterval = null;
             }
 
-            // 2. Fix C: Strip the "junk" inline styles we added
-            document.querySelectorAll('[id*="accessbit"], .accessbit-widget-panel').forEach(el => {
+            // 2. Deep-Clean Widget Styles (Shadow DOM aware)
+            const cleanElement = (el) => {
+                if (!el) return;
                 el.style.removeProperty('display');
                 el.style.removeProperty('opacity');
                 el.style.removeProperty('visibility');
                 el.style.removeProperty('transform');
-            });
+                el.style.removeProperty('animation-play-state');
+            };
+
+            document.querySelectorAll('[id*="accessbit"], .accessbit-widget-panel').forEach(cleanElement);
+
             if (this.shadowRoot) {
-                this.shadowRoot.querySelectorAll('[id*="accessbit"], .accessbit-widget-panel').forEach(el => {
-                    el.style.removeProperty('display');
-                    el.style.removeProperty('opacity');
-                    el.style.removeProperty('visibility');
-                    el.style.removeProperty('transform');
-                });
+                this.shadowRoot.querySelectorAll('*').forEach(cleanElement);
             }
 
-            // 3. Clean up the environment
+            // 3. Environment Clean-up
             document.documentElement.classList.remove('seizure-safe');
             document.body.classList.remove('seizure-safe');
 
-            // 4. Force browser to recalculate layout
+            // 4. Force Reflow
             void document.documentElement.offsetWidth;
 
-            // 5. Remove the injection tags
+            // 5. Remove CSS Tags
             ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.remove();
             });
 
-            // 6. Resume engines
+            // 6. Resume External Engines
             this.restoreLottieAnimations();
             if (window.gsap && window.gsap.ticker) window.gsap.ticker.wake();
             if (window.gsap && window.gsap.globalTimeline) window.gsap.globalTimeline.play();
@@ -26996,7 +26999,8 @@ class AccessibilityWidget {
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
                 if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
-            }, 50);
+                this._isRecovering = false;
+            }, 60);
 
             this.saveSettings();
         }
@@ -27130,6 +27134,8 @@ class AccessibilityWidget {
         // Stop Lottie/GSAP – IX2 dispatch + hard freeze (stub element so Webflow loses control)
         stopLottieAnimations() {
             try {
+                if (this._isRecovering) return;
+
                 // 1. Force Webflow IX2 to stop processing
                 if (window.Webflow && Webflow.require) {
                     try {
