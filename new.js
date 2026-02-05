@@ -26950,82 +26950,18 @@ class AccessibilityWidget {
     
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
-            this._isRecovering = true;
+            this.saveSettings(); // Must save first so the early-run script knows it's OFF after reload
 
-            if (this.seizureObserver) {
-                this.seizureObserver.disconnect();
-                this.seizureObserver = null;
-            }
-            if (this._seizureLottieBootInterval) {
-                clearInterval(this._seizureLottieBootInterval);
-                this._seizureLottieBootInterval = null;
-            }
-
-            // Targeted cleaner: don't strip display/transform from panel or icon (widget layout)
-            const cleanElement = (el) => {
-                if (!el) return;
-                el.style.removeProperty('animation-play-state');
-                if (!el.classList.contains('accessbit-widget-panel') && !el.classList.contains('accessbit-widget-icon')) {
-                    el.style.removeProperty('display');
-                    el.style.removeProperty('opacity');
-                    el.style.removeProperty('visibility');
-                    el.style.removeProperty('transform');
-                }
-            };
-
-            document.querySelectorAll('[id*="accessbit"], .accessbit-widget-panel').forEach(cleanElement);
-            if (this.shadowRoot) {
-                this.shadowRoot.querySelectorAll('*').forEach(cleanElement);
-            }
-
+            // 1. Immediate visual feedback (optional but feels better)
             document.documentElement.classList.remove('seizure-safe');
             document.body.classList.remove('seizure-safe');
 
-            void document.documentElement.offsetWidth;
+            // 2. Clear the early-run style immediately so the "freeze" lifts while the page is preparing to reload
+            const earlyStyle = document.getElementById('accessbit-seizure-immediate-early');
+            if (earlyStyle) earlyStyle.remove();
 
-            ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.remove();
-            });
-
-            this.restoreLottieAnimations();
-            if (window.gsap && window.gsap.ticker) window.gsap.ticker.wake();
-            if (window.gsap && window.gsap.globalTimeline) window.gsap.globalTimeline.play();
-            if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
-
-            // Immediate recovery – close the gap where the widget looks broken
-            try {
-                if (typeof this.ensureBasePanelCSS === 'function') this.ensureBasePanelCSS();
-                if (typeof this.updateInterfacePosition === 'function') this.updateInterfacePosition();
-            } catch (_) {}
-
-            setTimeout(() => {
-                if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
-
-                try {
-                    if (typeof this.ensureBasePanelCSS === 'function') this.ensureBasePanelCSS();
-                    if (typeof this.updateInterfacePosition === 'function') this.updateInterfacePosition();
-                    if (this.isPanelOpen && typeof this.ensureWidgetCSS === 'function') this.ensureWidgetCSS();
-                } catch (e) {
-                    console.warn('Widget recovery failed:', e);
-                }
-
-                window.dispatchEvent(new Event('resize'));
-
-                if (window.Webflow && typeof window.Webflow.require === 'function') {
-                    try {
-                        const ix2 = window.Webflow.require('ix2');
-                        if (ix2 && typeof ix2.init === 'function') {
-                            ix2.init();
-                            window.dispatchEvent(new CustomEvent('scroll'));
-                        }
-                    } catch (_) {}
-                }
-
-                this._isRecovering = false;
-            }, 30);
-
-            this.saveSettings();
+            // 3. THE FIX: Reload the page – cleanest way to restart IX2 and Lottie
+            window.location.reload();
         }
 
         injectSeizureSafeCSS() {
