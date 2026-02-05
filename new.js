@@ -26941,22 +26941,20 @@ class AccessibilityWidget {
         }
     
         disableSeizureSafe() {
-            // 1. Update internal settings and save to Storage
+            // 1. Set the flag to block any observers (e.g. stopLottieAnimations) from firing
+            this._isRecovering = true;
+
+            // 2. Save the OFF setting to localStorage
             this.settings['seizure-safe'] = false;
             this.saveSettings();
 
-            // 2. Lift the freeze from the background site immediately
-            document.documentElement.classList.remove('seizure-safe');
-            document.body.classList.remove('seizure-safe');
+            // 3. DO NOT remove classes. DO NOT remove style tags.
+            // By leaving them alone, the widget stays perfectly styled until the refresh.
 
-            /* NOTE: We do NOT remove 'accessbit-seizure-immediate-early' here.
-               Keeping it active ensures the widget stays styled/visible
-               until the very millisecond the page reloads. */
-
-            // 3. Trigger the refresh with a tiny delay to ensure Storage write is finished
+            // 4. Reload the page
             setTimeout(() => {
                 window.location.reload();
-            }, 100);
+            }, 50);
         }
 
         injectSeizureSafeCSS() {
@@ -27093,7 +27091,8 @@ class AccessibilityWidget {
         // Stop Lottie/GSAP – IX2 dispatch + hard freeze (stub element so Webflow loses control)
         stopLottieAnimations() {
             try {
-                if (this._isRecovering) return;
+               
+                if (this._isRecovering || this.settings['seizure-safe'] === false) return;
 
                 // 1. Force Webflow IX2 to stop processing
                 if (window.Webflow && Webflow.require) {
