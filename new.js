@@ -26995,10 +26995,12 @@ class AccessibilityWidget {
             if (window.gsap && window.gsap.globalTimeline) window.gsap.globalTimeline.play();
             if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
 
-            // 7. Final layout refresh
+            // 7. Final layout refresh – re-apply panel/icon layout so widget doesn't stay broken
             setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
                 if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+                // Re-run the same layout logic as on resize (panel position, base CSS) so we don't rely on debounced resize
+                if (typeof this.handleResizeOptimized === 'function') this.handleResizeOptimized();
+                window.dispatchEvent(new Event('resize'));
                 this._isRecovering = false;
             }, 60);
 
