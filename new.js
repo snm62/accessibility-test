@@ -5069,10 +5069,39 @@ class AccessibilityWidget {
                 z-index: 100001 !important;
                 display: none !important; /* Hidden by default */
                 overflow: hidden !important;
+                overflow-x: hidden !important;
                 max-height: min(calc(100vh - 80px), 85vh) !important;
                 flex-direction: column !important;
+                box-sizing: border-box !important;
+                max-width: min(400px, 92vw) !important;
             }
-            
+            /* Responsive drag: keep all content inside panel – no spill onto page */
+            .accessbit-widget-panel,
+            .accessbit-widget-panel * {
+                box-sizing: border-box !important;
+            }
+            .accessbit-widget-panel .profile-item,
+            .accessbit-widget-panel .profile-info,
+            .accessbit-widget-panel .profile-item h4,
+            .accessbit-widget-panel .profile-item p,
+            .accessbit-widget-panel .profile-info h4,
+            .accessbit-widget-panel .profile-info p,
+            .accessbit-widget-panel p,
+            .accessbit-widget-panel h3,
+            .accessbit-widget-panel h4,
+            .accessbit-widget-panel .feature-card,
+            .accessbit-widget-panel .action-btn,
+            .accessbit-widget-panel .panel-header,
+            .accessbit-widget-panel .widget-header,
+            .accessbit-widget-panel .header-content,
+            .accessbit-widget-panel .language-dropdown,
+            .accessbit-widget-panel [class*="dropdown"] {
+                max-width: 100% !important;
+                overflow-wrap: break-word !important;
+                word-wrap: break-word !important;
+                overflow-x: hidden !important;
+                white-space: normal !important;
+            }
             .accessbit-widget-panel.show,
             .accessbit-widget-panel.active {
                 display: flex !important;
@@ -31103,10 +31132,10 @@ class AccessibilityWidget {
         
         // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
         setupOptimizedResizeHandlers() {
-            // Debounced resize handler (150ms delay)
+            // Short debounce so panel/icon reflow quickly when user drags to check responsiveness (like a normal site)
             const debouncedResize = this.debounce(() => {
                 this.handleResizeOptimized();
-            }, 150);
+            }, 50);
             
             // Single resize listener (covers window resize and, in many browsers, zoom)
             window.addEventListener('resize', debouncedResize, { passive: true });
