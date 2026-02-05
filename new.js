@@ -3295,9 +3295,7 @@ class AccessibilityWidget {
     .accessbit-widget-panel {
         position: fixed;
         z-index: 2147483646; /* Below spotlight, above icon */
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+        overflow: hidden; /* Panel does not scroll – only .accessbit-widget-content / .white-content-section scroll */
         overscroll-behavior: contain;
         /* Position controlled by JavaScript - no default top/left to prevent top-left positioning */
         top: auto;
@@ -4766,6 +4764,13 @@ class AccessibilityWidget {
     
             icon.style.pointerEvents = 'auto';
             
+            // Set default position on host (relative units) before first paint so icon is never broken on load
+            widgetContainer.style.setProperty('--widget-icon-left', '1.25rem');
+            widgetContainer.style.setProperty('--widget-icon-right', 'auto');
+            widgetContainer.style.setProperty('--widget-icon-top', '1.25rem');
+            widgetContainer.style.setProperty('--widget-icon-bottom', 'auto');
+            widgetContainer.style.setProperty('--widget-icon-transform', 'none');
+            
             // Initially hide the icon - will show after customization is loaded
             console.log('[ICON HIDE] createWidget() - Initially hiding icon (will show after customization loads)');
             icon.style.display = 'none';
@@ -5064,16 +5069,42 @@ class AccessibilityWidget {
                 -moz-border-radius: 12px !important;
             }
             
-            /* Force panel positioning; zoom-resilient (Ctrl+/-): overflow + max-height so structure holds */
+            /* Force panel positioning; full height so widget covers screen length; no scrollbar on panel/header */
             .accessbit-widget-panel {
-                z-index: 100001 !important;
-                display: none !important; /* Hidden by default */
+                z-index: 2147483646 !important;
+                display: none !important;
                 overflow: hidden !important;
                 overflow-x: hidden !important;
-                max-height: min(calc(100vh - 80px), 85vh) !important;
+                overflow-y: hidden !important;
+                max-height: calc(100vh - 20px) !important;
                 flex-direction: column !important;
                 box-sizing: border-box !important;
-                max-width: min(400px, 92vw) !important;
+                max-width: min(420px, 94vw) !important;
+            }
+            /* Panel always covers viewport height when open (CSS-driven, any screen size) */
+            .accessbit-widget-panel.show,
+            .accessbit-widget-panel.active {
+                height: calc(100vh - 20px) !important;
+                min-height: calc(100vh - 20px) !important;
+            }
+            @supports (height: 100dvh) {
+                .accessbit-widget-panel.show,
+                .accessbit-widget-panel.active {
+                    height: calc(100dvh - 20px) !important;
+                    min-height: calc(100dvh - 20px) !important;
+                    max-height: calc(100dvh - 20px) !important;
+                }
+            }
+            /* Header must not scroll – no scrollbar near "Accessibility Adjustments" */
+            .accessbit-widget-panel .panel-header,
+            .accessbit-widget-panel .widget-header {
+                flex-shrink: 0 !important;
+                overflow: hidden !important;
+                overflow-x: hidden !important;
+            }
+            .accessbit-widget-panel .panel-header *,
+            .accessbit-widget-panel .widget-header * {
+                overflow: visible !important;
             }
             /* Responsive drag: keep all content inside panel – no spill onto page */
             .accessbit-widget-panel,
@@ -5134,26 +5165,26 @@ class AccessibilityWidget {
     
     
     
-                /* Fluid positioning: CSS variables on host – no inline layout pollution; media query overrides on mobile */
+                /* Fluid positioning: CSS variables on host – relative units; media query overrides on mobile */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
-                    left: var(--widget-icon-left, 20px) !important;
+                    left: var(--widget-icon-left, 1.25rem) !important;
                     right: var(--widget-icon-right, auto) !important;
-                    top: var(--widget-icon-top, 20px) !important;
+                    top: var(--widget-icon-top, 1.25rem) !important;
                     bottom: var(--widget-icon-bottom, auto) !important;
                     transform: var(--widget-icon-transform, none) !important;
                 }
     
     
     
-                /* Accessibility Icon - Visual styling */
+                /* Accessibility Icon - relative units + clamp so icon never breaks on any screen size */
     
                 .accessbit-widget-icon {
     
-                    width: 60px;
+                    width: clamp(2.5rem, 8vw, 3.75rem) !important;
     
-                    height: 60px;
+                    height: clamp(2.5rem, 8vw, 3.75rem) !important;
     
                     background: #6366f1;
     
@@ -5188,11 +5219,11 @@ class AccessibilityWidget {
     
     
                 .accessbit-widget-icon i {
-    
+
                     color: #ffffff;
-    
-                    font-size: 24px;
-    
+
+                    font-size: clamp(0.875rem, 2.5vw, 1.5rem) !important;
+
                 }
     
     
@@ -5461,12 +5492,16 @@ class AccessibilityWidget {
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
-                /* Desktop: cap width so panel never dominates on large screens (1440, 1530, etc.) */
+                /* Desktop: CSS-driven position/size via vars; panel always covers viewport height */
                 @media (min-width: 1281px) {
-                    .accessbit-widget-panel {
-                        max-width: min(400px, 92vw) !important;
-                        height: calc(100vh - 40px) !important;
-                        max-height: min(calc(100vh - 80px), 85vh) !important;
+                    .accessbit-widget-panel:not(.mobile-mode) {
+                        position: fixed !important;
+                        top: var(--panel-top, 1.25rem) !important;
+                        left: var(--panel-left, 1.25rem) !important;
+                        width: var(--panel-width, min(420px, 94vw)) !important;
+                        height: calc(100vh - 20px) !important;
+                        max-height: calc(100vh - 20px) !important;
+                        max-width: min(420px, 94vw) !important;
                     }
                 }
                 /* Sleek custom scrollbar */
@@ -5500,7 +5535,6 @@ class AccessibilityWidget {
                     overflow-x: hidden !important;
                     min-height: 0 !important;
                     -webkit-overflow-scrolling: touch !important;
-                    scrollbar-gutter: stable !important;
                 }
                 .accessbit-widget-panel .accessbit-widget-content,
                 .accessbit-widget-panel .white-content-section {
@@ -5509,19 +5543,19 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-content *,
                 .accessbit-widget-panel .panel-content * { max-width: 100% !important; }
-                /* --- Nest Hub & large tablet (≤1280px) – drawer mode --- */
+                /* --- Nest Hub & large tablet (≤1280px) – drawer mode; icon clamp so it never breaks --- */
                 @media (max-width: 1280px) {
                     .accessbit-widget-icon {
-                        width: 50px !important;
-                        height: 50px !important;
+                        width: clamp(2rem, 6vw, 3.125rem) !important;
+                        height: clamp(2rem, 6vw, 3.125rem) !important;
                     }
                     .accessbit-widget-panel.mobile-mode {
-                        width: calc(100% - 24px) !important;
+                        width: calc(100% - 1.5rem) !important;
                         max-width: 420px !important;
-                        height: calc(100vh - 24px) !important;
-                        top: 12px !important;
-                        bottom: 12px !important;
-                        margin: 0 12px !important;
+                        height: calc(100vh - 1.5rem) !important;
+                        top: 0.75rem !important;
+                        bottom: 0.75rem !important;
+                        margin: 0 0.75rem !important;
                         border-radius: 12px !important;
                         box-sizing: border-box !important;
                         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
@@ -5542,18 +5576,24 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode:not(.active) {
                         transition: none !important;
                     }
+                    @supports (height: 100dvh) {
+                        .accessbit-widget-panel.mobile-mode {
+                            height: calc(100dvh - 1.5rem) !important;
+                            max-height: calc(100dvh - 1.5rem) !important;
+                        }
+                    }
                     @media (max-width: 480px) {
                         .accessbit-widget-panel.mobile-mode {
-                            width: calc(100vw - 24px) !important;
-                            max-width: calc(100vw - 24px) !important;
-                            margin: 0 12px !important;
+                            width: calc(100vw - 1.5rem) !important;
+                            max-width: calc(100vw - 1.5rem) !important;
+                            margin: 0 0.75rem !important;
                         }
                         .accessbit-widget-panel.mobile-mode.side-left {
-                            left: 12px !important;
+                            left: 0.75rem !important;
                             right: auto !important;
                         }
                         .accessbit-widget-panel.mobile-mode.side-right {
-                            right: 12px !important;
+                            right: 0.75rem !important;
                             left: auto !important;
                         }
                     }
@@ -31130,46 +31170,36 @@ class AccessibilityWidget {
             };
         }
         
-        // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
+        // CSS-driven continuous updates: rAF-throttled (no debounce) so layout stays in sync with browser
         setupOptimizedResizeHandlers() {
-            // Short debounce so panel/icon reflow quickly when user drags to check responsiveness (like a normal site)
-            const debouncedResize = this.debounce(() => {
+            let resizeScheduled = false;
+            const runResize = () => {
+                resizeScheduled = false;
                 this.handleResizeOptimized();
-            }, 50);
-            
-            // Single resize listener (covers window resize and, in many browsers, zoom)
-            window.addEventListener('resize', debouncedResize, { passive: true });
-            // Visual Viewport: ensure icon + panel reflow on zoom (Ctrl+ / Ctrl-) like a normal site
+            };
+            const onResize = () => {
+                if (resizeScheduled) return;
+                resizeScheduled = true;
+                requestAnimationFrame(runResize);
+            };
+
+            window.addEventListener('resize', onResize, { passive: true });
             if (typeof window.visualViewport !== 'undefined') {
-                window.visualViewport.addEventListener('resize', debouncedResize, { passive: true });
-                window.visualViewport.addEventListener('scroll', debouncedResize, { passive: true });
+                window.visualViewport.addEventListener('resize', onResize, { passive: true });
+                window.visualViewport.addEventListener('scroll', onResize, { passive: true });
             }
-            
-            // Use ResizeObserver for better responsive mode detection
-            // Only set up ResizeObserver after icon visibility has been determined
+
             if (this.shadowRoot && window.ResizeObserver) {
-                // Delay ResizeObserver setup to ensure icon visibility is determined first
                 const self = this;
-                const debouncedResizeFn = debouncedResize;
                 setTimeout(function() {
                     const resizeObserver = new ResizeObserver(function() {
-                        console.log('[ICON DEBUG] ResizeObserver callback fired', {
-                            _iconExplicitlyShown: self._iconExplicitlyShown
-                        });
-                        // Don't trigger resize handler if icon was explicitly shown during initialization
-                        if (self._iconExplicitlyShown === true) {
-                            console.log('[ICON DEBUG] ResizeObserver - Skipping because _iconExplicitlyShown=true');
-                            return;
-                        }
-                        // Safe to call resize handler
-                        debouncedResizeFn();
+                        if (self._iconExplicitlyShown === true) return;
+                        onResize();
                     });
-                    
                     const panel = self.shadowRoot.getElementById('accessbit-widget-panel');
                     const icon = self.shadowRoot.getElementById('accessbit-widget-icon');
                     if (panel) resizeObserver.observe(panel);
                     if (icon) resizeObserver.observe(icon);
-                    
                     self._resizeObserver = resizeObserver;
                 }, 200);
             }
@@ -32682,42 +32712,32 @@ class AccessibilityWidget {
         updateInterfacePosition() {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            const host = this.shadowRoot?.host;
             const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
-            if (!icon || !panel || isMobile) return;
+            if (!icon || !panel || !host || isMobile) return;
 
             const iconRect = icon.getBoundingClientRect();
             const screenWidth = window.innerWidth;
             const minMargin = 20;
-            const gapAboveIcon = 12;
             const minTop = 20;
-            const spaceAboveIcon = iconRect.top - minTop - gapAboveIcon;
-            const preferredHeight = 560;
-            let panelHeight = Math.max(280, Math.min(preferredHeight, spaceAboveIcon));
-            let topPos = iconRect.top - panelHeight - gapAboveIcon;
-            if (topPos < minTop) {
-                topPos = minTop;
-                panelHeight = Math.max(280, iconRect.top - minTop - gapAboveIcon);
-            }
 
-            // Cap width on all desktop sizes so panel doesn't dominate on 1440 / 1530+ (max 400px, or ~28% viewport)
-            const panelWidth = Math.min(400, screenWidth - minMargin * 2, Math.max(320, Math.floor(screenWidth * 0.28)));
+            // Panel width: CSS-driven; height is 100vh - 20px in CSS
+            const panelWidth = Math.min(420, screenWidth - minMargin * 2, Math.max(340, Math.floor(screenWidth * 0.32)));
+            const topPos = minTop;
 
             let leftPos = (iconRect.left + iconRect.width / 2) - (panelWidth / 2);
             const iconCenterX = iconRect.left + iconRect.width / 2;
-            // Keep panel in same half as icon so it doesn't cover center content on large screens
             if (iconCenterX < screenWidth / 2) {
                 leftPos = Math.max(minMargin, Math.min(leftPos, screenWidth / 2 - panelWidth));
             } else {
                 leftPos = Math.max(screenWidth / 2, Math.min(leftPos, screenWidth - panelWidth - minMargin));
             }
 
-            Object.assign(panel.style, {
-                top: `${topPos}px`,
-                left: `${leftPos}px`,
-                width: `${panelWidth}px`,
-                height: `${panelHeight}px`,
-                maxHeight: `${panelHeight}px`
-            });
+            // CSS-driven: set vars on host so panel uses them; clear inline dimensions so CSS applies
+            host.style.setProperty('--panel-top', `${topPos}px`);
+            host.style.setProperty('--panel-left', `${leftPos}px`);
+            host.style.setProperty('--panel-width', `${panelWidth}px`);
+            ['top', 'left', 'width', 'height', 'max-height'].forEach(prop => panel.style.removeProperty(prop));
         }
     
         updateInterfaceFooter(content) {
