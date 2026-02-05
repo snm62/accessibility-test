@@ -10939,6 +10939,7 @@ class AccessibilityWidget {
                 if (panel.classList.contains('active')) {
     
                     panel.classList.remove('active');
+                    document.body.classList.remove('accessbit-panel-open');
     
                     
                     
@@ -10947,6 +10948,8 @@ class AccessibilityWidget {
     
                 } else {
     
+                    this.ensureGreylayerStyle();
+                    document.body.classList.add('accessbit-panel-open');
                     panel.classList.add('active');
     
                     
@@ -30339,9 +30342,12 @@ class AccessibilityWidget {
                     panel.setAttribute('aria-hidden', 'true');
                     icon.setAttribute('aria-expanded', 'false');
                     this.isPanelOpen = false;
+                    document.body.classList.remove('accessbit-panel-open');
                     this.enableSmoothScrollingLibraries();
                 } else {
                     // Show panel
+                    this.ensureGreylayerStyle();
+                    document.body.classList.add('accessbit-panel-open');
                     this.ensureWidgetCSS();
                     this.ensureBasePanelCSS();
                     this.updateInterfacePosition();
@@ -32236,7 +32242,7 @@ class AccessibilityWidget {
             
             // Set flag in localStorage to hide interface permanently
             localStorage.setItem('accessbit-widget-hidden', 'true');
-        
+            document.body.classList.remove('accessbit-panel-open');
             
             // Hide the panel and icon completely
             const panel = this.shadowRoot?.querySelector('#accessbit-widget-panel');
@@ -32559,6 +32565,20 @@ class AccessibilityWidget {
                 panel.style.setProperty('overflow-wrap', 'break-word');
                 panel.style.setProperty('hyphens', 'auto');
             }
+        }
+        
+        // Greylayer: dim page content when panel is open (not an overlay – avoids affecting sticky nav)
+        ensureGreylayerStyle() {
+            if (typeof document === 'undefined' || !document.head) return;
+            const id = 'accessbit-greylayer-style';
+            if (document.getElementById(id)) return;
+            const style = document.createElement('style');
+            style.id = id;
+            style.textContent = [
+                'body.accessbit-panel-open main, body.accessbit-panel-open [role="main"], body.accessbit-panel-open article, body.accessbit-panel-open section { filter: brightness(0.92); }',
+                'body.accessbit-panel-open nav, body.accessbit-panel-open header, body.accessbit-panel-open .navbar, body.accessbit-panel-open [role="navigation"], body.accessbit-panel-open [role="banner"] { filter: none; }'
+            ].join(' ');
+            document.head.appendChild(style);
         }
         
         // Apply mobile responsive behavior: CSS media queries handle panel/icon layout; clear inline position so CSS applies
