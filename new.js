@@ -26892,11 +26892,10 @@ class AccessibilityWidget {
                 if (loader) loader.style.display = 'none';
             } catch (_) {}
 
-            // 2. Force GSAP to jump to end of all timelines (curtains snap to scaleY: 0)
+            // 2. Pause GSAP (do not progress to 1 – keeps layout intact for recovery)
             try {
-                if (window.gsap && typeof gsap.globalTimeline !== 'undefined') {
-                    gsap.globalTimeline.progress(1);
-                    gsap.globalTimeline.pause();
+                if (window.gsap && window.gsap.globalTimeline) {
+                    window.gsap.globalTimeline.pause();
                 }
             } catch (_) {}
 
@@ -27025,17 +27024,21 @@ class AccessibilityWidget {
                     animation-play-state: paused !important;
                     transition: none !important;
                 }
+                html.seizure-safe lottie-player:not([id*="accessbit"]),
+                html.seizure-safe dotlottie-player:not([id*="accessbit"]),
                 html.seizure-safe canvas:not([id*="accessbit"]),
-                html.seizure-safe lottie-player:not([id*="accessbit"]) {
-                    display: none !important;
+                body.seizure-safe lottie-player:not([id*="accessbit"]),
+                body.seizure-safe dotlottie-player:not([id*="accessbit"]),
+                body.seizure-safe canvas:not([id*="accessbit"]) {
+                    pointer-events: none !important;
                 }
                 #accessbit-widget-container,
                 [id*="accessbit-widget-icon"],
                 .accessbit-widget-panel {
                     animation-play-state: running !important;
-                    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                    filter: none !important;
-                    opacity: 1;
+                    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
             `;
         }
@@ -27178,12 +27181,15 @@ class AccessibilityWidget {
                     } catch (_) {}
                 });
 
-                // 3. Standalone players (lottie-player / dotlottie-player)
+                // 3. Standalone players – pause only; use play-state on renderer (no display:none to avoid layout collapse)
                 document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
                     try {
-                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit-widget"]')) return;
-                        player.pause();
-                        if (player.seek) player.seek(0);
+                        if (player.closest('#accessbit-widget-container') || player.closest('[id*="accessbit"]')) return;
+                        if (player.pause) player.pause();
+                        if (player.shadowRoot) {
+                            const renderer = player.shadowRoot.querySelector('svg, canvas');
+                            if (renderer) renderer.style.animationPlayState = 'paused';
+                        }
                     } catch (_) {}
                 });
 
