@@ -105,17 +105,21 @@
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-immediate-early';
             style.textContent = `
-                /* 1. Freeze the site's motion */
-                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
-                    animation-play-state: paused !important;
-                    transition-property: none !important;
+                /* Widget container never affected by pause */
+                #accessbit-widget-container,
+                #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
                 }
-
-                /* 2. Protect widget's existence WITHOUT forcing layout */
+                /* Freeze the site's motion (exclude widget container first) */
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+                /* Protect widget panel/icon WITHOUT forcing layout */
                 #accessbit-widget-container,
                 [id*="accessbit-widget"],
                 .accessbit-widget-panel {
-                    animation-play-state: running !important;
                     opacity: 1 !important;
                     visibility: visible !important;
                     transition: opacity 0.25s ease, transform 0.25s ease !important;
@@ -26946,11 +26950,8 @@ class AccessibilityWidget {
     
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
-
-            // Guard: prevent Observer from re-freezing during restore
             this._isRecovering = true;
 
-            // 1. Kill the Observer immediately
             if (this.seizureObserver) {
                 this.seizureObserver.disconnect();
                 this.seizureObserver = null;
@@ -26960,72 +26961,69 @@ class AccessibilityWidget {
                 this._seizureLottieBootInterval = null;
             }
 
-            // 2. Deep-Clean Widget Styles (Shadow DOM aware)
+            // Targeted cleaner: don't strip display/transform from panel or icon (widget layout)
             const cleanElement = (el) => {
                 if (!el) return;
-                el.style.removeProperty('display');
-                el.style.removeProperty('opacity');
-                el.style.removeProperty('visibility');
-                el.style.removeProperty('transform');
                 el.style.removeProperty('animation-play-state');
+                if (!el.classList.contains('accessbit-widget-panel') && !el.classList.contains('accessbit-widget-icon')) {
+                    el.style.removeProperty('display');
+                    el.style.removeProperty('opacity');
+                    el.style.removeProperty('visibility');
+                    el.style.removeProperty('transform');
+                }
             };
 
             document.querySelectorAll('[id*="accessbit"], .accessbit-widget-panel').forEach(cleanElement);
-
             if (this.shadowRoot) {
                 this.shadowRoot.querySelectorAll('*').forEach(cleanElement);
             }
 
-            // 3. Environment Clean-up
             document.documentElement.classList.remove('seizure-safe');
             document.body.classList.remove('seizure-safe');
 
-            // 4. Force Reflow
             void document.documentElement.offsetWidth;
 
-            // 5. Remove CSS Tags
             ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.remove();
             });
 
-            // 6. Resume External Engines
             this.restoreLottieAnimations();
             if (window.gsap && window.gsap.ticker) window.gsap.ticker.wake();
             if (window.gsap && window.gsap.globalTimeline) window.gsap.globalTimeline.play();
             if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
 
-            // 7. Final layout refresh (Optimized) – Immediate Layout Refresh + IX2 re-init
-            setTimeout(() => {
-                // A. Fix #1 & #5: Force the layout logic, not just class sync
-                if (typeof this.updateWidgetAppearance === 'function') {
-                    this.updateWidgetAppearance();
-                }
+            // Immediate recovery – close the gap where the widget looks broken
+            try {
+                if (typeof this.ensureBasePanelCSS === 'function') this.ensureBasePanelCSS();
+                if (typeof this.updateInterfacePosition === 'function') this.updateInterfacePosition();
+            } catch (_) {}
 
-                // B. Fix #3: Bypass the 150ms debounce – directly re-apply position and visibility
+            setTimeout(() => {
+                if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+
                 try {
                     if (typeof this.ensureBasePanelCSS === 'function') this.ensureBasePanelCSS();
                     if (typeof this.updateInterfacePosition === 'function') this.updateInterfacePosition();
-                    if (this.isPanelOpen && typeof this.ensureWidgetCSS === 'function') {
-                        this.ensureWidgetCSS();
-                    }
+                    if (this.isPanelOpen && typeof this.ensureWidgetCSS === 'function') this.ensureWidgetCSS();
                 } catch (e) {
-                    console.warn('Widget layout refresh failed:', e);
+                    console.warn('Widget recovery failed:', e);
                 }
 
-                // C. Trigger global events for external scripts
                 window.dispatchEvent(new Event('resize'));
 
-                // D. Tell Webflow IX2 to stop "freezing" Lotties after seizure-safe is off
                 if (window.Webflow && typeof window.Webflow.require === 'function') {
                     try {
                         const ix2 = window.Webflow.require('ix2');
-                        if (ix2 && typeof ix2.init === 'function') ix2.init();
+                        if (ix2 && typeof ix2.init === 'function') {
+                            ix2.init();
+                            window.dispatchEvent(new CustomEvent('scroll'));
+                        }
                     } catch (_) {}
                 }
 
                 this._isRecovering = false;
-            }, 60);
+            }, 30);
 
             this.saveSettings();
         }
@@ -27038,10 +27036,16 @@ class AccessibilityWidget {
                 document.head.appendChild(styleEl);
             }
             styleEl.textContent = `
-                /* 1. Freeze the site's motion */
-                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
+                /* Widget container never affected by pause */
+                #accessbit-widget-container,
+                #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
+                }
+                /* Freeze the site's motion (exclude widget container first) */
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
                     animation-play-state: paused !important;
-                    transition-property: none !important;
+                    transition: none !important;
                 }
                 /* Keep Lottie/Canvas visible but unclickable */
                 html.seizure-safe lottie-player:not([id*="accessbit"]),
@@ -27049,11 +27053,10 @@ class AccessibilityWidget {
                 html.seizure-safe canvas:not([id*="accessbit"]) {
                     pointer-events: none !important;
                 }
-                /* 2. Protect widget's existence WITHOUT forcing layout */
+                /* Protect widget panel/icon WITHOUT forcing layout */
                 #accessbit-widget-container,
                 [id*="accessbit-widget"],
                 .accessbit-widget-panel {
-                    animation-play-state: running !important;
                     opacity: 1 !important;
                     visibility: visible !important;
                     transition: opacity 0.25s ease, transform 0.25s ease !important;
