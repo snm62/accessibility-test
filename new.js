@@ -5432,20 +5432,12 @@ class AccessibilityWidget {
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
+                /* Desktop: cap width so panel never dominates on large screens (1440, 1530, etc.) */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel {
-                        width: 400px !important;
-                        max-width: 95vw !important;
+                        max-width: min(400px, 92vw) !important;
                         height: calc(100vh - 40px) !important;
-                        top: 20px !important;
-                    }
-                }
-                @media (min-width: 1440px) {
-                    .accessbit-widget-panel {
-                        width: 480px !important;
-                        max-width: 480px !important;
-                        height: calc(100vh - 40px) !important;
-                        max-height: calc(100vh - 40px) !important;
+                        max-height: min(calc(100vh - 80px), 85vh) !important;
                     }
                 }
                 /* Sleek custom scrollbar */
@@ -32666,7 +32658,7 @@ class AccessibilityWidget {
 
             const iconRect = icon.getBoundingClientRect();
             const screenWidth = window.innerWidth;
-            const panelWidth = Math.min(screenWidth >= 1440 ? 480 : 400, screenWidth - 40);
+            const minMargin = 20;
             const gapAboveIcon = 12;
             const minTop = 20;
             const spaceAboveIcon = iconRect.top - minTop - gapAboveIcon;
@@ -32678,8 +32670,17 @@ class AccessibilityWidget {
                 panelHeight = Math.max(280, iconRect.top - minTop - gapAboveIcon);
             }
 
+            // Cap width on all desktop sizes so panel doesn't dominate on 1440 / 1530+ (max 400px, or ~28% viewport)
+            const panelWidth = Math.min(400, screenWidth - minMargin * 2, Math.max(320, Math.floor(screenWidth * 0.28)));
+
             let leftPos = (iconRect.left + iconRect.width / 2) - (panelWidth / 2);
-            leftPos = Math.max(20, Math.min(leftPos, screenWidth - panelWidth - 20));
+            const iconCenterX = iconRect.left + iconRect.width / 2;
+            // Keep panel in same half as icon so it doesn't cover center content on large screens
+            if (iconCenterX < screenWidth / 2) {
+                leftPos = Math.max(minMargin, Math.min(leftPos, screenWidth / 2 - panelWidth));
+            } else {
+                leftPos = Math.max(screenWidth / 2, Math.min(leftPos, screenWidth - panelWidth - minMargin));
+            }
 
             Object.assign(panel.style, {
                 top: `${topPos}px`,
