@@ -4764,13 +4764,12 @@ class AccessibilityWidget {
     
             icon.style.pointerEvents = 'auto';
             
-            // Set default position on host (relative units) before first paint so icon is never broken on load
-            widgetContainer.style.setProperty('--widget-icon-left', '1.25rem');
-            widgetContainer.style.setProperty('--widget-icon-right', 'auto');
-            widgetContainer.style.setProperty('--widget-icon-top', '1.25rem');
-            widgetContainer.style.setProperty('--widget-icon-bottom', 'auto');
+            // 1. Set absolute starting position as CSS variables BEFORE append (avoids "logic gap" / broken icon on load)
+            widgetContainer.style.setProperty('--widget-icon-bottom', '20px');
+            widgetContainer.style.setProperty('--widget-icon-right', '20px');
+            widgetContainer.style.setProperty('--widget-icon-left', 'auto');
+            widgetContainer.style.setProperty('--widget-icon-top', 'auto');
             widgetContainer.style.setProperty('--widget-icon-transform', 'none');
-            
             // Initially hide the icon - will show after customization is loaded
             console.log('[ICON HIDE] createWidget() - Initially hiding icon (will show after customization loads)');
             icon.style.display = 'none';
@@ -5165,65 +5164,33 @@ class AccessibilityWidget {
     
     
     
-                /* Fluid positioning: CSS variables on host – relative units; media query overrides on mobile */
+                /* Safe defaults: icon has valid coordinates before JS runs; avoids "logic gap" on load */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
-                    left: var(--widget-icon-left, 1.25rem) !important;
-                    right: var(--widget-icon-right, auto) !important;
-                    top: var(--widget-icon-top, 1.25rem) !important;
-                    bottom: var(--widget-icon-bottom, auto) !important;
+                    bottom: var(--widget-icon-bottom, 20px) !important;
+                    right: var(--widget-icon-right, 20px) !important;
+                    left: var(--widget-icon-left, auto) !important;
+                    top: var(--widget-icon-top, auto) !important;
                     transform: var(--widget-icon-transform, none) !important;
-                }
-    
-    
-    
-                /* Accessibility Icon - relative units + clamp so icon never breaks on any screen size */
-    
-                .accessbit-widget-icon {
-    
-                    width: clamp(2.5rem, 8vw, 3.75rem) !important;
-    
-                    height: clamp(2.5rem, 8vw, 3.75rem) !important;
-    
-                    background: #6366f1;
-    
-                    display: flex;
-    
+                    width: clamp(40px, 6vw, 60px) !important;
+                    height: clamp(40px, 6vw, 60px) !important;
+                    display: flex !important;
                     align-items: center;
-    
                     justify-content: center;
-    
+                    background: #6366f1;
                     cursor: pointer;
-    
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
                     transition: all 0.3s ease;
-    
                     pointer-events: auto;
-    
-                    z-index: 2147483645 !important;
-    
                 }
-    
-    
-    
                 .accessbit-widget-icon:hover {
-    
-                    transform: scale(1.05);
-    
+                    transform: var(--widget-icon-transform, none) scale(1.05);
                     background: #4f46e5;
-    
                 }
-    
-    
-    
                 .accessbit-widget-icon i {
-
                     color: #ffffff;
-
                     font-size: clamp(0.875rem, 2.5vw, 1.5rem) !important;
-
                 }
     
     
@@ -5492,16 +5459,28 @@ class AccessibilityWidget {
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
-                /* Desktop: CSS-driven position/size via vars; panel always covers viewport height */
+                /* Desktop: CSS-driven position via left/right + auto (no pixel left = no specificity war on resize) */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel:not(.mobile-mode) {
                         position: fixed !important;
-                        top: var(--panel-top, 1.25rem) !important;
-                        left: var(--panel-left, 1.25rem) !important;
+                        top: var(--panel-top, 20px) !important;
+                        left: var(--panel-left, 20px) !important;
+                        right: var(--panel-right, auto) !important;
                         width: var(--panel-width, min(420px, 94vw)) !important;
                         height: calc(100vh - 20px) !important;
                         max-height: calc(100vh - 20px) !important;
                         max-width: min(420px, 94vw) !important;
+                    }
+                }
+                /* Ultra-wide (1441px+): cap height so panel doesn't look like a skyscraper on 4K */
+                @media (min-width: 1441px) {
+                    .accessbit-widget-panel:not(.mobile-mode) {
+                        height: 800px !important;
+                        max-height: 90vh !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                        border-radius: 16px !important;
+                        box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
                     }
                 }
                 /* Sleek custom scrollbar */
@@ -32716,28 +32695,25 @@ class AccessibilityWidget {
             const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
             if (!icon || !panel || !host || isMobile) return;
 
-            const iconRect = icon.getBoundingClientRect();
             const screenWidth = window.innerWidth;
-            const minMargin = 20;
-            const minTop = 20;
+            const marginPx = 20;
+            const panelWidthPx = Math.min(420, screenWidth - marginPx * 2, Math.max(340, Math.floor(screenWidth * 0.32)));
 
-            // Panel width: CSS-driven; height is 100vh - 20px in CSS
-            const panelWidth = Math.min(420, screenWidth - minMargin * 2, Math.max(340, Math.floor(screenWidth * 0.32)));
-            const topPos = minTop;
-
-            let leftPos = (iconRect.left + iconRect.width / 2) - (panelWidth / 2);
+            // Use left/right + auto instead of pixel left so panel doesn't "jump" during drag resize (same coordinate system as CSS)
+            const iconRect = icon.getBoundingClientRect();
             const iconCenterX = iconRect.left + iconRect.width / 2;
-            if (iconCenterX < screenWidth / 2) {
-                leftPos = Math.max(minMargin, Math.min(leftPos, screenWidth / 2 - panelWidth));
-            } else {
-                leftPos = Math.max(screenWidth / 2, Math.min(leftPos, screenWidth - panelWidth - minMargin));
-            }
+            const isRightSide = iconCenterX >= screenWidth / 2;
 
-            // CSS-driven: set vars on host so panel uses them; clear inline dimensions so CSS applies
-            host.style.setProperty('--panel-top', `${topPos}px`);
-            host.style.setProperty('--panel-left', `${leftPos}px`);
-            host.style.setProperty('--panel-width', `${panelWidth}px`);
-            ['top', 'left', 'width', 'height', 'max-height'].forEach(prop => panel.style.removeProperty(prop));
+            if (isRightSide) {
+                host.style.setProperty('--panel-left', 'auto');
+                host.style.setProperty('--panel-right', `${marginPx}px`);
+            } else {
+                host.style.setProperty('--panel-left', `${marginPx}px`);
+                host.style.setProperty('--panel-right', 'auto');
+            }
+            host.style.setProperty('--panel-top', `${marginPx}px`);
+            host.style.setProperty('--panel-width', `${panelWidthPx}px`);
+            ['top', 'left', 'right', 'width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
         }
     
         updateInterfaceFooter(content) {
