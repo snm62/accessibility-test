@@ -5164,7 +5164,7 @@ class AccessibilityWidget {
     
     
     
-                /* Safe defaults: icon has valid coordinates before JS runs; avoids "logic gap" on load */
+                /* Safety defaults: no FOUC – icon has position/size before JS runs; overflow hides alt-text if icon fails */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -5173,8 +5173,9 @@ class AccessibilityWidget {
                     left: var(--widget-icon-left, auto) !important;
                     top: var(--widget-icon-top, auto) !important;
                     transform: var(--widget-icon-transform, none) !important;
-                    width: clamp(40px, 6vw, 60px) !important;
-                    height: clamp(40px, 6vw, 60px) !important;
+                    width: clamp(2.5rem, 8vw, 3.75rem) !important;
+                    height: clamp(2.5rem, 8vw, 3.75rem) !important;
+                    overflow: hidden !important;
                     display: flex !important;
                     align-items: center;
                     justify-content: center;
@@ -5475,8 +5476,8 @@ class AccessibilityWidget {
                 /* Ultra-wide (1441px+): cap height so panel doesn't look like a skyscraper on 4K */
                 @media (min-width: 1441px) {
                     .accessbit-widget-panel:not(.mobile-mode) {
-                        height: 800px !important;
-                        max-height: 90vh !important;
+                        max-height: 800px !important;
+                        height: auto !important;
                         top: 50% !important;
                         transform: translateY(-50%) !important;
                         border-radius: 16px !important;
@@ -31149,23 +31150,16 @@ class AccessibilityWidget {
             };
         }
         
-        // CSS-driven continuous updates: rAF-throttled (no debounce) so layout stays in sync with browser
+        // Stabilize on load, zoom (Ctrl+/-), and drag resize: rAF + visualViewport so widget stays anchored
         setupOptimizedResizeHandlers() {
-            let resizeScheduled = false;
-            const runResize = () => {
-                resizeScheduled = false;
-                this.handleResizeOptimized();
-            };
             const onResize = () => {
-                if (resizeScheduled) return;
-                resizeScheduled = true;
-                requestAnimationFrame(runResize);
+                requestAnimationFrame(() => this.handleResizeOptimized());
             };
 
             window.addEventListener('resize', onResize, { passive: true });
-            if (typeof window.visualViewport !== 'undefined') {
-                window.visualViewport.addEventListener('resize', onResize, { passive: true });
-                window.visualViewport.addEventListener('scroll', onResize, { passive: true });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onResize);
+                window.visualViewport.addEventListener('scroll', onResize);
             }
 
             if (this.shadowRoot && window.ResizeObserver) {
@@ -32689,31 +32683,27 @@ class AccessibilityWidget {
         }
         
         updateInterfacePosition() {
-            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const host = this.shadowRoot?.host;
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
-            if (!icon || !panel || !host || isMobile) return;
+            if (!host || window.innerWidth <= 1280) return;
 
-            const screenWidth = window.innerWidth;
-            const marginPx = 20;
-            const panelWidthPx = Math.min(420, screenWidth - marginPx * 2, Math.max(340, Math.floor(screenWidth * 0.32)));
-
-            // Use left/right + auto instead of pixel left so panel doesn't "jump" during drag resize (same coordinate system as CSS)
-            const iconRect = icon.getBoundingClientRect();
-            const iconCenterX = iconRect.left + iconRect.width / 2;
-            const isRightSide = iconCenterX >= screenWidth / 2;
+            const margin = 20;
+            // Side from customization, or default right – keeps panel "glued" to edge during drag (no pixel left drift)
+            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
+            const isRightSide = hPos.includes('right');
 
             if (isRightSide) {
+                host.style.setProperty('--panel-right', `${margin}px`);
                 host.style.setProperty('--panel-left', 'auto');
-                host.style.setProperty('--panel-right', `${marginPx}px`);
             } else {
-                host.style.setProperty('--panel-left', `${marginPx}px`);
+                host.style.setProperty('--panel-left', `${margin}px`);
                 host.style.setProperty('--panel-right', 'auto');
             }
-            host.style.setProperty('--panel-top', `${marginPx}px`);
-            host.style.setProperty('--panel-width', `${panelWidthPx}px`);
-            ['top', 'left', 'right', 'width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
+            host.style.setProperty('--panel-top', `${margin}px`);
+            host.style.setProperty('--panel-width', '420px');
+            if (panel) {
+                ['top', 'left', 'right', 'width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
+            }
         }
     
         updateInterfaceFooter(content) {
