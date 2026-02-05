@@ -516,21 +516,13 @@ function applyVisionImpaired(on) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
                     localStorage.setItem('accessbit-widget-seizure-safe', on ? 'true' : 'false');
+
                     var widget = window.accessbitWidgetInstance || window.accessbitWidget;
                     if (widget) {
                         on ? widget.enableSeizureSafe() : widget.disableSeizureSafe();
                     } else {
-                        try { document.documentElement.classList.toggle('seizure-safe', on); } catch (_) {}
-                        try { document.body.classList.toggle('seizure-safe', on); } catch (_) {}
-                        if (on) {
-                            try { applySeizureSafeDOMFreeze && applySeizureSafeDOMFreeze(); } catch (_) {}
-                            try { seizureConsolidateSplitText && seizureConsolidateSplitText(); } catch (_) {}
-                        } else {
-                            ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(function(id) {
-                                var el = document.getElementById(id);
-                                if (el) el.remove();
-                            });
-                        }
+                        document.documentElement.classList.toggle('seizure-safe', on);
+                        if (!on) window.location.reload();
                     }
                 });
                 input.__seizureBound = true;
@@ -26949,19 +26941,22 @@ class AccessibilityWidget {
         }
     
         disableSeizureSafe() {
+            // 1. Update internal settings and save to Storage
             this.settings['seizure-safe'] = false;
-            this.saveSettings(); // Must save first so the early-run script knows it's OFF after reload
+            this.saveSettings();
 
-            // 1. Immediate visual feedback (optional but feels better)
+            // 2. Lift the freeze from the background site immediately
             document.documentElement.classList.remove('seizure-safe');
             document.body.classList.remove('seizure-safe');
 
-            // 2. Clear the early-run style immediately so the "freeze" lifts while the page is preparing to reload
-            const earlyStyle = document.getElementById('accessbit-seizure-immediate-early');
-            if (earlyStyle) earlyStyle.remove();
+            /* NOTE: We do NOT remove 'accessbit-seizure-immediate-early' here.
+               Keeping it active ensures the widget stays styled/visible
+               until the very millisecond the page reloads. */
 
-            // 3. THE FIX: Reload the page – cleanest way to restart IX2 and Lottie
-            window.location.reload();
+            // 3. Trigger the refresh with a tiny delay to ensure Storage write is finished
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         }
 
         injectSeizureSafeCSS() {
