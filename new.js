@@ -26995,12 +26995,35 @@ class AccessibilityWidget {
             if (window.gsap && window.gsap.globalTimeline) window.gsap.globalTimeline.play();
             if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
 
-            // 7. Final layout refresh – re-apply panel/icon layout so widget doesn't stay broken
+            // 7. Final layout refresh (Optimized) – Immediate Layout Refresh + IX2 re-init
             setTimeout(() => {
-                if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
-                // Re-run the same layout logic as on resize (panel position, base CSS) so we don't rely on debounced resize
-                if (typeof this.handleResizeOptimized === 'function') this.handleResizeOptimized();
+                // A. Fix #1 & #5: Force the layout logic, not just class sync
+                if (typeof this.updateWidgetAppearance === 'function') {
+                    this.updateWidgetAppearance();
+                }
+
+                // B. Fix #3: Bypass the 150ms debounce – directly re-apply position and visibility
+                try {
+                    if (typeof this.ensureBasePanelCSS === 'function') this.ensureBasePanelCSS();
+                    if (typeof this.updateInterfacePosition === 'function') this.updateInterfacePosition();
+                    if (this.isPanelOpen && typeof this.ensureWidgetCSS === 'function') {
+                        this.ensureWidgetCSS();
+                    }
+                } catch (e) {
+                    console.warn('Widget layout refresh failed:', e);
+                }
+
+                // C. Trigger global events for external scripts
                 window.dispatchEvent(new Event('resize'));
+
+                // D. Tell Webflow IX2 to stop "freezing" Lotties after seizure-safe is off
+                if (window.Webflow && typeof window.Webflow.require === 'function') {
+                    try {
+                        const ix2 = window.Webflow.require('ix2');
+                        if (ix2 && typeof ix2.init === 'function') ix2.init();
+                    } catch (_) {}
+                }
+
                 this._isRecovering = false;
             }, 60);
 
