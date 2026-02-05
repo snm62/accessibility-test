@@ -5164,7 +5164,7 @@ class AccessibilityWidget {
     
     
     
-                /* Safety defaults: no FOUC – icon has position/size before JS runs; overflow hides alt-text if icon fails */
+                /* Resource loading priority: container ready immediately; hide alt-text until font/image loads */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -5173,13 +5173,14 @@ class AccessibilityWidget {
                     left: var(--widget-icon-left, auto) !important;
                     top: var(--widget-icon-top, auto) !important;
                     transform: var(--widget-icon-transform, none) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    text-indent: -9999px !important;
+                    overflow: hidden !important;
+                    background-color: #6366f1 !important;
                     width: clamp(2.5rem, 8vw, 3.75rem) !important;
                     height: clamp(2.5rem, 8vw, 3.75rem) !important;
-                    overflow: hidden !important;
-                    display: flex !important;
-                    align-items: center;
-                    justify-content: center;
-                    background: #6366f1;
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                     transition: all 0.3s ease;
@@ -5187,7 +5188,14 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-icon:hover {
                     transform: var(--widget-icon-transform, none) scale(1.05);
-                    background: #4f46e5;
+                    background: #4f46e5 !important;
+                }
+                .accessbit-widget-icon i,
+                .accessbit-widget-icon img {
+                    text-indent: 0 !important;
+                    font-style: normal !important;
+                    width: 60% !important;
+                    height: auto !important;
                 }
                 .accessbit-widget-icon i {
                     color: #ffffff;
@@ -31158,7 +31166,9 @@ class AccessibilityWidget {
 
             window.addEventListener('resize', onResize, { passive: true });
             if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', onResize);
+                window.visualViewport.addEventListener('resize', () => {
+                    onResize();
+                });
                 window.visualViewport.addEventListener('scroll', onResize);
             }
 
@@ -32683,15 +32693,16 @@ class AccessibilityWidget {
         }
         
         updateInterfacePosition() {
-            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const host = this.shadowRoot?.host;
-            if (!host || window.innerWidth <= 1280) return;
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            if (!host || !panel || window.innerWidth <= 1280) return;
 
             const margin = 20;
-            // Side from customization, or default right – keeps panel "glued" to edge during drag (no pixel left drift)
             const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
             const isRightSide = hPos.includes('right');
 
+            host.style.setProperty('--panel-width', '420px');
+            host.style.setProperty('--panel-top', `${margin}px`);
             if (isRightSide) {
                 host.style.setProperty('--panel-right', `${margin}px`);
                 host.style.setProperty('--panel-left', 'auto');
@@ -32699,11 +32710,14 @@ class AccessibilityWidget {
                 host.style.setProperty('--panel-left', `${margin}px`);
                 host.style.setProperty('--panel-right', 'auto');
             }
-            host.style.setProperty('--panel-top', `${margin}px`);
-            host.style.setProperty('--panel-width', '420px');
-            if (panel) {
-                ['top', 'left', 'right', 'width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
-            }
+
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('bottom');
+            panel.style.removeProperty('width');
+            panel.style.removeProperty('height');
+            panel.style.removeProperty('transform');
         }
     
         updateInterfaceFooter(content) {
