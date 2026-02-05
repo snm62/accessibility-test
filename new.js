@@ -678,6 +678,8 @@ class AccessibilityWidget {
             this._resizeTimer = null;
             this._mutationTimer = null;
             this._rafPending = false;
+            // Single source of truth for breakpoint – JS and CSS flip together
+            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 1280px)') : null;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1738,7 +1740,7 @@ class AccessibilityWidget {
                 
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = window.innerWidth <= 1280;
+                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     console.log('[INIT] Icon visibility settings:', {
@@ -1969,7 +1971,7 @@ class AccessibilityWidget {
                 this.setupOptimizedResizeHandlers();
                 
                 // Apply mobile responsive styles on load if mobile
-                if (window.innerWidth <= 1280) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280))) {
                     this.applyMobileResponsiveStyles();
                 }
                 
@@ -5062,11 +5064,13 @@ class AccessibilityWidget {
                 -moz-border-radius: 12px !important;
             }
             
-            /* Force panel positioning */
+            /* Force panel positioning; zoom-resilient (Ctrl+/-): overflow + max-height so structure holds */
             .accessbit-widget-panel {
-                /* REMOVED: position: fixed !important; - This was preventing widget from scrolling with viewport */
                 z-index: 100001 !important;
                 display: none !important; /* Hidden by default */
+                overflow: hidden !important;
+                max-height: min(calc(100vh - 80px), 85vh) !important;
+                flex-direction: column !important;
             }
             
             .accessbit-widget-panel.show,
@@ -5101,21 +5105,15 @@ class AccessibilityWidget {
     
     
     
-                /* Ensure icon positioning is always fixed and not affected by host context */
-    
+                /* Fluid positioning: CSS variables on host – no inline layout pollution; media query overrides on mobile */
                 .accessbit-widget-icon {
-    
                     position: fixed !important;
-    
                     z-index: 2147483645 !important;
-                    
-                    /* Ensure JavaScript positioning takes precedence */
-                    top: unset !important;
-                    bottom: unset !important;
-                    left: unset !important;
-                    right: unset !important;
-                    transform: unset !important;
-    
+                    left: var(--widget-icon-left, 20px) !important;
+                    right: var(--widget-icon-right, auto) !important;
+                    top: var(--widget-icon-top, 20px) !important;
+                    bottom: var(--widget-icon-bottom, auto) !important;
+                    transform: var(--widget-icon-transform, none) !important;
                 }
     
     
@@ -5599,6 +5597,33 @@ class AccessibilityWidget {
                     }
                     .accessbit-widget-panel .toggle-switch input:checked + .slider:before {
                         transform: translateX(14px) !important;
+                    }
+                    /* Fluid size reductions – CSS as source of truth (no JS inline layout) */
+                    .accessbit-widget-panel .action-btn {
+                        font-size: 11px !important;
+                        padding: 6px 10px !important;
+                        min-height: 30px !important;
+                    }
+                    .accessbit-widget-panel .profile-item {
+                        padding: 8px 10px !important;
+                        margin-bottom: 6px !important;
+                    }
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2 {
+                        font-size: 16px !important;
+                        line-height: 20px !important;
+                    }
+                    .accessbit-widget-panel .profile-item h4 {
+                        font-size: 12px !important;
+                        line-height: 1.3 !important;
+                    }
+                    .accessbit-widget-panel .profile-item p {
+                        font-size: 10px !important;
+                        line-height: 1.2 !important;
+                    }
+                    .accessbit-widget-panel h3 {
+                        font-size: 14px !important;
+                        line-height: 1.3 !important;
                     }
                 }
     
@@ -30852,7 +30877,7 @@ class AccessibilityWidget {
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if (window.innerWidth <= 1280) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280))) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -30910,7 +30935,7 @@ class AccessibilityWidget {
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -30960,7 +30985,7 @@ class AccessibilityWidget {
             }
             
             // Check device type
-            const isMobile = window.innerWidth <= 1280;
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -31091,8 +31116,13 @@ class AccessibilityWidget {
                 this.handleResizeOptimized();
             }, 150);
             
-            // Single resize listener
+            // Single resize listener (covers window resize and, in many browsers, zoom)
             window.addEventListener('resize', debouncedResize, { passive: true });
+            // Visual Viewport: ensure icon + panel reflow on zoom (Ctrl+ / Ctrl-) like a normal site
+            if (typeof window.visualViewport !== 'undefined') {
+                window.visualViewport.addEventListener('resize', debouncedResize, { passive: true });
+                window.visualViewport.addEventListener('scroll', debouncedResize, { passive: true });
+            }
             
             // Use ResizeObserver for better responsive mode detection
             // Only set up ResizeObserver after icon visibility has been determined
@@ -31123,19 +31153,13 @@ class AccessibilityWidget {
                 }, 200);
             }
             
-            // Listen to media query changes for breakpoints (1280 = Nest Hub Max / iPad Pro landscape)
-            if (window.matchMedia) {
-                const mobileQuery = window.matchMedia('(max-width: 1280px)');
-                const handleMediaChange = (e) => {
-                    this.handleResizeOptimized();
-                };
-                
-                // Modern browsers
-                if (mobileQuery.addEventListener) {
-                    mobileQuery.addEventListener('change', handleMediaChange);
-                } else {
-                    // Legacy browsers
-                    mobileQuery.addListener(handleMediaChange);
+            // matchMedia: JS and CSS flip at the same moment (no logic gap)
+            if (this._mobileMql) {
+                const handleMediaChange = () => { this.handleResizeOptimized(); };
+                if (this._mobileMql.addEventListener) {
+                    this._mobileMql.addEventListener('change', handleMediaChange);
+                } else if (this._mobileMql.addListener) {
+                    this._mobileMql.addListener(handleMediaChange);
                 }
                 
                 // Device pixel ratio changes
@@ -31157,8 +31181,7 @@ class AccessibilityWidget {
          * Threshold 1280px; clear transform at start to prevent panel stuck in middle when resizing.
          */
         handleResizeOptimized() {
-            const screenWidth = window.innerWidth;
-            const isMobile = screenWidth <= 1280;
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
 
@@ -31171,6 +31194,7 @@ class AccessibilityWidget {
             if (isMobile) {
                 panel.classList.add('mobile-mode');
                 if (icon) {
+                    const screenWidth = window.innerWidth;
                     const isRightSide = (icon.getBoundingClientRect().left + icon.offsetWidth / 2) > (screenWidth / 2);
                     panel.classList.toggle('side-right', isRightSide);
                     panel.classList.toggle('side-left', !isRightSide);
@@ -31711,103 +31735,7 @@ class AccessibilityWidget {
         }
         
         applyMobileSizeReductions() {
-       
-            
-            // Reduce action button sizes
-            const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
-            if (actionBtns && actionBtns.length > 0) {
-                actionBtns.forEach((btn, index) => {
-                    btn.style.setProperty('font-size', '11px', 'important');
-                    btn.style.setProperty('padding', '6px 10px', 'important');
-                    btn.style.setProperty('min-height', '30px', 'important');
-                  
-                });
-            }
-            
-            // Reduce toggle switch sizes for Nest Hub / tablet (1024–1280px) – smaller than previous 38x22
-            const toggles = this.shadowRoot?.querySelectorAll('label.toggle-switch');
-            if (toggles && toggles.length > 0) {
-                toggles.forEach((toggle) => {
-                    toggle.style.setProperty('width', '32px', 'important');
-                    toggle.style.setProperty('height', '18px', 'important');
-                });
-            }
-            
-            const sliders = this.shadowRoot?.querySelectorAll('label.toggle-switch > span.slider');
-            if (sliders && sliders.length > 0) {
-                sliders.forEach((slider) => {
-                    slider.style.setProperty('height', '18px', 'important');
-                    slider.style.setProperty('border-radius', '18px', 'important');
-                    slider.style.setProperty('padding', '0', 'important');
-                    slider.style.setProperty('box-sizing', 'border-box', 'important');
-                });
-                // Single injected style for knob at 1280px and below (Nest Hub, Nest Hub Max, tablets)
-                if (!this.shadowRoot.querySelector('#accessbit-toggle-knob-1280')) {
-                    const style = document.createElement('style');
-                    style.id = 'accessbit-toggle-knob-1280';
-                    style.textContent = `
-                        @media (max-width: 1280px) {
-                            .accessbit-widget-panel .toggle-switch .slider:before {
-                                width: 14px !important;
-                                height: 14px !important;
-                                left: 2px !important;
-                                bottom: 2px !important;
-                            }
-                            .accessbit-widget-panel .toggle-switch input:checked + .slider:before {
-                                transform: translateX(14px) !important;
-                            }
-                        }
-                    `;
-                    this.shadowRoot.appendChild(style);
-                }
-            }
-            
-            // Reduce profile item sizes
-            const profileItems = this.shadowRoot?.querySelectorAll('.profile-item');
-            if (profileItems && profileItems.length > 0) {
-                profileItems.forEach((item, index) => {
-                    item.style.setProperty('padding', '8px 10px', 'important');
-                    item.style.setProperty('margin-bottom', '6px', 'important');
-                  
-                });
-            }
-            
-            // Reduce headings and profile titles
-            const headerH2 = this.shadowRoot?.querySelector('.panel-header h2');
-            if (headerH2) {
-                headerH2.style.setProperty('font-size', '16px', 'important');
-                headerH2.style.setProperty('line-height', '20px', 'important');
-             
-            }
-            const profileTitles = this.shadowRoot?.querySelectorAll('.profile-item h4');
-            if (profileTitles && profileTitles.length > 0) {
-                profileTitles.forEach((title, index) => {
-                    title.style.setProperty('font-size', '12px', 'important');
-                    title.style.setProperty('line-height', '1.3', 'important');
-                    
-                });
-            }
-            
-            // Reduce profile descriptions
-            const profileDescs = this.shadowRoot?.querySelectorAll('.profile-item p');
-            if (profileDescs && profileDescs.length > 0) {
-                profileDescs.forEach((desc, index) => {
-                    desc.style.setProperty('font-size', '10px', 'important');
-                    desc.style.setProperty('line-height', '1.2', 'important');
-                   
-                });
-            }
-            
-            // Reduce section titles
-            const sectionTitles = this.shadowRoot?.querySelectorAll('h3');
-            if (sectionTitles && sectionTitles.length > 0) {
-                sectionTitles.forEach((title, index) => {
-                    title.style.setProperty('font-size', '13px', 'important');
-                    title.style.setProperty('margin-bottom', '8px', 'important');
-                   
-                });
-            }
-            
+            /* Action buttons, toggles, profile items, headings: handled by getWidgetCSS() @media (max-width: 1280px) for fluid responsiveness */
             // Reduce language selector size
             const languageSelector = this.shadowRoot?.querySelector('.language-selector');
             if (languageSelector) {
@@ -32279,61 +32207,20 @@ class AccessibilityWidget {
         }
     
         updateTriggerPosition(direction, position) {
-           
             const normalizedDirection = (direction || '').toLowerCase();
             const pos = (position || '').toLowerCase();
-            
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-            if (icon) {
-                if (normalizedDirection === 'vertical') {
-                    // Force remove any existing positioning
-                    icon.style.removeProperty('top');
-                    icon.style.removeProperty('bottom');
-                    icon.style.removeProperty('transform');
-                    
-                    if (pos === 'top') {
-                        icon.style.setProperty('top', '20px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                     
-                    } else if (pos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                      
-                    } else if (pos === 'bottom') {
-                        icon.style.setProperty('bottom', '20px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
-                        
-                    }
-                } else if (normalizedDirection === 'horizontal') {
-                    // Force remove any existing positioning
-                    icon.style.removeProperty('left');
-                    icon.style.removeProperty('right');
-                    
-                    if (pos === 'left') {
-                        icon.style.setProperty('left', '20px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
-                     
-                    } else if (pos === 'right') {
-                        icon.style.setProperty('right', '20px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
-                        
-                    }
-                }
-                
-                // Force the style to take effect
-                icon.offsetHeight; // Trigger reflow
-                
-                // Apply stored desktop offsets if they exist
-                if (this.desktopHorizontalOffset !== undefined) {
-                  
-                    this.updateTriggerOffset('horizontal', this.desktopHorizontalOffset);
-                }
-                if (this.desktopVerticalOffset !== undefined) {
-                   
-                    this.updateTriggerOffset('vertical', this.desktopVerticalOffset);
-                }
+            if (!icon) return;
+            if (normalizedDirection === 'vertical') {
+                if (pos === 'top') this.setIconPositionVars({ top: '20px', bottom: 'auto', transform: 'none' });
+                else if (pos === 'middle') this.setIconPositionVars({ top: '50%', bottom: 'auto', transform: 'translateY(-50%)' });
+                else if (pos === 'bottom') this.setIconPositionVars({ bottom: '20px', top: 'auto', transform: 'none' });
+            } else if (normalizedDirection === 'horizontal') {
+                if (pos === 'left') this.setIconPositionVars({ left: '20px', right: 'auto' });
+                else if (pos === 'right') this.setIconPositionVars({ right: '20px', left: 'auto' });
             }
+            if (this.desktopHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', this.desktopHorizontalOffset);
+            if (this.desktopVerticalOffset !== undefined) this.updateTriggerOffset('vertical', this.desktopVerticalOffset);
         }
         // Helper methods for applying customizations with actual DOM manipulation
         updateTriggerButtonColor(color) {
@@ -32358,7 +32245,7 @@ class AccessibilityWidget {
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -32625,12 +32512,22 @@ class AccessibilityWidget {
         }
         
         
+        setIconPositionVars(vars) {
+            const host = this.shadowRoot?.host;
+            if (!host) return;
+            if (vars.left !== undefined) host.style.setProperty('--widget-icon-left', vars.left);
+            if (vars.right !== undefined) host.style.setProperty('--widget-icon-right', vars.right);
+            if (vars.top !== undefined) host.style.setProperty('--widget-icon-top', vars.top);
+            if (vars.bottom !== undefined) host.style.setProperty('--widget-icon-bottom', vars.bottom);
+            if (vars.transform !== undefined) host.style.setProperty('--widget-icon-transform', vars.transform);
+        }
+        
         updateTriggerOffset(direction, offset) {
           
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -32648,71 +32545,34 @@ class AccessibilityWidget {
                     const normalizedOffset = (typeof offset === 'number' || /^-?\d+$/.test(String(offset))) ? `${offset}px` : String(offset);
                     
                 if (direction === 'horizontal') {
-                        // Check which side the icon is positioned on
-                       
-                        
                         if (currentLeftRaw && currentLeftRaw !== 'auto' && currentLeftRaw !== '0px' && currentLeftRaw !== '0') {
-                            // Icon is positioned from left
                             const currentLeft = currentLeftRaw;
-                            const newLeft = currentLeft.includes('calc') ? 
-                                currentLeft.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentLeft} + ${normalizedOffset})`;
-                            icon.style.setProperty('left', newLeft, 'important');
-                           
+                            const newLeft = currentLeft.includes('calc') ? currentLeft.replace(')', ` + ${normalizedOffset})`) : `calc(${currentLeft} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ left: newLeft, right: 'auto' });
                         } else if (currentRightRaw && currentRightRaw !== 'auto' && currentRightRaw !== '0px' && currentRightRaw !== '0') {
-                            // Icon is positioned from right
                             const currentRight = currentRightRaw;
-                            const newRight = currentRight.includes('calc') ? 
-                                currentRight.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentRight} + ${normalizedOffset})`;
-                            icon.style.setProperty('right', newRight, 'important');
-                     
+                            const newRight = currentRight.includes('calc') ? currentRight.replace(')', ` + ${normalizedOffset})`) : `calc(${currentRight} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ right: newRight, left: 'auto' });
                         } else {
-
-                            // Default to left positioning if no clear positioning is found
-                            const defaultLeft = '20px';
-                            const newLeft = `calc(${defaultLeft} + ${normalizedOffset})`;
-                            icon.style.setProperty('left', newLeft, 'important');
-                            icon.style.setProperty('right', 'auto', 'important');
-                      
-                    }
+                            this.setIconPositionVars({ left: `calc(20px + ${normalizedOffset})`, right: 'auto' });
+                        }
                 } else if (direction === 'vertical') {
-                       
-                        
                         if (currentTopRaw && currentTopRaw !== 'auto' && currentTopRaw !== '0px' && currentTopRaw !== '0') {
-                            // Icon is positioned from top
                             const currentTop = currentTopRaw;
                             if (currentTop === '50%') {
-                                // For middle position, adjust the transform
                                 const currentTransform = currentTransformRaw || 'translateY(-50%)';
-                                const newTransform = currentTransform.includes('calc') ? 
-                                    currentTransform.replace(')', ` + ${normalizedOffset})`) : 
-                                    `translateY(calc(-50% + ${normalizedOffset}))`;
-                                icon.style.setProperty('transform', newTransform, 'important');
-                               
-                        } else {
-                                const newTop = currentTop.includes('calc') ? 
-                                    currentTop.replace(')', ` + ${normalizedOffset})`) : 
-                                    `calc(${currentTop} + ${normalizedOffset})`;
-                                icon.style.setProperty('top', newTop, 'important');
-                         
+                                const newTransform = currentTransform.includes('calc') ? currentTransform.replace(')', ` + ${normalizedOffset})`) : `translateY(calc(-50% + ${normalizedOffset}))`;
+                                this.setIconPositionVars({ transform: newTransform });
+                            } else {
+                                const newTop = currentTop.includes('calc') ? currentTop.replace(')', ` + ${normalizedOffset})`) : `calc(${currentTop} + ${normalizedOffset})`;
+                                this.setIconPositionVars({ top: newTop, bottom: 'auto' });
                             }
                         } else if (currentBottomRaw && currentBottomRaw !== 'auto' && currentBottomRaw !== '0px' && currentBottomRaw !== '0') {
-                            // Icon is positioned from bottom
                             const currentBottom = currentBottomRaw;
-                            const newBottom = currentBottom.includes('calc') ? 
-                                currentBottom.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentBottom} + ${normalizedOffset})`;
-                            icon.style.setProperty('bottom', newBottom, 'important');
-                   
+                            const newBottom = currentBottom.includes('calc') ? currentBottom.replace(')', ` + ${normalizedOffset})`) : `calc(${currentBottom} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ bottom: newBottom, top: 'auto' });
                         } else {
-                    
-                            // Default to top positioning if no clear positioning is found
-                            const defaultTop = '20px';
-                            const newTop = `calc(${defaultTop} + ${normalizedOffset})`;
-                            icon.style.setProperty('top', newTop, 'important');
-                            icon.style.setProperty('bottom', 'auto', 'important');
-                           
+                            this.setIconPositionVars({ top: `calc(20px + ${normalizedOffset})`, bottom: 'auto' });
                         }
                     }
                     
@@ -32801,19 +32661,28 @@ class AccessibilityWidget {
         updateInterfacePosition() {
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
-            if (!icon || !panel || window.innerWidth <= 1280) return;
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+            if (!icon || !panel || isMobile) return;
 
             const iconRect = icon.getBoundingClientRect();
             const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            const panelWidth = screenWidth >= 1440 ? 480 : 400;
-            const panelHeight = screenHeight - 40;
+            const panelWidth = Math.min(screenWidth >= 1440 ? 480 : 400, screenWidth - 40);
+            const gapAboveIcon = 12;
+            const minTop = 20;
+            const spaceAboveIcon = iconRect.top - minTop - gapAboveIcon;
+            const preferredHeight = 560;
+            let panelHeight = Math.max(280, Math.min(preferredHeight, spaceAboveIcon));
+            let topPos = iconRect.top - panelHeight - gapAboveIcon;
+            if (topPos < minTop) {
+                topPos = minTop;
+                panelHeight = Math.max(280, iconRect.top - minTop - gapAboveIcon);
+            }
 
             let leftPos = (iconRect.left + iconRect.width / 2) - (panelWidth / 2);
             leftPos = Math.max(20, Math.min(leftPos, screenWidth - panelWidth - 20));
 
             Object.assign(panel.style, {
-                top: '20px',
+                top: `${topPos}px`,
                 left: `${leftPos}px`,
                 width: `${panelWidth}px`,
                 height: `${panelHeight}px`,
@@ -32936,155 +32805,38 @@ class AccessibilityWidget {
         }
         
         updateMobileTriggerPosition(direction, position) {
-          
             const normalizedDirection = (direction || '').toLowerCase();
             const pos = (position || '').toLowerCase();
-            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-            if (icon) {
-                const isMobile = window.innerWidth <= 1280;
-                if (isMobile) {
-                    // First, clear all existing positioning
-                    icon.style.removeProperty('top');
-                    icon.style.removeProperty('bottom');
-                    icon.style.removeProperty('left');
-                    icon.style.removeProperty('right');
-                    icon.style.removeProperty('transform');
-                    
-                    if (normalizedDirection === 'horizontal') {
-                        if (pos === 'left') {
-                            icon.style.setProperty('left', '10px');
-                            icon.style.setProperty('right', 'auto');
-                   
-                        } else if (pos === 'right') {
-                            icon.style.setProperty('right', '10px');
-                            icon.style.setProperty('left', 'auto');
-                  
-                        }
-                    } else if (normalizedDirection === 'vertical') {
-                        if (pos === 'top') {
-                            icon.style.setProperty('top', '10px');
-                            icon.style.setProperty('bottom', 'auto');
-                            icon.style.setProperty('transform', 'none');
-                        
-                        } else if (pos === 'bottom') {
-                            icon.style.setProperty('bottom', '10px');
-                            icon.style.setProperty('top', 'auto');
-                            icon.style.setProperty('transform', 'none');
-                        
-                        } else if (pos === 'middle') {
-                            icon.style.setProperty('top', '50%');
-                            icon.style.setProperty('bottom', 'auto');
-                            icon.style.setProperty('transform', 'translateY(-50%)');
-                            
-                        }
-                    }
-                }
+            if (!(this._mobileMql && this._mobileMql.matches)) return;
+            if (normalizedDirection === 'horizontal') {
+                if (pos === 'left') this.setIconPositionVars({ left: '10px', right: 'auto' });
+                else if (pos === 'right') this.setIconPositionVars({ right: '10px', left: 'auto' });
+            } else if (normalizedDirection === 'vertical') {
+                if (pos === 'top') this.setIconPositionVars({ top: '10px', bottom: 'auto', transform: 'none' });
+                else if (pos === 'bottom') this.setIconPositionVars({ bottom: '10px', top: 'auto', transform: 'none' });
+                else if (pos === 'middle') this.setIconPositionVars({ top: '50%', bottom: 'auto', transform: 'translateY(-50%)' });
             }
         }
         
         // New method to handle combined positioning (e.g., "right middle")
         updateMobileTriggerCombinedPosition(horizontalPos, verticalPos) {
-           
-            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-       
-            if (icon) {
-                const isMobile = window.innerWidth <= 1280;
-               
-                if (isMobile) {
-                   
-                    
-                    // Clear all existing positioning properties more aggressively
-                    icon.style.removeProperty('top');
-                    icon.style.removeProperty('bottom');
-                    icon.style.removeProperty('left');
-                    icon.style.removeProperty('right');
-                    icon.style.removeProperty('transform');
-                    icon.style.removeProperty('inset');
-                    icon.style.removeProperty('position');
-                    icon.style.removeProperty('z-index');
-                    
-                  
-                    
-                    // Set base positioning with higher specificity
-                    icon.style.setProperty('position', 'fixed', 'important');
-                    icon.style.setProperty('z-index', '2147483645', 'important');
-                    
-                   
-                    
-                    if (horizontalPos === 'Left' || horizontalPos === 'left') {
-                        icon.style.setProperty('left', '20px', 'important');
-                        icon.style.setProperty('right', 'auto', 'important');
-  
-                    } else if (horizontalPos === 'Right' || horizontalPos === 'right') {
-                        icon.style.setProperty('right', '20px', 'important');
-                        icon.style.setProperty('left', 'auto', 'important');
-                        
-                    }
-                    
-              
-                    if (verticalPos === 'Top' || verticalPos === 'top') {
-                        icon.style.setProperty('top', '20px', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
-                       
-                    } else if (verticalPos === 'Bottom' || verticalPos === 'bottom') {
-                        icon.style.setProperty('bottom', '20px', 'important');
-                        icon.style.setProperty('top', 'auto', 'important');
-                        icon.style.setProperty('transform', 'none', 'important');
-        
-                    } else if (verticalPos === 'Middle' || verticalPos === 'middle') {
-                        icon.style.setProperty('top', '50%', 'important');
-                        icon.style.setProperty('bottom', 'auto', 'important');
-                        icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                        
-                    }
-    
-                    // Force a reflow to ensure styles are applied
-                    icon.offsetHeight;
-                    
-                 
-                    
-                    // Additional force with a small delay to ensure positioning sticks
-                    setTimeout(() => {
-                        // Re-apply positioning to ensure it sticks after any other CSS loads
-                        if (verticalPos === 'Middle' || verticalPos === 'middle') {
-                            icon.style.setProperty('top', '50%', 'important');
-                            icon.style.setProperty('bottom', 'auto', 'important');
-                            icon.style.setProperty('transform', 'translateY(-50%)', 'important');
-                            
-                        }
-                        
-                        // Re-apply stored offsets after re-positioning
-                        if (this.mobileHorizontalOffset !== undefined) {
-                            
-                            this.updateMobileTriggerOffset('horizontal', this.mobileHorizontalOffset);
-                        }
-                        if (this.mobileVerticalOffset !== undefined) {
-                            this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
-                        }
-                        
-                      
-                    }, 100);
-                    
-                    // Apply stored offsets if they exist
-                    if (this.mobileHorizontalOffset !== undefined) {
-                        this.updateMobileTriggerOffset('horizontal', this.mobileHorizontalOffset);
-                    }
-                    if (this.mobileVerticalOffset !== undefined) {
-                       
-                        this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
-                    }
-                    
-                   
-                }
-            }
+            if (!(this._mobileMql && this._mobileMql.matches)) return;
+            const left = (horizontalPos === 'Left' || horizontalPos === 'left') ? '20px' : 'auto';
+            const right = (horizontalPos === 'Right' || horizontalPos === 'right') ? '20px' : 'auto';
+            let top = 'auto', bottom = 'auto', transform = 'none';
+            if (verticalPos === 'Top' || verticalPos === 'top') { top = '20px'; bottom = 'auto'; transform = 'none'; }
+            else if (verticalPos === 'Bottom' || verticalPos === 'bottom') { bottom = '20px'; top = 'auto'; transform = 'none'; }
+            else if (verticalPos === 'Middle' || verticalPos === 'middle') { top = '50%'; bottom = 'auto'; transform = 'translateY(-50%)'; }
+            this.setIconPositionVars({ left, right, top, bottom, transform });
+            if (this.mobileHorizontalOffset !== undefined) this.updateMobileTriggerOffset('horizontal', this.mobileHorizontalOffset);
+            if (this.mobileVerticalOffset !== undefined) this.updateMobileTriggerOffset('vertical', this.mobileVerticalOffset);
         }
         
         updateMobileTriggerSize(size) {
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -33108,7 +32860,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
                 if (isMobile) {
                   
                     
@@ -33224,7 +32976,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = window.innerWidth <= 1280;
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
 
                 
                 if (isMobile) {
