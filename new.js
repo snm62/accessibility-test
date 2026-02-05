@@ -105,15 +105,22 @@
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-immediate-early';
             style.textContent = `
-                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]):not([data-ck-widget]) {
+                /* 1. Stop all external animations */
+                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
                     animation-play-state: paused !important;
                     transition: none !important;
-                    scroll-behavior: auto !important;
                 }
-                [id*="accessbit-widget"], [class*="accessbit-widget"] {
-                    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+                /* 2. EXPLICITLY force the widget to stay functional */
+                html.seizure-safe #accessbit-widget-container,
+                html.seizure-safe [id*="accessbit-widget"],
+                html.seizure-safe [class*="accessbit-widget"],
+                html.seizure-safe .accessbit-widget-panel {
+                    display: flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                     animation-play-state: running !important;
-                    visibility: visible;
+                    transition: opacity 0.3s ease, transform 0.3s ease !important;
                 }
             `;
             try {
@@ -26970,44 +26977,44 @@ class AccessibilityWidget {
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
 
+            // 1. Remove classes immediately
             document.documentElement.classList.remove('seizure-safe');
             document.body.classList.remove('seizure-safe');
 
-            if (window.gsap) {
-                try {
-                    if (window.gsap.ticker && typeof window.gsap.ticker.wake === 'function') window.gsap.ticker.wake();
-                    if (window.gsap.globalTimeline && typeof window.gsap.globalTimeline.play === 'function') window.gsap.globalTimeline.play();
-                } catch (_) {}
+            // 2. THE SECRET SAUCE: Force a Layout Reflow
+            void document.documentElement.offsetWidth;
+
+            // 3. Clean up CSS and observers
+            if (this.seizureObserver) {
+                try { this.seizureObserver.disconnect(); } catch (_) {}
+                this.seizureObserver = null;
             }
-
-            requestAnimationFrame(() => {
-                if (this.seizureObserver) {
-                    try { this.seizureObserver.disconnect(); } catch (_) {}
-                    this.seizureObserver = null;
-                }
-                if (this._seizureLottieBootInterval) {
-                    clearInterval(this._seizureLottieBootInterval);
-                    this._seizureLottieBootInterval = null;
-                }
-                ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.remove();
-                });
-
-                this.restoreLottieAnimations();
-
-                const panel = document.querySelector('.accessbit-widget-panel') || (this.shadowRoot && this.shadowRoot.querySelector('.accessbit-widget-panel'));
-                if (panel && panel.classList.contains('active')) {
-                    panel.style.display = 'flex';
-                    panel.style.opacity = '1';
-                }
-
-                setTimeout(() => {
-                    if (window.gsap && window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
-                    window.dispatchEvent(new Event('resize'));
-                }, 150);
+            if (this._seizureLottieBootInterval) {
+                clearInterval(this._seizureLottieBootInterval);
+                this._seizureLottieBootInterval = null;
+            }
+            ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.remove();
             });
 
+            // 4. Resume GSAP and Lottie
+            if (window.gsap) {
+                try {
+                    if (window.gsap.ticker) window.gsap.ticker.wake();
+                    if (window.gsap.globalTimeline) window.gsap.globalTimeline.play();
+                } catch (_) {}
+            }
+            this.restoreLottieAnimations();
+
+            // 5. Explicitly fix the panel state
+            const panel = document.querySelector('.accessbit-widget-panel') || (this.shadowRoot && this.shadowRoot.querySelector('.accessbit-widget-panel'));
+            if (panel) {
+                panel.style.setProperty('display', 'flex', 'important');
+                panel.style.setProperty('opacity', '1', 'important');
+            }
+
+            window.dispatchEvent(new Event('resize'));
             this.saveSettings();
         }
 
