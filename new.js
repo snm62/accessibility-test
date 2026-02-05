@@ -26885,56 +26885,28 @@ class AccessibilityWidget {
             if (this.settings['cognitive-disability']) { this.disableCognitiveDisability(); this.updateToggleSwitch('cognitive-disability', false); }
 
             this.settings['seizure-safe'] = true;
-            try { document.body.classList.add('seizure-safe'); } catch (_) {}
-            try { document.documentElement.classList.add('seizure-safe'); } catch (_) {}
+            const doc = document.documentElement;
+            const body = document.body;
+
+            doc.classList.add('seizure-safe');
+            if (body) body.classList.add('seizure-safe');
             this.safeBodyClassToggle('seizure-safe', true);
 
             this.injectSeizureSafeCSS();
 
-            // 1. Force kill the Curtain Loader (so page doesn't stay black when GSAP is paused)
-            try {
-                document.documentElement.classList.remove('page-locked');
-                document.body.classList.remove('page-with-loader');
-                const loader = document.querySelector('.page-loader, .curtain-page-loader');
-                if (loader) loader.style.display = 'none';
-            } catch (_) {}
-
-            // 2. Pause GSAP (do not progress to 1 – keeps layout intact for recovery)
-            try {
-                if (window.gsap && window.gsap.globalTimeline) {
-                    window.gsap.globalTimeline.pause();
-                }
-            } catch (_) {}
+            // Pause Engines
+            if (window.gsap && window.gsap.globalTimeline) {
+                try { window.gsap.globalTimeline.pause(); } catch(_) {}
+            }
 
             this.stopLottieAnimations();
             this.stopAutoplayMedia();
-            if (this.seizureObserver) {
-                try { this.seizureObserver.disconnect(); } catch (_) {}
-                this.seizureObserver = null;
-            }
-            this.seizureObserver = new MutationObserver(() => {
-                this.stopLottieAnimations();
-            });
-            try {
-                this.seizureObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
-            } catch (_) {}
-            /* Webflow boot race: run now, after Webflow loads (push + ready), and poll for late/CMS Lotties */
-            if (window.Webflow) {
-                try {
-                    if (typeof Webflow.push === 'function') Webflow.push(() => this.stopLottieAnimations());
-                    if (Webflow.ready) Webflow.ready(() => this.stopLottieAnimations());
-                } catch (_) {}
-                if (this._seizureLottieBootInterval) clearInterval(this._seizureLottieBootInterval);
-                let checkCount = 0;
-                this._seizureLottieBootInterval = setInterval(() => {
-                    this.stopLottieAnimations();
-                    checkCount++;
-                    if (checkCount > 4) {
-                        clearInterval(this._seizureLottieBootInterval);
-                        this._seizureLottieBootInterval = null;
-                    }
-                }, 500);
-            }
+
+            // Observer setup
+            if (this.seizureObserver) this.seizureObserver.disconnect();
+            this.seizureObserver = new MutationObserver(() => this.stopLottieAnimations());
+            try { this.seizureObserver.observe(document.body, { childList: true, subtree: true }); } catch(_) {}
+
             this.saveSettings();
         }
         
@@ -26977,44 +26949,56 @@ class AccessibilityWidget {
         disableSeizureSafe() {
             this.settings['seizure-safe'] = false;
 
-            // 1. Remove classes immediately
-            document.documentElement.classList.remove('seizure-safe');
-            document.body.classList.remove('seizure-safe');
-
-            // 2. THE SECRET SAUCE: Force a Layout Reflow
-            void document.documentElement.offsetWidth;
-
-            // 3. Clean up CSS and observers
+            // 1. Kill the Observer first so it doesn't fight the restoration
             if (this.seizureObserver) {
-                try { this.seizureObserver.disconnect(); } catch (_) {}
+                this.seizureObserver.disconnect();
                 this.seizureObserver = null;
             }
             if (this._seizureLottieBootInterval) {
                 clearInterval(this._seizureLottieBootInterval);
                 this._seizureLottieBootInterval = null;
             }
+
+            // 2. Immediate Class Removal
+            document.documentElement.classList.remove('seizure-safe');
+            document.body.classList.remove('seizure-safe');
+
+            // 3. FORCE REFLOW (The "Secret Sauce")
+            void document.documentElement.offsetWidth;
+
+            // 4. Resume Engines
+            if (window.gsap) {
+                try {
+                    if (window.gsap.ticker) window.gsap.ticker.wake();
+                    if (window.gsap.globalTimeline) window.gsap.globalTimeline.play();
+                    if (window.gsap.ScrollTrigger) window.gsap.ScrollTrigger.refresh();
+                } catch (_) {}
+            }
+
+            this.restoreLottieAnimations();
+
+            // 5. CLEANUP CSS TAGS
             ['seizure-safe-css', 'accessbit-seizure-immediate-early'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.remove();
             });
 
-            // 4. Resume GSAP and Lottie
-            if (window.gsap) {
-                try {
-                    if (window.gsap.ticker) window.gsap.ticker.wake();
-                    if (window.gsap.globalTimeline) window.gsap.globalTimeline.play();
-                } catch (_) {}
-            }
-            this.restoreLottieAnimations();
+            // 6. DELAYED WIDGET UI FIX (Fixes the "overlapping/breaking" UI)
+            setTimeout(() => {
+                const panel = document.querySelector('.accessbit-widget-panel') ||
+                              (this.shadowRoot && this.shadowRoot.querySelector('.accessbit-widget-panel'));
 
-            // 5. Explicitly fix the panel state
-            const panel = document.querySelector('.accessbit-widget-panel') || (this.shadowRoot && this.shadowRoot.querySelector('.accessbit-widget-panel'));
-            if (panel) {
-                panel.style.setProperty('display', 'flex', 'important');
-                panel.style.setProperty('opacity', '1', 'important');
-            }
+                if (panel) {
+                    panel.style.setProperty('display', 'flex', 'important');
+                    panel.style.setProperty('opacity', '1', 'important');
+                    panel.style.setProperty('visibility', 'visible', 'important');
+                    panel.style.setProperty('transform', 'none', '');
+                }
 
-            window.dispatchEvent(new Event('resize'));
+                window.dispatchEvent(new Event('resize'));
+                if (typeof this.updateWidgetAppearance === 'function') this.updateWidgetAppearance();
+            }, 50);
+
             this.saveSettings();
         }
 
@@ -27026,26 +27010,26 @@ class AccessibilityWidget {
                 document.head.appendChild(styleEl);
             }
             styleEl.textContent = `
-                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]),
-                body.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
+                /* Pause all site animations */
+                html.seizure-safe *:not([id*="accessbit"]):not([class*="accessbit"]) {
                     animation-play-state: paused !important;
                     transition: none !important;
                 }
+                /* Keep Lottie/Canvas visible but unclickable */
                 html.seizure-safe lottie-player:not([id*="accessbit"]),
                 html.seizure-safe dotlottie-player:not([id*="accessbit"]),
-                html.seizure-safe canvas:not([id*="accessbit"]),
-                body.seizure-safe lottie-player:not([id*="accessbit"]),
-                body.seizure-safe dotlottie-player:not([id*="accessbit"]),
-                body.seizure-safe canvas:not([id*="accessbit"]) {
+                html.seizure-safe canvas:not([id*="accessbit"]) {
                     pointer-events: none !important;
                 }
+                /* FORCE WIDGET STABILITY */
                 #accessbit-widget-container,
-                [id*="accessbit-widget-icon"],
+                [id*="accessbit-widget"],
                 .accessbit-widget-panel {
                     animation-play-state: running !important;
-                    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+                    display: flex !important;
                     opacity: 1 !important;
                     visibility: visible !important;
+                    transition: opacity 0.3s ease, transform 0.3s ease !important;
                 }
             `;
         }
@@ -27217,6 +27201,20 @@ class AccessibilityWidget {
         // Restore Lottie and GSAP (Surgical: no lottie.init, targeted play + GSAP trigger filter, widget self-heal only)
         restoreLottieAnimations() {
             try {
+                // 0. Lottie Shadow Root Force – wipe stuck inline styles on renderers
+                document.querySelectorAll('lottie-player, dotlottie-player').forEach(player => {
+                    if (player.closest('[id*="accessbit"]')) return;
+                    if (player.shadowRoot) {
+                        const renderer = player.shadowRoot.querySelector('svg, canvas, .animation');
+                        if (renderer) {
+                            renderer.style.animationPlayState = '';
+                            renderer.style.display = '';
+                            renderer.style.visibility = '';
+                        }
+                    }
+                    if (player.play) player.play();
+                });
+
                 // 1. RE-ENABLE CSS ANIMATIONS (Site-wide except widget)
                 const frozenElements = document.querySelectorAll('[data-is-frozen="true"]');
                 frozenElements.forEach(el => {
