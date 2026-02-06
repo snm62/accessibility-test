@@ -105,29 +105,15 @@
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-immediate-early';
             style.textContent = `
-                /* Grey overlay when seizure-safe is on (full viewport) */
+                /* Subtle grey overlay when seizure-safe is on */
                 html.seizure-safe::before,
                 body.seizure-safe::before {
                     content: "" !important;
                     position: fixed !important;
                     inset: 0 !important;
-                    background: rgba(128, 128, 128, 0.2) !important;
+                    background: rgba(128, 128, 128, 0.15) !important;
                     z-index: 2147483640 !important;
                     pointer-events: none !important;
-                }
-                /* Nav/header above overlay so they are not greyed */
-                html.seizure-safe nav,
-                html.seizure-safe header,
-                html.seizure-safe .navbar,
-                html.seizure-safe [class*="nav"],
-                html.seizure-safe [class*="header"],
-                body.seizure-safe nav,
-                body.seizure-safe header,
-                body.seizure-safe .navbar,
-                body.seizure-safe [class*="nav"],
-                body.seizure-safe [class*="header"] {
-                    position: relative !important;
-                    z-index: 2147483641 !important;
                 }
                 /* Widget container never affected by pause */
                 #accessbit-widget-container,
@@ -26332,29 +26318,15 @@ class AccessibilityWidget {
                 document.head.appendChild(styleEl);
             }
             styleEl.textContent = `
-                /* Grey overlay when seizure-safe is on (full viewport) */
+                /* Subtle grey overlay when seizure-safe is on */
                 html.seizure-safe::before,
                 body.seizure-safe::before {
                     content: "" !important;
                     position: fixed !important;
                     inset: 0 !important;
-                    background: rgba(128, 128, 128, 0.2) !important;
+                    background: rgba(128, 128, 128, 0.15) !important;
                     z-index: 2147483640 !important;
                     pointer-events: none !important;
-                }
-                /* Nav/header above overlay so they are not greyed */
-                html.seizure-safe nav,
-                html.seizure-safe header,
-                html.seizure-safe .navbar,
-                html.seizure-safe [class*="nav"],
-                html.seizure-safe [class*="header"],
-                body.seizure-safe nav,
-                body.seizure-safe header,
-                body.seizure-safe .navbar,
-                body.seizure-safe [class*="nav"],
-                body.seizure-safe [class*="header"] {
-                    position: relative !important;
-                    z-index: 2147483641 !important;
                 }
                 /* Widget container never affected by pause */
                 #accessbit-widget-container,
