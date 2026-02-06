@@ -32211,60 +32211,41 @@ class AccessibilityWidget {
         }
         
        updateSelectedIcon(icon) {
-        console.log('[DEBUG] Applying Icon:', {
+        console.log('[DEBUG] Applying Icon (SVG-only mode):', {
             iconValue: icon,
             iconType: typeof icon,
             iconTrimmed: icon ? String(icon).trim() : null
         });
-    const iconElement = this.shadowRoot?.getElementById('accessbit-widget-icon');
-    
-    if (iconElement) {
-        const iconMap = {
-            'accessibility': 'fas fa-universal-access',
-            'wheelchair': 'fas fa-wheelchair',
-            'eye': 'fas fa-eye',
-            'ear': 'fas fa-deaf',
-            'brain': 'fas fa-brain',
-            'hand': 'fas fa-hand-paper',
-            'heart': 'fas fa-heart',
-            'star': 'fas fa-star',
-            'gear': 'fas fa-cog',
-            'settings': 'fas fa-sliders-h'
-        };
-        
-        // Normalize icon value (trim whitespace, lowercase for comparison)
-        const normalizedIcon = icon ? String(icon).trim().toLowerCase() : '';
-        const iconClass = iconMap[normalizedIcon] || iconMap[icon] || 'fas fa-universal-access';
-        
-        console.log('[DEBUG] Icon mapping result:', {
-            originalIcon: icon,
-            normalizedIcon: normalizedIcon,
-            mappedClass: iconClass,
-            iconMapKeys: Object.keys(iconMap),
-            foundInMap: normalizedIcon in iconMap || icon in iconMap
-        });
-        
-        
-        // Remove any existing FontAwesome icon AND the default SVG
+        const iconElement = this.shadowRoot?.getElementById('accessbit-widget-icon');
+        if (!iconElement) return;
+
+        // Always remove any Font Awesome <i> so there is no extra inline glyph box / spacing
         const existingIcon = iconElement.querySelector('i');
         if (existingIcon) existingIcon.remove();
-        const defaultSvg = iconElement.querySelector('svg[data-default-icon="true"]');
-        if (defaultSvg) defaultSvg.remove();
-   
-        const sanitizedIconClass = this.validateClassName(iconClass);
-        const iconInner = document.createElement('i');
-        iconInner.className = sanitizedIconClass;
-        iconInner.setAttribute('aria-hidden', 'true');
-        iconElement.appendChild(iconInner); // Now it appends to a clean container
-        
-        // Ensure proper styling
-        iconElement.style.display = 'flex';
-        iconElement.style.alignItems = 'center';
-        iconElement.style.justifyContent = 'center';
-        iconElement.style.color = '#ffffff';
-        iconElement.style.fontSize = 'inherit';
+
+        // Ensure we have exactly one inline SVG standing-man icon.
+        // If the default SVG was removed for any reason, recreate it using the same source
+        // as in createWidget() so the visual stays consistent.
+        let defaultSvg = iconElement.querySelector('svg[data-default-icon="true"]');
+        if (!defaultSvg) {
+            defaultSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            defaultSvg.setAttribute('data-default-icon', 'true');
+            defaultSvg.setAttribute('aria-hidden', 'true');
+            defaultSvg.setAttribute('viewBox', '0 0 512 512');
+            defaultSvg.setAttribute('focusable', 'false');
+            defaultSvg.style.width = '60%';
+            defaultSvg.style.height = '60%';
+            defaultSvg.style.display = 'block';
+            defaultSvg.style.margin = '0';
+            defaultSvg.style.flexShrink = '0';
+            defaultSvg.style.fill = 'currentColor';
+            defaultSvg.innerHTML = '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/><circle cx="256" cy="180" r="50" fill="currentColor"/><path fill="currentColor" d="M256 250v180M206 320h100M156 400h200"/>';
+            iconElement.appendChild(defaultSvg);
+        }
+
+        // Do NOT change layout styles here; centering and sizing are handled purely by CSS
+        // (.accessbit-widget-icon svg is absolutely centered). This avoids any extra space.
     }
-}
         
         updateSelectedIconName(name) {
           
