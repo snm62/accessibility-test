@@ -1973,6 +1973,30 @@ class AccessibilityWidget {
                 // Apply mobile responsive styles on load if mobile
                 if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
                     this.applyMobileResponsiveStyles();
+                } else {
+                    this.applyDesktopIconPosition();
+                }
+                // When viewport crosses mobile/desktop breakpoint, apply correct icon position (fixes icon stuck in middle after resize)
+                if (this._mobileMql) {
+                    const onBreakpointChange = () => {
+                        if (!this._mobileMql.matches) {
+                            this.removeMobileResponsiveStyles();
+                            this.applyDesktopIconPosition();
+                        } else {
+                            this.applyMobileResponsiveStyles();
+                            const d = this.customizationData;
+                            if (d?.mobileTriggerHorizontalPosition && d?.mobileTriggerVerticalPosition) {
+                                this.updateMobileTriggerCombinedPosition(d.mobileTriggerHorizontalPosition, d.mobileTriggerVerticalPosition);
+                            } else {
+                                if (d?.mobileTriggerHorizontalPosition) this.updateMobileTriggerPosition('horizontal', d.mobileTriggerHorizontalPosition);
+                                if (d?.mobileTriggerVerticalPosition) this.updateMobileTriggerPosition('vertical', d.mobileTriggerVerticalPosition);
+                            }
+                        }
+                    };
+                    try {
+                        if (this._mobileMql.addEventListener) this._mobileMql.addEventListener('change', onBreakpointChange);
+                        else if (this._mobileMql.addListener) this._mobileMql.addListener(onBreakpointChange);
+                    } catch (e) {}
                 }
                 
                 // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
@@ -4601,10 +4625,6 @@ class AccessibilityWidget {
                 overflow-x: hidden !important;
                 white-space: normal !important;
             }
-            /* Ensure there is always space under the Hide Interface button on all breakpoints */
-            .accessbit-widget-panel .action-btn.hide-btn {
-                margin-bottom: 12px !important;
-            }
             .accessbit-widget-panel.show,
             .accessbit-widget-panel.active {
                 display: flex !important;
@@ -5183,31 +5203,31 @@ class AccessibilityWidget {
                 /* Panel Header */
     
                 .panel-header {
-    
+
                     display: flex;
-    
+
                     flex-direction: column;
-    
-                    padding: 10px 20px 30px 20px;
-    
+
+                    padding: 10px 20px 40px 20px;
+
                     background: transparent !important;
-    
+
                     color: #ffffff !important;
-    
+
                     border-radius: 24px !important;
-    
+
                     border: 4px solid #ffffff !important;
-    
+
                     border-bottom: none !important;
-    
+
                     position: relative;
-    
+
                     z-index: 1002;
-    
+
                     overflow: hidden;
-    
+
                     min-height: 210px;
-    
+
                 }
     
     
@@ -31965,6 +31985,19 @@ class AccessibilityWidget {
             if (vars.top !== undefined) host.style.setProperty('--widget-icon-top', vars.top);
             if (vars.bottom !== undefined) host.style.setProperty('--widget-icon-bottom', vars.bottom);
             if (vars.transform !== undefined) host.style.setProperty('--widget-icon-transform', vars.transform);
+        }
+
+        /** Reset icon position to desktop values when viewport crosses from mobile to desktop (fixes icon stuck in middle after resize). */
+        applyDesktopIconPosition() {
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+            if (isMobile) return;
+            const data = this.customizationData;
+            const hPos = (data?.triggerHorizontalPosition || 'right').toString().trim().toLowerCase();
+            const vPos = (data?.triggerVerticalPosition || 'bottom').toString().trim().toLowerCase();
+            this.updateTriggerPosition('horizontal', hPos);
+            this.updateTriggerPosition('vertical', vPos);
+            if (this.desktopHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', this.desktopHorizontalOffset);
+            if (this.desktopVerticalOffset !== undefined) this.updateTriggerOffset('vertical', this.desktopVerticalOffset);
         }
         
         updateTriggerOffset(direction, offset) {
