@@ -111,7 +111,7 @@
                     content: "" !important;
                     position: fixed !important;
                     inset: 0 !important;
-                    background: rgba(128, 128, 128, 0.35) !important;
+                    background: rgba(128, 128, 128, 0.2) !important;
                     z-index: 2147483640 !important;
                     pointer-events: none !important;
                 }
@@ -26338,7 +26338,7 @@ class AccessibilityWidget {
                     content: "" !important;
                     position: fixed !important;
                     inset: 0 !important;
-                    background: rgba(128, 128, 128, 0.35) !important;
+                    background: rgba(128, 128, 128, 0.2) !important;
                     z-index: 2147483640 !important;
                     pointer-events: none !important;
                 }
