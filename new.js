@@ -3766,7 +3766,7 @@ class AccessibilityWidget {
     /* Mobile Portrait - Reasonable text and toggles */
     @media (max-width: 480px) {
         .accessbit-widget-panel {
-            padding: 12px !important;
+            padding: 12px 16px !important;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4628,7 +4628,7 @@ class AccessibilityWidget {
                 }
     
     
-                /* Icon: fluid size, anti-flicker (hides alt-text/aria-label until font loads) */
+                /* Icon: block layout so sr-only span cannot affect centering; graphic absolutely centered */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -4639,9 +4639,7 @@ class AccessibilityWidget {
                     transform: var(--widget-icon-transform, none) !important;
                     width: clamp(40px, 10vw, 60px) !important;
                     height: clamp(40px, 10vw, 60px) !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
+                    display: block !important;
                     overflow: hidden !important;
                     text-indent: -9999px !important;
                     font-size: 0 !important;
@@ -4673,7 +4671,11 @@ class AccessibilityWidget {
                 .accessbit-widget-icon i,
                 .accessbit-widget-icon img {
                     display: block !important;
-                    margin: auto !important;
+                    position: absolute !important;
+                    left: 50% !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    margin: 0 !important;
                     text-indent: 0 !important;
                     font-style: normal !important;
                     width: 60% !important;
@@ -4683,12 +4685,15 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-icon svg {
                     display: block !important;
+                    position: absolute !important;
+                    left: 50% !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
                     width: 60% !important;
                     height: 60% !important;
                     max-width: 100% !important;
                     max-height: 100% !important;
-                    flex-shrink: 0 !important;
-                    margin: auto !important;
+                    margin: 0 !important;
                     fill: #ffffff;
                     color: #ffffff;
                 }
@@ -5059,6 +5064,8 @@ class AccessibilityWidget {
                             width: calc(100vw - (var(--widget-spacing) * 2)) !important;
                             max-width: calc(100vw - (var(--widget-spacing) * 2)) !important;
                             margin: 0 var(--widget-spacing) !important;
+                            padding-left: 16px !important;
+                            padding-right: 16px !important;
                         }
                         .accessbit-widget-panel.mobile-mode.side-left {
                             left: var(--widget-spacing) !important;
@@ -5067,6 +5074,13 @@ class AccessibilityWidget {
                         .accessbit-widget-panel.mobile-mode.side-right {
                             right: var(--widget-spacing) !important;
                             left: auto !important;
+                        }
+                        .accessbit-widget-panel.mobile-mode .action-btn.reset-btn,
+                        .accessbit-widget-panel.mobile-mode .action-btn.statement-btn,
+                        .accessbit-widget-panel.mobile-mode .action-btn.hide-btn {
+                            min-height: 36px !important;
+                            padding: 6px 12px !important;
+                            font-size: 11px !important;
                         }
                     }
                     /* NEST HUB & SCROLL FIX */
@@ -5079,7 +5093,9 @@ class AccessibilityWidget {
                         overflow-x: hidden !important;
                         display: block !important;
                         -webkit-overflow-scrolling: touch !important;
-                        padding: 15px !important;
+                        padding: 16px !important;
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
                         padding-bottom: 60px !important;
                     }
                     /* Structure Protector */
@@ -5094,13 +5110,15 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode .action-btn,
                     .accessbit-widget-panel.mobile-mode .feature-card {
                         width: 100% !important;
-                        min-height: 50px !important;
+                        min-height: 40px !important;
                         margin: 0 !important;
                         box-sizing: border-box !important;
                     }
                     .accessbit-widget-panel.mobile-mode .panel-header,
                     .accessbit-widget-panel.mobile-mode .widget-header {
-                        padding: 20px 15px !important;
+                        padding: 20px 16px !important;
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
                         font-size: 1.2rem !important;
                         flex-shrink: 0 !important;
                     }
