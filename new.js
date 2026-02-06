@@ -3763,16 +3763,17 @@ class AccessibilityWidget {
         }
     }
     
-    /* Mobile Portrait - Reasonable text and toggles */
+    /* Mobile Portrait - use same core padding/button sizes as tablet */
     @media (max-width: 480px) {
         .accessbit-widget-panel {
-            padding: 12px 16px !important;
+            /* Match tablet core padding so mobile doesn't look cramped or oversized */
+            padding: 14px !important;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
         }
-        /* Reasonable text and toggles for mobile portrait */
+        /* Keep heading spacing reasonable on mobile */
         .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
             margin-bottom: 8px !important;
@@ -3784,8 +3785,8 @@ class AccessibilityWidget {
         }
         
         .profile-item {
-            padding: 2px !important;
-            margin-bottom: 2px !important;
+            padding: 4px !important;
+            margin-bottom: 4px !important;
         }
         
         .profile-item h4 {
@@ -3796,19 +3797,13 @@ class AccessibilityWidget {
             /* Font size controlled by JavaScript */
         }
         
-        .action-btn {
-            padding: 2px 3px !important;
-            /* Font size controlled by JavaScript */
-        }
-        
-        /* EXTREMELY small action buttons for mobile portrait */
+        /* Use tablet button sizing on mobile for Reset / Statement / Hide */
+        .action-btn,
         .action-btn.reset-btn,
         .action-btn.statement-btn,
         .action-btn.hide-btn {
-            padding: 1px 2px !important;
-            /* Font size controlled by JavaScript */
-            min-height: 12px !important;
-            margin-bottom: 10px !important;
+            padding: 8px 12px !important;
+            min-height: 32px !important;
         }
         
         .action-btn i {
@@ -4211,11 +4206,11 @@ class AccessibilityWidget {
             icon.setAttribute('aria-describedby', 'accessbit-widget-icon-description');
             icon.setAttribute('aria-label', 'Open accessibility options');
             icon.textContent = '';
-            // Inline SVG so the icon graphic shows at page load without waiting for Font Awesome
+            // Inline SVG icon (Font Awesome style circle + figure)
             const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             iconSvg.setAttribute('data-default-icon', 'true');
             iconSvg.setAttribute('aria-hidden', 'true');
-            iconSvg.setAttribute('viewBox', '0 0 512 512');
+            iconSvg.setAttribute('viewBox', '0 0 640 640');
             iconSvg.setAttribute('focusable', 'false');
             iconSvg.style.width = '60%';
             iconSvg.style.height = '60%';
@@ -4223,14 +4218,7 @@ class AccessibilityWidget {
             iconSvg.style.margin = '0';
             iconSvg.style.flexShrink = '0';
             iconSvg.style.fill = 'currentColor';
-            // Standing man accessibility icon with outer ring (white on transparent; background comes from button)
-            iconSvg.innerHTML = ''
-                + '<circle cx=\"256\" cy=\"256\" r=\"220\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" />'  // outer ring
-                + '<circle cx=\"256\" cy=\"176\" r=\"40\" fill=\"currentColor\" />'                                   // head
-                + '<path d=\"M160 236 H352\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />' // arms
-                + '<path d=\"M256 216 V360\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'  // body
-                + '<path d=\"M256 360 L192 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />' // left leg
-                + '<path d=\"M256 360 L320 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'; // right leg
+            iconSvg.innerHTML = '<path d=\"M64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM225.5 233.9C213.3 228.7 199.2 234.3 194 246.5C188.8 258.7 194.4 272.8 206.6 278L218.5 283.1C235.8 290.5 253.7 296 272.1 299.4L272.1 349.5C272.1 353.8 271.4 358.1 270 362.1L241.3 448.2C237.1 460.8 243.9 474.4 256.5 478.6C269.1 482.8 282.7 476 286.9 463.4L311.3 390.2C312.6 386.4 316.1 383.8 320.1 383.8C324.1 383.8 327.7 386.4 328.9 390.2L353.3 463.4C357.5 476 371.1 482.8 383.7 478.6C396.3 474.4 403 461 398.8 448.4L370.1 362.3C368.7 358.2 368 354 368 349.7L368 299.6C386.4 296.1 404.3 290.7 421.6 283.3L433.5 278.2C445.7 273 451.3 258.9 446.1 246.7C440.9 234.5 426.8 228.9 414.6 234.1L402.7 239C376.6 250.2 348.5 256 320 256C291.5 256 263.5 250.2 237.3 239L225.4 233.9zM320 224C342.1 224 360 206.1 360 184C360 161.9 342.1 144 320 144C297.9 144 280 161.9 280 184C280 206.1 297.9 224 320 224z\"/>';
             icon.appendChild(iconSvg);
             const descriptionSpan = document.createElement('span');
             descriptionSpan.id = 'accessbit-widget-icon-description';
