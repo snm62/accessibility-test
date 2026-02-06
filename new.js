@@ -679,7 +679,7 @@ class AccessibilityWidget {
             this._mutationTimer = null;
             this._rafPending = false;
             // Single source of truth for breakpoint – JS and CSS flip together
-            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 1280px)') : null;
+            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 1279px)') : null;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1740,7 +1740,7 @@ class AccessibilityWidget {
                 
                 if (icon && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     
                     console.log('[INIT] Icon visibility settings:', {
@@ -1971,7 +1971,7 @@ class AccessibilityWidget {
                 this.setupOptimizedResizeHandlers();
                 
                 // Apply mobile responsive styles on load if mobile
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
                     this.applyMobileResponsiveStyles();
                 }
                 
@@ -3216,25 +3216,18 @@ class AccessibilityWidget {
     
     
         addFontAwesome() {
-            // CRITICAL: Don't manipulate Designer DOM
-            if (this.isDesignerMode()) {
-                return;
-            }
-    
-            if (!document.querySelector('link[href*="font-awesome"]')) {
-    
-                const fontAwesome = document.createElement('link');
-    
-                fontAwesome.rel = 'stylesheet';
-    
-                fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-    
-                document.head.appendChild(fontAwesome);
-    
-                
-    
-            }
-    
+            if (this.isDesignerMode()) return;
+            const faUrl = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            if (document.querySelector('link[href*="font-awesome"]')) return;
+            const preload = document.createElement('link');
+            preload.rel = 'preload';
+            preload.as = 'style';
+            preload.href = faUrl;
+            document.head.appendChild(preload);
+            const fontAwesome = document.createElement('link');
+            fontAwesome.rel = 'stylesheet';
+            fontAwesome.href = faUrl;
+            document.head.appendChild(fontAwesome);
         }
     
     
@@ -3412,7 +3405,7 @@ class AccessibilityWidget {
         .accessbit-widget-panel .action-btn { padding: 6px 10px; min-height: 28px; font-size: 0.9em; }
         .accessbit-widget-panel .close-btn { font-size: 18px; padding: 6px; }
     }
-    @media (min-width: 481px) and (max-width: 1280px) {
+    @media (min-width: 481px) and (max-width: 1279px) {
         .accessbit-widget-panel { font-size: 13px; padding: 14px; }
         .accessbit-widget-panel .action-btn { padding: 8px 12px; min-height: 32px; }
     }
@@ -4214,21 +4207,24 @@ class AccessibilityWidget {
     
             icon.setAttribute('aria-expanded', 'false');
             icon.setAttribute('aria-describedby', 'accessbit-widget-icon-description');
+            icon.setAttribute('aria-label', 'Open accessibility options');
             icon.textContent = '';
-            const iconElement = document.createElement('i');
-            iconElement.className = 'fas fa-universal-access';
-            iconElement.setAttribute('aria-hidden', 'true');
-            icon.appendChild(iconElement);
+            // Inline SVG so the icon graphic shows at page load without waiting for Font Awesome
+            const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconSvg.setAttribute('data-default-icon', 'true');
+            iconSvg.setAttribute('aria-hidden', 'true');
+            iconSvg.setAttribute('viewBox', '0 0 512 512');
+            iconSvg.setAttribute('focusable', 'false');
+            iconSvg.style.width = '60%';
+            iconSvg.style.height = '60%';
+            iconSvg.style.fill = 'currentColor';
+            iconSvg.innerHTML = '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/><circle cx="256" cy="180" r="50" fill="currentColor"/><path fill="currentColor" d="M256 250v180M206 320h100M156 400h200"/>';
+            icon.appendChild(iconSvg);
             const descriptionSpan = document.createElement('span');
             descriptionSpan.id = 'accessbit-widget-icon-description';
             descriptionSpan.className = 'sr-only';
             descriptionSpan.textContent = 'Click to open accessibility settings panel';
             icon.appendChild(descriptionSpan);
-            // Defer aria-label so browser doesn't show it as visible "alt text" before icon font loads
-            icon.setAttribute('aria-label', '');
-            setTimeout(() => {
-                if (icon.isConnected) icon.setAttribute('aria-label', 'Open accessibility options');
-            }, 400);
     
             icon.style.pointerEvents = 'auto';
             
@@ -4674,6 +4670,12 @@ class AccessibilityWidget {
                     font-size: clamp(18px, 4vw, 24px) !important;
                     color: #ffffff;
                 }
+                .accessbit-widget-icon svg {
+                    width: 60% !important;
+                    height: 60% !important;
+                    fill: #ffffff;
+                    color: #ffffff;
+                }
     
     
     
@@ -4936,8 +4938,8 @@ class AccessibilityWidget {
                         right: auto !important;
                     }
                 }
-                /* [Tablets & small laptops: 481px to 1280px] - Drawer mode (mobile-mode class) */
-                @media (min-width: 481px) and (max-width: 1280px) {
+                /* [Tablets & small laptops: 481px to 1279px] - Drawer mode (mobile-mode class) */
+                @media (min-width: 481px) and (max-width: 1279px) {
                     :host {
                         --widget-width: min(400px, 92vw);
                         --widget-spacing: 15px;
@@ -4949,7 +4951,7 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode.side-left { left: 15px !important; right: auto !important; }
                 }
                 /* [Desktop: 1281px+] - Position from CSS variables only */
-                @media (min-width: 1281px) {
+                @media (min-width: 1280px) {
                     .accessbit-widget-panel:not(.mobile-mode) {
                         top: var(--panel-top, 20px) !important;
                         left: var(--panel-left, auto) !important;
@@ -5008,8 +5010,8 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-content *,
                 .accessbit-widget-panel .panel-content * { max-width: 100% !important; }
-                /* --- ≤1280px: drawer mode (mobile-mode) – fluid height with 100dvh --- */
-                @media (max-width: 1280px) {
+                /* --- ≤1279px: drawer mode (mobile-mode) – fluid height with 100dvh --- */
+                @media (max-width: 1279px) {
                     .accessbit-widget-panel.mobile-mode {
                         width: calc(100% - (var(--widget-spacing) * 2)) !important;
                         max-width: 420px !important;
@@ -30394,7 +30396,7 @@ class AccessibilityWidget {
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -30452,7 +30454,7 @@ class AccessibilityWidget {
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -30502,7 +30504,7 @@ class AccessibilityWidget {
             }
             
             // Check device type
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -30683,7 +30685,7 @@ class AccessibilityWidget {
          * Threshold 1280px; clear transform at start to prevent panel stuck in middle when resizing.
          */
         handleResizeOptimized() {
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
 
@@ -31455,7 +31457,7 @@ class AccessibilityWidget {
                 }
                 
                 /* Hide ON/OFF text on tablet and mobile (iPad Air/Pro, Surface Pro, Nest Hub, phones) */
-                @media (max-width: 1280px) {
+                @media (max-width: 1279px) {
                     .toggle-switch > input + .slider::after {
                         content: "" !important;
                         display: none !important;
@@ -31748,7 +31750,7 @@ class AccessibilityWidget {
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -32030,7 +32032,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -32167,7 +32169,7 @@ class AccessibilityWidget {
             if (!host || !panel) return;
 
             const screenWidth = window.innerWidth;
-            const isMobile = screenWidth <= 1280;
+            const isMobile = screenWidth <= 1279;
 
             // Remove ALL inline pixel styles so media queries control layout (prevents break at 1200px)
             ['width', 'height', 'top', 'left', 'right', 'bottom', 'transform'].forEach(p => panel.style.removeProperty(p));
@@ -32348,7 +32350,7 @@ class AccessibilityWidget {
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -32372,7 +32374,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
                 if (isMobile) {
                   
                     
@@ -32488,7 +32490,7 @@ class AccessibilityWidget {
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1280);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
 
                 
                 if (isMobile) {
