@@ -4919,6 +4919,15 @@ class AccessibilityWidget {
                         padding: 4px 10px !important;
                         min-height: 26px !important;
                     }
+
+                    /* Desktop: larger primary action buttons (Reset / Statement / Hide Interface) */
+                    @media (min-width: 1281px) {
+                        .accessbit-widget-panel .action-btn {
+                            font-size: 13px !important;
+                            padding: 10px 22px !important;
+                            min-height: 44px !important;
+                        }
+                    }
                     .accessbit-widget-panel .profile-item {
                         padding: 8px 10px !important;
                         margin-bottom: 6px !important;
