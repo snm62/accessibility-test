@@ -4750,13 +4750,13 @@ class AccessibilityWidget {
                 /* STATE 1: MOBILE DRAWER (max-width: 1280px) */
                 @media (max-width: 1280px) {
                     .accessbit-widget-panel {
-                        /* Symmetric spacing on both sides so panel is visually centred */
-                        width: auto !important;
-                        max-width: 480px !important;
+                        /* Full-width drawer: flush with viewport edges */
+                        width: 100% !important;
+                        max-width: none !important;
                         height: calc(100dvh - 30px) !important;
                         bottom: 15px !important;
-                        left: 15px !important;
-                        right: 15px !important;
+                        left: 0 !important;
+                        right: 0 !important;
                         top: auto !important;
                         transform: none !important;
                         transition: transform 0.3s ease !important;
