@@ -4219,6 +4219,9 @@ class AccessibilityWidget {
             iconSvg.setAttribute('focusable', 'false');
             iconSvg.style.width = '60%';
             iconSvg.style.height = '60%';
+            iconSvg.style.display = 'block';
+            iconSvg.style.margin = '0';
+            iconSvg.style.flexShrink = '0';
             iconSvg.style.fill = 'currentColor';
             iconSvg.innerHTML = '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/><circle cx="256" cy="180" r="50" fill="currentColor"/><path fill="currentColor" d="M256 250v180M206 320h100M156 400h200"/>';
             icon.appendChild(iconSvg);
@@ -4665,6 +4668,8 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-icon i,
                 .accessbit-widget-icon img {
+                    display: block !important;
+                    margin: 0 !important;
                     text-indent: 0 !important;
                     font-style: normal !important;
                     width: 60% !important;
@@ -4673,8 +4678,13 @@ class AccessibilityWidget {
                     color: #ffffff;
                 }
                 .accessbit-widget-icon svg {
+                    display: block !important;
                     width: 60% !important;
                     height: 60% !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                    flex-shrink: 0 !important;
+                    margin: 0 !important;
                     fill: #ffffff;
                     color: #ffffff;
                 }
