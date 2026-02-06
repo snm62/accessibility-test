@@ -4925,46 +4925,44 @@ class AccessibilityWidget {
     
     
     
-                /* --- Universal breakpoints (no conflicting fixed widths) --- */
-                /* [Small Mobile: < 480px] */
-                @media (max-width: 480px) {
-                    :host {
-                        --widget-width: 92vw;
-                        --widget-spacing: 10px;
-                    }
-                    .accessbit-widget-panel:not(.mobile-mode) {
-                        border-radius: 12px !important;
-                        left: 4vw !important;
+                /* --- CSS-ONLY responsive: no JS resize logic; browser handles 1280/1281 transition --- */
+                /* STATE 1: MOBILE DRAWER (max-width: 1280px) */
+                @media (max-width: 1280px) {
+                    .accessbit-widget-panel {
+                        width: calc(100% - 30px) !important;
+                        max-width: 420px !important;
+                        height: calc(100dvh - 30px) !important;
+                        bottom: 15px !important;
+                        left: 15px !important;
                         right: auto !important;
+                        top: auto !important;
+                        transform: translateX(110%) !important;
+                        transition: transform 0.3s ease !important;
+                        border-radius: 12px !important;
+                    }
+                    .accessbit-widget-panel.active,
+                    .accessbit-widget-panel.show {
+                        transform: translateX(0) !important;
+                        display: flex !important;
                     }
                 }
-                /* [Tablets & small laptops: 481px to 1279px] - Drawer mode (mobile-mode class) */
-                @media (min-width: 481px) and (max-width: 1279px) {
-                    :host {
-                        --widget-width: min(400px, 92vw);
-                        --widget-spacing: 15px;
-                    }
-                    .accessbit-widget-panel.mobile-mode {
-                        border-radius: 16px !important;
-                    }
-                    .accessbit-widget-panel.mobile-mode.side-right { right: 15px !important; left: auto !important; }
-                    .accessbit-widget-panel.mobile-mode.side-left { left: 15px !important; right: auto !important; }
-                }
-                /* [Desktop: 1281px+] - Position from CSS variables only */
-                @media (min-width: 1280px) {
-                    .accessbit-widget-panel:not(.mobile-mode) {
-                        top: var(--panel-top, 20px) !important;
-                        left: var(--panel-left, auto) !important;
-                        right: var(--panel-right, 20px) !important;
+                /* STATE 2: DESKTOP FLOATING (min-width: 1281px) - vars set once by JS on load/settings */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel {
                         width: 420px !important;
-                        height: calc(100vh - 40px) !important;
+                        height: auto !important;
                         max-height: 800px !important;
+                        top: var(--panel-top, 20px) !important;
+                        right: var(--panel-right, 20px) !important;
+                        left: var(--panel-left, auto) !important;
+                        transform: none !important;
+                        bottom: auto !important;
                         border-radius: 16px !important;
                     }
                 }
-                /* [Ultra-wide: > 1921px] - Cap height to prevent skyscraper look */
+                /* [Ultra-wide: > 1921px] */
                 @media (min-width: 1921px) {
-                    .accessbit-widget-panel:not(.mobile-mode) {
+                    .accessbit-widget-panel {
                         height: 800px !important;
                         max-height: 800px !important;
                         top: 50% !important;
@@ -30628,109 +30626,17 @@ class AccessibilityWidget {
             };
         }
         
-        // Stabilize on load, zoom (Ctrl+/-), and drag resize: rAF + visualViewport so widget stays anchored
+        /* CSS-only responsiveness: no resize/matchMedia/ResizeObserver. Set panel vars once on load. */
         setupOptimizedResizeHandlers() {
-            const onResize = () => {
-                requestAnimationFrame(() => this.handleResizeOptimized());
-            };
-
-            window.addEventListener('resize', onResize, { passive: true });
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
-                    onResize();
-                });
-                window.visualViewport.addEventListener('scroll', onResize);
-            }
-
-            if (this.shadowRoot && window.ResizeObserver) {
-                const self = this;
-                setTimeout(function() {
-                    const resizeObserver = new ResizeObserver(function() {
-                        if (self._iconExplicitlyShown === true) return;
-                        onResize();
-                    });
-                    const panel = self.shadowRoot.getElementById('accessbit-widget-panel');
-                    const icon = self.shadowRoot.getElementById('accessbit-widget-icon');
-                    if (panel) resizeObserver.observe(panel);
-                    if (icon) resizeObserver.observe(icon);
-                    self._resizeObserver = resizeObserver;
-                }, 200);
-            }
-            
-            // matchMedia: JS and CSS flip at the same moment (no logic gap)
-            if (this._mobileMql) {
-                const handleMediaChange = () => { this.handleResizeOptimized(); };
-                if (this._mobileMql.addEventListener) {
-                    this._mobileMql.addEventListener('change', handleMediaChange);
-                } else if (this._mobileMql.addListener) {
-                    this._mobileMql.addListener(handleMediaChange);
-                }
-                
-                // Device pixel ratio changes
-                const pixelRatioQuery = window.matchMedia('(min-resolution: 1.5dppx)');
-                const handlePixelRatioChange = () => {
-                    this.handleResizeOptimized();
-                };
-                
-                if (pixelRatioQuery.addEventListener) {
-                    pixelRatioQuery.addEventListener('change', handlePixelRatioChange);
-                } else {
-                    pixelRatioQuery.addListener(handlePixelRatioChange);
-                }
-            }
-        }
-        
-        /**
-         * Core Responsiveness & Side Detection (Responsive Drawer).
-         * Threshold 1280px; clear transform at start to prevent panel stuck in middle when resizing.
-         */
-        handleResizeOptimized() {
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
-            const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-
-            if (!panel) return;
-
-            this.handleWindowResize();
-            this.ensureBasePanelCSS();
-            panel.style.removeProperty('transform');
-
-            if (isMobile) {
-                panel.classList.add('mobile-mode');
-                if (icon) {
-                    const screenWidth = window.innerWidth;
-                    const isRightSide = (icon.getBoundingClientRect().left + icon.offsetWidth / 2) > (screenWidth / 2);
-                    panel.classList.toggle('side-right', isRightSide);
-                    panel.classList.toggle('side-left', !isRightSide);
-                }
-                panel.style.removeProperty('left');
-                panel.style.removeProperty('right');
-                panel.style.removeProperty('top');
-                panel.style.removeProperty('bottom');
-                panel.style.removeProperty('width');
-                panel.style.removeProperty('height');
-                this.applyMobileResponsiveStyles();
-            } else {
-                panel.classList.remove('mobile-mode', 'side-left', 'side-right');
-                this.removeMobileSizeReductions();
-                ['left', 'right', 'top', 'bottom', 'width', 'max-width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
-                this.updateInterfacePosition();
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        if (panel) void panel.offsetHeight;
-                        if (icon) void icon.offsetHeight;
-                        if (this.customizationData) {
-                            if (this.customizationData.triggerHorizontalPosition) this.updateTriggerPosition('horizontal', this.customizationData.triggerHorizontalPosition);
-                            if (this.customizationData.triggerVerticalPosition) this.updateTriggerPosition('vertical', this.customizationData.triggerVerticalPosition);
-                            if (this.customizationData.triggerHorizontalOffset) this.updateTriggerOffset('horizontal', this.customizationData.triggerHorizontalOffset);
-                            if (this.customizationData.triggerVerticalOffset) this.updateTriggerOffset('vertical', this.customizationData.triggerVerticalOffset);
-                            if (this.customizationData.triggerButtonSize) this.updateTriggerButtonSize(this.customizationData.triggerButtonSize);
-                        }
-                        this.updateInterfacePosition();
-                    });
-                });
+            if (panel) {
+                ['left', 'right', 'top', 'bottom', 'width', 'max-width', 'height', 'max-height', 'transform'].forEach(p => panel.style.removeProperty(p));
             }
+            this.updateInterfacePosition();
         }
+
+        /** No-op: layout is CSS-only via @media (max-width: 1280px) / (min-width: 1281px). Kept for call compatibility. */
+        handleResizeOptimized() {}
         
         // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
         setupThrottledMutationObserver() {
@@ -32163,45 +32069,32 @@ class AccessibilityWidget {
             }
         }
         
+        /* Set once on load and when user changes left/right in settings. CSS handles layout on resize. */
         updateInterfacePosition() {
             const host = this.shadowRoot?.host;
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             if (!host || !panel) return;
 
-            const screenWidth = window.innerWidth;
-            const isMobile = screenWidth <= 1279;
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('right');
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('bottom');
+            panel.style.removeProperty('width');
+            panel.style.removeProperty('height');
+            panel.style.removeProperty('transform');
 
-            // Remove ALL inline pixel styles so media queries control layout (prevents break at 1200px)
-            ['width', 'height', 'top', 'left', 'right', 'bottom', 'transform'].forEach(p => panel.style.removeProperty(p));
-
-            if (!isMobile) {
-                const margin = 20;
-                const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
-                const isRight = hPos.includes('right');
-                // Set on HOST so CSS in shadow can inherit
-                if (isRight) {
-                    host.style.setProperty('--panel-right', margin + 'px');
-                    host.style.setProperty('--panel-left', 'auto');
-                } else {
-                    host.style.setProperty('--panel-left', margin + 'px');
-                    host.style.setProperty('--panel-right', 'auto');
-                }
-                host.style.setProperty('--panel-top', margin + 'px');
-                host.style.setProperty('--panel-width', '420px');
-                // Also set on PANEL so position is guaranteed (avoids inheritance quirks at 1280px boundary)
-                if (isRight) {
-                    panel.style.setProperty('--panel-right', margin + 'px');
-                    panel.style.setProperty('--panel-left', 'auto');
-                } else {
-                    panel.style.setProperty('--panel-left', margin + 'px');
-                    panel.style.setProperty('--panel-right', 'auto');
-                }
-                panel.style.setProperty('--panel-top', margin + 'px');
-                panel.style.setProperty('--panel-width', '420px');
+            const margin = 20;
+            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
+            const isRight = hPos.includes('right');
+            if (isRight) {
+                host.style.setProperty('--panel-right', margin + 'px');
+                host.style.setProperty('--panel-left', 'auto');
             } else {
-                // Mobile: clear panel vars so drawer CSS (mobile-mode) is the only source
-                ['--panel-left', '--panel-right', '--panel-top', '--panel-width'].forEach(p => panel.style.removeProperty(p));
+                host.style.setProperty('--panel-left', margin + 'px');
+                host.style.setProperty('--panel-right', 'auto');
             }
+            host.style.setProperty('--panel-top', margin + 'px');
+            host.style.setProperty('--panel-width', '420px');
         }
     
         updateInterfaceFooter(content) {
