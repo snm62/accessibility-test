@@ -4444,7 +4444,8 @@ class AccessibilityWidget {
                     text-indent: -9999px !important;
                     font-size: 0 !important;
                     line-height: 0 !important;
-                    background-color: #6366f1 !important;
+                    /* Background color is controlled by JS (updateTriggerButtonColor);
+                       fall back to default there when app doesn't send a color */
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                     transition: all 0.3s ease;
@@ -4750,20 +4751,22 @@ class AccessibilityWidget {
                 /* STATE 1: MOBILE DRAWER (max-width: 1280px) */
                 @media (max-width: 1280px) {
                     .accessbit-widget-panel {
+                        /* Center the panel horizontally within the viewport */
                         width: calc(100% - 30px) !important;
                         max-width: 480px !important;
                         height: calc(100dvh - 30px) !important;
                         bottom: 15px !important;
-                        left: 15px !important;
+                        left: 50% !important;
                         right: auto !important;
                         top: auto !important;
-                        transform: translateX(110%) !important;
-                        transition: transform 0.3s ease !important;
+                        transform: translateX(-50%) !important;
+                        transition: none !important;
                         border-radius: 12px !important;
                     }
                     .accessbit-widget-panel.active,
                     .accessbit-widget-panel.show {
-                        transform: translateX(0) !important;
+                        /* Same centered position when visible */
+                        transform: translateX(-50%) !important;
                         display: flex !important;
                     }
                 }
@@ -4929,8 +4932,8 @@ class AccessibilityWidget {
                     /* Fluid size reductions – CSS as source of truth (no JS inline layout) */
                     .accessbit-widget-panel .action-btn {
                         font-size: 11px !important;
-                        padding: 6px 10px !important;
-                        min-height: 30px !important;
+                        padding: 4px 10px !important;
+                        min-height: 26px !important;
                     }
                     .accessbit-widget-panel .profile-item {
                         padding: 8px 10px !important;
@@ -5278,35 +5281,20 @@ class AccessibilityWidget {
     
     
                 .action-btn {
-    
                     display: flex;
-    
                     align-items: center;
-    
-                    gap: 8px;
-    
-                    padding: 8px 16px;
-    
+                    gap: 6px;
+                    padding: 6px 14px;
                     background: rgba(217, 217, 217, 0.3) !important;
-    
                     border: 2px solid rgba(217, 217, 217, 0.3) !important;
-    
                     color: #ffffff !important;
-    
                     border-radius: 30px;
-    
                     cursor: pointer;
-    
                     font-weight: 600;
-    
                     transition: all 0.3s ease;
-    
                     white-space: nowrap;
-    
-                    font-size: 12px;
-    
+                    font-size: 11px;
                     justify-content: center;
-    
                 }
     
     
@@ -30092,10 +30080,8 @@ class AccessibilityWidget {
         
         try {
             // Apply trigger button customizations
-            if (customizationData.triggerButtonColor) {
-           
-                this.updateTriggerButtonColor(customizationData.triggerButtonColor);
-            }
+            // Always set a color: use app-provided value if present, otherwise fall back to default
+            this.updateTriggerButtonColor(customizationData.triggerButtonColor || '#6366f1');
             
             if (customizationData.triggerButtonShape) {
               
