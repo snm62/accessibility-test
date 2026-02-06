@@ -1973,32 +1973,8 @@ class AccessibilityWidget {
                 // Apply mobile responsive styles on load if mobile
                 if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
                     this.applyMobileResponsiveStyles();
-                } else {
-                    this.applyDesktopIconPosition();
                 }
-                // When viewport crosses mobile/desktop breakpoint, apply correct icon position (fixes icon stuck in middle after resize)
-                if (this._mobileMql) {
-                    const onBreakpointChange = () => {
-                        if (!this._mobileMql.matches) {
-                            this.removeMobileResponsiveStyles();
-                            this.applyDesktopIconPosition();
-                        } else {
-                            this.applyMobileResponsiveStyles();
-                            const d = this.customizationData;
-                            if (d?.mobileTriggerHorizontalPosition && d?.mobileTriggerVerticalPosition) {
-                                this.updateMobileTriggerCombinedPosition(d.mobileTriggerHorizontalPosition, d.mobileTriggerVerticalPosition);
-                            } else {
-                                if (d?.mobileTriggerHorizontalPosition) this.updateMobileTriggerPosition('horizontal', d.mobileTriggerHorizontalPosition);
-                                if (d?.mobileTriggerVerticalPosition) this.updateMobileTriggerPosition('vertical', d.mobileTriggerVerticalPosition);
-                            }
-                        }
-                    };
-                    try {
-                        if (this._mobileMql.addEventListener) this._mobileMql.addEventListener('change', onBreakpointChange);
-                        else if (this._mobileMql.addListener) this._mobileMql.addListener(onBreakpointChange);
-                    } catch (e) {}
-                }
-                
+
                 // PERFORMANCE OPTIMIZATION: Throttled MutationObserver
                 this.setupThrottledMutationObserver();
                 
@@ -4239,7 +4215,7 @@ class AccessibilityWidget {
             const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             iconSvg.setAttribute('data-default-icon', 'true');
             iconSvg.setAttribute('aria-hidden', 'true');
-            iconSvg.setAttribute('viewBox', '0 0 512 512');
+            iconSvg.setAttribute('viewBox', '0 0 16 16');
             iconSvg.setAttribute('focusable', 'false');
             iconSvg.style.width = '60%';
             iconSvg.style.height = '60%';
@@ -4247,14 +4223,8 @@ class AccessibilityWidget {
             iconSvg.style.margin = '0';
             iconSvg.style.flexShrink = '0';
             iconSvg.style.fill = 'currentColor';
-            // Standing man icon: circular border + head + body, arms, and legs
-            iconSvg.innerHTML = ''
-                + '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/>'  // outer ring
-                + '<circle cx="256" cy="140" r="40" fill="currentColor"/>'                                   // head
-                + '<path d="M176 220 H336" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // arms
-                + '<path d="M256 180 V340" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // body
-                + '<path d="M256 340 L200 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // left leg
-                + '<path d="M256 340 L312 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'; // right leg
+            // Standing man accessibility icon (Bootstrap \"universal-access\" style)
+            iconSvg.innerHTML = '<path d=\"M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.531 4H14.47a.531.531 0 0 1 .066 1.058L10 5.5V9l.452 6.42a.535.535 0 0 1-1.053.174L8.243 9.97c-.064-.252-.422-.252-.486 0l-1.156 5.624a.535.535 0 0 1-1.053-.174L6 9z\"/>';
             icon.appendChild(iconSvg);
             const descriptionSpan = document.createElement('span');
             descriptionSpan.id = 'accessbit-widget-icon-description';
@@ -5123,7 +5093,7 @@ class AccessibilityWidget {
                         padding: 16px !important;
                         padding-left: 16px !important;
                         padding-right: 16px !important;
-                        padding-bottom: 60px !important;
+                        padding-bottom: 16px !important;
                     }
                     /* Structure Protector */
                     .accessbit-widget-panel.mobile-mode .button-row,
@@ -32000,19 +31970,6 @@ class AccessibilityWidget {
             if (vars.transform !== undefined) host.style.setProperty('--widget-icon-transform', vars.transform);
         }
 
-        /** Reset icon position to desktop values when viewport crosses from mobile to desktop (fixes icon stuck in middle after resize). */
-        applyDesktopIconPosition() {
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
-            if (isMobile) return;
-            const data = this.customizationData;
-            const hPos = (data?.triggerHorizontalPosition || 'right').toString().trim().toLowerCase();
-            const vPos = (data?.triggerVerticalPosition || 'bottom').toString().trim().toLowerCase();
-            this.updateTriggerPosition('horizontal', hPos);
-            this.updateTriggerPosition('vertical', vPos);
-            if (this.desktopHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', this.desktopHorizontalOffset);
-            if (this.desktopVerticalOffset !== undefined) this.updateTriggerOffset('vertical', this.desktopVerticalOffset);
-        }
-        
         updateTriggerOffset(direction, offset) {
           
             
@@ -32244,7 +32201,7 @@ class AccessibilityWidget {
             defaultSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             defaultSvg.setAttribute('data-default-icon', 'true');
             defaultSvg.setAttribute('aria-hidden', 'true');
-            defaultSvg.setAttribute('viewBox', '0 0 512 512');
+            defaultSvg.setAttribute('viewBox', '0 0 16 16');
             defaultSvg.setAttribute('focusable', 'false');
             defaultSvg.style.width = '60%';
             defaultSvg.style.height = '60%';
@@ -32252,14 +32209,8 @@ class AccessibilityWidget {
             defaultSvg.style.margin = '0';
             defaultSvg.style.flexShrink = '0';
             defaultSvg.style.fill = 'currentColor';
-            // Same standing man SVG as in createWidget()
-            defaultSvg.innerHTML = ''
-                + '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/>'
-                + '<circle cx="256" cy="140" r="40" fill="currentColor"/>'
-                + '<path d="M176 220 H336" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
-                + '<path d="M256 180 V340" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
-                + '<path d="M256 340 L200 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
-                + '<path d="M256 340 L312 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>';
+            // Same standing man accessibility SVG as in createWidget()
+            defaultSvg.innerHTML = '<path d=\"M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.531 4H14.47a.531.531 0 0 1 .066 1.058L10 5.5V9l.452 6.42a.535.535 0 0 1-1.053.174L8.243 9.97c-.064-.252-.422-.252-.486 0l-1.156 5.624a.535.535 0 0 1-1.053-.174L6 9z\"/>';
             iconElement.appendChild(defaultSvg);
         }
 
