@@ -3397,12 +3397,13 @@ class AccessibilityWidget {
     
     /* Typography/sizing only in override – no width/left/right (handled by getWidgetCSS fluid system) */
     @media (max-width: 480px) {
-        .accessbit-widget-panel { font-size: 12px; padding: 12px; }
+        /* Match tablet-like sizing on mobile so buttons/padding stay consistent */
+        .accessbit-widget-panel { font-size: 12px; padding: 14px; }
         .accessbit-widget-panel h2 { margin-bottom: 8px; font-size: 1.5em; }
         .accessbit-widget-panel h3 { margin-bottom: 6px; font-size: 1.2em; }
         .accessbit-widget-panel h4 { font-size: 1em; }
         .accessbit-widget-panel p { line-height: 1.3; font-size: 0.9em; }
-        .accessbit-widget-panel .action-btn { padding: 6px 10px; min-height: 28px; font-size: 0.9em; }
+        .accessbit-widget-panel .action-btn { padding: 8px 12px; min-height: 32px; font-size: 0.9em; }
         .accessbit-widget-panel .close-btn { font-size: 18px; padding: 6px; }
     }
     @media (min-width: 481px) and (max-width: 1279px) {
@@ -3525,7 +3526,7 @@ class AccessibilityWidget {
     
     @media (max-width: 400px) {
         .accessbit-widget-panel {
-            padding: 8px;
+            padding: 14px;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -3544,8 +3545,8 @@ class AccessibilityWidget {
         
         .accessbit-widget-panel .action-btn {
             /* Font size controlled by JavaScript */
-            padding: 4px 6px;
-            min-height: 24px;
+            padding: 8px 12px;
+            min-height: 32px;
         }
         
         .accessbit-widget-panel .scaling-btn {
@@ -3721,17 +3722,18 @@ class AccessibilityWidget {
         }
         
         .action-btn {
-            padding: 4px 6px !important;
+            /* Match tablet button sizing in mobile landscape */
+            padding: 8px 12px !important;
+            min-height: 32px !important;
             /* Font size controlled by JavaScript */
         }
         
-        /* Much smaller action buttons for mobile landscape */
+        /* Use same sizing for Reset / Statement / Hide */
         .action-btn.reset-btn,
         .action-btn.statement-btn,
         .action-btn.hide-btn {
-            padding: 3px 5px !important;
-            /* Font size controlled by JavaScript */
-            min-height: 20px !important;
+            padding: 8px 12px !important;
+            min-height: 32px !important;
             margin-bottom: 10px !important;
         }
         
@@ -3907,16 +3909,18 @@ class AccessibilityWidget {
         }
         
         .action-btn {
+            /* Use tablet button sizing even in aggressive mobile overrides */
             /* Font size controlled by JavaScript */
-            padding: 2px 3px !important;
+            padding: 8px 12px !important;
+            min-height: 32px !important;
         }
         
         .action-btn.reset-btn,
         .action-btn.statement-btn,
         .action-btn.hide-btn {
             /* Font size controlled by JavaScript */
-            padding: 1px 2px !important;
-            min-height: 12px !important;
+            padding: 8px 12px !important;
+            min-height: 32px !important;
         }
         
         .toggle-switch {
@@ -5066,11 +5070,12 @@ class AccessibilityWidget {
                             right: var(--widget-spacing) !important;
                             left: auto !important;
                         }
-                        .accessbit-widget-panel.mobile-mode .action-btn.reset-btn,
-                        .accessbit-widget-panel.mobile-mode .action-btn.statement-btn,
-                        .accessbit-widget-panel.mobile-mode .action-btn.hide-btn {
-                            min-height: 36px !important;
-                            padding: 6px 12px !important;
+                    .accessbit-widget-panel.mobile-mode .action-btn.reset-btn,
+                    .accessbit-widget-panel.mobile-mode .action-btn.statement-btn,
+                    .accessbit-widget-panel.mobile-mode .action-btn.hide-btn {
+                            /* Match tablet sizing inside mobile drawer */
+                            min-height: 32px !important;
+                            padding: 8px 12px !important;
                             font-size: 11px !important;
                         }
                     }
