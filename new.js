@@ -3732,6 +3732,7 @@ class AccessibilityWidget {
             padding: 3px 5px !important;
             /* Font size controlled by JavaScript */
             min-height: 20px !important;
+            margin-bottom: 10px !important;
         }
         
         .action-btn i {
@@ -3807,6 +3808,7 @@ class AccessibilityWidget {
             padding: 1px 2px !important;
             /* Font size controlled by JavaScript */
             min-height: 12px !important;
+            margin-bottom: 10px !important;
         }
         
         .action-btn i {
@@ -4930,7 +4932,7 @@ class AccessibilityWidget {
                 @media (max-width: 1280px) {
                     .accessbit-widget-panel {
                         width: calc(100% - 30px) !important;
-                        max-width: 420px !important;
+                        max-width: 480px !important;
                         height: calc(100dvh - 30px) !important;
                         bottom: 15px !important;
                         left: 15px !important;
@@ -4949,9 +4951,9 @@ class AccessibilityWidget {
                 /* STATE 2: DESKTOP FLOATING (min-width: 1281px) - vars set once by JS on load/settings */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel {
-                        width: 420px !important;
-                        height: auto !important;
-                        max-height: 800px !important;
+                        width: 480px !important;
+                        height: calc(100dvh - 40px) !important;
+                        max-height: calc(100dvh - 40px) !important;
                         top: var(--panel-top, 20px) !important;
                         right: var(--panel-right, 20px) !important;
                         left: var(--panel-left, auto) !important;
@@ -32094,7 +32096,7 @@ class AccessibilityWidget {
                 host.style.setProperty('--panel-right', 'auto');
             }
             host.style.setProperty('--panel-top', margin + 'px');
-            host.style.setProperty('--panel-width', '420px');
+            host.style.setProperty('--panel-width', '480px');
         }
     
         updateInterfaceFooter(content) {
@@ -32178,14 +32180,16 @@ class AccessibilityWidget {
         });
         
         
+        // Remove any existing FontAwesome icon AND the default SVG
         const existingIcon = iconElement.querySelector('i');
-        if (existingIcon) {
-            existingIcon.remove();
-        }
+        if (existingIcon) existingIcon.remove();
+        const defaultSvg = iconElement.querySelector('svg[data-default-icon="true"]');
+        if (defaultSvg) defaultSvg.remove();
    
         const sanitizedIconClass = this.validateClassName(iconClass);
         const iconInner = document.createElement('i');
         iconInner.className = sanitizedIconClass;
+        iconInner.setAttribute('aria-hidden', 'true');
         iconElement.appendChild(iconInner); // Now it appends to a clean container
         
         // Ensure proper styling
@@ -32202,7 +32206,8 @@ class AccessibilityWidget {
             const iconElement = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (iconElement) {
                 iconElement.setAttribute('aria-label', name);
-                iconElement.setAttribute('title', name);
+                // Don't set title; it shows as a tooltip (looks like “alt text”)
+                iconElement.removeAttribute('title');
             }
         }
         
