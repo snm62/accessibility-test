@@ -4467,7 +4467,6 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-icon:hover {
                     transform: var(--widget-icon-transform, none) scale(1.05);
-                    background: #4f46e5 !important;
                 }
                 .accessbit-widget-icon i,
                 .accessbit-widget-icon img {
@@ -4878,21 +4877,7 @@ class AccessibilityWidget {
                         padding-bottom: 16px !important;
                     }
                     /* Structure Protector */
-                    .accessbit-widget-panel.mobile-mode .button-row,
-                    .accessbit-widget-panel.mobile-mode .action-buttons,
-                    .accessbit-widget-panel.mobile-mode .settings-grid {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        width: 100% !important;
-                        gap: 10px !important;
-                    }
-                    .accessbit-widget-panel.mobile-mode .action-btn,
-                    .accessbit-widget-panel.mobile-mode .feature-card {
-                        width: 100% !important;
-                        min-height: 40px !important;
-                        margin: 0 !important;
-                        box-sizing: border-box !important;
-                    }
+                    /* Keep existing row layout for action buttons; don't force vertical stacking */
                     .accessbit-widget-panel.mobile-mode .panel-header,
                     .accessbit-widget-panel.mobile-mode .widget-header {
                         padding: 20px 16px !important;
