@@ -5164,7 +5164,7 @@ class AccessibilityWidget {
     
     
     
-                /* Resource loading priority: container ready immediately; hide alt-text until font/image loads */
+                /* Resource loading priority: hide all text in icon until font/image loads (avoids FOUC/alt-text flash) */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -5181,10 +5181,26 @@ class AccessibilityWidget {
                     background-color: #6366f1 !important;
                     width: clamp(2.5rem, 8vw, 3.75rem) !important;
                     height: clamp(2.5rem, 8vw, 3.75rem) !important;
+                    font-size: 0 !important;
+                    line-height: 0 !important;
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                     transition: all 0.3s ease;
                     pointer-events: auto;
+                }
+                .accessbit-widget-icon .sr-only {
+                    position: absolute !important;
+                    left: -9999px !important;
+                    top: 0 !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    padding: 0 !important;
+                    margin: -1px !important;
+                    overflow: hidden !important;
+                    clip: rect(0, 0, 0, 0) !important;
+                    clip-path: inset(50%) !important;
+                    white-space: nowrap !important;
+                    border: 0 !important;
                 }
                 .accessbit-widget-icon:hover {
                     transform: var(--widget-icon-transform, none) scale(1.05);
@@ -5196,10 +5212,10 @@ class AccessibilityWidget {
                     font-style: normal !important;
                     width: 60% !important;
                     height: auto !important;
+                    font-size: clamp(0.875rem, 2.5vw, 1.5rem) !important;
                 }
                 .accessbit-widget-icon i {
                     color: #ffffff;
-                    font-size: clamp(0.875rem, 2.5vw, 1.5rem) !important;
                 }
     
     
@@ -31243,7 +31259,8 @@ class AccessibilityWidget {
             } else {
                 panel.classList.remove('mobile-mode', 'side-left', 'side-right');
                 this.removeMobileSizeReductions();
-                panel.style.setProperty('transform', 'none');
+                ['left', 'right', 'top', 'bottom', 'width', 'max-width', 'height', 'max-height', 'transform'].forEach(prop => panel.style.removeProperty(prop));
+                this.updateInterfacePosition();
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         if (panel) void panel.offsetHeight;
