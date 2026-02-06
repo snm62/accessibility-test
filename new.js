@@ -4247,7 +4247,14 @@ class AccessibilityWidget {
             iconSvg.style.margin = '0';
             iconSvg.style.flexShrink = '0';
             iconSvg.style.fill = 'currentColor';
-            iconSvg.innerHTML = '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/><circle cx="256" cy="180" r="50" fill="currentColor"/><path fill="currentColor" d="M256 250v180M206 320h100M156 400h200"/>';
+            // Standing man icon: circular border + head + body, arms, and legs
+            iconSvg.innerHTML = ''
+                + '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/>'  // outer ring
+                + '<circle cx="256" cy="140" r="40" fill="currentColor"/>'                                   // head
+                + '<path d="M176 220 H336" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // arms
+                + '<path d="M256 180 V340" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // body
+                + '<path d="M256 340 L200 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>' // left leg
+                + '<path d="M256 340 L312 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'; // right leg
             icon.appendChild(iconSvg);
             const descriptionSpan = document.createElement('span');
             descriptionSpan.id = 'accessbit-widget-icon-description';
@@ -5628,9 +5635,8 @@ class AccessibilityWidget {
     
                     border: none;
     
+                    /* Use a single divider line between items: top border only */
                     border-top: 1px solid #e2e8f0;
-    
-                    border-bottom: 1px solid #e2e8f0;
     
                     min-height: 60px;
     
@@ -5644,6 +5650,13 @@ class AccessibilityWidget {
     
                     border-top: 1px solid #e2e8f0;
     
+                }
+
+
+                .profile-item:last-child {
+
+                    border-bottom: 1px solid #e2e8f0;
+
                 }
     
     
@@ -32239,7 +32252,14 @@ class AccessibilityWidget {
             defaultSvg.style.margin = '0';
             defaultSvg.style.flexShrink = '0';
             defaultSvg.style.fill = 'currentColor';
-            defaultSvg.innerHTML = '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/><circle cx="256" cy="180" r="50" fill="currentColor"/><path fill="currentColor" d="M256 250v180M206 320h100M156 400h200"/>';
+            // Same standing man SVG as in createWidget()
+            defaultSvg.innerHTML = ''
+                + '<circle cx="256" cy="256" r="220" fill="none" stroke="currentColor" stroke-width="24"/>'
+                + '<circle cx="256" cy="140" r="40" fill="currentColor"/>'
+                + '<path d="M176 220 H336" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
+                + '<path d="M256 180 V340" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
+                + '<path d="M256 340 L200 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>'
+                + '<path d="M256 340 L312 430" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>';
             iconElement.appendChild(defaultSvg);
         }
 
