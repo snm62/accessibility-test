@@ -4601,6 +4601,10 @@ class AccessibilityWidget {
                 overflow-x: hidden !important;
                 white-space: normal !important;
             }
+            /* Ensure there is always space under the Hide Interface button on all breakpoints */
+            .accessbit-widget-panel .action-btn.hide-btn {
+                margin-bottom: 12px !important;
+            }
             .accessbit-widget-panel.show,
             .accessbit-widget-panel.active {
                 display: flex !important;
@@ -4669,7 +4673,7 @@ class AccessibilityWidget {
                 .accessbit-widget-icon i,
                 .accessbit-widget-icon img {
                     display: block !important;
-                    margin: 0 !important;
+                    margin: auto !important;
                     text-indent: 0 !important;
                     font-style: normal !important;
                     width: 60% !important;
@@ -4684,7 +4688,7 @@ class AccessibilityWidget {
                     max-width: 100% !important;
                     max-height: 100% !important;
                     flex-shrink: 0 !important;
-                    margin: 0 !important;
+                    margin: auto !important;
                     fill: #ffffff;
                     color: #ffffff;
                 }
