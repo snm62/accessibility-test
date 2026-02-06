@@ -3402,413 +3402,27 @@ class AccessibilityWidget {
         }
     }
     
-    /* Mobile Devices (Small Screens) - Base styles (CSS-only layout) */
+    /* Typography/sizing only in override – no width/left/right (handled by getWidgetCSS fluid system) */
     @media (max-width: 480px) {
-        .accessbit-widget-panel {
-            width: 75vw;
-            max-width: 320px;
-            left: 12.5vw;
-            right: auto;
-            top: 0;
-            bottom: 0;
-            height: 100vh;
-            padding: 12px;
-            font-size: 12px;
-            max-height: 100vh;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-        }
-        
-        .accessbit-widget-panel h2 {
-            margin-bottom: 8px;
-            font-size: 1.5em;
-        }
-        
-        .accessbit-widget-panel h3 {
-            margin-bottom: 6px;
-            font-size: 1.2em;
-        }
-        
-        .accessbit-widget-panel h4 {
-            font-size: 1em;
-        }
-        
-        .accessbit-widget-panel p {
-            line-height: 1.3;
-            font-size: 0.9em;
-        }
-        
-        .accessbit-widget-panel .action-btn {
-            padding: 6px 10px;
-            min-height: 28px;
-            font-size: 0.9em;
-        }
-        
-        .accessbit-widget-panel .scaling-btn {
-            padding: 4px 6px;
-            min-height: 24px;
-            font-size: 0.8em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        
-        .accessbit-widget-panel .profile-info h4 {
-            font-size: 0.9em;
-        }
-        
-        .accessbit-widget-panel .profile-info p {
-            font-size: 0.8em;
-        }
-        
-        .accessbit-widget-panel .profile-item h4 {
-            font-size: 0.9em;
-        }
-        
-        .accessbit-widget-panel .profile-item p {
-            font-size: 0.8em;
-        }
-        
-        .accessbit-widget-panel .close-btn {
-            font-size: 18px;
-            padding: 6px;
-        }
-        
-        .accessbit-widget-icon {
-            width: 45px;
-            height: 45px;
-            /* Position controlled by JS; do not force a corner here */
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
+        .accessbit-widget-panel { font-size: 12px; padding: 12px; }
+        .accessbit-widget-panel h2 { margin-bottom: 8px; font-size: 1.5em; }
+        .accessbit-widget-panel h3 { margin-bottom: 6px; font-size: 1.2em; }
+        .accessbit-widget-panel h4 { font-size: 1em; }
+        .accessbit-widget-panel p { line-height: 1.3; font-size: 0.9em; }
+        .accessbit-widget-panel .action-btn { padding: 6px 10px; min-height: 28px; font-size: 0.9em; }
+        .accessbit-widget-panel .close-btn { font-size: 18px; padding: 6px; }
+    }
+    @media (min-width: 481px) and (max-width: 1280px) {
+        .accessbit-widget-panel { font-size: 13px; padding: 14px; }
+        .accessbit-widget-panel .action-btn { padding: 8px 12px; min-height: 32px; }
     }
     
-    /* Landscape Phones & Smaller Portrait Tablets (CSS-only layout) */
-    @media (min-width: 481px) and (max-width: 768px) {
-        .accessbit-widget-panel {
-            width: 80vw;
-            max-width: 380px;
-            left: 10vw;
-            right: auto;
-            top: 0;
-            bottom: 0;
-            height: 100vh;
-            padding: 14px;
-            font-size: 13px;
-            max-height: 100vh;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-        }
-        
-        .accessbit-widget-panel h2 {
-            margin-bottom: 10px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h3 {
-            margin-bottom: 8px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel p {
-            line-height: 1.4;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .action-btn {
-            padding: 8px 12px;
-            min-height: 32px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .scaling-btn {
-            padding: 5px 10px !important;
-            min-height: 26px;
-            /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-            text-align: center !important;
-        }
-        
-        .accessbit-widget-panel .scaling-btn span {
-            display: flex;
-            align-items: center;
-            line-height: 1;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .accessbit-widget-panel .profile-info h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-info p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .close-btn {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-icon {
-            width: 50px;
-            height: 50px;
-            /* Position controlled by JS */
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-    }
-    
-    /* Tablets (Portrait & Landscape) & Laptops */
-    @media (min-width: 769px) and (max-width: 1280px) {
-        .accessbit-widget-panel {
-            width: 75vw;
-            max-width: 520px;
-            max-height: calc(100vh - 40px);
-            padding: 20px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            /* Position controlled by JavaScript - no default top/left */
-            top: auto;
-            left: auto;
-            right: auto;
-            bottom: auto;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h2 {
-            margin-bottom: 12px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h3 {
-            margin-bottom: 10px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel p {
-            line-height: 1.5;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .action-btn {
-            padding: 10px 14px;
-            min-height: 36px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .scaling-btn {
-            padding: 6px 10px;
-            min-height: 28px;
-            /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-        }
-        
-        .accessbit-widget-panel .profile-info h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-info p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .close-btn {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-icon {
-            width: 55px;
-            height: 55px;
-            /* Position controlled by JS */
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-    }
-    
-    /* Larger Displays (Desktops) */
-    @media (min-width: 1012px) {
-        .accessbit-widget-panel {
-            width: 600px;
-            max-width: 600px;
-            max-height: calc(100vh - 40px);
-            padding: 24px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h2 {
-            margin-bottom: 14px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h3 {
-            margin-bottom: 12px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel p {
-            line-height: 1.6;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .action-btn {
-            padding: 12px 16px;
-            min-height: 40px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .scaling-btn {
-            padding: 8px 12px;
-            min-height: 32px;
-            /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-        }
-        
-        .accessbit-widget-panel .profile-info h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-info p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .close-btn {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-icon {
-            width: 60px;
-            height: 60px;
-            /* Position controlled by JS */
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-    }
-    
-    /* Orientation-specific styles */
     @media (orientation: landscape) and (max-width: 768px) {
         .accessbit-widget-panel {
-            width: 85vw;
-            max-width: 400px;
-            /* REMOVED: height: 100vh, top: 0, bottom: 0 - Panel should position relative to icon */
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h2 {
-            margin-bottom: 8px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h3 {
-            margin-bottom: 6px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel p {
-            line-height: 1.3;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .action-btn {
-            padding: 6px 10px;
-            min-height: 28px;
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .scaling-btn {
-            padding: 4px 6px;
-            min-height: 24px;
-            /* Font size controlled by JavaScript */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
-        }
-        
-        .accessbit-widget-panel .profile-info h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-info p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .accessbit-widget-panel .close-btn {
-            /* Font size controlled by JavaScript */
         }
     }
     
@@ -3916,16 +3530,9 @@ class AccessibilityWidget {
         }
     }
     
-    /* Small Mobile Screens (375px and below) */
     @media (max-width: 400px) {
         .accessbit-widget-panel {
-            /* Font size controlled by JavaScript */
             padding: 8px;
-            width: 90vw;
-            max-width: 300px;
-            height: 100vh;
-            top: 0;
-            bottom: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -4076,137 +3683,13 @@ class AccessibilityWidget {
         transform: none;
     }
     
-    /* ===== MOBILE RESPONSIVE - PANEL CLOSE TO ICON ===== */
-    
-    /* Removed - replaced with mobile-first approach above */
-        
-        /* Ensure rounded shape works on large tablets */
-        .accessbit-widget-icon[data-shape="rounded"] {
-            border-radius: 12px !important;
-            -webkit-border-radius: 12px !important;
-            -moz-border-radius: 12px !important;
-        }
-        
-        .accessbit-widget-icon {
-            width: 55px !important;
-            height: 55px !important;
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-        
-        /* Better content spacing for large tablets */
-        .accessbit-widget-panel h2 {
-            /* Font size controlled by JavaScript */
-            margin-bottom: 14px !important;
-        }
-        
-        .accessbit-widget-panel h3 {
-            /* Font size controlled by JavaScript */
-            margin-bottom: 12px !important;
-        }
-        
-        .profile-item {
-            padding: 12px !important;
-            margin-bottom: 10px !important;
-        }
-        
-        .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .action-btn {
-            padding: 10px 14px !important;
-            /* Font size controlled by JavaScript */
-        }
-    }
-    
-    /* Removed - replaced with mobile-first approach above */
-        
-        /* Ensure rounded shape works on tablets */
-        .accessbit-widget-icon[data-shape="rounded"] {
-            border-radius: 12px !important;
-            -webkit-border-radius: 12px !important;
-            -moz-border-radius: 12px !important;
-        }
-        
-        .accessbit-widget-icon {
-            width: 50px !important;
-            height: 50px !important;
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-    }
-    
-    /* iPad Mini and Tablet - Responsive sizing */
+    /* iPad / tablet: typography only – no width/position (getWidgetCSS fluid system) */
     @media (max-width: 819px) and (min-width: 769px) {
-        .accessbit-widget-panel {
-            width: 85vw;
-            max-width: 450px;
-            /* Font size controlled by JavaScript */
-            padding: 16px;
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-            position: fixed;
-            z-index: 100001;
-            /* Position controlled by JavaScript - no default top/left */
-            top: auto;
-            left: auto;
-            right: auto;
-            bottom: auto;
-        }
-        
-        /* Ensure rounded shape works on iPad Mini */
-        .accessbit-widget-icon[data-shape="rounded"] {
-            border-radius: 12px;
-            -webkit-border-radius: 12px;
-            -moz-border-radius: 12px;
-        }
-        
-        .accessbit-widget-icon {
-            width: 50px;
-            height: 50px;
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-        
-        /* Better content spacing for tablet */
-        .accessbit-widget-panel h2 {
-            /* Font size controlled by JavaScript */
-            margin-bottom: 12px;
-        }
-        
-        .accessbit-widget-panel h3 {
-            /* Font size controlled by JavaScript */
-            margin-bottom: 10px;
-        }
-        
-        .profile-item {
-            padding: 10px;
-            margin-bottom: 8px;
-        }
-        
-        .profile-item h4 {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .profile-item p {
-            /* Font size controlled by JavaScript */
-        }
-        
-        .action-btn {
-            padding: 8px 12px;
-            /* Font size controlled by JavaScript */
-        }
+        .accessbit-widget-panel { padding: 16px; overflow-y: auto; }
+        .accessbit-widget-panel h2 { margin-bottom: 12px; }
+        .accessbit-widget-panel h3 { margin-bottom: 10px; }
+        .profile-item { padding: 10px; margin-bottom: 8px; }
+        .action-btn { padding: 8px 12px; }
     }
     
     /* Removed - replaced with mobile-first approach above */
@@ -4289,28 +3772,12 @@ class AccessibilityWidget {
     /* Mobile Portrait - Reasonable text and toggles */
     @media (max-width: 480px) {
         .accessbit-widget-panel {
-            width: 75vw !important;
-            max-width: 320px !important;
-            /* Font size controlled by JavaScript */
             padding: 12px !important;
-            height: 100vh !important;
-            top: 0 !important;
-            bottom: 0 !important;
             overflow-y: auto;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
         }
-        
-        .accessbit-widget-icon {
-            width: 40px !important;
-            height: 40px !important;
-        }
-        
-        .accessbit-widget-icon i {
-            /* Font size controlled by JavaScript */
-        }
-        
         /* Reasonable text and toggles for mobile portrait */
         .accessbit-widget-panel h2 {
             /* Font size controlled by JavaScript */
@@ -5068,31 +4535,31 @@ class AccessibilityWidget {
                 -moz-border-radius: 12px !important;
             }
             
-            /* Force panel positioning; full height so widget covers screen length; no scrollbar on panel/header */
+            /* Panel base: fluid width/height (single source of truth, no fixed px) */
             .accessbit-widget-panel {
+                position: fixed !important;
                 z-index: 2147483646 !important;
                 display: none !important;
-                overflow: hidden !important;
-                overflow-x: hidden !important;
-                overflow-y: hidden !important;
-                max-height: calc(100vh - 20px) !important;
                 flex-direction: column !important;
+                overflow: hidden !important;
+                background: #ffffff !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
                 box-sizing: border-box !important;
-                max-width: min(420px, 94vw) !important;
-            }
-            /* Panel always covers viewport height when open (CSS-driven, any screen size) */
-            .accessbit-widget-panel.show,
-            .accessbit-widget-panel.active {
-                height: calc(100vh - 20px) !important;
-                min-height: calc(100vh - 20px) !important;
+                width: var(--widget-width) !important;
+                height: calc(100vh - (var(--widget-spacing) * 2)) !important;
+                max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
             }
             @supports (height: 100dvh) {
-                .accessbit-widget-panel.show,
-                .accessbit-widget-panel.active {
-                    height: calc(100dvh - 20px) !important;
-                    min-height: calc(100dvh - 20px) !important;
-                    max-height: calc(100dvh - 20px) !important;
+                .accessbit-widget-panel {
+                    height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                    max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
                 }
+            }
+            .accessbit-widget-panel.show,
+            .accessbit-widget-panel.active {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
             /* Header must not scroll – no scrollbar near "Accessibility Adjustments" */
             .accessbit-widget-panel .panel-header,
@@ -5141,30 +4608,21 @@ class AccessibilityWidget {
                 /* Accessibility Widget Styles - Shadow DOM */
     
                 :host {
-    
+                    --widget-width: min(420px, 92vw);
+                    --widget-spacing: 15px;
                     position: fixed;
-    
                     top: 0;
-    
                     left: 0;
-    
                     width: 100%;
-    
                     height: 100%;
-    
                     pointer-events: none;
-    
                     z-index: 2147483645 !important;
-    
                     isolation: isolate;
-    
                     contain: layout style paint;
-    
                 }
     
     
-    
-                /* Resource loading priority: hide all text in icon until font/image loads (avoids FOUC/alt-text flash) */
+                /* Icon: fluid size, anti-flicker (hides alt-text until font loads) */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -5173,16 +4631,14 @@ class AccessibilityWidget {
                     left: var(--widget-icon-left, auto) !important;
                     top: var(--widget-icon-top, auto) !important;
                     transform: var(--widget-icon-transform, none) !important;
+                    width: clamp(40px, 10vw, 60px) !important;
+                    height: clamp(40px, 10vw, 60px) !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    text-indent: -9999px !important;
                     overflow: hidden !important;
+                    text-indent: -9999px !important;
                     background-color: #6366f1 !important;
-                    width: clamp(2.5rem, 8vw, 3.75rem) !important;
-                    height: clamp(2.5rem, 8vw, 3.75rem) !important;
-                    font-size: 0 !important;
-                    line-height: 0 !important;
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                     transition: all 0.3s ease;
@@ -5212,9 +4668,7 @@ class AccessibilityWidget {
                     font-style: normal !important;
                     width: 60% !important;
                     height: auto !important;
-                    font-size: clamp(0.875rem, 2.5vw, 1.5rem) !important;
-                }
-                .accessbit-widget-icon i {
+                    font-size: clamp(18px, 4vw, 24px) !important;
                     color: #ffffff;
                 }
     
@@ -5466,46 +4920,50 @@ class AccessibilityWidget {
     
     
     
-                /* --- Desktop Base Panel: no transform transition (prevents skeleton slide on close) --- */
-                .accessbit-widget-panel {
-                    position: fixed !important;
-                    display: none !important;
-                    flex-direction: column !important;
-                    overflow: hidden !important;
-                    z-index: 2147483647 !important;
-                    background: #ffffff !important;
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
-                    border-radius: 12px !important;
-                    transition: opacity 0.2s ease !important;
-                }
-                .accessbit-widget-panel.active,
-                .accessbit-widget-panel.show {
-                    display: flex !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                }
-                /* Desktop: CSS-driven position via left/right + auto (no pixel left = no specificity war on resize) */
-                @media (min-width: 1281px) {
+                /* --- Universal breakpoints (no conflicting fixed widths) --- */
+                /* [Small Mobile: < 480px] */
+                @media (max-width: 480px) {
+                    :host {
+                        --widget-width: 92vw;
+                        --widget-spacing: 10px;
+                    }
                     .accessbit-widget-panel:not(.mobile-mode) {
-                        position: fixed !important;
-                        top: var(--panel-top, 20px) !important;
-                        left: var(--panel-left, 20px) !important;
-                        right: var(--panel-right, auto) !important;
-                        width: var(--panel-width, min(420px, 94vw)) !important;
-                        height: calc(100vh - 20px) !important;
-                        max-height: calc(100vh - 20px) !important;
-                        max-width: min(420px, 94vw) !important;
+                        border-radius: 12px !important;
+                        left: 4vw !important;
+                        right: auto !important;
                     }
                 }
-                /* Ultra-wide (1441px+): cap height so panel doesn't look like a skyscraper on 4K */
-                @media (min-width: 1441px) {
+                /* [Tablets & small laptops: 481px to 1280px] - Drawer mode (mobile-mode class) */
+                @media (min-width: 481px) and (max-width: 1280px) {
+                    :host {
+                        --widget-width: min(400px, 92vw);
+                        --widget-spacing: 15px;
+                    }
+                    .accessbit-widget-panel.mobile-mode {
+                        border-radius: 16px !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.side-right { right: 15px !important; left: auto !important; }
+                    .accessbit-widget-panel.mobile-mode.side-left { left: 15px !important; right: auto !important; }
+                }
+                /* [Desktop: 1281px+] - Position from CSS variables only */
+                @media (min-width: 1281px) {
                     .accessbit-widget-panel:not(.mobile-mode) {
+                        top: var(--panel-top, 20px) !important;
+                        left: var(--panel-left, auto) !important;
+                        right: var(--panel-right, 20px) !important;
+                        width: 420px !important;
+                        height: calc(100vh - 40px) !important;
                         max-height: 800px !important;
-                        height: auto !important;
+                        border-radius: 16px !important;
+                    }
+                }
+                /* [Ultra-wide: > 1921px] - Cap height to prevent skyscraper look */
+                @media (min-width: 1921px) {
+                    .accessbit-widget-panel:not(.mobile-mode) {
+                        height: 800px !important;
+                        max-height: 800px !important;
                         top: 50% !important;
                         transform: translateY(-50%) !important;
-                        border-radius: 16px !important;
-                        box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
                     }
                 }
                 /* Sleek custom scrollbar */
@@ -5547,22 +5005,19 @@ class AccessibilityWidget {
                 }
                 .accessbit-widget-content *,
                 .accessbit-widget-panel .panel-content * { max-width: 100% !important; }
-                /* --- Nest Hub & large tablet (≤1280px) – drawer mode; icon clamp so it never breaks --- */
+                /* --- ≤1280px: drawer mode (mobile-mode) – fluid height with 100dvh --- */
                 @media (max-width: 1280px) {
-                    .accessbit-widget-icon {
-                        width: clamp(2rem, 6vw, 3.125rem) !important;
-                        height: clamp(2rem, 6vw, 3.125rem) !important;
-                    }
                     .accessbit-widget-panel.mobile-mode {
-                        width: calc(100% - 1.5rem) !important;
+                        width: calc(100% - (var(--widget-spacing) * 2)) !important;
                         max-width: 420px !important;
-                        height: calc(100vh - 1.5rem) !important;
-                        top: 0.75rem !important;
-                        bottom: 0.75rem !important;
-                        margin: 0 0.75rem !important;
+                        height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                        max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                        top: var(--widget-spacing) !important;
+                        bottom: var(--widget-spacing) !important;
+                        margin: 0 var(--widget-spacing) !important;
                         border-radius: 12px !important;
                         box-sizing: border-box !important;
-                        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+                        transition: transform 0.3s ease !important;
                     }
                     .accessbit-widget-panel.mobile-mode.side-left {
                         left: 0 !important;
@@ -5580,24 +5035,18 @@ class AccessibilityWidget {
                     .accessbit-widget-panel.mobile-mode:not(.active) {
                         transition: none !important;
                     }
-                    @supports (height: 100dvh) {
-                        .accessbit-widget-panel.mobile-mode {
-                            height: calc(100dvh - 1.5rem) !important;
-                            max-height: calc(100dvh - 1.5rem) !important;
-                        }
-                    }
                     @media (max-width: 480px) {
                         .accessbit-widget-panel.mobile-mode {
-                            width: calc(100vw - 1.5rem) !important;
-                            max-width: calc(100vw - 1.5rem) !important;
-                            margin: 0 0.75rem !important;
+                            width: calc(100vw - (var(--widget-spacing) * 2)) !important;
+                            max-width: calc(100vw - (var(--widget-spacing) * 2)) !important;
+                            margin: 0 var(--widget-spacing) !important;
                         }
                         .accessbit-widget-panel.mobile-mode.side-left {
-                            left: 0.75rem !important;
+                            left: var(--widget-spacing) !important;
                             right: auto !important;
                         }
                         .accessbit-widget-panel.mobile-mode.side-right {
-                            right: 0.75rem !important;
+                            right: var(--widget-spacing) !important;
                             left: auto !important;
                         }
                     }
@@ -32712,29 +32161,26 @@ class AccessibilityWidget {
         updateInterfacePosition() {
             const host = this.shadowRoot?.host;
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
-            if (!host || !panel || window.innerWidth <= 1280) return;
+            if (!host || !panel) return;
 
-            const margin = 20;
-            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
-            const isRightSide = hPos.includes('right');
+            const screenWidth = window.innerWidth;
+            const isMobile = screenWidth <= 1280;
 
-            host.style.setProperty('--panel-width', '420px');
-            host.style.setProperty('--panel-top', `${margin}px`);
-            if (isRightSide) {
-                host.style.setProperty('--panel-right', `${margin}px`);
-                host.style.setProperty('--panel-left', 'auto');
-            } else {
-                host.style.setProperty('--panel-left', `${margin}px`);
-                host.style.setProperty('--panel-right', 'auto');
+            // Remove ALL inline pixel styles so media queries control layout (prevents break at 1200px)
+            ['width', 'height', 'top', 'left', 'right', 'bottom', 'transform'].forEach(p => panel.style.removeProperty(p));
+
+            if (!isMobile) {
+                const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
+                if (hPos.includes('right')) {
+                    host.style.setProperty('--panel-right', '20px');
+                    host.style.setProperty('--panel-left', 'auto');
+                } else {
+                    host.style.setProperty('--panel-left', '20px');
+                    host.style.setProperty('--panel-right', 'auto');
+                }
+                host.style.setProperty('--panel-top', '20px');
+                host.style.setProperty('--panel-width', '420px');
             }
-
-            panel.style.removeProperty('left');
-            panel.style.removeProperty('right');
-            panel.style.removeProperty('top');
-            panel.style.removeProperty('bottom');
-            panel.style.removeProperty('width');
-            panel.style.removeProperty('height');
-            panel.style.removeProperty('transform');
         }
     
         updateInterfaceFooter(content) {
