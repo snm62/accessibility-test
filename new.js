@@ -4212,12 +4212,8 @@ class AccessibilityWidget {
     
             icon.setAttribute('tabindex', '0');
     
-            icon.setAttribute('aria-label', 'Open accessibility options');
-    
             icon.setAttribute('aria-expanded', 'false');
-    
             icon.setAttribute('aria-describedby', 'accessbit-widget-icon-description');
-    
             icon.textContent = '';
             const iconElement = document.createElement('i');
             iconElement.className = 'fas fa-universal-access';
@@ -4228,6 +4224,11 @@ class AccessibilityWidget {
             descriptionSpan.className = 'sr-only';
             descriptionSpan.textContent = 'Click to open accessibility settings panel';
             icon.appendChild(descriptionSpan);
+            // Defer aria-label so browser doesn't show it as visible "alt text" before icon font loads
+            icon.setAttribute('aria-label', '');
+            setTimeout(() => {
+                if (icon.isConnected) icon.setAttribute('aria-label', 'Open accessibility options');
+            }, 400);
     
             icon.style.pointerEvents = 'auto';
             
@@ -4622,7 +4623,7 @@ class AccessibilityWidget {
                 }
     
     
-                /* Icon: fluid size, anti-flicker (hides alt-text until font loads) */
+                /* Icon: fluid size, anti-flicker (hides alt-text/aria-label until font loads) */
                 .accessbit-widget-icon {
                     position: fixed !important;
                     z-index: 2147483645 !important;
@@ -4638,6 +4639,8 @@ class AccessibilityWidget {
                     justify-content: center !important;
                     overflow: hidden !important;
                     text-indent: -9999px !important;
+                    font-size: 0 !important;
+                    line-height: 0 !important;
                     background-color: #6366f1 !important;
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -32170,16 +32173,32 @@ class AccessibilityWidget {
             ['width', 'height', 'top', 'left', 'right', 'bottom', 'transform'].forEach(p => panel.style.removeProperty(p));
 
             if (!isMobile) {
+                const margin = 20;
                 const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
-                if (hPos.includes('right')) {
-                    host.style.setProperty('--panel-right', '20px');
+                const isRight = hPos.includes('right');
+                // Set on HOST so CSS in shadow can inherit
+                if (isRight) {
+                    host.style.setProperty('--panel-right', margin + 'px');
                     host.style.setProperty('--panel-left', 'auto');
                 } else {
-                    host.style.setProperty('--panel-left', '20px');
+                    host.style.setProperty('--panel-left', margin + 'px');
                     host.style.setProperty('--panel-right', 'auto');
                 }
-                host.style.setProperty('--panel-top', '20px');
+                host.style.setProperty('--panel-top', margin + 'px');
                 host.style.setProperty('--panel-width', '420px');
+                // Also set on PANEL so position is guaranteed (avoids inheritance quirks at 1280px boundary)
+                if (isRight) {
+                    panel.style.setProperty('--panel-right', margin + 'px');
+                    panel.style.setProperty('--panel-left', 'auto');
+                } else {
+                    panel.style.setProperty('--panel-left', margin + 'px');
+                    panel.style.setProperty('--panel-right', 'auto');
+                }
+                panel.style.setProperty('--panel-top', margin + 'px');
+                panel.style.setProperty('--panel-width', '420px');
+            } else {
+                // Mobile: clear panel vars so drawer CSS (mobile-mode) is the only source
+                ['--panel-left', '--panel-right', '--panel-top', '--panel-width'].forEach(p => panel.style.removeProperty(p));
             }
         }
     
