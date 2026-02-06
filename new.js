@@ -4215,7 +4215,7 @@ class AccessibilityWidget {
             const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             iconSvg.setAttribute('data-default-icon', 'true');
             iconSvg.setAttribute('aria-hidden', 'true');
-            iconSvg.setAttribute('viewBox', '0 0 16 16');
+            iconSvg.setAttribute('viewBox', '0 0 512 512');
             iconSvg.setAttribute('focusable', 'false');
             iconSvg.style.width = '60%';
             iconSvg.style.height = '60%';
@@ -4223,8 +4223,14 @@ class AccessibilityWidget {
             iconSvg.style.margin = '0';
             iconSvg.style.flexShrink = '0';
             iconSvg.style.fill = 'currentColor';
-            // Standing man accessibility icon (Bootstrap \"universal-access\" style)
-            iconSvg.innerHTML = '<path d=\"M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.531 4H14.47a.531.531 0 0 1 .066 1.058L10 5.5V9l.452 6.42a.535.535 0 0 1-1.053.174L8.243 9.97c-.064-.252-.422-.252-.486 0l-1.156 5.624a.535.535 0 0 1-1.053-.174L6 9z\"/>';
+            // Standing man accessibility icon with outer ring (white on transparent; background comes from button)
+            iconSvg.innerHTML = ''
+                + '<circle cx=\"256\" cy=\"256\" r=\"220\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" />'  // outer ring
+                + '<circle cx=\"256\" cy=\"176\" r=\"40\" fill=\"currentColor\" />'                                   // head
+                + '<path d=\"M160 236 H352\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />' // arms
+                + '<path d=\"M256 216 V360\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'  // body
+                + '<path d=\"M256 360 L192 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />' // left leg
+                + '<path d=\"M256 360 L320 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'; // right leg
             icon.appendChild(iconSvg);
             const descriptionSpan = document.createElement('span');
             descriptionSpan.id = 'accessbit-widget-icon-description';
@@ -32201,7 +32207,7 @@ class AccessibilityWidget {
             defaultSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             defaultSvg.setAttribute('data-default-icon', 'true');
             defaultSvg.setAttribute('aria-hidden', 'true');
-            defaultSvg.setAttribute('viewBox', '0 0 16 16');
+            defaultSvg.setAttribute('viewBox', '0 0 512 512');
             defaultSvg.setAttribute('focusable', 'false');
             defaultSvg.style.width = '60%';
             defaultSvg.style.height = '60%';
@@ -32209,8 +32215,14 @@ class AccessibilityWidget {
             defaultSvg.style.margin = '0';
             defaultSvg.style.flexShrink = '0';
             defaultSvg.style.fill = 'currentColor';
-            // Same standing man accessibility SVG as in createWidget()
-            defaultSvg.innerHTML = '<path d=\"M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.531 4H14.47a.531.531 0 0 1 .066 1.058L10 5.5V9l.452 6.42a.535.535 0 0 1-1.053.174L8.243 9.97c-.064-.252-.422-.252-.486 0l-1.156 5.624a.535.535 0 0 1-1.053-.174L6 9z\"/>';
+            // Same standing man with ring as in createWidget()
+            defaultSvg.innerHTML = ''
+                + '<circle cx=\"256\" cy=\"256\" r=\"220\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" />'
+                + '<circle cx=\"256\" cy=\"176\" r=\"40\" fill=\"currentColor\" />'
+                + '<path d=\"M160 236 H352\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'
+                + '<path d=\"M256 216 V360\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'
+                + '<path d=\"M256 360 L192 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />'
+                + '<path d=\"M256 360 L320 464\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"40\" stroke-linecap=\"round\" />';
             iconElement.appendChild(defaultSvg);
         }
 
