@@ -30895,42 +30895,9 @@ class AccessibilityWidget {
             }
         }
         
-        applyMobileButtonStacking() {
-
-            // Find the action buttons container
-            const actionButtons = this.shadowRoot?.querySelector('.action-buttons');
-            const buttonRows = this.shadowRoot?.querySelectorAll('.button-row');
-            
-            
-            
-            if (actionButtons) {
-                // Stack all buttons vertically on mobile
-                actionButtons.style.setProperty('flex-direction', 'column', 'important');
-                actionButtons.style.setProperty('gap', '8px', 'important');
-                actionButtons.style.setProperty('align-items', 'stretch', 'important');
-
-            }
-            
-            if (buttonRows && buttonRows.length > 0) {
-                buttonRows.forEach((row, index) => {
-                    // Make each button row stack vertically
-                    row.style.setProperty('flex-direction', 'column', 'important');
-                    row.style.setProperty('gap', '8px', 'important');
-                    row.style.setProperty('width', '100%', 'important');
-                
-                });
-            }
-            
-            // Also ensure individual buttons take full width
-            const actionBtns = this.shadowRoot?.querySelectorAll('.action-btn');
-            if (actionBtns && actionBtns.length > 0) {
-                actionBtns.forEach((btn, index) => {
-                    btn.style.setProperty('width', '100%', 'important');
-                    btn.style.setProperty('justify-content', 'center', 'important');
-                   
-                });
-            }
-        }
+        // applyMobileButtonStacking previously forced Reset/Statement/Hide buttons to stack.
+        // It is now intentionally a no-op so button layout always matches the base CSS rows.
+        applyMobileButtonStacking() {}
         
         applyMobileSizeReductions() {
             /* Action buttons, toggles, profile items, headings: handled by getWidgetCSS() @media (max-width: 1280px) for fluid responsiveness */
