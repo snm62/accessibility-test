@@ -4751,22 +4751,21 @@ class AccessibilityWidget {
                 /* STATE 1: MOBILE DRAWER (max-width: 1280px) */
                 @media (max-width: 1280px) {
                     .accessbit-widget-panel {
-                        /* Center the panel horizontally within the viewport */
-                        width: calc(100% - 30px) !important;
+                        /* Symmetric spacing on both sides so panel is visually centred */
+                        width: auto !important;
                         max-width: 480px !important;
                         height: calc(100dvh - 30px) !important;
                         bottom: 15px !important;
-                        left: 50% !important;
-                        right: auto !important;
+                        left: 15px !important;
+                        right: 15px !important;
                         top: auto !important;
-                        transform: translateX(-50%) !important;
-                        transition: none !important;
+                        transform: none !important;
+                        transition: transform 0.3s ease !important;
                         border-radius: 12px !important;
                     }
                     .accessbit-widget-panel.active,
                     .accessbit-widget-panel.show {
-                        /* Same centered position when visible */
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                         display: flex !important;
                     }
                 }
