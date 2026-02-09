@@ -10340,7 +10340,10 @@ class AccessibilityWidget {
                 if (sessionStorage.getItem('accessbit-open-panel-after-load') !== '1') return;
                 sessionStorage.removeItem('accessbit-open-panel-after-load');
                 const panel = this.shadowRoot && this.shadowRoot.getElementById('accessbit-widget-panel');
-                if (panel && !panel.classList.contains('active')) this.togglePanel();
+                if (panel && !panel.classList.contains('active')) {
+                    this._reopenAfterLoadNoFocus = true;
+                    this.togglePanel();
+                }
             } catch (_) {}
         }
     
@@ -29956,14 +29959,17 @@ class AccessibilityWidget {
                         setTimeout(fixScrolling, 0);
                     }
                     
-                    // Focus first focusable element in panel
-                    const focusPanel = () => {
-                        this.ensureFocusInPanel();
-                    };
-                    const rafId2 = requestAnimationFrame(focusPanel);
-                    // Fallback if requestAnimationFrame is blocked (seizure-safe mode)
-                    if (rafId2 === 0) {
-                        setTimeout(focusPanel, 0);
+                    // Focus first focusable element in panel (skip when reopening after refresh to avoid focus ring)
+                    if (!this._reopenAfterLoadNoFocus) {
+                        const focusPanel = () => {
+                            this.ensureFocusInPanel();
+                        };
+                        const rafId2 = requestAnimationFrame(focusPanel);
+                        if (rafId2 === 0) {
+                            setTimeout(focusPanel, 0);
+                        }
+                    } else {
+                        this._reopenAfterLoadNoFocus = false;
                     }
                     
                     this.announceToScreenReader('Accessibility panel opened. Use Tab to navigate, Enter or Space to toggle features, and Escape to close.');
