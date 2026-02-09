@@ -1873,6 +1873,9 @@ class AccessibilityWidget {
                 this.bindEvents();
     
                 this.applySettings();
+    
+                // Reopen panel after refresh if user disabled a feature that reloads (e.g. light contrast)
+                setTimeout(() => this.reopenPanelAfterLoadIfRequested(), 50);
                 
                 // Set up ResizeObserver AFTER icon visibility is determined
                 // This prevents it from firing before _iconExplicitlyShown is set
@@ -10331,6 +10334,16 @@ class AccessibilityWidget {
     
         }
     
+        /** If the user disabled a feature that triggers a reload (e.g. light contrast), reopen the panel after load. Flag is set before reload and cleared here so we only reopen once. */
+        reopenPanelAfterLoadIfRequested() {
+            try {
+                if (sessionStorage.getItem('accessbit-open-panel-after-load') !== '1') return;
+                sessionStorage.removeItem('accessbit-open-panel-after-load');
+                const panel = this.shadowRoot && this.shadowRoot.getElementById('accessbit-widget-panel');
+                if (panel && !panel.classList.contains('active')) this.togglePanel();
+            } catch (_) {}
+        }
+    
     
     
         showStatement() {
@@ -18589,6 +18602,7 @@ class AccessibilityWidget {
             
             // Refresh the page to ensure all elements return to their original state
             setTimeout(() => {
+                try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
                 window.location.reload();
             }, 100);
     
@@ -23607,6 +23621,7 @@ class AccessibilityWidget {
             // Stop autoplay media and JS-driven sliders (e.g., Swiper/Webflow)
             this.stopAutoplayMedia();
             this.stopJavaScriptAnimations();
+            this.preserveManualSliderNavigation();
 
             // Stop Webflow interactions / data-w-id transforms and hovers
             try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
@@ -23673,6 +23688,77 @@ class AccessibilityWidget {
                     transition: none !important;
                     transform: none !important;
                 }
+
+                /* Same as seizure: widget container never affected by pause */
+                body.stop-animation #accessbit-widget-container,
+                body.stop-animation #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
+                }
+                /* Same as seizure: freeze site motion excluding widget */
+                html.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]),
+                body.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+                /* Same as seizure: Lottie/Canvas visible but unclickable */
+                html.stop-animation lottie-player:not([id*="accessbit"]),
+                html.stop-animation dotlottie-player:not([id*="accessbit"]),
+                html.stop-animation canvas:not([id*="accessbit"]),
+                body.stop-animation lottie-player:not([id*="accessbit"]),
+                body.stop-animation dotlottie-player:not([id*="accessbit"]),
+                body.stop-animation canvas:not([id*="accessbit"]) {
+                    pointer-events: none !important;
+                }
+                /* Same as seizure: protect widget panel/icon */
+                body.stop-animation #accessbit-widget-container,
+                body.stop-animation [id*="accessbit-widget"],
+                body.stop-animation .accessbit-widget-panel {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transition: opacity 0.25s ease, transform 0.25s ease !important;
+                }
+                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                body.stop-animation video, body.stop-animation audio, body.stop-animation iframe, body.stop-animation embed, body.stop-animation object, body.stop-animation [autoplay], body.stop-animation [data-autoplay], body.stop-animation [class*="autoplay"], body.stop-animation [class*="video"], body.stop-animation [class*="media"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                /* SLIDERS: Block auto-play animations but allow manual navigation - preserve transforms */
+                body.stop-animation .swiper-slide,
+                body.stop-animation .slick-slide,
+                body.stop-animation .carousel-item,
+                body.stop-animation [class*="swiper"] *,
+                body.stop-animation [class*="slick"] *,
+                body.stop-animation [class*="carousel"] *,
+                body.stop-animation [data-slider] *,
+                body.stop-animation [data-carousel] * {
+                    transform: unset !important;
+                }
+                /* SLIDERS: Block auto-play animations but allow manual navigation */
+                body.stop-animation .swiper,
+                body.stop-animation .swiper-container,
+                body.stop-animation .slick-slider,
+                body.stop-animation .carousel,
+                body.stop-animation [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
+                body.stop-animation [class*="carousel"],
+                body.stop-animation [data-slider],
+                body.stop-animation [data-carousel] {
+                    animation: none !important;
+                    pointer-events: auto !important;
+                    cursor: default !important;
+                    transition: transform 0.3s ease !important;
+                }
+                /* Slider slides: block auto-animations but allow manual slide changes */
+                body.stop-animation .swiper-slide,
+                body.stop-animation .slick-slide,
+                body.stop-animation .carousel-item {
+                    animation: none !important;
+                    transition: transform 0.3s ease !important;
+                    pointer-events: auto !important;
+                }
             `;
             document.head.appendChild(style);
         }
@@ -23680,6 +23766,67 @@ class AccessibilityWidget {
         
         stopDOMAnimationLoops() {
             
+        }
+        
+        // Preserve manual slider navigation controls: arrows and dots remain functional; only pause autoplay
+        preserveManualSliderNavigation() {
+            try {
+                const queryFn = (sel) => {
+                    const all = document.querySelectorAll(sel);
+                    return Array.from(all).filter(el => !el.closest('#accessbit-widget-container'));
+                };
+                const sliderControlSelectors = [
+                    '.swiper-button-next', '.swiper-button-prev', '.swiper-pagination-bullet', '.swiper-pagination-clickable',
+                    '.slick-next', '.slick-prev', '.slick-dots li', '.slick-dots button',
+                    '.glide__arrow', '.glide__bullet', '.splide__arrow', '.splide__pagination__page',
+                    '.carousel-control-next', '.carousel-control-prev', '.carousel-indicators li', '.carousel-indicators button',
+                    '[data-slide]', '[data-bs-slide]', '[data-glide-dir]'
+                ];
+                queryFn(sliderControlSelectors.join(',')).forEach(ctrl => {
+                    try {
+                        ctrl.style.pointerEvents = 'auto';
+                        ctrl.style.cursor = 'pointer';
+                        ctrl.style.visibility = '';
+                        ctrl.style.opacity = '';
+                    } catch (_) {}
+                });
+                try {
+                    const swipers = queryFn('.swiper, .swiper-container');
+                    swipers.forEach(el => {
+                        const inst = el.swiper || el.__swiper || (el._swiper || null);
+                        if (inst && inst.autoplay && typeof inst.autoplay.stop === 'function') {
+                            inst.autoplay.stop();
+                        }
+                    });
+                } catch (_) {}
+                try {
+                    const jq = window.jQuery || window.$;
+                    if (jq) {
+                        jq('.slick-slider').each(function() {
+                            try { jq(this).slick && jq(this).slick('slickPause'); } catch (e) {}
+                        });
+                    }
+                } catch (_) {}
+                try {
+                    queryFn('.splide').forEach(el => {
+                        const inst = el.splide || el._splide || null;
+                        if (inst && typeof inst.options === 'object') {
+                            try { inst.options = Object.assign({}, inst.options, { autoplay: false }); } catch (e) {}
+                            if (inst.Components && inst.Components.Autoplay && typeof inst.Components.Autoplay.pause === 'function') {
+                                inst.Components.Autoplay.pause();
+                            }
+                        }
+                    });
+                } catch (_) {}
+                try {
+                    document.querySelectorAll('.glide').forEach(el => {
+                        const inst = el._glide || null;
+                        if (inst && typeof inst.pause === 'function') {
+                            inst.pause();
+                        }
+                    });
+                } catch (_) {}
+            } catch (_) {}
         }
         
         
@@ -26248,6 +26395,7 @@ class AccessibilityWidget {
 
             this.stopLottieAnimations();
             this.stopAutoplayMedia();
+            this.preserveManualSliderNavigation();
 
             // Observer setup
             if (this.seizureObserver) this.seizureObserver.disconnect();
@@ -26352,6 +26500,60 @@ class AccessibilityWidget {
                     opacity: 1 !important;
                     visibility: visible !important;
                     transition: opacity 0.25s ease, transform 0.25s ease !important;
+                }
+                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
+                body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"],
+                body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"],
+                body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"],
+                body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
+                html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"],
+                html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"],
+                html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"],
+                html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
+                    animation: none !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                /* SLIDERS: Block auto-play animations but allow manual navigation - preserve transforms */
+                body.seizure-safe .swiper-slide,
+                body.seizure-safe .slick-slide,
+                body.seizure-safe .carousel-item,
+                body.seizure-safe [class*="swiper"] *,
+                body.seizure-safe [class*="slick"] *,
+                body.seizure-safe [class*="carousel"] *,
+                body.seizure-safe [data-slider] *,
+                body.seizure-safe [data-carousel] * {
+                    transform: unset !important;
+                }
+                /* SLIDERS: Block auto-play animations but allow manual navigation */
+                body.seizure-safe .swiper,
+                body.seizure-safe .swiper-container,
+                body.seizure-safe .slick-slider,
+                body.seizure-safe .carousel,
+                body.seizure-safe [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
+                body.seizure-safe [class*="carousel"],
+                body.seizure-safe [data-slider],
+                body.seizure-safe [data-carousel] {
+                    animation: none !important;
+                    pointer-events: auto !important;
+                    cursor: default !important;
+                    transition: transform 0.3s ease !important;
+                }
+                /* Slider slides: block auto-animations but allow manual slide changes */
+                body.seizure-safe .swiper-slide,
+                body.seizure-safe .slick-slide,
+                body.seizure-safe .carousel-item {
+                    animation: none !important;
+                    transition: transform 0.3s ease !important;
+                    pointer-events: auto !important;
                 }
             `;
         }
