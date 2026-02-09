@@ -532,7 +532,10 @@ function applyVisionImpaired(on) {
                         on ? widget.enableSeizureSafe() : widget.disableSeizureSafe();
                     } else {
                         document.documentElement.classList.toggle('seizure-safe', on);
-                        if (!on) window.location.reload();
+                        if (!on) {
+                            try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
+                            window.location.reload();
+                        }
                     }
                 });
                 input.__seizureBound = true;
@@ -15324,6 +15327,7 @@ class AccessibilityWidget {
             // Force a quick refresh to fully restore original styles/layout after un-highlighting
             try {
                 setTimeout(() => {
+                    try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
                     try { window.location.reload(); } catch (_) {}
                 }, 50);
             } catch (_) {}
@@ -20388,6 +20392,7 @@ class AccessibilityWidget {
             this.restoreCustomPlayers();
             
             // Refresh page to ensure all audio is fully restored
+            try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
             window.location.reload();
           
         }
@@ -23539,7 +23544,7 @@ class AccessibilityWidget {
             if (blackCursorDisabled && whiteCursorDisabled) {
     
                 // Refresh the page immediately without showing any message
-    
+                try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
                 window.location.reload();
     
             }
@@ -26457,6 +26462,7 @@ class AccessibilityWidget {
 
             // 4. Reload the page
             setTimeout(() => {
+                try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
                 window.location.reload();
             }, 50);
         }
@@ -28773,6 +28779,7 @@ class AccessibilityWidget {
             // Force a lightweight refresh to fully restore original layout/styles
             try {
                 setTimeout(() => {
+                    try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
                     try { window.location.reload(); } catch (_) {}
                 }, 50);
             } catch (_) {}
