@@ -23658,7 +23658,7 @@ class AccessibilityWidget {
                     scroll-behavior: auto !important;
                     animation-play-state: paused !important;
                 }
-                /* Remove common flash triggers */
+                /* Remove common flash triggers - animation only so sliders with pulse/shimmer in class are not forced visible */
                 html.stop-animation *[class*="blink"], html.stop-animation *[class*="shimmer"], 
                 html.stop-animation *[class*="pulse"], html.stop-animation *[class*="caret"], 
                 html.stop-animation *[class*="cursor-blink"], html.stop-animation *[class*="skeleton"],
@@ -23668,8 +23668,6 @@ class AccessibilityWidget {
                 body.stop-animation *[class*="cursor-blink"], body.stop-animation *[class*="skeleton"],
                 body.stop-animation *[class*="pulsing"], body.stop-animation *[class*="flashing"] {
                     animation: none !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
                 }
 
                 /* Stop Webflow interactions (data-w-id) */
@@ -23726,25 +23724,15 @@ class AccessibilityWidget {
                     visibility: visible !important;
                     transition: opacity 0.25s ease, transform 0.25s ease !important;
                 }
-                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
-                body.stop-animation video, body.stop-animation audio, body.stop-animation iframe, body.stop-animation embed, body.stop-animation object, body.stop-animation [autoplay], body.stop-animation [data-autoplay], body.stop-animation [class*="autoplay"], body.stop-animation [class*="video"], body.stop-animation [class*="media"] {
+                /* AUTOPLAY MEDIA: Stop autoplay (exclude [class*="media"] to avoid forcing visibility on slider wrappers like slide-media) */
+                body.stop-animation video, body.stop-animation audio, body.stop-animation iframe, body.stop-animation embed, body.stop-animation object, body.stop-animation [autoplay], body.stop-animation [data-autoplay], body.stop-animation [class*="autoplay"], body.stop-animation [class*="video"] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* SLIDERS: Block auto-play animations but allow manual navigation - preserve transforms */
-                body.stop-animation .swiper-slide,
-                body.stop-animation .slick-slide,
-                body.stop-animation .carousel-item,
-                body.stop-animation [class*="swiper"] *,
-                body.stop-animation [class*="slick"] *,
-                body.stop-animation [class*="carousel"] *,
-                body.stop-animation [data-slider] *,
-                body.stop-animation [data-carousel] * {
-                    transform: unset !important;
-                }
+                /* SLIDERS: Block auto-play animations only - do NOT override transform on slides (Swiper/Slick use transform for positioning) */
                 /* SLIDERS: Block auto-play animations but allow manual navigation */
                 body.stop-animation .swiper,
                 body.stop-animation .swiper-container,
@@ -24755,8 +24743,7 @@ class AccessibilityWidget {
                     .stop-animation [autoplay],
                     .stop-animation [data-autoplay],
                     .stop-animation [class*="autoplay"],
-                    .stop-animation [class*="video"],
-                    .stop-animation [class*="media"] {
+                    .stop-animation [class*="video"] {
                         animation: none !important;
                         transition: none !important;
                         /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
@@ -26510,7 +26497,7 @@ class AccessibilityWidget {
                     visibility: visible !important;
                     transition: opacity 0.25s ease, transform 0.25s ease !important;
                 }
-                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
+                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) - animation only so sliders with pulse/shimmer in class are not forced visible */
                 body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"],
                 body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"],
                 body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"],
@@ -26520,28 +26507,16 @@ class AccessibilityWidget {
                 html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"],
                 html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
                     animation: none !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
                 }
-                /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
-                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"], body.seizure-safe [class*="media"] {
+                /* AUTOPLAY MEDIA: Stop autoplay (exclude [class*="media"] to avoid forcing visibility on slider wrappers like slide-media) */
+                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"] {
                     animation: none !important;
                     transition: none !important;
                     animation-fill-mode: forwards !important;
                     opacity: 1 !important;
                     visibility: visible !important;
                 }
-                /* SLIDERS: Block auto-play animations but allow manual navigation - preserve transforms */
-                body.seizure-safe .swiper-slide,
-                body.seizure-safe .slick-slide,
-                body.seizure-safe .carousel-item,
-                body.seizure-safe [class*="swiper"] *,
-                body.seizure-safe [class*="slick"] *,
-                body.seizure-safe [class*="carousel"] *,
-                body.seizure-safe [data-slider] *,
-                body.seizure-safe [data-carousel] * {
-                    transform: unset !important;
-                }
+                /* SLIDERS: Block auto-play animations only - do NOT override transform on slides or descendants (Swiper/Slick use transform for positioning) */
                 /* SLIDERS: Block auto-play animations but allow manual navigation */
                 body.seizure-safe .swiper,
                 body.seizure-safe .swiper-container,
