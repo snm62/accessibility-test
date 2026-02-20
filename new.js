@@ -30040,7 +30040,7 @@ class AccessibilityWidget {
                 return this._fetchCustomizationPromise;
             }
             
-            // Check cache first (5 minute cache as per worker headers)
+            // Check cache first (60 second cache as per worker headers)
             // Cache is invalidated if publishedAt changes (new customization published)
             const cacheKey = `customization_cache_${this.siteId || 'unknown'}`;
             const cached = sessionStorage.getItem(cacheKey);
@@ -30052,7 +30052,7 @@ class AccessibilityWidget {
                     cachedDataObj = JSON.parse(cached);
                     const cacheTime = cachedDataObj.timestamp || 0;
                     const cacheAge = Date.now() - cacheTime;
-                    const cacheTTL = 5 * 60 * 1000; // 5 minutes
+                    const cacheTTL = 60 * 1000; // 60 seconds
                     cachedPublishedAt = cachedDataObj.data?.publishedAt || cachedDataObj.publishedAt;
                     
                     if (cacheAge < cacheTTL) {
@@ -32851,4 +32851,4 @@ class AccessibilityWidget {
         
     })();
     
-    
+ //latest code in live
