@@ -655,6 +655,13 @@ class AccessibilityWidget {
             this.letterSpacing = 100;
     
             this.textMagnifierHandlers = new Map(); // Store event handler references
+            // Line-height controls binding guards/handlers (prevents duplicate +10/-10 handlers)
+            this.lineHeightEventsBound = false;
+            this.lineHeightEventsBindingInProgress = false;
+            this.decreaseLineHeightHandler = null;
+            this.increaseLineHeightHandler = null;
+            this.decreaseLineHeightKeydownHandler = null;
+            this.increaseLineHeightKeydownHandler = null;
     
             this.originalLineHeight = null; // Legacy single baseline (no longer primary)
             this.originalLineHeights = new Map(); // Store original line-height per element
@@ -14062,12 +14069,6 @@ class AccessibilityWidget {
                 // Bind events to the line height buttons when they become visible
     
                 this.bindLineHeightEvents();
-                this.bindLineHeightEventsDirect();
-                
-                // Test the functionality
-                setTimeout(() => {
-                    this.testLineHeight();
-                }, 1000);
     
             
     
@@ -14101,7 +14102,6 @@ class AccessibilityWidget {
                 
                 // Bind events when controls are shown
                 this.bindLineHeightEvents();
-                this.bindLineHeightEventsDirect();
     
             }
     
@@ -14127,10 +14127,12 @@ class AccessibilityWidget {
     
         
             // Prevent duplicate event binding
-            if (this.lineHeightEventsBound) {
+            if (this.lineHeightEventsBound || this.lineHeightEventsBindingInProgress) {
              
                 return;
             }
+            // Set immediately to prevent race conditions from repeated calls before timeout fires
+            this.lineHeightEventsBindingInProgress = true;
     
             
     
@@ -14142,6 +14144,7 @@ class AccessibilityWidget {
                 const controls = this.shadowRoot.getElementById('line-height-controls');
               
                 if (!controls) {
+                    this.lineHeightEventsBindingInProgress = false;
                    
                     setTimeout(() => this.bindLineHeightEvents(), 200);
                     return;
@@ -14163,6 +14166,14 @@ class AccessibilityWidget {
     
                     
     
+                    // Remove old handlers if any (defensive cleanup)
+                    if (this.decreaseLineHeightHandler) {
+                        decreaseLineHeightBtn.removeEventListener('click', this.decreaseLineHeightHandler);
+                    }
+                    if (this.decreaseLineHeightKeydownHandler) {
+                        decreaseLineHeightBtn.removeEventListener('keydown', this.decreaseLineHeightKeydownHandler);
+                    }
+
                     // Create a bound handler
     
                     this.decreaseLineHeightHandler = (e) => {
@@ -14184,7 +14195,7 @@ class AccessibilityWidget {
                     decreaseLineHeightBtn.addEventListener('click', this.decreaseLineHeightHandler);
     
                     // Add keyboard support
-                    decreaseLineHeightBtn.addEventListener('keydown', (e) => {
+                    this.decreaseLineHeightKeydownHandler = (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             e.stopPropagation();
@@ -14201,7 +14212,8 @@ class AccessibilityWidget {
                             e.stopPropagation();
                             this.increaseLineHeight();
                         }
-                    });
+                    };
+                    decreaseLineHeightBtn.addEventListener('keydown', this.decreaseLineHeightKeydownHandler);
     
       
     
@@ -14221,6 +14233,14 @@ class AccessibilityWidget {
     
                     
     
+                    // Remove old handlers if any (defensive cleanup)
+                    if (this.increaseLineHeightHandler) {
+                        increaseLineHeightBtn.removeEventListener('click', this.increaseLineHeightHandler);
+                    }
+                    if (this.increaseLineHeightKeydownHandler) {
+                        increaseLineHeightBtn.removeEventListener('keydown', this.increaseLineHeightKeydownHandler);
+                    }
+
                     // Create a bound handler
     
                     this.increaseLineHeightHandler = (e) => {
@@ -14242,7 +14262,7 @@ class AccessibilityWidget {
                     increaseLineHeightBtn.addEventListener('click', this.increaseLineHeightHandler);
     
                     // Add keyboard support
-                    increaseLineHeightBtn.addEventListener('keydown', (e) => {
+                    this.increaseLineHeightKeydownHandler = (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             e.stopPropagation();
@@ -14259,7 +14279,8 @@ class AccessibilityWidget {
                             e.stopPropagation();
                             this.increaseLineHeight();
                         }
-                    });
+                    };
+                    increaseLineHeightBtn.addEventListener('keydown', this.increaseLineHeightKeydownHandler);
     
                     
     
@@ -14271,6 +14292,7 @@ class AccessibilityWidget {
                 
                 // Mark events as bound
                 this.lineHeightEventsBound = true;
+                this.lineHeightEventsBindingInProgress = false;
     
             }, 500); // Increased delay to ensure DOM is ready and controls are visible
     
@@ -17580,7 +17602,6 @@ class AccessibilityWidget {
                     
                     // Bind events when controls are shown
                     this.bindLineHeightEvents();
-                    this.bindLineHeightEventsDirect();
     
                 }
     
@@ -17898,8 +17919,8 @@ class AccessibilityWidget {
                 body.high-contrast article picture,
                 body.high-contrast article canvas,
                 body.high-contrast article svg {
-                    filter: contrast(1.4) brightness(1.1) !important;
-                    -webkit-filter: contrast(1.4) brightness(1.1) !important;
+                    filter: contrast(1.9) brightness(1.15) !important;
+                    -webkit-filter: contrast(1.9) brightness(1.15) !important;
                 }
                 
                 /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
@@ -18307,8 +18328,8 @@ class AccessibilityWidget {
                 body.high-saturation article picture,
                 body.high-saturation article canvas,
                 body.high-saturation article svg {
-                    filter: saturate(1.6) !important;
-                    -webkit-filter: saturate(1.6) !important;
+                    filter: saturate(2.3) contrast(1.1) brightness(1.05) !important;
+                    -webkit-filter: saturate(2.3) contrast(1.1) brightness(1.05) !important;
                 }
                 
                 /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
@@ -29510,27 +29531,29 @@ class AccessibilityWidget {
       
             
     
-            // Only target main content areas, completely avoid accessibility widget
-    
-            const mainContent = document.querySelector('main') || document.querySelector('#main') || document.querySelector('.main') || document.querySelector('#content') || document.querySelector('.content');
-    
-            
-    
-            if (mainContent) {
-    
-                // Remove left alignment only from main content area
-    
-                const contentElements = mainContent.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
-    
-                
-    
-                contentElements.forEach(element => {
-    
-                    element.style.textAlign = '';
-    
-                });
-    
-            }
+            // Reset body-level alignment first (was set in enableAlignLeft)
+            document.body.style.textAlign = '';
+
+            // Reset the same broad set of elements touched by enableAlignLeft
+            const contentElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span:not([class*="icon"]):not([class*="button"]), div:not([class*="icon"]):not([class*="button"]):not([class*="nav"]):not([class*="menu"]), li, td, th, label, small, em, strong, i, b, a, button, input, textarea, select, article, section, aside, nav, header, footer');
+
+            contentElements.forEach(element => {
+                // Skip accessibility widget elements completely
+                if (element.closest('#accessbit-widget-container') || 
+                    element.closest('.accessbit-widget-panel') ||
+                    element.closest('#accessbit-widget-icon') ||
+                    element.closest('.accessbit-widget-icon') ||
+                    element.closest('.text-alignment-panel') ||
+                    element.closest('#text-alignment-panel') ||
+                    element.id === 'accessbit-widget-container' ||
+                    element.id === 'accessbit-widget-panel' ||
+                    element.id === 'accessbit-widget-icon' ||
+                    element.id === 'text-alignment-panel') {
+                    return;
+                }
+
+                element.style.textAlign = '';
+            });
     
         
     
@@ -29616,27 +29639,29 @@ class AccessibilityWidget {
     
             
     
-            // Only target main content areas, completely avoid accessibility widget
-    
-            const mainContent = document.querySelector('main') || document.querySelector('#main') || document.querySelector('.main') || document.querySelector('#content') || document.querySelector('.content');
-    
-            
-    
-            if (mainContent) {
-    
-                // Reset text alignment only from main content area
-    
-                const contentElements = mainContent.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
-    
-                
-    
-                contentElements.forEach(element => {
-    
-                    element.style.textAlign = '';
-    
-                });
-    
-            }
+            // Reset body-level alignment
+            document.body.style.textAlign = '';
+
+            // Reset all common text/content elements across the document
+            const contentElements = document.querySelectorAll('p, span, div, li, td, th, label, small, em, strong, i, b, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, article, section, aside, nav, header, footer');
+
+            contentElements.forEach(element => {
+                // Skip accessibility widget elements completely
+                if (element.closest('#accessbit-widget-container') || 
+                    element.closest('.accessbit-widget-panel') ||
+                    element.closest('#accessbit-widget-icon') ||
+                    element.closest('.accessbit-widget-icon') ||
+                    element.closest('.text-alignment-panel') ||
+                    element.closest('#text-alignment-panel') ||
+                    element.id === 'accessbit-widget-container' ||
+                    element.id === 'accessbit-widget-panel' ||
+                    element.id === 'accessbit-widget-icon' ||
+                    element.id === 'text-alignment-panel') {
+                    return;
+                }
+
+                element.style.textAlign = '';
+            });
     
         }
     
