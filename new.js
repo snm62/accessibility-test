@@ -16,12 +16,12 @@
         }
     }
     
-    try {
-        if (isDesignerModeStandalone()) {
-            return;
-        }
-        
-        function isReaderModeStandalone() {
+    // Defer to window.load so this script does not block initial render (LCP).
+    function runEarlyA11y() {
+        try {
+            if (isDesignerModeStandalone()) return;
+
+            function isReaderModeStandalone() {
             try {
                 return (
                     document.documentElement.classList.contains('reader-mode') || 
@@ -139,9 +139,13 @@
                 if (document.head) document.head.appendChild(style);
             } catch (_) {}
         }
-        
-    } catch (e) {
-        
+
+        } catch (e) {}
+    }
+    if (document.readyState === 'complete') {
+        setTimeout(runEarlyA11y, 0);
+    } else {
+        window.addEventListener('load', runEarlyA11y);
     }
 })();
 
