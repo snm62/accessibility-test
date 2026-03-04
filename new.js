@@ -32678,36 +32678,21 @@ class AccessibilityWidget {
     }
     
     
-    
-    // Try multiple ways to initialize
-    
-    if (document.readyState === 'loading') {
-    
-        document.addEventListener('DOMContentLoaded', initWidget);
-    
+    // Defer widget initialization until after full window load to avoid blocking initial render.
+    if (document.readyState === 'complete') {
+        // Window already loaded – schedule init shortly after to keep out of critical path
+        setTimeout(() => {
+            if (!accessibilityWidget) {
+                initWidget();
+            }
+        }, 0);
     } else {
-    
-        // DOM is already loaded
-    
-        initWidget();
-    
+        window.addEventListener('load', () => {
+            if (!accessibilityWidget) {
+                initWidget();
+            }
+        });
     }
-    
-    
-    
-    // Also try with a small delay as backup
-    
-    setTimeout(() => {
-    
-        if (!accessibilityWidget) {
-    
-          
-    
-            initWidget();
-    
-        }
-    
-    }, 1000);
     
     
     
