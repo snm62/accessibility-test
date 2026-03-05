@@ -1704,135 +1704,61 @@ class AccessibilityWidget {
                 }
             }
             
-            // Load user settings from KV storage
-            await this.loadSettingsFromKV();
-            // If KV indicates seizure-safe, ensure it is enabled immediately
-            if (this.settings && this.settings['seizure-safe']) {
-                // Use safe class toggle (Designer-compliant)
-                if (!document.body.classList.contains('seizure-safe')) {
-                    this.safeBodyClassToggle('seizure-safe', true);
-                }
-                this.enableSeizureSafe(true /* immediate */);
-            }
-    
-            
             // Restore saved language FIRST (before showing icon)
-            // This ensures language is set before any positioning or customization
             const savedLanguage = localStorage.getItem('accessbit-widget-language');
             if (savedLanguage) {
                 this.applyLanguage(savedLanguage);
             } else {
                 this.applyLanguage('English');
             }
-            
-            // Fetch customization data (BLOCKING - load on page load for immediate customization)
-            // This ensures icon appears with user's customization immediately, no delays
-            console.log('[INIT] Starting customization data fetch...');
-            try {
-                const customizationData = await this.fetchCustomizationData();
-                console.log('[INIT] fetchCustomizationData() returned:', {
-                    hasData: !!customizationData,
-                    hasCustomization: !!(customizationData && customizationData.customization),
-                    customizationKeys: customizationData && customizationData.customization ? Object.keys(customizationData.customization) : [],
-                    fullData: customizationData
+
+            // Defer user-settings + config to idle (off critical path). Icon only becomes visible after config is fetched and user styles applied.
+            const runWhenIdle = () => {
+                this.loadSettingsFromKV().then(() => {
+                    if (this.settings && this.settings['seizure-safe']) {
+                        if (!document.body.classList.contains('seizure-safe')) {
+                            this.safeBodyClassToggle('seizure-safe', true);
+                        }
+                        this.enableSeizureSafe(true);
+                    }
+                    return this.fetchCustomizationData();
+                }).then((customizationData) => {
+                    if (customizationData && customizationData.customization) {
+                        this.applyCustomizations(customizationData.customization);
+                        if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
+                            this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
+                        }
+                    }
+                    const iconEl = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                    if (iconEl && customizationData && customizationData.customization) {
+                        const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
+                        const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                        const mobileVisibility = customizationData.customization.showOnMobile;
+                        const shouldShow = !isMobile ? !hideTrigger : (mobileVisibility === 'Show');
+                        if (shouldShow) {
+                            iconEl.style.removeProperty('display');
+                            iconEl.style.removeProperty('visibility');
+                            iconEl.style.removeProperty('opacity');
+                            iconEl.style.setProperty('display', 'flex', 'important');
+                            iconEl.style.setProperty('visibility', 'visible', 'important');
+                            iconEl.style.setProperty('opacity', '1', 'important');
+                            iconEl.style.setProperty('pointer-events', 'auto', 'important');
+                            this._iconExplicitlyShown = true;
+                        } else {
+                            iconEl.style.setProperty('display', 'none', 'important');
+                            iconEl.style.setProperty('visibility', 'hidden', 'important');
+                            iconEl.style.setProperty('opacity', '0', 'important');
+                            this._iconExplicitlyShown = false;
+                        }
+                    }
+                }).catch((err) => {
+                    console.warn('[INIT] Deferred config/settings fetch failed:', err);
                 });
-                
-                if (customizationData && customizationData.customization) {
-                    console.log('[INIT] Applying customizations...');
-                    // Apply customizations BEFORE showing icon
-                    this.applyCustomizations(customizationData.customization);
-                    // Also apply accessibility profiles if present
-                    if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
-                        this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
-                    }
-                    console.log('[INIT] Customizations applied successfully');
-                } else {
-                    console.warn('[INIT] No customization data to apply');
-                }
-                
-              
-                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-                console.log('[INIT] Checking icon visibility conditions:', {
-                    hasIcon: !!icon,
-                    hasCustomizationData: !!customizationData,
-                    hasCustomization: !!(customizationData && customizationData.customization),
-                    iconElement: icon,
-                    iconCurrentDisplay: icon ? icon.style.display : 'N/A',
-                    iconCurrentVisibility: icon ? icon.style.visibility : 'N/A',
-                    iconCurrentOpacity: icon ? icon.style.opacity : 'N/A'
-                });
-                
-                if (icon && customizationData && customizationData.customization) {
-                    const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
-                    const mobileVisibility = customizationData.customization.showOnMobile;
-                    
-                    console.log('[INIT] Icon visibility settings:', {
-                        hideTrigger,
-                        isMobile,
-                        mobileVisibility,
-                        shouldShow: !hideTrigger || (isMobile && mobileVisibility === 'Show')
-                    });
-                    
-                    // Determine if icon should be shown based on settings
-                    let shouldShow = false;
-                    
-                    // Desktop/Tablet: show only if hideTriggerButton is NOT 'Yes'
-                    if (!isMobile) {
-                        shouldShow = !hideTrigger;
-                    } 
-                    // Mobile: show only if showOnMobile is 'Show'
-                    else {
-                        shouldShow = mobileVisibility === 'Show';
-                    }
-                    
-                    if (shouldShow) {
-                        console.log('[ICON SHOW] init() - Showing icon after customization loaded', {
-                            hideTrigger,
-                            isMobile,
-                            mobileVisibility,
-                            shouldShow
-                        });
-                        // Remove any conflicting inline styles first
-                        icon.style.removeProperty('display');
-                        icon.style.removeProperty('visibility');
-                        icon.style.removeProperty('opacity');
-                        // Use setProperty with !important to override any CSS rules
-                        icon.style.setProperty('display', 'flex', 'important');
-                        icon.style.setProperty('visibility', 'visible', 'important');
-                        icon.style.setProperty('opacity', '1', 'important');
-                        icon.style.setProperty('pointer-events', 'auto', 'important');
-                        // Mark that icon was explicitly shown during initialization
-                        // This prevents showIcon() from hiding it during resize events
-                        this._iconExplicitlyShown = true;
-                    } else {
-                        console.log('[ICON HIDE] init() - Hiding icon based on settings', {
-                            hideTrigger,
-                            isMobile,
-                            mobileVisibility,
-                            shouldShow
-                        });
-                        // Ensure icon is hidden
-                        icon.style.setProperty('display', 'none', 'important');
-                        icon.style.setProperty('visibility', 'hidden', 'important');
-                        icon.style.setProperty('opacity', '0', 'important');
-                        this._iconExplicitlyShown = false;
-                    }
-                } else {
-                    console.warn('[ICON HIDE] init() - No customization data available', {
-                        hasCustomizationData: !!customizationData,
-                        hasCustomization: !!(customizationData && customizationData.customization),
-                        hasIcon: !!icon,
-                        siteId: this.siteId,
-                        reason: !icon ? 'Icon element not found' : 
-                                !customizationData ? 'No customization data returned' : 
-                                'Customization object missing'
-                    });
-                }
-            } catch (err) {
-                // Log error but don't show icon (user wants icon only with customization data)
-                console.error('[ICON HIDE] init() - Error fetching customization data:', err);
-                console.error('[ICON HIDE] Error stack:', err.stack);
+            };
+            if (typeof requestIdleCallback !== 'undefined') {
+                requestIdleCallback(runWhenIdle, { timeout: 2000 });
+            } else {
+                setTimeout(runWhenIdle, 100);
             }
             
             // Set up periodic payment status refresh (every 5 minutes)
