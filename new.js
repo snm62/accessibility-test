@@ -1704,6 +1704,17 @@ class AccessibilityWidget {
                 }
             }
             
+            // Load user settings from KV storage
+            await this.loadSettingsFromKV();
+            // If KV indicates seizure-safe, ensure it is enabled immediately
+            if (this.settings && this.settings['seizure-safe']) {
+                // Use safe class toggle (Designer-compliant)
+                if (!document.body.classList.contains('seizure-safe')) {
+                    this.safeBodyClassToggle('seizure-safe', true);
+                }
+                this.enableSeizureSafe(true /* immediate */);
+            }
+
             // Restore saved language FIRST (before showing icon)
             const savedLanguage = localStorage.getItem('accessbit-widget-language');
             if (savedLanguage) {
@@ -1712,53 +1723,40 @@ class AccessibilityWidget {
                 this.applyLanguage('English');
             }
 
-            // Defer user-settings + config to idle (off critical path). Icon only becomes visible after config is fetched and user styles applied.
-            const runWhenIdle = () => {
-                this.loadSettingsFromKV().then(() => {
-                    if (this.settings && this.settings['seizure-safe']) {
-                        if (!document.body.classList.contains('seizure-safe')) {
-                            this.safeBodyClassToggle('seizure-safe', true);
-                        }
-                        this.enableSeizureSafe(true);
+            // Fetch customization and show icon only after user styles are applied
+            console.log('[INIT] Starting customization data fetch...');
+            try {
+                const customizationData = await this.fetchCustomizationData();
+                if (customizationData && customizationData.customization) {
+                    this.applyCustomizations(customizationData.customization);
+                    if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
+                        this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
                     }
-                    return this.fetchCustomizationData();
-                }).then((customizationData) => {
-                    if (customizationData && customizationData.customization) {
-                        this.applyCustomizations(customizationData.customization);
-                        if (customizationData.accessibilityProfiles && typeof this.applyAccessibilityProfiles === 'function') {
-                            this.applyAccessibilityProfiles(customizationData.accessibilityProfiles);
-                        }
+                }
+                const iconEl = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                if (iconEl && customizationData && customizationData.customization) {
+                    const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
+                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                    const mobileVisibility = customizationData.customization.showOnMobile;
+                    const shouldShow = !isMobile ? !hideTrigger : (mobileVisibility === 'Show');
+                    if (shouldShow) {
+                        iconEl.style.removeProperty('display');
+                        iconEl.style.removeProperty('visibility');
+                        iconEl.style.removeProperty('opacity');
+                        iconEl.style.setProperty('display', 'flex', 'important');
+                        iconEl.style.setProperty('visibility', 'visible', 'important');
+                        iconEl.style.setProperty('opacity', '1', 'important');
+                        iconEl.style.setProperty('pointer-events', 'auto', 'important');
+                        this._iconExplicitlyShown = true;
+                    } else {
+                        iconEl.style.setProperty('display', 'none', 'important');
+                        iconEl.style.setProperty('visibility', 'hidden', 'important');
+                        iconEl.style.setProperty('opacity', '0', 'important');
+                        this._iconExplicitlyShown = false;
                     }
-                    const iconEl = this.shadowRoot?.getElementById('accessbit-widget-icon');
-                    if (iconEl && customizationData && customizationData.customization) {
-                        const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                        const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
-                        const mobileVisibility = customizationData.customization.showOnMobile;
-                        const shouldShow = !isMobile ? !hideTrigger : (mobileVisibility === 'Show');
-                        if (shouldShow) {
-                            iconEl.style.removeProperty('display');
-                            iconEl.style.removeProperty('visibility');
-                            iconEl.style.removeProperty('opacity');
-                            iconEl.style.setProperty('display', 'flex', 'important');
-                            iconEl.style.setProperty('visibility', 'visible', 'important');
-                            iconEl.style.setProperty('opacity', '1', 'important');
-                            iconEl.style.setProperty('pointer-events', 'auto', 'important');
-                            this._iconExplicitlyShown = true;
-                        } else {
-                            iconEl.style.setProperty('display', 'none', 'important');
-                            iconEl.style.setProperty('visibility', 'hidden', 'important');
-                            iconEl.style.setProperty('opacity', '0', 'important');
-                            this._iconExplicitlyShown = false;
-                        }
-                    }
-                }).catch((err) => {
-                    console.warn('[INIT] Deferred config/settings fetch failed:', err);
-                });
-            };
-            if (typeof requestIdleCallback !== 'undefined') {
-                requestIdleCallback(runWhenIdle, { timeout: 2000 });
-            } else {
-                setTimeout(runWhenIdle, 100);
+                }
+            } catch (err) {
+                console.warn('[INIT] Customization fetch failed:', err);
             }
             
             // Set up periodic payment status refresh (every 5 minutes)
