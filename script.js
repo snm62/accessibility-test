@@ -5407,9 +5407,7 @@ font-family: Archivo;
 
                     border-radius: 24px !important;
 
-                    border: 4px solid #ffffff !important;
-
-                    border-bottom: none !important;
+                    border: none !important;
 
                     position: relative;
 
