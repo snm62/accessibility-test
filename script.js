@@ -5429,17 +5429,17 @@ font-family: Archivo;
 
                     position: absolute;
 
-                    top: 2px;
+                    top: 0;
 
-                    left: 4px;
+                    left: 0;
 
-                    right: 4px;
+                    right: 0;
 
                     bottom: 0;
 
                     background: linear-gradient(135deg, #262E84, #2AA2F1);
 
-                    border-radius: 16px 16px 0 0;
+                    border-radius: 20px 20px 0 0;
 
                     z-index: -1;
 
