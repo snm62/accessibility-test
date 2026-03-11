@@ -1,4 +1,4 @@
-// CRITICAL: Immediate seizure-safe check - runs before any animations can start
+// CRITICAL: Immedia
 (function() {
     try {
         // Skip accessibility widget if in reader mode or if page is being processed for reader mode
