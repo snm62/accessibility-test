@@ -651,6 +651,9 @@ class AccessibilityWidget {
             this.settings = {};
     
             this.contentScale = 100; // Start at 100% (normal size)
+            this._contentScaleApplyScheduled = null;
+            this._contentScaleLastApplied = 100;
+            this._contentScaleThrottleMs = 120;
     
             this.fontSize = 100;
     
@@ -2342,50 +2345,33 @@ class AccessibilityWidget {
             }
             const contentScaleRange = this.shadowRoot.getElementById('content-scale-range');
             if (contentScaleRange) {
-                const contentScaleTrack = contentScaleRange.closest('.scaling-slider-track');
-                const contentScaleThumb = contentScaleTrack?.querySelector('.scaling-slider-thumb');
-                const applyContentScaleFromRatio = (ratio) => {
-                    ratio = Math.max(0, Math.min(1, ratio));
-                    const value = ratio <= 0.5 ? 50 + ratio * 100 : 100 + (ratio - 0.5) * 40;
-                    const val = Math.round(value);
-                    contentScaleRange.value = String(val);
-                    this.contentScale = val;
-                    this.settings['content-scale'] = val;
-                    this.updateContentScale();
-                    this.updateContentScaleDisplay();
-                    if (contentScaleThumb) contentScaleThumb.style.left = (ratio * 100) + '%';
-                };
-                const onPointer = (e) => {
-                    if (!contentScaleTrack) return;
-                    const rect = contentScaleTrack.getBoundingClientRect();
-                    const ratio = (e.clientX - rect.left) / rect.width;
-                    applyContentScaleFromRatio(ratio);
-                };
-                const overlay = document.createElement('div');
-                overlay.className = 'scaling-pointer-overlay';
-                overlay.setAttribute('aria-hidden', 'true');
-                overlay.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onPointer(e);
-                    const move = (e2) => { e2.preventDefault(); onPointer(e2); };
-                    const up = () => {
-                        document.removeEventListener('pointermove', move);
-                        document.removeEventListener('pointerup', up);
-                        document.removeEventListener('pointercancel', up);
-                    };
-                    document.addEventListener('pointermove', move);
-                    document.addEventListener('pointerup', up);
-                    document.addEventListener('pointercancel', up);
-                });
-                if (contentScaleTrack) contentScaleTrack.appendChild(overlay);
                 contentScaleRange.addEventListener('input', () => {
                     const val = parseInt(contentScaleRange.value, 10);
                     this.contentScale = val;
-                    this.settings['content-scale'] = val;
+                    this.settings['content-scale'] = this.contentScale;
+                    this.updateContentScaleDisplay();
+                    this.updateScalingThumbPosition(contentScaleRange);
+                    if (this._contentScaleApplyScheduled != null) return;
+                    this.updateContentScale();
+                    this._contentScaleApplyScheduled = setTimeout(() => {
+                        this._contentScaleApplyScheduled = null;
+                        this.updateContentScale();
+                    }, this._contentScaleThrottleMs || 100);
+                });
+                contentScaleRange.addEventListener('change', () => {
+                    if (this._contentScaleApplyScheduled != null) {
+                        clearTimeout(this._contentScaleApplyScheduled);
+                        this._contentScaleApplyScheduled = null;
+                    }
+                    const val = parseInt(contentScaleRange.value, 10);
+                    this.contentScale = val;
+                    this.settings['content-scale'] = this.contentScale;
                     this.updateContentScale();
                     this.updateContentScaleDisplay();
+                    this.updateScalingThumbPosition(contentScaleRange);
+                    this.saveSettings();
                 });
+                contentScaleRange.value = String(Math.min(120, Math.max(50, this.contentScale)));
                 this.updateScalingThumbPosition(contentScaleRange);
             }
     
@@ -2462,6 +2448,9 @@ class AccessibilityWidget {
             }
             const fontSizeRange = this.shadowRoot.getElementById('font-size-range');
             if (fontSizeRange) {
+                const fMin = parseFloat(fontSizeRange.getAttribute('min')) || 80;
+                const fMax = parseFloat(fontSizeRange.getAttribute('max')) || 120;
+                fontSizeRange.value = String(Math.min(fMax, Math.max(fMin, this.fontSize)));
                 fontSizeRange.addEventListener('input', () => {
                     const val = parseInt(fontSizeRange.value, 10);
                     this.fontSize = val;
@@ -2469,6 +2458,9 @@ class AccessibilityWidget {
                     this.updateFontSizeDisplay();
                     this.updateFontSizeEnhanced();
                     this.updateScalingThumbPosition(fontSizeRange);
+                });
+                fontSizeRange.addEventListener('change', () => {
+                    this.saveSettings();
                 });
                 this.updateScalingThumbPosition(fontSizeRange);
             }
@@ -2548,6 +2540,9 @@ class AccessibilityWidget {
             }
             const letterSpacingRange = this.shadowRoot.getElementById('letter-spacing-range');
             if (letterSpacingRange) {
+                const lsMin = parseFloat(letterSpacingRange.getAttribute('min')) || 90;
+                const lsMax = parseFloat(letterSpacingRange.getAttribute('max')) || 110;
+                letterSpacingRange.value = String(Math.min(lsMax, Math.max(lsMin, this.letterSpacing)));
                 letterSpacingRange.addEventListener('input', () => {
                     const val = parseInt(letterSpacingRange.value, 10);
                     this.letterSpacing = val;
@@ -2556,10 +2551,16 @@ class AccessibilityWidget {
                     this.updateLetterSpacingDisplay();
                     this.updateScalingThumbPosition(letterSpacingRange);
                 });
+                letterSpacingRange.addEventListener('change', () => {
+                    this.saveSettings();
+                });
                 this.updateScalingThumbPosition(letterSpacingRange);
             }
             const lineHeightRange = this.shadowRoot.getElementById('line-height-range');
             if (lineHeightRange) {
+                const lhMin = parseFloat(lineHeightRange.getAttribute('min')) || 90;
+                const lhMax = parseFloat(lineHeightRange.getAttribute('max')) || 110;
+                lineHeightRange.value = String(Math.min(lhMax, Math.max(lhMin, this.lineHeight)));
                 lineHeightRange.addEventListener('input', () => {
                     const val = parseInt(lineHeightRange.value, 10);
                     this.lineHeight = val;
@@ -2567,6 +2568,9 @@ class AccessibilityWidget {
                     this.updateLineHeight();
                     this.updateLineHeightDisplay();
                     this.updateScalingThumbPosition(lineHeightRange);
+                });
+                lineHeightRange.addEventListener('change', () => {
+                    this.saveSettings();
                 });
                 this.updateScalingThumbPosition(lineHeightRange);
             }
@@ -3289,17 +3293,6 @@ font-family: Archivo;
     
                 // Define overrideCSS first
                 const overrideCSS = `
-    .accessbit-widget-panel {
-      /* Position controlled by JavaScript - no hardcoded positioning */
-      left: auto;
-      right: auto;
-      top: auto;
-      bottom: auto;
-      transform: none;
-    }
-    
-    /* REMOVED the conflicting accessbit-widget-icon rule that was forcing 50% border-radius */
-    
     /* Icon Shape Rules - Simplified */
     .accessbit-widget-icon[data-shape="circle"] {
         border-radius: 50%;
@@ -3319,11 +3312,7 @@ font-family: Archivo;
         z-index: 2147483646; /* Below spotlight, above icon */
         overflow: hidden; /* Panel does not scroll – only .accessbit-widget-content / .white-content-section scroll */
         overscroll-behavior: contain;
-        /* Position controlled by JavaScript - no default top/left to prevent top-left positioning */
-        top: auto;
-        left: auto;
-        right: auto;
-        bottom: auto;
+        /* Position and transform are controlled by JavaScript; do not override here */
     }
     
     .accessbit-widget-icon {
@@ -4448,6 +4437,8 @@ font-family: Archivo;
             }
             
                 /* Accessibility Widget Styles - Shadow DOM */
+
+                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
     
                 :host {
                     --widget-width: min(480px, 94vw);
@@ -4781,19 +4772,19 @@ font-family: Archivo;
     
     
                 /* --- CSS-ONLY responsive: no JS resize logic; browser handles 1280/1281 transition --- */
-                /* STATE 1: SMALL/MIDDLE VIEWPORT (max-width: 1280px) – panel centered, width clamped to viewport */
-                @media (max-width: 1280px) {
+                /* STATE 1: TABLET/BASE VIEWPORT (601px–1280px) – panel docked to same side as widget icon; wider 800–1280 */
+                @media (min-width: 601px) and (max-width: 1280px) {
                     .accessbit-widget-panel {
                         position: fixed !important;
-                        width: min(480px, calc(100vw - 24px)) !important;
-                        max-width: min(480px, calc(100vw - 24px)) !important;
+                        width: min(680px, calc(100vw - 24px)) !important;
+                        max-width: min(680px, calc(100vw - 24px)) !important;
                         height: calc(100dvh - 30px) !important;
                         max-height: calc(100dvh - 30px) !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
-                        left: 50% !important;
-                        right: auto !important;
+                        right: var(--panel-right, 20px) !important;
+                        left: auto !important;
                         top: var(--widget-icon-top, auto) !important;
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                         transition: transform 0.3s ease !important;
                         border-radius: 12px !important;
                         margin: 0 !important;
@@ -4802,7 +4793,7 @@ font-family: Archivo;
                     }
                     .accessbit-widget-panel.active,
                     .accessbit-widget-panel.show {
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                         display: flex !important;
                     }
                     .accessbit-widget-panel .useful-links-card,
@@ -4824,6 +4815,31 @@ font-family: Archivo;
                         box-sizing: border-box !important;
                     }
                 }
+                /* STATE 1A: SMALL PHONES (max-width: 600px) – panel centered above icon (e.g. 375x812, 414x896) */
+                @media (max-width: 600px) {
+                    .accessbit-widget-panel {
+                        position: fixed !important;
+                        width: min(480px, calc(100vw - 24px)) !important;
+                        max-width: min(480px, calc(100vw - 24px)) !important;
+                        height: calc(100dvh - 30px) !important;
+                        max-height: calc(100dvh - 30px) !important;
+                        left: 50% !important;
+                        right: auto !important;
+                        bottom: var(--widget-icon-bottom, 20px) !important;
+                        top: auto !important;
+                        transform: translateX(-50%) !important;
+                        transition: transform 0.3s ease !important;
+                        border-radius: 12px !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                    }
+                    .accessbit-widget-panel.active,
+                    .accessbit-widget-panel.show {
+                        transform: translateX(-50%) !important;
+                        display: flex !important;
+                    }
+                }
                 /* STATE 2: DESKTOP FLOATING (min-width: 1281px) - vars set once by JS on load/settings */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel {
@@ -4838,13 +4854,23 @@ font-family: Archivo;
                         border-radius: 16px !important;
                     }
                 }
-                /* [Ultra-wide: > 1921px] */
+                /* [Ultra-wide: > 1921px] – panel fills viewport height, no small box */
                 @media (min-width: 1921px) {
                     .accessbit-widget-panel {
-                        height: 800px !important;
-                        max-height: 800px !important;
-                        top: 50% !important;
-                        transform: translateY(-50%) !important;
+                        height: calc(100vh - 40px) !important;
+                        max-height: calc(100dvh - 40px) !important;
+                        top: var(--panel-top, 20px) !important;
+                        transform: none !important;
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                    }
+                }
+                @supports (height: 100dvh) {
+                    @media (min-width: 1921px) {
+                        .accessbit-widget-panel {
+                            height: calc(100dvh - 40px) !important;
+                            max-height: calc(100dvh - 40px) !important;
+                        }
                     }
                 }
                 /* Hide scrollbar on panel and main content – panel gets overflow-y:auto in some media queries and becomes scroll container */
@@ -4956,9 +4982,10 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-letter-spacing) { max-width: min(528px, 100%) !important; }
                 .accessbit-widget-panel .profile-item { min-width: 0 !important; overflow-x: hidden !important; overflow-y: visible !important; background: #FFFFFF !important; border-radius: 7px !important; min-height: 84px !important; max-width: min(440px, 100%) !important; width: 100% !important; opacity: 1 !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; padding: 15px 22px !important; }
-                /* First block (Seizure → Screen Reader): 5px vertical space between items */
-                .accessbit-widget-panel .white-content-section > .profile-item { margin-bottom: 5px !important; }
-                .accessbit-widget-panel .profile-item:has(#seizure-safe) { width: 528px !important; max-width: min(528px, 100%) !important; }
+                /* First block (Seizure → Screen Reader): spacing handled by individual cards (e.g. content-scaling-card) */
+                .accessbit-widget-panel .white-content-section > .profile-item { margin-bottom: 0 !important; }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon { overflow: visible !important; }
                 .accessbit-widget-panel .profile-item:has(#reduce-motion),
                 .accessbit-widget-panel .profile-item:has(#vision-impaired),
                 .accessbit-widget-panel .profile-item:has(#adhd-friendly),
@@ -4968,7 +4995,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .profile-item:has(#adjust-line-height),
-                .accessbit-widget-panel .profile-item:has(#adjust-letter-spacing) { width: 528px !important; max-width: min(528px, 100%) !important; }
+                .accessbit-widget-panel .profile-item:has(#adjust-letter-spacing) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
                 /* Desktop: dark/light/high contrast, high/low saturation, monochrome = 257px width */
                 @media (min-width: 1281px) {
                     .accessbit-widget-panel .panel-content .profile-item:has(#dark-contrast),
@@ -5050,21 +5077,10 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item::-webkit-scrollbar,
                 .accessbit-widget-panel .profile-item *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 12px !important; }
-                /* Toggle on: highlight card with border; icon itself changes color (no border on icon) */
+                /* Toggle on: highlight card with border; icon ring handled purely inside SVG (exclude font-size, line-height, letter-spacing) */
                 .accessbit-widget-panel .profile-item { border: 2px solid transparent !important; }
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) { border: 2px solid #01CE9C !important; }
-                .accessbit-widget-panel .profile-item .profile-item-icon,
-                .accessbit-widget-panel .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .profile-item-icon,
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
-                /* Icon when on: circle border + inner graphic borders/strokes turn green */
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:first-of-type,
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg path,
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:not(:first-of-type),
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .content-card-icon svg path,
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C !important; }
-                /* --- ≤1279px: drawer mode (mobile-mode) – centered panel, width clamped to viewport --- */
+                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border: 2px solid #01CE9C !important; }
+                /* --- ≤1279px: drawer mode (mobile-mode) – width/height; position set by viewport below --- */
                 @media (max-width: 1279px) {
                     .accessbit-widget-panel.mobile-mode {
                         width: min(480px, calc(100vw - 24px)) !important;
@@ -5073,32 +5089,43 @@ font-family: Archivo;
                         max-height: calc(100dvh - 30px) !important;
                         top: auto !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
-                        left: 50% !important;
-                        right: auto !important;
                         margin: 0 !important;
                         border-radius: 12px !important;
                         box-sizing: border-box !important;
                         transition: transform 0.3s ease !important;
                     }
-                    .accessbit-widget-panel.mobile-mode.side-left {
+                }
+                /* Small phones (≤600px): center panel when mobile-mode */
+                @media (max-width: 600px) {
+                    .accessbit-widget-panel.mobile-mode {
                         left: 50% !important;
                         right: auto !important;
-                        transform: translateX(-110%) !important;
-                    }
-                    .accessbit-widget-panel.mobile-mode.side-right {
-                        left: 50% !important;
-                        right: auto !important;
-                        transform: translateX(110%) !important;
+                        transform: translateX(-50%) !important;
                     }
                     .accessbit-widget-panel.mobile-mode.active,
                     .accessbit-widget-panel.mobile-mode.show {
                         transform: translateX(-50%) !important;
                     }
+                }
+                /* Tablets/base (601px–1279px): dock panel by icon when mobile-mode */
+                @media (min-width: 601px) and (max-width: 1279px) {
+                    .accessbit-widget-panel.mobile-mode,
+                    .accessbit-widget-panel.mobile-mode.side-left,
+                    .accessbit-widget-panel.mobile-mode.side-right {
+                        left: auto !important;
+                        right: var(--panel-right, 20px) !important;
+                        transform: none !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.active,
+                    .accessbit-widget-panel.mobile-mode.show {
+                        transform: none !important;
+                    }
+                }
+                /* Shared mobile-mode layout/scroll (all ≤1279px) */
+                @media (max-width: 1279px) {
                     .accessbit-widget-panel.mobile-mode:not(.active) {
                         transition: none !important;
                     }
-                    /* (removed nested max-width:480px drawer overrides to keep single style; drawer width handled by higher-level rules) */
-                    /* NEST HUB & SCROLL FIX – only direct scroll container scrolls */
                     .accessbit-widget-panel.mobile-mode .accessbit-panel-screenshot > .white-content-section,
                     .accessbit-widget-panel.mobile-mode > .accessbit-widget-content,
                     .accessbit-widget-panel.mobile-mode > .panel-content {
@@ -5114,8 +5141,6 @@ font-family: Archivo;
                         padding-right: 16px !important;
                         padding-bottom: 16px !important;
                     }
-                    /* Structure Protector */
-                    /* Keep existing row layout for action buttons; don't force vertical stacking */
                     .accessbit-widget-panel.mobile-mode .panel-header,
                     .accessbit-widget-panel.mobile-mode .widget-header {
                         padding: 20px 16px !important;
@@ -5159,6 +5184,19 @@ font-family: Archivo;
                         border-radius: 0 !important;
                         pointer-events: none !important;
                         transition: none !important;
+                    }
+                    /* Override: hide ring and | bar inside toggles on mobile/tablet (≤1279px) */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        content: none !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                        overflow: hidden !important;
                     }
                     /* Smaller toggles for Nest Hub (1024x600), Nest Hub Max (1280x800) and tablets */
                     .accessbit-widget-panel .toggle-switch {
@@ -5257,19 +5295,35 @@ font-family: Archivo;
                         justify-content: center !important;
                         gap: 4px !important;
                     }
-                    .accessbit-widget-panel .toggle-switch { width: 16px !important; height: 10px !important; }
-                    .accessbit-widget-panel .toggle-switch .slider { width: 16px !important; height: 10px !important; }
+                    /* Toggles on very small mobile: compact (32x18), green when on */
+                    .accessbit-widget-panel .toggle-switch { width: 32px !important; height: 18px !important; }
+                    .accessbit-widget-panel .toggle-switch .slider { width: 32px !important; height: 18px !important; border-radius: 18px !important; }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider { background-color: #01CE9C !important; }
                     .accessbit-widget-panel .toggle-switch .slider:before {
-                        width: 6px !important; height: 6px !important; left: 2px !important; bottom: 2px !important;
+                        width: 12px !important; height: 12px !important; left: 3px !important; bottom: 3px !important;
                     }
-                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before { transform: translateX(6px) !important; }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before { transform: translateX(13px) !important; }
+                    /* Ensure inner ring/bar is hidden in widget toggles on very small mobile */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after { display: none !important; }
                     .accessbit-widget-panel .profile-item { padding: 2px !important; margin-bottom: 2px !important; }
                     .accessbit-widget-panel .profile-item h4 { margin-bottom: 1px !important; }
                     .accessbit-widget-panel .profile-item p { margin-bottom: 1px !important; }
                     .accessbit-widget-panel .close-btn {
-                        padding: 8px !important;
-                        width: 36px !important; height: 36px !important;
-                        min-width: 36px !important; min-height: 36px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        padding: 0 !important;
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        min-height: 36px !important;
+                    }
+                    .accessbit-widget-panel .close-btn svg {
+                        display: block !important;
+                        margin: 0 auto !important;
                     }
                     .accessbit-widget-icon[data-shape="rounded"] {
                         border-radius: 12px !important;
@@ -5298,36 +5352,65 @@ font-family: Archivo;
                         justify-content: center !important;
                         gap: 6px !important;
                     }
+                    .accessbit-widget-panel .panel-header .action-buttons {
+                        margin-bottom: 4px !important;
+                    }
                     .accessbit-widget-panel .panel-header .action-btn,
                     .accessbit-widget-panel .widget-header .action-btn,
                     .accessbit-panel-screenshot .panel-header .action-btn {
                         width: 100% !important;
                         max-width: 100% !important;
                         min-width: 0 !important;
-                        font-size: 10px;
+                        font-size: 11px !important;
                         padding: 4px 8px !important;
-                        min-height: 24px !important;
+                        min-height: 22px !important;
                     }
+                    /* Toggles on mobile: slightly larger (38x20), green when on; no inner ring/bar */
                     .accessbit-widget-panel .toggle-switch,
-                    .accessbit-panel-screenshot .toggle-switch { width: 26px !important; height: 14px !important; min-width: 26px !important; }
+                    .accessbit-panel-screenshot .toggle-switch { width: 38px !important; height: 20px !important; min-width: 38px !important; }
                     .accessbit-widget-panel .toggle-switch .slider,
-                    .accessbit-panel-screenshot .toggle-switch .slider { width: 26px !important; height: 14px !important; border-radius: 14px !important; }
+                    .accessbit-panel-screenshot .toggle-switch .slider { width: 38px !important; height: 20px !important; border-radius: 20px !important; }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #01CE9C !important; }
                     .accessbit-widget-panel .toggle-switch .slider:before,
                     .accessbit-panel-screenshot .toggle-switch .slider:before {
-                        width: 8px !important; height: 8px !important; left: 2px !important; bottom: 2px !important;
+                        width: 14px !important; height: 14px !important; left: 3px !important; bottom: 3px !important;
                     }
                     .accessbit-widget-panel .toggle-switch input:checked + .slider:before,
-                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(12px) !important; }
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(18px) !important; }
+                    /* Mobile: hide inner ring and bar inside toggle */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch .slider::after,
+                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch > input + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after { display: none !important; }
                     .accessbit-widget-panel .panel-header h2,
                     .accessbit-widget-panel .widget-header h2,
-                    .accessbit-panel-screenshot .panel-header h2 { font-size: 10px; line-height: 14px; }
+                    .accessbit-panel-screenshot .panel-header h2 { font-size: 18px; line-height: 22px; }
                     .accessbit-widget-panel h3,
                     .accessbit-widget-panel .content-adjustments-title,
                     .accessbit-widget-panel .color-adjustments-title,
                     .accessbit-widget-panel .interface-controls-title,
                     .accessbit-widget-panel .placeholder-title,
                     .accessbit-panel-screenshot .white-content-section .content-adjustments-title,
-                    .accessbit-panel-screenshot .white-content-section > h3 { font-size: 12px; line-height: 16px; }
+                    .accessbit-panel-screenshot .white-content-section > h3 { font-size: 15px; line-height: 19px; }
+                    /* Override :host and global section title font-size for mobile */
+                    :host .accessbit-widget-panel .panel-header h2,
+                    :host .accessbit-widget-panel .widget-header h2 { font-size: 18px !important; line-height: 22px !important; }
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel h3 { font-size: 15px !important; line-height: 19px !important; }
+                    /* Mobile: tighter spacing above/below section headers */
+                    .accessbit-widget-panel .white-content-section > h3:first-child,
+                    .accessbit-widget-panel .white-content-section > h3.placeholder-title { margin: 12px 0 6px 0 !important; }
+                    .accessbit-widget-panel .white-content-section .content-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .color-adjustments-title { margin: 10px 0 6px 0 !important; }
+                    .accessbit-widget-panel .white-content-section .interface-controls-title { margin: 6px 0 10px 0 !important; }
                     .accessbit-widget-panel .profile-item h4,
                     .accessbit-panel-screenshot .profile-item h4,
                     .accessbit-widget-panel .content-adjustments-card h4,
@@ -5335,23 +5418,73 @@ font-family: Archivo;
                     .accessbit-widget-panel .profile-item p,
                     .accessbit-panel-screenshot .profile-item p { font-size: 10px; line-height: 1.3; }
                     .accessbit-widget-panel .profile-item-icon,
-                    .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; }
+                    .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; }
                     .accessbit-widget-panel .profile-item-icon svg,
-                    .accessbit-panel-screenshot .profile-item .profile-item-icon svg { width: 32px !important; height: 32px !important; }
+                    .accessbit-panel-screenshot .profile-item .profile-item-icon svg { width: 43px !important; height: 43px !important; }
                     .accessbit-widget-panel .content-card-icon,
                     .accessbit-widget-panel .color-adjustments-card .content-card-icon,
                     .accessbit-widget-panel .contrast-style-card .content-card-icon,
-                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; }
+                    /* Same icon and container as desktop on mobile: no extra outer layer; icon SVG fills 43px */
                     .accessbit-widget-panel .content-card-icon svg,
                     .accessbit-widget-panel .color-adjustments-card .content-card-icon svg,
-                    .accessbit-widget-panel .contrast-style-card .content-card-icon svg { width: 18px !important; height: 18px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg { width: 32px !important; height: 32px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .color-option { width: 26px !important; height: 26px !important; min-width: 26px !important; min-height: 26px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg { width: 26px !important; height: 26px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { height: 28px !important; min-height: 28px !important; gap: 8px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { width: 26px !important; height: 26px !important; min-height: 26px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg { width: 26px !important; height: 26px !important; }
+                    .accessbit-widget-panel .contrast-style-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option { width: 20px !important; height: 20px !important; min-width: 20px !important; min-height: 20px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg { width: 20px !important; height: 20px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { height: 20px !important; min-height: 20px !important; gap: 4px !important; padding-left: 0 !important; align-items: center !important; display: flex !important; flex-wrap: nowrap !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options { gap: 4px !important; flex-wrap: nowrap !important; align-items: center !important; height: 20px !important; min-height: 20px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { width: 20px !important; height: 20px !important; min-width: 20px !important; min-height: 20px !important; margin: 0 !important; padding: 0 !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; line-height: 0 !important; flex-shrink: 0 !important; vertical-align: middle !important; border: none !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg { width: 20px !important; height: 20px !important; display: block !important; vertical-align: middle !important; }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 14px; line-height: 1.25; }
+                    /* Slider thumbs: slightly smaller green circle on mobile */
+                    .accessbit-widget-panel .scaling-slider-track .scaling-slider-thumb {
+                        width: 28px !important;
+                        height: 28px !important;
+                        margin-left: -14px !important;
+                        margin-top: -14px !important;
+                    }
+                    .accessbit-widget-panel .scaling-slider-track .scaling-thumb-circle {
+                        width: 28px !important;
+                        height: 28px !important;
+                    }
+                    .accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    .accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    /* Text align left/center/right: reduce container height on mobile */
+                    .accessbit-widget-panel .content-adjustments-card.align-left-card,
+                    .accessbit-widget-panel .content-adjustments-card.align-center-card,
+                    .accessbit-widget-panel .content-adjustments-card.align-right-card { min-height: auto !important; height: auto !important; padding: 8px 12px !important; }
+                    .accessbit-widget-panel .align-left-card .align-left-label,
+                    .accessbit-widget-panel .align-center-card .align-center-label,
+                    .accessbit-widget-panel .align-right-card .align-right-label { padding: 8px 12px !important; margin: -8px -12px !important; }
+                    .accessbit-widget-panel .align-left-card h4,
+                    .accessbit-widget-panel .align-center-card h4,
+                    .accessbit-widget-panel .align-right-card h4 { margin-top: 4px !important; }
+                    /* Slider cards (Content Scaling, Letter Spacing, Line Height, Font Size): decrease title and value on mobile; override any global font-size */
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-scaling-header h4 { font-size: 12px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-adjustments-slider-value { font-size: 11px !important; line-height: 1.3 !important; white-space: nowrap !important; }
+                    /* Mobile: smaller description text for Keyboard Nav + Blind Users (all text under those cards) */
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) p,
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) small {
+                        font-size: 11px !important;
+                        line-height: 15px !important;
+                    }
                     .accessbit-widget-panel .panel-header .reset-settings-icon svg,
                     .accessbit-widget-panel .panel-header .statement-btn-icon svg,
                     .accessbit-widget-panel .panel-header .hide-interface-btn-icon svg,
@@ -5387,6 +5520,130 @@ font-family: Archivo;
                     .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,
                     .accessbit-panel-screenshot .useful-links-card #useful-links-select,
                     .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select { font-size: 11px !important; line-height: 1.3 !important; }
+                    /* Mobile: shrink useful links card & trigger further */
+                    .accessbit-widget-panel .useful-links-card {
+                        padding: 10px 14px !important;
+                        min-height: 110px !important;
+                        gap: 8px !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-header h4 {
+                        font-size: 14px !important;
+                        line-height: 18px !important;
+                    }
+                    .accessbit-widget-panel .useful-links-custom-trigger,
+                    .accessbit-panel-screenshot .useful-links-custom-trigger {
+                        height: 34px !important;
+                        font-size: 12px !important;
+                        padding-left: 10px !important;
+                        padding-right: 10px !important;
+                    }
+                    /* Mobile: color picker circles + reset icon on same row, tight gap */
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        gap: 4px !important;
+                        /* start circles under title text (icon width 43 + gap 12) */
+                        padding-left: 55px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        flex: 1 1 auto !important;
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                        gap: 4px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                    }
+                    /* Useful links dropdown + placeholder responsive on mobile; override any global fixed width */
+                    .accessbit-widget-panel .useful-links-custom-dropdown,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown,
+                    .accessbit-widget-panel .useful-links-custom-dropdown,
+                    .accessbit-panel-screenshot .useful-links-custom-dropdown { width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-left: 0 !important; box-sizing: border-box !important; }
+                    .accessbit-widget-panel .useful-links-custom-trigger,
+                    .accessbit-panel-screenshot .useful-links-custom-trigger { width: 100% !important; max-width: 100% !important; min-width: 0 !important; font-size: 12px !important; padding-left: 10px !important; padding-right: 10px !important; box-sizing: border-box !important; }
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger { width: 100% !important; max-width: none !important; min-width: 0 !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { align-items: center !important; min-height: 20px !important; height: 20px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { align-self: center !important; margin-bottom: 0 !important; }
+                }
+
+                /* Apply some of the same spacing tweaks for small tablets/base screens (769px–1280px) */
+                @media (max-width: 1280px) and (min-width: 769px) {
+                    .accessbit-widget-panel .white-content-section .content-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .color-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .interface-controls-title,
+                    .accessbit-widget-panel .white-content-section > h3.placeholder-title {
+                        margin: 18px 0 10px 0 !important;
+                    }
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) .profile-description p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) .profile-info > div > p:first-of-type,
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) small {
+                        font-size: 11px !important;
+                        line-height: 15px !important;
+                    }
+                    /* Smaller colour picker and icons at 769–1280px to prevent overlap (e.g. 776px) */
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg {
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        min-height: 36px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 16px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        gap: 6px !important;
+                        padding-left: 44px !important;
+                        height: 28px !important;
+                        min-height: 28px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        flex: 1 1 auto !important;
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                        gap: 6px !important;
+                        align-items: center !important;
+                        height: 28px !important;
+                        min-height: 28px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                        align-self: center !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    /* 769–1280px: smaller font for Content Scaling, Font Size, Letter Spacing, Line Height labels and 100% values, Useful Links */
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 { font-size: 14px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value { font-size: 12px !important; line-height: 1.3 !important; }
+                    .accessbit-widget-panel .useful-links-card h4,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card #useful-links-select,
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select { font-size: 12px !important; line-height: 1.3 !important; }
                 }
     
     
@@ -5399,7 +5656,7 @@ font-family: Archivo;
 
                     flex-direction: column;
 
-                    padding: 10px 20px 40px 20px;
+                    padding: 10px 20px 14px 20px;
 
                     background: transparent !important;
 
@@ -5540,22 +5797,25 @@ font-family: Archivo;
                     letter-spacing: -1px;
                 }
                 .accessbit-panel-screenshot .profile-item .toggle-switch { flex-shrink: 0; margin-left: auto; margin-right: 12px; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) { border-color: #01CE9C !important; }
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border-color: #01CE9C !important; }
                 .accessbit-panel-screenshot .profile-item .profile-item-icon,
                 .accessbit-panel-screenshot .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .profile-item-icon,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:first-of-type,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg path,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:not(:first-of-type),
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .content-card-icon svg path,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C !important; }
-                .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
-                .accessbit-panel-screenshot .toggle-switch .slider { width: 80px !important; height: 40px !important; border-radius: 99px !important; box-shadow: 0px 1px 3px 0px #00000033 inset !important; }
-                .accessbit-panel-screenshot .toggle-switch .slider:before { height: 32px !important; width: 32px !important; left: 4px !important; bottom: 4px !important; border-radius: 50% !important; }
-                .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #00CE9C !important; }
-                .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(40px) !important; }
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon,
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg path,
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:not(:first-of-type),
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg path,
+                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C !important; }
+                /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
+                @media (min-width: 769px) {
+                    .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
+                    .accessbit-panel-screenshot .toggle-switch .slider { width: 80px !important; height: 40px !important; border-radius: 99px !important; box-shadow: 0px 1px 3px 0px #00000033 inset !important; }
+                    .accessbit-panel-screenshot .toggle-switch .slider:before { height: 32px !important; width: 32px !important; left: 4px !important; bottom: 4px !important; border-radius: 50% !important; }
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #00CE9C !important; }
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(40px) !important; }
+                }
                 .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after { content: "" !important; display: block !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; border: 2px solid white !important; border-radius: 50% !important; background: transparent !important; transition: none !important; }
                 .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after { content: "" !important; display: block !important; left: 22px !important; right: auto !important; top: 50% !important; transform: translateY(-50%) !important; width: 2px !important; height: 12px !important; background: white !important; border: none !important; border-radius: 0 !important; pointer-events: none !important; transition: none !important; opacity: 1 !important; }
                 .accessbit-panel-screenshot .panel-header .header-center { align-items: center !important; padding-left: 0 !important; padding-right: 0 !important; overflow: visible !important; }
@@ -5721,28 +5981,18 @@ font-family: Archivo;
                     border-radius: 0 !important;
                 }
                 .close-btn {
-    
                     cursor: pointer !important;
-    
                     font-size: 24px;
-    
-                    padding: 12px !important;
-    
+                    padding: 0 !important;
                     position: absolute !important;
-    
-                    top: 0px !important;
-    
-                    left: 6px !important;
-    
+                    top: 50% !important;
+                    left: 50% !important;
+                    right: auto !important;
+                    transform: translate(-50%, -50%) !important;
                     z-index: 1005 !important;
-    
                     background: transparent !important;
-    
                     border: none !important;
-    
                     color: white;
-    
-                    /* Increased clickable area */
                     width: 48px !important;
                     height: 48px !important;
                     min-width: 48px !important;
@@ -5757,11 +6007,36 @@ font-family: Archivo;
                     outline: none !important;
                     border-radius: 8px !important;
                     transition: background-color 0.2s ease !important;
-                    
-                    /* Ensure the entire button area is clickable */
-                    position: relative !important;
                     overflow: visible !important;
-    
+                    line-height: 1 !important;
+                    text-align: center !important;
+                }
+                /* Keep close X inside its container and centered (main panel and screenshot) */
+                .accessbit-widget-panel .panel-header .close-btn-container,
+                .accessbit-panel-screenshot .panel-header .close-btn-container {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 55px !important;
+                    height: 55px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    overflow: hidden !important;
+                }
+                .accessbit-widget-panel .panel-header .close-btn-container .close-btn,
+                .accessbit-panel-screenshot .panel-header .close-btn-container .close-btn {
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    right: auto !important;
+                    transform: translate(-50%, -50%) !important;
+                }
+                .close-btn svg,
+                .accessbit-widget-panel .close-btn svg,
+                .accessbit-panel-screenshot .close-btn svg {
+                    display: block !important;
+                    margin: 0 auto !important;
                 }
     
     
@@ -6068,15 +6343,16 @@ font-family: Archivo;
     
     
                 .action-btn:hover {
-    
+
                     background: #6366f1;
-    
+
                     color: #ffffff;
-    
-                    transform: translateY(-1px);
-    
-                    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
-    
+
+                    /* Remove hover lift animation */
+                    transform: none;
+
+                    box-shadow: none;
+
                 }
     
     
@@ -6091,7 +6367,7 @@ font-family: Archivo;
     
                     border-radius: 0 !important;
     
-                    margin-top: -30px !important;
+                    margin-top: -20px !important;
     
                     position: relative;
     
@@ -6131,7 +6407,7 @@ font-family: Archivo;
 
                 }
 
-                .content-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(528px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .content-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(528px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: visible !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .content-adjustments-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .content-adjustments-title,
                 .color-adjustments-title,
@@ -6234,6 +6510,7 @@ font-family: Archivo;
                 .contrast-style-card .content-card-icon.highlight-titles-icon svg,
                 .contrast-style-card .content-card-icon.highlight-links-icon svg,
                 .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; }
+                /* No icons hidden – Highlight Links, Text Magnifier, Text align use ring/icon styling */
                 .contrast-style-card .content-card-icon.text-magnifier-icon { min-width: 43px; min-height: 43px; border: 1px solid rgba(0,0,0,0.12); box-sizing: border-box; }
                 .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px !important; height: 43px !important; min-width: 43px; min-height: 43px; display: block !important; }
                 .contrast-style-card .content-card-icon.dark-contrast-icon svg,
@@ -6247,6 +6524,12 @@ font-family: Archivo;
                 .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .interface-controls-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .interface-controls-title { font-family: Archivo; font-weight: 600; font-style: normal; font-size: 26px; line-height: 27px; letter-spacing: -1px; color: #524072 !important; margin: 36px 0 18px 0 !important; text-align: left !important; display: block !important; min-height: 27px !important; contain: layout !important; }
+                @media (max-width: 768px) {
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title { font-size: 15px !important; line-height: 19px !important; }
+                }
                 .interface-controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
                 .color-adjustments-pickers { display: flex; flex-direction: column; gap: 12px; }
                 .color-adjustments-picker-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(0,0,0,0.1); box-sizing: border-box; }
@@ -6254,13 +6537,13 @@ font-family: Archivo;
                 .color-adjustments-picker-card .content-card-icon svg { width: 43px; height: 43px; }
                 .color-adjustments-picker-card .picker-card-header { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: nowrap; width: 100%; }
                 .color-adjustments-picker-card .picker-card-header h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; flex-shrink: 0; }
-                .color-adjustments-picker-card .picker-row { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; width: 100%; min-width: 0; height: 34px; min-height: 34px; }
-                .color-adjustments-picker-card .color-options { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; flex: 1; min-width: 0; height: 34px; align-self: stretch; }
+                .color-adjustments-picker-card .picker-row { display: flex; align-items: center; justify-content: flex-start; gap: 15.95px; flex-wrap: nowrap; width: 100%; min-width: 0; height: 34px; min-height: 34px; }
+                .color-adjustments-picker-card .color-options { display: flex; align-items: center; gap: 15px; flex-wrap: nowrap; flex: 1; min-width: 0; height: 34px; align-self: stretch; padding-left: 55px; box-sizing: border-box; }
                 .color-adjustments-picker-card .color-option { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; flex-shrink: 0; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
                 .color-adjustments-picker-card .color-option svg { width: 34px; height: 34px; display: block; flex-shrink: 0; }
                 .color-adjustments-picker-card .color-option:hover { border-color: #999; }
                 .color-adjustments-picker-card .color-option.selected { border-color: #14b8a6; outline: 2px solid #14b8a6; outline-offset: 1px; }
-                .color-adjustments-picker-card .picker-clear-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; margin: 0; border: none; background: transparent; cursor: pointer; flex-shrink: 0; margin-left: auto; align-self: center; display: flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 0; vertical-align: middle; }
+                .color-adjustments-picker-card .picker-clear-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; margin: 0; border: none; background: transparent; cursor: pointer; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 0; vertical-align: middle; }
                 .color-adjustments-picker-card .picker-clear-btn:hover { background: rgba(0,0,0,0.06); }
                 .color-adjustments-picker-card .picker-clear-btn svg { width: 34px; height: 34px; display: block; vertical-align: middle; }
                 .content-adjustments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
@@ -6275,6 +6558,18 @@ font-family: Archivo;
                 .highlight-titles-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
                 .highlight-titles-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .highlight-titles-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card .highlight-titles-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .ht-ring-on { display: none; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-off { display: none; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-on { display: block; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-path {
+                    fill: #01CE9C;
+                    stroke: #01CE9C;
+                }
                 .content-adjustments-card.highlight-links-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
                 .accessbit-widget-panel .content-adjustments-card.highlight-links-card { overflow: hidden !important; }
                 .content-adjustments-card .content-card-icon.highlight-links-icon svg { width: 43px; height: 43px; }
@@ -6316,17 +6611,29 @@ font-family: Archivo;
                 .content-adjustments-card .content-card-icon { width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; }
                 .content-adjustments-card .content-card-icon svg { width: 24px; height: 24px; }
                 .content-adjustments-card .content-card-icon.content-scaling-icon svg { width: 43px; height: 43px; }
-                .content-adjustments-card.content-scaling-card { display: flex; flex-direction: row; align-items: flex-start; flex-wrap: nowrap; }
+                .content-adjustments-card.content-scaling-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; margin-bottom: 14px !important; }
                 .content-adjustments-card.content-scaling-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
                 /* All slider cards (Content Scaling, Font Sizing, Letter Spacing, Line Height): icon + title + value on first row, slider on second */
-                .content-adjustments-card.slider-card { display: flex; flex-direction: row; align-items: flex-start; flex-wrap: nowrap; }
+                .content-adjustments-card.slider-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; overflow: visible !important; overflow-x: visible !important; }
                 .content-adjustments-card.slider-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
+                .accessbit-widget-panel .content-adjustments-card.content-scaling-card { margin-bottom: 14px !important; }
                 .content-adjustments-card .content-card-icon.readable-font-icon svg { width: 43px; height: 43px; }
                 .content-adjustments-card.readable-font-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
                 .accessbit-widget-panel .content-adjustments-card.readable-font-card { overflow: hidden !important; }
                 .readable-font-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
                 .readable-font-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .readable-font-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+
+                .accessbit-widget-panel .content-adjustments-card.readable-font-card .readable-font-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .readable-font-ring-on,
+                .readable-font-icon-on { display: none; }
+                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off,
+                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off { display: none; }
+                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-on,
+                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-on { display: block; }
                 .content-scaling-header { display: flex; align-items: center; gap: 12px; }
                 .content-scaling-header .content-adjustments-slider-value { margin-left: auto; }
                 .content-adjustments-card.slider-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -6335,25 +6642,74 @@ font-family: Archivo;
                 .content-adjustments-card .content-card-icon.line-height-icon svg { width: 43px; height: 43px; }
                 .content-adjustments-card .content-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
                 .content-adjustments-card .content-card-body h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .content-adjustments-card.content-scaling-card .content-card-body h4,
+                .content-adjustments-card.slider-card .content-card-body h4 { margin-top: 0; line-height: 23px; }
                 .content-adjustments-card .content-card-body p { margin: 0; font-family: Archivo; font-size: 16px; font-weight: 400; color: #4A5565; }
                 .content-adjustments-card.slider-card .content-card-body { flex: 1; }
-                .content-adjustments-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+                .content-adjustments-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
                 .scaling-slider-svg-wrap { display: flex; align-items: center; margin-top: 8px; width: 100%; }
                 .scaling-slider-track { position: relative; width: 100%; height: 61px; display: flex; align-items: center; direction: ltr; }
-                .scaling-slider-track::before { content: ""; position: absolute; left: 0; width: 100%; max-width: 433px; top: 50%; height: 12px; margin-top: -6px; background: #EAECF2; border-radius: 37px; opacity: 1; pointer-events: none; }
-                .scaling-slider-track .scaling-range-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: 100%; height: 100% !important; min-height: 61px; opacity: 0; cursor: pointer; margin: 0; z-index: 2; background: transparent; direction: ltr; }
+                .scaling-slider-track::before { content: ""; position: absolute; left: 0; width: 100%; max-width: 100%; top: 50%; height: 12px; margin-top: -6px; background: #EAECF2; border-radius: 37px; opacity: 1; pointer-events: none; overflow: hidden; }
+                .scaling-slider-track .scaling-range-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: 100%; height: 100% !important; min-height: 61px; opacity: 0; cursor: pointer; margin: 0; z-index: 3; background: transparent; direction: ltr; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track,
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay,
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track .scaling-range-overlay { direction: ltr !important; }
                 .scaling-slider-track .scaling-range-overlay::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: transparent; cursor: pointer; border: none; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-webkit-slider-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-moz-range-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-thumb { transition: none !important; }
                 .scaling-slider-track .scaling-range-overlay::-webkit-slider-runnable-track { cursor: pointer; }
                 .scaling-slider-track .scaling-range-overlay::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: transparent; cursor: pointer; border: none; }
                 .scaling-slider-track .scaling-range-overlay::-moz-range-track { cursor: pointer; }
-                .scaling-slider-track .scaling-pointer-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 3; cursor: pointer; }
-                .scaling-slider-track:has(.scaling-pointer-overlay) .scaling-range-overlay { pointer-events: none; }
-.scaling-slider-track .scaling-slider-thumb { position: absolute; top: 50%; left: 50%; width: 50px; height: 61px; margin-left: -25px; margin-top: -19px; pointer-events: none; transition: left 0.12s ease; }
-                .scaling-slider-track .scaling-slider-thumb svg { width: 50px; height: 61px; display: block; }
+                .scaling-slider-track .scaling-pointer-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 2; cursor: pointer; pointer-events: none; }
+                .scaling-slider-track .scaling-range-overlay { pointer-events: auto !important; cursor: pointer; }
+                .scaling-slider-track { overflow: visible !important; }
+                .scaling-slider-track .scaling-slider-thumb { position: absolute; top: 50%; left: 50%; width: 36px; height: 36px; margin-left: -18px; margin-top: -18px; pointer-events: none; transition: left 0.12s ease; }
+                .scaling-slider-track .scaling-thumb-circle {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 99px;
+                    background: linear-gradient(180deg, #00CE9C 0%, #01B086 100%);
+                    box-shadow:
+                        0px 1px 2px 0px #00000033,
+                        0px 4px 4px 0px #0000002B,
+                        0px 10px 6px 0px #0000001A,
+                        0px 17px 7px 0px #00000008,
+                        0px 27px 27px 0px #00000000,
+                        0.25px -2px 20px 0px #0000000D inset,
+                        0.5px 0.5px 1px 0px #FFFFFF inset;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .scaling-slider-track .scaling-thumb-circle svg {
+                    width: 7px;
+                    height: 14px;
+                    display: block;
+                }
                 .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay) { flex: 1; min-width: 0; height: 6px; -webkit-appearance: none; appearance: none; background: #E2E8F0; border-radius: 3px; }
                 .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; box-shadow: 0 0 0 2px #fff; }
                 .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; border: none; }
-                .content-adjustments-slider-value { font-weight: 700; font-size: 16px; color: #1E2939; min-width: 44px; text-align: right; }
+                .content-adjustments-slider-value {
+                    font-family: Archivo;
+                    font-weight: 700;
+                    font-size: 21px;
+                    line-height: 27px;
+                    letter-spacing: -0.44px;
+                    color: #1E2939;
+                    min-width: 44px;
+                    text-align: right;
+                }
+
+                @media (max-width: 768px) {
+                    .accessbit-widget-panel .content-adjustments-slider-value {
+                        font-size: 16px !important;
+                        line-height: 22px !important;
+                        min-width: 36px !important;
+                        white-space: nowrap !important;
+                        display: inline-block !important;
+                    }
+                }
                 .content-adjustments-card .toggle-switch { margin-left: auto; flex-shrink: 0; }
 
 
@@ -6398,13 +6754,269 @@ font-family: Archivo;
     
                 }
     
-                .profile-item:has(.toggle-switch input:checked) { border: 2px solid #01CE9C; }
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border: 2px solid #01CE9C; }
     
     
                 /* Seizure Safe container only: 528px width */
                 .profile-item:has(#seizure-safe) {
                     width: 528px;
                     max-width: min(528px, 100%);
+                }
+                .profile-item .seizure-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .seizure-ring-on { display: none; }
+                .profile-item:has(#seizure-safe:checked) .seizure-ring-off { display: none; }
+                .profile-item:has(#seizure-safe:checked) .seizure-ring-on { display: block; }
+                .profile-item:has(#seizure-safe:checked) .seizure-icon-path { stroke: #01CE9C; }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe),
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon,
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .seizure-icon {
+                    overflow: visible !important;
+                }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon {
+                    margin-left: 4px;
+                }
+                .accessbit-widget-panel .profile-item:has(#reduce-motion) .reduce-motion-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .reduce-ring-on { display: none; }
+                .profile-item:has(#reduce-motion:checked) .reduce-ring-off { display: none; }
+                .profile-item:has(#reduce-motion:checked) .reduce-ring-on { display: block; }
+                .profile-item:has(#reduce-motion:checked) .reduce-motion-path,
+                .profile-item:has(#reduce-motion:checked) .reduce-motion-dot {
+                    fill: #01CE9C;
+                }
+                .accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                /* Vision Impaired icon: off/on rings and eye */
+                .vision-ring-on,
+                .vision-eye-on {
+                    display: none;
+                }
+                .profile-item:has(#vision-impaired:checked) .vision-ring-off,
+                .profile-item:has(#vision-impaired:checked) .vision-eye-off {
+                    display: none;
+                }
+                .profile-item:has(#vision-impaired:checked) .vision-ring-on,
+                .profile-item:has(#vision-impaired:checked) .vision-eye-on {
+                    display: block;
+                }
+                /* Dark Contrast icon: off/on rings and moon */
+                .dark-contrast-ring-on,
+                .dark-contrast-icon-on {
+                    display: none;
+                }
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off,
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off {
+                    display: none;
+                }
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-on,
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-on {
+                    display: block;
+                }
+                /* Light Contrast icon: off/on rings and sun */
+                .light-contrast-ring-on,
+                .light-contrast-icon-on {
+                    display: none;
+                }
+                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off,
+                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off {
+                    display: none;
+                }
+                .profile-item:has(#light-contrast:checked) .light-contrast-ring-on,
+                .profile-item:has(#light-contrast:checked) .light-contrast-icon-on {
+                    display: block;
+                }
+                /* High Contrast icon: off/on rings and circle */
+                .high-contrast-ring-on,
+                .high-contrast-icon-on {
+                    display: none;
+                }
+                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off,
+                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off {
+                    display: none;
+                }
+                .profile-item:has(#high-contrast:checked) .high-contrast-ring-on,
+                .profile-item:has(#high-contrast:checked) .high-contrast-icon-on {
+                    display: block;
+                }
+                /* High Saturation icon: off/on rings and droplet */
+                .high-sat-ring-on,
+                .high-sat-icon-on { display: none; }
+                .contrast-style-card:has(#high-saturation:checked) .high-sat-ring-off,
+                .contrast-style-card:has(#high-saturation:checked) .high-sat-icon-off { display: none; }
+                .contrast-style-card:has(#high-saturation:checked) .high-sat-ring-on,
+                .contrast-style-card:has(#high-saturation:checked) .high-sat-icon-on { display: block; }
+                /* Low Saturation icon: off/on rings and droplet */
+                .low-sat-ring-on,
+                .low-sat-icon-on { display: none; }
+                .contrast-style-card:has(#low-saturation:checked) .low-sat-ring-off,
+                .contrast-style-card:has(#low-saturation:checked) .low-sat-icon-off { display: none; }
+                .contrast-style-card:has(#low-saturation:checked) .low-sat-ring-on,
+                .contrast-style-card:has(#low-saturation:checked) .low-sat-icon-on { display: block; }
+                /* Monochrome icon: off/on rings and circle paths */
+                .mono-ring-on,
+                .mono-icon-on { display: none; }
+                .contrast-style-card:has(#monochrome:checked) .mono-ring-off,
+                .contrast-style-card:has(#monochrome:checked) .mono-icon-off { display: none; }
+                .contrast-style-card:has(#monochrome:checked) .mono-ring-on,
+                .contrast-style-card:has(#monochrome:checked) .mono-icon-on { display: block; }
+                /* Mute Sounds icon: off/on rings and speaker */
+                .mute-ring-on,
+                .mute-icon-on { display: none; }
+                .contrast-style-card:has(#mute-sound:checked) .mute-ring-off,
+                .contrast-style-card:has(#mute-sound:checked) .mute-icon-off { display: none; }
+                .contrast-style-card:has(#mute-sound:checked) .mute-ring-on,
+                .contrast-style-card:has(#mute-sound:checked) .mute-icon-on { display: block; }
+                /* Hide Images icon: off/on rings and image */
+                .hide-img-ring-on,
+                .hide-img-icon-on { display: none; }
+                .contrast-style-card:has(#hide-images:checked) .hide-img-ring-off,
+                .contrast-style-card:has(#hide-images:checked) .hide-img-icon-off { display: none; }
+                .contrast-style-card:has(#hide-images:checked) .hide-img-ring-on,
+                .contrast-style-card:has(#hide-images:checked) .hide-img-icon-on { display: block; }
+                /* Read Mode icon: off/on rings and card */
+                .read-mode-ring-on,
+                .read-mode-icon-on { display: none; }
+                .contrast-style-card:has(#read-mode:checked) .read-mode-ring-off,
+                .contrast-style-card:has(#read-mode:checked) .read-mode-icon-off { display: none; }
+                .contrast-style-card:has(#read-mode:checked) .read-mode-ring-on,
+                .contrast-style-card:has(#read-mode:checked) .read-mode-icon-on { display: block; }
+                /* Reading Guide icon: off/on rings and arrow */
+                .reading-guide-ring-on,
+                .reading-guide-icon-on { display: none; }
+                .contrast-style-card:has(#reading-guide:checked) .reading-guide-ring-off,
+                .contrast-style-card:has(#reading-guide:checked) .reading-guide-icon-off { display: none; }
+                .contrast-style-card:has(#reading-guide:checked) .reading-guide-ring-on,
+                .contrast-style-card:has(#reading-guide:checked) .reading-guide-icon-on { display: block; }
+                /* Stop Animations icon: off/on rings and image */
+                .stop-anim-ring-on,
+                .stop-anim-icon-on { display: none; }
+                .contrast-style-card:has(#stop-animation:checked) .stop-anim-ring-off,
+                .contrast-style-card:has(#stop-animation:checked) .stop-anim-icon-off { display: none; }
+                .contrast-style-card:has(#stop-animation:checked) .stop-anim-ring-on,
+                .contrast-style-card:has(#stop-animation:checked) .stop-anim-icon-on { display: block; }
+                /* Reading Mask icon: off/on rings and bars */
+                .reading-mask-ring-on,
+                .reading-mask-icon-on { display: none; }
+                .contrast-style-card:has(#reading-mask:checked) .reading-mask-ring-off,
+                .contrast-style-card:has(#reading-mask:checked) .reading-mask-icon-off { display: none; }
+                .contrast-style-card:has(#reading-mask:checked) .reading-mask-ring-on,
+                .contrast-style-card:has(#reading-mask:checked) .reading-mask-icon-on { display: block; }
+                /* Highlight Titles icon: off/on rings and paths */
+                .ht-ring-on,
+                .ht-icon-on { display: none; }
+                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off,
+                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off { display: none; }
+                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-on,
+                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-on { display: block; }
+                /* Highlight Focus icon: off/on rings and target */
+                .hl-focus-ring-on,
+                .hl-focus-icon-on { display: none; }
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off,
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off { display: none; }
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-on,
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-on { display: block; }
+                /* Highlight Hover icon: off/on rings and frame */
+                .hl-hover-ring-on,
+                .hl-hover-icon-on { display: none; }
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off,
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off { display: none; }
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-on,
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-on { display: block; }
+                /* Big Black Cursor icon: off/on rings and cursor */
+                .bbc-ring-on,
+                .bbc-icon-on { display: none; }
+                .contrast-style-card:has(#big-black-cursor:checked) .bbc-ring-off,
+                .contrast-style-card:has(#big-black-cursor:checked) .bbc-icon-off { display: none; }
+                .contrast-style-card:has(#big-black-cursor:checked) .bbc-ring-on,
+                .contrast-style-card:has(#big-black-cursor:checked) .bbc-icon-on { display: block; }
+                /* Big White Cursor icon: off/on rings and cursor */
+                .bwc-ring-on,
+                .bwc-icon-on { display: none; }
+                .contrast-style-card:has(#big-white-cursor:checked) .bwc-ring-off,
+                .contrast-style-card:has(#big-white-cursor:checked) .bwc-icon-off { display: none; }
+                .contrast-style-card:has(#big-white-cursor:checked) .bwc-ring-on,
+                .contrast-style-card:has(#big-white-cursor:checked) .bwc-icon-on { display: block; }
+                /* Highlight Links icon: off/on rings and link paths */
+                .hl-links-ring-on,
+                .hl-links-icon-on { display: none; }
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off,
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off { display: none; }
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-on,
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-on { display: block; }
+                /* Text Magnifier icon: off/on rings and magnifier */
+                .tm-ring-on,
+                .tm-icon-on { display: none; }
+                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off,
+                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off { display: none; }
+                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-on,
+                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-on { display: block; }
+                /* Text Left align icon: off/on rings and lines */
+                .align-left-ring-on,
+                .align-left-icon-on { display: none; }
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off,
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off { display: none; }
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-on,
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-on { display: block; }
+                /* Text Center align icon: off/on rings and lines */
+                .align-center-ring-on,
+                .align-center-icon-on { display: none; }
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off,
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off { display: none; }
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-on,
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-on { display: block; }
+                /* Text Right align icon: off/on rings and lines */
+                .align-right-ring-on,
+                .align-right-icon-on { display: none; }
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off,
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off { display: none; }
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-on,
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-on { display: block; }
+                .accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .adhd-ring-on { display: none; }
+                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off { display: none; }
+                .profile-item:has(#adhd-friendly:checked) .adhd-ring-on { display: block; }
+                .profile-item:has(#adhd-friendly:checked) .adhd-path {
+                    stroke: #01CE9C;
+                }
+                .accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .cog-ring-on { display: none; }
+                .profile-item:has(#cognitive-disability:checked) .cog-ring-off { display: none; }
+                .profile-item:has(#cognitive-disability:checked) .cog-ring-on { display: block; }
+                .profile-item:has(#cognitive-disability:checked) .cog-path {
+                    fill: #01CE9C;
+                }
+                .accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .kb-ring-on { display: none; }
+                .profile-item:has(#keyboard-nav:checked) .kb-ring-off { display: none; }
+                .profile-item:has(#keyboard-nav:checked) .kb-ring-on { display: block; }
+                .profile-item:has(#keyboard-nav:checked) .kb-path {
+                    fill: #01CE9C;
+                }
+                .accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .blind-ring-on { display: none; }
+                .profile-item:has(#screen-reader:checked) .blind-ring-off { display: none; }
+                .profile-item:has(#screen-reader:checked) .blind-ring-on { display: block; }
+                .profile-item:has(#screen-reader:checked) .blind-path {
+                    fill: #01CE9C;
                 }
                 /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
                 .profile-item:has(#reduce-motion),
@@ -6437,17 +7049,18 @@ font-family: Archivo;
     
     
                 .profile-item:hover {
-    
+
                     background: rgba(99, 102, 241, 0.05);
-    
+
                     border-top-color: #e2e8f0;
-    
+
                     border-bottom-color: #e2e8f0;
-    
-                    transform: translateX(2px);
-    
-                    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
-    
+
+                    /* Remove hover movement/jump */
+                    transform: none;
+
+                    box-shadow: none;
+
                 }
     
     
@@ -6491,19 +7104,20 @@ font-family: Archivo;
                     justify-content: center;
                     border: 2px solid transparent;
                     box-sizing: border-box;
+                    background: transparent;
                 }
-                .profile-item:has(.toggle-switch input:checked) .profile-item-icon,
-                .profile-item:has(.toggle-switch input:checked) .content-card-icon { border: 2px solid transparent; background: transparent; }
-                .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:first-of-type,
-                .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
-                .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg path,
-                .profile-item:has(.toggle-switch input:checked) .profile-item-icon svg circle:not(:first-of-type),
-                .profile-item:has(.toggle-switch input:checked) .content-card-icon svg path,
-                .profile-item:has(.toggle-switch input:checked) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C; }
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon,
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent; background: transparent; }
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg path,
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:not(:first-of-type),
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg path,
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C; }
                 .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
                 .profile-item-icon svg {
-                    width: 43px;
-                    height: 43px;
+                    width: 36px;
+                    height: 36px;
                     display: block;
                 }
                 .profile-info h4 {
@@ -6587,26 +7201,26 @@ font-family: Archivo;
     
     
     
-                /* Toggle Switch */
-    
+                /* Toggle Switch – desktop size only; mobile size set in @media (max-width: 768px) */
+                @media (min-width: 769px) {
+                    .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 80px !important;
+                        height: 40px !important;
+                        flex-shrink: 0;
+                        margin-left: auto;
+                        margin-right: 12px;
+                        order: 2;
+                    }
+                }
                 .toggle-switch {
-    
                     position: relative;
-    
                     display: inline-block;
-    
-                    width: 80px !important;
-    
-                    height: 40px !important;
-    
                     flex-shrink: 0;
-    
                     margin-left: auto;
-    
                     margin-right: 12px;
-    
                     order: 2;
-    
                 }
     
     
@@ -6815,7 +7429,7 @@ input:checked + .slider::after {
     
                     max-width: 100%;
     
-                    height: 51px;
+                    height: auto;
     
                     opacity: 1;
     
@@ -6823,7 +7437,7 @@ input:checked + .slider::after {
     
                     color: #1E2939;
     
-                    padding: 0 20px;
+                    padding: 18px 20px;
     
                     display: flex;
     
@@ -6886,7 +7500,7 @@ input:checked + .slider::after {
                     justify-content: center !important;
                 }
                 .accessbit-panel-screenshot #current-language-header {
-                    font-family: Archivo;
+                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                     font-weight: 500;
                     font-size: 14px;
                     line-height: 20px;
@@ -6903,7 +7517,7 @@ input:checked + .slider::after {
     
                 /* Language Selector Header Styles */
     
-.language-selector-header {
+                .language-selector-header {
 
                     display: flex;
 
@@ -6913,7 +7527,7 @@ input:checked + .slider::after {
     
                     cursor: pointer;
     
-                    padding: 6px 10px;
+                    padding: 5px;
     
                     border-radius: 6px;
     
@@ -6993,7 +7607,7 @@ input:checked + .slider::after {
     
                 .language-dropdown {
     
-                    /* Position set by JS below the "ENGLISH" trigger; do not fix top/left here */
+                    /* Position set by JS below the \"ENGLISH\" trigger; do not fix top/left here */
                     position: fixed !important;
     
                     background: #FFFFFF !important;
@@ -7014,16 +7628,15 @@ input:checked + .slider::after {
     
                     overflow-x: hidden !important;
     
-                    animation: dropdownSlideIn 0.2s ease-out !important;
-    
-                    /* transform: none !important; - REMOVED: This was causing elements to snap to initial positions */
+                    /* Remove slide-in animation for no movement when hovering */
+                    animation: none !important;
     
                     clip: none !important;
     
                     display: none !important;
-
+    
                     font-family: Archivo, sans-serif !important;
-
+    
                     pointer-events: auto !important;
     
                     /* Ensure dropdown is positioned relative to panel */
@@ -7064,6 +7677,19 @@ input:checked + .slider::after {
     
                 }
     
+                /* Language dropdown: stay inside widget on mobile/tablet, visible and responsive */
+                @media (max-width: 1024px) {
+                    .accessbit-widget-panel { position: relative !important; overflow: visible !important; }
+                    .accessbit-widget-panel .language-dropdown,
+                    #language-dropdown.language-dropdown {
+                        width: min(192px, 100%) !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                        max-height: min(60vh, 280px) !important;
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                    }
+                }
     
     
                 @keyframes dropdownSlideIn {
@@ -7090,7 +7716,7 @@ input:checked + .slider::after {
     
                 .language-dropdown-content {
     
-                    padding: 20px !important;
+                    padding: 5px !important;
     
                     background: #ffffff !important;
     
@@ -7101,40 +7727,40 @@ input:checked + .slider::after {
     
     
                 .language-option {
-
-                    display: flex;
-
-                    align-items: center;
-
-                    gap: 12px;
-
-                    padding: 12px 16px;
-
-                    border: none;
-
-                    border-radius: 8px;
-
-                    background: transparent;
-
-                    cursor: pointer;
-
-                    transition: all 0.2s ease;
-
-                    font-size: 14px;
-
-                    font-weight: 500;
-
-                    color: #374151;
-
-                    text-align: left;
-
-                    width: 100%;
-
-                    margin-bottom: 4px;
-
-                    font-family: Archivo, sans-serif;
     
-                
+                    display: flex;
+    
+                    align-items: center;
+    
+                    gap: 12px;
+    
+                    padding: 5px;
+    
+                    border: none;
+    
+                    border-radius: 6px;
+    
+                    background: transparent;
+    
+                    cursor: pointer;
+    
+                    transition: none;
+    
+                    font-size: 14px;
+    
+                    font-weight: 500;
+    
+                    color: #374151;
+    
+                    text-align: left;
+    
+                    width: 154px;
+    
+                    height: 35px;
+    
+                    margin: 0 auto 13px;
+    
+                    font-family: Archivo, sans-serif;
     
                     pointer-events: auto !important;
     
@@ -7145,9 +7771,9 @@ input:checked + .slider::after {
     
     
                 .language-option:hover {
-
+    
                     background: #DEDEDE;
-
+    
                 }
     
     
@@ -7193,9 +7819,15 @@ input:checked + .slider::after {
     
                     flex: 1;
     
+                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    
                     font-weight: 500;
     
                     font-size: 14px;
+    
+                    line-height: 20px;
+    
+                    letter-spacing: -0.15px;
     
                     white-space: nowrap;
     
@@ -7289,7 +7921,8 @@ input:checked + .slider::after {
     
                 :host(.cognitive-disability) .accessbit-widget-panel {
     
-                    filter: saturate(1.2) brightness(1.1) !important;
+                    /* Softer effect so widget colors remain readable */
+                    filter: saturate(1.05) brightness(1.03) !important;
     
                 }
     
@@ -7320,11 +7953,8 @@ input:checked + .slider::after {
     
     
                 :host(.light-contrast) .accessbit-widget-icon,
-    
                 :host(.light-contrast) .accessbit-widget-panel {
-    
-                    filter: saturate(1.2) brightness(1.2) contrast(0.9) !important;
-    
+                    filter: none !important;
                 }
     
     
@@ -7741,6 +8371,27 @@ input:checked + .slider::after {
                     flex-wrap: wrap;
     
                 }
+                /* Override generic color-options for Adjust Text/Title/Background pickers */
+                .color-adjustments-picker-card .picker-row {
+                    justify-content: flex-start;
+                    gap: 15.95px;
+                }
+                .color-adjustments-picker-card .color-options {
+                    justify-content: flex-start;
+                    gap: 15px;
+                    margin-bottom: 0;
+                    padding-left: 55px;
+                }
+
+                /* Small-screen override: allow color options to wrap so they don't overlap reset icon */
+                @media (max-width: 480px) {
+                    .color-adjustments-picker-card .color-options {
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        padding-left: 0;
+                        justify-content: flex-start;
+                    }
+                }
     
     
     
@@ -7973,8 +8624,24 @@ input:checked + .slider::after {
                     position: relative !important;
                     display: block !important;
                     margin-top: 12px !important;
+                    margin-left: 55px !important;
+                    max-width: calc(100% - 55px) !important;
+                    width: calc(100% - 55px) !important;
                     z-index: 10 !important;
                     pointer-events: auto !important;
+                }
+
+                @media (max-width: 480px) {
+                    .useful-links-custom-dropdown {
+                        margin-left: 55px !important;
+                        max-width: calc(100% - 55px) !important;
+                    }
+                    .useful-links-custom-trigger {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        height: 34px !important;
+                        font-size: 12px !important;
+                    }
                 }
                 .useful-links-custom-trigger {
                     pointer-events: auto !important;
@@ -7985,12 +8652,15 @@ input:checked + .slider::after {
                     height: 48px !important;
                     border-radius: 33px !important;
                     border: 1px solid #E0E0E0 !important;
-                    background: #FFFFFF !important;
+                    background: #E0E0E0 !important;
                     opacity: 1 !important;
                     cursor: pointer !important;
                     font-family: Archivo, sans-serif !important;
-                    font-size: 16px !important;
-                    color: #1E2939 !important;
+                    font-weight: 500 !important;
+                    font-size: 20px !important;
+                    line-height: 27px !important;
+                    letter-spacing: -0.44px !important;
+                    color: #000000 !important;
                     text-align: left !important;
                     padding: 0 20px !important;
                     box-sizing: border-box !important;
@@ -8003,7 +8673,7 @@ input:checked + .slider::after {
                     margin-left: auto !important;
                     width: 14px !important;
                     height: 14px !important;
-                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
                     background-repeat: no-repeat !important;
                     background-position: center !important;
                 }
@@ -8581,7 +9251,7 @@ input:checked + .slider::after {
             languageSelectorHeader.appendChild(flagWrap);
             const currentLangSpan = document.createElement('span');
             currentLangSpan.id = 'current-language-header';
-            currentLangSpan.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:Archivo;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;';
+            currentLangSpan.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,\\"Segoe UI\\",sans-serif;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;';
             currentLangSpan.textContent = 'ENGLISH';
             languageSelectorHeader.appendChild(currentLangSpan);
             const arrowWrap = document.createElement('span');
@@ -8659,17 +9329,19 @@ input:checked + .slider::after {
             tempWrap.innerHTML = fullPanelHtml;
             const sectionEl = tempWrap.querySelector('.white-content-section');
             if (sectionEl) {
+                // Remove icon and container for: Readable Font, Highlight Titles/Links, Text Magnifier, Mute Sounds, Hide Images, Reading Guide, Stop Animations, Reading Mask, Highlight Focus/Hover, Big Cursors (High/Low Saturation and Monochrome keep icons with new SVGs)
+                /* Highlight Links and Text Magnifier icons now shown with ring/icon styling - not removed */
                 whiteContentSection.innerHTML = sectionEl.innerHTML;
             }
             const footerEl = tempWrap.querySelector('.panel-footer');
             if (!sectionEl) {
             const profiles = [
-                { id: 'seizure-safe', title: 'Seizure Safe Profile', description: 'Clear flashes & reduces color', descriptionId: 'seizure-safe-desc', ariaLabel: 'Seizure Safe Profile - Clear flashes and reduces color', ariaDescribedBy: 'seizure-safe-desc', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M16.9031 22.496H19.3087V28.0982C19.3087 28.9281 20.3318 29.3155 20.8848 28.693L26.7744 21.998C27.2859 21.417 26.8711 20.504 26.0969 20.504H23.6913V14.9018C23.6913 14.0719 22.6682 13.6845 22.1152 14.307L16.2256 21.002C15.7141 21.583 16.1289 22.496 16.9031 22.496Z" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+                { id: 'seizure-safe', title: 'Seizure Safe Profile', description: 'Clear flashes & reduces color', descriptionId: 'seizure-safe-desc', ariaLabel: 'Seizure Safe Profile - Clear flashes and reduces color', ariaDescribedBy: 'seizure-safe-desc', iconSvg: '' },
                 { id: 'reduce-motion', title: 'Reduce Motion', description: 'Disable animations and transitions', descriptionId: 'reduce-motion-desc', ariaLabel: 'Reduce Motion - Disable animations, transitions, and flash triggers', ariaDescribedBy: 'reduce-motion-desc', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M13.2854 27.1478C13.2854 27.0302 13.2816 26.9164 13.2863 26.8028C13.2955 26.5779 13.2888 26.3497 13.3263 26.1292C13.3875 25.7694 13.5787 25.4669 13.8327 25.2114C14.0382 25.0049 14.2636 24.8183 14.4802 24.6228C14.5003 24.6047 14.5269 24.5903 14.5398 24.5681C14.6089 24.4485 14.7169 24.4422 14.8398 24.4443C15.1889 24.4502 15.5382 24.446 15.8874 24.4458C15.9172 24.4457 15.9469 24.4458 15.9935 24.4458C15.9715 25.0389 15.6353 25.4367 15.1876 25.8002C15.2828 25.8002 15.3502 25.8006 15.4176 25.8001C15.7757 25.7976 16.1342 25.8048 16.4917 25.7888C16.7545 25.7771 16.9501 25.6262 17.1057 25.4214C17.1111 25.4142 17.1163 25.4068 17.1211 25.3992C17.1784 25.3079 17.2159 25.1811 17.2984 25.1352C17.3815 25.0889 17.5093 25.1221 17.6175 25.122C18.5387 25.1218 19.4599 25.1261 20.3811 25.1207C21.3076 25.1152 22.2015 24.9396 23.0498 24.5621C23.2987 24.4513 23.5332 24.3078 23.7743 24.1794C23.8032 24.164 23.8326 24.1498 23.8699 24.1309C23.9464 24.401 24.0149 24.6668 24.0976 24.928C24.1853 25.2051 24.3188 25.4598 24.5148 25.6783C24.5897 25.7617 24.6828 25.8016 24.7943 25.8015C25.3422 25.801 25.8901 25.8007 26.4379 25.8002C26.4549 25.8002 26.472 25.7977 26.5141 25.7943C26.4531 25.7388 26.4101 25.6948 26.3622 25.6569C26.1358 25.4773 25.9069 25.3003 25.7456 25.0542C25.5911 24.8186 25.4896 24.5632 25.484 24.279C25.4697 23.5618 25.5651 22.8645 25.8861 22.2125C26.1467 21.6832 26.5433 21.2757 27.0306 20.9516C27.4775 20.6544 27.9702 20.444 28.4496 20.2087C28.8878 19.9937 29.3203 19.7681 29.6779 19.4292C29.8299 19.2851 29.9604 19.118 30.099 18.96C30.1752 18.8733 30.2051 18.7795 30.1879 18.6561C30.1391 18.306 30.0514 17.9727 29.8361 17.6854C29.5986 17.3683 29.2703 17.1878 28.8954 17.088C28.5435 16.9943 28.1848 16.9661 27.8224 17.0121C27.5032 17.0526 27.2586 17.2265 27.0833 17.4818C26.7976 17.8975 26.5231 18.3216 26.2593 18.7517C25.7986 19.503 25.2968 20.2208 24.6563 20.8331C24.0339 21.4282 23.3306 21.9063 22.5613 22.2902C21.5394 22.8002 20.4574 23.1264 19.3416 23.3521C18.5782 23.5065 17.8079 23.616 17.0319 23.6692C16.2969 23.7196 15.5596 23.7552 14.8231 23.7587C14.3896 23.7608 14.0353 23.9032 13.7317 24.1895C13.5596 24.3517 13.4101 24.5378 13.2508 24.7135C13.2328 24.7333 13.2168 24.7548 13.1964 24.7797C12.8035 24.5552 12.4131 24.3322 12 24.0961C12.1492 23.8959 12.2851 23.6985 12.4365 23.5139C12.6689 23.2304 12.9464 22.9956 13.2564 22.7989C13.2834 22.7818 13.3066 22.7411 13.3109 22.7086C13.3676 22.2833 13.4871 21.8808 13.7404 21.5282C13.7845 21.4669 13.8548 21.4252 13.9071 21.3689C13.9317 21.3425 13.9601 21.3008 13.9564 21.2698C13.9006 20.8039 13.9101 20.3381 13.965 19.8739C14.086 18.8511 14.4386 17.9232 15.1164 17.1337C15.5667 16.6091 16.1061 16.1963 16.7153 15.8729C17.4298 15.4937 18.1934 15.2609 18.986 15.118C19.5264 15.0206 20.0728 14.9799 20.6208 15.0095C21.6714 15.0661 22.6389 15.3654 23.4739 16.0294C23.8254 16.309 24.1217 16.6386 24.3639 17.0172C24.3814 17.0446 24.4106 17.0766 24.4395 17.0828C24.7989 17.1608 25.1309 17.3004 25.4357 17.5224C25.4732 17.462 25.5082 17.407 25.5419 17.3512C25.8063 16.9126 26.117 16.5141 26.5248 16.1969C27.0721 15.7713 27.6926 15.5968 28.3805 15.6431C28.8295 15.6733 29.2676 15.751 29.6862 15.9236C30.5268 16.27 31.0829 16.8808 31.3756 17.7367C31.531 18.1912 31.5838 18.6608 31.5728 19.1387C31.5718 19.181 31.5546 19.2262 31.5341 19.2643C31.0809 20.1107 30.4076 20.7345 29.5668 21.1805C29.148 21.4027 28.7161 21.6001 28.2912 21.8108C27.9752 21.9675 27.6689 22.1398 27.4157 22.3913C27.0971 22.7076 26.9382 23.101 26.8805 23.5373C26.8522 23.7513 26.8439 23.9685 26.8364 24.1846C26.8347 24.2339 26.8605 24.2994 26.8966 24.3321C27.0747 24.4937 27.2682 24.6388 27.4421 24.8045C27.8489 25.1922 28.1144 25.6624 28.1697 26.2258C28.1995 26.529 28.175 26.8374 28.175 27.1548C28.1395 27.1548 28.1041 27.1548 28.0687 27.1548C27.012 27.1548 25.9552 27.143 24.8987 27.1586C24.0997 27.1705 23.5604 26.7747 23.1572 26.1328C23.1275 26.0855 23.1108 26.03 23.0861 25.9739C22.9026 26.0353 22.7225 26.0984 22.5407 26.1559C21.8566 26.3723 21.1537 26.4707 20.4379 26.4748C19.6341 26.4794 18.8303 26.4754 18.0265 26.4776C17.9861 26.4777 17.9324 26.4899 17.9073 26.5171C17.4934 26.9654 16.9758 27.1568 16.3741 27.1552C15.3717 27.1526 14.3692 27.1546 13.3667 27.1544C13.3432 27.1544 13.3198 27.1507 13.2854 27.1478ZM24.7077 18.6651C24.5884 18.4831 24.4186 18.3819 24.2016 18.3633C24.091 18.3538 23.9797 18.3511 23.8686 18.3476C23.7724 18.3447 23.6541 18.3789 23.586 18.3345C23.5143 18.2878 23.4856 18.1695 23.4468 18.0788C23.2935 17.7207 23.0656 17.4189 22.7694 17.1678C22.1231 16.6199 21.3608 16.3845 20.5287 16.3432C20.1432 16.3241 19.7592 16.3498 19.3782 16.4146C18.725 16.5256 18.0881 16.6916 17.4856 16.9739C16.7818 17.3036 16.1978 17.7706 15.817 18.4606C15.4449 19.1349 15.2757 19.8638 15.2789 20.631C15.2807 21.0791 15.3028 21.5271 15.318 21.9751C15.3198 22.0307 15.3064 22.0625 15.2495 22.0815C15.1558 22.1129 15.0664 22.1571 14.9729 22.1891C14.8663 22.2257 14.8197 22.3037 14.798 22.4064C14.8091 22.4089 14.8149 22.4113 14.8208 22.4113C15.6457 22.4091 16.4699 22.3791 17.2904 22.2947C17.8157 22.2406 18.34 22.1687 18.8613 22.0838C19.6115 21.9616 20.3443 21.7673 21.0593 21.5067C22.5787 20.9529 23.8054 20.0237 24.7077 18.6651Z" fill="black"/><path d="M29.1583 18.1889C29.1503 18.5743 28.8483 18.8597 28.4552 18.8533C28.1043 18.8477 27.7993 18.5291 27.807 18.1762C27.8153 17.794 28.1203 17.494 28.4947 17.4998C28.8671 17.5055 29.1661 17.816 29.1583 18.1889Z" fill="black"/></svg>' },
-                { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M17.0534 15C17.0783 15 17.1032 15 17.1281 15C17.323 15.3272 17.5345 15.6452 17.7075 15.9844C17.8529 16.2695 18.0057 16.3343 18.3209 16.2379C20.2956 15.6341 22.282 15.6357 24.2647 16.2057C27.1934 17.0476 29.5341 18.8462 31.585 21.1085C31.7429 21.2827 31.8626 21.4945 32 21.6889V21.9222C31.9376 22.0467 31.8891 22.1817 31.8108 22.2941C30.3964 24.3223 28.6471 25.9287 26.4058 26.9057C25.9396 27.109 25.4602 27.2794 24.9665 27.473C25.1177 27.7215 25.2606 27.9562 25.4046 28.1927C25.0269 28.4693 24.6647 28.7347 24.3025 29H24.2278C24.0072 28.6284 23.7949 28.2509 23.5587 27.8903C23.513 27.8205 23.3681 27.7757 23.2786 27.7892C21.9584 27.9871 20.6507 27.8988 19.3488 27.6299C16.1974 26.9789 13.6703 25.2446 11.5765 22.7662C11.3587 22.5083 11.191 22.2046 11 21.9222C11 21.8704 11 21.8185 11 21.7667C11.1033 21.5825 11.1842 21.3789 11.3134 21.2171C12.7259 19.4478 14.3829 17.9932 16.3835 16.9854C16.4573 16.9482 16.5233 16.8941 16.5975 16.845C16.3723 16.4862 16.1586 16.1459 15.9459 15.8072C16.3288 15.5281 16.6911 15.2641 17.0534 15ZM19.5343 18.8554C21.6617 17.4728 23.6268 18.5092 24.438 19.763C25.5252 21.4434 25.1551 23.2325 23.3494 24.9269C23.5798 25.2936 23.8002 25.6694 24.0497 26.0231C24.1099 26.1084 24.2815 26.1824 24.3761 26.157C26.8797 25.4871 28.8526 23.9972 30.4783 21.8332C29.6971 21.1347 28.9585 20.3984 28.1466 19.7634C25.9726 18.063 23.5555 17.0479 20.785 17.1931C20.1038 17.2288 19.4284 17.3829 18.6743 17.4938C19.007 18.0205 19.2708 18.4382 19.5343 18.8554ZM22.6876 26.5045C20.8704 23.6201 19.1179 20.8386 17.35 18.0327C16.9789 18.231 16.6348 18.415 16.2685 18.6108C17.9085 21.2157 19.5188 23.775 21.1341 26.3309C21.1822 26.4071 21.2808 26.4936 21.3588 26.4967C21.765 26.5133 22.1722 26.5045 22.6876 26.5045ZM19.9603 26.386C19.9773 26.3589 19.9942 26.3317 20.0112 26.3045C18.5059 23.9144 17.0006 21.5242 15.4748 19.1014C15.0617 19.4322 14.6761 19.7409 14.2923 20.0482C15.5126 21.93 16.6988 23.762 17.8905 25.59C17.9637 25.7022 18.0661 25.8342 18.1802 25.8705C18.769 26.0579 19.3661 26.217 19.9603 26.386ZM12.556 21.8257C13.6587 23.1238 14.8814 24.219 16.3779 24.9701C15.4587 23.5536 14.5395 22.137 13.5974 20.6852C13.2323 21.0851 12.9015 21.4473 12.556 21.8257ZM19.7508 19.2091C20.2486 19.9959 20.7332 20.762 21.2194 21.5305C21.949 20.9585 22.1008 20.1596 21.6438 19.5042C21.1912 18.8552 20.4191 18.7223 19.7508 19.2091Z" fill="black"/></svg>' },
+                { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc', iconSvg: '<svg width=\"43\" height=\"43\" viewBox=\"0 0 43 43\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20.5\" fill=\"#ECEDED\"/><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20\" stroke=\"black\" stroke-opacity=\"0.1\"/><circle class=\"vision-ring-on\" cx=\"21.5\" cy=\"21.5\" r=\"19.5\" fill=\"#D9F8F0\" stroke=\"#01CE9C\" stroke-width=\"2\"/><g transform=\"translate(11,15)\"><path class=\"vision-eye-off\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"black\"/><path class=\"vision-eye-on\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"#01CE9C\"/></g></svg>' },
                 { id: 'adhd-friendly', title: 'ADHD Friendly Profile', description: 'More focus & fewer distractions', ariaLabel: 'ADHD Friendly Profile - Reduces distractions and highlights focus', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.4167 19.375V17.9584C14.4167 15.8334 15.8334 14.4167 17.9584 14.4167H25.0417C27.1667 14.4167 28.5834 15.8334 28.5834 17.9584V19.375" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 23.625V25.0417C14.4167 27.1667 15.8334 28.5833 17.9584 28.5833H25.0417C27.1667 28.5833 28.5834 27.1667 28.5834 25.0417V23.625" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 21.5H28.5834" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
                 { id: 'cognitive-disability', title: 'Cognitive Disability Profile', description: 'Assists with reading & focusing', ariaLabel: 'Cognitive Disability Profile - Simplifies interface and content', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22.0001 24.5C23.3808 24.5 24.5001 23.3807 24.5001 22C24.5001 20.6193 23.3808 19.5 22.0001 19.5C20.6194 19.5 19.5001 20.6193 19.5001 22C19.5001 23.3807 20.6194 24.5 22.0001 24.5Z" fill="black"/><path d="M22.8334 15.3909V13.6667H21.1667V15.3909C19.7002 15.5778 18.3373 16.2465 17.2919 17.2919C16.2465 18.3372 15.5779 19.7002 15.3909 21.1667H13.6667V22.8334H15.3909C15.5777 24.2999 16.2463 25.6629 17.2918 26.7083C18.3372 27.7538 19.7002 28.4224 21.1667 28.6092V30.3334H22.8334V28.6092C24.3 28.4224 25.663 27.7538 26.7084 26.7083C27.7538 25.6629 28.4224 24.2999 28.6092 22.8334H30.3334V21.1667H28.6092C28.4223 19.7002 27.7536 18.3372 26.7083 17.2919C25.6629 16.2465 24.2999 15.5778 22.8334 15.3909ZM22.0001 27C19.2426 27 17.0001 24.7575 17.0001 22C17.0001 19.2425 19.2426 17 22.0001 17C24.7576 17 27.0001 19.2425 27.0001 22C27.0001 24.7575 24.7576 27 22.0001 27Z" fill="black"/></svg>' },
-                { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts' }, smallText: 'Activates with Screen Reader', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
+                { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts' }, smallText: '(Activates with Screen Reader)', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
                 { id: 'screen-reader', title: 'Blind Users (Screen Reader)', description: 'Optimize website for screen-readers', ariaLabel: 'Screen Reader - Optimize for screen readers', extraContent: { type: 'description', text: 'This profile adjusts the website to be compatible with screen-readers such as JAWS, NVDA, VoiceOver, and TalkBack. Screen-reader software is installed on the blind user\'s computer and smartphone, and websites should ensure compatibility.' }, smallText: 'Activates with Keyboard Navigation', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
                 { id: 'content-scaling', title: 'Content Scaling', description: 'Scale content with arrow controls', ariaLabel: 'Content Scaling - Adjust content size for better readability', extraContent: { type: 'scaling-controls', className: 'scaling-controls', id: 'content-scaling-controls', style: 'display: none; margin-top: 10px;', decreaseId: 'decrease-content-scale-btn', decreaseLabel: 'Decrease content scale by 2%', decreaseText: '-2%', valueId: 'content-scale-value', valueText: '100%', increaseId: 'increase-content-scale-btn', increaseLabel: 'Increase content scale by 2%', increaseText: '+2%' } },
                 { id: 'readable-font', title: 'Readable Font', description: 'High-legibility fonts', ariaLabel: 'Readable Font - Use dyslexia-friendly fonts' },
@@ -8691,12 +9363,12 @@ input:checked + .slider::after {
                 { id: 'adjust-title-colors', title: 'Adjust Title Colors', description: 'Color customization for headings', ariaLabel: 'Adjust Title Colors - Modify heading color scheme', switchFirst: false },
                 { id: 'low-saturation', title: 'Low Saturation', description: 'Reduces color intensity', ariaLabel: 'Low Saturation - Decrease color intensity', switchFirst: false },
                 { id: 'adjust-bg-colors', title: 'Adjust Background Colors', description: 'Background color customization', ariaLabel: 'Adjust Background Colors - Modify background color scheme', switchFirst: false },
-                { id: 'mute-sound', title: 'Mute Sound', description: 'Disables all audio content', ariaLabel: 'Mute Sound - Disable all audio', switchFirst: false },
+                { id: 'mute-sound', title: 'Mute Sounds', description: 'Disables all audio content', ariaLabel: 'Mute Sounds - Disable all audio', switchFirst: false },
                 { id: 'hide-images', title: 'Hide Images', description: 'Toggle to hide all images', ariaLabel: 'Hide Images - Hide all images on page', switchFirst: false },
                 { id: 'read-mode', title: 'Read Mode', description: 'Removes navigation elements', ariaLabel: 'Read Mode - Simplify page for reading', switchFirst: false },
                 { id: 'reading-guide', title: 'Reading Guide', description: 'Movable highlight bar', descriptionId: 'reading-guide-desc', ariaLabel: 'Reading Guide - Movable highlight bar', ariaDescribedBy: 'reading-guide-desc', switchFirst: false },
                 { id: 'useful-links', title: 'Useful Links', ariaLabel: 'Useful Links - Select', switchFirst: false },
-                { id: 'stop-animation', title: 'Stop Animation', description: 'Pauses all CSS animations', ariaLabel: 'Stop Animation - Pauses all CSS animations' },
+                { id: 'stop-animation', title: 'Stop Animations', description: 'Pauses all CSS animations', ariaLabel: 'Stop Animations - Pauses all CSS animations' },
                 { id: 'reading-mask', title: 'Reading Mask', description: 'Semi-transparent overlay', ariaLabel: 'Reading Mask - Focus on specific text area', switchFirst: false },
                 { id: 'highlight-hover', title: 'Highlight Hover', description: 'Visual feedback on hover', ariaLabel: 'Highlight Hover - Highlight elements on mouse hover', switchFirst: false },
                 { id: 'highlight-focus', title: 'Highlight Focus', description: 'Prominent focus indicators', ariaLabel: 'Highlight Focus - Highlight focused elements', switchFirst: false },
@@ -8784,7 +9456,7 @@ input:checked + .slider::after {
                     <div class="language-dropdown-outer" style="position:absolute;top:0;right:0;width:144px;height:55px;background:rgba(255,255,255,0.15);border-bottom-left-radius:20px;display:flex;align-items:center;justify-content:center;padding:0 8px;box-sizing:border-box;">
                         <button class="language-selector-header" id="language-selector-header" type="button" tabindex="0" role="button" aria-label="Select language" aria-expanded="false" aria-haspopup="listbox" style="width:100%;max-width:128px;height:36px;border:none;background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
                             <span class="language-flag" id="language-flag-header" aria-hidden="true" style="flex-shrink:0;display:inline-block;width:20px;height:14px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="20" height="14"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></span>
-                            <span id="current-language-header" style="font-family:Archivo;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;">ENGLISH</span>
+                            <span id="current-language-header" style="font-family:Inter;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;">ENGLISH</span>
                             <span class="language-dropdown-arrow" style="flex-shrink:0;display:inline-flex;align-items:center;"><svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0.666748 0.666666L4.66675 4.66667L8.66675 0.666666" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
                         </button>
                     </div>
@@ -8818,28 +9490,47 @@ input:checked + .slider::after {
     
                     <h3 class="placeholder-title">Placeholder title</h3>
     
-                    <!-- Module 1: Seizure Safe Profile -->
+            <!-- Module 1: Seizure Safe Profile -->
     
-                    <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M16.9031 22.496H19.3087V28.0982C19.3087 28.9281 20.3318 29.3155 20.8848 28.693L26.7744 21.998C27.2859 21.417 26.8711 20.504 26.0969 20.504H23.6913V14.9018C23.6913 14.0719 22.6682 13.6845 22.1152 14.307L16.2256 21.002C15.7141 21.583 16.1289 22.496 16.9031 22.496Z" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                        <div class="profile-info">
-                            <div>
-                                <h4>Seizure Safe Profile</h4>
-                                <p id="seizure-safe-desc">Clear flashes & reduces color</p>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="seizure-safe" tabindex="0" aria-label="Seizure Safe Profile - Clear flashes and reduces color" aria-describedby="seizure-safe-desc">
-                            <span class="slider"></span>
-                        </label>
+            <div class="profile-item">
+                <div class="profile-item-icon seizure-icon" aria-hidden="true">
+                    <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="seizure-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                        <circle class="seizure-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                        <circle class="seizure-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                        <g transform="translate(15,13)">
+                            <path class="seizure-icon-path" d="M1.65503 9.2469H4.06064V14.8491C4.06064 15.6791 5.08371 16.0664 5.63673 15.4439L11.5263 8.74892C12.0379 8.16795 11.6231 7.25499 10.8489 7.25499H8.44327V1.65277C8.44327 0.822809 7.42019 0.435495 6.86718 1.05796L0.977586 7.75297C0.466049 8.33394 0.88081 9.2469 1.65503 9.2469Z" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="profile-info">
+                    <div>
+                        <h4>Seizure Safe Profile</h4>
+                        <p id="seizure-safe-desc">Clear flashes & reduces color</p>
                     </div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="seizure-safe" tabindex="0" aria-label="Seizure Safe Profile - Clear flashes and reduces color" aria-describedby="seizure-safe-desc">
+                    <span class="slider"></span>
+                </label>
+            </div>
     
     
     
                     <!-- Module 1.5: Reduce Motion -->
     
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M13.2854 27.1478C13.2854 27.0302 13.2816 26.9164 13.2863 26.8028C13.2955 26.5779 13.2888 26.3497 13.3263 26.1292C13.3875 25.7694 13.5787 25.4669 13.8327 25.2114C14.0382 25.0049 14.2636 24.8183 14.4802 24.6228C14.5003 24.6047 14.5269 24.5903 14.5398 24.5681C14.6089 24.4485 14.7169 24.4422 14.8398 24.4443C15.1889 24.4502 15.5382 24.446 15.8874 24.4458C15.9172 24.4457 15.9469 24.4458 15.9935 24.4458C15.9715 25.0389 15.6353 25.4367 15.1876 25.8002C15.2828 25.8002 15.3502 25.8006 15.4176 25.8001C15.7757 25.7976 16.1342 25.8048 16.4917 25.7888C16.7545 25.7771 16.9501 25.6262 17.1057 25.4214C17.1111 25.4142 17.1163 25.4068 17.1211 25.3992C17.1784 25.3079 17.2159 25.1811 17.2984 25.1352C17.3815 25.0889 17.5093 25.1221 17.6175 25.122C18.5387 25.1218 19.4599 25.1261 20.3811 25.1207C21.3076 25.1152 22.2015 24.9396 23.0498 24.5621C23.2987 24.4513 23.5332 24.3078 23.7743 24.1794C23.8032 24.164 23.8326 24.1498 23.8699 24.1309C23.9464 24.401 24.0149 24.6668 24.0976 24.928C24.1853 25.2051 24.3188 25.4598 24.5148 25.6783C24.5897 25.7617 24.6828 25.8016 24.7943 25.8015C25.3422 25.801 25.8901 25.8007 26.4379 25.8002C26.4549 25.8002 26.472 25.7977 26.5141 25.7943C26.4531 25.7388 26.4101 25.6948 26.3622 25.6569C26.1358 25.4773 25.9069 25.3003 25.7456 25.0542C25.5911 24.8186 25.4896 24.5632 25.484 24.279C25.4697 23.5618 25.5651 22.8645 25.8861 22.2125C26.1467 21.6832 26.5433 21.2757 27.0306 20.9516C27.4775 20.6544 27.9702 20.444 28.4496 20.2087C28.8878 19.9937 29.3203 19.7681 29.6779 19.4292C29.8299 19.2851 29.9604 19.118 30.099 18.96C30.1752 18.8733 30.2051 18.7795 30.1879 18.6561C30.1391 18.306 30.0514 17.9727 29.8361 17.6854C29.5986 17.3683 29.2703 17.1878 28.8954 17.088C28.5435 16.9943 28.1848 16.9661 27.8224 17.0121C27.5032 17.0526 27.2586 17.2265 27.0833 17.4818C26.7976 17.8975 26.5231 18.3216 26.2593 18.7517C25.7986 19.503 25.2968 20.2208 24.6563 20.8331C24.0339 21.4282 23.3306 21.9063 22.5613 22.2902C21.5394 22.8002 20.4574 23.1264 19.3416 23.3521C18.5782 23.5065 17.8079 23.616 17.0319 23.6692C16.2969 23.7196 15.5596 23.7552 14.8231 23.7587C14.3896 23.7608 14.0353 23.9032 13.7317 24.1895C13.5596 24.3517 13.4101 24.5378 13.2508 24.7135C13.2328 24.7333 13.2168 24.7548 13.1964 24.7797C12.8035 24.5552 12.4131 24.3322 12 24.0961C12.1492 23.8959 12.2851 23.6985 12.4365 23.5139C12.6689 23.2304 12.9464 22.9956 13.2564 22.7989C13.2834 22.7818 13.3066 22.7411 13.3109 22.7086C13.3676 22.2833 13.4871 21.8808 13.7404 21.5282C13.7845 21.4669 13.8548 21.4252 13.9071 21.3689C13.9317 21.3425 13.9601 21.3008 13.9564 21.2698C13.9006 20.8039 13.9101 20.3381 13.965 19.8739C14.086 18.8511 14.4386 17.9232 15.1164 17.1337C15.5667 16.6091 16.1061 16.1963 16.7153 15.8729C17.4298 15.4937 18.1934 15.2609 18.986 15.118C19.5264 15.0206 20.0728 14.9799 20.6208 15.0095C21.6714 15.0661 22.6389 15.3654 23.4739 16.0294C23.8254 16.309 24.1217 16.6386 24.3639 17.0172C24.3814 17.0446 24.4106 17.0766 24.4395 17.0828C24.7989 17.1608 25.1309 17.3004 25.4357 17.5224C25.4732 17.462 25.5082 17.407 25.5419 17.3512C25.8063 16.9126 26.117 16.5141 26.5248 16.1969C27.0721 15.7713 27.6926 15.5968 28.3805 15.6431C28.8295 15.6733 29.2676 15.751 29.6862 15.9236C30.5268 16.27 31.0829 16.8808 31.3756 17.7367C31.531 18.1912 31.5838 18.6608 31.5728 19.1387C31.5718 19.181 31.5546 19.2262 31.5341 19.2643C31.0809 20.1107 30.4076 20.7345 29.5668 21.1805C29.148 21.4027 28.7161 21.6001 28.2912 21.8108C27.9752 21.9675 27.6689 22.1398 27.4157 22.3913C27.0971 22.7076 26.9382 23.101 26.8805 23.5373C26.8522 23.7513 26.8439 23.9685 26.8364 24.1846C26.8347 24.2339 26.8605 24.2994 26.8966 24.3321C27.0747 24.4937 27.2682 24.6388 27.4421 24.8045C27.8489 25.1922 28.1144 25.6624 28.1697 26.2258C28.1995 26.529 28.175 26.8374 28.175 27.1548C28.1395 27.1548 28.1041 27.1548 28.0687 27.1548C27.012 27.1548 25.9552 27.143 24.8987 27.1586C24.0997 27.1705 23.5604 26.7747 23.1572 26.1328C23.1275 26.0855 23.1108 26.03 23.0861 25.9739C22.9026 26.0353 22.7225 26.0984 22.5407 26.1559C21.8566 26.3723 21.1537 26.4707 20.4379 26.4748C19.6341 26.4794 18.8303 26.4754 18.0265 26.4776C17.9861 26.4777 17.9324 26.4899 17.9073 26.5171C17.4934 26.9654 16.9758 27.1568 16.3741 27.1552C15.3717 27.1526 14.3692 27.1546 13.3667 27.1544C13.3432 27.1544 13.3198 27.1507 13.2854 27.1478ZM24.7077 18.6651C24.5884 18.4831 24.4186 18.3819 24.2016 18.3633C24.091 18.3538 23.9797 18.3511 23.8686 18.3476C23.7724 18.3447 23.6541 18.3789 23.586 18.3345C23.5143 18.2878 23.4856 18.1695 23.4468 18.0788C23.2935 17.7207 23.0656 17.4189 22.7694 17.1678C22.1231 16.6199 21.3608 16.3845 20.5287 16.3432C20.1432 16.3241 19.7592 16.3498 19.3782 16.4146C18.725 16.5256 18.0881 16.6916 17.4856 16.9739C16.7818 17.3036 16.1978 17.7706 15.817 18.4606C15.4449 19.1349 15.2757 19.8638 15.2789 20.631C15.2807 21.0791 15.3028 21.5271 15.318 21.9751C15.3198 22.0307 15.3064 22.0625 15.2495 22.0815C15.1558 22.1129 15.0664 22.1571 14.9729 22.1891C14.8663 22.2257 14.8197 22.3037 14.798 22.4064C14.8091 22.4089 14.8149 22.4113 14.8208 22.4113C15.6457 22.4091 16.4699 22.3791 17.2904 22.2947C17.8157 22.2406 18.34 22.1687 18.8613 22.0838C19.6115 21.9616 20.3443 21.7673 21.0593 21.5067C22.5787 20.9529 23.8054 20.0237 24.7077 18.6651Z" fill="black"/><path d="M29.1583 18.1889C29.1503 18.5743 28.8483 18.8597 28.4552 18.8533C28.1043 18.8477 27.7993 18.5291 27.807 18.1762C27.8153 17.794 28.1203 17.494 28.4947 17.4998C28.8671 17.5055 29.1661 17.816 29.1583 18.1889Z" fill="black"/></svg></div>
+                        <div class="profile-item-icon reduce-motion-icon" aria-hidden="true">
+            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="reduce-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="reduce-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="reduce-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(12,15)">
+                                    <path class="reduce-motion-path" d="M1.28544 12.1478C1.28544 12.0302 1.28157 11.9164 1.28626 11.8028C1.29554 11.5779 1.28879 11.3497 1.32629 11.1292C1.38748 10.7694 1.57866 10.4669 1.83274 10.2114C2.03816 10.0049 2.26364 9.81826 2.48024 9.62283C2.50034 9.60469 2.52687 9.59035 2.53975 9.56807C2.60887 9.44852 2.71686 9.44217 2.8398 9.44426C3.1889 9.4502 3.53818 9.44597 3.88739 9.44575C3.91715 9.44574 3.94692 9.44575 3.99352 9.44575C3.97146 10.0389 3.63528 10.4367 3.18763 10.8002C3.28284 10.8002 3.35023 10.8006 3.41762 10.8001C3.77571 10.7976 4.13424 10.8048 4.49174 10.7888C4.75448 10.7771 4.95013 10.6262 5.10565 10.4214C5.11111 10.4142 5.1163 10.4068 5.12109 10.3992C5.1784 10.3079 5.21587 10.1811 5.29837 10.1352C5.38148 10.0889 5.50931 10.1221 5.61754 10.122C6.53873 10.1218 7.45995 10.1261 8.38111 10.1207C9.30756 10.1152 10.2015 9.93959 11.0498 9.56212C11.2987 9.45132 11.5332 9.30776 11.7743 9.17939C11.8032 9.16403 11.8326 9.14977 11.8699 9.13091C11.9464 9.40104 12.0149 9.66677 12.0976 9.92799C12.1853 10.2051 12.3188 10.4598 12.5148 10.6783C12.5897 10.7617 12.6828 10.8016 12.7943 10.8015C13.3422 10.801 13.8901 10.8007 14.4379 10.8002C14.4549 10.8002 14.472 10.7977 14.5141 10.7943C14.4531 10.7388 14.4101 10.6948 14.3622 10.6569C14.1358 10.4773 13.9069 10.3003 13.7456 10.0542C13.5911 9.81858 13.4896 9.56318 13.484 9.27903C13.4697 8.56183 13.5651 7.86453 13.8861 7.21249C14.1467 6.68316 14.5433 6.27566 15.0306 5.95162C15.4775 5.6544 15.9702 5.44399 16.4496 5.20874C16.8878 4.99374 17.3203 4.76812 17.6779 4.4292C17.8299 4.2851 17.9604 4.11805 18.099 3.96004C18.1752 3.87327 18.2051 3.77946 18.1879 3.65613C18.1391 3.30603 18.0514 2.97272 17.8361 2.6854C17.5986 2.36828 17.2703 2.18784 16.8954 2.08802C16.5435 1.99435 16.1848 1.96608 15.8224 2.0121C15.5032 2.05264 15.2586 2.22651 15.0833 2.48175C14.7976 2.89753 14.5231 3.32163 14.2593 3.75169C13.7986 4.50299 13.2968 5.22076 12.6563 5.83307C12.0339 6.42819 11.3306 6.90628 10.5613 7.2902C9.53944 7.80018 8.45745 8.12638 7.34163 8.35207C6.57821 8.50648 5.80793 8.61599 5.03194 8.66917C4.2969 8.71955 3.55957 8.75516 2.82306 8.75869C2.38961 8.76076 2.03531 8.90322 1.73168 9.18946C1.55962 9.35167 1.41014 9.53784 1.25079 9.71349C1.23282 9.73329 1.21675 9.75482 1.19639 9.77973C0.80351 9.55524 0.413149 9.3322 0 9.09613C0.149188 8.89592 0.285058 8.6985 0.436485 8.51385C0.668944 8.23039 0.946366 7.99557 1.25637 7.79891C1.28335 7.7818 1.30657 7.74111 1.3109 7.70862C1.36761 7.2833 1.48711 6.88078 1.74042 6.52824C1.78447 6.46694 1.85482 6.42517 1.90711 6.36889C1.93166 6.34246 1.96008 6.30085 1.95636 6.26976C1.90059 5.80387 1.91009 5.3381 1.96499 4.87393C2.08598 3.85109 2.43861 2.92321 3.11638 2.1337C3.56672 1.60913 4.10605 1.19633 4.71533 0.87291C5.42976 0.493674 6.19338 0.260857 6.98602 0.117994C7.52644 0.0205904 8.07278 -0.0200914 8.62079 0.00945039C9.67137 0.0660845 10.6389 0.365446 11.4739 1.02944C11.8254 1.30896 12.1217 1.63863 12.3639 2.01716C12.3814 2.04457 12.4106 2.07655 12.4395 2.08282C12.7989 2.16082 13.1309 2.30041 13.4357 2.5224C13.4732 2.46197 13.5082 2.407 13.5419 2.35121C13.8063 1.91261 14.117 1.51406 14.5248 1.19691C15.0721 0.771257 15.6926 0.596818 16.3805 0.643116C16.8295 0.673341 17.2676 0.751037 17.6862 0.923568C18.5268 1.27002 19.0829 1.88079 19.3756 2.73674C19.531 3.19116 19.5838 3.66079 19.5728 4.13865C19.5718 4.18097 19.5546 4.22617 19.5341 4.26429C19.0809 5.11068 18.4076 5.73448 17.5668 6.18055C17.148 6.40274 16.7161 6.6001 16.2912 6.81081C15.9752 6.96749 15.6689 7.13985 15.4157 7.39129C15.0971 7.70758 14.9382 8.10101 14.8805 8.53728C14.8522 8.75134 14.8439 8.96848 14.8364 9.18457C14.8347 9.23386 14.8605 9.29935 14.8966 9.3321C15.0747 9.4937 15.2682 9.63877 15.4421 9.80451C15.8489 10.1922 16.1144 10.6624 16.1697 11.2258C16.1995 11.529 16.175 11.8374 16.175 12.1548C16.1395 12.1548 16.1041 12.1548 16.0687 12.1548C15.012 12.1548 13.9552 12.143 12.8987 12.1586C12.0997 12.1705 11.5604 11.7747 11.1572 11.1328C11.1275 11.0855 11.1108 11.03 11.0861 10.9739C10.9026 11.0353 10.7225 11.0984 10.5407 11.1559C9.85656 11.3723 9.15366 11.4707 8.43786 11.4748C7.6341 11.4794 6.8303 11.4754 6.02652 11.4776C5.98608 11.4777 5.93242 11.4899 5.9073 11.5171C5.4934 11.9654 4.9758 12.1568 4.37414 12.1552C3.37166 12.1526 2.36918 12.1546 1.3667 12.1544C1.34323 12.1544 1.31976 12.1507 1.28544 12.1478ZM12.7077 3.66514C12.5884 3.48314 12.4186 3.3819 12.2016 3.36328C12.091 3.35378 11.9797 3.35108 11.8686 3.34764C11.7724 3.34466 11.6541 3.37889 11.586 3.33453C11.5143 3.28783 11.4856 3.16954 11.4468 3.07882C11.2935 2.72074 11.0656 2.41894 10.7694 2.16784C10.1231 1.61995 9.36076 1.38446 8.52871 1.34324C8.14315 1.32414 7.75922 1.34982 7.37821 1.41457C6.72502 1.52557 6.08808 1.69161 5.48562 1.97387C4.78181 2.30362 4.19776 2.7706 3.81703 3.4606C3.44495 4.13493 3.27566 4.86385 3.27887 5.63104C3.28074 6.07912 3.30285 6.52714 3.31796 6.97512C3.31983 7.03073 3.30641 7.06254 3.24954 7.08154C3.1558 7.11285 3.0664 7.15707 2.97286 7.18913C2.86631 7.22566 2.81973 7.30367 2.79801 7.40645C2.80906 7.40888 2.81492 7.4113 2.82078 7.41129C3.64572 7.40909 4.46987 7.3791 5.29038 7.29469C5.81575 7.24063 6.33997 7.16866 6.86129 7.08377C7.61148 6.96162 8.34427 6.76735 9.05931 6.50673C10.5787 5.95294 11.8054 5.02374 12.7077 3.66514Z" fill="black"/>
+                                    <path class="reduce-motion-dot" d="M17.1583 3.1889C17.1503 3.57431 16.8483 3.8597 16.4552 3.85334C16.1043 3.84767 15.7993 3.52909 15.807 3.17621C15.8153 2.79397 16.1203 2.49401 16.4947 2.49978C16.8671 2.50551 17.1661 2.81599 17.1583 3.1889Z" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Reduce Motion</h4>
@@ -8856,7 +9547,17 @@ input:checked + .slider::after {
     
                     <!-- Module 2: Vision Impaired Profile -->
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M17.0534 15C17.0783 15 17.1032 15 17.1281 15C17.323 15.3272 17.5345 15.6452 17.7075 15.9844C17.8529 16.2695 18.0057 16.3343 18.3209 16.2379C20.2956 15.6341 22.282 15.6357 24.2647 16.2057C27.1934 17.0476 29.5341 18.8462 31.585 21.1085C31.7429 21.2827 31.8626 21.4945 32 21.6889V21.9222C31.9376 22.0467 31.8891 22.1817 31.8108 22.2941C30.3964 24.3223 28.6471 25.9287 26.4058 26.9057C25.9396 27.109 25.4602 27.2794 24.9665 27.473C25.1177 27.7215 25.2606 27.9562 25.4046 28.1927C25.0269 28.4693 24.6647 28.7347 24.3025 29H24.2278C24.0072 28.6284 23.7949 28.2509 23.5587 27.8903C23.513 27.8205 23.3681 27.7757 23.2786 27.7892C21.9584 27.9871 20.6507 27.8988 19.3488 27.6299C16.1974 26.9789 13.6703 25.2446 11.5765 22.7662C11.3587 22.5083 11.191 22.2046 11 21.9222C11 21.8704 11 21.8185 11 21.7667C11.1033 21.5825 11.1842 21.3789 11.3134 21.2171C12.7259 19.4478 14.3829 17.9932 16.3835 16.9854C16.4573 16.9482 16.5233 16.8941 16.5975 16.845C16.3723 16.4862 16.1586 16.1459 15.9459 15.8072C16.3288 15.5281 16.6911 15.2641 17.0534 15ZM19.5343 18.8554C21.6617 17.4728 23.6268 18.5092 24.438 19.763C25.5252 21.4434 25.1551 23.2325 23.3494 24.9269C23.5798 25.2936 23.8002 25.6694 24.0497 26.0231C24.1099 26.1084 24.2815 26.1824 24.3761 26.157C26.8797 25.4871 28.8526 23.9972 30.4783 21.8332C29.6971 21.1347 28.9585 20.3984 28.1466 19.7634C25.9726 18.063 23.5555 17.0479 20.785 17.1931C20.1038 17.2288 19.4284 17.3829 18.6743 17.4938C19.007 18.0205 19.2708 18.4382 19.5343 18.8554ZM22.6876 26.5045C20.8704 23.6201 19.1179 20.8386 17.35 18.0327C16.9789 18.231 16.6348 18.415 16.2685 18.6108C17.9085 21.2157 19.5188 23.775 21.1341 26.3309C21.1822 26.4071 21.2808 26.4936 21.3588 26.4967C21.765 26.5133 22.1722 26.5045 22.6876 26.5045ZM19.9603 26.386C19.9773 26.3589 19.9942 26.3317 20.0112 26.3045C18.5059 23.9144 17.0006 21.5242 15.4748 19.1014C15.0617 19.4322 14.6761 19.7409 14.2923 20.0482C15.5126 21.93 16.6988 23.762 17.8905 25.59C17.9637 25.7022 18.0661 25.8342 18.1802 25.8705C18.769 26.0579 19.3661 26.217 19.9603 26.386ZM12.556 21.8257C13.6587 23.1238 14.8814 24.219 16.3779 24.9701C15.4587 23.5536 14.5395 22.137 13.5974 20.6852C13.2323 21.0851 12.9015 21.4473 12.556 21.8257ZM19.7508 19.2091C20.2486 19.9959 20.7332 20.762 21.2194 21.5305C21.949 20.9585 22.1008 20.1596 21.6438 19.5042C21.1912 18.8552 20.4191 18.7223 19.7508 19.2091Z" fill="black"/></svg></div>
+                        <div class="profile-item-icon vision-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="vision-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="vision-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="vision-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(11,15)">
+                                    <path class="vision-eye-off" d="M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z" fill="black"/>
+                                    <path class="vision-eye-on" d="M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z" fill="#01CE9C"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Vision Impaired Profile</h4>
@@ -8873,7 +9574,18 @@ input:checked + .slider::after {
     
                     <!-- Module 3: ADHD Friendly Profile -->
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.4167 19.375V17.9584C14.4167 15.8334 15.8334 14.4167 17.9584 14.4167H25.0417C27.1667 14.4167 28.5834 15.8334 28.5834 17.9584V19.375" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 23.625V25.0417C14.4167 27.1667 15.8334 28.5833 17.9584 28.5833H25.0417C27.1667 28.5833 28.5834 27.1667 28.5834 25.0417V23.625" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 21.5H28.5834" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div class="profile-item-icon adhd-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="adhd-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="adhd-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="adhd-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(13,13)">
+                                    <path class="adhd-path" d="M1.41663 6.37502V4.95835C1.41663 2.83335 2.83329 1.41669 4.95829 1.41669H12.0416C14.1666 1.41669 15.5833 2.83335 15.5833 4.95835V6.37502" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="adhd-path" d="M1.41663 10.625V12.0417C1.41663 14.1667 2.83329 15.5833 4.95829 15.5833H12.0416C14.1666 15.5833 15.5833 14.1667 15.5833 12.0417V10.625" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="adhd-path" d="M1.41663 8.5H15.5833" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>ADHD Friendly Profile</h4>
@@ -8890,7 +9602,17 @@ input:checked + .slider::after {
     
                     <!-- Module 4: Cognitive Disability Profile -->
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22.0001 24.5C23.3808 24.5 24.5001 23.3807 24.5001 22C24.5001 20.6193 23.3808 19.5 22.0001 19.5C20.6194 19.5 19.5001 20.6193 19.5001 22C19.5001 23.3807 20.6194 24.5 22.0001 24.5Z" fill="black"/><path d="M22.8334 15.3909V13.6667H21.1667V15.3909C19.7002 15.5778 18.3373 16.2465 17.2919 17.2919C16.2465 18.3372 15.5779 19.7002 15.3909 21.1667H13.6667V22.8334H15.3909C15.5777 24.2999 16.2463 25.6629 17.2918 26.7083C18.3372 27.7538 19.7002 28.4224 21.1667 28.6092V30.3334H22.8334V28.6092C24.3 28.4224 25.663 27.7538 26.7084 26.7083C27.7538 25.6629 28.4224 24.2999 28.6092 22.8334H30.3334V21.1667H28.6092C28.4223 19.7002 27.7536 18.3372 26.7083 17.2919C25.6629 16.2465 24.2999 15.5778 22.8334 15.3909ZM22.0001 27C19.2426 27 17.0001 24.7575 17.0001 22C17.0001 19.2425 19.2426 17 22.0001 17C24.7576 17 27.0001 19.2425 27.0001 22C27.0001 24.7575 24.7576 27 22.0001 27Z" fill="black"/></svg></div>
+                        <div class="profile-item-icon cognitive-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="cog-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="cog-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="cog-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(12,12)">
+                                    <path class="cog-path" d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61931 11.3807 7.50002 10 7.50002C8.61925 7.50002 7.49996 8.61931 7.49996 10C7.49996 11.3807 8.61925 12.5 10 12.5Z" fill="black"/>
+                                    <path class="cog-path" d="M10.8333 3.39085V1.66669H9.16663V3.39085C7.7001 3.57781 6.33717 4.24647 5.29179 5.29185C4.24641 6.33723 3.57775 7.70016 3.39079 9.16669H1.66663V10.8334H3.39079C3.57762 12.2999 4.24622 13.6629 5.29163 14.7083C6.33704 15.7538 7.70005 16.4224 9.16663 16.6092V18.3334H10.8333V16.6092C12.2999 16.4224 13.6629 15.7538 14.7083 14.7083C15.7537 13.6629 16.4223 12.2999 16.6091 10.8334H18.3333V9.16669H16.6091C16.4222 7.70016 15.7535 6.33723 14.7081 5.29185C13.6627 4.24647 12.2998 3.57781 10.8333 3.39085ZM9.99996 15C7.24246 15 4.99996 12.7575 4.99996 10C4.99996 7.24252 7.24246 5.00002 9.99996 5.00002C12.7575 5.00002 15 7.24252 15 10C15 12.7575 12.7575 15 9.99996 15Z" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Cognitive Disability Profile</h4>
@@ -8907,14 +9629,23 @@ input:checked + .slider::after {
     
                     <!-- Module 5: Keyboard Navigation -->
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg></div>
+                        <div class="profile-item-icon keyboard-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="kb-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="kb-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="kb-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="kb-path" d="M8 7L2 7L2 0H0L0 8C0 8.26522 0.105356 8.51957 0.292892 8.70711C0.480429 8.89464 0.734783 9 1 9H8V12L13 8L8 4L8 7Z" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Keyboard Navigation (Motor)</h4>
                                 <div class="profile-description">
                                     <p>This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts</p>
                                 </div>
-                                <small class="profile-activates-label">Activates with Screen Reader</small>
+                                <small class="profile-activates-label">(Activates with Screen Reader)</small>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -8927,7 +9658,16 @@ input:checked + .slider::after {
     
                     <!-- Module 6: Blind Users Screen Reader -->
                     <div class="profile-item">
-                        <div class="profile-item-icon" aria-hidden="true"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg></div>
+                        <div class="profile-item-icon blind-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="blind-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="blind-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="blind-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="blind-path" d="M8 7L2 7L2 0H0L0 8C0 8.26522 0.105356 8.51957 0.292892 8.70711C0.480429 8.89464 0.734783 9 1 9H8V12L13 8L8 4L8 7Z" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Blind Users (Screen Reader)</h4>
@@ -8959,7 +9699,14 @@ input:checked + .slider::after {
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
                                     <input type="range" id="content-scale-range" class="scaling-range-overlay" min="50" max="120" value="100" aria-label="Content scale percentage">
-                                    <div class="scaling-slider-thumb"><svg width="50" height="61" viewBox="0 0 50 61" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_dddd_cs)"><g clip-path="url(#clip0_cs)"><g filter="url(#filter1_ii_cs)"><path d="M43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19C7 9.05887 15.0589 1 25 1C34.9411 1 43 9.05887 43 19Z" fill="url(#paint0_linear_cs)"/></g></g></g><line x1="22.5" y1="12.5" x2="22.5" y2="25.5" stroke="white" stroke-linecap="round"/><line x1="28.5" y1="12.5" x2="28.5" y2="25.5" stroke="white" stroke-linecap="round"/><defs><filter id="filter0_dddd_cs" x="0" y="0" width="50" height="61" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="1"/><feGaussianBlur stdDeviation="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_892_1383"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="4"/><feGaussianBlur stdDeviation="2"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/><feBlend mode="normal" in2="effect1_dropShadow_892_1383" result="effect2_dropShadow_892_1383"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="10"/><feGaussianBlur stdDeviation="3"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/><feBlend mode="normal" in2="effect2_dropShadow_892_1383" result="effect3_dropShadow_892_1383"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="17"/><feGaussianBlur stdDeviation="3.5"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/><feBlend mode="normal" in2="effect3_dropShadow_892_1383" result="effect4_dropShadow_892_1383"/><feBlend mode="normal" in="SourceGraphic" in2="effect4_dropShadow_892_1383" result="shape"/></filter><filter id="filter1_ii_cs" x="7" y="-1" width="36.5" height="38.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.25" dy="-2"/><feGaussianBlur stdDeviation="10"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/><feBlend mode="normal" in2="shape" result="effect1_innerShadow_892_1383"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.5" dy="0.5"/><feGaussianBlur stdDeviation="0.5"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/><feBlend mode="normal" in2="effect1_innerShadow_892_1383" result="effect2_innerShadow_892_1383"/></filter><linearGradient id="paint0_linear_cs" x1="25" y1="1" x2="25" y2="37" gradientUnits="userSpaceOnUse"><stop stop-color="#00CE9C"/><stop offset="1" stop-color="#01B086"/></linearGradient><clipPath id="clip0_cs"><path d="M7 19C7 9.05888 15.0589 1 25 1C34.9411 1 43 9.05888 43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19Z" fill="white"/></clipPath></defs></svg></div>
+                                    <div class="scaling-slider-thumb">
+                                        <div class="scaling-thumb-circle">
+                                            <svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/>
+                                                <line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                                 <div style="display:none;"><button class="scaling-btn" id="decrease-content-scale-btn" tabindex="-1" aria-hidden="true">-2%</button><button class="scaling-btn" id="increase-content-scale-btn" tabindex="-1" aria-hidden="true">+2%</button></div>
@@ -8969,14 +9716,22 @@ input:checked + .slider::after {
                     <div class="content-adjustments-grid">
                         <div class="contrast-style-card profile-item">
                             <div class="card-top">
-                                <div class="content-card-icon readable-font-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M26.0001 29V21H22.6667V19.6666H30.6667V21H27.3334V29H26.0001Z" fill="black"/><path d="M18 29V16.3333H12V15H25.3333V16.3333H19.3333V29H18Z" fill="black"/></svg></div>
+                            <div class="content-card-icon readable-font-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="readable-font-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="readable-font-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="readable-font-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="readable-font-icon-off" transform="translate(12, 14.5)"><path d="M14.0001 14V5.99996H10.6667V4.66663H18.6667V5.99996H15.3334V14H14.0001Z" fill="black"/><path d="M6 14V1.33333H0V0H13.3333V1.33333H7.33333V14H6Z" fill="black"/></g><g class="readable-font-icon-on" transform="translate(12, 14.5)"><path d="M14.0001 14V5.99996H10.6667V4.66663H18.6667V5.99996H15.3334V14H14.0001Z" fill="#01CE9C"/><path d="M6 14V1.33333H0V0H13.3333V1.33333H7.33333V14H6Z" fill="#01CE9C"/></g></svg></div>
                                 <label class="toggle-switch"><input type="checkbox" id="readable-font" tabindex="0" aria-label="Readable Font - Use dyslexia-friendly fonts"><span class="slider"></span></label>
                             </div>
                             <h4>Readable Font</h4>
                         </div>
                         <div class="contrast-style-card profile-item">
                             <div class="card-top">
-                                <div class="content-card-icon highlight-titles-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M26.5948 26.319V16.9828H22.1724V16H31.9999V16.9828H27.5775V26.319H26.5948Z" fill="black"/><path d="M15.4224 26.319V16.9828H11V16H20.8276V16.9828H16.4052V26.319H15.4224Z" fill="black"/></svg></div>
+                                <div class="content-card-icon highlight-titles-icon">
+                                    <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle class="ht-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                        <circle class="ht-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                        <circle class="ht-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                        <g class="ht-icon-off" transform="translate(10.5, 15.5)"><path d="M15.9449 10.6689V1.33273H11.5225V0.349976H21.35V1.33273H16.9276V10.6689H15.9449Z" fill="black" stroke="black" stroke-width="0.7"/><path d="M4.77251 10.6689V1.33273H0.350098V0.349976H10.1777V1.33273H5.75527V10.6689H4.77251Z" fill="black" stroke="black" stroke-width="0.7"/></g>
+                                        <g class="ht-icon-on" transform="translate(10.5, 15.5)"><path d="M15.9449 10.6689V1.33273H11.5225V0.349976H21.35V1.33273H16.9276V10.6689H15.9449Z" fill="#01CE9C" stroke="#01CE9C" stroke-width="0.7"/><path d="M4.77251 10.6689V1.33273H0.350098V0.349976H10.1777V1.33273H5.75527V10.6689H4.77251Z" fill="#01CE9C" stroke="#01CE9C" stroke-width="0.7"/></g>
+                                    </svg>
+                                </div>
                                 <label class="toggle-switch"><input type="checkbox" id="highlight-titles" tabindex="0" aria-label="Highlight Titles - Emphasize headings and titles"><span class="slider"></span></label>
                             </div>
                             <h4>Highlight Titles</h4>
@@ -8985,14 +9740,14 @@ input:checked + .slider::after {
                     <div class="content-adjustments-grid">
                         <div class="contrast-style-card profile-item">
                             <div class="card-top">
-                                <div class="content-card-icon highlight-links-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.1432 21.8868C13.4322 21.0543 13.0002 19.9852 13.0002 18.8197C13.0002 16.1733 15.2232 14 17.9502 14H22.4502C25.1682 14 27.4002 16.1733 27.4002 18.8197C27.4002 21.4662 25.1772 23.6394 22.4502 23.6394H20.2002" stroke="#292D32" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29.857 21.8868C30.568 22.7193 31 23.7884 31 24.9539C31 27.6003 28.777 29.7736 26.05 29.7736H21.5501C18.8321 29.7736 16.6001 27.6003 16.6001 24.9539C16.6001 22.3074 18.8231 20.1342 21.5501 20.1342H23.8001" stroke="#292D32" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                                <div class="content-card-icon highlight-links-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="hl-links-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="hl-links-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="hl-links-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="hl-links-icon-off" transform="translate(11.5, 12.5)"><path d="M1.84294 8.58675C1.13195 7.75426 0.699951 6.68516 0.699951 5.51966C0.699951 2.8732 2.92294 0.699951 5.64993 0.699951H10.1499C12.8679 0.699951 15.0999 2.8732 15.0999 5.51966C15.0999 8.16612 12.8769 10.3394 10.1499 10.3394H7.89991" stroke="black" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5567 8.58673C18.2677 9.41922 18.6997 10.4883 18.6997 11.6538C18.6997 14.3003 16.4767 16.4735 13.7498 16.4735H9.24978C6.53179 16.4735 4.2998 14.3003 4.2998 11.6538C4.2998 9.00736 6.52279 6.83411 9.24978 6.83411H11.4998" stroke="black" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><g class="hl-links-icon-on" transform="translate(11.5, 12.5)"><path d="M1.84294 8.58675C1.13195 7.75426 0.699951 6.68516 0.699951 5.51966C0.699951 2.8732 2.92294 0.699951 5.64993 0.699951H10.1499C12.8679 0.699951 15.0999 2.8732 15.0999 5.51966C15.0999 8.16612 12.8769 10.3394 10.1499 10.3394H7.89991" stroke="#01CE9C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5567 8.58673C18.2677 9.41922 18.6997 10.4883 18.6997 11.6538C18.6997 14.3003 16.4767 16.4735 13.7498 16.4735H9.24978C6.53179 16.4735 4.2998 14.3003 4.2998 11.6538C4.2998 9.00736 6.52279 6.83411 9.24978 6.83411H11.4998" stroke="#01CE9C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
                                 <label class="toggle-switch"><input type="checkbox" id="highlight-links" tabindex="0" aria-label="Highlight Links - Emphasize clickable links"><span class="slider"></span></label>
                             </div>
                             <h4>Highlight Links</h4>
                         </div>
                         <div class="contrast-style-card profile-item">
                             <div class="card-top">
-                                <div class="content-card-icon text-magnifier-icon" style="width:43px;height:43px;min-width:43px;min-height:43px;flex-shrink:0;border:1px solid rgba(0,0,0,0.15);box-sizing:border-box;"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:43px;height:43px;min-width:43px;min-height:43px;display:block;flex-shrink:0;"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/></svg></div>
+                                <div class="content-card-icon text-magnifier-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="tm-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="tm-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="tm-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="tm-icon-off" transform="translate(12, 12)"><path d="M4.57495 7.55005H9.67498" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.125 10.1002V5.00012" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.42865 14.1073C11.1172 14.1073 14.1073 11.1172 14.1073 7.42865C14.1073 3.74013 11.1172 0.75 7.42865 0.75C3.74013 0.75 0.75 3.74013 0.75 7.42865C0.75 11.1172 3.74013 14.1073 7.42865 14.1073Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.7501 17.7502L13.4043 13.4044" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="tm-icon-on" transform="translate(12, 12)"><path d="M4.57495 7.55005H9.67498" stroke="#01CE9C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.125 10.1002V5.00012" stroke="#01CE9C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.42865 14.1073C11.1172 14.1073 14.1073 11.1172 14.1073 7.42865C14.1073 3.74013 11.1172 0.75 7.42865 0.75C3.74013 0.75 0.75 3.74013 0.75 7.42865C0.75 11.1172 3.74013 14.1073 7.42865 14.1073Z" stroke="#01CE9C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.7501 17.7502L13.4043 13.4044" stroke="#01CE9C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
                                 <label class="toggle-switch"><input type="checkbox" id="text-magnifier" tabindex="0" aria-label="Text Magnifier - Enlarge text on hover"><span class="slider"></span></label>
                             </div>
                             <h4>Text Magnifier</h4>
@@ -9006,7 +9761,7 @@ input:checked + .slider::after {
                             <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="align-left" class="align-left-checkbox-hidden" tabindex="-1" aria-label="Text Left align - Left-align text content"></div>
                             <label for="align-left" class="align-left-label" tabindex="0" role="button">
                                 <div class="align-left-top">
-                                    <div class="content-card-icon align-left-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.6667 28.4167H29.3334V30.25H14.6667V28.4167ZM14.6667 24.75H24.7501V26.5833H14.6667V24.75ZM14.6667 21.0833H29.3334V22.9167H14.6667V21.0833ZM14.6667 13.75H29.3334V15.5833H14.6667V13.75ZM14.6667 17.4167H24.7501V19.25H14.6667V17.4167Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon align-left-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="align-left-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="align-left-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="align-left-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="align-left-icon-off" transform="translate(10.5, 10.5)"><path d="M3.66675 17.4167H18.3334V19.25H3.66675V17.4167ZM3.66675 13.75H13.7501V15.5833H3.66675V13.75ZM3.66675 10.0833H18.3334V11.9167H3.66675V10.0833ZM3.66675 2.75H18.3334V4.58333H3.66675V2.75ZM3.66675 6.41667H13.7501V8.25H3.66675V6.41667Z" fill="black"/></g><g class="align-left-icon-on" transform="translate(10.5, 10.5)"><path d="M3.66675 17.4167H18.3334V19.25H3.66675V17.4167ZM3.66675 13.75H13.7501V15.5833H3.66675V13.75ZM3.66675 10.0833H18.3334V11.9167H3.66675V10.0833ZM3.66675 2.75H18.3334V4.58333H3.66675V2.75ZM3.66675 6.41667H13.7501V8.25H3.66675V6.41667Z" fill="#01CE9C"/></g></svg></div>
                                 </div>
                                 <h4>Text Left align</h4>
                             </label>
@@ -9015,7 +9770,7 @@ input:checked + .slider::after {
                             <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="align-center" class="align-center-checkbox-hidden" tabindex="-1" aria-label="Text Center align - Center-align text content"></div>
                             <label for="align-center" class="align-center-label" tabindex="0" role="button">
                                 <div class="align-center-top">
-                                    <div class="content-card-icon align-center-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" transform="matrix(-1 0 0 1 43 0)" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" transform="matrix(-1 0 0 1 43 0)" stroke="black" stroke-opacity="0.1"/><path d="M13.8333 29H29.1666V31H13.8333V29ZM16.7083 25H26.2916V27H16.7083V25ZM13.8333 21H29.1666V23H13.8333V21ZM13.8333 13H29.1666V15H13.8333V13ZM16.7083 17H26.2916V19H16.7083V17Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon align-center-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="align-center-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="align-center-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="align-center-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="align-center-icon-off" transform="translate(10, 9.5)"><path d="M3.83325 19H19.1666V21H3.83325V19ZM6.70825 15H16.2916V17H6.70825V15ZM3.83325 11H19.1666V13H3.83325V11ZM3.83325 3H19.1666V5H3.83325V3ZM6.70825 7H16.2916V9H6.70825V7Z" fill="black"/></g><g class="align-center-icon-on" transform="translate(10, 9.5)"><path d="M3.83325 19H19.1666V21H3.83325V19ZM6.70825 15H16.2916V17H6.70825V15ZM3.83325 11H19.1666V13H3.83325V11ZM3.83325 3H19.1666V5H3.83325V3ZM6.70825 7H16.2916V9H6.70825V7Z" fill="#01CE9C"/></g></svg></div>
                                 </div>
                                 <h4>Text Center align</h4>
                             </label>
@@ -9024,7 +9779,7 @@ input:checked + .slider::after {
                             <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="align-right" class="align-right-checkbox-hidden" tabindex="-1" aria-label="Text Right align - Right-align text content"></div>
                             <label for="align-right" class="align-right-label" tabindex="0" role="button">
                                 <div class="align-right-top">
-                                    <div class="content-card-icon align-right-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" transform="matrix(-1 0 0 1 43 0)" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" transform="matrix(-1 0 0 1 43 0)" stroke="black" stroke-opacity="0.1"/><path d="M27.6667 27.8333H14.3334V29.5H27.6667V27.8333ZM27.6667 24.5H18.5001V26.1667H27.6667V24.5ZM27.6667 21.1667H14.3334V22.8333H27.6667V21.1667ZM27.6667 14.5H14.3334V16.1667H27.6667V14.5ZM27.6667 17.8333H18.5001V19.5H27.6667V17.8333Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon align-right-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="align-right-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="align-right-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="align-right-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="align-right-icon-off" transform="translate(11.5, 11.5)"><path d="M16.6667 15.8333H3.33342V17.5H16.6667V15.8333ZM16.6667 12.5H7.50008V14.1667H16.6667V12.5ZM16.6667 9.16667H3.33342V10.8333H16.6667V9.16667ZM16.6667 2.5H3.33342V4.16667H16.6667V2.5ZM16.6667 5.83333H7.50008V7.5H16.6667V5.83333Z" fill="black"/></g><g class="align-right-icon-on" transform="translate(11.5, 11.5)"><path d="M16.6667 15.8333H3.33342V17.5H16.6667V15.8333ZM16.6667 12.5H7.50008V14.1667H16.6667V12.5ZM16.6667 9.16667H3.33342V10.8333H16.6667V9.16667ZM16.6667 2.5H3.33342V4.16667H16.6667V2.5ZM16.6667 5.83333H7.50008V7.5H16.6667V5.83333Z" fill="#01CE9C"/></g></svg></div>
                                 </div>
                                 <h4>Text Right align</h4>
                             </label>
@@ -9042,7 +9797,7 @@ input:checked + .slider::after {
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
                                     <input type="range" id="font-size-range" class="scaling-range-overlay" min="80" max="120" value="100" aria-label="Font size percentage">
-                                    <div class="scaling-slider-thumb"><svg width="50" height="61" viewBox="0 0 50 61" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_dddd_fs)"><g clip-path="url(#clip0_fs)"><g filter="url(#filter1_ii_fs)"><path d="M43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19C7 9.05887 15.0589 1 25 1C34.9411 1 43 9.05887 43 19Z" fill="url(#paint0_linear_fs)"/></g></g></g><line x1="22.5" y1="12.5" x2="22.5" y2="25.5" stroke="white" stroke-linecap="round"/><line x1="28.5" y1="12.5" x2="28.5" y2="25.5" stroke="white" stroke-linecap="round"/><defs><filter id="filter0_dddd_fs" x="0" y="0" width="50" height="61" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="1"/><feGaussianBlur stdDeviation="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_fs"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="4"/><feGaussianBlur stdDeviation="2"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/><feBlend mode="normal" in2="effect1_dropShadow_fs" result="effect2_dropShadow_fs"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="10"/><feGaussianBlur stdDeviation="3"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/><feBlend mode="normal" in2="effect2_dropShadow_fs" result="effect3_dropShadow_fs"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="17"/><feGaussianBlur stdDeviation="3.5"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/><feBlend mode="normal" in2="effect3_dropShadow_fs" result="effect4_dropShadow_fs"/><feBlend mode="normal" in="SourceGraphic" in2="effect4_dropShadow_fs" result="shape"/></filter><filter id="filter1_ii_fs" x="7" y="-1" width="36.5" height="38.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.25" dy="-2"/><feGaussianBlur stdDeviation="10"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/><feBlend mode="normal" in2="shape" result="effect1_innerShadow_fs"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.5" dy="0.5"/><feGaussianBlur stdDeviation="0.5"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/><feBlend mode="normal" in2="effect1_innerShadow_fs" result="effect2_innerShadow_fs"/></filter><linearGradient id="paint0_linear_fs" x1="25" y1="1" x2="25" y2="37" gradientUnits="userSpaceOnUse"><stop stop-color="#00CE9C"/><stop offset="1" stop-color="#01B086"/></linearGradient><clipPath id="clip0_fs"><path d="M7 19C7 9.05888 15.0589 1 25 1C34.9411 1 43 9.05888 43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19Z" fill="white"/></clipPath></defs></svg></div>
+                                    <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
                                 </div>
                                 <div style="display:none;"><button class="scaling-btn" id="decrease-font-size-btn" tabindex="-1" aria-hidden="true">-5%</button><button class="scaling-btn" id="increase-font-size-btn" tabindex="-1" aria-hidden="true">+5%</button></div>
@@ -9061,7 +9816,7 @@ input:checked + .slider::after {
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
                                     <input type="range" id="letter-spacing-range" class="scaling-range-overlay" min="90" max="110" value="100" aria-label="Letter spacing percentage">
-                                    <div class="scaling-slider-thumb"><svg width="50" height="61" viewBox="0 0 50 61" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_dddd_ls)"><g clip-path="url(#clip0_ls)"><g filter="url(#filter1_ii_ls)"><path d="M43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19C7 9.05887 15.0589 1 25 1C34.9411 1 43 9.05887 43 19Z" fill="url(#paint0_linear_ls)"/></g></g></g><line x1="22.5" y1="12.5" x2="22.5" y2="25.5" stroke="white" stroke-linecap="round"/><line x1="28.5" y1="12.5" x2="28.5" y2="25.5" stroke="white" stroke-linecap="round"/><defs><filter id="filter0_dddd_ls" x="0" y="0" width="50" height="61" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="1"/><feGaussianBlur stdDeviation="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_ls"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="4"/><feGaussianBlur stdDeviation="2"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/><feBlend mode="normal" in2="effect1_dropShadow_ls" result="effect2_dropShadow_ls"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="10"/><feGaussianBlur stdDeviation="3"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/><feBlend mode="normal" in2="effect2_dropShadow_ls" result="effect3_dropShadow_ls"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="17"/><feGaussianBlur stdDeviation="3.5"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/><feBlend mode="normal" in2="effect3_dropShadow_ls" result="effect4_dropShadow_ls"/><feBlend mode="normal" in="SourceGraphic" in2="effect4_dropShadow_ls" result="shape"/></filter><filter id="filter1_ii_ls" x="7" y="-1" width="36.5" height="38.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.25" dy="-2"/><feGaussianBlur stdDeviation="10"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/><feBlend mode="normal" in2="shape" result="effect1_innerShadow_ls"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.5" dy="0.5"/><feGaussianBlur stdDeviation="0.5"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/><feBlend mode="normal" in2="effect1_innerShadow_ls" result="effect2_innerShadow_ls"/></filter><linearGradient id="paint0_linear_ls" x1="25" y1="1" x2="25" y2="37" gradientUnits="userSpaceOnUse"><stop stop-color="#00CE9C"/><stop offset="1" stop-color="#01B086"/></linearGradient><clipPath id="clip0_ls"><path d="M7 19C7 9.05888 15.0589 1 25 1C34.9411 1 43 9.05888 43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19Z" fill="white"/></clipPath></defs></svg></div>
+                                    <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
                                 </div>
                                 <div style="display:none;"><button class="scaling-btn" id="decrease-letter-spacing-btn" tabindex="-1" aria-hidden="true">-10%</button><button class="scaling-btn" id="increase-letter-spacing-btn" tabindex="-1" aria-hidden="true">+10%</button></div>
@@ -9080,7 +9835,7 @@ input:checked + .slider::after {
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
                                     <input type="range" id="line-height-range" class="scaling-range-overlay" min="90" max="110" value="100" aria-label="Line height percentage">
-                                    <div class="scaling-slider-thumb"><svg width="50" height="61" viewBox="0 0 50 61" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_dddd_lh)"><g clip-path="url(#clip0_lh)"><g filter="url(#filter1_ii_lh)"><path d="M43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19C7 9.05887 15.0589 1 25 1C34.9411 1 43 9.05887 43 19Z" fill="url(#paint0_linear_lh)"/></g></g></g><line x1="22.5" y1="12.5" x2="22.5" y2="25.5" stroke="white" stroke-linecap="round"/><line x1="28.5" y1="12.5" x2="28.5" y2="25.5" stroke="white" stroke-linecap="round"/><defs><filter id="filter0_dddd_lh" x="0" y="0" width="50" height="61" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="1"/><feGaussianBlur stdDeviation="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_lh"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="4"/><feGaussianBlur stdDeviation="2"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/><feBlend mode="normal" in2="effect1_dropShadow_lh" result="effect2_dropShadow_lh"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="10"/><feGaussianBlur stdDeviation="3"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/><feBlend mode="normal" in2="effect2_dropShadow_lh" result="effect3_dropShadow_lh"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="17"/><feGaussianBlur stdDeviation="3.5"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/><feBlend mode="normal" in2="effect3_dropShadow_lh" result="effect4_dropShadow_lh"/><feBlend mode="normal" in="SourceGraphic" in2="effect4_dropShadow_lh" result="shape"/></filter><filter id="filter1_ii_lh" x="7" y="-1" width="36.5" height="38.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.25" dy="-2"/><feGaussianBlur stdDeviation="10"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/><feBlend mode="normal" in2="shape" result="effect1_innerShadow_lh"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dx="0.5" dy="0.5"/><feGaussianBlur stdDeviation="0.5"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/><feBlend mode="normal" in2="effect1_innerShadow_lh" result="effect2_innerShadow_lh"/></filter><linearGradient id="paint0_linear_lh" x1="25" y1="1" x2="25" y2="37" gradientUnits="userSpaceOnUse"><stop stop-color="#00CE9C"/><stop offset="1" stop-color="#01B086"/></linearGradient><clipPath id="clip0_lh"><path d="M7 19C7 9.05888 15.0589 1 25 1C34.9411 1 43 9.05888 43 19C43 28.9411 34.9411 37 25 37C15.0589 37 7 28.9411 7 19Z" fill="white"/></clipPath></defs></svg></div>
+                                    <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
                                 </div>
                                 <div style="display:none;"><button class="scaling-btn" id="decrease-line-height-btn" tabindex="-1" aria-hidden="true">-10%</button><button class="scaling-btn" id="increase-line-height-btn" tabindex="-1" aria-hidden="true">+10%</button></div>
@@ -9097,42 +9852,42 @@ input:checked + .slider::after {
                         <div class="color-adjustments-toggles-grid">
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon dark-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_dark_contrast_icon)"><path d="M19.5488 13.2294C19.1906 14.7585 19.1419 16.3437 19.4055 17.8919C19.669 19.4401 20.2395 20.92 21.0835 22.2444C21.9274 23.5689 23.0277 24.7112 24.3196 25.6041C25.6115 26.497 27.069 27.1226 28.6062 27.4439C27.798 28.28 26.83 28.9452 25.7597 29.4001C24.6895 29.855 23.5387 30.0902 22.3758 30.0918C22.2676 30.0918 22.1585 30.0958 22.0494 30.0918C20.0249 30.0202 18.0895 29.2417 16.5792 27.8916C15.069 26.5415 14.0793 24.705 13.7822 22.7012C13.485 20.6973 13.8991 18.6527 14.9526 16.9224C16.006 15.1921 17.6322 13.8854 19.5488 13.2294ZM20.7031 11.3438C20.6574 11.3438 20.6117 11.3479 20.5667 11.3559C18.079 11.7978 15.8428 13.1445 14.2888 15.1368C12.7348 17.129 11.9729 19.6258 12.1499 22.1462C12.3269 24.6666 13.4303 27.0324 15.2474 28.7878C17.0646 30.5433 19.4671 31.5643 21.9921 31.6541C22.1204 31.6588 22.2486 31.6541 22.3757 31.6541C24.0154 31.655 25.6312 31.261 27.0865 30.5056C28.5418 29.7501 29.7938 28.6553 30.7366 27.3138C30.813 27.1982 30.8577 27.0645 30.866 26.9262C30.8743 26.7878 30.846 26.6498 30.7839 26.5258C30.7219 26.4019 30.6283 26.2965 30.5125 26.2203C30.3968 26.1441 30.263 26.0997 30.1247 26.0916C28.5639 25.9547 27.0555 25.4607 25.716 24.6479C24.3766 23.835 23.242 22.725 22.4 21.4037C21.558 20.0824 21.0311 18.5852 20.86 17.0278C20.6889 15.4703 20.8783 13.8944 21.4134 12.4219C21.4589 12.3041 21.4756 12.1771 21.4622 12.0515C21.4487 11.9259 21.4054 11.8053 21.3359 11.6999C21.2664 11.5944 21.1727 11.5071 21.0627 11.4451C20.9526 11.3832 20.8293 11.3484 20.7031 11.3438Z" fill="black"/></g><defs><clipPath id="clip0_dark_contrast_icon"><rect width="25" height="25" fill="white" transform="translate(9 9)"/></clipPath></defs></svg></div>
+                                    <div class="content-card-icon dark-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="dark-contrast-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="dark-contrast-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="dark-contrast-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g clip-path="url(#clip0_dark_contrast_icon)"><path class="dark-contrast-icon-off" d="M19.5488 13.2294C19.1906 14.7585 19.1419 16.3437 19.4055 17.8919C19.669 19.4401 20.2395 20.92 21.0835 22.2444C21.9274 23.5689 23.0277 24.7112 24.3196 25.6041C25.6115 26.497 27.069 27.1226 28.6062 27.4439C27.798 28.28 26.83 28.9452 25.7597 29.4001C24.6895 29.855 23.5387 30.0902 22.3758 30.0918C22.2676 30.0918 22.1585 30.0958 22.0494 30.0918C20.0249 30.0202 18.0895 29.2417 16.5792 27.8916C15.069 26.5415 14.0793 24.705 13.7822 22.7012C13.485 20.6973 13.8991 18.6527 14.9526 16.9224C16.006 15.1921 17.6322 13.8854 19.5488 13.2294ZM20.7031 11.3438C20.6574 11.3438 20.6117 11.3479 20.5667 11.3559C18.079 11.7978 15.8428 13.1445 14.2888 15.1368C12.7348 17.129 11.9729 19.6258 12.1499 22.1462C12.3269 24.6666 13.4303 27.0324 15.2474 28.7878C17.0646 30.5433 19.4671 31.5643 21.9921 31.6541C22.1204 31.6588 22.2486 31.6541 22.3757 31.6541C24.0154 31.655 25.6312 31.261 27.0865 30.5056C28.5418 29.7501 29.7938 28.6553 30.7366 27.3138C30.813 27.1982 30.8577 27.0645 30.866 26.9262C30.8743 26.7878 30.846 26.6498 30.7839 26.5258C30.7219 26.4019 30.6283 26.2965 30.5125 26.2203C30.3968 26.1441 30.263 26.0997 30.1247 26.0916C28.5639 25.9547 27.0555 25.4607 25.716 24.6479C24.3766 23.835 23.242 22.725 22.4 21.4037C21.558 20.0824 21.0311 18.5852 20.86 17.0278C20.6889 15.4703 20.8783 13.8944 21.4134 12.4219C21.4589 12.3041 21.4756 12.1771 21.4622 12.0515C21.4487 11.9259 21.4054 11.8053 21.3359 11.6999C21.2664 11.5944 21.1727 11.5071 21.0627 11.4451C20.9526 11.3832 20.8293 11.3484 20.7031 11.3438Z" fill="black"/><path class="dark-contrast-icon-on" d="M19.5488 13.2294C19.1906 14.7585 19.1419 16.3437 19.4055 17.8919C19.669 19.4401 20.2395 20.92 21.0835 22.2444C21.9274 23.5689 23.0277 24.7112 24.3196 25.6041C25.6115 26.497 27.069 27.1226 28.6062 27.4439C27.798 28.28 26.83 28.9452 25.7597 29.4001C24.6895 29.855 23.5387 30.0902 22.3758 30.0918C22.2676 30.0918 22.1585 30.0958 22.0494 30.0918C20.0249 30.0202 18.0895 29.2417 16.5792 27.8916C15.069 26.5415 14.0793 24.705 13.7822 22.7012C13.485 20.6973 13.8991 18.6527 14.9526 16.9224C16.006 15.1921 17.6322 13.8854 19.5488 13.2294ZM20.7031 11.3438C20.6574 11.3438 20.6117 11.3479 20.5667 11.3559C18.079 11.7978 15.8428 13.1445 14.2888 15.1368C12.7348 17.129 11.9729 19.6258 12.1499 22.1462C12.3269 24.6666 13.4303 27.0324 15.2474 28.7878C17.0646 30.5433 19.4671 31.5643 21.9921 31.6541C22.1204 31.6588 22.2486 31.6541 22.3757 31.6541C24.0154 31.655 25.6312 31.261 27.0865 30.5056C28.5418 29.7501 29.7938 28.6553 30.7366 27.3138C30.813 27.1982 30.8577 27.0645 30.866 26.9262C30.8743 26.7878 30.846 26.6498 30.7839 26.5258C30.7219 26.4019 30.6283 26.2965 30.5125 26.2203C30.3968 26.1441 30.263 26.0997 30.1247 26.0916C28.5639 25.9547 27.0555 25.4607 25.716 24.6479C24.3766 23.835 23.242 22.725 22.4 21.4037C21.558 20.0824 21.0311 18.5852 20.86 17.0278C20.6889 15.4703 20.8783 13.8944 21.4134 12.4219C21.4589 12.3041 21.4756 12.1771 21.4622 12.0515C21.4487 11.9259 21.4054 11.8053 21.3359 11.6999C21.2664 11.5944 21.1727 11.5071 21.0627 11.4451C20.9526 11.3832 20.8293 11.3484 20.7031 11.3438Z" fill="#01CE9C"/></g><defs><clipPath id="clip0_dark_contrast_icon"><rect width="25" height="25" fill="white" transform="translate(9 9)"/></clipPath></defs></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="dark-contrast" tabindex="0" aria-label="Dark Contrast - Apply dark color scheme"><span class="slider"></span></label>
                                 </div>
                                 <h4>Dark Contrast</h4>
                             </div>
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon light-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M16.2844 21.5C16.2844 24.3761 18.624 26.7157 21.5 26.7157C24.3761 26.7157 26.7157 24.3761 26.7157 21.5C26.7157 18.624 24.3761 16.2844 21.5 16.2844C18.624 16.2844 16.2844 18.624 16.2844 21.5ZM21.5 18.3677C23.2271 18.3677 24.6323 19.773 24.6323 21.5C24.6323 23.2271 23.2271 24.6323 21.5 24.6323C19.773 24.6323 18.3678 23.2271 18.3678 21.5C18.3678 19.773 19.773 18.3677 21.5 18.3677ZM20.4563 28.7917H22.5396V31.9167H20.4563V28.7917ZM20.4563 11.0834H22.5396V14.2084H20.4563V11.0834ZM11.0813 20.4584H14.2063V22.5417H11.0813V20.4584ZM28.7896 20.4584H31.9146V22.5417H28.7896V20.4584ZM13.3948 28.1282L15.6032 25.9177L17.0771 27.3907L14.8688 29.6011L13.3948 28.1282ZM25.9167 15.6084L28.1271 13.398L29.6 14.8709L27.3896 17.0813L25.9167 15.6084ZM15.6063 17.0823L13.3959 14.8719L14.8698 13.399L17.0782 15.6094L15.6063 17.0823ZM29.6 28.1292L28.1271 29.6021L25.9167 27.3917L27.3896 25.9188L29.6 28.1292Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon light-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="light-contrast-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="light-contrast-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="light-contrast-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g transform="translate(9,9)"><path class="light-contrast-icon-off" d="M7.28442 12.5C7.28442 15.3761 9.62401 17.7157 12.5 17.7157C15.3761 17.7157 17.7157 15.3761 17.7157 12.5C17.7157 9.624 15.3761 7.28442 12.5 7.28442C9.62401 7.28442 7.28442 9.624 7.28442 12.5ZM12.5 9.36775C14.2271 9.36775 15.6323 10.773 15.6323 12.5C15.6323 14.2271 14.2271 15.6323 12.5 15.6323C10.773 15.6323 9.36776 14.2271 9.36776 12.5C9.36776 10.773 10.773 9.36775 12.5 9.36775ZM11.4563 19.7917H13.5396V22.9167H11.4563V19.7917ZM11.4563 2.08337H13.5396V5.20837H11.4563V2.08337ZM2.0813 11.4584H5.2063V13.5417H2.0813V11.4584ZM19.7896 11.4584H22.9146V13.5417H19.7896V11.4584ZM4.39484 19.1282L6.60317 16.9177L8.07713 18.3907L5.8688 20.6011L4.39484 19.1282ZM16.9167 6.60837L19.1271 4.39796L20.6 5.87087L18.3896 8.08129L16.9167 6.60837ZM6.6063 8.08233L4.39588 5.87192L5.86984 4.399L8.07817 6.60942L6.6063 8.08233ZM20.6 19.1292L19.1271 20.6021L16.9167 18.3917L18.3896 16.9188L20.6 19.1292Z" fill="black"/><path class="light-contrast-icon-on" d="M7.28442 12.5C7.28442 15.3761 9.62401 17.7157 12.5 17.7157C15.3761 17.7157 17.7157 15.3761 17.7157 12.5C17.7157 9.624 15.3761 7.28442 12.5 7.28442C9.62401 7.28442 7.28442 9.624 7.28442 12.5ZM12.5 9.36775C14.2271 9.36775 15.6323 10.773 15.6323 12.5C15.6323 14.2271 14.2271 15.6323 12.5 15.6323C10.773 15.6323 9.36776 14.2271 9.36776 12.5C9.36776 10.773 10.773 9.36775 12.5 9.36775ZM11.4563 19.7917H13.5396V22.9167H11.4563V19.7917ZM11.4563 2.08337H13.5396V5.20837H11.4563V2.08337ZM2.0813 11.4584H5.2063V13.5417H2.0813V11.4584ZM19.7896 11.4584H22.9146V13.5417H19.7896V11.4584ZM4.39484 19.1282L6.60317 16.9177L8.07713 18.3907L5.8688 20.6011L4.39484 19.1282ZM16.9167 6.60837L19.1271 4.39796L20.6 5.87087L18.3896 8.08129L16.9167 6.60837ZM6.6063 8.08233L4.39588 5.87192L5.86984 4.399L8.07817 6.60942L6.6063 8.08233ZM20.6 19.1292L19.1271 20.6021L16.9167 18.3917L18.3896 16.9188L20.6 19.1292Z" fill="#01CE9C"/></g></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="light-contrast" tabindex="0" aria-label="Light Contrast - Apply light color scheme"><span class="slider"></span></label>
                                 </div>
                                 <h4>Light Contrast</h4>
                             </div>
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon high-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M21.9999 32.75C28.4329 32.75 33.6666 27.7033 33.6666 21.5C33.6666 15.2968 28.4329 10.25 21.9999 10.25C15.5669 10.25 10.3333 15.2968 10.3333 21.5C10.3333 27.7033 15.5669 32.75 21.9999 32.75ZM21.9999 12.5C27.1461 12.5 31.3333 16.5376 31.3333 21.5C31.3333 26.4624 27.1461 30.5 21.9999 30.5C16.8538 30.5 12.6666 26.4624 12.6666 21.5C12.6666 16.5376 16.8538 12.5 21.9999 12.5Z" fill="black"/><path d="M30.1666 21.5C30.1666 19.4114 29.3062 17.4084 27.7746 15.9315C26.2431 14.4547 24.1659 13.625 21.9999 13.625V29.375C24.1659 29.375 26.2431 28.5453 27.7746 27.0685C29.3062 25.5916 30.1666 23.5886 30.1666 21.5Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon high-contrast-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="high-contrast-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="high-contrast-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="high-contrast-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g transform="translate(9.5,10)"><path class="high-contrast-icon-off" d="M11.6667 22.5C18.0997 22.5 23.3333 17.4532 23.3333 11.25C23.3333 5.04675 18.0997 0 11.6667 0C5.23367 0 0 5.04675 0 11.25C0 17.4532 5.23367 22.5 11.6667 22.5ZM11.6667 2.25C16.8128 2.25 21 6.28763 21 11.25C21 16.2124 16.8128 20.25 11.6667 20.25C6.5205 20.25 2.33333 16.2124 2.33333 11.25C2.33333 6.28763 6.5205 2.25 11.6667 2.25Z" fill="black"/><path class="high-contrast-icon-off" d="M19.8333 11.25C19.8333 9.16142 18.9729 7.15838 17.4414 5.68153C15.9098 4.20469 13.8326 3.375 11.6667 3.375V19.125C13.8326 19.125 15.9098 18.2953 17.4414 16.8185C18.9729 15.3416 19.8333 13.3386 19.8333 11.25Z" fill="black"/><path class="high-contrast-icon-on" d="M11.6667 22.5C18.0997 22.5 23.3333 17.4532 23.3333 11.25C23.3333 5.04675 18.0997 0 11.6667 0C5.23367 0 0 5.04675 0 11.25C0 17.4532 5.23367 22.5 11.6667 22.5ZM11.6667 2.25C16.8128 2.25 21 6.28763 21 11.25C21 16.2124 16.8128 20.25 11.6667 20.25C6.5205 20.25 2.33333 16.2124 2.33333 11.25C2.33333 6.28763 6.5205 2.25 11.6667 2.25Z" fill="#01CE9C"/><path class="high-contrast-icon-on" d="M19.8333 11.25C19.8333 9.16142 18.9729 7.15838 17.4414 5.68153C15.9098 4.20469 13.8326 3.375 11.6667 3.375V19.125C13.8326 19.125 15.9098 18.2953 17.4414 16.8185C18.9729 15.3416 19.8333 13.3386 19.8333 11.25Z" fill="#01CE9C"/></g></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="high-contrast" tabindex="0" aria-label="High Contrast - Apply high contrast colors"><span class="slider"></span></label>
                                 </div>
                                 <h4>High Contrast</h4>
                             </div>
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon high-saturation-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_high_saturation_icon)"><path d="M29.7252 23.5039C29.3376 22.1233 28.7421 20.821 28.0952 19.5414C26.4904 16.3684 24.5982 13.3599 22.6034 10.4097C22.2334 9.8635 21.7618 9.86304 21.389 10.4106C19.9366 12.5445 18.5555 14.721 17.2826 16.9614C16.2715 18.7423 15.3221 20.5519 14.6011 22.468C14.092 23.8222 13.8331 25.1962 14.1176 26.6389C14.849 30.3498 18.0981 32.9891 21.9846 32.9979C22.2216 32.9979 22.459 33.0039 22.696 32.9956C22.8456 32.9905 22.9953 32.9692 23.1434 32.946C25.4284 32.5851 27.2721 31.5075 28.5787 29.6419C29.8867 27.7749 30.3493 25.7253 29.7252 23.5039ZM25.5671 18.2688C24.6542 17.9079 23.7191 17.7842 22.7687 18.0895C22.4586 18.1891 22.1608 18.3541 21.891 18.5361C21.1444 19.0406 20.3726 19.0402 19.5766 18.6918C19.0884 18.4777 18.6111 18.2405 18.054 17.9788C19.3434 15.8922 20.6353 13.8014 21.9661 11.6481C23.4764 13.9061 24.8699 16.1349 26.1707 18.506C25.9252 18.4096 25.7461 18.3397 25.5671 18.2688Z" fill="black"/></g><defs><clipPath id="clip0_high_saturation_icon"><rect width="16" height="23" fill="white" transform="translate(14 10)"/></clipPath></defs></svg></div>
+                                    <div class="content-card-icon high-saturation-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="high-sat-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="high-sat-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="high-sat-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g transform="translate(13.5, 10)"><path class="high-sat-icon-off" d="M15.7252 13.5039C15.3376 12.1233 14.7421 10.821 14.0952 9.54144C12.4904 6.36843 10.5982 3.35989 8.60343 0.409714C8.23345 -0.136496 7.76183 -0.136957 7.389 0.410642C5.93663 2.54451 4.55549 4.72101 3.28265 6.96143C2.27149 8.74228 1.32208 10.5519 0.60112 12.468C0.091983 13.8222 -0.166861 15.1962 0.117629 16.6389C0.849038 20.3498 4.09812 22.9891 7.98458 22.9979C8.22157 22.9979 8.45904 23.0039 8.69604 22.9956C8.84565 22.9905 8.99525 22.9692 9.14343 22.946C11.4284 22.5851 13.2721 21.5075 14.5787 19.6419C15.8867 17.7749 16.3493 15.7253 15.7252 13.5039ZM11.5671 8.26881C10.6542 7.90791 9.71907 7.78422 8.76871 8.08952C8.45857 8.18913 8.16078 8.35405 7.89101 8.53612C7.1444 9.04064 6.37262 9.04017 5.57662 8.69179C5.08838 8.47775 4.61106 8.24055 4.05395 7.9788C5.34342 5.89218 6.63526 3.80139 7.96605 1.64806C9.47637 3.90609 10.8699 6.13494 12.1707 8.50601C11.9252 8.40965 11.7461 8.33969 11.5671 8.26881Z" fill="black"/><path class="high-sat-icon-on" d="M15.7252 13.5039C15.3376 12.1233 14.7421 10.821 14.0952 9.54144C12.4904 6.36843 10.5982 3.35989 8.60343 0.409714C8.23345 -0.136496 7.76183 -0.136957 7.389 0.410642C5.93663 2.54451 4.55549 4.72101 3.28265 6.96143C2.27149 8.74228 1.32208 10.5519 0.60112 12.468C0.091983 13.8222 -0.166861 15.1962 0.117629 16.6389C0.849038 20.3498 4.09812 22.9891 7.98458 22.9979C8.22157 22.9979 8.45904 23.0039 8.69604 22.9956C8.84565 22.9905 8.99525 22.9692 9.14343 22.946C11.4284 22.5851 13.2721 21.5075 14.5787 19.6419C15.8867 17.7749 16.3493 15.7253 15.7252 13.5039ZM11.5671 8.26881C10.6542 7.90791 9.71907 7.78422 8.76871 8.08952C8.45857 8.18913 8.16078 8.35405 7.89101 8.53612C7.1444 9.04064 6.37262 9.04017 5.57662 8.69179C5.08838 8.47775 4.61106 8.24055 4.05395 7.9788C5.34342 5.89218 6.63526 3.80139 7.96605 1.64806C9.47637 3.90609 10.8699 6.13494 12.1707 8.50601C11.9252 8.40965 11.7461 8.33969 11.5671 8.26881Z" fill="#01CE9C"/></g></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="high-saturation" tabindex="0" aria-label="High Saturation - Increase color intensity"><span class="slider"></span></label>
                                 </div>
                                 <h4>High Saturation</h4>
                             </div>
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon low-saturation-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M30 24.1749C29.965 28.0549 27.038 31.3572 23.1261 31.918C18.8072 32.5372 14.7607 29.5813 14.083 25.3567C13.8421 23.855 14.145 22.4697 14.7425 21.1119C15.5944 19.1759 16.7182 17.3943 17.9613 15.6894C19.0069 14.2554 20.1212 12.8704 21.2049 11.4635C21.4581 11.1348 21.7615 10.8999 22.2048 11.0426C22.3641 11.0938 22.5323 11.1955 22.6376 11.322C25.0331 14.2006 27.2981 17.1692 28.967 20.5351C29.4475 21.5041 29.8354 22.5106 29.9576 23.5966C29.9792 23.7885 29.9862 23.9821 30 24.1749ZM26.1451 18.7925C26.0436 18.9324 25.9974 19.0133 25.9352 19.0794C25.2397 19.8184 24.3838 20.1205 23.3682 20.0242C22.5991 19.9514 21.8762 19.7198 21.1678 19.4392C20.4203 19.1432 19.673 18.854 18.8463 18.9576C18.1154 19.0491 17.4786 19.2964 17.138 20.021C16.84 20.6549 16.5005 21.27 16.2136 21.9085C15.7804 22.8725 15.5621 23.8667 15.7035 24.9426C16.0894 27.8793 18.6961 30.2797 21.6904 30.349C24.3442 30.4103 26.3377 29.2582 27.6135 26.9596C28.2183 25.8701 28.5066 24.6707 28.2355 23.438C28.0636 22.6559 27.7477 21.8944 27.4136 21.1605C27.0566 20.3765 26.6024 19.6359 26.1451 18.7925ZM18.8619 17.2181C18.8774 17.2469 18.8929 17.2756 18.9084 17.3043C19.9781 17.2183 20.942 17.5771 21.9054 17.9563C22.2926 18.1088 22.6965 18.2283 23.1021 18.3249C24.0136 18.542 24.49 18.3446 25.0176 17.5877C25.1265 17.4314 25.1505 17.3147 25.0253 17.1473C24.3276 16.214 23.6464 15.2686 22.9504 14.334C22.6486 13.9288 22.3248 13.5396 21.9668 13.0872C20.912 14.4906 19.887 15.8543 18.8619 17.2181Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon low-saturation-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="low-sat-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="low-sat-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="low-sat-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g transform="translate(13.5, 11)"><path class="low-sat-icon-off" d="M16 13.1749C15.965 17.0549 13.038 20.3572 9.12607 20.918C4.80717 21.5372 0.760694 18.5813 0.0829683 14.3567C-0.157937 12.855 0.145043 11.4697 0.742488 10.1119C1.59435 8.17592 2.71823 6.39429 3.96129 4.68944C5.00689 3.25541 6.12119 1.87039 7.20487 0.463517C7.45806 0.134811 7.76147 -0.100078 8.20483 0.0425795C8.36412 0.0938306 8.53231 0.195484 8.63763 0.322036C11.0331 3.20057 13.2981 6.16919 14.967 9.53507C15.4475 10.5041 15.8354 11.5106 15.9576 12.5966C15.9792 12.7885 15.9862 12.9821 16 13.1749ZM12.1451 7.7925C12.0436 7.93244 11.9974 8.01328 11.9352 8.07939C11.2397 8.81844 10.3838 9.12052 9.36818 9.02425C8.59911 8.95135 7.87622 8.71982 7.16778 8.43924C6.42027 8.14318 5.673 7.85403 4.84634 7.95758C4.11543 8.04913 3.47858 8.29637 3.13799 9.02098C2.84005 9.65486 2.50052 10.27 2.2136 10.9085C1.78038 11.8725 1.56215 12.8667 1.70353 13.9426C2.08941 16.8793 4.69607 19.2797 7.6904 19.349C10.3442 19.4103 12.3377 18.2582 13.6135 15.9596C14.2183 14.8701 14.5066 13.6707 14.2355 12.438C14.0636 11.6559 13.7477 10.8944 13.4136 10.1605C13.0566 9.37651 12.6024 8.63591 12.1451 7.7925ZM4.8619 6.21813C4.87739 6.24686 4.89288 6.27559 4.90837 6.30433C5.97813 6.21829 6.94204 6.57709 7.90535 6.95634C8.2926 7.10879 8.69654 7.22834 9.10212 7.32492C10.0136 7.54199 10.49 7.34458 11.0176 6.58774C11.1265 6.43144 11.1505 6.31467 11.0253 6.14727C10.3276 5.21396 9.64641 4.26857 8.95037 3.334C8.64858 2.92879 8.32483 2.5396 7.96683 2.08723C6.91204 3.49055 5.88697 4.85434 4.8619 6.21813Z" fill="black"/><path class="low-sat-icon-on" d="M16 13.1749C15.965 17.0549 13.038 20.3572 9.12607 20.918C4.80717 21.5372 0.760694 18.5813 0.0829683 14.3567C-0.157937 12.855 0.145043 11.4697 0.742488 10.1119C1.59435 8.17592 2.71823 6.39429 3.96129 4.68944C5.00689 3.25541 6.12119 1.87039 7.20487 0.463517C7.45806 0.134811 7.76147 -0.100078 8.20483 0.0425795C8.36412 0.0938306 8.53231 0.195484 8.63763 0.322036C11.0331 3.20057 13.2981 6.16919 14.967 9.53507C15.4475 10.5041 15.8354 11.5106 15.9576 12.5966C15.9792 12.7885 15.9862 12.9821 16 13.1749ZM12.1451 7.7925C12.0436 7.93244 11.9974 8.01328 11.9352 8.07939C11.2397 8.81844 10.3838 9.12052 9.36818 9.02425C8.59911 8.95135 7.87622 8.71982 7.16778 8.43924C6.42027 8.14318 5.673 7.85403 4.84634 7.95758C4.11543 8.04913 3.47858 8.29637 3.13799 9.02098C2.84005 9.65486 2.50052 10.27 2.2136 10.9085C1.78038 11.8725 1.56215 12.8667 1.70353 13.9426C2.08941 16.8793 4.69607 19.2797 7.6904 19.349C10.3442 19.4103 12.3377 18.2582 13.6135 15.9596C14.2183 14.8701 14.5066 13.6707 14.2355 12.438C14.0636 11.6559 13.7477 10.8944 13.4136 10.1605C13.0566 9.37651 12.6024 8.63591 12.1451 7.7925ZM4.8619 6.21813C4.87739 6.24686 4.89288 6.27559 4.90837 6.30433C5.97813 6.21829 6.94204 6.57709 7.90535 6.95634C8.2926 7.10879 8.69654 7.22834 9.10212 7.32492C10.0136 7.54199 10.49 7.34458 11.0176 6.58774C11.1265 6.43144 11.1505 6.31467 11.0253 6.14727C10.3276 5.21396 9.64641 4.26857 8.95037 3.334C8.64858 2.92879 8.32483 2.5396 7.96683 2.08723C6.91204 3.49055 5.88697 4.85434 4.8619 6.21813Z" fill="#01CE9C"/></g></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="low-saturation" tabindex="0" aria-label="Low Saturation - Decrease color intensity"><span class="slider"></span></label>
                                 </div>
                                 <h4>Low Saturation</h4>
                             </div>
                             <div class="contrast-style-card profile-item">
                                 <div class="card-top">
-                                    <div class="content-card-icon monochrome-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M29.4687 14.7214C33.3823 19.3854 32.8942 26.2611 28.3806 30.0484C23.8671 33.8357 17.0111 33.1225 13.0975 28.4585C9.18394 23.7945 9.67207 16.9188 14.1856 13.1315C18.6992 9.34414 25.5552 10.0574 29.4687 14.7214ZM14.7346 27.0848C17.8653 30.8158 23.3504 31.3864 26.9611 28.3567C30.5718 25.327 30.9623 19.8261 27.8316 16.0951C24.7009 12.3641 19.2158 11.7934 15.6051 14.8231C11.9944 17.8529 11.6039 23.3537 14.7346 27.0848Z" fill="black"/><path d="M26.2514 27.5108C24.7317 28.786 22.7508 29.3851 20.7445 29.1764C18.7382 28.9677 16.8708 27.9682 15.5532 26.3979L27.013 16.7819C28.3307 18.3523 28.9907 20.3648 28.8479 22.3769C28.705 24.389 27.771 26.2357 26.2514 27.5108Z" fill="black"/></svg></div>
+                                    <div class="content-card-icon monochrome-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="mono-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="mono-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="mono-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g transform="translate(10.5, 10.5)"><path class="mono-icon-off" d="M19.0149 4.02289C22.9284 8.68689 22.4403 15.5626 17.9267 19.3499C13.4132 23.1372 6.5572 22.424 2.64364 17.76C-1.26992 13.096 -0.781791 6.22028 3.73176 2.43297C8.2453 -1.35435 15.1013 -0.641107 19.0149 4.02289ZM4.28076 16.3863C7.41147 20.1173 12.8966 20.6879 16.5072 17.6582C20.1179 14.6285 20.5084 9.12763 17.3777 5.3966C14.247 1.66557 8.76193 1.09495 5.15126 4.12466C1.54058 7.15438 1.15006 12.6552 4.28076 16.3863Z" fill="black"/><path class="mono-icon-off" d="M15.7975 16.8124C14.2778 18.0875 12.297 18.6866 10.2907 18.4779C8.28436 18.2692 6.41698 17.2697 5.09932 15.6994L16.5592 6.08345C17.8768 7.65378 18.5368 9.66635 18.394 11.6784C18.2512 13.6905 17.3172 15.5372 15.7975 16.8124Z" fill="black"/><path class="mono-icon-on" d="M19.0149 4.02289C22.9284 8.68689 22.4403 15.5626 17.9267 19.3499C13.4132 23.1372 6.5572 22.424 2.64364 17.76C-1.26992 13.096 -0.781791 6.22028 3.73176 2.43297C8.2453 -1.35435 15.1013 -0.641107 19.0149 4.02289ZM4.28076 16.3863C7.41147 20.1173 12.8966 20.6879 16.5072 17.6582C20.1179 14.6285 20.5084 9.12763 17.3777 5.3966C14.247 1.66557 8.76193 1.09495 5.15126 4.12466C1.54058 7.15438 1.15006 12.6552 4.28076 16.3863Z" fill="#01CE9C"/><path class="mono-icon-on" d="M15.7975 16.8124C14.2778 18.0875 12.297 18.6866 10.2907 18.4779C8.28436 18.2692 6.41698 17.2697 5.09932 15.6994L16.5592 6.08345C17.8768 7.65378 18.5368 9.66635 18.394 11.6784C18.2512 13.6905 17.3172 15.5372 15.7975 16.8124Z" fill="#01CE9C"/></g></svg></div>
                                     <label class="toggle-switch"><input type="checkbox" id="monochrome" tabindex="0" aria-label="Monochrome - Apply grayscale color scheme"><span class="slider"></span></label>
                                 </div>
                                 <h4>Monochrome</h4>
@@ -9202,18 +9957,66 @@ input:checked + .slider::after {
                     <div class="interface-controls-section">
                         <h3 class="interface-controls-title">Interface Controls</h3>
                         <div class="interface-controls-grid">
-                    <!-- Module 27: Mute Sound -->
+                    <!-- Module 27: Mute Sounds -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon mute-sound-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_mute_sound_icon)"><path d="M33.25 19.3075L32.1925 18.25L29.5 20.9425L26.8075 18.25L25.75 19.3075L28.4425 22L25.75 24.6925L26.8075 25.75L29.5 23.0575L32.1925 25.75L33.25 24.6925L30.5575 22L33.25 19.3075Z" fill="black"/><path d="M23.5 32.4999C23.4008 32.4995 23.3026 32.4794 23.2112 32.4408C23.1198 32.4022 23.037 32.3458 22.9675 32.2749L17.2525 26.4999H12.25C12.0511 26.4999 11.8603 26.4209 11.7197 26.2803C11.579 26.1396 11.5 25.9488 11.5 25.7499V18.2499C11.5 18.051 11.579 17.8603 11.7197 17.7196C11.8603 17.5789 12.0511 17.4999 12.25 17.4999H17.2525L22.9675 11.7249C23.108 11.5852 23.2981 11.5068 23.4963 11.5068C23.6944 11.5068 23.8845 11.5852 24.025 11.7249C24.1663 11.8634 24.2472 12.0521 24.25 12.2499V31.7499C24.25 31.9488 24.171 32.1396 24.0303 32.2803C23.8897 32.4209 23.6989 32.4999 23.5 32.4999ZM13 24.9999H17.5C17.7186 24.9985 17.9299 25.0787 18.0925 25.2249L22.75 29.9274V14.0724L18.0925 18.7749C17.9299 18.9211 17.7186 19.0014 17.5 18.9999H13V24.9999Z" fill="black"/></g><defs><clipPath id="clip0_mute_sound_icon"><rect width="24" height="24" fill="white" transform="translate(10 10)"/></clipPath></defs></svg></div>
-                            <label class="toggle-switch"><input type="checkbox" id="mute-sound" tabindex="0" aria-label="Mute Sound - Disable all audio"><span class="slider"></span></label>
+                            <div class="content-card-icon mute-sound-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="mute-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="mute-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="mute-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="mute-icon-off" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_mute_off)">
+                                            <path d="M23.25 9.3075L22.1925 8.25L19.5 10.9425L16.8075 8.25L15.75 9.3075L18.4425 12L15.75 14.6925L16.8075 15.75L19.5 13.0575L22.1925 15.75L23.25 14.6925L20.5575 12L23.25 9.3075Z" fill="black"/>
+                                            <path d="M13.5 22.4999C13.4008 22.4995 13.3026 22.4794 13.2112 22.4408C13.1198 22.4022 13.037 22.3458 12.9675 22.2749L7.2525 16.4999H2.25C2.05109 16.4999 1.86032 16.4209 1.71967 16.2803C1.57902 16.1396 1.5 15.9488 1.5 15.7499V8.24993C1.5 8.05102 1.57902 7.86025 1.71967 7.7196C1.86032 7.57895 2.05109 7.49993 2.25 7.49993H7.2525L12.9675 1.72493C13.108 1.58524 13.2981 1.50684 13.4963 1.50684C13.6944 1.50684 13.8845 1.58524 14.025 1.72493C14.1663 1.8634 14.2472 2.0521 14.25 2.24993V21.7499C14.25 21.9488 14.171 22.1396 14.0303 22.2803C13.8897 22.4209 13.6989 22.4999 13.5 22.4999ZM3 14.9999H7.5C7.71863 14.9985 7.92993 15.0787 8.0925 15.2249L12.75 19.9274V4.07243L8.0925 8.77493C7.92993 8.92112 7.71863 9.00136 7.5 8.99993H3V14.9999Z" fill="black"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_mute_off">
+                                                <rect width="24" height="24" fill="white"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                    <svg class="mute-icon-on" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_mute_on)">
+                                            <path d="M23.25 9.3075L22.1925 8.25L19.5 10.9425L16.8075 8.25L15.75 9.3075L18.4425 12L15.75 14.6925L16.8075 15.75L19.5 13.0575L22.1925 15.75L23.25 14.6925L20.5575 12L23.25 9.3075Z" fill=\"#01CE9C\"/>
+                                            <path d="M13.5 22.4999C13.4008 22.4995 13.3026 22.4794 13.2112 22.4408C13.1198 22.4022 13.037 22.3458 12.9675 22.2749L7.2525 16.4999H2.25C2.05109 16.4999 1.86032 16.4209 1.71967 16.2803C1.57902 16.1396 1.5 15.9488 1.5 15.7499V8.24993C1.5 8.05102 1.57902 7.86025 1.71967 7.7196C1.86032 7.57895 2.05109 7.49993 2.25 7.49993H7.2525L12.9675 1.72493C13.108 1.58524 13.2981 1.50684 13.4963 1.50684C13.6944 1.50684 13.8845 1.58524 14.025 1.72493C14.1663 1.8634 14.2472 2.0521 14.25 2.24993V21.7499C14.25 21.9488 14.171 22.1396 14.0303 22.2803C13.8897 22.4209 13.6989 22.4999 13.5 22.4999ZM3 14.9999H7.5C7.71863 14.9985 7.92993 15.0787 8.0925 15.2249L12.75 19.9274V4.07243L8.0925 8.77493C7.92993 8.92112 7.71863 9.00136 7.5 8.99993H3V14.9999Z" fill=\"#01CE9C\"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_mute_on">
+                                                <rect width="24" height="24" fill="white"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </svg>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="mute-sound" tabindex="0" aria-label="Mute Sounds - Disable all audio"><span class="slider"></span></label>
                         </div>
-                        <h4>Mute Sound</h4>
+                        <h4>Mute Sounds</h4>
                     </div>
                     <!-- Module 28: Hide Images -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon hide-images-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M18.9688 19.8542C19.9468 19.8542 20.7397 19.0613 20.7397 18.0833C20.7397 17.1053 19.9468 16.3125 18.9688 16.3125C17.9908 16.3125 17.198 17.1053 17.198 18.0833C17.198 19.0613 17.9908 19.8542 18.9688 19.8542Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5103 12.7708H18.9687C14.5416 12.7708 12.7708 14.5416 12.7708 18.9687V24.2812C12.7708 28.7083 14.5416 30.4791 18.9687 30.4791H24.2812C28.7083 30.4791 30.4791 28.7083 30.4791 24.2812V19.8541" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.6626 17.1449L29.098 13.7095" stroke="black" stroke-width="2" stroke-linecap="round"/><path d="M29.098 17.1449L25.6626 13.7095" stroke="black" stroke-width="2" stroke-linecap="round"/><path d="M13.364 27.7787L17.7291 24.8479C18.4286 24.3787 19.438 24.4318 20.0666 24.9719L20.3588 25.2287C21.0494 25.8219 22.1651 25.8219 22.8557 25.2287L26.539 22.0677C27.2296 21.4745 28.3453 21.4745 29.0359 22.0677L30.4791 23.3073" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <div class="content-card-icon hide-images-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="hide-img-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="hide-img-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="hide-img-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="hide-img-icon-off" x="10.5" y="10.5" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.96883 8.85417C8.94684 8.85417 9.73966 8.06134 9.73966 7.08333C9.73966 6.10533 8.94684 5.3125 7.96883 5.3125C6.99083 5.3125 6.198 6.10533 6.198 7.08333C6.198 8.06134 6.99083 8.85417 7.96883 8.85417Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M11.5103 1.77075H7.96867C3.54159 1.77075 1.77075 3.54159 1.77075 7.96867V13.2812C1.77075 17.7083 3.54159 19.4791 7.96867 19.4791H13.2812C17.7083 19.4791 19.4791 17.7083 19.4791 13.2812V8.85409" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14.6626 6.14489L18.098 2.70947" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M18.098 6.14489L14.6626 2.70947" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M2.36401 16.7787L6.72912 13.8479C7.4286 13.3787 8.43797 13.4318 9.06662 13.9719L9.35881 14.2287C10.0494 14.8219 11.1651 14.8219 11.8557 14.2287L15.539 11.0677C16.2296 10.4745 17.3453 10.4745 18.0359 11.0677L19.4791 12.3073" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <svg class="hide-img-icon-on" x="10.5" y="10.5" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.96883 8.85417C8.94684 8.85417 9.73966 8.06134 9.73966 7.08333C9.73966 6.10533 8.94684 5.3125 7.96883 5.3125C6.99083 5.3125 6.198 6.10533 6.198 7.08333C6.198 8.06134 6.99083 8.85417 7.96883 8.85417Z" stroke="#01CE9C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M11.5103 1.77075H7.96867C3.54159 1.77075 1.77075 3.54159 1.77075 7.96867V13.2812C1.77075 17.7083 3.54159 19.4791 7.96867 19.4791H13.2812C17.7083 19.4791 19.4791 17.7083 19.4791 13.2812V8.85409" stroke="#01CE9C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14.6626 6.14489L18.098 2.70947" stroke="#01CE9C" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M18.098 6.14489L14.6626 2.70947" stroke="#01CE9C" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M2.36401 16.7787L6.72912 13.8479C7.4286 13.3787 8.43797 13.4318 9.06662 13.9719L9.35881 14.2287C10.0494 14.8219 11.1651 14.8219 11.8557 14.2287L15.539 11.0677C16.2296 10.4745 17.3453 10.4745 18.0359 11.0677L19.4791 12.3073" stroke="#01CE9C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </svg>
+                            </div>
                             <label class="toggle-switch"><input type="checkbox" id="hide-images" tabindex="0" aria-label="Hide Images - Hide all images on page"><span class="slider"></span></label>
                         </div>
                         <h4>Hide Images</h4>
@@ -9221,7 +10024,21 @@ input:checked + .slider::after {
                     <!-- Module 29: Read Mode -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon read-mode-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M31.625 12.4167C31.625 11.2217 30.6159 10.25 29.375 10.25H13.625C12.3841 10.25 11.375 11.2217 11.375 12.4167V27.5833C11.375 28.7783 12.3841 29.75 13.625 29.75H29.375C30.6159 29.75 31.625 28.7783 31.625 27.5833V12.4167ZM13.625 27.5833V12.4167H29.375L29.3773 27.5833H13.625Z" fill="black"/><path d="M15.875 14.5833H18.1228V16.75H15.875V14.5833ZM20.375 14.5833H27.125V16.75H20.375V14.5833ZM15.875 18.9167H18.1228V21.0833H15.875V18.9167ZM20.375 18.9167H27.125V21.0833H20.375V18.9167ZM15.875 23.25H18.1228V25.4167H15.875V23.25ZM20.375 23.25H27.125V25.4167H20.375V23.25Z" fill="black"/></svg></div>
+                            <div class="content-card-icon read-mode-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="read-mode-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="read-mode-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="read-mode-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="read-mode-icon-off" x="8" y="8.5" width="27" height="26" viewBox="0 0 27 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M23.625 5.41667C23.625 4.22175 22.6159 3.25 21.375 3.25H5.625C4.38412 3.25 3.375 4.22175 3.375 5.41667V20.5833C3.375 21.7783 4.38412 22.75 5.625 22.75H21.375C22.6159 22.75 23.625 21.7783 23.625 20.5833V5.41667ZM5.625 20.5833V5.41667H21.375L21.3773 20.5833H5.625Z" fill="black"/>
+                                        <path d="M7.875 7.58333H10.1228V9.75H7.875V7.58333ZM12.375 7.58333H19.125V9.75H12.375V7.58333ZM7.875 11.9167H10.1228V14.0833H7.875V11.9167ZM12.375 11.9167H19.125V14.0833H12.375V11.9167ZM7.875 16.25H10.1228V18.4167H7.875V16.25ZM12.375 16.25H19.125V18.4167H12.375V16.25Z" fill="black"/>
+                                    </svg>
+                                    <svg class="read-mode-icon-on" x="8" y="8.5" width="27" height="26" viewBox="0 0 27 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M23.625 5.41667C23.625 4.22175 22.6159 3.25 21.375 3.25H5.625C4.38412 3.25 3.375 4.22175 3.375 5.41667V20.5833C3.375 21.7783 4.38412 22.75 5.625 22.75H21.375C22.6159 22.75 23.625 21.7783 23.625 20.5833V5.41667ZM5.625 20.5833V5.41667H21.375L21.3773 20.5833H5.625Z" fill=\"#01CE9C\"/>
+                                        <path d="M7.875 7.58333H10.1228V9.75H7.875V7.58333ZM12.375 7.58333H19.125V9.75H12.375V7.58333ZM7.875 11.9167H10.1228V14.0833H7.875V11.9167ZM12.375 11.9167H19.125V14.0833H12.375V11.9167ZM7.875 16.25H10.1228V18.4167H7.875V16.25ZM12.375 16.25H19.125V18.4167H12.375V16.25Z" fill=\"#01CE9C\"/>
+                                    </svg>
+                                </svg>
+                            </div>
                             <label class="toggle-switch"><input type="checkbox" id="read-mode" tabindex="0" aria-label="Read Mode - Simplify page for reading"><span class="slider"></span></label>
                         </div>
                         <h4>Read Mode</h4>
@@ -9229,42 +10046,86 @@ input:checked + .slider::after {
                     <!-- Module 30: Reading Guide -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon reading-guide-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22 17L18 21H21V29H23V21H26L22 17ZM13 13H16V15H13V13ZM18 13H21V15H18V13ZM23 13H26V15H23V13ZM28 13H31V15H28V13Z" fill="black"/></svg></div>
+                            <div class="content-card-icon reading-guide-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="reading-guide-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="reading-guide-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="reading-guide-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="reading-guide-icon-off" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 7L8 11H11V19H13V11H16L12 7ZM3 3H6V5H3V3ZM8 3H11V5H8V3ZM13 3H16V5H13V3ZM18 3H21V5H18V3Z" fill="black"/>
+                                    </svg>
+                                    <svg class="reading-guide-icon-on" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 7L8 11H11V19H13V11H16L12 7ZM3 3H6V5H3V3ZM8 3H11V5H8V3ZM13 3H16V5H13V3ZM18 3H21V5H18V3Z" fill=\"#01CE9C\"/>
+                                    </svg>
+                                </svg>
+                            </div>
                             <label class="toggle-switch"><input type="checkbox" id="reading-guide" tabindex="0" aria-label="Reading Guide - Movable highlight bar" aria-describedby="reading-guide-desc"><span class="slider"></span></label>
                         </div>
                         <h4>Reading Guide</h4>
                     </div>
-                    <!-- Module 32: Stop Animation -->
+                    <!-- Module 32: Stop Animations -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon stop-animation-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M18.9688 19.8542C19.9468 19.8542 20.7397 19.0613 20.7397 18.0833C20.7397 17.1053 19.9468 16.3125 18.9688 16.3125C17.9908 16.3125 17.198 17.1053 17.198 18.0833C17.198 19.0613 17.9908 19.8542 18.9688 19.8542Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5103 12.7708H18.9687C14.5416 12.7708 12.7708 14.5416 12.7708 18.9687V24.2812C12.7708 28.7083 14.5416 30.4791 18.9687 30.4791H24.2812C28.7083 30.4791 30.4791 28.7083 30.4791 24.2812V19.8541" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.6626 17.1449L29.098 13.7095" stroke="black" stroke-width="2" stroke-linecap="round"/><path d="M29.098 17.1449L25.6626 13.7095" stroke="black" stroke-width="2" stroke-linecap="round"/><path d="M13.364 27.7787L17.7291 24.8479C18.4286 24.3787 19.438 24.4318 20.0666 24.9719L20.3588 25.2287C21.0494 25.8219 22.1651 25.8219 22.8557 25.2287L26.539 22.0677C27.2296 21.4745 28.3453 21.4745 29.0359 22.0677L30.4791 23.3073" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                            <label class="toggle-switch"><input type="checkbox" id="stop-animation" tabindex="0" aria-label="Stop Animation - Pauses all CSS animations"><span class="slider"></span></label>
+                            <div class="content-card-icon stop-animation-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="stop-anim-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="stop-anim-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="stop-anim-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="stop-anim-icon-off" x="10.5" y="10.5" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.96883 8.85417C8.94684 8.85417 9.73966 8.06134 9.73966 7.08333C9.73966 6.10533 8.94684 5.3125 7.96883 5.3125C6.99083 5.3125 6.198 6.10533 6.198 7.08333C6.198 8.06134 6.99083 8.85417 7.96883 8.85417Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M11.5103 1.77075H7.96867C3.54159 1.77075 1.77075 3.54159 1.77075 7.96867V13.2812C1.77075 17.7083 3.54159 19.4791 7.96867 19.4791H13.2812C17.7083 19.4791 19.4791 17.7083 19.4791 13.2812V8.85409" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14.6626 6.14489L18.098 2.70947" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M18.098 6.14489L14.6626 2.70947" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M2.36401 16.7787L6.72912 13.8479C7.4286 13.3787 8.43797 13.4318 9.06662 13.9719L9.35881 14.2287C10.0494 14.8219 11.1651 14.8219 11.8557 14.2287L15.539 11.0677C16.2296 10.4745 17.3453 10.4745 18.0359 11.0677L19.4791 12.3073" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <svg class="stop-anim-icon-on" x="10.5" y="10.5" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.96883 8.85417C8.94684 8.85417 9.73966 8.06134 9.73966 7.08333C9.73966 6.10533 8.94684 5.3125 7.96883 5.3125C6.99083 5.3125 6.198 6.10533 6.198 7.08333C6.198 8.06134 6.99083 8.85417 7.96883 8.85417Z" stroke=\"#01CE9C\" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M11.5103 1.77075H7.96867C3.54159 1.77075 1.77075 3.54159 1.77075 7.96867V13.2812C1.77075 17.7083 3.54159 19.4791 7.96867 19.4791H13.2812C17.7083 19.4791 19.4791 17.7083 19.4791 13.2812V8.85409" stroke=\"#01CE9C\" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M14.6626 6.14489L18.098 2.70947" stroke=\"#01CE9C\" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M18.098 6.14489L14.6626 2.70947" stroke=\"#01CE9C\" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M2.36401 16.7787L6.72912 13.8479C7.4286 13.3787 8.43797 13.4318 9.06662 13.9719L9.35881 14.2287C10.0494 14.8219 11.1651 14.8219 11.8557 14.2287L15.539 11.0677C16.2296 10.4745 17.3453 10.4745 18.0359 11.0677L19.4791 12.3073" stroke=\"#01CE9C\" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </svg>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="stop-animation" tabindex="0" aria-label="Stop Animations - Pauses all CSS animations"><span class="slider"></span></label>
                         </div>
-                        <h4>Stop Animation</h4>
+                        <h4>Stop Animations</h4>
                     </div>
                     <!-- Module 33: Reading Mask -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon reading-mask-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M13.2832 23.5898L11.2832 23.5898L11.2832 29.5898L31.2832 29.5898L31.2832 23.5898L29.2832 23.5898L29.2832 27.5898L13.2832 27.5898L13.2832 23.5898ZM29.2832 19.5898L31.2832 19.5898L31.2832 13.5898L11.2832 13.5898L11.2832 19.5898L13.2832 19.5898L13.2832 15.5898L29.2832 15.5898L29.2832 19.5898Z" fill="black"/></svg></div>
+                            <div class="content-card-icon reading-mask-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="reading-mask-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle class="reading-mask-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <circle class="reading-mask-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                    <svg class="reading-mask-icon-off" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 14L2 14L2 20L22 20L22 14L20 14L20 18L4 18L4 14ZM20 10L22 10L22 4L2 4L2 10L4 10L4 6L20 6L20 10Z" fill="black"/>
+                                    </svg>
+                                    <svg class="reading-mask-icon-on" x="9.5" y="9.5" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 14L2 14L2 20L22 20L22 14L20 14L20 18L4 18L4 14ZM20 10L22 10L22 4L2 4L2 10L4 10L4 6L20 6L20 10Z" fill=\"#01CE9C\"/>
+                                    </svg>
+                                </svg>
+                            </div>
                             <label class="toggle-switch"><input type="checkbox" id="reading-mask" tabindex="0" aria-label="Reading Mask - Focus on specific text area"><span class="slider"></span></label>
                         </div>
                         <h4>Reading Mask</h4>
                     </div>
-                    <!-- Module 34: Highlight Hover -->
+                    <!-- Module 34: Highlight Focus -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon highlight-hover-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M11.8333 18.2499V16.4166C11.8333 13.6666 13.6666 11.8333 16.4166 11.8333H25.5833C28.3333 11.8333 30.1666 13.6666 30.1666 16.4166V18.2499" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8333 23.75V25.5833C11.8333 28.3333 13.6666 30.1667 16.4166 30.1667H25.5833C28.3333 30.1667 30.1666 28.3333 30.1666 25.5833V23.75" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8333 21H30.1666" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                            <label class="toggle-switch"><input type="checkbox" id="highlight-hover" tabindex="0" aria-label="Highlight Hover - Highlight elements on mouse hover"><span class="slider"></span></label>
-                        </div>
-                        <h4>Highlight Hover</h4>
-                    </div>
-                    <!-- Module 35: Highlight Focus -->
-                    <div class="contrast-style-card profile-item">
-                        <div class="card-top">
-                            <div class="content-card-icon highlight-focus-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22 25.6C23.9882 25.6 25.6 23.9882 25.6 22C25.6 20.0118 23.9882 18.4 22 18.4C20.0118 18.4 18.4 20.0118 18.4 22C18.4 23.9882 20.0118 25.6 22 25.6Z" fill="black"/><path d="M23.2 12.4828V10H20.8V12.4828C18.6882 12.752 16.7256 13.7149 15.2202 15.2202C13.7149 16.7256 12.752 18.6882 12.4828 20.8H10V23.2H12.4828C12.7518 25.3119 13.7146 27.2746 15.22 28.78C16.7254 30.2854 18.6881 31.2482 20.8 31.5172V34H23.2V31.5172C25.3119 31.2482 27.2746 30.2854 28.78 28.78C30.2854 27.2746 31.2482 25.3119 31.5172 23.2H34V20.8H31.5172C31.248 18.6882 30.2851 16.7256 28.7798 15.2202C27.2744 13.7149 25.3118 12.752 23.2 12.4828ZM22 29.2C18.0292 29.2 14.8 25.9708 14.8 22C14.8 18.0292 18.0292 14.8 22 14.8C25.9708 14.8 29.2 18.0292 29.2 22C29.2 25.9708 25.9708 29.2 22 29.2Z" fill="black"/></svg></div>
+                            <div class="content-card-icon highlight-focus-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="hl-focus-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="hl-focus-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="hl-focus-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="hl-focus-icon-off" transform="translate(9.5, 9.5)"><path d="M12 15.6C13.9882 15.6 15.6 13.9882 15.6 12C15.6 10.0118 13.9882 8.4 12 8.4C10.0118 8.4 8.4 10.0118 8.4 12C8.4 13.9882 10.0118 15.6 12 15.6Z" fill="black"/><path d="M13.2 2.4828V0H10.8V2.4828C8.6882 2.75202 6.72559 3.71488 5.22024 5.22024C3.71488 6.72559 2.75202 8.6882 2.4828 10.8H0V13.2H2.4828C2.75183 15.3119 3.71462 17.2746 5.22001 18.78C6.7254 20.2854 8.68812 21.2482 10.8 21.5172V24H13.2V21.5172C15.3119 21.2482 17.2746 20.2854 18.78 18.78C20.2854 17.2746 21.2482 15.3119 21.5172 13.2H24V10.8H21.5172C21.248 8.6882 20.2851 6.72559 18.7798 5.22024C17.2744 3.71488 15.3118 2.75202 13.2 2.4828ZM12 19.2C8.0292 19.2 4.8 15.9708 4.8 12C4.8 8.0292 8.0292 4.8 12 4.8C15.9708 4.8 19.2 8.0292 19.2 12C19.2 15.9708 15.9708 19.2 12 19.2Z" fill="black"/></g><g class="hl-focus-icon-on" transform="translate(9.5, 9.5)"><path d="M12 15.6C13.9882 15.6 15.6 13.9882 15.6 12C15.6 10.0118 13.9882 8.4 12 8.4C10.0118 8.4 8.4 10.0118 8.4 12C8.4 13.9882 10.0118 15.6 12 15.6Z" fill="#01CE9C"/><path d="M13.2 2.4828V0H10.8V2.4828C8.6882 2.75202 6.72559 3.71488 5.22024 5.22024C3.71488 6.72559 2.75202 8.6882 2.4828 10.8H0V13.2H2.4828C2.75183 15.3119 3.71462 17.2746 5.22001 18.78C6.7254 20.2854 8.68812 21.2482 10.8 21.5172V24H13.2V21.5172C15.3119 21.2482 17.2746 20.2854 18.78 18.78C20.2854 17.2746 21.2482 15.3119 21.5172 13.2H24V10.8H21.5172C21.248 8.6882 20.2851 6.72559 18.7798 5.22024C17.2744 3.71488 15.3118 2.75202 13.2 2.4828ZM12 19.2C8.0292 19.2 4.8 15.9708 4.8 12C4.8 8.0292 8.0292 4.8 12 4.8C15.9708 4.8 19.2 8.0292 19.2 12C19.2 15.9708 15.9708 19.2 12 19.2Z" fill="#01CE9C"/></g></svg></div>
                             <label class="toggle-switch"><input type="checkbox" id="highlight-focus" tabindex="0" aria-label="Highlight Focus - Highlight focused elements"><span class="slider"></span></label>
                         </div>
                         <h4>Highlight Focus</h4>
+                    </div>
+                    <!-- Module 35: Highlight Hover -->
+                    <div class="contrast-style-card profile-item">
+                        <div class="card-top">
+                            <div class="content-card-icon highlight-hover-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="hl-hover-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="hl-hover-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="hl-hover-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="hl-hover-icon-off" transform="translate(10.5, 10.5)"><path d="M1.83325 8.24992V6.41659C1.83325 3.66659 3.66659 1.83325 6.41659 1.83325H15.5833C18.3333 1.83325 20.1666 3.66659 20.1666 6.41659V8.24992" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.83325 13.75V15.5833C1.83325 18.3333 3.66659 20.1667 6.41659 20.1667H15.5833C18.3333 20.1667 20.1666 18.3333 20.1666 15.5833V13.75" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.83325 11H20.1666" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></g><g class="hl-hover-icon-on" transform="translate(10.5, 10.5)"><path d="M1.83325 8.24992V6.41659C1.83325 3.66659 3.66659 1.83325 6.41659 1.83325H15.5833C18.3333 1.83325 20.1666 3.66659 20.1666 6.41659V8.24992" stroke="#01CE9C" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.83325 13.75V15.5833C1.83325 18.3333 3.66659 20.1667 6.41659 20.1667H15.5833C18.3333 20.1667 20.1666 18.3333 20.1666 15.5833V13.75" stroke="#01CE9C" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.83325 11H20.1666" stroke="#01CE9C" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+                            <label class="toggle-switch"><input type="checkbox" id="highlight-hover" tabindex="0" aria-label="Highlight Hover - Highlight elements on mouse hover"><span class="slider"></span></label>
+                        </div>
+                        <h4>Highlight Hover</h4>
                     </div>
                         </div>
                     </div>
@@ -9306,7 +10167,7 @@ input:checked + .slider::after {
                     <div class="cursor-cards-grid">
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon big-black-cursor-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M31.7575 22.9513C31.8054 22.7368 31.7872 22.5134 31.7051 22.3087C31.623 22.104 31.4806 21.9269 31.2955 21.7993L14.9621 10.5493C14.7783 10.4219 14.56 10.3488 14.3339 10.339C14.1077 10.3292 13.8835 10.3832 13.6886 10.4943C13.4938 10.6054 13.3366 10.7688 13.2365 10.9645C13.1363 11.1603 13.0975 11.38 13.1246 11.5967L15.458 30.7217C15.4848 30.9409 15.578 31.1477 15.7259 31.3163C15.8737 31.4848 16.0698 31.6077 16.2896 31.6696C16.5093 31.7315 16.7431 31.7297 16.9618 31.6643C17.1805 31.599 17.3745 31.473 17.5195 31.3022L21.7335 26.3342L25.6733 32.4767L27.6578 31.2932L23.7413 25.1867L30.8451 23.8164C31.0684 23.7743 31.2739 23.6698 31.4361 23.516C31.5983 23.3622 31.71 23.1658 31.7575 22.9513ZM16.2896 22.3087C14.9621 22.9513 16.4607 24.3886 16.2896 24.5901L17.4541 27.8271L15.7496 13.8579L15.7259 20.5901L16.2896 22.3087Z" fill="black"/></svg></div>
+                            <div class="content-card-icon big-black-cursor-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="bbc-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="bbc-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="bbc-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="bbc-icon-off" transform="translate(7.5, 8)"><path d="M24.4743 14.8615C24.5222 14.6469 24.504 14.4235 24.4219 14.2189C24.3398 14.0142 24.1974 13.8371 24.0123 13.7095L7.67894 2.45946C7.49514 2.33201 7.27683 2.25894 7.05068 2.24917C6.82452 2.2394 6.60031 2.29335 6.40543 2.40443C6.21055 2.51552 6.05344 2.67892 5.95328 2.87469C5.85313 3.07046 5.81426 3.29011 5.84144 3.50683L8.17477 22.6318C8.20163 22.8511 8.29479 23.0579 8.44267 23.2264C8.59054 23.395 8.78657 23.5179 9.00635 23.5798C9.22613 23.6417 9.45993 23.6398 9.67864 23.5745C9.89734 23.5091 10.0913 23.3832 10.2363 23.2123L14.4503 18.2443L18.3901 24.3868L20.3746 23.2033L16.4581 17.0968L23.5619 15.7266C23.7852 15.6844 23.9907 15.58 24.1529 15.4262C24.3151 15.2724 24.4268 15.076 24.4743 14.8615ZM9.00635 14.2189C7.67894 14.8615 9.17749 16.2988 9.00635 16.5002L10.1709 19.7372L8.46644 5.76808L8.44267 12.5002L9.00635 14.2189Z" fill="black"/></g><g class="bbc-icon-on" transform="translate(7.5, 8)"><path d="M24.4743 14.8615C24.5222 14.6469 24.504 14.4235 24.4219 14.2189C24.3398 14.0142 24.1974 13.8371 24.0123 13.7095L7.67894 2.45946C7.49514 2.33201 7.27683 2.25894 7.05068 2.24917C6.82452 2.2394 6.60031 2.29335 6.40543 2.40443C6.21055 2.51552 6.05344 2.67892 5.95328 2.87469C5.85313 3.07046 5.81426 3.29011 5.84144 3.50683L8.17477 22.6318C8.20163 22.8511 8.29479 23.0579 8.44267 23.2264C8.59054 23.395 8.78657 23.5179 9.00635 23.5798C9.22613 23.6417 9.45993 23.6398 9.67864 23.5745C9.89734 23.5091 10.0913 23.3832 10.2363 23.2123L14.4503 18.2443L18.3901 24.3868L20.3746 23.2033L16.4581 17.0968L23.5619 15.7266C23.7852 15.6844 23.9907 15.58 24.1529 15.4262C24.3151 15.2724 24.4268 15.076 24.4743 14.8615ZM9.00635 14.2189C7.67894 14.8615 9.17749 16.2988 9.00635 16.5002L10.1709 19.7372L8.46644 5.76808L8.44267 12.5002L9.00635 14.2189Z" fill="#01CE9C"/></g></svg></div>
                             <label class="toggle-switch"><input type="checkbox" id="big-black-cursor" tabindex="0" aria-label="Big Black Cursor - Larger black mouse cursor"><span class="slider"></span></label>
                         </div>
                         <h4>Big Black Cursor</h4>
@@ -9314,7 +10175,7 @@ input:checked + .slider::after {
                     <!-- Module 37: Big White Cursor -->
                     <div class="contrast-style-card profile-item">
                         <div class="card-top">
-                            <div class="content-card-icon big-white-cursor-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M31.7575 23.0015C31.8054 22.779 31.7872 22.5473 31.7051 22.3351C31.623 22.1228 31.4806 21.9392 31.2955 21.8068L14.9621 10.1401C14.7783 10.008 14.56 9.9322 14.3339 9.92207C14.1077 9.91193 13.8835 9.96788 13.6886 10.0831C13.4938 10.1983 13.3366 10.3677 13.2365 10.5707C13.1363 10.7738 13.0975 11.0016 13.1246 11.2263L15.458 31.0596C15.4848 31.287 15.578 31.5015 15.7259 31.6763C15.8737 31.8511 16.0698 31.9785 16.2896 32.0427C16.5093 32.1069 16.7431 32.105 16.9618 32.0372C17.1805 31.9694 17.3745 31.8388 17.5195 31.6616L21.7335 26.5096L25.6733 32.8796L27.6578 31.6523L23.7413 25.3196L30.8451 23.8986C31.0684 23.8549 31.2739 23.7466 31.4361 23.5871C31.5983 23.4276 31.71 23.224 31.7575 23.0015ZM21.6378 23.3631C21.3729 23.416 21.1346 23.559 20.9635 23.768L17.4541 28.0578L15.7496 13.5713L27.7465 22.1405L21.6378 23.3631Z" fill="black"/></svg></div>
+                            <div class="content-card-icon big-white-cursor-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="bwc-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/><circle class="bwc-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/><circle class="bwc-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/><g class="bwc-icon-off" transform="translate(7.5, 7.5)"><path d="M24.4743 15.4116C24.5222 15.1891 24.504 14.9575 24.4219 14.7452C24.3398 14.533 24.1974 14.3493 24.0123 14.217L7.67894 2.55029C7.49514 2.41813 7.27683 2.34236 7.05068 2.33222C6.82452 2.32209 6.60031 2.37804 6.40543 2.49323C6.21055 2.60843 6.05344 2.77789 5.95328 2.98091C5.85313 3.18392 5.81426 3.41172 5.84144 3.63646L8.17477 23.4698C8.20163 23.6972 8.29479 23.9116 8.44266 24.0864C8.59054 24.2612 8.78657 24.3887 9.00635 24.4528C9.22613 24.517 9.45993 24.5151 9.67864 24.4474C9.89734 24.3796 10.0913 24.249 10.2363 24.0718L14.4503 18.9198L18.3901 25.2898L20.3746 24.0625L16.4581 17.7298L23.5619 16.3088C23.7852 16.2651 23.9907 16.1568 24.1529 15.9973C24.3151 15.8378 24.4268 15.6341 24.4743 15.4116ZM14.3546 15.7733C14.0897 15.8261 13.8514 15.9692 13.6803 16.1781L10.1709 20.468L8.46644 5.98146L20.4633 14.5506L14.3546 15.7733Z" fill="black"/></g><g class="bwc-icon-on" transform="translate(7.5, 7.5)"><path d="M24.4743 15.4116C24.5222 15.1891 24.504 14.9575 24.4219 14.7452C24.3398 14.533 24.1974 14.3493 24.0123 14.217L7.67894 2.55029C7.49514 2.41813 7.27683 2.34236 7.05068 2.33222C6.82452 2.32209 6.60031 2.37804 6.40543 2.49323C6.21055 2.60843 6.05344 2.77789 5.95328 2.98091C5.85313 3.18392 5.81426 3.41172 5.84144 3.63646L8.17477 23.4698C8.20163 23.6972 8.29479 23.9116 8.44266 24.0864C8.59054 24.2612 8.78657 24.3887 9.00635 24.4528C9.22613 24.517 9.45993 24.5151 9.67864 24.4474C9.89734 24.3796 10.0913 24.249 10.2363 24.0718L14.4503 18.9198L18.3901 25.2898L20.3746 24.0625L16.4581 17.7298L23.5619 16.3088C23.7852 16.2651 23.9907 16.1568 24.1529 15.9973C24.3151 15.8378 24.4268 15.6341 24.4743 15.4116ZM14.3546 15.7733C14.0897 15.8261 13.8514 15.9692 13.6803 16.1781L10.1709 20.468L8.46644 5.98146L20.4633 14.5506L14.3546 15.7733Z" fill="#01CE9C"/></g></svg></div>
                             <label class="toggle-switch"><input type="checkbox" id="big-white-cursor" tabindex="0" aria-label="Big White Cursor - Larger white mouse cursor"><span class="slider"></span></label>
                         </div>
                         <h4>Big White Cursor</h4>
@@ -9553,7 +10414,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     adjustBgColorsDesc: "Background color customization",
     
-                    muteSound: "Mute Sound",
+                    muteSound: "Mute Sounds",
     
                     muteSoundDesc: "Disables all audio content",
     
@@ -9595,7 +10456,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     bigWhiteCursorDesc: "Increases cursor size",
     
-                    stopAnimation: "Stop Animation",
+                    stopAnimation: "Stop Animations",
     
                     stopAnimationDesc: "Pauses all CSS animations",
     
@@ -9621,7 +10482,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     screenReaderNote: "Note: This profile prompts automatically to screen-readers.",
     
-                    activatesWithScreenReader: "Activates with Screen Reader",
+                    activatesWithScreenReader: "(Activates with Screen Reader)",
     
                     activatesWithKeyboardNav: "Activates with Keyboard Navigation",
                     
@@ -11264,7 +12125,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 const header = this.shadowRoot.getElementById('language-selector-header');
     
-                if (dropdown && header && !header.contains(e.target) && !dropdown.contains(e.target)) {
+            if (dropdown && header && !header.contains(e.target) && !dropdown.contains(e.target)) {
     
                 
     
@@ -11350,15 +12211,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 const header = this.shadowRoot.getElementById('language-selector-header');
                 const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
                 if (header && panel) {
-                    const headerRect = header.getBoundingClientRect();
-                    const panelRect = panel.getBoundingClientRect();
-                    const gap = 4;
-                    const dropdownWidth = 192;
-                    let left = headerRect.right - dropdownWidth;
-                    left = Math.max(panelRect.left, Math.min(left, panelRect.right - dropdownWidth));
-                    dropdown.style.position = 'fixed';
-                    dropdown.style.top = (headerRect.bottom + gap) + 'px';
-                    dropdown.style.left = left + 'px';
+                    this.positionLanguageDropdown();
                 }
     
                 // Mark current language as selected and focus first option
@@ -11943,7 +12796,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     case 'mute-sound':
     
-                        if (title) title.textContent = translations.muteSound || 'Mute Sound';
+                        if (title) title.textContent = translations.muteSound || 'Mute Sounds';
     
                         if (desc) desc.textContent = translations.muteSoundDesc || 'Disables all audio content';
     
@@ -14652,9 +15505,22 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     overflow-x: hidden !important;
                     overflow-y: auto !important;
                 }
+
+                /* Prevent widget container and panel from being scaled by content scaling */
+                #accessbit-widget-container,
+                #accessbit-widget,
+                [id*="accessbit-widget"],
+                .accessbit-widget-panel,
+                #accessbit-widget-icon {
+                    zoom: ${inverseScale} !important;
+                    transition: none !important;
+                    will-change: auto !important;
+                    contain: layout style !important;
+                    isolation: isolate !important;
+                }
             `;
             
-            // Counter-scale widget elements directly via JavaScript (Shadow DOM can't be targeted by CSS)
+            // Counter-scale widget from inside Shadow DOM so host is unaffected by html zoom
             this.applyWidgetCounterScale(inverseScale);
         }
         
@@ -14670,15 +15536,20 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 this.shadowRoot.appendChild(counterStyle);
             }
             
-            // Use zoom to counter the html zoom - maintains original visual size
+            // Use zoom on host so the entire widget (host + shadow contents) counter-scales; inner elements stay 1:1
             counterStyle.textContent = `
-                /* Counter-scale widget elements to maintain fixed size */
+                :host {
+                    zoom: ${inverseScale} !important;
+                    transition: none !important;
+                    contain: layout style !important;
+                    isolation: isolate !important;
+                }
                 #accessbit-widget-panel,
                 #accessbit-widget-icon {
-                    zoom: ${inverseScale} !important;
+                    zoom: 1 !important;
+                    transition: none !important;
+                    will-change: auto !important;
                 }
-                
-                /* Ensure panel maintains its height regardless of zoom */
                 #accessbit-widget-panel {
                     min-height: auto !important;
                     height: auto !important;
@@ -14703,7 +15574,10 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 display.textContent = this.contentScale + '%';
             }
             const rangeEl = this.shadowRoot.getElementById('content-scale-range');
-            if (rangeEl) this.updateScalingThumbPosition(rangeEl);
+            if (rangeEl) {
+                rangeEl.value = String(Math.min(120, Math.max(50, this.contentScale)));
+                this.updateScalingThumbPosition(rangeEl);
+            }
         }
         updateScalingThumbPosition(rangeEl) {
             if (!rangeEl || !rangeEl.closest) return;
@@ -14714,20 +15588,17 @@ keyboardNav: "Keyboard Navigation (Motor)",
             const max = parseFloat(rangeEl.getAttribute('max')) || 100;
             const value = parseFloat(rangeEl.value) || 100;
             let leftPercent;
-            if (min < 100 && max > 100) {
-                leftPercent = value <= 100
-                    ? (value - min) / (100 - min) * 50
-                    : 50 + (value - 100) / (max - 100) * 50;
+            if (rangeEl.id === 'content-scale-range') {
+                if (value <= 100) leftPercent = (value - min) / (100 - min) * 50;
+                else leftPercent = 50 + (value - 100) / (max - 100) * 50;
             } else {
                 leftPercent = (value - min) / (max - min) * 100;
             }
-            // In RTL the native range reverses (drag right = lower value); flip thumb so it follows
-            const root = rangeEl.getRootNode && rangeEl.getRootNode();
-            const host = root && root.host;
-            const docEl = typeof document !== 'undefined' && document.documentElement;
-            const dir = (host && getComputedStyle(host).direction) || (docEl && getComputedStyle(docEl).direction) || (getComputedStyle(rangeEl).direction);
-            if (dir === 'rtl') leftPercent = 100 - leftPercent;
-            thumb.style.left = leftPercent + '%';
+            const trackDir = (track && track.getAttribute('dir')) || 'ltr';
+            const finalPercent = trackDir === 'rtl' ? 100 - leftPercent : leftPercent;
+            thumb.style.left = Math.max(3, Math.min(97, finalPercent)) + '%';
+            thumb.style.removeProperty('right');
+            thumb.style.removeProperty('transform');
         }
         
         toggleContentScalingControls(enabled) {
@@ -14737,10 +15608,11 @@ keyboardNav: "Keyboard Navigation (Motor)",
             }
             const contentScaleRange = this.shadowRoot.getElementById('content-scale-range');
             if (contentScaleRange) {
-                contentScaleRange.value = String(this.contentScale);
+                contentScaleRange.value = String(Math.min(120, Math.max(50, this.contentScale)));
             }
             if (enabled) {
                 this.updateContentScaleDisplay();
+                this.updateScalingThumbPosition(contentScaleRange);
                 if (this.contentScale !== 100) {
                     this.updateContentScale();
                 }
@@ -16324,14 +17196,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         const panelRect = panel.getBoundingClientRect ? panel.getBoundingClientRect() : { left: 0, right: (typeof window !== 'undefined' ? window.innerWidth : 800), bottom: (typeof window !== 'undefined' ? window.innerHeight : 600) };
                         const gap = 4;
                         const pad = 8;
-                        let listLeft = rect.left;
                         let listWidth = rect.width;
                         const maxRight = panelRect.right - pad;
                         const minLeft = panelRect.left + pad;
                         const maxBottom = (panelRect.bottom != null ? panelRect.bottom : (typeof window !== 'undefined' ? window.innerHeight : 600)) - pad;
-                        if (listLeft + listWidth > maxRight) listWidth = Math.max(100, maxRight - listLeft);
+                        // Center the useful links list under the trigger, then clamp to panel
+                        let listLeft = rect.left + (rect.width / 2) - (listWidth / 2);
                         if (listLeft < minLeft) listLeft = minLeft;
-                        if (listLeft + listWidth > maxRight) listWidth = Math.max(100, maxRight - listLeft);
+                        if (listLeft + listWidth > maxRight) {
+                            listWidth = Math.max(100, maxRight - listLeft);
+                        }
                         const listMaxHeight = Math.max(120, maxBottom - (rect.bottom + gap));
 
                         list._usefulLinksReturnTo = dropdown;
@@ -16375,6 +17249,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
 
             });
+            // Close useful links dropdown when the panel scrolls (user scrolls content)
+            if (panel && panel.addEventListener) {
+                panel.addEventListener('scroll', () => {
+                    const list = getList();
+                    if (list && !list.hasAttribute('hidden')) {
+                        closeList();
+                    }
+                }, true);
+            }
 
         }
     
@@ -19872,6 +20755,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 body.light-contrast {
                     background: #ffffff !important;
                     color: #000000 !important;
+                    filter: brightness(1.01) contrast(1.01) !important;
                 }
 
                 /* Apply light contrast to all text elements - comprehensive coverage */
@@ -19895,6 +20779,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 body.light-contrast b,
                 body.light-contrast a {
                     color: #000000 !important;
+                }
+                
+                /* Do NOT apply light-contrast filter to the widget itself */
+                body.light-contrast #accessbit-widget-container,
+                body.light-contrast .accessbit-widget,
+                body.light-contrast #accessbit-widget,
+                body.light-contrast .accessbit-widget-panel,
+                body.light-contrast #accessbit-widget-icon {
+                    filter: none !important;
                 }
                 
                 /* Comprehensive coverage for dynamically loaded dark elements */
@@ -31210,7 +32103,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
               
             }
             
-            // Reduce close button size and fix position - match hide interface modal approach
+            // Close button: rely on CSS centering in .close-btn-container (do not set top/left so it stays centered)
             const closeBtn = this.shadowRoot?.querySelector('.close-btn');
             if (closeBtn) {
                 closeBtn.style.setProperty('font-size', '20px');
@@ -31220,8 +32113,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 closeBtn.style.setProperty('min-height', '28px', 'important');
                 closeBtn.style.setProperty('max-width', '28px', 'important');
                 closeBtn.style.setProperty('max-height', '28px', 'important');
-                closeBtn.style.setProperty('top', '8px', 'important');
-                closeBtn.style.setProperty('left', '12px', 'important');
+                closeBtn.style.removeProperty('top');
+                closeBtn.style.removeProperty('left');
                 closeBtn.style.setProperty('display', 'flex', 'important');
                 closeBtn.style.setProperty('align-items', 'center', 'important');
                 closeBtn.style.setProperty('justify-content', 'center', 'important');
@@ -32692,31 +33585,39 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
             const header = this.shadowRoot?.getElementById('language-selector-header');
             
-            if (!dropdown || !panel) return;
+            if (!dropdown || !panel || !header) return;
     
             const gap = 4;
             const dropdownWidth = 192;
+            const panelRect = panel.getBoundingClientRect();
+            const headerRect = header.getBoundingClientRect();
+            const isNarrow = window.innerWidth <= 1024;
     
-            if (header) {
-                const headerRect = header.getBoundingClientRect();
-                const panelRect = panel.getBoundingClientRect();
-                let left = headerRect.right - dropdownWidth;
-                left = Math.max(panelRect.left, Math.min(left, panelRect.right - dropdownWidth));
-                dropdown.style.setProperty('position', 'fixed', 'important');
-                dropdown.style.setProperty('top', (headerRect.bottom + gap) + 'px', 'important');
-                dropdown.style.setProperty('left', left + 'px', 'important');
-                dropdown.style.setProperty('z-index', '100002', 'important');
-                dropdown.style.setProperty('transform', 'none', 'important');
-                return;
+            if (isNarrow) {
+                // Mobile/tablet: position absolute under the ENGLISH trigger, aligned with it
+                const panelStyle = window.getComputedStyle(panel);
+                const panelPosition = panelStyle.position;
+                if (panelPosition === 'relative' || panelPosition === 'absolute' || panelPosition === 'fixed') {
+                    const maxWidth = Math.min(192, Math.max(160, headerRect.width + 16));
+                    const leftInPanel = headerRect.left - panelRect.left;
+                    dropdown.style.setProperty('position', 'absolute', 'important');
+                    dropdown.style.setProperty('top', (headerRect.bottom - panelRect.top + gap) + 'px', 'important');
+                    dropdown.style.setProperty('left', Math.max(8, Math.min(leftInPanel, panelRect.width - maxWidth - 8)) + 'px', 'important');
+                    dropdown.style.setProperty('right', 'auto', 'important');
+                    dropdown.style.setProperty('width', maxWidth + 'px', 'important');
+                    dropdown.style.setProperty('max-width', (panelRect.width - 16) + 'px', 'important');
+                    dropdown.style.setProperty('z-index', '100002', 'important');
+                    dropdown.style.setProperty('transform', 'none', 'important');
+                    return;
+                }
             }
     
-            const panelRect = panel.getBoundingClientRect();
-            const isPanelOnLeft = panelRect.left < (window.innerWidth / 2);
-            const dropdownLeft = isPanelOnLeft ? 10 : (panelRect.width - dropdownWidth - 10);
-            const dropdownTop = 10;
-            dropdown.style.setProperty('left', `${dropdownLeft}px`, 'important');
-            dropdown.style.setProperty('top', `${dropdownTop}px`, 'important');
-            dropdown.style.setProperty('position', 'absolute', 'important');
+            // Desktop: fixed below trigger, clamped to panel
+            let left = headerRect.left + (headerRect.width / 2) - (dropdownWidth / 2);
+            left = Math.max(panelRect.left, Math.min(left, panelRect.right - dropdownWidth));
+            dropdown.style.setProperty('position', 'fixed', 'important');
+            dropdown.style.setProperty('top', (headerRect.bottom + gap) + 'px', 'important');
+            dropdown.style.setProperty('left', left + 'px', 'important');
             dropdown.style.setProperty('z-index', '100002', 'important');
             dropdown.style.setProperty('transform', 'none', 'important');
         }
