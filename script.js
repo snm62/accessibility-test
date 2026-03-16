@@ -2371,7 +2371,7 @@ class AccessibilityWidget {
                     this.updateScalingThumbPosition(contentScaleRange);
                     this.saveSettings();
                 });
-                contentScaleRange.value = String(Math.min(120, Math.max(50, this.contentScale)));
+                contentScaleRange.value = String(Math.min(150, Math.max(50, this.contentScale)));
                 this.updateScalingThumbPosition(contentScaleRange);
             }
     
@@ -2455,6 +2455,8 @@ class AccessibilityWidget {
                     const val = parseInt(fontSizeRange.value, 10);
                     this.fontSize = val;
                     this.settings['font-size'] = val;
+                    // Mark font sizing as actively used so it persists across refreshes
+                    localStorage.setItem('font-sizing-used', 'true');
                     this.updateFontSizeDisplay();
                     this.updateFontSizeEnhanced();
                     this.updateScalingThumbPosition(fontSizeRange);
@@ -2547,6 +2549,8 @@ class AccessibilityWidget {
                     const val = parseInt(letterSpacingRange.value, 10);
                     this.letterSpacing = val;
                     this.settings['letter-spacing'] = val;
+                    // Mark letter spacing as actively used so it persists across refreshes
+                    localStorage.setItem('letter-spacing-used', 'true');
                     this.updateLetterSpacing();
                     this.updateLetterSpacingDisplay();
                     this.updateScalingThumbPosition(letterSpacingRange);
@@ -3307,11 +3311,12 @@ font-family: Archivo;
     }
     
     /* Z-index hierarchy: Spotlight > Panel > Icon */
-    .accessbit-widget-panel {
+            .accessbit-widget-panel {
         position: fixed;
         z-index: 2147483646; /* Below spotlight, above icon */
         overflow: hidden; /* Panel does not scroll – only .accessbit-widget-content / .white-content-section scroll */
         overscroll-behavior: contain;
+        border-radius: 20px;
         /* Position and transform are controlled by JavaScript; do not override here */
     }
     
@@ -4097,6 +4102,8 @@ font-family: Archivo;
             this.createPanelElements(panel);
     
             panel.style.pointerEvents = 'auto';
+            panel.style.setProperty('overflow', 'hidden', 'important');
+            panel.style.setProperty('border-radius', '20px', 'important');
     
             shadowRoot.appendChild(panel);
     
@@ -4373,12 +4380,14 @@ font-family: Archivo;
                 display: none !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
-                background: #ffffff !important;
+                background: transparent !important;
                 box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
                 box-sizing: border-box !important;
                 width: var(--widget-width) !important;
                 height: calc(100vh - (var(--widget-spacing) * 2)) !important;
                 max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                border-radius: 20px !important;
+                background-clip: padding-box !important;
             }
             @supports (height: 100dvh) {
                 .accessbit-widget-panel {
@@ -4398,6 +4407,7 @@ font-family: Archivo;
                 flex-shrink: 0 !important;
                 overflow: hidden !important;
                 overflow-x: hidden !important;
+                border-radius: 20px 20px 0 0 !important;
             }
             .accessbit-widget-panel .panel-header *,
             .accessbit-widget-panel .widget-header * {
@@ -4440,6 +4450,22 @@ font-family: Archivo;
 
                 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
     
+                /* Prevent white peeking in corners: outermost panel and inner wrapper share same 20px radius */
+                :host { background: transparent !important; background-color: transparent !important; }
+                .accessbit-widget-panel { border-radius: 20px !important; background: transparent !important; background-color: transparent !important; overflow: hidden !important; background-clip: padding-box !important; }
+                .accessbit-widget-panel .accessbit-panel-screenshot,
+                .accessbit-widget-panel > .accessbit-panel-screenshot {
+                    background: #EAECF2 !important;
+                    background-color: #EAECF2 !important;
+                    border-radius: 20px !important;
+                    overflow: hidden !important;
+                }
+                /* Screenshot wrapper: allow icon overflow so 1px stroke is not clipped */
+                .accessbit-panel-screenshot {
+                    overflow-x: visible !important;
+                    overflow-y: auto !important;
+                    background-color: transparent !important;
+                }
                 :host {
                     --widget-width: min(480px, 94vw);
                     --widget-spacing: 15px;
@@ -4452,7 +4478,10 @@ font-family: Archivo;
                     z-index: 2147483645 !important;
                     isolation: isolate;
                     contain: layout style paint;
+                    background: transparent !important;
                 }
+                .accessbit-widget-panel .accessbit-panel-screenshot,
+                .accessbit-widget-panel > .accessbit-panel-screenshot { background: #EAECF2 !important; }
     
     
                 /* Icon: block layout so sr-only span cannot affect centering; graphic absolutely centered */
@@ -4638,6 +4667,10 @@ font-family: Archivo;
                 .language-dropdown-content {
                     overflow: hidden !important;
                     border-radius: 8px !important;
+                }
+                /* Center language options horizontally inside the dropdown */
+                .language-dropdown-content {
+                    text-align: center;
                 }
     
                 /* Keep option focus ring tight to the option */
@@ -4946,7 +4979,7 @@ font-family: Archivo;
                     background: #EAECF2 !important;
                     border-radius: 0 !important;
                     box-sizing: border-box !important;
-                    overflow-x: hidden !important;
+                    overflow-x: visible !important;
                 }
                 /* Section headers (e.g. Accessibility Profiles) start at same left edge as feature containers (Seizure Safe box) */
                 .accessbit-widget-panel .white-content-section > h3,
@@ -4981,7 +5014,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-letter-spacing) { max-width: min(528px, 100%) !important; }
-                .accessbit-widget-panel .profile-item { min-width: 0 !important; overflow-x: hidden !important; overflow-y: visible !important; background: #FFFFFF !important; border-radius: 7px !important; min-height: 84px !important; max-width: min(440px, 100%) !important; width: 100% !important; opacity: 1 !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; padding: 15px 22px !important; }
+                .accessbit-widget-panel .profile-item { min-width: 0 !important; overflow-x: visible !important; overflow-y: visible !important; background: #FFFFFF !important; border-radius: 7px !important; min-height: 84px !important; max-width: min(440px, 100%) !important; width: 100% !important; opacity: 1 !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; padding: 15px 22px !important; }
                 /* First block (Seizure → Screen Reader): spacing handled by individual cards (e.g. content-scaling-card) */
                 .accessbit-widget-panel .white-content-section > .profile-item { margin-bottom: 0 !important; }
                 .accessbit-widget-panel .profile-item:has(#seizure-safe) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
@@ -4996,8 +5029,11 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .profile-item:has(#adjust-line-height),
                 .accessbit-widget-panel .profile-item:has(#adjust-letter-spacing) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
-                /* Desktop: dark/light/high contrast, high/low saturation, monochrome = 257px width */
+                /* Desktop: dark/light/high contrast, high/low saturation, monochrome = 257px width; gap last colour picker to reset = same as gap between pickers (12px) */
                 @media (min-width: 1281px) {
+                    .accessbit-widget-panel .white-content-section,
+                    .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section { padding-top: 0 !important; }
+                    .accessbit-widget-panel .color-adjustments-section { margin-top: 12px !important; }
                     .accessbit-widget-panel .panel-content .profile-item:has(#dark-contrast),
                     .accessbit-widget-panel .panel-content .profile-item:has(#light-contrast),
                     .accessbit-widget-panel .panel-content .profile-item:has(#high-contrast),
@@ -5071,6 +5107,28 @@ font-family: Archivo;
                 }
                 .accessbit-widget-panel .profile-item .profile-info,
                 .accessbit-widget-panel .profile-item .profile-item-icon { overflow: visible !important; }
+                /* Icon container: prevent flex compression; 44px gives 1px buffer so SVG stroke is never clipped on the right */
+                .accessbit-widget-panel .profile-item .profile-item-icon {
+                    width: 44px !important;
+                    height: 43px !important;
+                    min-width: 44px !important;
+                    flex: 0 0 44px !important;
+                    flex-shrink: 0 !important;
+                    box-sizing: content-box !important;
+                    padding: 0 !important;
+                    overflow: visible !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .accessbit-widget-panel .profile-item .profile-item-icon svg {
+                    width: 43px !important;
+                    height: 43px !important;
+                    max-width: 98% !important;
+                    height: auto !important;
+                    flex-shrink: 0 !important;
+                    display: block !important;
+                }
                 .accessbit-widget-panel .profile-item * { overflow-y: visible !important; }
                 .accessbit-widget-panel .profile-item,
                 .accessbit-widget-panel .profile-item * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
@@ -5090,7 +5148,7 @@ font-family: Archivo;
                         top: auto !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
                         margin: 0 !important;
-                        border-radius: 12px !important;
+                        border-radius: 20px !important;
                         box-sizing: border-box !important;
                         transition: transform 0.3s ease !important;
                     }
@@ -5341,6 +5399,90 @@ font-family: Archivo;
                     .accessbit-widget-panel .action-btn { padding: 8px 12px !important; }
                 }
 
+                /* Tablet and mobile: remove white thick outline and extra white in corners – host and panel */
+                @media (max-width: 1279px) {
+                    :host {
+                        outline: none !important;
+                        outline-offset: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        -webkit-box-shadow: none !important;
+                        background: transparent !important;
+                    }
+                    :host .accessbit-widget-panel,
+                    :host #accessbit-widget-panel,
+                    .accessbit-widget-panel,
+                    #accessbit-widget-panel.accessbit-widget-panel,
+                    .accessbit-widget-panel:focus,
+                    #accessbit-widget-panel:focus {
+                        outline: none !important;
+                        outline-offset: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        -webkit-box-shadow: none !important;
+                    }
+                    .accessbit-widget-panel {
+                        background: #EAECF2 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                        outline: none !important;
+                        box-shadow: none !important;
+                    }
+                    .accessbit-widget-panel .panel-header::before,
+                    .accessbit-widget-panel .widget-header::before {
+                        border-radius: 12px 12px 0 0 !important;
+                    }
+                    /* Remove white corners: inner wrapper has inline background #fff – override to match panel */
+                    .accessbit-widget-panel .accessbit-panel-screenshot,
+                    .accessbit-widget-panel > .accessbit-panel-screenshot {
+                        background: #EAECF2 !important;
+                    }
+                    .accessbit-widget-panel .panel-content,
+                    .accessbit-widget-panel .accessbit-widget-content {
+                        padding-left: 12px !important;
+                        padding-right: 12px !important;
+                    }
+                    :host .accessbit-widget-icon,
+                    .accessbit-widget-icon,
+                    #accessbit-widget-icon {
+                        outline: none !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        -webkit-box-shadow: none !important;
+                    }
+                }
+                /* Very narrow (e.g. 210px): prevent last colour picker overlapping reset icon in header */
+                @media (max-width: 320px) {
+                    .accessbit-widget-panel .panel-header,
+                    .accessbit-widget-panel .widget-header {
+                        position: relative !important;
+                        z-index: 10 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    .accessbit-widget-panel > .panel-content,
+                    .accessbit-widget-panel > .accessbit-widget-content {
+                        padding-top: 12px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers,
+                    .accessbit-widget-panel #adjust-bg-colors {
+                        margin-bottom: 16px !important;
+                    }
+                }
+                @media (max-width: 240px) {
+                    .accessbit-widget-panel .panel-header,
+                    .accessbit-widget-panel .widget-header {
+                        z-index: 25 !important;
+                        isolation: isolate !important;
+                        position: relative !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers {
+                        position: relative !important;
+                        z-index: 1 !important;
+                        margin-top: 8px !important;
+                    }
+                }
                 /* --- Mobile phone (≤768px): stack action buttons, smaller toggles, fonts, icons, color picker --- */
                 @media (max-width: 768px) {
                     .accessbit-widget-panel .action-buttons,
@@ -5418,13 +5560,13 @@ font-family: Archivo;
                     .accessbit-widget-panel .profile-item p,
                     .accessbit-panel-screenshot .profile-item p { font-size: 10px; line-height: 1.3; }
                     .accessbit-widget-panel .profile-item-icon,
-                    .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; }
+                    .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; flex: 0 0 43px !important; flex-shrink: 0 !important; box-sizing: content-box !important; padding: 0 !important; }
                     .accessbit-widget-panel .profile-item-icon svg,
                     .accessbit-panel-screenshot .profile-item .profile-item-icon svg { width: 43px !important; height: 43px !important; }
                     .accessbit-widget-panel .content-card-icon,
                     .accessbit-widget-panel .color-adjustments-card .content-card-icon,
                     .accessbit-widget-panel .contrast-style-card .content-card-icon,
-                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; flex: 0 0 43px !important; flex-shrink: 0 !important; box-sizing: content-box !important; padding: 0 !important; }
                     /* Same icon and container as desktop on mobile: no extra outer layer; icon SVG fills 43px */
                     .accessbit-widget-panel .content-card-icon svg,
                     .accessbit-widget-panel .color-adjustments-card .content-card-icon svg,
@@ -5555,17 +5697,84 @@ font-family: Archivo;
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
                         flex-shrink: 0 !important;
                     }
-                    /* Useful links dropdown + placeholder responsive on mobile; override any global fixed width */
+                    /* Useful links dropdown: start under U of USEFUL LINKS (icon 43px + gap 12px = 55px) on mobile/tablet */
                     .accessbit-widget-panel .useful-links-custom-dropdown,
                     .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown,
                     .accessbit-widget-panel .useful-links-custom-dropdown,
-                    .accessbit-panel-screenshot .useful-links-custom-dropdown { width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-left: 0 !important; box-sizing: border-box !important; }
+                    .accessbit-panel-screenshot .useful-links-custom-dropdown { width: calc(100% - 55px) !important; max-width: calc(100% - 55px) !important; min-width: 0 !important; margin-left: 55px !important; box-sizing: border-box !important; }
                     .accessbit-widget-panel .useful-links-custom-trigger,
                     .accessbit-panel-screenshot .useful-links-custom-trigger { width: 100% !important; max-width: 100% !important; min-width: 0 !important; font-size: 12px !important; padding-left: 10px !important; padding-right: 10px !important; box-sizing: border-box !important; }
                     .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
                     .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger { width: 100% !important; max-width: none !important; min-width: 0 !important; }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-row { align-items: center !important; min-height: 20px !important; height: 20px !important; }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { align-self: center !important; margin-bottom: 0 !important; }
+                }
+
+                /* Very narrow (≤400px) and ≤375px: prevent last colour picker overlapping reset icon */
+                @media (max-width: 400px) {
+                    .accessbit-widget-panel .panel-header {
+                        position: relative !important;
+                        z-index: 5 !important;
+                        flex-shrink: 0 !important;
+                        min-height: auto !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers {
+                        margin-top: 4px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card:last-child,
+                    .accessbit-widget-panel #adjust-bg-colors {
+                        margin-bottom: 16px !important;
+                    }
+                }
+                /* Very small mobile (≤375px): prevent colour picker and reset icon overlap – reduce both */
+                @media (max-width: 375px) {
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        padding-left: 32px !important;
+                        gap: 4px !important;
+                        min-height: 18px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 3px !important;
+                        flex: 1 1 auto !important;
+                        min-width: 0 !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 16px !important;
+                        height: 16px !important;
+                        min-width: 16px !important;
+                        min-height: 16px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                        margin-left: 2px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 11px !important; }
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn {
+                        padding: 2px 6px !important;
+                        min-height: 18px !important;
+                        font-size: 9px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 12px !important; height: 12px !important; }
+                    .accessbit-widget-panel .panel-header .action-buttons,
+                    .accessbit-widget-panel .widget-header .action-buttons { gap: 4px !important; }
                 }
 
                 /* Apply some of the same spacing tweaks for small tablets/base screens (769px–1280px) */
@@ -5704,7 +5913,7 @@ font-family: Archivo;
                     background: #34A2AB !important;
                     border: none !important;
                     padding-bottom: 54px !important;
-                    border-radius: 20px 20px 0 0 !important;
+                    border-radius: 0 !important;
                 }
                 .accessbit-widget-panel .accessbit-panel-screenshot {
                     min-width: 0;
@@ -5732,6 +5941,7 @@ font-family: Archivo;
                     margin-bottom: 6px !important;
                     border: 2px solid transparent !important;
                 }
+                /* Hide color-adjustments section in screenshot panel only to avoid duplicate Adjust Text/Title/BG cards */
                 /* First block (Seizure → Screen Reader): 5px vertical space between items */
                 .accessbit-panel-screenshot .white-content-section > .profile-item { margin-bottom: 5px !important; }
                 .accessbit-panel-screenshot .white-content-section .profile-item.color-adjustments-picker-card {
@@ -5804,10 +6014,6 @@ font-family: Archivo;
                 .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
                 .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
                 .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg path,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:not(:first-of-type),
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg path,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C !important; }
                 /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
                 @media (min-width: 769px) {
                     .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
@@ -6331,7 +6537,7 @@ font-family: Archivo;
                     background: rgba(217, 217, 217, 0.3) !important;
                     border: 2px solid rgba(217, 217, 217, 0.3) !important;
                     color: #ffffff !important;
-                    border-radius: 30px;
+                    border-radius: 60px;
                     cursor: pointer;
                     font-weight: 600;
                     transition: all 0.3s ease;
@@ -6360,21 +6566,39 @@ font-family: Archivo;
                 /* White Content Section */
     
                 .white-content-section {
-    
                     padding: 0 0 20px 0;
-    
                     background: #EAECF2 !important;
-    
                     border-radius: 0 !important;
-    
                     margin-top: -20px !important;
-    
                     position: relative;
-    
                     z-index: 1003;
-    
                     padding-top: 12px;
+                }
     
+                /* Mobile / tablet: seal white corners and keep cards within bounds */
+                @media (max-width: 1279px) {
+                    /* Let the panel define the outer rounded shape and clip children */
+                    .accessbit-widget-panel {
+                        border-radius: 20px !important;
+                        overflow: hidden !important;
+                    }
+    
+                    /* Screenshot wrapper: clip to panel radius and avoid gray base bleeding */
+                    .accessbit-panel-screenshot {
+                        overflow: hidden !important;
+                        background-color: transparent !important;
+                    }
+    
+                    /* Inner white section should not add its own corner radius on mobile/tablet */
+                    .white-content-section {
+                        border-radius: 0 !important;
+                    }
+    
+                    .content-adjustments-card {
+                        background: #ffffff;
+                        margin: 0 0 14px 0;
+                        border-radius: 12px;
+                    }
                 }
     
     
@@ -6465,36 +6689,36 @@ font-family: Archivo;
                 .color-adjustments-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .color-adjustments-toggles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
                 .color-adjustments-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; box-sizing: border-box; }
-                .color-adjustments-card .content-card-icon { width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; }
+                .color-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
                 .color-adjustments-card .content-card-icon svg { width: 24px; height: 24px; }
                 .color-adjustments-card .content-card-body { flex: 1; min-width: 0; }
                 .color-adjustments-card .content-card-body h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
                 .color-adjustments-card .toggle-switch { margin-left: auto; flex-shrink: 0; }
-                .color-adjustments-card.dark-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; }
+                .color-adjustments-card.dark-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
                 .color-adjustments-card .content-card-icon.dark-contrast-icon svg { width: 43px; height: 43px; }
-                .dark-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+                .dark-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .dark-contrast-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .dark-contrast-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
-                .color-adjustments-card.light-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; }
+                .color-adjustments-card.light-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
                 .color-adjustments-card .content-card-icon.light-contrast-icon svg { width: 43px; height: 43px; }
-                .light-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+                .light-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .light-contrast-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .light-contrast-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
                 .color-adjustments-card.high-contrast-card,
                 .color-adjustments-card.high-saturation-card,
                 .color-adjustments-card.low-saturation-card,
-                .color-adjustments-card.monochrome-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; }
-                .high-contrast-top, .high-saturation-top, .low-saturation-top, .monochrome-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+                .color-adjustments-card.monochrome-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
+                .high-contrast-top, .high-saturation-top, .low-saturation-top, .monochrome-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .high-contrast-top .toggle-switch, .high-saturation-top .toggle-switch, .low-saturation-top .toggle-switch, .monochrome-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .color-adjustments-card .content-card-icon.high-contrast-icon svg { width: 43px; height: 43px; }
                 .color-adjustments-card .content-card-icon.high-saturation-icon svg { width: 43px; height: 43px; }
                 .color-adjustments-card .content-card-icon.low-saturation-icon svg { width: 43px; height: 43px; }
                 .color-adjustments-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; }
                 .high-contrast-card h4, .high-saturation-card h4, .low-saturation-card h4, .monochrome-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
-                .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; background: #FFFFFF; padding: 15px 22px; }
-                .contrast-style-card .card-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+                .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; background: #FFFFFF; padding: 15px 22px; }
+                .contrast-style-card .card-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .contrast-style-card .card-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
-                .contrast-style-card .card-top .content-card-icon { width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; }
+                .contrast-style-card .card-top .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
                 .contrast-style-card .card-top .content-card-icon svg { width: 24px; height: 24px; }
                 .contrast-style-card .content-card-icon.mute-sound-icon svg { width: 43px; height: 43px; }
                 .contrast-style-card .content-card-icon.hide-images-icon svg { width: 43px; height: 43px; }
@@ -6509,7 +6733,7 @@ font-family: Archivo;
                 .contrast-style-card .content-card-icon.readable-font-icon svg,
                 .contrast-style-card .content-card-icon.highlight-titles-icon svg,
                 .contrast-style-card .content-card-icon.highlight-links-icon svg,
-                .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
                 /* No icons hidden – Highlight Links, Text Magnifier, Text align use ring/icon styling */
                 .contrast-style-card .content-card-icon.text-magnifier-icon { min-width: 43px; min-height: 43px; border: 1px solid rgba(0,0,0,0.12); box-sizing: border-box; }
                 .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px !important; height: 43px !important; min-width: 43px; min-height: 43px; display: block !important; }
@@ -6518,7 +6742,7 @@ font-family: Archivo;
                 .contrast-style-card .content-card-icon.high-contrast-icon svg,
                 .contrast-style-card .content-card-icon.high-saturation-icon svg,
                 .contrast-style-card .content-card-icon.low-saturation-icon svg,
-                .contrast-style-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
                 .contrast-style-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
                 .cursor-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; margin-bottom: 16px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
                 .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
@@ -6538,7 +6762,8 @@ font-family: Archivo;
                 .color-adjustments-picker-card .picker-card-header { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: nowrap; width: 100%; }
                 .color-adjustments-picker-card .picker-card-header h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; flex-shrink: 0; }
                 .color-adjustments-picker-card .picker-row { display: flex; align-items: center; justify-content: flex-start; gap: 15.95px; flex-wrap: nowrap; width: 100%; min-width: 0; height: 34px; min-height: 34px; }
-                .color-adjustments-picker-card .color-options { display: flex; align-items: center; gap: 15px; flex-wrap: nowrap; flex: 1; min-width: 0; height: 34px; align-self: stretch; padding-left: 55px; box-sizing: border-box; }
+                /* Desktop: gap between picker icon (43px) and first color circle = 12px (55px padding - 43px icon) */
+                .color-adjustments-picker-card .color-options { display: flex; align-items: center; gap: 15px; flex-wrap: nowrap; flex: 0 0 auto; min-width: 0; height: 34px; align-self: stretch; padding-left: 55px; box-sizing: border-box; }
                 .color-adjustments-picker-card .color-option { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; flex-shrink: 0; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
                 .color-adjustments-picker-card .color-option svg { width: 34px; height: 34px; display: block; flex-shrink: 0; }
                 .color-adjustments-picker-card .color-option:hover { border-color: #999; }
@@ -6548,14 +6773,32 @@ font-family: Archivo;
                 .color-adjustments-picker-card .picker-clear-btn svg { width: 34px; height: 34px; display: block; vertical-align: middle; }
                 .content-adjustments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
                 .content-adjustments-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px; }
-                .content-adjustments-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; transition: all 0.2s ease; box-sizing: border-box; }
+                .content-adjustments-card {
+                    background: #FFFFFF;
+                    border-radius: 7px;
+                    padding: 15px 22px;
+                    min-height: 84px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px; /* 15px gap between icon block and text block */
+                    border: 2px solid transparent;
+                    transition: all 0.2s ease;
+                    box-sizing: border-box;
+                }
                 .content-adjustments-card.profile-item { margin-bottom: 0; max-width: none; }
+
+                /* Mobile: reduce side padding to give more room to the slider */
+                @media (max-width: 768px) {
+                    .content-adjustments-card {
+                        padding: 12px !important;
+                    }
+                }
                 .content-adjustments-card.card-active-green { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
                 .content-adjustments-card.card-active-blue { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
-                .content-adjustments-card.highlight-titles-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card { overflow: hidden !important; }
+                .content-adjustments-card.highlight-titles-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.highlight-titles-icon svg { width: 43px; height: 43px; }
-                .highlight-titles-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .highlight-titles-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .highlight-titles-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .highlight-titles-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
 
@@ -6564,58 +6807,58 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .ht-ring-on { display: none; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-off { display: none; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-on { display: block; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-path {
-                    fill: #01CE9C;
-                    stroke: #01CE9C;
-                }
-                .content-adjustments-card.highlight-links-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-links-card { overflow: hidden !important; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
+                .content-adjustments-card.highlight-links-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-links-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.highlight-links-icon svg { width: 43px; height: 43px; }
-                .highlight-links-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .highlight-links-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .highlight-links-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .highlight-links-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-                .content-adjustments-card.text-magnifier-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
-                .accessbit-widget-panel .content-adjustments-card.text-magnifier-card { overflow: hidden !important; }
+                .content-adjustments-card.text-magnifier-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.text-magnifier-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; }
-                .text-magnifier-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .text-magnifier-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .text-magnifier-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .text-magnifier-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-                .content-adjustments-card.align-left-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 140px; }
-                .accessbit-widget-panel .content-adjustments-card.align-left-card { overflow: hidden !important; }
+                .content-adjustments-card.align-left-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-left-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.align-left-icon svg { width: 43px; height: 43px; }
-                .align-left-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .align-left-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .align-left-card .align-left-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-left-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-left-card .align-left-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
                 .align-left-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-                .content-adjustments-card.align-center-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 140px; }
-                .accessbit-widget-panel .content-adjustments-card.align-center-card { overflow: hidden !important; }
+                .content-adjustments-card.align-center-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-center-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.align-center-icon svg { width: 43px; height: 43px; }
-                .align-center-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .align-center-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .align-center-card .align-center-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-center-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-center-card .align-center-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
                 .align-center-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-                .content-adjustments-card.align-right-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 140px; }
-                .accessbit-widget-panel .content-adjustments-card.align-right-card { overflow: hidden !important; }
+                .content-adjustments-card.align-right-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-right-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.align-right-icon svg { width: 43px; height: 43px; }
-                .align-right-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .align-right-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .align-right-card .align-right-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-right-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-right-card .align-right-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
                 .align-right-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
                 .content-adjustments-card:has(#highlight-titles:checked) { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
                 .content-adjustments-card:has(#highlight-links:checked) { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
-                .content-adjustments-card .content-card-icon { width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; }
-                .content-adjustments-card .content-card-icon svg { width: 24px; height: 24px; }
+                .content-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
+                .content-adjustments-card .content-card-icon svg { width: 24px; height: 24px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
                 .content-adjustments-card .content-card-icon.content-scaling-icon svg { width: 43px; height: 43px; }
-                .content-adjustments-card.content-scaling-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; margin-bottom: 14px !important; }
+                .content-adjustments-card.content-scaling-card { display: flex; flex-direction: row; align-items: flex-start; flex-wrap: nowrap; gap: 15px; margin-bottom: 14px !important; padding: 15px 22px; }
                 .content-adjustments-card.content-scaling-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
                 /* All slider cards (Content Scaling, Font Sizing, Letter Spacing, Line Height): icon + title + value on first row, slider on second */
-                .content-adjustments-card.slider-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; overflow: visible !important; overflow-x: visible !important; }
-                .content-adjustments-card.slider-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
+                .content-adjustments-card.slider-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; overflow: visible !important; overflow-x: visible !important; padding-right: 0; }
+                .content-adjustments-card.slider-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; min-height: 43px; }
+                .accessbit-panel-screenshot .content-adjustments-card.slider-card { margin-bottom: 14px !important; }
+                .content-adjustments-card.slider-card .content-scaling-header h4,
+                .content-adjustments-card.slider-card .content-card-body h4 { display: flex; align-items: center; margin: 0; }
                 .accessbit-widget-panel .content-adjustments-card.content-scaling-card { margin-bottom: 14px !important; }
                 .content-adjustments-card .content-card-icon.readable-font-icon svg { width: 43px; height: 43px; }
                 .content-adjustments-card.readable-font-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
@@ -6630,27 +6873,157 @@ font-family: Archivo;
                 }
                 .readable-font-ring-on,
                 .readable-font-icon-on { display: none; }
-                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off,
-                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off { display: none; }
-                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-on,
-                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-on { display: block; }
-                .content-scaling-header { display: flex; align-items: center; gap: 12px; }
-                .content-scaling-header .content-adjustments-slider-value { margin-left: auto; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off path { fill: #01CE9C; }
+
+                /* --- SHARED STYLES (Mobile & Desktop) --- */
+                .content-scaling-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .label-with-icon-gap {
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    padding-left: 58px; /* 43px icon + 15px gap */
+                }
+                .label-with-icon-gap h4 {
+                    margin: 0;
+                    white-space: nowrap;
+                }
+                .content-scaling-header .content-adjustments-slider-value {
+                    margin: 0;
+                    line-height: 1;
+                    text-align: right;
+                }
                 .content-adjustments-card.slider-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-                .content-adjustments-card .content-card-icon.font-sizing-icon svg { width: 43px; height: 43px; }
-                .content-adjustments-card .content-card-icon.letter-spacing-icon svg { width: 43px; height: 43px; }
-                .content-adjustments-card .content-card-icon.line-height-icon svg { width: 43px; height: 43px; }
-                .content-adjustments-card .content-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+                /* Base icon layout for NON-slider cards (left/center/right, text-magnifier, etc.) */
+                .content-adjustments-card:not(.slider-card) .content-card-icon {
+                    width: 43px !important;
+                    height: 43px !important;
+                    min-width: 43px !important;
+                    flex: 0 0 43px !important;
+                    flex-shrink: 0 !important;
+                    border-radius: 50%;
+                    background: #ECEDED;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: content-box !important;
+                    padding: 0 !important;
+                }
+
+                /* Slider cards (Content Scaling, Font Size, Letter Spacing, Line Height) use absolute icons inside the header label */
+                .content-adjustments-card.slider-card .content-card-icon {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    /* Match visual size of other icons */
+                    width: 43px;
+                    height: 43px;
+                    /* No extra gray background – let the SVG provide its own shape */
+                    background: transparent;
+                    border-radius: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .content-adjustments-card .content-card-body {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    align-items: stretch !important;
+                }
                 .content-adjustments-card .content-card-body h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
                 .content-adjustments-card.content-scaling-card .content-card-body h4,
                 .content-adjustments-card.slider-card .content-card-body h4 { margin-top: 0; line-height: 23px; }
+                .content-adjustments-card.slider-card .content-card-body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
                 .content-adjustments-card .content-card-body p { margin: 0; font-family: Archivo; font-size: 16px; font-weight: 400; color: #4A5565; }
                 .content-adjustments-card.slider-card .content-card-body { flex: 1; }
-                .content-adjustments-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
-                .scaling-slider-svg-wrap { display: flex; align-items: center; margin-top: 8px; width: 100%; }
-                .scaling-slider-track { position: relative; width: 100%; height: 61px; display: flex; align-items: center; direction: ltr; }
-                .scaling-slider-track::before { content: ""; position: absolute; left: 0; width: 100%; max-width: 100%; top: 50%; height: 12px; margin-top: -6px; background: #EAECF2; border-radius: 37px; opacity: 1; pointer-events: none; overflow: hidden; }
-                .scaling-slider-track .scaling-range-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: 100%; height: 100% !important; min-height: 61px; opacity: 0; cursor: pointer; margin: 0; z-index: 3; background: transparent; direction: ltr; }
+                .content-adjustments-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; margin-bottom: 14px; overflow: visible !important; }
+                .scaling-slider-svg-wrap {
+                    margin-top: 12px;
+                    display: block;
+                    overflow: visible !important;
+                    /* Matches the text padding so it starts under the label */
+                    margin-left: 58px !important;
+                    /* Ends exactly under the percentage */
+                    width: calc(100% - 58px) !important;
+                }
+                /* Simplified slider: use native range track for the path; no absolute overlays so the bar is always visible */
+                .scaling-slider-track {
+                    position: relative;
+                    height: 12px !important;
+                    min-height: 12px !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    direction: ltr;
+                    overflow: visible !important;
+                    background: transparent;
+                    width: 100% !important;
+                    display: block;
+                }
+                .scaling-slider-track::before { content: none !important; }
+                /* Old segmented path – no longer used */
+                .scaling-track-left,
+                .scaling-track-right { display: none !important; }
+                .accessbit-widget-panel .profile-item.slider-card { overflow: visible !important; overflow-x: visible !important; }
+                .accessbit-widget-panel .profile-item.slider-card .content-card-body { overflow: visible !important; }
+                /* Native slider path: 12px bar with 37px radius, always visible */
+                .scaling-slider-track .scaling-range-overlay {
+                    position: relative;
+                    left: auto;
+                    right: auto;
+                    top: auto;
+                    bottom: auto;
+                    width: 100% !important;
+                    max-width: 100%;
+                    height: 12px !important;
+                    min-height: 12px !important;
+                    margin: 0 !important;
+                    background: #EAECF2 !important;
+                    border-radius: 37px !important;
+                    cursor: pointer;
+                    z-index: 0;
+                    direction: ltr;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+
+                /* 4. Desktop Constraint */
+                @media (min-width: 1280px) {
+                    .content-card-body {
+                        width: 391px !important;
+                        max-width: 391px !important;
+                    }
+
+                    /* Ensure slider card icons (font size, letter spacing, line height, content scaling)
+                       use the same visual size as other 43x43 icons on desktop */
+                    .content-adjustments-card.slider-card .content-card-icon svg {
+                        width: 43px !important;
+                        height: 43px !important;
+                    }
+                }
+
+                /* --- MOBILE SPECIFIC (≤1279px) --- */
+                @media (max-width: 1279px) {
+                    .content-card-body {
+                        width: 100%;
+                    }
+
+                    .content-adjustments-card {
+                        padding: 15px 12px;
+                    }
+                }
+                #content-scale-range { direction: ltr !important; }
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track,
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay,
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track .scaling-range-overlay { direction: ltr !important; }
@@ -6658,9 +7031,9 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-webkit-slider-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-moz-range-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
                 .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-thumb { transition: none !important; }
-                .scaling-slider-track .scaling-range-overlay::-webkit-slider-runnable-track { cursor: pointer; }
+                .scaling-slider-track .scaling-range-overlay::-webkit-slider-runnable-track { height: 12px !important; background: #EAECF2 !important; border-radius: 37px; cursor: pointer; -webkit-appearance: none; }
                 .scaling-slider-track .scaling-range-overlay::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: transparent; cursor: pointer; border: none; }
-                .scaling-slider-track .scaling-range-overlay::-moz-range-track { cursor: pointer; }
+                .scaling-slider-track .scaling-range-overlay::-moz-range-track { height: 12px !important; background: #EAECF2 !important; border-radius: 37px; cursor: pointer; }
                 .scaling-slider-track .scaling-pointer-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 2; cursor: pointer; pointer-events: none; }
                 .scaling-slider-track .scaling-range-overlay { pointer-events: auto !important; cursor: pointer; }
                 .scaling-slider-track { overflow: visible !important; }
@@ -6687,7 +7060,9 @@ font-family: Archivo;
                     height: 14px;
                     display: block;
                 }
-                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay) { flex: 1; min-width: 0; height: 6px; -webkit-appearance: none; appearance: none; background: #E2E8F0; border-radius: 3px; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay) { flex: 1; min-width: 0; height: 6px !important; -webkit-appearance: none; appearance: none; background: #E2E8F0 !important; border-radius: 3px; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-runnable-track { height: 6px !important; background: #E2E8F0 !important; border-radius: 3px; -webkit-appearance: none; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-track { height: 6px !important; background: #E2E8F0 !important; border-radius: 3px; }
                 .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; box-shadow: 0 0 0 2px #fff; }
                 .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; border: none; }
                 .content-adjustments-slider-value {
@@ -6767,8 +7142,8 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .seizure-ring-on { display: none; }
-                .profile-item:has(#seizure-safe:checked) .seizure-ring-off { display: none; }
-                .profile-item:has(#seizure-safe:checked) .seizure-ring-on { display: block; }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#seizure-safe:checked) .seizure-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
                 .profile-item:has(#seizure-safe:checked) .seizure-icon-path { stroke: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#seizure-safe),
                 .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon,
@@ -6783,64 +7158,44 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .reduce-ring-on { display: none; }
-                .profile-item:has(#reduce-motion:checked) .reduce-ring-off { display: none; }
-                .profile-item:has(#reduce-motion:checked) .reduce-ring-on { display: block; }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#reduce-motion:checked) .reduce-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
                 .profile-item:has(#reduce-motion:checked) .reduce-motion-path,
-                .profile-item:has(#reduce-motion:checked) .reduce-motion-dot {
-                    fill: #01CE9C;
-                }
+                .profile-item:has(#reduce-motion:checked) .reduce-motion-dot { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 /* Vision Impaired icon: off/on rings and eye */
                 .vision-ring-on,
-                .vision-eye-on {
-                    display: none;
-                }
-                .profile-item:has(#vision-impaired:checked) .vision-ring-off,
-                .profile-item:has(#vision-impaired:checked) .vision-eye-off {
-                    display: none;
-                }
-                .profile-item:has(#vision-impaired:checked) .vision-ring-on,
-                .profile-item:has(#vision-impaired:checked) .vision-eye-on {
-                    display: block;
-                }
+                .vision-eye-on { display: none; }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#vision-impaired:checked) .vision-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#vision-impaired:checked) .vision-eye-off { fill: #01CE9C; stroke: #01CE9C; }
                 /* Dark Contrast icon: off/on rings and moon */
                 .dark-contrast-ring-on,
                 .dark-contrast-icon-on {
                     display: none;
                 }
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off,
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off {
-                    display: none;
-                }
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-on,
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-on {
-                    display: block;
-                }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off { fill: #01CE9C; }
                 /* Light Contrast icon: off/on rings and sun */
                 .light-contrast-ring-on,
                 .light-contrast-icon-on {
                     display: none;
                 }
-                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off,
-                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off {
-                    display: none;
-                }
-                .profile-item:has(#light-contrast:checked) .light-contrast-ring-on,
-                .profile-item:has(#light-contrast:checked) .light-contrast-icon-on {
-                    display: block;
-                }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off { fill: #01CE9C; }
                 /* High Contrast icon: off/on rings and circle */
                 .high-contrast-ring-on,
                 .high-contrast-icon-on {
                     display: none;
                 }
-                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off,
-                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off {
-                    display: none;
-                }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off { fill: #01CE9C; }
                 .profile-item:has(#high-contrast:checked) .high-contrast-ring-on,
                 .profile-item:has(#high-contrast:checked) .high-contrast-icon-on {
                     display: block;
@@ -6911,24 +7266,21 @@ font-family: Archivo;
                 /* Highlight Titles icon: off/on rings and paths */
                 .ht-ring-on,
                 .ht-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off,
-                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off { display: none; }
-                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-on,
-                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
                 /* Highlight Focus icon: off/on rings and target */
                 .hl-focus-ring-on,
                 .hl-focus-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off,
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off { display: none; }
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-on,
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
                 /* Highlight Hover icon: off/on rings and frame */
                 .hl-hover-ring-on,
                 .hl-hover-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off,
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off { display: none; }
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-on,
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
                 /* Big Black Cursor icon: off/on rings and cursor */
                 .bbc-ring-on,
                 .bbc-icon-on { display: none; }
@@ -6946,78 +7298,65 @@ font-family: Archivo;
                 /* Highlight Links icon: off/on rings and link paths */
                 .hl-links-ring-on,
                 .hl-links-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off,
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off { display: none; }
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-on,
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off path { stroke: #01CE9C; }
                 /* Text Magnifier icon: off/on rings and magnifier */
                 .tm-ring-on,
                 .tm-icon-on { display: none; }
-                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off,
-                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off { display: none; }
-                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-on,
-                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off path { stroke: #01CE9C; }
                 /* Text Left align icon: off/on rings and lines */
                 .align-left-ring-on,
                 .align-left-icon-on { display: none; }
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off,
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off { display: none; }
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-on,
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off path { fill: #01CE9C; }
                 /* Text Center align icon: off/on rings and lines */
                 .align-center-ring-on,
                 .align-center-icon-on { display: none; }
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off,
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off { display: none; }
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-on,
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off path { fill: #01CE9C; }
                 /* Text Right align icon: off/on rings and lines */
                 .align-right-ring-on,
                 .align-right-icon-on { display: none; }
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off,
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off { display: none; }
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-on,
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .adhd-ring-on { display: none; }
-                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off { display: none; }
-                .profile-item:has(#adhd-friendly:checked) .adhd-ring-on { display: block; }
-                .profile-item:has(#adhd-friendly:checked) .adhd-path {
-                    stroke: #01CE9C;
-                }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#adhd-friendly:checked) .adhd-path { stroke: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .cog-ring-on { display: none; }
-                .profile-item:has(#cognitive-disability:checked) .cog-ring-off { display: none; }
-                .profile-item:has(#cognitive-disability:checked) .cog-ring-on { display: block; }
-                .profile-item:has(#cognitive-disability:checked) .cog-path {
-                    fill: #01CE9C;
-                }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#cognitive-disability:checked) .cog-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#cognitive-disability:checked) .cog-path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .kb-ring-on { display: none; }
-                .profile-item:has(#keyboard-nav:checked) .kb-ring-off { display: none; }
-                .profile-item:has(#keyboard-nav:checked) .kb-ring-on { display: block; }
-                .profile-item:has(#keyboard-nav:checked) .kb-path {
-                    fill: #01CE9C;
-                }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#keyboard-nav:checked) .kb-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#keyboard-nav:checked) .kb-path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .blind-ring-on { display: none; }
-                .profile-item:has(#screen-reader:checked) .blind-ring-off { display: none; }
-                .profile-item:has(#screen-reader:checked) .blind-ring-on { display: block; }
-                .profile-item:has(#screen-reader:checked) .blind-path {
-                    fill: #01CE9C;
-                }
+                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
+                .profile-item:has(#screen-reader:checked) .blind-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item:has(#screen-reader:checked) .blind-path { fill: #01CE9C; }
                 /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
                 .profile-item:has(#reduce-motion),
                 .profile-item:has(#vision-impaired),
@@ -7110,10 +7449,8 @@ font-family: Archivo;
                 .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent; background: transparent; }
                 .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
                 .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg path,
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:not(:first-of-type),
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg path,
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:not(:first-of-type) { stroke: #01CE9C; }
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
+                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
                 .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
                 .profile-item-icon svg {
                     width: 36px;
@@ -7489,7 +7826,7 @@ input:checked + .slider::after {
     
                 /* Language dropdown outer container */
                 .language-dropdown-outer {
-                    width: 144px !important;
+                    width: 132px !important;
                     height: 55px !important;
                     right: 0 !important;
                     left: auto !important;
@@ -7679,7 +8016,7 @@ input:checked + .slider::after {
     
                 /* Language dropdown: stay inside widget on mobile/tablet, visible and responsive */
                 @media (max-width: 1024px) {
-                    .accessbit-widget-panel { position: relative !important; overflow: visible !important; }
+                    .accessbit-widget-panel { position: relative !important; }
                     .accessbit-widget-panel .language-dropdown,
                     #language-dropdown.language-dropdown {
                         width: min(192px, 100%) !important;
@@ -7715,65 +8052,45 @@ input:checked + .slider::after {
     
     
                 .language-dropdown-content {
-    
                     padding: 5px !important;
-    
                     background: #ffffff !important;
-    
                     min-height: 100px !important;
-    
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: stretch !important; /* left-aligned full-width list */
                 }
-    
-    
-    
+
                 .language-option {
-    
-                    display: flex;
-    
+                    display: flex !important;
                     align-items: center;
-    
-                    gap: 12px;
-    
-                    padding: 5px;
-    
+                    justify-content: flex-start;
+                    gap: 5px !important;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    margin: 0 0 4px 0 !important;
+                    padding: 8px 12px !important;
                     border: none;
-    
                     border-radius: 6px;
-    
                     background: transparent;
-    
                     cursor: pointer;
-    
                     transition: none;
-    
                     font-size: 14px;
-    
                     font-weight: 500;
-    
                     color: #374151;
-    
                     text-align: left;
-    
-                    width: 154px;
-    
                     height: 35px;
-    
-                    margin: 0 auto 13px;
-    
+                    box-sizing: border-box !important;
                     font-family: Archivo, sans-serif;
-    
                     pointer-events: auto !important;
-    
                     user-select: none;
-    
                 }
-    
-    
-    
+
+                .language-option:last-child {
+                    margin-bottom: 0 !important;
+                }
+
                 .language-option:hover {
-    
-                    background: #DEDEDE;
-    
+                    background: #DEDEDE !important;
                 }
     
     
@@ -7806,6 +8123,10 @@ input:checked + .slider::after {
 
                     align-items: center;
 
+                    justify-content: center;
+
+                    margin: 0 !important;
+
                 }
                 .language-option .flag svg {
                     width: 20px;
@@ -7816,11 +8137,9 @@ input:checked + .slider::after {
     
     
                 .language-option .language-name {
-    
-                    flex: 1;
-    
+                    flex: 0 0 auto;             /* don't stretch and create extra space */
+                    margin: 0 !important;
                     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-    
                     font-weight: 500;
     
                     font-size: 14px;
@@ -9216,13 +9535,13 @@ input:checked + .slider::after {
             const teal = '#34A2AB';
             const panelRoot = document.createElement('div');
             panelRoot.className = 'accessbit-panel-screenshot';
-            panelRoot.style.cssText = 'display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;min-width:0;width:100%;max-width:100%;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.15);';
+            panelRoot.style.cssText = 'display:flex;flex-direction:column;background:#EAECF2;border-radius:20px;overflow:hidden;min-width:0;width:100%;max-width:100%;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.15);';
             const panelHeader = document.createElement('div');
             panelHeader.className = 'panel-header accessbit-screenshot-header';
-            panelHeader.style.cssText = 'position:relative;background:' + teal + ';padding:0 18px 54px 18px;border-radius:20px 20px 0 0;min-height:200px;display:flex;flex-direction:column;align-items:center;padding-top:14px;overflow:hidden;box-sizing:border-box;width:100%;';
+            panelHeader.style.cssText = 'position:relative;background:' + teal + ';padding:0 18px 54px 18px;border-radius:60px 60px 0 0;min-height:200px;display:flex;flex-direction:column;align-items:center;padding-top:14px;overflow:hidden;box-sizing:border-box;width:100%;';
             const closeOuter = document.createElement('div');
             closeOuter.className = 'close-btn-container';
-            closeOuter.style.cssText = 'position:absolute;top:0;left:0;width:55px;height:55px;margin-right:17px;border-bottom-right-radius:20px;background:rgba(255,255,255,0.15);opacity:1;transform:rotate(0deg);display:flex;align-items:center;justify-content:center;';
+            closeOuter.style.cssText = 'position:absolute;top:0;left:0;width:55px;height:55px;margin-right:17px;border-bottom-right-radius:20px;background:transparent;opacity:1;transform:rotate(0deg);display:flex;align-items:center;justify-content:center;';
             const closeBtn = document.createElement('button');
             closeBtn.className = 'close-btn';
             closeBtn.id = 'close-panel';
@@ -9234,7 +9553,7 @@ input:checked + .slider::after {
             panelHeader.appendChild(closeOuter);
             const langOuter = document.createElement('div');
             langOuter.className = 'language-dropdown-outer';
-            langOuter.style.cssText = 'position:absolute;top:0;right:0;width:144px;height:55px;background:rgba(255,255,255,0.15);border-bottom-left-radius:20px;display:flex;align-items:center;justify-content:center;padding-right:8px;padding-left:8px;box-sizing:border-box;';
+            langOuter.style.cssText = 'position:absolute;top:0;right:0;width:132px;height:55px;background:rgba(255,255,255,0.15);border-bottom-left-radius:20px;display:flex;align-items:center;justify-content:center;padding-right:6px;padding-left:6px;box-sizing:border-box;';
             const languageSelectorHeader = document.createElement('button');
             languageSelectorHeader.className = 'language-selector-header';
             languageSelectorHeader.id = 'language-selector-header';
@@ -9242,7 +9561,7 @@ input:checked + .slider::after {
             languageSelectorHeader.setAttribute('aria-label', 'Select language');
             languageSelectorHeader.setAttribute('aria-expanded', 'false');
             languageSelectorHeader.setAttribute('aria-haspopup', 'listbox');
-            languageSelectorHeader.style.cssText = 'width:100%;max-width:128px;height:36px;border-radius:10px;border:none;background:transparent;color:#fff;cursor:pointer;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;min-width:0;overflow:hidden;box-sizing:border-box;';
+            languageSelectorHeader.style.cssText = 'width:100%;max-width:122px;height:36px;border-radius:10px;border:none;background:transparent;color:#fff;cursor:pointer;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:3px;min-width:0;overflow:hidden;box-sizing:border-box;';
             const flagWrap = document.createElement('span');
             flagWrap.className = 'language-flag';
             flagWrap.id = 'language-flag-header';
@@ -9689,16 +10008,22 @@ input:checked + .slider::after {
                     <div class="content-adjustments-section">
                     <h3 class="content-adjustments-title">Content Adjustments</h3>
                     <div class="content-adjustments-card profile-item slider-card content-scaling-card">
-                        <div class="content-card-icon content-scaling-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M30 24.6582L27.9968 26.6614L25.0011 23.6656L23.6656 25.0011L26.6614 27.9968L24.6582 30H30V24.6582ZM13 18.3418L15.0032 16.3386L17.9989 19.3344L19.3344 17.9989L16.3386 15.0032L18.3418 13H13V18.3418ZM30 13H24.6582L26.6614 15.0032L23.6656 17.9989L25.0011 19.3344L27.9968 16.3386L30 18.3418V13ZM13 30H18.3418L16.3386 27.9968L19.3344 25.0011L17.9989 23.6656L15.0032 26.6614L13 24.6582V30Z" fill="black"/></svg></div>
                         <div class="content-card-body">
                             <div class="content-scaling-header">
-                                <h4>Content Scaling</h4>
+                                <div class="label-with-icon-gap">
+                                    <div class="content-card-icon content-scaling-icon">
+                                        <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M30 24.6582L27.9968 26.6614L25.0011 23.6656L23.6656 25.0011L26.6614 27.9968L24.6582 30H30V24.6582ZM13 18.3418L15.0032 16.3386L17.9989 19.3344L19.3344 17.9989L16.3386 15.0032L18.3418 13H13V18.3418ZM30 13H24.6582L26.6614 15.0032L23.6656 17.9989L25.0011 19.3344L27.9968 16.3386L30 18.3418V13ZM13 30H18.3418L16.3386 27.9968L19.3344 25.0011L17.9989 23.6656L15.0032 26.6614L13 24.6582V30Z" fill="black"/></svg>
+                                    </div>
+                                    <h4>Content Scaling</h4>
+                                </div>
                                 <span id="content-scale-value" class="content-adjustments-slider-value">100%</span>
                             </div>
                             <div class="scaling-controls" id="content-scaling-controls">
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
-                                    <input type="range" id="content-scale-range" class="scaling-range-overlay" min="50" max="120" value="100" aria-label="Content scale percentage">
+                                    <div class="scaling-track-left" aria-hidden="true"></div>
+                                    <div class="scaling-track-right" aria-hidden="true"></div>
+                                    <input type="range" id="content-scale-range" class="scaling-range-overlay" min="50" max="150" value="100" aria-label="Content scale percentage" dir="ltr">
                                     <div class="scaling-slider-thumb">
                                         <div class="scaling-thumb-circle">
                                             <svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -9787,15 +10112,19 @@ input:checked + .slider::after {
                     </div>
                     <div class="content-adjustments-card profile-item slider-card">
                         <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="font-sizing" tabindex="-1" aria-label="Adjust Font Sizing - Font size with arrow controls"></div>
-                        <div class="content-card-icon font-sizing-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M15.1557 14L10 28.2778H11.8363L13.4474 23.816H18.915L20.5262 28.2778H22.3625L17.2068 14H15.1557ZM14.091 22.0313L16.1808 16.2443L18.2706 22.0313H14.091Z" fill="black"/><path d="M28.9797 18.0562L32.6335 28.2778H31.3322L30.1903 25.0835H26.3154L25.1735 28.2778H23.8722L27.526 18.0562H28.9797ZM29.7342 23.8058L28.2532 19.6629L26.7721 23.8058H29.7342Z" fill="black"/></svg></div>
                         <div class="content-card-body">
                             <div class="content-scaling-header">
-                                <h4>Adjust Font Sizing</h4>
+                                <div class="label-with-icon-gap">
+                                    <div class="content-card-icon font-sizing-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M15.1557 14L10 28.2778H11.8363L13.4474 23.816H18.915L20.5262 28.2778H22.3625L17.2068 14H15.1557ZM14.091 22.0313L16.1808 16.2443L18.2706 22.0313H14.091Z" fill="black"/><path d="M28.9797 18.0562L32.6335 28.2778H31.3322L30.1903 25.0835H26.3154L25.1735 28.2778H23.8722L27.526 18.0562H28.9797ZM29.7342 23.8058L28.2532 19.6629L26.7721 23.8058H29.7342Z" fill="black"/></svg></div>
+                                    <h4>Adjust Font Sizing</h4>
+                                </div>
                                 <span id="font-size-value" class="content-adjustments-slider-value">100%</span>
                             </div>
                             <div class="scaling-controls" id="font-sizing-controls">
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
+                                    <div class="scaling-track-left" aria-hidden="true"></div>
+                                    <div class="scaling-track-right" aria-hidden="true"></div>
                                     <input type="range" id="font-size-range" class="scaling-range-overlay" min="80" max="120" value="100" aria-label="Font size percentage">
                                     <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
@@ -9806,15 +10135,19 @@ input:checked + .slider::after {
                     </div>
                     <div class="content-adjustments-card profile-item slider-card">
                         <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="adjust-letter-spacing" tabindex="-1" aria-label="Adjust Letter Spacing - Increase spacing between letters"></div>
-                        <div class="content-card-icon letter-spacing-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_letter_spacing_icon)"><path d="M28.9675 24.4675L27.91 25.5325L29.6275 27.25H14.3725L16.09 25.5325L15.0325 24.4675L11.5 28L15.0325 31.5325L16.09 30.4675L14.3725 28.75H29.6275L27.91 30.4675L28.9675 31.5325L32.5 28L28.9675 24.4675Z" fill="#030303"/><path d="M29.5 22.75H31L27.25 12.25H25.75L22 22.75H23.5L24.25 20.5H28.75L29.5 22.75ZM24.7525 19L26.5 13.75L28.2475 19H24.7525Z" fill="#030303"/><path d="M20.5 12.25L17.5 21.25L14.5 12.25H13L16.75 22.75H18.25L22 12.25H20.5Z" fill="#030303"/></g><defs><clipPath id="clip0_letter_spacing_icon"><rect width="24" height="24" fill="white" transform="translate(10 10)"/></clipPath></defs></svg></div>
                         <div class="content-card-body">
                             <div class="content-scaling-header">
-                                <h4>Adjust Letter spacing</h4>
+                                <div class="label-with-icon-gap">
+                                    <div class="content-card-icon letter-spacing-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_letter_spacing_icon)"><path d="M28.9675 24.4675L27.91 25.5325L29.6275 27.25H14.3725L16.09 25.5325L15.0325 24.4675L11.5 28L15.0325 31.5325L16.09 30.4675L14.3725 28.75H29.6275L27.91 30.4675L28.9675 31.5325L32.5 28L28.9675 24.4675Z" fill="#030303"/><path d="M29.5 22.75H31L27.25 12.25H25.75L22 22.75H23.5L24.25 20.5H28.75L29.5 22.75ZM24.7525 19L26.5 13.75L28.2475 19H24.7525Z" fill="#030303"/><path d="M20.5 12.25L17.5 21.25L14.5 12.25H13L16.75 22.75H18.25L22 12.25H20.5Z" fill="#030303"/></g><defs><clipPath id="clip0_letter_spacing_icon"><rect width="24" height="24" fill="white" transform="translate(10 10)"/></clipPath></defs></svg></div>
+                                    <h4>Adjust Letter spacing</h4>
+                                </div>
                                 <span id="letter-spacing-value" class="content-adjustments-slider-value">100%</span>
                             </div>
                             <div class="scaling-controls" id="letter-spacing-controls">
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
+                                    <div class="scaling-track-left" aria-hidden="true"></div>
+                                    <div class="scaling-track-right" aria-hidden="true"></div>
                                     <input type="range" id="letter-spacing-range" class="scaling-range-overlay" min="90" max="110" value="100" aria-label="Letter spacing percentage">
                                     <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
@@ -9825,15 +10158,19 @@ input:checked + .slider::after {
                     </div>
                     <div class="content-adjustments-card profile-item slider-card">
                         <div class="toggle-switch toggle-switch-hidden" aria-hidden="true"><input type="checkbox" id="adjust-line-height" tabindex="-1" aria-label="Adjust Line Height - Increase spacing between lines"></div>
-                        <div class="content-card-icon line-height-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_line_height_icon)"><path d="M31.625 18.9375H20.625V20.3125H31.625V18.9375Z" fill="black"/><path d="M31.625 29.25H21.3125V30.625H31.625V29.25Z" fill="black"/><path d="M28.7719 28.5625H30.25L27.2525 21.6875H25.685L22.6875 28.5625H24.1656L24.7156 27.1875H28.2219L28.7719 28.5625ZM25.2656 25.8125L26.4688 22.8081L27.6719 25.8125H25.2656Z" fill="black"/><path d="M28.7719 18.25H30.25L27.2525 11.375H25.685L22.6875 18.25H24.1656L24.7156 16.875H28.2219L28.7719 18.25ZM25.2656 15.5L26.4688 12.4956L27.6719 15.5H25.2656Z" fill="black"/><path d="M15.125 20.8831L16.8987 22.6569L17.875 21.6875L15.125 18.9375L12.375 21.6875L13.3444 22.6638L15.125 20.8831Z" fill="black"/><path d="M15.125 28.6794L13.3513 26.9057L12.375 27.8751L15.125 30.6251L17.875 27.8751L16.9056 26.8988L15.125 28.6794Z" fill="black"/></g><defs><clipPath id="clip0_line_height_icon"><rect width="22" height="22" fill="white" transform="translate(11 10)"/></clipPath></defs></svg></div>
                         <div class="content-card-body">
                             <div class="content-scaling-header">
-                                <h4>Adjust Line Height</h4>
+                                <div class="label-with-icon-gap">
+                                    <div class="content-card-icon line-height-icon"><svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><g clip-path="url(#clip0_line_height_icon)"><path d="M31.625 18.9375H20.625V20.3125H31.625V18.9375Z" fill="black"/><path d="M31.625 29.25H21.3125V30.625H31.625V29.25Z" fill="black"/><path d="M28.7719 28.5625H30.25L27.2525 21.6875H25.685L22.6875 28.5625H24.1656L24.7156 27.1875H28.2219L28.7719 28.5625ZM25.2656 25.8125L26.4688 22.8081L27.6719 25.8125H25.2656Z" fill="black"/><path d="M28.7719 18.25H30.25L27.2525 11.375H25.685L22.6875 18.25H24.1656L24.7156 16.875H28.2219L28.7719 18.25ZM25.2656 15.5L26.4688 12.4956L27.6719 15.5H25.2656Z" fill="black"/><path d="M15.125 20.8831L16.8987 22.6569L17.875 21.6875L15.125 18.9375L12.375 21.6875L13.3444 22.6638L15.125 20.8831Z" fill="black"/><path d="M15.125 28.6794L13.3513 26.9057L12.375 27.8751L15.125 30.6251L17.875 27.8751L16.9056 26.8988L15.125 28.6794Z" fill="black"/></g><defs><clipPath id="clip0_line_height_icon"><rect width="22" height="22" fill="white" transform="translate(11 10)"/></clipPath></defs></svg></div>
+                                    <h4>Adjust Line Height</h4>
+                                </div>
                                 <span id="line-height-value" class="content-adjustments-slider-value">100%</span>
                             </div>
                             <div class="scaling-controls" id="line-height-controls">
                                 <div class="content-adjustments-slider-row scaling-slider-svg-wrap">
                                     <div class="scaling-slider-track" dir="ltr">
+                                    <div class="scaling-track-left" aria-hidden="true"></div>
+                                    <div class="scaling-track-right" aria-hidden="true"></div>
                                     <input type="range" id="line-height-range" class="scaling-range-overlay" min="90" max="110" value="100" aria-label="Line height percentage">
                                     <div class="scaling-slider-thumb"><div class="scaling-thumb-circle"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="0.5" y1="0.5" x2="0.499999" y2="13.5" stroke="white" stroke-linecap="round"/><line x1="6.5" y1="0.5" x2="6.5" y2="13.5" stroke="white" stroke-linecap="round"/></svg></div></div>
                                     </div>
@@ -15575,7 +15912,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
             }
             const rangeEl = this.shadowRoot.getElementById('content-scale-range');
             if (rangeEl) {
-                rangeEl.value = String(Math.min(120, Math.max(50, this.contentScale)));
+                rangeEl.value = String(Math.min(150, Math.max(50, this.contentScale)));
                 this.updateScalingThumbPosition(rangeEl);
             }
         }
@@ -15587,16 +15924,11 @@ keyboardNav: "Keyboard Navigation (Motor)",
             const min = parseFloat(rangeEl.getAttribute('min')) || 0;
             const max = parseFloat(rangeEl.getAttribute('max')) || 100;
             const value = parseFloat(rangeEl.value) || 100;
-            let leftPercent;
-            if (rangeEl.id === 'content-scale-range') {
-                if (value <= 100) leftPercent = (value - min) / (100 - min) * 50;
-                else leftPercent = 50 + (value - 100) / (max - 100) * 50;
-            } else {
-                leftPercent = (value - min) / (max - min) * 100;
-            }
+            const leftPercent = (value - min) / (max - min) * 100;
             const trackDir = (track && track.getAttribute('dir')) || 'ltr';
             const finalPercent = trackDir === 'rtl' ? 100 - leftPercent : leftPercent;
-            thumb.style.left = Math.max(3, Math.min(97, finalPercent)) + '%';
+            const pct = Math.max(0, Math.min(100, finalPercent));
+            thumb.style.left = pct + '%';
             thumb.style.removeProperty('right');
             thumb.style.removeProperty('transform');
         }
@@ -15608,7 +15940,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
             }
             const contentScaleRange = this.shadowRoot.getElementById('content-scale-range');
             if (contentScaleRange) {
-                contentScaleRange.value = String(Math.min(120, Math.max(50, this.contentScale)));
+                contentScaleRange.value = String(Math.min(150, Math.max(50, this.contentScale)));
             }
             if (enabled) {
                 this.updateContentScaleDisplay();
@@ -19142,48 +19474,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
     
             // Apply content scale if it's not 100% AND was actually used
-    
             if (this.contentScale !== 100) {
-    
                 const wasContentScalingUsed = localStorage.getItem('content-scaling-used') === 'true';
-                
                 if (wasContentScalingUsed) {
-         
-    
-                this.updateContentScale();
-    
-                this.updateContentScaleDisplay(); // Update the display value
-    
-                
-    
-                // Show content scaling controls if content scale is not 100%
-    
-                const controls = this.shadowRoot.getElementById('content-scaling-controls');
-    
-                if (controls) {
-    
-                    controls.style.display = 'block';
-    
-                }
-    
-                
-    
-                // Update the toggle switch to show it's enabled
-    
-                const toggle = this.shadowRoot.getElementById('content-scaling');
-    
-                if (toggle) {
-    
-                    toggle.checked = true;
-    
+                    this.updateContentScale();
+                    this.updateContentScaleDisplay(); // Update the display value
+
+                    // Show content scaling controls if content scale is not 100%
+                    const controls = this.shadowRoot.getElementById('content-scaling-controls');
+                    if (controls) {
+                        controls.style.display = 'block';
                     }
-                } else {
-                   
-                    this.contentScale = 100;
-                    this.settings['content-scale'] = 100;
-                    this.saveSettings();
+
+                    // Update the toggle switch to show it's enabled
+                    const toggle = this.shadowRoot.getElementById('content-scaling');
+                    if (toggle) {
+                        toggle.checked = true;
+                    }
                 }
-    
             }
     
             
@@ -27050,16 +27358,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
-            // Find the adjust-bg-colors module in the panel
-    
-            const bgColorsModule = this.shadowRoot.querySelector('#adjust-bg-colors').closest('.profile-item');
-    
-            
-    
+            // Use existing card only – do not inject duplicate panel
+            const bgCard = this.shadowRoot.getElementById('adjust-bg-colors');
+            if (bgCard && bgCard.querySelector('.picker-row')) {
+                const opts = bgCard.querySelectorAll('.bg-color-options .color-option');
+                const currentColor = this.settings['bg-color'] || this.selectedBackgroundColor;
+                opts.forEach(o => {
+                    o.classList.toggle('selected', o.getAttribute('data-color') === currentColor);
+                });
+            }
+            return;
+            const bgColorsModule = this.shadowRoot.querySelector('#adjust-bg-colors') && this.shadowRoot.querySelector('#adjust-bg-colors').closest('.profile-item');
             if (bgColorsModule) {
-    
-                // Create color picker content with predefined color swatches
-    
                 const colorPickerHTML = `
     
                     <div class="bg-color-picker-controls" style="margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
@@ -27187,13 +27497,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
         hideBackgroundColorPicker() {
-    
             const bgCard = this.shadowRoot.getElementById('adjust-bg-colors');
             if (bgCard) {
                 bgCard.querySelectorAll('.bg-color-options .color-option').forEach(o => o.classList.remove('selected'));
             }
+            const injected = this.shadowRoot.querySelectorAll('.bg-color-picker-controls');
+            injected.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         }
-    
+
         applyBackgroundColor(color) {
             // Apply to html and body so the page background actually changes
             document.documentElement.style.backgroundColor = color;
@@ -31613,6 +31924,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 ['left', 'right', 'top', 'bottom', 'width', 'max-width', 'height', 'max-height', 'transform'].forEach(p => panel.style.removeProperty(p));
             }
             this.updateInterfacePosition();
+            /* Keep trigger icon position stable on resize/inspect: restore position vars only if missing so icon does not jump or vanish */
+            const host = this.shadowRoot?.host;
+            if (host) {
+                if (!host.style.getPropertyValue('--widget-icon-bottom')?.trim()) host.style.setProperty('--widget-icon-bottom', '20px');
+                if (!host.style.getPropertyValue('--widget-icon-right')?.trim()) host.style.setProperty('--widget-icon-right', '20px');
+                if (!host.style.getPropertyValue('--widget-icon-left')?.trim()) host.style.setProperty('--widget-icon-left', 'auto');
+                if (!host.style.getPropertyValue('--widget-icon-top')?.trim()) host.style.setProperty('--widget-icon-top', 'auto');
+                if (!host.style.getPropertyValue('--widget-icon-transform')?.trim()) host.style.setProperty('--widget-icon-transform', 'none');
+            }
         }
 
         /** No-op: layout is CSS-only via @media (max-width: 1280px) / (min-width: 1281px). Kept for call compatibility. */
