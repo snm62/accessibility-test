@@ -1923,6 +1923,14 @@ class AccessibilityWidget {
                 });
                 // PERFORMANCE OPTIMIZATION: Combined, debounced resize handler
                 this.setupOptimizedResizeHandlers();
+
+                // Keep trigger icon visibility in sync while resizing (DevTools / responsive drag)
+                if (!this._windowResizeListenerAdded) {
+                    this._windowResizeListenerAdded = true;
+                    window.addEventListener('resize', this.debounce(() => {
+                        try { this.handleWindowResize(); } catch (e) {}
+                    }, 120), { passive: true });
+                }
                 
                 // Apply mobile responsive styles on load if mobile
                 if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
@@ -32035,13 +32043,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 _iconExplicitlyShown: this._iconExplicitlyShown,
                 hasCustomizationData: !!this.customizationData
             });
-            // Don't call showIcon() if icon was explicitly shown during initialization
-            // This prevents ResizeObserver from hiding the icon immediately after it's shown
-            if (this._iconExplicitlyShown) {
-                console.log('[ICON DEBUG] handleWindowResize() - Skipping because _iconExplicitlyShown=true');
-                return; // Icon visibility is already correctly set, don't change it
-            }
-            
             // Only update icon visibility if customization data is available
             if (!this.customizationData) {
                 console.log('[ICON DEBUG] handleWindowResize() - Skipping because no customizationData');
