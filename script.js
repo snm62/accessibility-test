@@ -32049,6 +32049,40 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
             this.showIcon();
+
+            // If the icon "disappears" during responsive dragging, it's often because the position vars
+            // are temporarily cleared/invalid (e.g., both left/right or top/bottom effectively auto).
+            // Ensure we always have a valid anchor inside the viewport.
+            try {
+                const host = this.shadowRoot?.host;
+                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                if (host && icon) {
+                    const left = (host.style.getPropertyValue('--widget-icon-left') || '').trim();
+                    const right = (host.style.getPropertyValue('--widget-icon-right') || '').trim();
+                    const top = (host.style.getPropertyValue('--widget-icon-top') || '').trim();
+                    const bottom = (host.style.getPropertyValue('--widget-icon-bottom') || '').trim();
+
+                    const noHAnchor = (!left || left === 'auto') && (!right || right === 'auto');
+                    const noVAnchor = (!top || top === 'auto') && (!bottom || bottom === 'auto');
+
+                    if (noHAnchor) {
+                        host.style.setProperty('--widget-icon-right', '20px');
+                        host.style.setProperty('--widget-icon-left', 'auto');
+                    }
+                    if (noVAnchor) {
+                        host.style.setProperty('--widget-icon-bottom', '20px');
+                        host.style.setProperty('--widget-icon-top', 'auto');
+                    }
+
+                    // Also ensure it's not left in a hidden state by any transient logic.
+                    icon.style.setProperty('visibility', 'visible', 'important');
+                    icon.style.setProperty('opacity', '1', 'important');
+                    icon.style.setProperty('pointer-events', 'auto', 'important');
+                    if (window.getComputedStyle(icon).display === 'none') {
+                        icon.style.setProperty('display', 'flex', 'important');
+                    }
+                }
+            } catch (e) {}
         }
         
         // PERFORMANCE OPTIMIZATION: Get cached DOM elements with refresh capability
