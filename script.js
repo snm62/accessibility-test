@@ -32048,38 +32048,56 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 console.log('[ICON DEBUG] handleWindowResize() - Skipping because no customizationData');
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+
+            // Breakpoint-aware trigger positioning on resize (DevTools drag).
+            // This prevents "drifting to center" (stale transform) and "disappearing" (no anchor vars)
+            // when crossing the 1279/1280 breakpoint without a refresh.
+            try {
+                if (this._lastIsMobileOnResize === undefined) this._lastIsMobileOnResize = isMobile;
+                const crossedBreakpoint = this._lastIsMobileOnResize !== isMobile;
+                this._lastIsMobileOnResize = isMobile;
+
+                if (crossedBreakpoint) {
+                    const data = this.customizationData || {};
+                    if (isMobile) {
+                        // Apply mobile trigger position vars if provided
+                        if (data.mobileTriggerHorizontalPosition && data.mobileTriggerVerticalPosition) {
+                            this.updateMobileTriggerCombinedPosition(data.mobileTriggerHorizontalPosition, data.mobileTriggerVerticalPosition);
+                        } else {
+                            if (data.mobileTriggerHorizontalPosition) this.updateMobileTriggerPosition('horizontal', data.mobileTriggerHorizontalPosition);
+                            if (data.mobileTriggerVerticalPosition) this.updateMobileTriggerPosition('vertical', data.mobileTriggerVerticalPosition);
+                        }
+                        if (data.mobileTriggerHorizontalOffset !== undefined) this.updateMobileTriggerOffset('horizontal', data.mobileTriggerHorizontalOffset);
+                        if (data.mobileTriggerVerticalOffset !== undefined) this.updateMobileTriggerOffset('vertical', data.mobileTriggerVerticalOffset);
+                    } else {
+                        // Apply desktop trigger position vars if provided
+                        if (data.triggerHorizontalPosition) this.updateTriggerPosition('horizontal', data.triggerHorizontalPosition);
+                        if (data.triggerVerticalPosition) this.updateTriggerPosition('vertical', data.triggerVerticalPosition);
+                        if (data.triggerHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', data.triggerHorizontalOffset);
+                        if (data.triggerVerticalOffset !== undefined) this.updateTriggerOffset('vertical', data.triggerVerticalOffset);
+                    }
+                }
+            } catch (e) {}
+
+            // Update visibility after any positional adjustments
             this.showIcon();
 
-            // If the icon "disappears" during responsive dragging, it's often because the position vars
-            // are temporarily cleared/invalid (e.g., both left/right or top/bottom effectively auto).
-            // Ensure we always have a valid anchor inside the viewport.
+            // Final safety: always keep an anchor so fixed positioning can't become "free-floating"
             try {
                 const host = this.shadowRoot?.host;
-                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
-                if (host && icon) {
+                if (host) {
                     const left = (host.style.getPropertyValue('--widget-icon-left') || '').trim();
                     const right = (host.style.getPropertyValue('--widget-icon-right') || '').trim();
                     const top = (host.style.getPropertyValue('--widget-icon-top') || '').trim();
                     const bottom = (host.style.getPropertyValue('--widget-icon-bottom') || '').trim();
-
-                    const noHAnchor = (!left || left === 'auto') && (!right || right === 'auto');
-                    const noVAnchor = (!top || top === 'auto') && (!bottom || bottom === 'auto');
-
-                    if (noHAnchor) {
+                    if ((!left || left === 'auto') && (!right || right === 'auto')) {
                         host.style.setProperty('--widget-icon-right', '20px');
                         host.style.setProperty('--widget-icon-left', 'auto');
                     }
-                    if (noVAnchor) {
+                    if ((!top || top === 'auto') && (!bottom || bottom === 'auto')) {
                         host.style.setProperty('--widget-icon-bottom', '20px');
                         host.style.setProperty('--widget-icon-top', 'auto');
-                    }
-
-                    // Also ensure it's not left in a hidden state by any transient logic.
-                    icon.style.setProperty('visibility', 'visible', 'important');
-                    icon.style.setProperty('opacity', '1', 'important');
-                    icon.style.setProperty('pointer-events', 'auto', 'important');
-                    if (window.getComputedStyle(icon).display === 'none') {
-                        icon.style.setProperty('display', 'flex', 'important');
                     }
                 }
             } catch (e) {}
