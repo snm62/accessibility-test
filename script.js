@@ -4081,31 +4081,42 @@ font-family: Archivo;
     
     
     
-            // Create panel inside Shadow DOM with enhanced accessibility
+            // Create panel inside Shadow DOM (single container = .accessbit-panel-screenshot, no outer wrapper)
     
-            const panel = document.createElement('div');
+            const panelOuter = document.createElement('div');
     
-            panel.id = 'accessbit-widget-panel';
+            panelOuter.setAttribute('role', 'dialog');
     
-            panel.className = 'accessbit-widget-panel';
+            panelOuter.setAttribute('aria-label', 'Accessibility Settings');
     
-            panel.setAttribute('role', 'dialog');
+            panelOuter.setAttribute('aria-hidden', 'true');
     
-            panel.setAttribute('aria-label', 'Accessibility Settings');
+            panelOuter.setAttribute('aria-modal', 'true');
     
-            panel.setAttribute('aria-hidden', 'true');
+            panelOuter.setAttribute('aria-describedby', 'panel-description');
     
-            panel.setAttribute('aria-modal', 'true');
+            this.createPanelElements(panelOuter);
     
-            panel.setAttribute('aria-describedby', 'panel-description');
+            const panel = panelOuter.querySelector('.accessbit-panel-screenshot');
     
-            this.createPanelElements(panel);
+            const hideModal = panelOuter.querySelector('#hide-interface-modal');
     
-            panel.style.pointerEvents = 'auto';
-            panel.style.setProperty('overflow', 'hidden', 'important');
-            panel.style.setProperty('border-radius', '20px', 'important');
-    
-            shadowRoot.appendChild(panel);
+            if (panel) {
+                panel.id = 'accessbit-widget-panel';
+                panel.className = (panel.className + ' accessbit-widget-panel').trim();
+                panel.setAttribute('role', 'dialog');
+                panel.setAttribute('aria-label', 'Accessibility Settings');
+                panel.setAttribute('aria-hidden', 'true');
+                panel.setAttribute('aria-modal', 'true');
+                panel.setAttribute('aria-describedby', 'panel-description');
+                panel.style.pointerEvents = 'auto';
+                panel.style.setProperty('overflow', 'hidden', 'important');
+                panel.style.setProperty('border-radius', '20px', 'important');
+                panel.style.display = 'none';
+                panel.style.visibility = 'hidden';
+                shadowRoot.appendChild(panel);
+            }
+            if (hideModal) shadowRoot.appendChild(hideModal);
     
             this.initColorPickerCards();
 
@@ -4114,11 +4125,6 @@ font-family: Archivo;
             
 
             
-            // In your createWidget function, after creating the panel:
-            panel.style.pointerEvents = 'auto';
-            panel.style.display = 'none'; // Hide panel by default
-            panel.style.visibility = 'hidden'; // Also hide with visibility
-            shadowRoot.appendChild(panel);
             // Initialize current language display
     
             this.initializeLanguageDisplay();
@@ -4819,7 +4825,7 @@ font-family: Archivo;
                         top: var(--widget-icon-top, auto) !important;
                         transform: none !important;
                         transition: transform 0.3s ease !important;
-                        border-radius: 12px !important;
+                        border-radius: 20px !important;
                         margin: 0 !important;
                         box-sizing: border-box !important;
                         overflow-x: hidden !important;
@@ -4862,7 +4868,7 @@ font-family: Archivo;
                         top: auto !important;
                         transform: translateX(-50%) !important;
                         transition: transform 0.3s ease !important;
-                        border-radius: 12px !important;
+                        border-radius: 20px !important;
                         margin: 0 !important;
                         box-sizing: border-box !important;
                         overflow-x: hidden !important;
@@ -4908,6 +4914,7 @@ font-family: Archivo;
                 }
                 /* Hide scrollbar on panel and main content – panel gets overflow-y:auto in some media queries and becomes scroll container */
                 .accessbit-widget-panel,
+                .accessbit-widget-panel > .white-content-section,
                 .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section,
                 .accessbit-widget-panel > .accessbit-widget-content,
                 .accessbit-widget-panel > .panel-content {
@@ -4915,6 +4922,7 @@ font-family: Archivo;
                     -ms-overflow-style: none !important;
                 }
                 .accessbit-widget-panel::-webkit-scrollbar,
+                .accessbit-widget-panel > .white-content-section::-webkit-scrollbar,
                 .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section::-webkit-scrollbar,
                 .accessbit-widget-panel > .accessbit-widget-content::-webkit-scrollbar,
                 .accessbit-widget-panel > .panel-content::-webkit-scrollbar {
@@ -4953,7 +4961,8 @@ font-family: Archivo;
                     height: 0 !important;
                     visibility: hidden !important;
                 }
-                /* Only the direct scroll container scrolls – not nested .white-content-section (e.g. from injected HTML) */
+                /* Only the direct scroll container scrolls – panel is now single container so > .white-content-section is the scroll area */
+                .accessbit-widget-panel > .white-content-section,
                 .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section,
                 .accessbit-widget-panel > .accessbit-widget-content,
                 .accessbit-widget-panel > .panel-content {
@@ -4965,7 +4974,7 @@ font-family: Archivo;
                     -webkit-overflow-scrolling: touch !important;
                     scrollbar-gutter: stable !important;
                 }
-                .accessbit-widget-panel .white-content-section .white-content-section {
+.accessbit-widget-panel .white-content-section .white-content-section {
                     overflow-y: visible !important;
                     overflow-x: hidden !important;
                 }
@@ -4976,10 +4985,11 @@ font-family: Archivo;
                     padding: 20px 0 0 0;
                     width: 100% !important;
                     max-width: 100% !important;
-                    background: #EAECF2 !important;
+                    background-color: rgb(234, 236, 242) !important;
                     border-radius: 0 !important;
                     box-sizing: border-box !important;
                     overflow-x: visible !important;
+                    margin: 0 !important;
                 }
                 /* Section headers (e.g. Accessibility Profiles) start at same left edge as feature containers (Seizure Safe box) */
                 .accessbit-widget-panel .white-content-section > h3,
@@ -5184,6 +5194,7 @@ font-family: Archivo;
                     .accessbit-widget-panel.mobile-mode:not(.active) {
                         transition: none !important;
                     }
+                    .accessbit-widget-panel.mobile-mode > .white-content-section,
                     .accessbit-widget-panel.mobile-mode .accessbit-panel-screenshot > .white-content-section,
                     .accessbit-widget-panel.mobile-mode > .accessbit-widget-content,
                     .accessbit-widget-panel.mobile-mode > .panel-content {
@@ -5399,7 +5410,7 @@ font-family: Archivo;
                     .accessbit-widget-panel .action-btn { padding: 8px 12px !important; }
                 }
 
-                /* Tablet and mobile: remove white thick outline and extra white in corners – host and panel */
+                /* Tablet and mobile: remove outline; panel/screenshot radius+overflow in master-frame block below */
                 @media (max-width: 1279px) {
                     :host {
                         outline: none !important;
@@ -5423,21 +5434,9 @@ font-family: Archivo;
                         box-shadow: none !important;
                         -webkit-box-shadow: none !important;
                     }
-                    .accessbit-widget-panel {
-                        background: #EAECF2 !important;
-                        padding: 0 !important;
-                        border: none !important;
-                        outline: none !important;
-                        box-shadow: none !important;
-                    }
                     .accessbit-widget-panel .panel-header::before,
                     .accessbit-widget-panel .widget-header::before {
-                        border-radius: 12px 12px 0 0 !important;
-                    }
-                    /* Remove white corners: inner wrapper has inline background #fff – override to match panel */
-                    .accessbit-widget-panel .accessbit-panel-screenshot,
-                    .accessbit-widget-panel > .accessbit-panel-screenshot {
-                        background: #EAECF2 !important;
+                        border-radius: 20px 20px 0 0 !important;
                     }
                     .accessbit-widget-panel .panel-content,
                     .accessbit-widget-panel .accessbit-widget-content {
@@ -5871,7 +5870,7 @@ font-family: Archivo;
 
                     color: #ffffff !important;
 
-                    border-radius: 24px !important;
+                    border-radius: 20px 20px 0 0 !important;
 
                     border: none !important;
 
@@ -5913,7 +5912,7 @@ font-family: Archivo;
                     background: #34A2AB !important;
                     border: none !important;
                     padding-bottom: 54px !important;
-                    border-radius: 0 !important;
+                    border-radius: 20px 20px 0 0 !important;
                 }
                 .accessbit-widget-panel .accessbit-panel-screenshot {
                     min-width: 0;
@@ -6575,29 +6574,47 @@ font-family: Archivo;
                     padding-top: 12px;
                 }
     
-                /* Mobile / tablet: seal white corners and keep cards within bounds */
+                /* Mobile / tablet: Double Seal – override inline background, header stays inside clipping mask */
                 @media (max-width: 1279px) {
-                    /* Let the panel define the outer rounded shape and clip children */
-                    .accessbit-widget-panel {
+                    /* 1. Override inline background:#EAECF2 – use both background and background-color so teal wins */
+                    #accessbit-widget-panel.accessbit-widget-panel {
+                        background: rgb(52, 162, 171) !important;
+                        background-color: rgb(52, 162, 171) !important;
                         border-radius: 20px !important;
                         overflow: hidden !important;
+                        padding: 0 !important;
                     }
-    
-                    /* Screenshot wrapper: clip to panel radius and avoid gray base bleeding */
+
+                    /* 2. Double seal: same element gets teal again so no gray can peek */
                     .accessbit-panel-screenshot {
+                        background: rgb(52, 162, 171) !important;
+                        background-color: rgb(52, 162, 171) !important;
+                        border-radius: 20px !important;
                         overflow: hidden !important;
-                        background-color: transparent !important;
+                        width: 100% !important;
                     }
-    
-                    /* Inner white section should not add its own corner radius on mobile/tablet */
+
+                    /* 3. Header stays inside clipping mask – 1px box-shadow seal (no expansion outside) */
+                    .panel-header.accessbit-screenshot-header {
+                        border-radius: 20px 20px 0 0 !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        box-shadow: 0 0 0 1px rgb(52, 162, 171) !important;
+                        position: relative !important;
+                        z-index: 2 !important;
+                    }
+
+                    /* 4. White content section stays contained */
                     .white-content-section {
                         border-radius: 0 !important;
+                        margin: 0 !important;
+                        width: 100% !important;
+                        z-index: 1 !important;
                     }
-    
-                    .content-adjustments-card {
-                        background: #ffffff;
-                        margin: 0 0 14px 0;
-                        border-radius: 12px;
+
+                    /* 5. Footer curve */
+                    .accessbit-widget-panel .panel-footer {
+                        border-radius: 0 0 20px 20px !important;
                     }
                 }
     
@@ -6873,9 +6890,15 @@ font-family: Archivo;
                 }
                 .readable-font-ring-on,
                 .readable-font-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off path { fill: #01CE9C; }
+                /* Readable Font: explicit on/off ring + icon – hide off group and show on group when checked */
+                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off,
+                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-on,
+                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-on {
+                    display: block;
+                }
 
                 /* --- SHARED STYLES (Mobile & Desktop) --- */
                 .content-scaling-header {
@@ -7158,8 +7181,15 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .reduce-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#reduce-motion:checked) .reduce-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                /* Reduce Motion: explicit on/off ring – show green ring, recolor paths when checked */
+                .profile-item:has(#reduce-motion:checked) .reduce-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#reduce-motion:checked) .reduce-ring-on {
+                    display: block;
+                }
                 .profile-item:has(#reduce-motion:checked) .reduce-motion-path,
                 .profile-item:has(#reduce-motion:checked) .reduce-motion-dot { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg {
@@ -7169,35 +7199,70 @@ font-family: Archivo;
                 /* Vision Impaired icon: off/on rings and eye */
                 .vision-ring-on,
                 .vision-eye-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#vision-impaired:checked) .vision-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .profile-item:has(#vision-impaired:checked) .vision-eye-off { fill: #01CE9C; stroke: #01CE9C; }
-                /* Dark Contrast icon: off/on rings and moon */
+                /* Vision Impaired: explicit on/off ring + eye – show green versions when checked */
+                .profile-item:has(#vision-impaired:checked) .vision-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#vision-impaired:checked) .vision-eye-off {
+                    display: none;
+                    fill: #01CE9C;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#vision-impaired:checked) .vision-ring-on,
+                .profile-item:has(#vision-impaired:checked) .vision-eye-on {
+                    display: block;
+                }
+                /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .dark-contrast-ring-on,
                 .dark-contrast-icon-on {
                     display: none;
                 }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off { fill: #01CE9C; }
-                /* Light Contrast icon: off/on rings and sun */
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off,
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off,
+                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-ring-off,
+                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-icon-off {
+                    display: none;
+                }
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-on,
+                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-on,
+                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-ring-on,
+                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-icon-on {
+                    display: block;
+                }
+                /* Light Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .light-contrast-ring-on,
                 .light-contrast-icon-on {
                     display: none;
                 }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off { fill: #01CE9C; }
-                /* High Contrast icon: off/on rings and circle */
+                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off,
+                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off,
+                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-ring-off,
+                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-icon-off {
+                    display: none;
+                }
+                .profile-item:has(#light-contrast:checked) .light-contrast-ring-on,
+                .profile-item:has(#light-contrast:checked) .light-contrast-icon-on,
+                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-ring-on,
+                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-icon-on {
+                    display: block;
+                }
+                /* High Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .high-contrast-ring-on,
                 .high-contrast-icon-on {
                     display: none;
                 }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off { fill: #01CE9C; }
+                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off,
+                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off,
+                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-ring-off,
+                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-icon-off {
+                    display: none;
+                }
                 .profile-item:has(#high-contrast:checked) .high-contrast-ring-on,
-                .profile-item:has(#high-contrast:checked) .high-contrast-icon-on {
+                .profile-item:has(#high-contrast:checked) .high-contrast-icon-on,
+                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-ring-on,
+                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-icon-on {
                     display: block;
                 }
                 /* High Saturation icon: off/on rings and droplet */
@@ -7266,21 +7331,37 @@ font-family: Archivo;
                 /* Highlight Titles icon: off/on rings and paths */
                 .ht-ring-on,
                 .ht-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
-                /* Highlight Focus icon: off/on rings and target */
+                /* Highlight Titles: explicit on/off ring + icon – hide off, show on when checked */
+                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off,
+                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-on,
+                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-on {
+                    display: block;
+                }
+                /* Highlight Focus icon: explicit on/off ring + icon – hide off, show on when checked */
                 .hl-focus-ring-on,
                 .hl-focus-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
-                /* Highlight Hover icon: off/on rings and frame */
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off,
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-on,
+                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-on {
+                    display: block;
+                }
+                /* Highlight Hover icon: explicit on/off ring + icon – hide off, show on when checked */
                 .hl-hover-ring-on,
                 .hl-hover-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off,
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-on,
+                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-on {
+                    display: block;
+                }
                 /* Big Black Cursor icon: off/on rings and cursor */
                 .bbc-ring-on,
                 .bbc-icon-on { display: none; }
@@ -7298,64 +7379,122 @@ font-family: Archivo;
                 /* Highlight Links icon: off/on rings and link paths */
                 .hl-links-ring-on,
                 .hl-links-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off path { stroke: #01CE9C; }
+                /* Highlight Links: explicit on/off ring + icon – hide off, show on when checked */
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off,
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-on,
+                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-on {
+                    display: block;
+                }
                 /* Text Magnifier icon: off/on rings and magnifier */
                 .tm-ring-on,
                 .tm-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off path { stroke: #01CE9C; }
+                /* Text Magnifier: explicit on/off ring + icon – hide off, show on when checked */
+                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off,
+                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off {
+                    display: none;
+                }
+                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-on,
+                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-on {
+                    display: block;
+                }
                 /* Text Left align icon: off/on rings and lines */
                 .align-left-ring-on,
                 .align-left-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off path { fill: #01CE9C; }
+                /* Text Left Align: explicit on/off ring + icon – hide off, show on when checked */
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off,
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off {
+                    display: none;
+                }
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-on,
+                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-on {
+                    display: block;
+                }
                 /* Text Center align icon: off/on rings and lines */
                 .align-center-ring-on,
                 .align-center-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off path { fill: #01CE9C; }
+                /* Text Center Align: explicit on/off ring + icon – hide off, show on when checked */
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off,
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off {
+                    display: none;
+                }
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-on,
+                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-on {
+                    display: block;
+                }
                 /* Text Right align icon: off/on rings and lines */
                 .align-right-ring-on,
                 .align-right-icon-on { display: none; }
-                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off path { fill: #01CE9C; }
+                /* Text Right Align: explicit on/off ring + icon – hide off, show on when checked */
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off,
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off {
+                    display: none;
+                }
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-on,
+                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-on {
+                    display: block;
+                }
                 .accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .adhd-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                /* ADHD Friendly: explicit on/off ring – show green ring and recolor paths when checked */
+                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#adhd-friendly:checked) .adhd-ring-on {
+                    display: block;
+                }
                 .profile-item:has(#adhd-friendly:checked) .adhd-path { stroke: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .cog-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#cognitive-disability:checked) .cog-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                /* Cognitive Disability: explicit on/off ring – show green ring and recolor cog when checked */
+                .profile-item:has(#cognitive-disability:checked) .cog-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#cognitive-disability:checked) .cog-ring-on {
+                    display: block;
+                }
                 .profile-item:has(#cognitive-disability:checked) .cog-path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .kb-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#keyboard-nav:checked) .kb-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                /* Keyboard Nav: explicit on/off ring – show green ring and recolor arrow when checked */
+                .profile-item:has(#keyboard-nav:checked) .kb-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#keyboard-nav:checked) .kb-ring-on {
+                    display: block;
+                }
                 .profile-item:has(#keyboard-nav:checked) .kb-path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .blind-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#screen-reader:checked) .blind-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                /* Blind Users (Screen Reader): explicit on/off ring – show green ring and recolor arrow when checked */
+                .profile-item:has(#screen-reader:checked) .blind-ring-off {
+                    display: none;
+                    fill: #D9F8F0;
+                    stroke: #01CE9C;
+                }
+                .profile-item:has(#screen-reader:checked) .blind-ring-on {
+                    display: block;
+                }
                 .profile-item:has(#screen-reader:checked) .blind-path { fill: #01CE9C; }
                 /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
                 .profile-item:has(#reduce-motion),
@@ -9528,17 +9667,16 @@ input:checked + .slider::after {
         
         // Create panel elements – layout matches screenshot (teal header, light grey content, profile list)
         createPanelElements(container) {
-            container.classList.add('accessbit-hide-scrollbar');
             while (container.firstChild) {
                 container.removeChild(container.firstChild);
             }
             const teal = '#34A2AB';
             const panelRoot = document.createElement('div');
-            panelRoot.className = 'accessbit-panel-screenshot';
+            panelRoot.className = 'accessbit-panel-screenshot accessbit-hide-scrollbar';
             panelRoot.style.cssText = 'display:flex;flex-direction:column;background:#EAECF2;border-radius:20px;overflow:hidden;min-width:0;width:100%;max-width:100%;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.15);';
             const panelHeader = document.createElement('div');
             panelHeader.className = 'panel-header accessbit-screenshot-header';
-            panelHeader.style.cssText = 'position:relative;background:' + teal + ';padding:0 18px 54px 18px;border-radius:60px 60px 0 0;min-height:200px;display:flex;flex-direction:column;align-items:center;padding-top:14px;overflow:hidden;box-sizing:border-box;width:100%;';
+            panelHeader.style.cssText = 'position:relative;background:' + teal + ';padding:0 18px 54px 18px;border-radius:20px 20px 0 0;min-height:200px;display:flex;flex-direction:column;align-items:center;padding-top:14px;overflow:hidden;box-sizing:border-box;width:100%;';
             const closeOuter = document.createElement('div');
             closeOuter.className = 'close-btn-container';
             closeOuter.style.cssText = 'position:absolute;top:0;left:0;width:55px;height:55px;margin-right:17px;border-bottom-right-radius:20px;background:transparent;opacity:1;transform:rotate(0deg);display:flex;align-items:center;justify-content:center;';
@@ -33141,7 +33279,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 panel.style.setProperty('z-index', '2147483646', 'important');
                 /* REMOVED: background #ffffff – was forcing panel to white when seizure-safe on; keep panel gradient/theme */
                 panel.style.setProperty('box-shadow', '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 'important');
-                panel.style.setProperty('border-radius', '8px', 'important');
+                panel.style.setProperty('border-radius', '20px', 'important');
                 panel.style.setProperty('font-family', 'Archivo');
                 panel.style.setProperty('font-weight', '600');
                 panel.style.setProperty('pointer-events', 'auto', 'important');
