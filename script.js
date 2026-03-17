@@ -32054,6 +32054,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // We explicitly set the CSS vars each time so stale transforms/anchors can't accumulate.
             try {
                 const data = this.customizationData || {};
+                const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
+                if (icon) {
+                    // Ensure CSS variable positioning wins (offset functions previously set inline left/top/transform).
+                    ['left', 'right', 'top', 'bottom', 'transform'].forEach(p => icon.style.removeProperty(p));
+                }
                 const h = (isMobile ? (data.mobileTriggerHorizontalPosition || data.triggerHorizontalPosition) : data.triggerHorizontalPosition || 'Right') || 'Right';
                 const v = (isMobile ? (data.mobileTriggerVerticalPosition || data.triggerVerticalPosition) : data.triggerVerticalPosition || 'Bottom') || 'Bottom';
 
@@ -33922,64 +33927,53 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 
                 if (isMobile) {
-                    const cs = window.getComputedStyle(icon);
-                    const currentLeftRaw = icon.style.left || cs.left;
-                    const currentRightRaw = icon.style.right || cs.right;
-                    const currentTopRaw = icon.style.top || cs.top;
-                    const currentBottomRaw = icon.style.bottom || cs.bottom;
-                    const currentTransformRaw = icon.style.transform || cs.transform || '';
-    
-                 
-    
                     const normalizedOffset = (typeof offset === 'number' || /^-?\d+$/.test(String(offset))) ? `${offset}px` : String(offset);
                     
                     if (direction === 'horizontal') {
-                        // Check which side the icon is positioned on
-                        if (currentLeftRaw && currentLeftRaw !== 'auto' && currentLeftRaw !== '0px') {
-                            // Icon is positioned from left
-                            const currentLeft = currentLeftRaw;
-                            const newLeft = currentLeft.includes('calc') ? 
-                                currentLeft.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentLeft} + ${normalizedOffset})`;
-                            icon.style.setProperty('left', newLeft, 'important');
-                            
-                        } else if (currentRightRaw && currentRightRaw !== 'auto' && currentRightRaw !== '0px') {
-                            // Icon is positioned from right
-                            const currentRight = currentRightRaw;
-                            const newRight = currentRight.includes('calc') ? 
-                                currentRight.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentRight} + ${normalizedOffset})`;
-                            icon.style.setProperty('right', newRight, 'important');
-                            
+                        const host = this.shadowRoot?.host;
+                        if (!host) return;
+                        const currentLeftRaw = (host.style.getPropertyValue('--widget-icon-left') || '').trim();
+                        const currentRightRaw = (host.style.getPropertyValue('--widget-icon-right') || '').trim();
+                        if (currentLeftRaw && currentLeftRaw !== 'auto') {
+                            const newLeft = currentLeftRaw.includes('calc')
+                                ? currentLeftRaw.replace(')', ` + ${normalizedOffset})`)
+                                : `calc(${currentLeftRaw} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ left: newLeft, right: 'auto' });
+                        } else if (currentRightRaw && currentRightRaw !== 'auto') {
+                            const newRight = currentRightRaw.includes('calc')
+                                ? currentRightRaw.replace(')', ` + ${normalizedOffset})`)
+                                : `calc(${currentRightRaw} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ right: newRight, left: 'auto' });
+                        } else {
+                            this.setIconPositionVars({ right: `calc(10px + ${normalizedOffset})`, left: 'auto' });
                         }
                     } else if (direction === 'vertical') {
-                        // Check which side the icon is positioned on
-                        if (currentTopRaw && currentTopRaw !== 'auto' && currentTopRaw !== '0px') {
-                            // Icon is positioned from top
-                            const currentTop = currentTopRaw;
-                            if (currentTop === '50%') {
-                                // For middle position, adjust the transform
+                        const host = this.shadowRoot?.host;
+                        if (!host) return;
+                        const currentTopRaw = (host.style.getPropertyValue('--widget-icon-top') || '').trim();
+                        const currentBottomRaw = (host.style.getPropertyValue('--widget-icon-bottom') || '').trim();
+                        const currentTransformRaw = (host.style.getPropertyValue('--widget-icon-transform') || '').trim();
+
+                        if (currentTopRaw && currentTopRaw !== 'auto') {
+                            if (currentTopRaw === '50%') {
                                 const currentTransform = currentTransformRaw || 'translateY(-50%)';
-                                const newTransform = currentTransform.includes('calc') ? 
-                                    currentTransform.replace(')', ` + ${normalizedOffset})`) : 
-                                    `translateY(calc(-50% + ${normalizedOffset}))`;
-                                icon.style.setProperty('transform', newTransform, 'important');
-                               
+                                const newTransform = currentTransform.includes('calc')
+                                    ? currentTransform.replace(')', ` + ${normalizedOffset})`)
+                                    : `translateY(calc(-50% + ${normalizedOffset}))`;
+                                this.setIconPositionVars({ transform: newTransform });
                             } else {
-                                const newTop = currentTop.includes('calc') ? 
-                                    currentTop.replace(')', ` + ${normalizedOffset})`) : 
-                                    `calc(${currentTop} + ${normalizedOffset})`;
-                                icon.style.setProperty('top', newTop, 'important');
-                             
+                                const newTop = currentTopRaw.includes('calc')
+                                    ? currentTopRaw.replace(')', ` + ${normalizedOffset})`)
+                                    : `calc(${currentTopRaw} + ${normalizedOffset})`;
+                                this.setIconPositionVars({ top: newTop, bottom: 'auto' });
                             }
-                        } else if (currentBottomRaw && currentBottomRaw !== 'auto' && currentBottomRaw !== '0px') {
-                            // Icon is positioned from bottom
-                            const currentBottom = currentBottomRaw;
-                            const newBottom = currentBottom.includes('calc') ? 
-                                currentBottom.replace(')', ` + ${normalizedOffset})`) : 
-                                `calc(${currentBottom} + ${normalizedOffset})`;
-                            icon.style.setProperty('bottom', newBottom, 'important');
-                           
+                        } else if (currentBottomRaw && currentBottomRaw !== 'auto') {
+                            const newBottom = currentBottomRaw.includes('calc')
+                                ? currentBottomRaw.replace(')', ` + ${normalizedOffset})`)
+                                : `calc(${currentBottomRaw} + ${normalizedOffset})`;
+                            this.setIconPositionVars({ bottom: newBottom, top: 'auto' });
+                        } else {
+                            this.setIconPositionVars({ bottom: `calc(10px + ${normalizedOffset})`, top: 'auto' });
                         }
                     }
                     
