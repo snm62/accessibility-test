@@ -4815,13 +4815,13 @@ font-family: Archivo;
                 @media (min-width: 601px) and (max-width: 1280px) {
                     .accessbit-widget-panel {
                         position: fixed !important;
-                        width: min(680px, calc(100vw - 24px)) !important;
-                        max-width: min(680px, calc(100vw - 24px)) !important;
+                        width: min(576px, calc(100vw - 24px)) !important;
+                        max-width: min(576px, calc(100vw - 24px)) !important;
                         height: calc(100dvh - 30px) !important;
                         max-height: calc(100dvh - 30px) !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
-                        right: var(--panel-right, 20px) !important;
-                        left: auto !important;
+                        right: var(--panel-right, auto) !important;
+                        left: var(--panel-left, auto) !important;
                         top: var(--widget-icon-top, auto) !important;
                         transform: none !important;
                         transition: transform 0.3s ease !important;
@@ -5180,8 +5180,8 @@ font-family: Archivo;
                     .accessbit-widget-panel.mobile-mode,
                     .accessbit-widget-panel.mobile-mode.side-left,
                     .accessbit-widget-panel.mobile-mode.side-right {
-                        left: auto !important;
-                        right: var(--panel-right, 20px) !important;
+                        left: var(--panel-left, auto) !important;
+                        right: var(--panel-right, auto) !important;
                         transform: none !important;
                     }
                     .accessbit-widget-panel.mobile-mode.active,
@@ -6784,7 +6784,7 @@ font-family: Archivo;
                 .color-adjustments-picker-card .color-option { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; flex-shrink: 0; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
                 .color-adjustments-picker-card .color-option svg { width: 34px; height: 34px; display: block; flex-shrink: 0; }
                 .color-adjustments-picker-card .color-option:hover { border-color: #999; }
-                .color-adjustments-picker-card .color-option.selected { border-color: #14b8a6; outline: 2px solid #14b8a6; outline-offset: 1px; }
+                .color-adjustments-picker-card .color-option.selected { border-color: #14b8a6; outline: 2px solid #14b8a6; outline-offset: 2px; box-shadow: none !important; }
                 .color-adjustments-picker-card .picker-clear-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; margin: 0; border: none; background: transparent; cursor: pointer; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 0; vertical-align: middle; }
                 .color-adjustments-picker-card .picker-clear-btn:hover { background: rgba(0,0,0,0.06); }
                 .color-adjustments-picker-card .picker-clear-btn svg { width: 34px; height: 34px; display: block; vertical-align: middle; }
@@ -8885,12 +8885,16 @@ input:checked + .slider::after {
     
     
     
-                .color-option.selected {
-    
-                    border-color: #6366f1;
-    
-                    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #6366f1;
-    
+.color-adjustments-picker-card .color-option.selected {
+
+                    border-color: #14b8a6 !important;
+
+                    outline: 2px solid #14b8a6 !important;
+
+                    outline-offset: 2px !important;
+
+                    box-shadow: none !important;
+
                 }
     
     
@@ -15943,6 +15947,15 @@ keyboardNav: "Keyboard Navigation (Motor)",
         
         updateContentScale() {
             const body = document.body;
+
+            // Hard safety: normalize value every time before computing zoom.
+            const raw = Number(this.contentScale);
+            const normalized = Number.isFinite(raw) ? Math.round(raw) : 100;
+            const safePercent = Math.min(150, Math.max(50, normalized));
+            if (safePercent !== this.contentScale) {
+                this.contentScale = safePercent;
+                if (this.settings) this.settings['content-scale'] = safePercent;
+            }
             
             // If content scale is 100%, reset to normal
             if (this.contentScale === 100) {
@@ -15968,6 +15981,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
             
             const scale = this.contentScale / 100;
             const inverseScale = 1 / scale;
+            const safeInverse = Number.isFinite(inverseScale) ? Math.min(2, Math.max(0.6667, inverseScale)) : 1;
             
             style.textContent = `
                 /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
@@ -15987,7 +16001,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 [id*="accessbit-widget"],
                 .accessbit-widget-panel,
                 #accessbit-widget-icon {
-                    zoom: ${inverseScale} !important;
+                    zoom: ${safeInverse} !important;
                     transition: none !important;
                     will-change: auto !important;
                     contain: layout style !important;
@@ -15996,12 +16010,13 @@ keyboardNav: "Keyboard Navigation (Motor)",
             `;
             
             // Counter-scale widget from inside Shadow DOM so host is unaffected by html zoom
-            this.applyWidgetCounterScale(inverseScale);
+            this.applyWidgetCounterScale(safeInverse);
         }
         
         // Apply counter-scaling to widget elements to maintain fixed size
         applyWidgetCounterScale(inverseScale) {
             if (!this.shadowRoot) return;
+            const safeInverse = Number.isFinite(Number(inverseScale)) ? Math.min(2, Math.max(0.6667, Number(inverseScale))) : 1;
             
             // Inject counter-scaling styles into Shadow DOM
             let counterStyle = this.shadowRoot.getElementById('content-scaling-counter');
@@ -16014,7 +16029,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
             // Use zoom on host so the entire widget (host + shadow contents) counter-scales; inner elements stay 1:1
             counterStyle.textContent = `
                 :host {
-                    zoom: ${inverseScale} !important;
+                    zoom: ${safeInverse} !important;
                     transition: none !important;
                     contain: layout style !important;
                     isolation: isolate !important;
@@ -19172,7 +19187,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             if (this.settings['content-scale'] !== undefined) {
     
-                this.contentScale = this.settings['content-scale'];
+                // Normalize stored value to a safe percent (prevents runaway widget zoom)
+                const raw = Number(this.settings['content-scale']);
+                const normalized = Number.isFinite(raw) ? Math.round(raw) : 100;
+                this.contentScale = Math.min(150, Math.max(50, normalized));
+                this.settings['content-scale'] = this.contentScale;
     
           
     
@@ -19201,6 +19220,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
+            }
+
+            // Hard cleanup: if content scaling is not active, ensure no stale zoom styles remain.
+            // This prevents the trigger icon/widget from inheriting an old extreme `zoom` after DevTools/resizes.
+            if (this.contentScale === 100 || !this.settings['content-scaling']) {
+                try {
+                    const existingStyle = document.getElementById('content-scaling-styles');
+                    if (existingStyle) existingStyle.remove();
+                    if (typeof this.resetWidgetScale === 'function') this.resetWidgetScale();
+                } catch (e) {}
             }
     
             
@@ -33745,9 +33774,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     icon.style.setProperty('justify-content', 'center', 'important');
                     
                     // Force the shape with multiple approaches
-                    icon.setAttribute('data-shape', 'rounded');
-                    icon.classList.remove('circle', 'square');
-                    icon.classList.add('rounded');
+                    icon.setAttribute('data-shape', shape.toLowerCase());
+                    icon.classList.remove('circle', 'square', 'rounded');
+                    icon.classList.add(shape.toLowerCase());
                     
                     // Additional force with direct style assignment
                     icon.style.borderRadius = borderRadius;
@@ -33787,14 +33816,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                            
                             
                             // Last resort: Create a new style element with maximum specificity
+                            const shapeLower = shape.toLowerCase();
                             const style = document.createElement('style');
                             style.textContent = `
-                                .accessbit-widget-icon[data-shape="rounded"] {
+                                .accessbit-widget-icon[data-shape="${shapeLower}"] {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
                                 }
-                                .accessbit-widget-icon.rounded {
+                                .accessbit-widget-icon.${shapeLower} {
                                     border-radius: ${borderRadius} !important;
                                     -webkit-border-radius: ${borderRadius} !important;
                                     -moz-border-radius: ${borderRadius} !important;
