@@ -4120,11 +4120,14 @@ font-family: Archivo;
                 panel.style.pointerEvents = 'auto';
                 panel.style.setProperty('overflow', 'hidden', 'important');
                 panel.style.setProperty('border-radius', '20px', 'important');
+                panel.style.setProperty('position', 'relative', 'important');
                 panel.style.display = 'none';
                 panel.style.visibility = 'hidden';
                 shadowRoot.appendChild(panel);
             }
-            if (hideModal) shadowRoot.appendChild(hideModal);
+            // Keep the hide-confirmation modal INSIDE the widget panel so it cannot float
+            // outside the UI and always remains responsive to the panel size.
+            if (hideModal && panel) panel.appendChild(hideModal);
     
             this.initColorPickerCards();
 
@@ -9416,23 +9419,17 @@ input:checked + .slider::after {
         cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtd2hpdGUiIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC41Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLXdoaXRlKSIvPjwvc3ZnPg==') 24 10, pointer !important;
     }
                 /* Hide Interface Modal Styles */
+                /* Render as an overlay INSIDE the widget panel (responsive) */
                 .hide-interface-modal {
-                    position: sticky !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    right: 0 !important;
-                    bottom: 0 !important;
+                    position: absolute !important;
+                    inset: 0 !important;
                     background: rgba(0, 0, 0, 0.8);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 100001;
-                    /* Keep modal in panel viewport when scrolling */
                     width: 100% !important;
                     height: 100% !important;
-                    min-height: 100% !important;
-                    /* Ensure overlay covers full scrollable area */
-                    max-height: none;
                     overflow: hidden;
                 }
     
@@ -9440,16 +9437,14 @@ input:checked + .slider::after {
                     background: white;
                     border-radius: 12px;
                     box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
-                    /* Position the modal dialog in the center of viewable area */
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    /* Ensure it stays within the panel bounds */
-                    max-width: 400px;
-                    width: 90%;
-                    max-height: 80%;
-                    overflow: hidden;
+                    position: relative;
+                    transform: none;
+                    margin: 16px;
+                    width: min(400px, calc(100% - 32px));
+                    max-height: calc(100% - 32px);
+                    overflow: auto;
+                    -webkit-overflow-scrolling: touch;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
                 }
     
                 .hide-interface-modal .modal-header {
@@ -9465,6 +9460,7 @@ input:checked + .slider::after {
                     color: #1f2937;
                     font-size: 18px;
                     font-weight: 600;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
                 }
     
                 .hide-interface-modal .modal-close {
@@ -9494,6 +9490,7 @@ input:checked + .slider::after {
                     color: #374151;
                     line-height: 1.5;
                     font-size: 14px;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
                 }
     
                 .hide-interface-modal .modal-footer {
@@ -9511,15 +9508,16 @@ input:checked + .slider::after {
                     font-weight: 500;
                     cursor: pointer;
                     transition: all 0.2s ease;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
                 }
     
                 .hide-interface-modal .accept-btn {
-                    background: #3b82f6;
+                    background: #01CE9C;
                     color: white;
                 }
     
                 .hide-interface-modal .accept-btn:hover {
-                    background: #2563eb;
+                    background: #00b88a;
                 }
     
                 .hide-interface-modal .cancel-btn {
@@ -9685,7 +9683,7 @@ input:checked + .slider::after {
             const teal = '#34A2AB';
             const panelRoot = document.createElement('div');
             panelRoot.className = 'accessbit-panel-screenshot accessbit-hide-scrollbar';
-            panelRoot.style.cssText = 'display:flex;flex-direction:column;background:#EAECF2;border-radius:20px;overflow:hidden;min-width:0;width:100%;max-width:100%;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.15);';
+            panelRoot.style.cssText = 'position:relative;display:flex;flex-direction:column;background:#EAECF2;border-radius:20px;overflow:hidden;min-width:0;width:100%;max-width:100%;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.15);';
             const panelHeader = document.createElement('div');
             panelHeader.className = 'panel-header accessbit-screenshot-header';
             panelHeader.style.cssText = 'position:relative;background:' + teal + ';padding:0 18px 54px 18px;border-radius:20px 20px 0 0;min-height:200px;display:flex;flex-direction:column;align-items:center;padding-top:14px;overflow:hidden;box-sizing:border-box;width:100%;';
@@ -9901,7 +9899,8 @@ input:checked + .slider::after {
             modalContent.appendChild(modalFooter);
             
             hideModal.appendChild(modalContent);
-            container.appendChild(hideModal);
+            // Keep modal constrained inside the panel UI
+            panelRoot.appendChild(hideModal);
         }
         
         // Keep old method for reference but mark as deprecated
@@ -32556,31 +32555,25 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             
             if (modal && panel) {
-                // Set modal to cover the entire panel content including scrollable areas
-                const panelScrollHeight = panel.scrollHeight;
-                const panelClientHeight = panel.clientHeight;
+                // Ensure the panel is a positioning context so the modal stays inside it
+                const panelEl = panel;
+                const panelComputed = window.getComputedStyle(panelEl);
+                if (panelComputed.position === 'static') {
+                    panelEl.style.position = 'relative';
+                }
 
-                
-                // Set the modal height to cover the full scrollable content
-                modal.style.height = `${panelScrollHeight}px`;
-                modal.style.minHeight = `${panelScrollHeight}px`;
                 modal.style.display = 'flex';
-                
-                // Position the modal dialog in the center of the viewable area
+
+                // Let CSS flex centering + max sizes handle responsiveness
                 const modalContent = modal.querySelector('.modal-content');
                 if (modalContent) {
-                    // Calculate the center position of the viewable area
-                    const centerTop = (panelClientHeight / 2) - (modalContent.offsetHeight / 2);
-                    modalContent.style.position = 'absolute';
-                    modalContent.style.top = `${Math.max(0, centerTop)}px`;
-                    modalContent.style.left = '50%';
-                    modalContent.style.transform = 'translateX(-50%)';
-                    modalContent.style.margin = '0';
+                    modalContent.style.position = '';
+                    modalContent.style.top = '';
+                    modalContent.style.left = '';
+                    modalContent.style.transform = '';
+                    modalContent.style.margin = '';
                 }
-                
-                
             } else {
-                
             }
         }
         
