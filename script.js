@@ -32050,33 +32050,43 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
             const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
 
-            // Breakpoint-aware trigger positioning on resize (DevTools drag).
-            // This prevents "drifting to center" (stale transform) and "disappearing" (no anchor vars)
-            // when crossing the 1279/1280 breakpoint without a refresh.
+            // Keep trigger positioning responsive while dragging breakpoints.
+            // We explicitly set the CSS vars each time so stale transforms/anchors can't accumulate.
             try {
-                if (this._lastIsMobileOnResize === undefined) this._lastIsMobileOnResize = isMobile;
-                const crossedBreakpoint = this._lastIsMobileOnResize !== isMobile;
-                this._lastIsMobileOnResize = isMobile;
+                const data = this.customizationData || {};
+                const h = (isMobile ? (data.mobileTriggerHorizontalPosition || data.triggerHorizontalPosition) : data.triggerHorizontalPosition || 'Right') || 'Right';
+                const v = (isMobile ? (data.mobileTriggerVerticalPosition || data.triggerVerticalPosition) : data.triggerVerticalPosition || 'Bottom') || 'Bottom';
 
-                if (crossedBreakpoint) {
-                    const data = this.customizationData || {};
-                    if (isMobile) {
-                        // Apply mobile trigger position vars if provided
-                        if (data.mobileTriggerHorizontalPosition && data.mobileTriggerVerticalPosition) {
-                            this.updateMobileTriggerCombinedPosition(data.mobileTriggerHorizontalPosition, data.mobileTriggerVerticalPosition);
-                        } else {
-                            if (data.mobileTriggerHorizontalPosition) this.updateMobileTriggerPosition('horizontal', data.mobileTriggerHorizontalPosition);
-                            if (data.mobileTriggerVerticalPosition) this.updateMobileTriggerPosition('vertical', data.mobileTriggerVerticalPosition);
-                        }
-                        if (data.mobileTriggerHorizontalOffset !== undefined) this.updateMobileTriggerOffset('horizontal', data.mobileTriggerHorizontalOffset);
-                        if (data.mobileTriggerVerticalOffset !== undefined) this.updateMobileTriggerOffset('vertical', data.mobileTriggerVerticalOffset);
-                    } else {
-                        // Apply desktop trigger position vars if provided
-                        if (data.triggerHorizontalPosition) this.updateTriggerPosition('horizontal', data.triggerHorizontalPosition);
-                        if (data.triggerVerticalPosition) this.updateTriggerPosition('vertical', data.triggerVerticalPosition);
-                        if (data.triggerHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', data.triggerHorizontalOffset);
-                        if (data.triggerVerticalOffset !== undefined) this.updateTriggerOffset('vertical', data.triggerVerticalOffset);
-                    }
+                const hLower = String(h).toLowerCase();
+                const vLower = String(v).toLowerCase();
+
+                const left = hLower.includes('left') ? (isMobile ? '10px' : '20px') : 'auto';
+                const right = hLower.includes('right') ? (isMobile ? '10px' : '20px') : 'auto';
+
+                let top = 'auto', bottom = 'auto', transform = 'none';
+                if (vLower.includes('top')) {
+                    top = isMobile ? '10px' : '20px';
+                    bottom = 'auto';
+                    transform = 'none';
+                } else if (vLower.includes('middle') || vLower.includes('center')) {
+                    top = '50%';
+                    bottom = 'auto';
+                    transform = 'translateY(-50%)';
+                } else {
+                    bottom = isMobile ? '10px' : '20px';
+                    top = 'auto';
+                    transform = 'none';
+                }
+
+                this.setIconPositionVars({ left, right, top, bottom, transform });
+
+                // Apply offsets (if any) for the current mode
+                if (isMobile) {
+                    if (data.mobileTriggerHorizontalOffset !== undefined) this.updateMobileTriggerOffset('horizontal', data.mobileTriggerHorizontalOffset);
+                    if (data.mobileTriggerVerticalOffset !== undefined) this.updateMobileTriggerOffset('vertical', data.mobileTriggerVerticalOffset);
+                } else {
+                    if (data.triggerHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', data.triggerHorizontalOffset);
+                    if (data.triggerVerticalOffset !== undefined) this.updateTriggerOffset('vertical', data.triggerVerticalOffset);
                 }
             } catch (e) {}
 
