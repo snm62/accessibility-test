@@ -612,12 +612,36 @@ function applyVisionImpaired(on) {
                 if (!input) return;
                 const enabled = localStorage.getItem('accessbit-widget-vision-impaired') === 'true';
                 try { input.checked = enabled; } catch (_) {}
+                try {
+                    const item = input.closest && input.closest('.profile-item');
+                    if (item) item.classList.toggle('vision-impaired-on', !!enabled);
+                } catch (_) {}
                 if (!input.__viBound) {
                     input.addEventListener('change', function() {
                         const on = !!this.checked;
                         localStorage.setItem('accessbit-widget-vision-impaired', on ? 'true' : 'false');
-                        try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
-                        try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
+                        try {
+                            var widget = window.accessbitWidgetInstance || window.accessbitWidget;
+                            if (widget) {
+                                // Prefer the widget's implementation (injects/removes styles correctly)
+                                on ? widget.enableVisionImpaired() : widget.disableVisionImpaired();
+                            } else {
+                                // Fallback: apply global helper (injects/removes style tag)
+                                if (typeof applyVisionImpaired === 'function') {
+                                    applyVisionImpaired(on);
+                                } else {
+                                    document.documentElement.classList.toggle('vision-impaired', on);
+                                    document.body.classList.toggle('vision-impaired', on);
+                                }
+                            }
+                        } catch (_) {
+                            try { document.documentElement.classList.toggle('vision-impaired', on); } catch (_) {}
+                            try { document.body.classList.toggle('vision-impaired', on); } catch (_) {}
+                        }
+                        try {
+                            const item = this.closest && this.closest('.profile-item');
+                            if (item) item.classList.toggle('vision-impaired-on', on);
+                        } catch (_) {}
                         try {
                             if (on) {
                                 document.documentElement.setAttribute('data-vision-impaired', 'true');
@@ -4288,10 +4312,18 @@ font-family: Archivo;
                     );
                     if (!viToggle || viToggle.__viBound) return;
                     try { viToggle.checked = viEnabled; } catch (_) {}
+                    try {
+                        const item = viToggle.closest && viToggle.closest('.profile-item');
+                        if (item) item.classList.toggle('vision-impaired-on', !!viEnabled);
+                    } catch (_) {}
                     viToggle.addEventListener('change', () => {
                         const on = !!viToggle.checked;
                         localStorage.setItem('accessbit-widget-vision-impaired', on ? 'true' : 'false');
-                        applyVisionImpaired(on);
+                        try { this.enableVisionImpaired && this.disableVisionImpaired ? (on ? this.enableVisionImpaired() : this.disableVisionImpaired()) : applyVisionImpaired(on); } catch (_) { try { applyVisionImpaired(on); } catch (_) {} }
+                        try {
+                            const item = viToggle.closest && viToggle.closest('.profile-item');
+                            if (item) item.classList.toggle('vision-impaired-on', on);
+                        } catch (_) {}
                     });
                     viToggle.__viBound = true;
                 };
@@ -7411,6 +7443,16 @@ font-family: Archivo;
                     display: block;
                 }
                 .profile-item:has(#vision-impaired:checked) .vision-eye-path {
+                    fill: #01CE9C !important;
+                }
+                /* Safari fallback (and general robustness): JS toggles class on the card */
+                .profile-item.vision-impaired-on .vision-ring-off {
+                    display: none;
+                }
+                .profile-item.vision-impaired-on .vision-ring-on {
+                    display: block;
+                }
+                .profile-item.vision-impaired-on .vision-eye-path {
                     fill: #01CE9C !important;
                 }
                 /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
@@ -28755,6 +28797,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const viToggle = this.shadowRoot?.getElementById('vision-impaired') || this.shadowRoot?.getElementById('visionImpaired');
                 if (viToggle) {
                     viToggle.checked = true;
+                    try {
+                        const item = viToggle.closest && viToggle.closest('.profile-item');
+                        if (item) item.classList.add('vision-impaired-on');
+                    } catch (_) {}
                 }
 
                 // Apply comprehensive website scaling and contrast enhancement
@@ -28926,6 +28972,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const viToggle = this.shadowRoot?.getElementById('vision-impaired') || this.shadowRoot?.getElementById('visionImpaired');
                 if (viToggle) {
                     viToggle.checked = false;
+                    try {
+                        const item = viToggle.closest && viToggle.closest('.profile-item');
+                        if (item) item.classList.remove('vision-impaired-on');
+                    } catch (_) {}
                 }
 
                 // Remove comprehensive vision impaired styles
