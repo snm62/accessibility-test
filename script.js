@@ -1850,10 +1850,6 @@ class AccessibilityWidget {
                 return;
             }
     
-            this.addFontAwesome();
-    
-            // CSS is loaded in createWidget() via getWidgetCSS() - no need for separate addCSS()
-    
             // Check if interface should be hidden
             if (localStorage.getItem('accessbit-widget-hidden') === 'true') {
                 console.log('[ICON HIDE] init() - Interface is hidden in localStorage, preventing widget creation');
@@ -3435,23 +3431,6 @@ font-family: Archivo;
     
     
     
-        addFontAwesome() {
-            if (this.isDesignerMode()) return;
-            const faUrl = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-            if (document.querySelector('link[href*="font-awesome"]')) return;
-            const preload = document.createElement('link');
-            preload.rel = 'preload';
-            preload.as = 'style';
-            preload.href = faUrl;
-            document.head.appendChild(preload);
-            const fontAwesome = document.createElement('link');
-            fontAwesome.rel = 'stylesheet';
-            fontAwesome.href = faUrl;
-            document.head.appendChild(fontAwesome);
-        }
-    
-    
-    
         addCSS() {
     
             // Check if CSS is already loaded
@@ -4494,9 +4473,6 @@ font-family: Archivo;
         getWidgetCSS() {
     
             return `
-            /* Import FontAwesome for icons */
-            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-            
             /* Force icon shape overrides - must come first */
             .accessbit-widget-icon {
                 /* REMOVED empty rule that was potentially conflicting */
@@ -4861,6 +4837,66 @@ font-family: Archivo;
                     outline: none !important;
                     box-shadow: none !important;
                     background: inherit !important;
+                }
+
+                /* Unified mobile + tablet feature text sizing (≤1024px).
+                   Makes ALL feature cards (profiles, sliders, useful links) consistent, without touching desktop. */
+                @media (max-width: 1024px) {
+                    /* Primary feature titles: Seizure, Vision, ADHD, Cognitive, Keyboard, Blind Users, etc. */
+                    #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .content-adjustments-card h4,
+                    #accessbit-widget-panel .contrast-style-card h4,
+                    #accessbit-widget-panel .useful-links-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature descriptions / secondary text */
+                    #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .content-adjustments-card p,
+                    #accessbit-widget-panel .contrast-style-card p {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Profile cards that wrap text in .profile-info */
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    /* Slider cards: Content Scaling / Font Size / Letter Spacing / Line Height labels and 100% values */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Useful Links select/trigger text */
+                    #accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    #accessbit-widget-panel .useful-links-card #useful-links-select,
+                    #accessbit-widget-panel .useful-links-card .useful-links-select-wrap select {
+                        font-size: 16px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Header action buttons: make them readable on mobile + tablet */
+                    #accessbit-widget-panel .panel-header .action-btn,
+                    #accessbit-widget-panel .widget-header .action-btn {
+                        font-size: 13px !important;
+                        min-height: 28px !important;
+                        padding: 6px 12px !important;
+                    }
                 }
 
                 /* When Highlight Focus is OFF, suppress custom purple focus ring inside widget UI */
@@ -5564,9 +5600,21 @@ font-family: Archivo;
                     /* Desktop: larger primary action buttons (Reset / Statement / Hide Interface) */
                     @media (min-width: 1281px) {
                         .accessbit-widget-panel .action-btn {
-                            font-size: 13px;
+                            font-size: 15px;
                             padding: 10px 22px !important;
                             min-height: 44px !important;
+                        }
+                    }
+
+                    /* Tablet (>=768px): keep header primary action buttons at 15px */
+                    @media (min-width: 768px) and (max-width: 1280px) {
+                        #accessbit-widget-panel .panel-header #reset-settings,
+                        #accessbit-widget-panel .panel-header #statement,
+                        #accessbit-widget-panel .panel-header #hide-interface,
+                        #accessbit-widget-panel .widget-header #reset-settings,
+                        #accessbit-widget-panel .widget-header #statement,
+                        #accessbit-widget-panel .widget-header #hide-interface {
+                            font-size: 15px !important;
                         }
                     }
                     .accessbit-widget-panel .profile-item {
@@ -5668,7 +5716,10 @@ font-family: Archivo;
                 @media (max-width: 819px) and (min-width: 769px) {
                     .accessbit-widget-panel { padding: 16px !important; overflow-y: auto !important; }
                     .accessbit-widget-panel .panel-header h2,
-                    .accessbit-widget-panel .widget-header h2 { margin-bottom: 12px !important; }
+                    .accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        margin-bottom: 12px !important;
+                    }
                     .accessbit-widget-panel h3 { margin-bottom: 10px !important; }
                     .accessbit-widget-panel .profile-item { padding: 10px !important; margin-bottom: 8px !important; }
                     .accessbit-widget-panel .action-btn { padding: 8px 12px !important; }
@@ -5753,7 +5804,7 @@ font-family: Archivo;
                     .accessbit-panel-screenshot .action-buttons {
                         flex-direction: column !important;
                         flex-wrap: wrap !important;
-                        align-items: stretch !important;
+                        align-items: flex-start !important;
                         justify-content: center !important;
                         gap: 6px !important;
                     }
@@ -5763,12 +5814,10 @@ font-family: Archivo;
                     .accessbit-widget-panel .panel-header .action-btn,
                     .accessbit-widget-panel .widget-header .action-btn,
                     .accessbit-panel-screenshot .panel-header .action-btn {
-                        width: 100% !important;
-                        max-width: 100% !important;
+                        width: auto !important;
+                        max-width: max-content !important;
                         min-width: 0 !important;
-                        font-size: 11px !important;
-                        padding: 4px 8px !important;
-                        min-height: 22px !important;
+                        align-self: flex-start !important;
                     }
                     /* Toggles on mobile: slightly larger (38x20), green when on; no inner ring/bar */
                     .accessbit-widget-panel .toggle-switch,
@@ -5816,12 +5865,7 @@ font-family: Archivo;
                     .accessbit-widget-panel .white-content-section .content-adjustments-title,
                     .accessbit-widget-panel .white-content-section .color-adjustments-title { margin: 10px 0 6px 0 !important; }
                     .accessbit-widget-panel .white-content-section .interface-controls-title { margin: 6px 0 10px 0 !important; }
-                    .accessbit-widget-panel .profile-item h4,
-                    .accessbit-panel-screenshot .profile-item h4,
-                    .accessbit-widget-panel .content-adjustments-card h4,
-                    .accessbit-widget-panel .contrast-style-card h4 { font-size: 12px; line-height: 1.25; }
-                    .accessbit-widget-panel .profile-item p,
-                    .accessbit-panel-screenshot .profile-item p { font-size: 10px; line-height: 1.3; }
+                    /* Feature text font-size/line-height for mobile is controlled by unified ≤1024px block below. */
                     .accessbit-widget-panel .profile-item-icon,
                     .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; flex: 0 0 43px !important; flex-shrink: 0 !important; box-sizing: content-box !important; padding: 0 !important; }
                     .accessbit-widget-panel .profile-item-icon svg,
@@ -5888,8 +5932,8 @@ font-family: Archivo;
                     .accessbit-widget-panel .profile-item:has(#screen-reader) p,
                     .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
                     .accessbit-widget-panel .profile-item:has(#screen-reader) small {
-                        font-size: 11px !important;
-                        line-height: 15px !important;
+                        font-size: 14px !important;
+                        line-height: 20px !important;
                     }
                     .accessbit-widget-panel .panel-header .reset-settings-icon svg,
                     .accessbit-widget-panel .panel-header .statement-btn-icon svg,
@@ -6092,6 +6136,78 @@ font-family: Archivo;
 
                 /* Tablet (601px–768px): keep picker + header controls readable */
                 @media (max-width: 768px) and (min-width: 601px) {
+                    /* 768px consistency: make headings smaller and feature text larger than phone */
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2,
+                    .accessbit-panel-screenshot .panel-header h2,
+                    :host .accessbit-widget-panel .panel-header h2,
+                    :host .accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+                    .accessbit-widget-panel h3,
+                    .accessbit-widget-panel .content-adjustments-title,
+                    .accessbit-widget-panel .color-adjustments-title,
+                    .accessbit-widget-panel .interface-controls-title,
+                    .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel h3 {
+                        font-size: 17px !important;
+                        line-height: 21px !important;
+                    }
+                    .accessbit-widget-panel .profile-item h4,
+                    .accessbit-panel-screenshot .profile-item h4,
+                    .accessbit-widget-panel .content-adjustments-card h4,
+                    .accessbit-widget-panel .contrast-style-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item p,
+                    .accessbit-panel-screenshot .profile-item p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                    /* Some cards use .profile-info wrappers; ensure those match too */
+                    .accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Slider cards (Content Scaling / Font Size / Letter Spacing / Line Height): match feature text sizing */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Useful Links: match feature text sizing */
+                    #accessbit-widget-panel .useful-links-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    #accessbit-widget-panel .useful-links-card #useful-links-select,
+                    #accessbit-widget-panel .useful-links-card .useful-links-select-wrap select {
+                        font-size: 16px !important;
+                        line-height: 1.35 !important;
+                    }
+
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option,
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
                         width: 22px !important;
@@ -6143,8 +6259,25 @@ font-family: Archivo;
                     .accessbit-widget-panel .profile-item:has(#screen-reader) .profile-info > div > p:first-of-type,
                     .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
                     .accessbit-widget-panel .profile-item:has(#screen-reader) small {
-                        font-size: 11px !important;
-                        line-height: 15px !important;
+                        font-size: 14px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* 769–1280px (e.g. 783px): increase profile feature text sizes */
+                    .accessbit-widget-panel .profile-item h4,
+                    .accessbit-panel-screenshot .profile-item h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item p,
+                    .accessbit-panel-screenshot .profile-item p {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                    }
+                    .accessbit-widget-panel .profile-item .profile-info h4,
+                    .accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: inherit !important;
+                        line-height: inherit !important;
                     }
                     /* Smaller colour picker and icons at 769–1280px to prevent overlap (e.g. 776px) */
                     .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon,
@@ -6208,7 +6341,7 @@ font-family: Archivo;
                     .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
                     .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
                     .accessbit-widget-panel .useful-links-card #useful-links-select,
-                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select { font-size: 12px !important; line-height: 1.3 !important; }
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select { font-size: 16px !important; line-height: 1.3 !important; }
                 }
     
     
@@ -6729,6 +6862,70 @@ font-family: Archivo;
                     white-space: nowrap;
 
                 }
+
+                /* Desktop: Accessibility Controls title size */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel h2 {
+                        font-size: 24px !important;
+                    }
+                }
+
+                /* Tablet (>=768px): Accessibility Controls title size */
+                @media (min-width: 768px) and (max-width: 1280px) {
+                    .accessbit-widget-panel h2 {
+                        font-size: 24px !important;
+                    }
+                }
+
+                /* Desktop: Accessibility Adjustments heading + feature text sizing */
+                @media (min-width: 1281px) {
+                    /* Force "Accessibility Adjustments" heading exact size */
+                    #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 18px !important;
+                    }
+                    /* "Accessibility Adjustments" section title */
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+
+                    /* Feature titles: Seizure / Vision / ADHD / Cognitive / Keyboard / Blind Users etc. */
+                    #accessbit-widget-panel .profile-item h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature descriptions under those titles */
+                    #accessbit-widget-panel .profile-item p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Desktop: Keyboard Navigation prompt line styling */
+                    #accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p {
+                        font-family: Archivo;
+                        font-weight: 400;
+                        font-style: italic;
+                        font-size: 14px !important;
+                        color: #4A5565 !important;
+                        line-height: 20px !important;
+                        letter-spacing: -0.15px;
+                    }
+
+                    /* Desktop: Keyboard Navigation second line color "(Activates with Screen Reader)" */
+                    #accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p:last-child {
+                        color: #524072 !important;
+                    }
+                }
+
+                /* Tablet (>=768px): Accessibility Adjustments heading size */
+                @media (min-width: 768px) and (max-width: 1280px) {
+                    #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 18px !important;
+                    }
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+                }
     
                 .accessbit-widget-panel .panel-header h2,
                 .accessbit-widget-panel .widget-header h2 {
@@ -6787,11 +6984,11 @@ font-family: Archivo;
                     font-family: Archivo;
                     font-weight: 400;
                     font-style: italic;
-                    font-size: 16px;
+                    font-size: 14px;
                     line-height: 20px;
                     letter-spacing: -0.15px;
                     vertical-align: bottom;
-                    color: #4A5565;
+                    color: #524072;
                     leading-trim: cap;
                     text-box-trim: cap;
                 }
@@ -9537,7 +9734,7 @@ input:checked + .slider::after {
                         width: 100% !important;
                         max-width: 100% !important;
                         height: 34px !important;
-                        font-size: 12px !important;
+                        font-size: 16px !important;
                     }
                 }
                 .useful-links-custom-trigger {
@@ -9554,7 +9751,7 @@ input:checked + .slider::after {
                     cursor: pointer !important;
                     font-family: Archivo, sans-serif !important;
                     font-weight: 500 !important;
-                    font-size: 20px !important;
+                    font-size: 16px !important;
                     line-height: 27px !important;
                     letter-spacing: -0.44px !important;
                     color: #000000 !important;
@@ -9608,6 +9805,77 @@ input:checked + .slider::after {
                 .useful-links-card,
                 .useful-links-custom-dropdown {
                     overflow: visible !important;
+                }
+
+                /* FINAL tablet (601–768px) override: force profile titles/descriptions */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* FINAL mobile (≤768px, including 420/400/375/320/240): force all requested typography */
+                @media (max-width: 768px) {
+                    /* Accessibility Controls (panel header title) */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+
+                    /* Header action buttons: Reset Settings / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments heading (profilesTitle) */
+                    #accessbit-widget-panel .white-content-section > h3,
+                    #accessbit-widget-panel .white-content-section h3,
+                    :host #accessbit-widget-panel .white-content-section > h3,
+                    :host #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 16px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* Feature titles + descriptions (profiles) */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 15px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
                 }
                 /* Override .profile-item overflow so dropdown list can open downward (profile-item sets overflow-x: hidden which forces overflow-y to auto and clips the list) */
                 .accessbit-widget-panel .useful-links-card,
@@ -9953,6 +10221,197 @@ input:checked + .slider::after {
                 .hide-interface-modal .cancel-btn:hover {
                     background: #f9fafb;
                 }
+
+                /* === ABSOLUTE FINAL TYPOGRAPHY OVERRIDES (must be last in CSS) === */
+                /* Mobile (≤768px, including 420/400/375/320/240) */
+                @media (max-width: 768px) {
+                    /* When action buttons stack vertically, do NOT force full width */
+                    #accessbit-widget-panel .panel-header .action-buttons,
+                    #accessbit-widget-panel .widget-header .action-buttons,
+                    :host #accessbit-widget-panel .panel-header .action-buttons,
+                    :host #accessbit-widget-panel .widget-header .action-buttons {
+                        width: auto !important;
+                        max-width: none !important;
+                        align-items: stretch !important;
+                    }
+                    #accessbit-widget-panel .panel-header .action-buttons .action-btn,
+                    #accessbit-widget-panel .widget-header .action-buttons .action-btn,
+                    :host #accessbit-widget-panel .panel-header .action-buttons .action-btn,
+                    :host #accessbit-widget-panel .widget-header .action-buttons .action-btn {
+                        /* Same width for all stacked buttons (not full-width) */
+                        width: min(240px, calc(100vw - 80px)) !important;
+                        max-width: min(240px, calc(100vw - 80px)) !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                        align-self: stretch !important;
+                    }
+
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+
+                    /* Reset / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments (only the main section title in white content area) */
+                    #accessbit-widget-panel .white-content-section > h3:first-child,
+                    #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),
+                    :host #accessbit-widget-panel .white-content-section > h3:first-child,
+                    :host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 16px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 15px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* Tablet prompt sizing (601–768px): force profile titles/descriptions */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* iPad / tablet (769–819px): requested typography */
+                @media (max-width: 819px) and (min-width: 769px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Header action buttons */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments (main section title) */
+                    #accessbit-widget-panel .white-content-section > h3:first-child,
+                    #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),
+                    :host #accessbit-widget-panel .white-content-section > h3:first-child,
+                    :host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                        line-height: 22px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* Tablet/base (820–1024px): requested typography (covers 1024px screens) */
+                @media (max-width: 1024px) and (min-width: 820px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Slider titles: Font Sizing / Line Height / Letter Spacing */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
     
             `;
     
@@ -10232,8 +10691,8 @@ input:checked + .slider::after {
                 { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc', iconSvg: '<svg width=\"43\" height=\"43\" viewBox=\"0 0 43 43\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20.5\" fill=\"#ECEDED\"/><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20\" stroke=\"black\" stroke-opacity=\"0.1\"/><circle class=\"vision-ring-on\" cx=\"21.5\" cy=\"21.5\" r=\"19.5\" fill=\"#D9F8F0\" stroke=\"#01CE9C\" stroke-width=\"2\"/><g transform=\"translate(11,15)\"><path class=\"vision-eye-path\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"black\"/></g></svg>' },
                 { id: 'adhd-friendly', title: 'ADHD Friendly Profile', description: 'More focus & fewer distractions', ariaLabel: 'ADHD Friendly Profile - Reduces distractions and highlights focus', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.4167 19.375V17.9584C14.4167 15.8334 15.8334 14.4167 17.9584 14.4167H25.0417C27.1667 14.4167 28.5834 15.8334 28.5834 17.9584V19.375" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 23.625V25.0417C14.4167 27.1667 15.8334 28.5833 17.9584 28.5833H25.0417C27.1667 28.5833 28.5834 27.1667 28.5834 25.0417V23.625" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 21.5H28.5834" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
                 { id: 'cognitive-disability', title: 'Cognitive Disability Profile', description: 'Assists with reading & focusing', ariaLabel: 'Cognitive Disability Profile - Simplifies interface and content', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22.0001 24.5C23.3808 24.5 24.5001 23.3807 24.5001 22C24.5001 20.6193 23.3808 19.5 22.0001 19.5C20.6194 19.5 19.5001 20.6193 19.5001 22C19.5001 23.3807 20.6194 24.5 22.0001 24.5Z" fill="black"/><path d="M22.8334 15.3909V13.6667H21.1667V15.3909C19.7002 15.5778 18.3373 16.2465 17.2919 17.2919C16.2465 18.3372 15.5779 19.7002 15.3909 21.1667H13.6667V22.8334H15.3909C15.5777 24.2999 16.2463 25.6629 17.2918 26.7083C18.3372 27.7538 19.7002 28.4224 21.1667 28.6092V30.3334H22.8334V28.6092C24.3 28.4224 25.663 27.7538 26.7084 26.7083C27.7538 25.6629 28.4224 24.2999 28.6092 22.8334H30.3334V21.1667H28.6092C28.4223 19.7002 27.7536 18.3372 26.7083 17.2919C25.6629 16.2465 24.2999 15.5778 22.8334 15.3909ZM22.0001 27C19.2426 27 17.0001 24.7575 17.0001 22C17.0001 19.2425 19.2426 17 22.0001 17C24.7576 17 27.0001 19.2425 27.0001 22C27.0001 24.7575 24.7576 27 22.0001 27Z" fill="black"/></svg>' },
-                { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts' }, smallText: '(Activates with Screen Reader)', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
-                { id: 'screen-reader', title: 'Blind Users (Screen Reader)', description: 'Optimize website for screen-readers', ariaLabel: 'Screen Reader - Optimize for screen readers', extraContent: { type: 'description', text: 'This profile adjusts the website to be compatible with screen-readers such as JAWS, NVDA, VoiceOver, and TalkBack. Screen-reader software is installed on the blind user\'s computer and smartphone, and websites should ensure compatibility.' }, smallText: 'Activates with Keyboard Navigation', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
+                { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile prompts automatically for keyboard users.' }, smallText: '(Activates with Screen Reader)', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
+                { id: 'screen-reader', title: 'Blind Users (Screen Reader)', description: 'Optimize website for screen-readers', ariaLabel: 'Screen Reader - Optimize for screen readers', extraContent: { type: 'description', text: 'Activates with Keyboard Navigation' }, smallText: 'Activates with Keyboard Navigation', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
                 { id: 'content-scaling', title: 'Content Scaling', description: 'Scale content with arrow controls', ariaLabel: 'Content Scaling - Adjust content size for better readability', extraContent: { type: 'scaling-controls', className: 'scaling-controls', id: 'content-scaling-controls', style: 'display: none; margin-top: 10px;', decreaseId: 'decrease-content-scale-btn', decreaseLabel: 'Decrease content scale by 2%', decreaseText: '-2%', valueId: 'content-scale-value', valueText: '100%', increaseId: 'increase-content-scale-btn', increaseLabel: 'Increase content scale by 2%', increaseText: '+2%' } },
                 { id: 'readable-font', title: 'Readable Font', description: 'High-legibility fonts', ariaLabel: 'Readable Font - Use dyslexia-friendly fonts' },
                 { id: 'highlight-titles', title: 'Highlight Titles', description: 'Add boxes around heading tags (h1-h6)', ariaLabel: 'Highlight Titles - Emphasize headings and titles' },
@@ -10534,9 +10993,9 @@ input:checked + .slider::after {
                             <div>
                                 <h4>Keyboard Navigation (Motor)</h4>
                                 <div class="profile-description">
-                                    <p>This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts</p>
+                                    <p>This profile prompts automatically for keyboard users.</p>
+                                    <p>(Activates with Screen Reader)</p>
                                 </div>
-                                <small class="profile-activates-label">(Activates with Screen Reader)</small>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -10563,9 +11022,6 @@ input:checked + .slider::after {
                             <div>
                                 <h4>Blind Users (Screen Reader)</h4>
                                 <p>Optimize website for screen-readers</p>
-                                <div class="profile-description">
-                                    <p>This profile adjusts the website to be compatible with screen-readers such as JAWS, NVDA, VoiceOver, and TalkBack. Screen-reader software is installed on the blind user's computer and smartphone, and websites should ensure compatibility.</p>
-                                </div>
                                 <small class="profile-activates-label">Activates with Keyboard Navigation</small>
                             </div>
                         </div>
@@ -11397,13 +11853,13 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     // Additional detailed descriptions
     
-                    keyboardNavDetailed: "This profile enables motor-impaired persons to operate the website using keyboard keys (Tab, Shift+Tab, Enter) and shortcuts (e.g., \"M\" for menus, \"H\" for headings, \"F\" for forms, \"B\" for buttons, \"G\" for graphics).",
+                    keyboardNavDetailed: "This profile prompts automatically for keyboard users.",
     
-                    keyboardNavNote: "Note: This profile prompts automatically for keyboard users.",
+                    keyboardNavNote: "(Activates with Screen Reader)",
     
-                    screenReaderDetailed: "This profile adjusts the website to be compatible with screen-readers such as JAWS, NVDA, VoiceOver, and TalkBack. Screen-reader software is installed on the blind user's computer and smartphone, and websites should ensure compatibility.",
+                    screenReaderDetailed: "Activates with Keyboard Navigation",
     
-                    screenReaderNote: "Note: This profile prompts automatically to screen-readers.",
+                    screenReaderNote: "",
     
                     activatesWithScreenReader: "(Activates with Screen Reader)",
     
@@ -33254,7 +33710,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             const screenReaderDescription = this.shadowRoot?.querySelector('#screen-reader')?.closest('.profile-item')?.querySelector('.profile-description p');
             if (screenReaderDescription && content.screenReaderDetailed) {
                 screenReaderDescription.textContent = content.screenReaderDetailed;
-
             }
             
             // Update screen reader note
