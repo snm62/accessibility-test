@@ -544,19 +544,111 @@ function __abInstallToggleCardClassSync(root) {
     try {
         if (!root || root.__abToggleCardClassSyncInstalled) return;
         root.__abToggleCardClassSyncInstalled = true;
+        let syncScheduled = false;
+        const syncAll = () => {
+            try {
+                const inputs = root.querySelectorAll && root.querySelectorAll('input[type="checkbox"][id]');
+                if (inputs && inputs.forEach) inputs.forEach((i) => __abSyncToggleCardOnClass(i));
+            } catch (_) {}
+        };
+        const scheduleSyncAll = () => {
+            if (syncScheduled) return;
+            syncScheduled = true;
+            try {
+                (window.requestAnimationFrame || setTimeout)(() => {
+                    syncScheduled = false;
+                    syncAll();
+                }, 0);
+            } catch (_) {
+                syncScheduled = false;
+                syncAll();
+            }
+            // Some widget handlers update other toggles asynchronously; re-sync shortly after too.
+            try { setTimeout(syncAll, 50); } catch (_) {}
+            try { setTimeout(syncAll, 150); } catch (_) {}
+        };
         // Initial sync
         try {
-            const inputs = root.querySelectorAll && root.querySelectorAll('input[type="checkbox"][id]');
-            if (inputs && inputs.forEach) inputs.forEach((i) => __abSyncToggleCardOnClass(i));
+            syncAll();
         } catch (_) {}
         // Live sync
         try {
             root.addEventListener('change', (e) => {
                 const t = e && e.target;
                 if (t && t.matches && t.matches('input[type="checkbox"][id]')) {
+                    // Mutually exclusive text alignment toggles
+                    try {
+                        if (!root.__abAlignSyncing && (t.id === 'align-left' || t.id === 'align-center' || t.id === 'align-right')) {
+                            root.__abAlignSyncing = true;
+                            if (t.checked) {
+                                const others = ['align-left', 'align-center', 'align-right'].filter((id) => id !== t.id);
+                                others.forEach((id) => {
+                                    const other = root.getElementById ? root.getElementById(id) : (root.querySelector && root.querySelector(`#${CSS && CSS.escape ? CSS.escape(id) : id}`));
+                                    if (other && other.checked) {
+                                        other.checked = false;
+                                        // Fire change so feature logic + UI state fully updates
+                                        try { other.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                                    }
+                                    // Ensure Safari-safe classes are removed immediately
+                                    try { __abSyncToggleCardOnClass(other); } catch (_) {}
+                                });
+                            }
+                        }
+                    } catch (_) {} finally {
+                        try { root.__abAlignSyncing = false; } catch (_) {}
+                    }
+
+                    // Mutually exclusive contrast mode toggles (dark/light/high)
+                    try {
+                        if (!root.__abContrastSyncing && (t.id === 'dark-contrast' || t.id === 'light-contrast' || t.id === 'high-contrast')) {
+                            root.__abContrastSyncing = true;
+                            if (t.checked) {
+                                const others = ['dark-contrast', 'light-contrast', 'high-contrast'].filter((id) => id !== t.id);
+                                others.forEach((id) => {
+                                    const other = root.getElementById ? root.getElementById(id) : (root.querySelector && root.querySelector(`#${CSS && CSS.escape ? CSS.escape(id) : id}`));
+                                    if (other && other.checked) {
+                                        other.checked = false;
+                                        try { other.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                                    }
+                                    try { __abSyncToggleCardOnClass(other); } catch (_) {}
+                                });
+                            }
+                        }
+                    } catch (_) {} finally {
+                        try { root.__abContrastSyncing = false; } catch (_) {}
+                    }
+
+                    // Mutually exclusive cursor size toggles (black/white)
+                    try {
+                        if (!root.__abCursorSyncing && (t.id === 'big-black-cursor' || t.id === 'big-white-cursor')) {
+                            root.__abCursorSyncing = true;
+                            if (t.checked) {
+                                const others = ['big-black-cursor', 'big-white-cursor'].filter((id) => id !== t.id);
+                                others.forEach((id) => {
+                                    const other = root.getElementById ? root.getElementById(id) : (root.querySelector && root.querySelector(`#${CSS && CSS.escape ? CSS.escape(id) : id}`));
+                                    if (other && other.checked) {
+                                        other.checked = false;
+                                        try { other.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                                    }
+                                    try { __abSyncToggleCardOnClass(other); } catch (_) {}
+                                });
+                            }
+                        }
+                    } catch (_) {} finally {
+                        try { root.__abCursorSyncing = false; } catch (_) {}
+                    }
+
                     __abSyncToggleCardOnClass(t);
+                    // Some interactions re-render parts of the panel; re-sync all cards next frame
+                    scheduleSyncAll();
                 }
             }, true);
+        } catch (_) {}
+        // DOM changes (re-render) can drop card classes; keep them in sync
+        try {
+            const mo = new MutationObserver(() => scheduleSyncAll());
+            mo.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['checked', 'class'] });
+            root.__abToggleCardClassSyncObserver = mo;
         } catch (_) {}
     } catch (_) {}
 }
