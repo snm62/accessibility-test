@@ -526,6 +526,41 @@ function applyVisionImpaired(on) {
     }
 })();
 
+// Safari-safe icon styling: toggle a class on the card instead of relying on :has(:checked)
+function __abSyncToggleCardOnClass(input) {
+    try {
+        if (!input || !input.id) return;
+        const on = !!input.checked;
+        const cls = input.id + '-on';
+        const card = input.closest && (input.closest('.profile-item') || input.closest('.color-adjustments-card') || input.closest('.contrast-style-card') || input.closest('.content-adjustments-card'));
+        if (card && card.classList) {
+            card.classList.toggle(cls, on);
+            card.classList.toggle('ab-toggle-on', on);
+        }
+    } catch (_) {}
+}
+
+function __abInstallToggleCardClassSync(root) {
+    try {
+        if (!root || root.__abToggleCardClassSyncInstalled) return;
+        root.__abToggleCardClassSyncInstalled = true;
+        // Initial sync
+        try {
+            const inputs = root.querySelectorAll && root.querySelectorAll('input[type="checkbox"][id]');
+            if (inputs && inputs.forEach) inputs.forEach((i) => __abSyncToggleCardOnClass(i));
+        } catch (_) {}
+        // Live sync
+        try {
+            root.addEventListener('change', (e) => {
+                const t = e && e.target;
+                if (t && t.matches && t.matches('input[type="checkbox"][id]')) {
+                    __abSyncToggleCardOnClass(t);
+                }
+            }, true);
+        } catch (_) {}
+    } catch (_) {}
+}
+
 // Ensure the seizure-safe toggle actually applies classes and storage immediately
 (function() {
     try {
@@ -3351,42 +3386,6 @@ font-family: Archivo;
     .accessbit-widget-icon[data-shape="circle"] {
         border-radius: 50%;
     }
-
-    // Safari-safe icon styling: toggle a class on the card instead of relying on :has(:checked)
-    syncToggleCardOnClass(input) {
-        try {
-            if (!input || !input.id) return;
-            const on = !!input.checked;
-            const cls = input.id + '-on';
-            const card =
-                (input.closest && (input.closest('.profile-item') || input.closest('.color-adjustments-card') || input.closest('.contrast-style-card') || input.closest('.content-adjustments-card')));
-            if (card && card.classList) {
-                card.classList.toggle(cls, on);
-                card.classList.toggle('ab-toggle-on', on);
-            }
-        } catch (_) {}
-    }
-
-    installToggleCardClassSync(root) {
-        try {
-            if (!root || root.__abToggleCardClassSyncInstalled) return;
-            root.__abToggleCardClassSyncInstalled = true;
-            // Initial sync
-            try {
-                const inputs = root.querySelectorAll && root.querySelectorAll('input[type="checkbox"][id]');
-                if (inputs && inputs.forEach) inputs.forEach((i) => this.syncToggleCardOnClass(i));
-            } catch (_) {}
-            // Live sync
-            try {
-                root.addEventListener('change', (e) => {
-                    const t = e && e.target;
-                    if (t && t.matches && t.matches('input[type="checkbox"][id]')) {
-                        this.syncToggleCardOnClass(t);
-                    }
-                }, true);
-            } catch (_) {}
-        } catch (_) {}
-    }
     
     .accessbit-widget-icon[data-shape="rounded"] {
         border-radius: 12px;
@@ -4091,7 +4090,7 @@ font-family: Archivo;
             this.shadowRoot = shadowRoot;
 
             // Safari-safe: keep icon colors in sync without :has()
-            this.installToggleCardClassSync(shadowRoot);
+            try { __abInstallToggleCardClassSync(shadowRoot); } catch (_) {}
     
     
     
