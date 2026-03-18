@@ -534,6 +534,12 @@ function __abSyncToggleCardOnClass(input) {
         const cls = input.id + '-on';
         const card = input.closest && (input.closest('.profile-item') || input.closest('.color-adjustments-card') || input.closest('.contrast-style-card') || input.closest('.content-adjustments-card'));
         if (card && card.classList) {
+            // Slider cards like Content Scaling shouldn't get icon/border "toggle-on" coloring
+            if (input.id === 'content-scaling') {
+                try { card.classList.remove(cls); } catch (_) {}
+                try { card.classList.remove('ab-toggle-on'); } catch (_) {}
+                return;
+            }
             card.classList.toggle(cls, on);
             card.classList.toggle('ab-toggle-on', on);
         }
@@ -4801,9 +4807,60 @@ font-family: Archivo;
                 }
                 
                 body.highlight-focus .action-btn:focus-visible {
-                    outline: 2px solid #6366f1 !important;
-                    outline-offset: 2px !important;
-                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+                    /* Use an inset ring so it isn't clipped by overflow:hidden on header/button containers */
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: inherit !important;
+                }
+
+                /* Header action buttons ("Reset Settings", "Statement", "Hide Interface") often have overflow hidden for ellipsis.
+                   Ensure focus ring is still visible and covers the full button. */
+                body.highlight-focus .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                body.highlight-focus .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: 10px !important;
+                }
+
+                /* Shadow DOM equivalent: on desktop the header row uses overflow:hidden, so force inset ring */
+                :host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus,
+                :host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                :host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                :host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: 10px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                }
+
+                /* Base (always): prevent any default focus ring on header action buttons.
+                   Highlight Focus ON rule above will add the desired ring back. */
+                .accessbit-widget-panel .panel-header .action-btn:focus,
+                .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+
+                /* When Highlight Focus is OFF, ensure header action buttons don't retain any ring */
+                :host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus,
+                :host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                :host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                :host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    background: inherit !important;
+                }
+
+                /* Highlight Focus OFF (Shadow DOM safe): suppress focus rings inside widget UI */
+                :host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus,
+                :host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    background: inherit !important;
                 }
 
                 /* When Highlight Focus is OFF, suppress custom purple focus ring inside widget UI */
@@ -5354,7 +5411,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 12px !important; }
                 /* Toggle on: highlight card with border; icon ring handled purely inside SVG (exclude font-size, line-height, letter-spacing) */
                 .accessbit-widget-panel .profile-item { border: 2px solid transparent !important; }
-                .accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border: 2px solid #01CE9C !important; }
+                .accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border: 2px solid #01CE9C !important; }
                 /* --- ≤1279px: drawer mode (mobile-mode) – width/height; position set by viewport below --- */
                 @media (max-width: 1279px) {
                     .accessbit-widget-panel.mobile-mode {
@@ -6103,7 +6160,7 @@ font-family: Archivo;
                         align-items: center !important;
                         justify-content: space-between !important;
                         gap: 6px !important;
-                        padding-left: 44px !important;
+                        padding-left: 0 !important;
                         height: 28px !important;
                         min-height: 28px !important;
                     }
@@ -6115,6 +6172,9 @@ font-family: Archivo;
                         align-items: center !important;
                         height: 28px !important;
                         min-height: 28px !important;
+                        /* Align first circle under the "Adjust ..." text (36px icon + 12px gap = 48px) */
+                        padding-left: 48px !important;
+                        box-sizing: border-box !important;
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option,
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
@@ -6303,13 +6363,13 @@ font-family: Archivo;
                     letter-spacing: -1px;
                 }
                 .accessbit-panel-screenshot .profile-item .toggle-switch { flex-shrink: 0; margin-left: auto; margin-right: 12px; }
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border-color: #01CE9C !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border-color: #01CE9C !important; }
                 .accessbit-panel-screenshot .profile-item .profile-item-icon,
                 .accessbit-panel-screenshot .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon,
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon svg circle:first-of-type,
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon svg circle:first-of-type,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
                 /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
                 @media (min-width: 769px) {
                     .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
@@ -7403,6 +7463,12 @@ font-family: Archivo;
                         max-width: 391px !important;
                     }
 
+                    /* Desktop only: widen range slider track area without changing 100% widths */
+                    .content-adjustments-card.slider-card .content-card-body {
+                        width: 440px !important;
+                        max-width: 440px !important;
+                    }
+
                     /* Ensure slider card icons (font size, letter spacing, line height, content scaling)
                        use the same visual size as other 43x43 icons on desktop */
                     .content-adjustments-card.slider-card .content-card-icon svg {
@@ -7528,7 +7594,7 @@ font-family: Archivo;
                 }
     
                 /* Toggle ON highlight without :has() (Safari-safe) */
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border: 2px solid #01CE9C; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border: 2px solid #01CE9C; }
     
     
                 /* Seizure Safe container only: 528px width */
@@ -7913,10 +7979,10 @@ font-family: Archivo;
                     box-sizing: border-box;
                     background: transparent;
                 }
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon,
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon { border: 2px solid transparent; background: transparent; }
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon svg circle:first-of-type,
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent; background: transparent; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon svg circle:first-of-type,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
                 .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
                 .profile-item-icon svg {
                     width: 36px;
@@ -8015,6 +8081,17 @@ font-family: Archivo;
                         margin-left: auto;
                         margin-right: 12px;
                         order: 2;
+                    }
+                }
+                /* Desktop-only: widen toggle track without changing 100% internals */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        width: 92px !important;
+                    }
+                    #accessbit-widget-panel input:checked + .slider:before,
+                    .accessbit-panel-screenshot input:checked + .slider:before {
+                        transform: translateX(34px) !important;
                     }
                 }
                 .toggle-switch {
@@ -19232,17 +19309,46 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
+            // Remove any previously installed handlers (prevents duplicates causing "stuck" highlights)
+            try {
+                if (this._highlightFocusHandlers && Array.isArray(this._highlightFocusHandlers)) {
+                    this._highlightFocusHandlers.forEach(h => {
+                        try { document.removeEventListener('focusin', h, true); } catch (_) {}
+                    });
+                }
+                if (this._highlightFocusOutHandlers && Array.isArray(this._highlightFocusOutHandlers)) {
+                    this._highlightFocusOutHandlers.forEach(h => {
+                        try { document.removeEventListener('focusout', h, true); } catch (_) {}
+                    });
+                }
+            } catch (_) {}
+            this._highlightFocusHandlers = [];
+            this._highlightFocusOutHandlers = [];
+
+            // Remove any previously installed handlers (prevents duplicates causing "stuck" highlights)
+            try {
+                if (this._highlightFocusHandlers && Array.isArray(this._highlightFocusHandlers)) {
+                    this._highlightFocusHandlers.forEach(h => {
+                        try { document.removeEventListener('focusin', h, true); } catch (_) {}
+                    });
+                }
+                if (this._highlightFocusOutHandlers && Array.isArray(this._highlightFocusOutHandlers)) {
+                    this._highlightFocusOutHandlers.forEach(h => {
+                        try { document.removeEventListener('focusout', h, true); } catch (_) {}
+                    });
+                }
+            } catch (_) {}
+            this._highlightFocusHandlers = [];
+            this._highlightFocusOutHandlers = [];
+
             // Add a global focus event listener to ensure immediate application of styles
     
             this.highlightFocusHandler = (e) => {
-    
-            
+                // Never apply highlight styles unless toggle is ON
+                if (!document.body.classList.contains('highlight-focus')) return;
                 
-                // Special debugging for accessibility icon
+                // Special handling for accessibility icon (only when Highlight Focus is ON)
                 if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
-                   
-                    
-                    // Always apply focus styles to accessibility icon when focused
                     e.target.style.outline = '3px solid #6366f1';
                     e.target.style.outlineOffset = '2px';
                     e.target.style.background = 'rgba(99, 102, 241, 0.1)';
@@ -19251,8 +19357,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                     return; // Exit early to prevent other focus handling
                 }
-    
-                if (document.body.classList.contains('highlight-focus')) {
+                
+                {
     
                     const focusedElement = e.target;
     
@@ -19333,7 +19439,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     this.currentlyFocusedElement = focusedElement;
     
                 }
-    
             };
     
             
@@ -19341,6 +19446,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Add the focus event listener
     
             document.addEventListener('focusin', this.highlightFocusHandler, true);
+            try { this._highlightFocusHandlers.push(this.highlightFocusHandler); } catch (_) {}
+            try { this._highlightFocusHandlers.push(this.highlightFocusHandler); } catch (_) {}
             
             // Add focusout handler to clean up accessibility icon styles
             this.highlightFocusOutHandler = (e) => {
@@ -19355,6 +19462,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             };
             
             document.addEventListener('focusout', this.highlightFocusOutHandler, true);
+            try { this._highlightFocusOutHandlers.push(this.highlightFocusOutHandler); } catch (_) {}
+            try { this._highlightFocusOutHandlers.push(this.highlightFocusOutHandler); } catch (_) {}
     
             
     
@@ -19447,6 +19556,35 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     element.style.boxShadow = '';
                 }
             });
+
+            // IMPORTANT: Also clear any inline highlight styles inside the widget Shadow DOM.
+            // The focus handler can apply inline styles to the widget icon / controls; those must be reset too.
+            try {
+                const sr = this.shadowRoot;
+                if (sr) {
+                    // If something inside the widget is currently focused, blur it to drop any lingering focus visuals
+                    try {
+                        const ae = sr.activeElement;
+                        if (ae && typeof ae.blur === 'function') ae.blur();
+                    } catch (_) {}
+                    const shadowEls = sr.querySelectorAll('*');
+                    shadowEls.forEach(el => {
+                        try {
+                            const hasHighlightOutline = el.style.outline && el.style.outline.includes('6366f1');
+                            const hasHighlightBg = el.style.background && el.style.background.includes('99, 102, 241');
+                            const hasHighlightShadow = el.style.boxShadow && el.style.boxShadow.includes('99, 102, 241');
+                            if (hasHighlightOutline || hasHighlightBg || hasHighlightShadow) {
+                                el.style.outline = '';
+                                el.style.outlineOffset = '';
+                                el.style.background = '';
+                                el.style.borderRadius = '';
+                                el.style.transition = '';
+                                el.style.boxShadow = '';
+                            }
+                        } catch (_) {}
+                    });
+                }
+            } catch (_) {}
     
             
     
@@ -19471,6 +19609,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Also remove the CSS class from body to ensure complete cleanup
     
             document.body.classList.remove('highlight-focus');
+
+            // User-requested behavior: turning OFF Highlight Focus should trigger a refresh,
+            // and the widget should reopen after load.
+            try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
+            try { window.location.reload(); } catch (_) {}
     
         }
     
@@ -24992,12 +25135,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Add a global focus event listener to ensure immediate application of styles
     
             this.highlightFocusHandler = (e) => {
-    
-               
-                // Special debugging for accessibility icon
+                // Never apply highlight styles unless toggle is ON
+                if (!document.body.classList.contains('highlight-focus')) return;
+                
+                // Special handling for accessibility icon (only when Highlight Focus is ON)
                 if (e.target.classList && e.target.classList.contains('accessbit-widget-icon')) {
-                  
-                    // Always apply focus styles to accessibility icon when focused
                     e.target.style.outline = '3px solid #6366f1';
                     e.target.style.outlineOffset = '2px';
                     e.target.style.background = 'rgba(99, 102, 241, 0.1)';
@@ -25006,8 +25148,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.3)';
                     return; // Exit early to prevent other focus handling
                 }
-    
-                if (document.body.classList.contains('highlight-focus')) {
+                
+                {
     
                     const focusedElement = e.target;
     
@@ -25180,21 +25322,92 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     element.style.boxShadow = '';
                 }
             });
+
+            // IMPORTANT: Also clear any inline highlight styles inside the widget Shadow DOM.
+            try {
+                const sr = this.shadowRoot;
+                if (sr) {
+                    // If something inside the widget is currently focused, blur it to drop any lingering focus visuals
+                    try {
+                        const ae = sr.activeElement;
+                        if (ae && typeof ae.blur === 'function') ae.blur();
+                    } catch (_) {}
+                    const shadowEls = sr.querySelectorAll('*');
+                    shadowEls.forEach(el => {
+                        try {
+                            const hasHighlightOutline = el.style.outline && el.style.outline.includes('6366f1');
+                            const hasHighlightBg = el.style.background && el.style.background.includes('99, 102, 241');
+                            const hasHighlightShadow = el.style.boxShadow && el.style.boxShadow.includes('99, 102, 241');
+                            if (hasHighlightOutline || hasHighlightBg || hasHighlightShadow) {
+                                el.style.outline = '';
+                                el.style.outlineOffset = '';
+                                el.style.background = '';
+                                el.style.borderRadius = '';
+                                el.style.transition = '';
+                                el.style.boxShadow = '';
+                            }
+                        } catch (_) {}
+                    });
+                }
+            } catch (_) {}
     
             // Remove the focus event listener
             if (this.highlightFocusHandler) {
                 document.removeEventListener('focusin', this.highlightFocusHandler, true);
                 this.highlightFocusHandler = null;
             }
+
+            // Remove any older handlers that might have been installed previously
+            try {
+                if (this._highlightFocusHandlers && Array.isArray(this._highlightFocusHandlers)) {
+                    this._highlightFocusHandlers.forEach(h => {
+                        try { document.removeEventListener('focusin', h, true); } catch (_) {}
+                    });
+                    this._highlightFocusHandlers = [];
+                }
+            } catch (_) {}
+
+            // Remove any older handlers that might have been installed previously
+            try {
+                if (this._highlightFocusHandlers && Array.isArray(this._highlightFocusHandlers)) {
+                    this._highlightFocusHandlers.forEach(h => {
+                        try { document.removeEventListener('focusin', h, true); } catch (_) {}
+                    });
+                    this._highlightFocusHandlers = [];
+                }
+            } catch (_) {}
     
             // Remove the focusout handler
             if (this.highlightFocusOutHandler) {
                 document.removeEventListener('focusout', this.highlightFocusOutHandler, true);
                 this.highlightFocusOutHandler = null;
             }
+
+            try {
+                if (this._highlightFocusOutHandlers && Array.isArray(this._highlightFocusOutHandlers)) {
+                    this._highlightFocusOutHandlers.forEach(h => {
+                        try { document.removeEventListener('focusout', h, true); } catch (_) {}
+                    });
+                    this._highlightFocusOutHandlers = [];
+                }
+            } catch (_) {}
+
+            try {
+                if (this._highlightFocusOutHandlers && Array.isArray(this._highlightFocusOutHandlers)) {
+                    this._highlightFocusOutHandlers.forEach(h => {
+                        try { document.removeEventListener('focusout', h, true); } catch (_) {}
+                    });
+                    this._highlightFocusOutHandlers = [];
+                }
+            } catch (_) {}
     
             // Extra safety: ensure the class is gone
             document.body.classList.remove('highlight-focus');
+
+            // User-requested behavior: turning OFF Highlight Focus should trigger a refresh,
+            // and the widget should reopen after load (without requiring Reset).
+            try { sessionStorage.setItem('accessbit-open-panel-after-load', '1'); } catch (_) {}
+            try { window.location.reload(); } catch (_) {}
         }
     
     
