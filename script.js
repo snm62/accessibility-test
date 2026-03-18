@@ -4121,6 +4121,8 @@ font-family: Archivo;
                 panel.style.setProperty('overflow', 'hidden', 'important');
                 panel.style.setProperty('border-radius', '20px', 'important');
                 panel.style.setProperty('position', 'relative', 'important');
+                // Set current language on panel for language-specific layout tweaks
+                panel.setAttribute('data-lang', this.getCurrentLanguage());
                 panel.style.display = 'none';
                 panel.style.visibility = 'hidden';
                 shadowRoot.appendChild(panel);
@@ -4601,27 +4603,42 @@ font-family: Archivo;
     
     
     
-                /* Focus indicators for all interactive elements */
+                /* Focus indicators for interactive elements when Highlight Focus is ON */
     
-                input:focus-visible,
+                body.highlight-focus input:focus-visible,
     
-                button:focus-visible,
+                body.highlight-focus button:focus-visible,
     
-                select:focus-visible,
+                body.highlight-focus select:focus-visible,
     
-                label:focus-visible {
+                body.highlight-focus label:focus-visible {
                     outline: 2px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
                 }
                 
-                .action-btn:focus-visible {
+                body.highlight-focus .action-btn:focus-visible {
                     outline: 2px solid #6366f1 !important;
                     outline-offset: 2px !important;
                     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
-                    padding: 8px 16px !important;
-                    min-height: auto !important;
-                    transform: none !important;
+                }
+
+                /* When Highlight Focus is OFF, suppress custom purple focus ring inside widget UI */
+                body:not(.highlight-focus) .accessbit-panel-screenshot button:focus-visible,
+                body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel button:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel input:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+                body:not(.highlight-focus) .accessbit-panel-screenshot button:focus,
+                body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel button:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel input:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus {
+                    outline: none !important;
+                    box-shadow: none !important;
                 }
     
                 /* Ensure icons inside scaling buttons align properly */
@@ -4656,8 +4673,8 @@ font-family: Archivo;
     
                 .close-btn:focus-visible,
     
-                .language-selector-header:focus-visible,
-                .language-option:focus-visible {
+                body.highlight-focus .language-selector-header:focus-visible,
+                body.highlight-focus .language-option:focus-visible {
     
             
                  outline: 2px solid #6366f1 !important;
@@ -4807,16 +4824,12 @@ font-family: Archivo;
                     transition: outline 0.2s ease, background 0.2s ease !important;
                 }
     
-                /* High contrast focus for better visibility */
-    
-                .accessbit-widget-icon:focus-visible,
-    
-                .accessbit-widget-panel button:focus-visible,
-    
-                .accessbit-widget-panel input:focus-visible {
-    
-                    
-    
+                /* Inside the widget: only show custom focus when Highlight Focus is ON */
+                body:not(.highlight-focus) .accessbit-widget-icon:focus-visible,
+                body:not(.highlight-focus) .accessbit-widget-panel button:focus-visible,
+                body:not(.highlight-focus) .accessbit-widget-panel input:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
                 }
     
     
@@ -5582,12 +5595,13 @@ font-family: Archivo;
                     .accessbit-widget-panel .color-adjustments-card .content-card-icon svg,
                     .accessbit-widget-panel .contrast-style-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
                     .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .color-option { width: 20px !important; height: 20px !important; min-width: 20px !important; min-height: 20px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg { width: 20px !important; height: 20px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { height: 20px !important; min-height: 20px !important; gap: 4px !important; padding-left: 0 !important; align-items: center !important; display: flex !important; flex-wrap: nowrap !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .color-options { gap: 4px !important; flex-wrap: nowrap !important; align-items: center !important; height: 20px !important; min-height: 20px !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { width: 20px !important; height: 20px !important; min-width: 20px !important; min-height: 20px !important; margin: 0 !important; padding: 0 !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; line-height: 0 !important; flex-shrink: 0 !important; vertical-align: middle !important; border: none !important; }
-                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg { width: 20px !important; height: 20px !important; display: block !important; vertical-align: middle !important; }
+                    /* 768px tablet: keep controls comfortably sized */
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg { width: 18px !important; height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { height: 18px !important; min-height: 18px !important; gap: 4px !important; padding-left: 0 !important; align-items: center !important; display: flex !important; flex-wrap: nowrap !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options { gap: 4px !important; flex-wrap: nowrap !important; align-items: center !important; height: 18px !important; min-height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; margin: 0 !important; padding: 0 !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; line-height: 0 !important; flex-shrink: 0 !important; vertical-align: middle !important; border: none !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg { width: 18px !important; height: 18px !important; display: block !important; vertical-align: middle !important; }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 14px; line-height: 1.25; }
                     /* Slider thumbs: slightly smaller green circle on mobile */
                     .accessbit-widget-panel .scaling-slider-track .scaling-slider-thumb {
@@ -5745,15 +5759,30 @@ font-family: Archivo;
                         min-width: 26px !important;
                         min-height: 26px !important;
                     }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon {
+                        flex: 0 0 26px !important;
+                        max-width: 26px !important;
+                        border-radius: 50% !important;
+                        overflow: hidden !important;
+                        padding: 0 !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg {
+                        width: 100% !important;
+                        height: 100% !important;
+                        display: block !important;
+                    }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
-                        padding-left: 32px !important;
+                        /* align dots under the title text (icon 26px + gap 12px = 38px) */
+                        padding-left: 38px !important;
                         gap: 4px !important;
                         min-height: 18px !important;
+                        justify-content: flex-start !important;
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-options {
                         gap: 3px !important;
                         flex: 1 1 auto !important;
                         min-width: 0 !important;
+                        padding-left: 0 !important; /* avoid extra desktop offset */
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option,
                     .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
@@ -5777,14 +5806,88 @@ font-family: Archivo;
                     .accessbit-widget-panel .panel-header .action-btn,
                     .accessbit-widget-panel .widget-header .action-btn,
                     .accessbit-widget-panel .reset-settings-btn {
-                        padding: 2px 6px !important;
-                        min-height: 18px !important;
-                        font-size: 9px !important;
+                        padding: 3px 6px !important;
+                        min-height: 20px !important;
+                        font-size: 10px !important;
+                        gap: 8px !important;
                     }
                     .accessbit-widget-panel .panel-header .reset-settings-icon svg,
                     .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 12px !important; height: 12px !important; }
                     .accessbit-widget-panel .panel-header .action-buttons,
                     .accessbit-widget-panel .widget-header .action-buttons { gap: 4px !important; }
+                }
+
+                /* Extra small phones: use the tighter sizing */
+                @media (max-width: 420px) {
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        height: 14px !important;
+                        min-height: 14px !important;
+                        gap: 2px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 2px !important;
+                        height: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 8px !important; height: 8px !important; }
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn { padding: 2px 4px !important; min-height: 18px !important; font-size: 8px !important; gap: 6px !important; }
+                }
+
+                /* Tablet (601px–768px): keep picker + header controls readable */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 22px !important;
+                        height: 22px !important;
+                        min-width: 22px !important;
+                        min-height: 22px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 22px !important;
+                        height: 22px !important;
+                        min-width: 22px !important;
+                        min-height: 22px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        height: 22px !important;
+                        min-height: 22px !important;
+                        gap: 6px !important;
+                        padding-left: 55px !important; /* align under "Adjust" */
+                        justify-content: flex-start !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 6px !important;
+                        padding-left: 0 !important; /* avoid double offset; row handles alignment */
+                    }
+
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn {
+                        padding: 6px 10px !important;
+                        min-height: 30px !important;
+                        font-size: 12px !important;
+                        gap: 10px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 14px !important; height: 14px !important; }
                 }
 
                 /* Apply some of the same spacing tweaks for small tablets/base screens (769px–1280px) */
@@ -6051,12 +6154,23 @@ font-family: Archivo;
                 .accessbit-panel-screenshot .panel-header .header-center .action-buttons {
                     margin-top: 19px !important;
                 }
-                .accessbit-panel-screenshot .panel-header .action-buttons { justify-content: center !important; align-items: center !important; gap: 12px !important; width: 100%; overflow: visible !important; }
-                .accessbit-panel-screenshot .action-buttons { max-width: 100% !important; flex-wrap: nowrap !important; }
-                .accessbit-panel-screenshot .panel-header .action-btn { flex-shrink: 0; white-space: nowrap !important; overflow: visible !important; overflow-wrap: normal !important; word-wrap: normal !important; }
+                .accessbit-panel-screenshot .panel-header .action-buttons { justify-content: center !important; align-items: center !important; gap: 12px !important; width: 100%; overflow: hidden !important; }
+                /* Default: keep original sizing; translations: allow row wrap instead of overflow */
+                .accessbit-panel-screenshot .action-buttons { max-width: 100% !important; flex-wrap: wrap !important; min-width: 0 !important; }
+                .accessbit-panel-screenshot .panel-header .action-btn {
+                    flex: 0 0 auto !important;
+                    min-width: 0 !important;
+                    max-width: 100% !important;
+                    height: 36px !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
                 .accessbit-panel-screenshot .panel-header #reset-settings,
                 .accessbit-panel-screenshot .panel-header .reset-settings-btn {
-                    width: 152.1015625px !important;
+                    min-width: 152.1015625px !important;
+                    width: max-content !important;
+                    max-width: 100% !important;
                     height: 36px !important;
                     border-radius: 10px !important;
                     border: 1px solid #FFFFFF4D !important;
@@ -6095,7 +6209,9 @@ font-family: Archivo;
                 }
                 .accessbit-panel-screenshot .panel-header #statement,
                 .accessbit-panel-screenshot .panel-header .statement-btn {
-                    width: 124.6328125px !important;
+                    min-width: 124.6328125px !important;
+                    width: max-content !important;
+                    max-width: 100% !important;
                     height: 36px !important;
                     border-radius: 10px !important;
                     border: 1px solid #FFFFFF4D !important;
@@ -6743,7 +6859,7 @@ font-family: Archivo;
                 .color-adjustments-card .content-card-icon.low-saturation-icon svg { width: 43px; height: 43px; }
                 .color-adjustments-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; }
                 .high-contrast-card h4, .high-saturation-card h4, .low-saturation-card h4, .monochrome-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
-                .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; background: #FFFFFF; padding: 15px 22px; }
+                .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; background: #FFFFFF; padding: 15px 22px; }
                 .contrast-style-card .card-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .contrast-style-card .card-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 .contrast-style-card .card-top .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
@@ -6771,7 +6887,39 @@ font-family: Archivo;
                 .contrast-style-card .content-card-icon.high-saturation-icon svg,
                 .contrast-style-card .content-card-icon.low-saturation-icon svg,
                 .contrast-style-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
-                .contrast-style-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .contrast-style-card h4 {
+                    margin: 0;
+                    margin-top: 8px;
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 21px;
+                    line-height: 27px;
+                    letter-spacing: -0.44px;
+                    color: #1E2939;
+                    /* Prevent long translated words (e.g. Russian) from overflowing */
+                    white-space: normal;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                    hyphens: auto;
+                    /* Keep titles from pushing outside the card */
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3;
+                    overflow: hidden;
+                }
+                /* Russian: auto-resize compact card titles */
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4 {
+                    font-size: 17px;
+                    line-height: 21px;
+                    -webkit-line-clamp: 4;
+                }
+                /* Russian: give the compact cards more vertical room */
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card {
+                    min-height: 118px;
+                    padding: 12px 18px;
+                }
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card .card-top { min-height: 40px; }
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4 { margin-top: 6px; }
                 .cursor-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; margin-bottom: 16px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
                 .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .interface-controls-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
@@ -6874,6 +7022,38 @@ font-family: Archivo;
                 .align-right-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-right-card .align-right-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
                 .align-right-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                /* Russian: these three cards have long titles – allow wrapping and give more height */
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-left-card,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-center-card,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-right-card {
+                    height: auto !important;
+                    min-height: 176px !important;
+                    overflow: hidden !important;
+                }
+                #accessbit-widget-panel[data-lang="ru"] .align-left-card h4,
+                #accessbit-widget-panel[data-lang="ru"] .align-center-card h4,
+                #accessbit-widget-panel[data-lang="ru"] .align-right-card h4 {
+                    font-size: 17px !important;
+                    line-height: 21px !important;
+                    white-space: normal !important;
+                    overflow-wrap: anywhere !important;
+                    word-break: break-word !important;
+                    display: -webkit-box !important;
+                    -webkit-box-orient: vertical !important;
+                    -webkit-line-clamp: 5 !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
+                /* Russian: keep value like 100% on one line */
+                #accessbit-widget-panel[data-lang="ru"] .content-scaling-header .content-adjustments-slider-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #content-scale-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #font-size-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #letter-spacing-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #line-height-value {
+                    white-space: nowrap !important;
+                    flex-shrink: 0 !important;
+                }
                 .content-adjustments-card:has(#highlight-titles:checked) { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
                 .content-adjustments-card:has(#highlight-links:checked) { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
                 .content-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
@@ -6934,6 +7114,10 @@ font-family: Archivo;
                     margin: 0;
                     line-height: 1;
                     text-align: right;
+                    white-space: nowrap;
+                    display: inline-flex;
+                    align-items: baseline;
+                    flex-shrink: 0;
                 }
                 .content-adjustments-card.slider-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 /* Base icon layout for NON-slider cards (left/center/right, text-magnifier, etc.) */
@@ -7207,23 +7391,22 @@ font-family: Archivo;
                     width: 43px;
                     height: 43px;
                 }
-                /* Vision Impaired icon: off/on rings and eye */
-                .vision-ring-on,
-                .vision-eye-on { display: none; }
-                /* Vision Impaired: explicit on/off ring + eye – show green versions when checked */
+                /* Vision Impaired icon: single eye path, color controlled via CSS */
+                .vision-eye-path {
+                    fill: black;
+                }
+                .vision-ring-on {
+                    display: none;
+                }
+                /* Vision Impaired: when checked, show green ring and eye */
                 .profile-item:has(#vision-impaired:checked) .vision-ring-off {
                     display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
                 }
-                .profile-item:has(#vision-impaired:checked) .vision-eye-off {
-                    display: none;
-                    fill: #01CE9C;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#vision-impaired:checked) .vision-ring-on,
-                .profile-item:has(#vision-impaired:checked) .vision-eye-on {
+                .profile-item:has(#vision-impaired:checked) .vision-ring-on {
                     display: block;
+                }
+                .profile-item:has(#vision-impaired:checked) .vision-eye-path {
+                    fill: #01CE9C !important;
                 }
                 /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .dark-contrast-ring-on,
@@ -7976,7 +8159,8 @@ input:checked + .slider::after {
     
                 /* Language dropdown outer container */
                 .language-dropdown-outer {
-                    width: 132px !important;
+                    /* Wider so long names (e.g. PORTUGUÊS) fit */
+                    width: 168px !important;
                     height: 55px !important;
                     right: 0 !important;
                     left: auto !important;
@@ -7989,7 +8173,7 @@ input:checked + .slider::after {
                 .accessbit-panel-screenshot #current-language-header {
                     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                     font-weight: 500;
-                    font-size: 14px;
+                    font-size: 15px;
                     line-height: 20px;
                     letter-spacing: -0.15px;
                     text-align: center !important;
@@ -8010,7 +8194,7 @@ input:checked + .slider::after {
 
                     align-items: center;
 
-                    gap: 5px;
+                    gap: 3px;
     
                     cursor: pointer;
     
@@ -8036,6 +8220,36 @@ input:checked + .slider::after {
     
                     z-index: 1002;
     
+                }
+
+                /* Prevent long language names overlapping chevron (e.g. PORTUGUÊS) */
+                .language-selector-header {
+                    justify-content: flex-start !important;
+                    padding-left: 6px !important;
+                    padding-right: 6px !important;
+                    max-width: none !important;
+                }
+                .language-selector-header #current-language-header {
+                    min-width: 0 !important;
+                    flex: 0 1 auto !important;
+                    white-space: nowrap !important;
+                    text-align: left !important;
+                }
+                .language-selector-header .language-dropdown-arrow {
+                    flex: 0 0 auto !important;
+                    margin-left: 3px !important;
+                }
+
+                /* Responsive font size for placeholder text */
+                @media (max-width: 768px) {
+                    .language-selector-header #current-language-header {
+                        font-size: 13px !important;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .language-selector-header #current-language-header {
+                        font-size: 12px !important;
+                    }
                 }
     
     
@@ -9805,7 +10019,7 @@ input:checked + .slider::after {
             const profiles = [
                 { id: 'seizure-safe', title: 'Seizure Safe Profile', description: 'Clear flashes & reduces color', descriptionId: 'seizure-safe-desc', ariaLabel: 'Seizure Safe Profile - Clear flashes and reduces color', ariaDescribedBy: 'seizure-safe-desc', iconSvg: '' },
                 { id: 'reduce-motion', title: 'Reduce Motion', description: 'Disable animations and transitions', descriptionId: 'reduce-motion-desc', ariaLabel: 'Reduce Motion - Disable animations, transitions, and flash triggers', ariaDescribedBy: 'reduce-motion-desc', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M13.2854 27.1478C13.2854 27.0302 13.2816 26.9164 13.2863 26.8028C13.2955 26.5779 13.2888 26.3497 13.3263 26.1292C13.3875 25.7694 13.5787 25.4669 13.8327 25.2114C14.0382 25.0049 14.2636 24.8183 14.4802 24.6228C14.5003 24.6047 14.5269 24.5903 14.5398 24.5681C14.6089 24.4485 14.7169 24.4422 14.8398 24.4443C15.1889 24.4502 15.5382 24.446 15.8874 24.4458C15.9172 24.4457 15.9469 24.4458 15.9935 24.4458C15.9715 25.0389 15.6353 25.4367 15.1876 25.8002C15.2828 25.8002 15.3502 25.8006 15.4176 25.8001C15.7757 25.7976 16.1342 25.8048 16.4917 25.7888C16.7545 25.7771 16.9501 25.6262 17.1057 25.4214C17.1111 25.4142 17.1163 25.4068 17.1211 25.3992C17.1784 25.3079 17.2159 25.1811 17.2984 25.1352C17.3815 25.0889 17.5093 25.1221 17.6175 25.122C18.5387 25.1218 19.4599 25.1261 20.3811 25.1207C21.3076 25.1152 22.2015 24.9396 23.0498 24.5621C23.2987 24.4513 23.5332 24.3078 23.7743 24.1794C23.8032 24.164 23.8326 24.1498 23.8699 24.1309C23.9464 24.401 24.0149 24.6668 24.0976 24.928C24.1853 25.2051 24.3188 25.4598 24.5148 25.6783C24.5897 25.7617 24.6828 25.8016 24.7943 25.8015C25.3422 25.801 25.8901 25.8007 26.4379 25.8002C26.4549 25.8002 26.472 25.7977 26.5141 25.7943C26.4531 25.7388 26.4101 25.6948 26.3622 25.6569C26.1358 25.4773 25.9069 25.3003 25.7456 25.0542C25.5911 24.8186 25.4896 24.5632 25.484 24.279C25.4697 23.5618 25.5651 22.8645 25.8861 22.2125C26.1467 21.6832 26.5433 21.2757 27.0306 20.9516C27.4775 20.6544 27.9702 20.444 28.4496 20.2087C28.8878 19.9937 29.3203 19.7681 29.6779 19.4292C29.8299 19.2851 29.9604 19.118 30.099 18.96C30.1752 18.8733 30.2051 18.7795 30.1879 18.6561C30.1391 18.306 30.0514 17.9727 29.8361 17.6854C29.5986 17.3683 29.2703 17.1878 28.8954 17.088C28.5435 16.9943 28.1848 16.9661 27.8224 17.0121C27.5032 17.0526 27.2586 17.2265 27.0833 17.4818C26.7976 17.8975 26.5231 18.3216 26.2593 18.7517C25.7986 19.503 25.2968 20.2208 24.6563 20.8331C24.0339 21.4282 23.3306 21.9063 22.5613 22.2902C21.5394 22.8002 20.4574 23.1264 19.3416 23.3521C18.5782 23.5065 17.8079 23.616 17.0319 23.6692C16.2969 23.7196 15.5596 23.7552 14.8231 23.7587C14.3896 23.7608 14.0353 23.9032 13.7317 24.1895C13.5596 24.3517 13.4101 24.5378 13.2508 24.7135C13.2328 24.7333 13.2168 24.7548 13.1964 24.7797C12.8035 24.5552 12.4131 24.3322 12 24.0961C12.1492 23.8959 12.2851 23.6985 12.4365 23.5139C12.6689 23.2304 12.9464 22.9956 13.2564 22.7989C13.2834 22.7818 13.3066 22.7411 13.3109 22.7086C13.3676 22.2833 13.4871 21.8808 13.7404 21.5282C13.7845 21.4669 13.8548 21.4252 13.9071 21.3689C13.9317 21.3425 13.9601 21.3008 13.9564 21.2698C13.9006 20.8039 13.9101 20.3381 13.965 19.8739C14.086 18.8511 14.4386 17.9232 15.1164 17.1337C15.5667 16.6091 16.1061 16.1963 16.7153 15.8729C17.4298 15.4937 18.1934 15.2609 18.986 15.118C19.5264 15.0206 20.0728 14.9799 20.6208 15.0095C21.6714 15.0661 22.6389 15.3654 23.4739 16.0294C23.8254 16.309 24.1217 16.6386 24.3639 17.0172C24.3814 17.0446 24.4106 17.0766 24.4395 17.0828C24.7989 17.1608 25.1309 17.3004 25.4357 17.5224C25.4732 17.462 25.5082 17.407 25.5419 17.3512C25.8063 16.9126 26.117 16.5141 26.5248 16.1969C27.0721 15.7713 27.6926 15.5968 28.3805 15.6431C28.8295 15.6733 29.2676 15.751 29.6862 15.9236C30.5268 16.27 31.0829 16.8808 31.3756 17.7367C31.531 18.1912 31.5838 18.6608 31.5728 19.1387C31.5718 19.181 31.5546 19.2262 31.5341 19.2643C31.0809 20.1107 30.4076 20.7345 29.5668 21.1805C29.148 21.4027 28.7161 21.6001 28.2912 21.8108C27.9752 21.9675 27.6689 22.1398 27.4157 22.3913C27.0971 22.7076 26.9382 23.101 26.8805 23.5373C26.8522 23.7513 26.8439 23.9685 26.8364 24.1846C26.8347 24.2339 26.8605 24.2994 26.8966 24.3321C27.0747 24.4937 27.2682 24.6388 27.4421 24.8045C27.8489 25.1922 28.1144 25.6624 28.1697 26.2258C28.1995 26.529 28.175 26.8374 28.175 27.1548C28.1395 27.1548 28.1041 27.1548 28.0687 27.1548C27.012 27.1548 25.9552 27.143 24.8987 27.1586C24.0997 27.1705 23.5604 26.7747 23.1572 26.1328C23.1275 26.0855 23.1108 26.03 23.0861 25.9739C22.9026 26.0353 22.7225 26.0984 22.5407 26.1559C21.8566 26.3723 21.1537 26.4707 20.4379 26.4748C19.6341 26.4794 18.8303 26.4754 18.0265 26.4776C17.9861 26.4777 17.9324 26.4899 17.9073 26.5171C17.4934 26.9654 16.9758 27.1568 16.3741 27.1552C15.3717 27.1526 14.3692 27.1546 13.3667 27.1544C13.3432 27.1544 13.3198 27.1507 13.2854 27.1478ZM24.7077 18.6651C24.5884 18.4831 24.4186 18.3819 24.2016 18.3633C24.091 18.3538 23.9797 18.3511 23.8686 18.3476C23.7724 18.3447 23.6541 18.3789 23.586 18.3345C23.5143 18.2878 23.4856 18.1695 23.4468 18.0788C23.2935 17.7207 23.0656 17.4189 22.7694 17.1678C22.1231 16.6199 21.3608 16.3845 20.5287 16.3432C20.1432 16.3241 19.7592 16.3498 19.3782 16.4146C18.725 16.5256 18.0881 16.6916 17.4856 16.9739C16.7818 17.3036 16.1978 17.7706 15.817 18.4606C15.4449 19.1349 15.2757 19.8638 15.2789 20.631C15.2807 21.0791 15.3028 21.5271 15.318 21.9751C15.3198 22.0307 15.3064 22.0625 15.2495 22.0815C15.1558 22.1129 15.0664 22.1571 14.9729 22.1891C14.8663 22.2257 14.8197 22.3037 14.798 22.4064C14.8091 22.4089 14.8149 22.4113 14.8208 22.4113C15.6457 22.4091 16.4699 22.3791 17.2904 22.2947C17.8157 22.2406 18.34 22.1687 18.8613 22.0838C19.6115 21.9616 20.3443 21.7673 21.0593 21.5067C22.5787 20.9529 23.8054 20.0237 24.7077 18.6651Z" fill="black"/><path d="M29.1583 18.1889C29.1503 18.5743 28.8483 18.8597 28.4552 18.8533C28.1043 18.8477 27.7993 18.5291 27.807 18.1762C27.8153 17.794 28.1203 17.494 28.4947 17.4998C28.8671 17.5055 29.1661 17.816 29.1583 18.1889Z" fill="black"/></svg>' },
-                { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc', iconSvg: '<svg width=\"43\" height=\"43\" viewBox=\"0 0 43 43\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20.5\" fill=\"#ECEDED\"/><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20\" stroke=\"black\" stroke-opacity=\"0.1\"/><circle class=\"vision-ring-on\" cx=\"21.5\" cy=\"21.5\" r=\"19.5\" fill=\"#D9F8F0\" stroke=\"#01CE9C\" stroke-width=\"2\"/><g transform=\"translate(11,15)\"><path class=\"vision-eye-off\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"black\"/><path class=\"vision-eye-on\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"#01CE9C\"/></g></svg>' },
+                { id: 'vision-impaired', title: 'Vision Impaired Profile', description: 'Enhances text readability and visual clarity', descriptionId: 'vision-impaired-desc', ariaLabel: 'Vision Impaired Profile - Enhances text readability and visual clarity', ariaDescribedBy: 'vision-impaired-desc', iconSvg: '<svg width=\"43\" height=\"43\" viewBox=\"0 0 43 43\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20.5\" fill=\"#ECEDED\"/><circle class=\"vision-ring-off\" cx=\"21.5\" cy=\"21.5\" r=\"20\" stroke=\"black\" stroke-opacity=\"0.1\"/><circle class=\"vision-ring-on\" cx=\"21.5\" cy=\"21.5\" r=\"19.5\" fill=\"#D9F8F0\" stroke=\"#01CE9C\" stroke-width=\"2\"/><g transform=\"translate(11,15)\"><path class=\"vision-eye-path\" d=\"M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z\" fill=\"currentColor\"/></g></svg>' },
                 { id: 'adhd-friendly', title: 'ADHD Friendly Profile', description: 'More focus & fewer distractions', ariaLabel: 'ADHD Friendly Profile - Reduces distractions and highlights focus', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M14.4167 19.375V17.9584C14.4167 15.8334 15.8334 14.4167 17.9584 14.4167H25.0417C27.1667 14.4167 28.5834 15.8334 28.5834 17.9584V19.375" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 23.625V25.0417C14.4167 27.1667 15.8334 28.5833 17.9584 28.5833H25.0417C27.1667 28.5833 28.5834 27.1667 28.5834 25.0417V23.625" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.4167 21.5H28.5834" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
                 { id: 'cognitive-disability', title: 'Cognitive Disability Profile', description: 'Assists with reading & focusing', ariaLabel: 'Cognitive Disability Profile - Simplifies interface and content', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22.0001 24.5C23.3808 24.5 24.5001 23.3807 24.5001 22C24.5001 20.6193 23.3808 19.5 22.0001 19.5C20.6194 19.5 19.5001 20.6193 19.5001 22C19.5001 23.3807 20.6194 24.5 22.0001 24.5Z" fill="black"/><path d="M22.8334 15.3909V13.6667H21.1667V15.3909C19.7002 15.5778 18.3373 16.2465 17.2919 17.2919C16.2465 18.3372 15.5779 19.7002 15.3909 21.1667H13.6667V22.8334H15.3909C15.5777 24.2999 16.2463 25.6629 17.2918 26.7083C18.3372 27.7538 19.7002 28.4224 21.1667 28.6092V30.3334H22.8334V28.6092C24.3 28.4224 25.663 27.7538 26.7084 26.7083C27.7538 25.6629 28.4224 24.2999 28.6092 22.8334H30.3334V21.1667H28.6092C28.4223 19.7002 27.7536 18.3372 26.7083 17.2919C25.6629 16.2465 24.2999 15.5778 22.8334 15.3909ZM22.0001 27C19.2426 27 17.0001 24.7575 17.0001 22C17.0001 19.2425 19.2426 17 22.0001 17C24.7576 17 27.0001 19.2425 27.0001 22C27.0001 24.7575 24.7576 27 22.0001 27Z" fill="black"/></svg>' },
                 { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile enables motor-impaired persons to operate the website using keyboard keys and shortcuts' }, smallText: '(Activates with Screen Reader)', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
@@ -10021,8 +10235,7 @@ input:checked + .slider::after {
                                 <circle class="vision-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
                                 <circle class="vision-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
                                 <g transform="translate(11,15)">
-                                    <path class="vision-eye-off" d="M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z" fill="black"/>
-                                    <path class="vision-eye-on" d="M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z" fill="#01CE9C"/>
+                                    <path class="vision-eye-path" d="M6.05338 7.77778e-07C6.07829 7.77778e-07 6.1032 7.77778e-07 6.12811 7.77778e-07C6.32296 0.327201 6.53448 0.645192 6.70752 0.984439C6.85291 1.26946 7.00573 1.33428 7.32092 1.23791C9.29561 0.634135 11.282 0.635686 13.2647 1.20571C16.1934 2.04764 18.5341 3.8462 20.585 6.10845C20.7429 6.28268 20.8626 6.49453 21 6.68889V6.92222C20.9376 7.04671 20.8891 7.18172 20.8108 7.29413C19.3964 9.32233 17.6471 10.9287 15.4058 11.9057C14.9396 12.109 14.4602 12.2794 13.9665 12.473C14.1177 12.7215 14.2606 12.9562 14.4046 13.1927C14.0269 13.4693 13.6647 13.7347 13.3025 14H13.2278C13.0072 13.6284 12.7949 13.2509 12.5587 12.8903C12.513 12.8205 12.3681 12.7757 12.2786 12.7892C10.9584 12.9871 9.65073 12.8988 8.34881 12.6299C5.19741 11.9789 2.67035 10.2446 0.576531 7.76618C0.358699 7.50834 0.190974 7.20464 0 6.92222C0 6.87037 0 6.81852 0 6.76667C0.10331 6.58248 0.18419 6.37889 0.313373 6.21708C1.72588 4.44776 3.38293 2.99319 5.38347 1.98537C5.45731 1.94817 5.52333 1.89415 5.59752 1.84496C5.37227 1.48624 5.15857 1.14591 4.94587 0.807161C5.32876 0.528107 5.69107 0.264054 6.05338 7.77778e-07ZM8.53431 3.85538C10.6617 2.47281 12.6268 3.50916 13.438 4.76303C14.5252 6.44336 14.1551 8.23254 12.3494 9.9269C12.5798 10.2936 12.8002 10.6694 13.0497 11.0231C13.1099 11.1084 13.2815 11.1824 13.3761 11.157C15.8797 10.4871 17.8526 8.9972 19.4783 6.83316C18.6971 6.13474 17.9585 5.39837 17.1466 4.7634C14.9726 3.063 12.5555 2.04794 9.78498 2.1931C9.10382 2.22879 8.42838 2.38293 7.67427 2.49379C8.007 3.02055 8.27082 3.43822 8.53431 3.85538ZM11.6876 11.5045C9.87039 8.62014 8.11786 5.83855 6.35004 3.03268C5.97893 3.23102 5.63478 3.41497 5.26846 3.61076C6.90852 6.21572 8.5188 8.77503 10.1341 11.3309C10.1822 11.4071 10.2808 11.4936 10.3588 11.4967C10.765 11.5133 11.1722 11.5045 11.6876 11.5045ZM8.96033 11.386C8.97727 11.3589 8.99422 11.3317 9.01116 11.3045C7.50588 8.91436 6.0006 6.5242 4.47476 4.10141C4.06166 4.43216 3.67609 4.74088 3.29229 5.04818C4.51264 6.93003 5.69879 8.76197 6.89051 10.59C6.9637 10.7022 7.06606 10.8342 7.18025 10.8705C7.76905 11.0579 8.36614 11.217 8.96033 11.386ZM1.55596 6.82572C2.6587 8.12379 3.88143 9.21899 5.37786 9.97015C4.45868 8.55359 3.53949 7.13703 2.59742 5.68521C2.23226 6.0851 1.90154 6.44727 1.55596 6.82572ZM8.75076 4.20906C9.24857 4.99591 9.73324 5.76199 10.2194 6.5305C10.949 5.95846 11.1008 5.15956 10.6438 4.5042C10.1912 3.85524 9.41909 3.7223 8.75076 4.20906Z" fill="currentColor"/>
                                 </g>
                             </svg>
                         </div>
@@ -10157,6 +10370,9 @@ input:checked + .slider::after {
                     <div class="content-adjustments-section">
                     <h3 class="content-adjustments-title">Content Adjustments</h3>
                     <div class="content-adjustments-card profile-item slider-card content-scaling-card">
+                        <div class="toggle-switch toggle-switch-hidden" aria-hidden="true">
+                            <input type="checkbox" id="content-scaling" tabindex="-1" aria-hidden="true">
+                        </div>
                         <div class="content-card-body">
                             <div class="content-scaling-header">
                                 <div class="label-with-icon-gap">
@@ -10617,6 +10833,9 @@ input:checked + .slider::after {
                     </div>
                     <!-- Module 32: Useful Links -->
                     <div class="useful-links-card profile-item" id="useful-links-card">
+                        <div class="toggle-switch toggle-switch-hidden" aria-hidden="true">
+                            <input type="checkbox" id="useful-links" tabindex="-1" aria-hidden="true">
+                        </div>
                         <div class="useful-links-header">
                             <div class="content-card-icon useful-links-icon">
                                 <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10787,14 +11006,13 @@ input:checked + .slider::after {
     
     
         getTranslations() {
-    
-            return {
+            const t = {
     
                 en: {
     
                     title: "Accessibility Controls",
     
-                    profilesTitle: "Accessibility Profiles",
+                    profilesTitle: "Accessibility Adjustments",
     
                     seizureSafe: "Seizure Safe Profile",
     
@@ -10920,6 +11138,15 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     usefulLinks: "Useful Links",
     
                     usefulLinksDesc: "Accessibility resources and links",
+
+                    contentAdjustmentsTitle: "Content Adjustments",
+                    colorAdjustmentsTitle: "Color Adjustments",
+                    usefulLinksSelectPlaceholder: "Select",
+                    usefulLinksOptionHome: "Home",
+                    usefulLinksOptionHeader: "Header",
+                    usefulLinksOptionFooter: "Footer",
+                    usefulLinksOptionMainContent: "Main content",
+                    usefulLinksOptionAboutUs: "About us",
     
     
                     readingMask: "Reading Mask",
@@ -12424,7 +12651,225 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 al: { title: "Cilësimet e aksesueshmërisë", profilesTitle: "Zgjidhni profilin e duhur të aksesueshmërisë për ju", seizureSafe: "Profil i sigurt për sulmet", seizureSafeDesc: "Heq rrezatimet dhe zvogëlon ngjyrat", visionImpaired: "Profil për personat me probleme shikimi", visionImpairedDesc: "Përmirëson elementet vizuale të faqes së internetit", adhdFriendly: "Profil miqësor për ADHD", adhdFriendlyDesc: "Zvogëlon shpërqendrimet dhe ndihmon në fokusim", fontSizing: "Madhësia e shkronjave", fontSizingDesc: "Rrit ose zvogëlo madhësinë e shkronjave", adjustLineHeight: "Rregullo lartësinë e rreshtit", adjustLineHeightDesc: "Rrit ose zvogëlo lartësinë e rreshtit", adjustLetterSpacing: "Rregullo hapësirën midis shkronjave", adjustLetterSpacingDesc: "Rrit ose zvogëlo hapësirën midis shkronjave", contentScaling: "Shkalla e përmbajtjes", contentScalingDesc: "Rrit ose zvogëlo madhësinë e përmbajtjes", resetSettings: "Rivendos cilësimet", statement: "Deklarata", hideInterface: "Fshih ndërfaqen", accessibilityFeatures: "Funksionet e aksesueshmërisë" }
     
             };
-    
+
+            // Extra UI strings (section headers + Useful Links dropdown) merged into languages that don't define them yet.
+            const ui = {
+                en: {
+                    contentAdjustmentsTitle: "Content Adjustments",
+                    colorAdjustmentsTitle: "Color Adjustments",
+                    interfaceControlsTitle: "Interface Controls",
+                    usefulLinksSelectPlaceholder: "Select",
+                    usefulLinksOptionHome: "Home",
+                    usefulLinksOptionHeader: "Header",
+                    usefulLinksOptionFooter: "Footer",
+                    usefulLinksOptionMainContent: "Main content",
+                    usefulLinksOptionAboutUs: "About us",
+                },
+                es: {
+                    contentAdjustmentsTitle: "Ajustes de contenido",
+                    colorAdjustmentsTitle: "Ajustes de color",
+                    interfaceControlsTitle: "Controles de interfaz",
+                    usefulLinksSelectPlaceholder: "Seleccionar",
+                    usefulLinksOptionHome: "Inicio",
+                    usefulLinksOptionHeader: "Encabezado",
+                    usefulLinksOptionFooter: "Pie de página",
+                    usefulLinksOptionMainContent: "Contenido principal",
+                    usefulLinksOptionAboutUs: "Sobre nosotros",
+                },
+                de: {
+                    contentAdjustmentsTitle: "Inhaltsanpassungen",
+                    colorAdjustmentsTitle: "Farb-Anpassungen",
+                    interfaceControlsTitle: "Interface-Steuerung",
+                    usefulLinksSelectPlaceholder: "Auswählen",
+                    usefulLinksOptionHome: "Startseite",
+                    usefulLinksOptionHeader: "Kopfzeile",
+                    usefulLinksOptionFooter: "Fußzeile",
+                    usefulLinksOptionMainContent: "Hauptinhalt",
+                    usefulLinksOptionAboutUs: "Über uns",
+                },
+                fr: {
+                    contentAdjustmentsTitle: "Ajustements du contenu",
+                    colorAdjustmentsTitle: "Ajustements des couleurs",
+                    interfaceControlsTitle: "Commandes de l’interface",
+                    usefulLinksSelectPlaceholder: "Sélectionner",
+                    usefulLinksOptionHome: "Accueil",
+                    usefulLinksOptionHeader: "En-tête",
+                    usefulLinksOptionFooter: "Pied de page",
+                    usefulLinksOptionMainContent: "Contenu principal",
+                    usefulLinksOptionAboutUs: "À propos",
+                },
+                pt: {
+                    contentAdjustmentsTitle: "Ajustes de conteúdo",
+                    colorAdjustmentsTitle: "Ajustes de cores",
+                    interfaceControlsTitle: "Controles da interface",
+                    usefulLinksSelectPlaceholder: "Selecionar",
+                    usefulLinksOptionHome: "Início",
+                    usefulLinksOptionHeader: "Cabeçalho",
+                    usefulLinksOptionFooter: "Rodapé",
+                    usefulLinksOptionMainContent: "Conteúdo principal",
+                    usefulLinksOptionAboutUs: "Sobre nós",
+                },
+                it: {
+                    contentAdjustmentsTitle: "Regolazioni del contenuto",
+                    colorAdjustmentsTitle: "Regolazioni colore",
+                    interfaceControlsTitle: "Controlli interfaccia",
+                    usefulLinksSelectPlaceholder: "Seleziona",
+                    usefulLinksOptionHome: "Home",
+                    usefulLinksOptionHeader: "Intestazione",
+                    usefulLinksOptionFooter: "Piè di pagina",
+                    usefulLinksOptionMainContent: "Contenuto principale",
+                    usefulLinksOptionAboutUs: "Chi siamo",
+                },
+                ru: {
+                    contentAdjustmentsTitle: "Настройки содержимого",
+                    colorAdjustmentsTitle: "Настройки цветов",
+                    interfaceControlsTitle: "Элементы управления",
+                    usefulLinksSelectPlaceholder: "Выбрать",
+                    usefulLinksOptionHome: "Главная",
+                    usefulLinksOptionHeader: "Шапка",
+                    usefulLinksOptionFooter: "Подвал",
+                    usefulLinksOptionMainContent: "Основной контент",
+                    usefulLinksOptionAboutUs: "О нас",
+                },
+                he: {
+                    contentAdjustmentsTitle: "התאמות תוכן",
+                    colorAdjustmentsTitle: "התאמות צבע",
+                    interfaceControlsTitle: "פקדי ממשק",
+                    usefulLinksSelectPlaceholder: "בחר",
+                    usefulLinksOptionHome: "דף הבית",
+                    usefulLinksOptionHeader: "כותרת עליונה",
+                    usefulLinksOptionFooter: "כותרת תחתונה",
+                    usefulLinksOptionMainContent: "תוכן ראשי",
+                    usefulLinksOptionAboutUs: "אודות",
+                },
+                tw: {
+                    contentAdjustmentsTitle: "內容調整",
+                    colorAdjustmentsTitle: "顏色調整",
+                    interfaceControlsTitle: "介面控制",
+                    usefulLinksSelectPlaceholder: "選擇",
+                    usefulLinksOptionHome: "首頁",
+                    usefulLinksOptionHeader: "頁首",
+                    usefulLinksOptionFooter: "頁尾",
+                    usefulLinksOptionMainContent: "主要內容",
+                    usefulLinksOptionAboutUs: "關於我們",
+                },
+                ar: {
+                    contentAdjustmentsTitle: "تعديلات المحتوى",
+                    colorAdjustmentsTitle: "تعديلات الألوان",
+                    interfaceControlsTitle: "عناصر التحكم بالواجهة",
+                    usefulLinksSelectPlaceholder: "اختر",
+                    usefulLinksOptionHome: "الرئيسية",
+                    usefulLinksOptionHeader: "الترويسة",
+                    usefulLinksOptionFooter: "التذييل",
+                    usefulLinksOptionMainContent: "المحتوى الرئيسي",
+                    usefulLinksOptionAboutUs: "من نحن",
+                },
+                ae: {
+                    contentAdjustmentsTitle: "تعديلات المحتوى",
+                    colorAdjustmentsTitle: "تعديلات الألوان",
+                    interfaceControlsTitle: "عناصر التحكم بالواجهة",
+                    usefulLinksSelectPlaceholder: "اختر",
+                    usefulLinksOptionHome: "الرئيسية",
+                    usefulLinksOptionHeader: "الترويسة",
+                    usefulLinksOptionFooter: "التذييل",
+                    usefulLinksOptionMainContent: "المحتوى الرئيسي",
+                    usefulLinksOptionAboutUs: "من نحن",
+                },
+                pl: {
+                    contentAdjustmentsTitle: "Dostosowanie treści",
+                    colorAdjustmentsTitle: "Dostosowanie kolorów",
+                    interfaceControlsTitle: "Sterowanie interfejsem",
+                    usefulLinksSelectPlaceholder: "Wybierz",
+                    usefulLinksOptionHome: "Strona główna",
+                    usefulLinksOptionHeader: "Nagłówek",
+                    usefulLinksOptionFooter: "Stopka",
+                    usefulLinksOptionMainContent: "Treść główna",
+                    usefulLinksOptionAboutUs: "O nas",
+                },
+                tr: {
+                    contentAdjustmentsTitle: "İçerik ayarları",
+                    colorAdjustmentsTitle: "Renk ayarları",
+                    interfaceControlsTitle: "Arayüz kontrolleri",
+                    usefulLinksSelectPlaceholder: "Seç",
+                    usefulLinksOptionHome: "Ana sayfa",
+                    usefulLinksOptionHeader: "Üst bilgi",
+                    usefulLinksOptionFooter: "Alt bilgi",
+                    usefulLinksOptionMainContent: "Ana içerik",
+                    usefulLinksOptionAboutUs: "Hakkımızda",
+                },
+                cz: {
+                    contentAdjustmentsTitle: "Úpravy obsahu",
+                    colorAdjustmentsTitle: "Úpravy barev",
+                    interfaceControlsTitle: "Ovládání rozhraní",
+                    usefulLinksSelectPlaceholder: "Vybrat",
+                    usefulLinksOptionHome: "Domů",
+                    usefulLinksOptionHeader: "Záhlaví",
+                    usefulLinksOptionFooter: "Zápatí",
+                    usefulLinksOptionMainContent: "Hlavní obsah",
+                    usefulLinksOptionAboutUs: "O nás",
+                },
+                si: {
+                    contentAdjustmentsTitle: "Prilagoditve vsebine",
+                    colorAdjustmentsTitle: "Prilagoditve barv",
+                    interfaceControlsTitle: "Kontrole vmesnika",
+                    usefulLinksSelectPlaceholder: "Izberi",
+                    usefulLinksOptionHome: "Domov",
+                    usefulLinksOptionHeader: "Glava",
+                    usefulLinksOptionFooter: "Noga",
+                    usefulLinksOptionMainContent: "Glavna vsebina",
+                    usefulLinksOptionAboutUs: "O nas",
+                },
+                no: {
+                    contentAdjustmentsTitle: "Innholdsjusteringer",
+                    colorAdjustmentsTitle: "Fargejusteringer",
+                    interfaceControlsTitle: "Grensesnittkontroller",
+                    usefulLinksSelectPlaceholder: "Velg",
+                    usefulLinksOptionHome: "Hjem",
+                    usefulLinksOptionHeader: "Topptekst",
+                    usefulLinksOptionFooter: "Bunntekst",
+                    usefulLinksOptionMainContent: "Hovedinnhold",
+                    usefulLinksOptionAboutUs: "Om oss",
+                },
+                fi: {
+                    contentAdjustmentsTitle: "Sisällön säädöt",
+                    colorAdjustmentsTitle: "Värisäädöt",
+                    interfaceControlsTitle: "Käyttöliittymän hallinta",
+                    usefulLinksSelectPlaceholder: "Valitse",
+                    usefulLinksOptionHome: "Etusivu",
+                    usefulLinksOptionHeader: "Ylätunniste",
+                    usefulLinksOptionFooter: "Alatunniste",
+                    usefulLinksOptionMainContent: "Pääsisältö",
+                    usefulLinksOptionAboutUs: "Tietoa meistä",
+                },
+                ro: {
+                    contentAdjustmentsTitle: "Ajustări conținut",
+                    colorAdjustmentsTitle: "Ajustări culori",
+                    interfaceControlsTitle: "Controale interfață",
+                    usefulLinksSelectPlaceholder: "Selectează",
+                    usefulLinksOptionHome: "Acasă",
+                    usefulLinksOptionHeader: "Antet",
+                    usefulLinksOptionFooter: "Subsol",
+                    usefulLinksOptionMainContent: "Conținut principal",
+                    usefulLinksOptionAboutUs: "Despre noi",
+                },
+                gr: {
+                    contentAdjustmentsTitle: "Ρυθμίσεις περιεχομένου",
+                    colorAdjustmentsTitle: "Ρυθμίσεις χρωμάτων",
+                    interfaceControlsTitle: "Έλεγχοι διεπαφής",
+                    usefulLinksSelectPlaceholder: "Επιλογή",
+                    usefulLinksOptionHome: "Αρχική",
+                    usefulLinksOptionHeader: "Κεφαλίδα",
+                    usefulLinksOptionFooter: "Υποσέλιδο",
+                    usefulLinksOptionMainContent: "Κύριο περιεχόμενο",
+                    usefulLinksOptionAboutUs: "Σχετικά με εμάς",
+                },
+            };
+
+            Object.keys(ui).forEach((lang) => {
+                if (t[lang]) t[lang] = { ...t[lang], ...ui[lang] };
+            });
+
+            return t;
         }
     
     
@@ -12880,6 +13325,11 @@ keyboardNav: "Keyboard Navigation (Motor)",
             if (header) {
                 header.setAttribute('data-current-lang', normalizedCurrent);
             }
+            // Also reflect on the panel for language-specific CSS tweaks (e.g. Russian auto-sizing)
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            if (panel) {
+                panel.setAttribute('data-lang', normalizedCurrent);
+            }
         }
     
     
@@ -12915,6 +13365,19 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
             }
     
+            // Update header flag icon
+            try {
+                const headerFlag = this.shadowRoot?.getElementById('language-flag-header');
+                if (headerFlag) {
+                    const svg = this.getLanguageFlagSvg(langCode);
+                    if (svg) {
+                        headerFlag.innerHTML = svg;
+                    } else if (flag) {
+                        headerFlag.textContent = flag;
+                    }
+                }
+            } catch (_) {}
+
     
     
             // Store selected language
@@ -12922,6 +13385,12 @@ keyboardNav: "Keyboard Navigation (Motor)",
             this.currentLanguage = langCode;
     
             localStorage.setItem('accessbit-widget-language', langCode);
+
+            // Reflect on the panel immediately for language-specific CSS tweaks (e.g. Russian auto-sizing)
+            const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+            if (panel) {
+                panel.setAttribute('data-lang', langCode);
+            }
     
     
     
@@ -12999,6 +13468,20 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 profilesTitle.textContent = translations.profilesTitle || "Accessibility Profiles";
     
+            }
+
+            // Update section headers (Content Adjustments / Color Adjustments)
+            const contentAdjustmentsTitle = this.shadowRoot.querySelector('.content-adjustments-title');
+            if (contentAdjustmentsTitle) {
+                contentAdjustmentsTitle.textContent = translations.contentAdjustmentsTitle || 'Content Adjustments';
+            }
+            const colorAdjustmentsTitle = this.shadowRoot.querySelector('.color-adjustments-title');
+            if (colorAdjustmentsTitle) {
+                colorAdjustmentsTitle.textContent = translations.colorAdjustmentsTitle || 'Color Adjustments';
+            }
+            const interfaceControlsTitle = this.shadowRoot.querySelector('.interface-controls-title');
+            if (interfaceControlsTitle) {
+                interfaceControlsTitle.textContent = translations.interfaceControlsTitle || 'Interface Controls';
             }
     
             
@@ -13318,6 +13801,44 @@ keyboardNav: "Keyboard Navigation (Motor)",
                         if (title) title.textContent = translations.usefulLinks || 'Useful Links';
     
                         if (desc) desc.textContent = translations.usefulLinksDesc || 'Accessibility resources and links';
+
+                        // Useful Links placeholder + option labels (custom dropdown + native select)
+                        const placeholder = translations.usefulLinksSelectPlaceholder || 'Select';
+                        const optionLabelByValue = {
+                            '': placeholder,
+                            home: translations.usefulLinksOptionHome || 'Home',
+                            header: translations.usefulLinksOptionHeader || 'Header',
+                            footer: translations.usefulLinksOptionFooter || 'Footer',
+                            'main-content': translations.usefulLinksOptionMainContent || 'Main content',
+                            'about-us': translations.usefulLinksOptionAboutUs || 'About us',
+                        };
+
+                        const trigger = this.shadowRoot.getElementById('useful-links-custom-trigger');
+
+                        const customOptions = this.shadowRoot.querySelectorAll('.useful-links-custom-option');
+                        if (customOptions && customOptions.length) {
+                            customOptions.forEach((opt) => {
+                                const val = opt.getAttribute('data-value');
+                                if (val != null && optionLabelByValue[val]) opt.textContent = optionLabelByValue[val];
+                            });
+                        }
+
+                        const nativeSelect = this.shadowRoot.getElementById('useful-links-select');
+                        if (nativeSelect) {
+                            const nativeOptions = nativeSelect.querySelectorAll('option');
+                            nativeOptions.forEach((opt) => {
+                                const val = opt.getAttribute('value');
+                                if (val != null && optionLabelByValue[val]) opt.textContent = optionLabelByValue[val];
+                            });
+                        }
+
+                        // Keep trigger in sync with current selection, but translated
+                        if (trigger) {
+                            const currentVal = (nativeSelect && nativeSelect.value != null) ? nativeSelect.value : '';
+                            const label = optionLabelByValue[currentVal] || placeholder;
+                            trigger.textContent = label;
+                            trigger.setAttribute('aria-label', `${translations.usefulLinks || 'Useful Links'} - ${label}`);
+                        }
     
                         break;
     
@@ -18774,35 +19295,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             const allElements = document.querySelectorAll('*');
     
             allElements.forEach(element => {
-    
                 // Skip accessibility widget elements
-    
                 if (element.closest('.accessbit-widget-panel') || element.closest('#accessbit-widget-icon')) {
-    
                     return;
-    
                 }
     
-                
+                // Remove focus-related inline styles added by highlight-focus
+                const hasHighlightOutline = element.style.outline && element.style.outline.includes('6366f1');
+                const hasHighlightBg = element.style.background && element.style.background.includes('99, 102, 241');
+                const hasHighlightShadow = element.style.boxShadow && element.style.boxShadow.includes('99, 102, 241');
     
-                // Remove focus-related inline styles
-    
-                if (element.style.outline && element.style.outline.includes('6366f1')) {
-    
-                   
-    
+                if (hasHighlightOutline || hasHighlightBg || hasHighlightShadow) {
                     element.style.outline = '';
-    
                     element.style.outlineOffset = '';
-    
                     element.style.background = '';
-    
                     element.style.borderRadius = '';
-    
                     element.style.transition = '';
-    
+                    element.style.boxShadow = '';
                 }
-    
             });
     
             
@@ -24490,103 +25000,68 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
         disableHighlightFocus() {
     
             // Update toggle state
-    
             const toggle = this.shadowRoot.querySelector('#highlight-focus');
-    
             if (toggle) {
-    
                 toggle.checked = false;
-    
             }
     
-            
-    
+            // Remove the main class first
             document.body.classList.remove('highlight-focus');
     
-    
-    
-            
-    
-            // Remove focus styles from the currently tracked focused element
-    
-            if (this.currentlyFocusedElement) {
-    
-    
-                this.currentlyFocusedElement.style.outline = '';
-    
-                this.currentlyFocusedElement.style.outlineOffset = '';
-    
-                this.currentlyFocusedElement.style.background = '';
-    
-                this.currentlyFocusedElement.style.borderRadius = '';
-    
-                this.currentlyFocusedElement.style.transition = '';
-    
-                this.currentlyFocusedElement = null;
-    
+            // Remove the CSS rules for highlight focus (injected <style>)
+            const existingStyle = document.getElementById('highlight-focus-css');
+            if (existingStyle) {
+                existingStyle.remove();
             }
     
-            
+            // Remove focus styles from the currently tracked focused element
+            if (this.currentlyFocusedElement) {
+                this.currentlyFocusedElement.style.outline = '';
+                this.currentlyFocusedElement.style.outlineOffset = '';
+                this.currentlyFocusedElement.style.background = '';
+                this.currentlyFocusedElement.style.borderRadius = '';
+                this.currentlyFocusedElement.style.transition = '';
+                this.currentlyFocusedElement = null;
+            }
     
             // Also remove any remaining focus styles from all elements as a safety measure
-    
             const allElements = document.querySelectorAll('*');
     
             allElements.forEach(element => {
-    
                 // Skip accessibility widget elements
-    
                 if (element.closest('.accessbit-widget-panel') || element.closest('#accessbit-widget-icon')) {
-    
                     return;
-    
                 }
     
-                
+                // Remove focus-related inline styles added by highlight-focus
+                const hasHighlightOutline = element.style.outline && element.style.outline.includes('6366f1');
+                const hasHighlightBg = element.style.background && element.style.background.includes('99, 102, 241');
+                const hasHighlightShadow = element.style.boxShadow && element.style.boxShadow.includes('99, 102, 241');
     
-                // Remove focus-related inline styles
-    
-                if (element.style.outline && element.style.outline.includes('6366f1')) {
-    
-               
+                if (hasHighlightOutline || hasHighlightBg || hasHighlightShadow) {
                     element.style.outline = '';
-    
                     element.style.outlineOffset = '';
-    
                     element.style.background = '';
-    
                     element.style.borderRadius = '';
-    
                     element.style.transition = '';
-    
+                    element.style.boxShadow = '';
                 }
-    
             });
     
-            
-    
             // Remove the focus event listener
-    
             if (this.highlightFocusHandler) {
-    
                 document.removeEventListener('focusin', this.highlightFocusHandler, true);
-    
                 this.highlightFocusHandler = null;
-    
             }
-            
+    
             // Remove the focusout handler
             if (this.highlightFocusOutHandler) {
                 document.removeEventListener('focusout', this.highlightFocusOutHandler, true);
                 this.highlightFocusOutHandler = null;
             }
     
-            
-    
-            // Also remove the CSS class from body to ensure complete cleanup
-    
+            // Extra safety: ensure the class is gone
             document.body.classList.remove('highlight-focus');
-    
         }
     
     
@@ -32364,7 +32839,26 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Update toggle switch text
             this.updateToggleText(content);
             
-          
+            // Keep section headers + Useful Links dropdown in sync (placeholder/options, etc.)
+            try {
+                const panel = this.shadowRoot?.getElementById('accessbit-widget-panel');
+                if (panel) panel.setAttribute('data-lang', language);
+                this.updatePanelLanguage(language);
+            } catch (_) {}
+
+            // Update language header text + flag icon
+            try {
+                const currentLanguageHeader = this.shadowRoot?.getElementById('current-language-header');
+                if (currentLanguageHeader) {
+                    currentLanguageHeader.textContent = this.getLanguageNameFromCode(language);
+                }
+                const headerFlag = this.shadowRoot?.getElementById('language-flag-header');
+                if (headerFlag) {
+                    const svg = this.getLanguageFlagSvg(language);
+                    if (svg) headerFlag.innerHTML = svg;
+                }
+            } catch (_) {}
+
         }
         
         updateProfileItem(profileId, title, description) {
@@ -34048,7 +34542,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     // Update the header to show selected language
                     const currentLanguageHeader = this.shadowRoot?.getElementById('current-language-header');
                     if (currentLanguageHeader && langName) {
-                        currentLanguageHeader.textContent = langName.toUpperCase();
+                        currentLanguageHeader.textContent = langName;
                     }
                     
                     // Apply the language
@@ -34065,17 +34559,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
         }
     
         getLanguageNameFromCode(code) {
+            // Prefer native names as shown in the dropdown list (e.g. "Português", "Deutsch")
+            try {
+                const optionName = this.shadowRoot?.querySelector(`.language-option[data-lang="${code}"] .language-name`);
+                const nativeName = optionName?.textContent?.trim();
+                if (nativeName) return nativeName;
+            } catch (_) {}
+
             const languageMap = {
                 'en': 'English',
-                'de': 'German', 
-                'fr': 'French',
-                'he': 'Hebrew',
-                'ru': 'Russian',
-                'ar': 'Arabic',
-                'es': 'Spanish',
-                'pt': 'Portuguese',
-                'it': 'Italian',
-                'tw': 'Chinese'
+                'de': 'Deutsch',
+                'fr': 'Français',
+                'he': 'עברית',
+                'ru': 'Русский',
+                'ar': 'العربية',
+                'es': 'Español',
+                'pt': 'Português',
+                'it': 'Italiano',
+                'tw': '繁體中文'
             };
             return languageMap[code] || 'English';
         }
