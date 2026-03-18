@@ -10412,6 +10412,67 @@ input:checked + .slider::after {
                         line-height: 1.35 !important;
                     }
                 }
+
+                /* Tablet/base (1014px–1279px): match desktop typography */
+                @media (max-width: 1279px) and (min-width: 1014px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Reset / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments heading */
+                    #accessbit-widget-panel .white-content-section h3,
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Slider titles (Font Size / Line Height / Letter Spacing) */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                }
     
             `;
     
