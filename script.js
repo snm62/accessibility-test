@@ -427,12 +427,20 @@ function applyVisionImpaired(on) {
             if (!input) return;
             const enabled = localStorage.getItem('accessbit-widget-reduce-motion') === 'true';
             try { input.checked = enabled; } catch (_) {}
+            try {
+                const item = input.closest && input.closest('.profile-item');
+                if (item) item.classList.toggle('reduce-motion-on', !!enabled);
+            } catch (_) {}
             if (!input.__reduceMotionBound) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
                     localStorage.setItem('accessbit-widget-reduce-motion', on ? 'true' : 'false');
                     try { document.documentElement.classList.toggle('reduce-motion', on); } catch (_) {}
                     try { document.body.classList.toggle('reduce-motion', on); } catch (_) {}
+                    try {
+                        const item = this.closest && this.closest('.profile-item');
+                        if (item) item.classList.toggle('reduce-motion-on', on);
+                    } catch (_) {}
                     // Apply CSS and WAAPI controls
                     if (on) {
                         const style = document.getElementById('reduce-motion-css') || (() => {
@@ -526,6 +534,10 @@ function applyVisionImpaired(on) {
             if (!input) return;
             const enabled = localStorage.getItem('accessbit-widget-seizure-safe') === 'true';
             try { input.checked = enabled; } catch (_) {}
+            try {
+                const item = input.closest && input.closest('.profile-item');
+                if (item) item.classList.toggle('seizure-safe-on', !!enabled);
+            } catch (_) {}
             if (!input.__seizureBound) {
                 input.addEventListener('change', function() {
                     const on = !!this.checked;
@@ -541,6 +553,10 @@ function applyVisionImpaired(on) {
                             window.location.reload();
                         }
                     }
+                    try {
+                        const item = this.closest && this.closest('.profile-item');
+                        if (item) item.classList.toggle('seizure-safe-on', on);
+                    } catch (_) {}
                 });
                 input.__seizureBound = true;
             }
@@ -3335,6 +3351,42 @@ font-family: Archivo;
     .accessbit-widget-icon[data-shape="circle"] {
         border-radius: 50%;
     }
+
+    // Safari-safe icon styling: toggle a class on the card instead of relying on :has(:checked)
+    syncToggleCardOnClass(input) {
+        try {
+            if (!input || !input.id) return;
+            const on = !!input.checked;
+            const cls = input.id + '-on';
+            const card =
+                (input.closest && (input.closest('.profile-item') || input.closest('.color-adjustments-card') || input.closest('.contrast-style-card') || input.closest('.content-adjustments-card')));
+            if (card && card.classList) {
+                card.classList.toggle(cls, on);
+                card.classList.toggle('ab-toggle-on', on);
+            }
+        } catch (_) {}
+    }
+
+    installToggleCardClassSync(root) {
+        try {
+            if (!root || root.__abToggleCardClassSyncInstalled) return;
+            root.__abToggleCardClassSyncInstalled = true;
+            // Initial sync
+            try {
+                const inputs = root.querySelectorAll && root.querySelectorAll('input[type="checkbox"][id]');
+                if (inputs && inputs.forEach) inputs.forEach((i) => this.syncToggleCardOnClass(i));
+            } catch (_) {}
+            // Live sync
+            try {
+                root.addEventListener('change', (e) => {
+                    const t = e && e.target;
+                    if (t && t.matches && t.matches('input[type="checkbox"][id]')) {
+                        this.syncToggleCardOnClass(t);
+                    }
+                }, true);
+            } catch (_) {}
+        } catch (_) {}
+    }
     
     .accessbit-widget-icon[data-shape="rounded"] {
         border-radius: 12px;
@@ -4037,6 +4089,9 @@ font-family: Archivo;
             const shadowRoot = widgetContainer.attachShadow({ mode: 'open' });
     
             this.shadowRoot = shadowRoot;
+
+            // Safari-safe: keep icon colors in sync without :has()
+            this.installToggleCardClassSync(shadowRoot);
     
     
     
@@ -7455,6 +7510,112 @@ font-family: Archivo;
                 .profile-item.vision-impaired-on .vision-eye-path {
                     fill: #01CE9C !important;
                 }
+
+                /* Safari fallbacks for other toggles (JS adds <id>-on class on the card) */
+                .profile-item.seizure-safe-on .seizure-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.seizure-safe-on .seizure-icon-path { stroke: #01CE9C; }
+
+                .profile-item.reduce-motion-on .reduce-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.reduce-motion-on .reduce-ring-on { display: block; }
+                .profile-item.reduce-motion-on .reduce-motion-path,
+                .profile-item.reduce-motion-on .reduce-motion-dot { fill: #01CE9C; }
+
+                .profile-item.dark-contrast-on .dark-contrast-ring-off,
+                .profile-item.dark-contrast-on .dark-contrast-icon-off,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-ring-off,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-icon-off { display: none; }
+                .profile-item.dark-contrast-on .dark-contrast-ring-on,
+                .profile-item.dark-contrast-on .dark-contrast-icon-on,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-ring-on,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-icon-on { display: block; }
+
+                .profile-item.light-contrast-on .light-contrast-ring-off,
+                .profile-item.light-contrast-on .light-contrast-icon-off,
+                .color-adjustments-card.light-contrast-on .light-contrast-ring-off,
+                .color-adjustments-card.light-contrast-on .light-contrast-icon-off { display: none; }
+                .profile-item.light-contrast-on .light-contrast-ring-on,
+                .profile-item.light-contrast-on .light-contrast-icon-on,
+                .color-adjustments-card.light-contrast-on .light-contrast-ring-on,
+                .color-adjustments-card.light-contrast-on .light-contrast-icon-on { display: block; }
+
+                .profile-item.high-contrast-on .high-contrast-ring-off,
+                .profile-item.high-contrast-on .high-contrast-icon-off,
+                .color-adjustments-card.high-contrast-on .high-contrast-ring-off,
+                .color-adjustments-card.high-contrast-on .high-contrast-icon-off { display: none; }
+                .profile-item.high-contrast-on .high-contrast-ring-on,
+                .profile-item.high-contrast-on .high-contrast-icon-on,
+                .color-adjustments-card.high-contrast-on .high-contrast-ring-on,
+                .color-adjustments-card.high-contrast-on .high-contrast-icon-on { display: block; }
+
+                .contrast-style-card.high-saturation-on .high-sat-ring-off,
+                .contrast-style-card.high-saturation-on .high-sat-icon-off { display: none; }
+                .contrast-style-card.high-saturation-on .high-sat-ring-on,
+                .contrast-style-card.high-saturation-on .high-sat-icon-on { display: block; }
+
+                .contrast-style-card.low-saturation-on .low-sat-ring-off,
+                .contrast-style-card.low-saturation-on .low-sat-icon-off { display: none; }
+                .contrast-style-card.low-saturation-on .low-sat-ring-on,
+                .contrast-style-card.low-saturation-on .low-sat-icon-on { display: block; }
+
+                .contrast-style-card.monochrome-on .mono-ring-off,
+                .contrast-style-card.monochrome-on .mono-icon-off { display: none; }
+                .contrast-style-card.monochrome-on .mono-ring-on,
+                .contrast-style-card.monochrome-on .mono-icon-on { display: block; }
+
+                .contrast-style-card.mute-sound-on .mute-ring-off,
+                .contrast-style-card.mute-sound-on .mute-icon-off { display: none; }
+                .contrast-style-card.mute-sound-on .mute-ring-on,
+                .contrast-style-card.mute-sound-on .mute-icon-on { display: block; }
+
+                .contrast-style-card.hide-images-on .hide-img-ring-off,
+                .contrast-style-card.hide-images-on .hide-img-icon-off { display: none; }
+                .contrast-style-card.hide-images-on .hide-img-ring-on,
+                .contrast-style-card.hide-images-on .hide-img-icon-on { display: block; }
+
+                .contrast-style-card.read-mode-on .read-mode-ring-off,
+                .contrast-style-card.read-mode-on .read-mode-icon-off { display: none; }
+                .contrast-style-card.read-mode-on .read-mode-ring-on,
+                .contrast-style-card.read-mode-on .read-mode-icon-on { display: block; }
+
+                .contrast-style-card.reading-guide-on .reading-guide-ring-off,
+                .contrast-style-card.reading-guide-on .reading-guide-icon-off { display: none; }
+                .contrast-style-card.reading-guide-on .reading-guide-ring-on,
+                .contrast-style-card.reading-guide-on .reading-guide-icon-on { display: block; }
+
+                .contrast-style-card.stop-animation-on .stop-anim-ring-off,
+                .contrast-style-card.stop-animation-on .stop-anim-icon-off { display: none; }
+                .contrast-style-card.stop-animation-on .stop-anim-ring-on,
+                .contrast-style-card.stop-animation-on .stop-anim-icon-on { display: block; }
+
+                .contrast-style-card.reading-mask-on .reading-mask-ring-off,
+                .contrast-style-card.reading-mask-on .reading-mask-icon-off { display: none; }
+                .contrast-style-card.reading-mask-on .reading-mask-ring-on,
+                .contrast-style-card.reading-mask-on .reading-mask-icon-on { display: block; }
+
+                .contrast-style-card.readable-font-on .readable-font-ring-off,
+                .contrast-style-card.readable-font-on .readable-font-icon-off { display: none; }
+                .contrast-style-card.readable-font-on .readable-font-ring-on,
+                .contrast-style-card.readable-font-on .readable-font-icon-on { display: block; }
+
+                .contrast-style-card.highlight-titles-on .ht-ring-off,
+                .contrast-style-card.highlight-titles-on .ht-icon-off { display: none; }
+                .contrast-style-card.highlight-titles-on .ht-ring-on,
+                .contrast-style-card.highlight-titles-on .ht-icon-on { display: block; }
+
+                .contrast-style-card.highlight-focus-on .hl-focus-ring-off,
+                .contrast-style-card.highlight-focus-on .hl-focus-icon-off { display: none; }
+                .contrast-style-card.highlight-focus-on .hl-focus-ring-on,
+                .contrast-style-card.highlight-focus-on .hl-focus-icon-on { display: block; }
+
+                .contrast-style-card.highlight-hover-on .hl-hover-ring-off,
+                .contrast-style-card.highlight-hover-on .hl-hover-icon-off { display: none; }
+                .contrast-style-card.highlight-hover-on .hl-hover-ring-on,
+                .contrast-style-card.highlight-hover-on .hl-hover-icon-on { display: block; }
+
+                .contrast-style-card.big-black-cursor-on .bbc-ring-off,
+                .contrast-style-card.big-black-cursor-on .bbc-icon-off { display: none; }
+                .contrast-style-card.big-black-cursor-on .bbc-ring-on,
+                .contrast-style-card.big-black-cursor-on .bbc-icon-on { display: block; }
                 /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .dark-contrast-ring-on,
                 .dark-contrast-icon-on {
