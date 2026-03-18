@@ -5262,7 +5262,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 12px !important; }
                 /* Toggle on: highlight card with border; icon ring handled purely inside SVG (exclude font-size, line-height, letter-spacing) */
                 .accessbit-widget-panel .profile-item { border: 2px solid transparent !important; }
-                .accessbit-widget-panel .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border: 2px solid #01CE9C !important; }
+                .accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border: 2px solid #01CE9C !important; }
                 /* --- ≤1279px: drawer mode (mobile-mode) – width/height; position set by viewport below --- */
                 @media (max-width: 1279px) {
                     .accessbit-widget-panel.mobile-mode {
@@ -6211,13 +6211,13 @@ font-family: Archivo;
                     letter-spacing: -1px;
                 }
                 .accessbit-panel-screenshot .profile-item .toggle-switch { flex-shrink: 0; margin-left: auto; margin-right: 12px; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border-color: #01CE9C !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border-color: #01CE9C !important; }
                 .accessbit-panel-screenshot .profile-item .profile-item-icon,
                 .accessbit-panel-screenshot .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
-                .accessbit-panel-screenshot .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon svg circle:first-of-type,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
                 /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
                 @media (min-width: 769px) {
                     .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
@@ -7075,8 +7075,9 @@ font-family: Archivo;
                 }
                 .ht-ring-on { display: none; }
                 /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card:has(#highlight-titles:checked) .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
+                /* Safari-safe: highlight titles icon recolor via class */
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
                 .content-adjustments-card.highlight-links-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
                 .accessbit-widget-panel .content-adjustments-card.highlight-links-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.highlight-links-icon svg { width: 43px; height: 43px; }
@@ -7145,8 +7146,8 @@ font-family: Archivo;
                     white-space: nowrap !important;
                     flex-shrink: 0 !important;
                 }
-                .content-adjustments-card:has(#highlight-titles:checked) { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
-                .content-adjustments-card:has(#highlight-links:checked) { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
+                .content-adjustments-card.highlight-titles-on { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
+                .content-adjustments-card.highlight-links-on { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
                 .content-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: #ECEDED; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: visible !important; }
                 .content-adjustments-card .content-card-icon svg { width: 24px; height: 24px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
                 .content-adjustments-card .content-card-icon.content-scaling-icon svg { width: 43px; height: 43px; }
@@ -7172,15 +7173,11 @@ font-family: Archivo;
                 }
                 .readable-font-ring-on,
                 .readable-font-icon-on { display: none; }
-                /* Readable Font: explicit on/off ring + icon – hide off group and show on group when checked */
-                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-off,
-                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#readable-font:checked) .readable-font-ring-on,
-                .contrast-style-card:has(#readable-font:checked) .readable-font-icon-on {
-                    display: block;
-                }
+                /* Readable Font: swap via JS-added class (Safari-safe) */
+                .contrast-style-card.readable-font-on .readable-font-ring-off,
+                .contrast-style-card.readable-font-on .readable-font-icon-off { display: none; }
+                .contrast-style-card.readable-font-on .readable-font-ring-on,
+                .contrast-style-card.readable-font-on .readable-font-icon-on { display: block; }
 
                 /* --- SHARED STYLES (Mobile & Desktop) --- */
                 .content-scaling-header {
@@ -7438,7 +7435,8 @@ font-family: Archivo;
     
                 }
     
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) { border: 2px solid #01CE9C; }
+                /* Toggle ON highlight without :has() (Safari-safe) */
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) { border: 2px solid #01CE9C; }
     
     
                 /* Seizure Safe container only: 528px width */
@@ -7451,9 +7449,7 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .seizure-ring-on { display: none; }
-                /* Direct Path Color Swap: keep default icon same, only recolor when checked */
-                .profile-item:has(#seizure-safe:checked) .seizure-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
-                .profile-item:has(#seizure-safe:checked) .seizure-icon-path { stroke: #01CE9C; }
+                /* Seizure Safe: icon recolor via JS-added class (Safari-safe) */
                 .accessbit-widget-panel .profile-item:has(#seizure-safe),
                 .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon,
                 .accessbit-widget-panel .profile-item:has(#seizure-safe) .seizure-icon {
@@ -7467,17 +7463,7 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .reduce-ring-on { display: none; }
-                /* Reduce Motion: explicit on/off ring – show green ring, recolor paths when checked */
-                .profile-item:has(#reduce-motion:checked) .reduce-ring-off {
-                    display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#reduce-motion:checked) .reduce-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#reduce-motion:checked) .reduce-motion-path,
-                .profile-item:has(#reduce-motion:checked) .reduce-motion-dot { fill: #01CE9C; }
+                /* Reduce Motion: icon recolor via JS-added class (Safari-safe) */
                 .accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg {
                     width: 43px;
                     height: 43px;
@@ -7488,16 +7474,6 @@ font-family: Archivo;
                 }
                 .vision-ring-on {
                     display: none;
-                }
-                /* Vision Impaired: when checked, show green ring and eye */
-                .profile-item:has(#vision-impaired:checked) .vision-ring-off {
-                    display: none;
-                }
-                .profile-item:has(#vision-impaired:checked) .vision-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#vision-impaired:checked) .vision-eye-path {
-                    fill: #01CE9C !important;
                 }
                 /* Safari fallback (and general robustness): JS toggles class on the card */
                 .profile-item.vision-impaired-on .vision-ring-off {
@@ -7615,288 +7591,148 @@ font-family: Archivo;
                 .contrast-style-card.big-black-cursor-on .bbc-icon-off { display: none; }
                 .contrast-style-card.big-black-cursor-on .bbc-ring-on,
                 .contrast-style-card.big-black-cursor-on .bbc-icon-on { display: block; }
+
+                .contrast-style-card.big-white-cursor-on .bwc-ring-off,
+                .contrast-style-card.big-white-cursor-on .bwc-icon-off { display: none; }
+                .contrast-style-card.big-white-cursor-on .bwc-ring-on,
+                .contrast-style-card.big-white-cursor-on .bwc-icon-on { display: block; }
+
+                .contrast-style-card.highlight-links-on .hl-links-ring-off,
+                .contrast-style-card.highlight-links-on .hl-links-icon-off { display: none; }
+                .contrast-style-card.highlight-links-on .hl-links-ring-on,
+                .contrast-style-card.highlight-links-on .hl-links-icon-on { display: block; }
+
+                .contrast-style-card.text-magnifier-on .tm-ring-off,
+                .contrast-style-card.text-magnifier-on .tm-icon-off { display: none; }
+                .contrast-style-card.text-magnifier-on .tm-ring-on,
+                .contrast-style-card.text-magnifier-on .tm-icon-on { display: block; }
+
+                .content-adjustments-card.align-left-on .align-left-ring-off,
+                .content-adjustments-card.align-left-on .align-left-icon-off { display: none; }
+                .content-adjustments-card.align-left-on .align-left-ring-on,
+                .content-adjustments-card.align-left-on .align-left-icon-on { display: block; }
+
+                .content-adjustments-card.align-center-on .align-center-ring-off,
+                .content-adjustments-card.align-center-on .align-center-icon-off { display: none; }
+                .content-adjustments-card.align-center-on .align-center-ring-on,
+                .content-adjustments-card.align-center-on .align-center-icon-on { display: block; }
+
+                .content-adjustments-card.align-right-on .align-right-ring-off,
+                .content-adjustments-card.align-right-on .align-right-icon-off { display: none; }
+                .content-adjustments-card.align-right-on .align-right-ring-on,
+                .content-adjustments-card.align-right-on .align-right-icon-on { display: block; }
+
+                .profile-item.adhd-friendly-on .adhd-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.adhd-friendly-on .adhd-ring-on { display: block; }
+                .profile-item.adhd-friendly-on .adhd-path { stroke: #01CE9C; }
+
+                .profile-item.cognitive-disability-on .cog-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.cognitive-disability-on .cog-ring-on { display: block; }
+                .profile-item.cognitive-disability-on .cog-path { fill: #01CE9C; }
                 /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .dark-contrast-ring-on,
                 .dark-contrast-icon-on {
                     display: none;
-                }
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-off,
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-off,
-                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-ring-off,
-                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-icon-off {
-                    display: none;
-                }
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-ring-on,
-                .profile-item:has(#dark-contrast:checked) .dark-contrast-icon-on,
-                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-ring-on,
-                .color-adjustments-card:has(#dark-contrast:checked) .dark-contrast-icon-on {
-                    display: block;
                 }
                 /* Light Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .light-contrast-ring-on,
                 .light-contrast-icon-on {
                     display: none;
                 }
-                .profile-item:has(#light-contrast:checked) .light-contrast-ring-off,
-                .profile-item:has(#light-contrast:checked) .light-contrast-icon-off,
-                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-ring-off,
-                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-icon-off {
-                    display: none;
-                }
-                .profile-item:has(#light-contrast:checked) .light-contrast-ring-on,
-                .profile-item:has(#light-contrast:checked) .light-contrast-icon-on,
-                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-ring-on,
-                .color-adjustments-card:has(#light-contrast:checked) .light-contrast-icon-on {
-                    display: block;
-                }
                 /* High Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
                 .high-contrast-ring-on,
                 .high-contrast-icon-on {
                     display: none;
                 }
-                .profile-item:has(#high-contrast:checked) .high-contrast-ring-off,
-                .profile-item:has(#high-contrast:checked) .high-contrast-icon-off,
-                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-ring-off,
-                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-icon-off {
-                    display: none;
-                }
-                .profile-item:has(#high-contrast:checked) .high-contrast-ring-on,
-                .profile-item:has(#high-contrast:checked) .high-contrast-icon-on,
-                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-ring-on,
-                .color-adjustments-card:has(#high-contrast:checked) .high-contrast-icon-on {
-                    display: block;
-                }
                 /* High Saturation icon: off/on rings and droplet */
                 .high-sat-ring-on,
                 .high-sat-icon-on { display: none; }
-                .contrast-style-card:has(#high-saturation:checked) .high-sat-ring-off,
-                .contrast-style-card:has(#high-saturation:checked) .high-sat-icon-off { display: none; }
-                .contrast-style-card:has(#high-saturation:checked) .high-sat-ring-on,
-                .contrast-style-card:has(#high-saturation:checked) .high-sat-icon-on { display: block; }
                 /* Low Saturation icon: off/on rings and droplet */
                 .low-sat-ring-on,
                 .low-sat-icon-on { display: none; }
-                .contrast-style-card:has(#low-saturation:checked) .low-sat-ring-off,
-                .contrast-style-card:has(#low-saturation:checked) .low-sat-icon-off { display: none; }
-                .contrast-style-card:has(#low-saturation:checked) .low-sat-ring-on,
-                .contrast-style-card:has(#low-saturation:checked) .low-sat-icon-on { display: block; }
                 /* Monochrome icon: off/on rings and circle paths */
                 .mono-ring-on,
                 .mono-icon-on { display: none; }
-                .contrast-style-card:has(#monochrome:checked) .mono-ring-off,
-                .contrast-style-card:has(#monochrome:checked) .mono-icon-off { display: none; }
-                .contrast-style-card:has(#monochrome:checked) .mono-ring-on,
-                .contrast-style-card:has(#monochrome:checked) .mono-icon-on { display: block; }
                 /* Mute Sounds icon: off/on rings and speaker */
                 .mute-ring-on,
                 .mute-icon-on { display: none; }
-                .contrast-style-card:has(#mute-sound:checked) .mute-ring-off,
-                .contrast-style-card:has(#mute-sound:checked) .mute-icon-off { display: none; }
-                .contrast-style-card:has(#mute-sound:checked) .mute-ring-on,
-                .contrast-style-card:has(#mute-sound:checked) .mute-icon-on { display: block; }
                 /* Hide Images icon: off/on rings and image */
                 .hide-img-ring-on,
                 .hide-img-icon-on { display: none; }
-                .contrast-style-card:has(#hide-images:checked) .hide-img-ring-off,
-                .contrast-style-card:has(#hide-images:checked) .hide-img-icon-off { display: none; }
-                .contrast-style-card:has(#hide-images:checked) .hide-img-ring-on,
-                .contrast-style-card:has(#hide-images:checked) .hide-img-icon-on { display: block; }
                 /* Read Mode icon: off/on rings and card */
                 .read-mode-ring-on,
                 .read-mode-icon-on { display: none; }
-                .contrast-style-card:has(#read-mode:checked) .read-mode-ring-off,
-                .contrast-style-card:has(#read-mode:checked) .read-mode-icon-off { display: none; }
-                .contrast-style-card:has(#read-mode:checked) .read-mode-ring-on,
-                .contrast-style-card:has(#read-mode:checked) .read-mode-icon-on { display: block; }
                 /* Reading Guide icon: off/on rings and arrow */
                 .reading-guide-ring-on,
                 .reading-guide-icon-on { display: none; }
-                .contrast-style-card:has(#reading-guide:checked) .reading-guide-ring-off,
-                .contrast-style-card:has(#reading-guide:checked) .reading-guide-icon-off { display: none; }
-                .contrast-style-card:has(#reading-guide:checked) .reading-guide-ring-on,
-                .contrast-style-card:has(#reading-guide:checked) .reading-guide-icon-on { display: block; }
                 /* Stop Animations icon: off/on rings and image */
                 .stop-anim-ring-on,
                 .stop-anim-icon-on { display: none; }
-                .contrast-style-card:has(#stop-animation:checked) .stop-anim-ring-off,
-                .contrast-style-card:has(#stop-animation:checked) .stop-anim-icon-off { display: none; }
-                .contrast-style-card:has(#stop-animation:checked) .stop-anim-ring-on,
-                .contrast-style-card:has(#stop-animation:checked) .stop-anim-icon-on { display: block; }
                 /* Reading Mask icon: off/on rings and bars */
                 .reading-mask-ring-on,
                 .reading-mask-icon-on { display: none; }
-                .contrast-style-card:has(#reading-mask:checked) .reading-mask-ring-off,
-                .contrast-style-card:has(#reading-mask:checked) .reading-mask-icon-off { display: none; }
-                .contrast-style-card:has(#reading-mask:checked) .reading-mask-ring-on,
-                .contrast-style-card:has(#reading-mask:checked) .reading-mask-icon-on { display: block; }
                 /* Highlight Titles icon: off/on rings and paths */
                 .ht-ring-on,
                 .ht-icon-on { display: none; }
-                /* Highlight Titles: explicit on/off ring + icon – hide off, show on when checked */
-                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-off,
-                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#highlight-titles:checked) .ht-ring-on,
-                .contrast-style-card:has(#highlight-titles:checked) .ht-icon-on {
-                    display: block;
-                }
                 /* Highlight Focus icon: explicit on/off ring + icon – hide off, show on when checked */
                 .hl-focus-ring-on,
                 .hl-focus-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-off,
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-ring-on,
-                .contrast-style-card:has(#highlight-focus:checked) .hl-focus-icon-on {
-                    display: block;
-                }
                 /* Highlight Hover icon: explicit on/off ring + icon – hide off, show on when checked */
                 .hl-hover-ring-on,
                 .hl-hover-icon-on { display: none; }
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-off,
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-ring-on,
-                .contrast-style-card:has(#highlight-hover:checked) .hl-hover-icon-on {
-                    display: block;
-                }
                 /* Big Black Cursor icon: off/on rings and cursor */
                 .bbc-ring-on,
                 .bbc-icon-on { display: none; }
-                .contrast-style-card:has(#big-black-cursor:checked) .bbc-ring-off,
-                .contrast-style-card:has(#big-black-cursor:checked) .bbc-icon-off { display: none; }
-                .contrast-style-card:has(#big-black-cursor:checked) .bbc-ring-on,
-                .contrast-style-card:has(#big-black-cursor:checked) .bbc-icon-on { display: block; }
                 /* Big White Cursor icon: off/on rings and cursor */
                 .bwc-ring-on,
                 .bwc-icon-on { display: none; }
-                .contrast-style-card:has(#big-white-cursor:checked) .bwc-ring-off,
-                .contrast-style-card:has(#big-white-cursor:checked) .bwc-icon-off { display: none; }
-                .contrast-style-card:has(#big-white-cursor:checked) .bwc-ring-on,
-                .contrast-style-card:has(#big-white-cursor:checked) .bwc-icon-on { display: block; }
                 /* Highlight Links icon: off/on rings and link paths */
                 .hl-links-ring-on,
                 .hl-links-icon-on { display: none; }
-                /* Highlight Links: explicit on/off ring + icon – hide off, show on when checked */
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-off,
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-ring-on,
-                .contrast-style-card:has(#highlight-links:checked) .hl-links-icon-on {
-                    display: block;
-                }
                 /* Text Magnifier icon: off/on rings and magnifier */
                 .tm-ring-on,
                 .tm-icon-on { display: none; }
-                /* Text Magnifier: explicit on/off ring + icon – hide off, show on when checked */
-                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-off,
-                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-off {
-                    display: none;
-                }
-                .contrast-style-card:has(#text-magnifier:checked) .tm-ring-on,
-                .contrast-style-card:has(#text-magnifier:checked) .tm-icon-on {
-                    display: block;
-                }
                 /* Text Left align icon: off/on rings and lines */
                 .align-left-ring-on,
                 .align-left-icon-on { display: none; }
-                /* Text Left Align: explicit on/off ring + icon – hide off, show on when checked */
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-off,
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-off {
-                    display: none;
-                }
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-ring-on,
-                .content-adjustments-card.align-left-card:has(#align-left:checked) .align-left-icon-on {
-                    display: block;
-                }
                 /* Text Center align icon: off/on rings and lines */
                 .align-center-ring-on,
                 .align-center-icon-on { display: none; }
-                /* Text Center Align: explicit on/off ring + icon – hide off, show on when checked */
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-off,
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-off {
-                    display: none;
-                }
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-ring-on,
-                .content-adjustments-card.align-center-card:has(#align-center:checked) .align-center-icon-on {
-                    display: block;
-                }
+                /* Text Center Align: icon swap via JS-added class (Safari-safe) */
                 /* Text Right align icon: off/on rings and lines */
                 .align-right-ring-on,
                 .align-right-icon-on { display: none; }
-                /* Text Right Align: explicit on/off ring + icon – hide off, show on when checked */
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-off,
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-off {
-                    display: none;
-                }
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-ring-on,
-                .content-adjustments-card.align-right-card:has(#align-right:checked) .align-right-icon-on {
-                    display: block;
-                }
+                /* Text Right Align: icon swap via JS-added class (Safari-safe) */
                 .accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .adhd-ring-on { display: none; }
-                /* ADHD Friendly: explicit on/off ring – show green ring and recolor paths when checked */
-                .profile-item:has(#adhd-friendly:checked) .adhd-ring-off {
-                    display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#adhd-friendly:checked) .adhd-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#adhd-friendly:checked) .adhd-path { stroke: #01CE9C; }
+                /* ADHD Friendly: icon recolor via JS-added class (Safari-safe) */
                 .accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .cog-ring-on { display: none; }
-                /* Cognitive Disability: explicit on/off ring – show green ring and recolor cog when checked */
-                .profile-item:has(#cognitive-disability:checked) .cog-ring-off {
-                    display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#cognitive-disability:checked) .cog-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#cognitive-disability:checked) .cog-path { fill: #01CE9C; }
+                /* Cognitive Disability: icon recolor via JS-added class (Safari-safe) */
                 .accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .kb-ring-on { display: none; }
-                /* Keyboard Nav: explicit on/off ring – show green ring and recolor arrow when checked */
-                .profile-item:has(#keyboard-nav:checked) .kb-ring-off {
-                    display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#keyboard-nav:checked) .kb-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#keyboard-nav:checked) .kb-path { fill: #01CE9C; }
+                /* Keyboard Nav: recolor via JS-added class (Safari-safe) */
+                .profile-item.keyboard-nav-on .kb-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.keyboard-nav-on .kb-ring-on { display: block; }
+                .profile-item.keyboard-nav-on .kb-path { fill: #01CE9C; }
                 .accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg {
                     width: 43px;
                     height: 43px;
                 }
                 .blind-ring-on { display: none; }
-                /* Blind Users (Screen Reader): explicit on/off ring – show green ring and recolor arrow when checked */
-                .profile-item:has(#screen-reader:checked) .blind-ring-off {
-                    display: none;
-                    fill: #D9F8F0;
-                    stroke: #01CE9C;
-                }
-                .profile-item:has(#screen-reader:checked) .blind-ring-on {
-                    display: block;
-                }
-                .profile-item:has(#screen-reader:checked) .blind-path { fill: #01CE9C; }
+                /* Blind Users (Screen Reader): recolor via JS-added class (Safari-safe) */
+                .profile-item.screen-reader-on .blind-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.screen-reader-on .blind-ring-on { display: block; }
+                .profile-item.screen-reader-on .blind-path { fill: #01CE9C; }
                 /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
                 .profile-item:has(#reduce-motion),
                 .profile-item:has(#vision-impaired),
@@ -7985,12 +7821,10 @@ font-family: Archivo;
                     box-sizing: border-box;
                     background: transparent;
                 }
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon,
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon { border: 2px solid transparent; background: transparent; }
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .profile-item-icon svg circle:first-of-type,
-                .profile-item:has(.toggle-switch input:checked):not(:has(#font-sizing:checked)):not(:has(#adjust-line-height:checked)):not(:has(#adjust-letter-spacing:checked)) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon { border: 2px solid transparent; background: transparent; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .profile-item-icon svg circle:first-of-type,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
                 .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
                 .profile-item-icon svg {
                     width: 36px;
