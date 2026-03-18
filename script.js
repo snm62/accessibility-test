@@ -606,7 +606,9 @@ function applyVisionImpaired(on) {
         // Wire checkbox if present and sync initial checked state
         function syncVisionImpairedToggle() {
             try {
-                const input = document.getElementById('vision-impaired');
+                const input =
+                    document.getElementById('vision-impaired') ||
+                    document.getElementById('visionImpaired');
                 if (!input) return;
                 const enabled = localStorage.getItem('accessbit-widget-vision-impaired') === 'true';
                 try { input.checked = enabled; } catch (_) {}
@@ -4280,7 +4282,10 @@ font-family: Archivo;
                 applyVisionImpaired(viEnabled);
 
                 const bindVIToggle = () => {
-                    const viToggle = this.shadowRoot && this.shadowRoot.getElementById('vision-impaired');
+                    const viToggle = this.shadowRoot && (
+                        this.shadowRoot.getElementById('vision-impaired') ||
+                        this.shadowRoot.getElementById('visionImpaired')
+                    );
                     if (!viToggle || viToggle.__viBound) return;
                     try { viToggle.checked = viEnabled; } catch (_) {}
                     viToggle.addEventListener('change', () => {
@@ -28747,7 +28752,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
 
                 // Update toggle switch in UI
-                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired') || this.shadowRoot?.getElementById('visionImpaired');
                 if (viToggle) {
                     viToggle.checked = true;
                 }
@@ -28918,7 +28923,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
 
                 // Update toggle switch in UI
-                const viToggle = this.shadowRoot?.getElementById('vision-impaired');
+                const viToggle = this.shadowRoot?.getElementById('vision-impaired') || this.shadowRoot?.getElementById('visionImpaired');
                 if (viToggle) {
                     viToggle.checked = false;
                 }
