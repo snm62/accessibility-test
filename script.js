@@ -23384,6 +23384,36 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 });
 
                 this.colorReapplyObserver.observe(document.body, { childList: true, subtree: true });
+
+                // Also re-apply on SPA back/forward navigation.
+                // Some routers swap content without changing childList in a way we can reliably catch.
+                if (!this.__colorNavListenerAdded) {
+                    this.__colorNavListenerAdded = true;
+                    const reapplyFromSettings = () => {
+                        try {
+                            const s = this.settings || {};
+                            const desired = {
+                                text: (s['adjust-text-colors'] && s['text-color'] != null) ? s['text-color'] : null,
+                                title: (s['adjust-title-colors'] && s['title-color'] != null) ? s['title-color'] : null,
+                                bg: (s['adjust-bg-colors'] && s['bg-color'] != null) ? s['bg-color'] : null
+                            };
+                            const changed =
+                                desired.text !== lastApplied.text ||
+                                desired.title !== lastApplied.title ||
+                                desired.bg !== lastApplied.bg;
+
+                            if (changed) {
+                                if (desired.text != null) this.applyTextColor(desired.text, false);
+                                if (desired.title != null) this.applyTitleColor(desired.title, false);
+                                if (desired.bg != null) this.applyBackgroundColor(desired.bg, false);
+                                lastApplied = desired;
+                            }
+                            this.syncColorPickerSelectedClasses();
+                        } catch (_) {}
+                    };
+                    window.addEventListener('popstate', reapplyFromSettings, { passive: true });
+                    window.addEventListener('hashchange', reapplyFromSettings, { passive: true });
+                }
             } catch (_) {}
         }
     
@@ -29190,13 +29220,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
         showTitleColorPicker() {
-    
+            const titleCard = this.shadowRoot.getElementById('adjust-title-colors');
+            if (!titleCard) return;
 
-    
-            this.hideTitleColorPicker();
-    
-            
-    
+            const opts = titleCard.querySelectorAll('.title-color-options .color-option');
+            if (!opts || !opts.forEach) return;
+
+            const currentColor = this.settings['title-color'] ?? this.selectedTitleColor;
+            opts.forEach(o => {
+                o.classList.toggle('selected', o.getAttribute('data-color') === currentColor);
+            });
         }
     
     
