@@ -5188,8 +5188,8 @@ font-family: Archivo;
                         box-sizing: border-box !important;
                     }
                 }
-                /* STATE 1A: SMALL PHONES (max-width: 600px) – keep panel on trigger side */
-                @media (max-width: 600px) {
+                /* STATE 1A: SMALL PHONES (max-width: 599px) – panel centered above icon (e.g. 375x812, 414x896) */
+                @media (max-width: 599px) {
                     .accessbit-widget-panel {
                         position: fixed !important;
                         width: min(480px, calc(100vw - 24px)) !important;
@@ -5497,8 +5497,8 @@ font-family: Archivo;
                         transition: transform 0.3s ease !important;
                     }
                 }
-                /* Small phones (≤600px): keep panel on trigger side when mobile-mode */
-                @media (max-width: 600px) {
+                /* Small phones (≤599px): center panel when mobile-mode */
+                @media (max-width: 599px) {
                     .accessbit-widget-panel.mobile-mode {
                         left: var(--panel-left, auto) !important;
                         right: var(--panel-right, auto) !important;
@@ -35276,6 +35276,43 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (vars.top !== undefined) host.style.setProperty('--widget-icon-top', vars.top);
             if (vars.bottom !== undefined) host.style.setProperty('--widget-icon-bottom', vars.bottom);
             if (vars.transform !== undefined) host.style.setProperty('--widget-icon-transform', vars.transform);
+            this.syncPanelSideWithTrigger();
+        }
+
+        // Keep panel side anchored to the actual trigger side vars (including offsets).
+        syncPanelSideWithTrigger() {
+            const host = this.shadowRoot?.host;
+            if (!host) return;
+
+            const iconLeft = (host.style.getPropertyValue('--widget-icon-left') || '').trim();
+            const iconRight = (host.style.getPropertyValue('--widget-icon-right') || '').trim();
+            const hasLeft = !!iconLeft && iconLeft !== 'auto';
+            const hasRight = !!iconRight && iconRight !== 'auto';
+
+            if (hasLeft && !hasRight) {
+                host.style.setProperty('--panel-left', iconLeft);
+                host.style.setProperty('--panel-right', 'auto');
+                return;
+            }
+            if (hasRight && !hasLeft) {
+                host.style.setProperty('--panel-right', iconRight);
+                host.style.setProperty('--panel-left', 'auto');
+                return;
+            }
+
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+            const configuredSide = isMobile
+                ? (this.customizationData?.mobileTriggerHorizontalPosition || this.customizationData?.triggerHorizontalPosition || 'Right')
+                : (this.customizationData?.triggerHorizontalPosition || 'Right');
+            const isRight = String(configuredSide).toLowerCase().includes('right');
+
+            if (isRight) {
+                host.style.setProperty('--panel-right', '20px');
+                host.style.setProperty('--panel-left', 'auto');
+            } else {
+                host.style.setProperty('--panel-left', '20px');
+                host.style.setProperty('--panel-right', 'auto');
+            }
         }
 
         updateTriggerOffset(direction, offset) {
@@ -35428,25 +35465,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             panel.style.removeProperty('height');
             panel.style.removeProperty('transform');
 
-            const margin = 20;
-            // Use actual icon-side vars first so panel always follows trigger side,
-            // even after offsets/position updates or responsive transitions.
-            const iconLeftVar = (host.style.getPropertyValue('--widget-icon-left') || '').trim().toLowerCase();
-            const iconRightVar = (host.style.getPropertyValue('--widget-icon-right') || '').trim().toLowerCase();
-            const iconIsLeftAnchored = iconLeftVar && iconLeftVar !== 'auto';
-            const iconIsRightAnchored = iconRightVar && iconRightVar !== 'auto';
-
-            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
-            const fallbackIsRight = hPos.includes('right');
-            const isRight = iconIsRightAnchored ? true : (iconIsLeftAnchored ? false : fallbackIsRight);
-            if (isRight) {
-                host.style.setProperty('--panel-right', margin + 'px');
-                host.style.setProperty('--panel-left', 'auto');
-            } else {
-                host.style.setProperty('--panel-left', margin + 'px');
-                host.style.setProperty('--panel-right', 'auto');
-            }
-            host.style.setProperty('--panel-top', margin + 'px');
+            this.syncPanelSideWithTrigger();
+            host.style.setProperty('--panel-top', '20px');
             host.style.setProperty('--panel-width', '480px');
         }
     
@@ -36186,4 +36206,4 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
         
     })();
     
- //latest code in live (march 6)
+ //latest code in live (march 20)
