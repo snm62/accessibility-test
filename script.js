@@ -5188,7 +5188,7 @@ font-family: Archivo;
                         box-sizing: border-box !important;
                     }
                 }
-                /* STATE 1A: SMALL PHONES (max-width: 600px) – panel centered above icon (e.g. 375x812, 414x896) */
+                /* STATE 1A: SMALL PHONES (max-width: 600px) – keep panel on trigger side */
                 @media (max-width: 600px) {
                     .accessbit-widget-panel {
                         position: fixed !important;
@@ -5196,11 +5196,11 @@ font-family: Archivo;
                         max-width: min(480px, calc(100vw - 24px)) !important;
                         height: calc(100dvh - 30px) !important;
                         max-height: calc(100dvh - 30px) !important;
-                        left: 50% !important;
-                        right: auto !important;
+                        left: var(--panel-left, auto) !important;
+                        right: var(--panel-right, auto) !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
                         top: auto !important;
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                         transition: transform 0.3s ease !important;
                         border-radius: 20px !important;
                         margin: 0 !important;
@@ -5209,7 +5209,7 @@ font-family: Archivo;
                     }
                     .accessbit-widget-panel.active,
                     .accessbit-widget-panel.show {
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                         display: flex !important;
                     }
                 }
@@ -5497,16 +5497,16 @@ font-family: Archivo;
                         transition: transform 0.3s ease !important;
                     }
                 }
-                /* Small phones (≤600px): center panel when mobile-mode */
+                /* Small phones (≤600px): keep panel on trigger side when mobile-mode */
                 @media (max-width: 600px) {
                     .accessbit-widget-panel.mobile-mode {
-                        left: 50% !important;
-                        right: auto !important;
-                        transform: translateX(-50%) !important;
+                        left: var(--panel-left, auto) !important;
+                        right: var(--panel-right, auto) !important;
+                        transform: none !important;
                     }
                     .accessbit-widget-panel.mobile-mode.active,
                     .accessbit-widget-panel.mobile-mode.show {
-                        transform: translateX(-50%) !important;
+                        transform: none !important;
                     }
                 }
                 /* Tablets/base (601px–1279px): dock panel by icon when mobile-mode */
@@ -35429,8 +35429,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             panel.style.removeProperty('transform');
 
             const margin = 20;
+            // Use actual icon-side vars first so panel always follows trigger side,
+            // even after offsets/position updates or responsive transitions.
+            const iconLeftVar = (host.style.getPropertyValue('--widget-icon-left') || '').trim().toLowerCase();
+            const iconRightVar = (host.style.getPropertyValue('--widget-icon-right') || '').trim().toLowerCase();
+            const iconIsLeftAnchored = iconLeftVar && iconLeftVar !== 'auto';
+            const iconIsRightAnchored = iconRightVar && iconRightVar !== 'auto';
+
             const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
-            const isRight = hPos.includes('right');
+            const fallbackIsRight = hPos.includes('right');
+            const isRight = iconIsRightAnchored ? true : (iconIsLeftAnchored ? false : fallbackIsRight);
             if (isRight) {
                 host.style.setProperty('--panel-right', margin + 'px');
                 host.style.setProperty('--panel-left', 'auto');
