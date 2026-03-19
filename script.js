@@ -6038,6 +6038,7 @@ font-family: Archivo;
                         display: flex !important;
                         flex-wrap: nowrap !important;
                         gap: 4px !important;
+                        padding-left: 0 !important; /* prevent double offset; row already aligns under "Adjust" */
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
                         flex-shrink: 0 !important;
