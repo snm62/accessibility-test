@@ -1889,6 +1889,12 @@ class AccessibilityWidget {
                 this.enableSeizureSafe(true /* immediate */);
             }
 
+            // Sync color picker "selected" rings + re-apply saved colors after navigation (SPA-safe)
+            try {
+                this.syncColorPickerSelectedClasses();
+                this.setupColorReapplyObserver();
+            } catch (_) {}
+
             // Restore saved language FIRST (before showing icon)
             const savedLanguage = localStorage.getItem('accessbit-widget-language');
             if (savedLanguage) {
@@ -5472,7 +5478,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .accessbit-widget-panel .profile-item::-webkit-scrollbar,
                 .accessbit-widget-panel .profile-item *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-                .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 12px !important; }
+                .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 0px !important; }
                 /* Toggle on: highlight card with border; icon ring handled purely inside SVG (exclude font-size, line-height, letter-spacing) */
                 .accessbit-widget-panel .profile-item { border: 2px solid transparent !important; }
                 .accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border: 2px solid #01CE9C !important; }
@@ -5555,10 +5561,11 @@ font-family: Archivo;
                         position: absolute !important;
                         right: 16px !important;
                         top: 50% !important;
-                        transform: translateY(-50%) !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
                         width: 12px !important;
                         height: 12px !important;
-                        border: 2px solid white !important;
+                        border-width: 2px !important;
+                        border: 2px solid #FFFFFF !important;
                         border-radius: 50% !important;
                         background: transparent !important;
                         pointer-events: none !important;
@@ -6021,13 +6028,13 @@ font-family: Archivo;
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
                         display: flex !important;
                         align-items: center !important;
-                        justify-content: space-between !important;
+                        justify-content: flex-start !important;
                         gap: 4px !important;
                         /* start circles under title text (icon width 43 + gap 12) */
                         padding-left: 55px !important;
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-options {
-                        flex: 1 1 auto !important;
+                        flex: 0 0 auto !important;
                         display: flex !important;
                         flex-wrap: nowrap !important;
                         gap: 4px !important;
@@ -6094,7 +6101,7 @@ font-family: Archivo;
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-options {
                         gap: 3px !important;
-                        flex: 1 1 auto !important;
+                        flex: 0 0 auto !important;
                         min-width: 0 !important;
                         padding-left: 0 !important; /* avoid extra desktop offset */
                     }
@@ -6158,7 +6165,7 @@ font-family: Archivo;
                         min-height: 14px !important;
                     }
                     .accessbit-widget-panel .panel-header .reset-settings-icon svg,
-                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 8px !important; height: 8px !important; }
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 12px !important; height: 12px !important; }
                     .accessbit-widget-panel .panel-header .action-btn,
                     .accessbit-widget-panel .widget-header .action-btn,
                     .accessbit-widget-panel .reset-settings-btn { padding: 2px 4px !important; min-height: 18px !important; font-size: 8px !important; gap: 6px !important; }
@@ -6321,14 +6328,14 @@ font-family: Archivo;
                     .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
                         display: flex !important;
                         align-items: center !important;
-                        justify-content: space-between !important;
+                        justify-content: flex-start !important;
                         gap: 6px !important;
                         padding-left: 0 !important;
                         height: 28px !important;
                         min-height: 28px !important;
                     }
                     .accessbit-widget-panel .color-adjustments-picker-card .color-options {
-                        flex: 1 1 auto !important;
+                        flex: 0 0 auto !important;
                         display: flex !important;
                         flex-wrap: nowrap !important;
                         gap: 6px !important;
@@ -6541,7 +6548,7 @@ font-family: Archivo;
                     .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #00CE9C !important; }
                     .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(40px) !important; }
                 }
-                .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after { content: "" !important; display: block !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; border: 2px solid white !important; border-radius: 50% !important; background: transparent !important; transition: none !important; }
+                .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after { content: "" !important; display: block !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) rotate(0deg) !important; width: 12px !important; height: 12px !important; opacity: 1 !important; border-width: 2px !important; border: 2px solid #FFFFFF !important; border-radius: 50% !important; background: transparent !important; transition: none !important; }
                 .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after { content: "" !important; display: block !important; left: 22px !important; right: auto !important; top: 50% !important; transform: translateY(-50%) !important; width: 2px !important; height: 12px !important; background: white !important; border: none !important; border-radius: 0 !important; pointer-events: none !important; transition: none !important; opacity: 1 !important; }
                 .accessbit-panel-screenshot .panel-header .header-center { align-items: center !important; padding-left: 0 !important; padding-right: 0 !important; overflow: visible !important; }
                 .accessbit-panel-screenshot .panel-header .header-center h2 {
@@ -7480,7 +7487,7 @@ font-family: Archivo;
                 .align-left-card .align-left-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-left-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-left-card .align-left-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
-                .align-left-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                .align-left-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
                 .content-adjustments-card.align-center-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
                 .accessbit-widget-panel .content-adjustments-card.align-center-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.align-center-icon svg { width: 43px; height: 43px; }
@@ -7488,7 +7495,7 @@ font-family: Archivo;
                 .align-center-card .align-center-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-center-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-center-card .align-center-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
-                .align-center-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                .align-center-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
                 .content-adjustments-card.align-right-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
                 .accessbit-widget-panel .content-adjustments-card.align-right-card { overflow: visible !important; }
                 .content-adjustments-card .content-card-icon.align-right-icon svg { width: 43px; height: 43px; }
@@ -7496,7 +7503,7 @@ font-family: Archivo;
                 .align-right-card .align-right-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
                 .align-right-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                 .align-right-card .align-right-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
-                .align-right-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                .align-right-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
                 /* Russian: these three cards have long titles – allow wrapping and give more height */
                 #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-left-card,
                 #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-center-card,
@@ -8429,7 +8436,15 @@ font-family: Archivo;
                 @media (min-width: 769px) {
                     #accessbit-widget-panel .toggle-switch,
                     .accessbit-panel-screenshot .toggle-switch {
-                        margin-right: 20px !important;
+                        margin-right: 0px !important;
+                    }
+                }
+
+                /* Desktop (>=1280px): reduce right gap to match Figma */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        margin-right: 0px !important;
                     }
                 }
 
@@ -8465,7 +8480,7 @@ font-family: Archivo;
                         justify-self: end !important;
                         align-self: center !important;
                         margin-left: 0 !important;
-                        margin-right: 20px !important;
+                        margin-right: 0px !important;
                     }
 
                     /* Rows with toggle but no icon (text + switch only) */
@@ -8489,7 +8504,7 @@ font-family: Archivo;
                         grid-column: 2;
                         justify-self: end !important;
                         margin-left: 0 !important;
-                        margin-right: 20px !important;
+                        margin-right: 0px !important;
                     }
                 }
                 .toggle-switch {
@@ -23275,6 +23290,78 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 });
             }
         }
+
+        // Keep the selected ring state in sync with persisted settings.
+        syncColorPickerSelectedClasses() {
+            try {
+                const textCard = this.shadowRoot?.getElementById('adjust-text-colors');
+                const titleCard = this.shadowRoot?.getElementById('adjust-title-colors');
+                const bgCard = this.shadowRoot?.getElementById('adjust-bg-colors');
+
+                if (textCard) {
+                    if (this.settings?.['adjust-text-colors'] && this.settings?.['text-color'] != null) {
+                        this.showTextColorPicker();
+                    } else {
+                        this.hideTextColorPicker();
+                    }
+                }
+
+                if (titleCard) {
+                    if (this.settings?.['adjust-title-colors'] && this.settings?.['title-color'] != null) {
+                        this.showTitleColorPicker();
+                    } else {
+                        this.hideTitleColorPicker();
+                    }
+                }
+
+                if (bgCard) {
+                    if (this.settings?.['adjust-bg-colors'] && this.settings?.['bg-color'] != null) {
+                        this.showBackgroundColorPicker();
+                    } else {
+                        this.hideBackgroundColorPicker();
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // Re-apply saved colors to newly rendered DOM (SPA navigation).
+        setupColorReapplyObserver() {
+            try {
+                if (this.colorReapplyObserver) return;
+
+                let lastRunAt = 0;
+                let timer = null;
+                const debounceMs = 250;
+                const minGapMs = 700; // prevent heavy loops during large DOM updates
+
+                this.colorReapplyObserver = new MutationObserver(() => {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        try {
+                            const now = Date.now();
+                            if (now - lastRunAt < minGapMs) return;
+                            lastRunAt = now;
+
+                            const s = this.settings || {};
+                            if (s['adjust-text-colors'] && s['text-color'] != null) {
+                                this.applyTextColor(s['text-color'], false);
+                            }
+                            if (s['adjust-title-colors'] && s['title-color'] != null) {
+                                this.applyTitleColor(s['title-color'], false);
+                            }
+                            if (s['adjust-bg-colors'] && s['bg-color'] != null) {
+                                this.applyBackgroundColor(s['bg-color'], false);
+                            }
+
+                            // Also refresh picker ring state (in case UI was re-rendered).
+                            this.syncColorPickerSelectedClasses();
+                        } catch (_) {}
+                    }, debounceMs);
+                });
+
+                this.colorReapplyObserver.observe(document.body, { childList: true, subtree: true });
+            } catch (_) {}
+        }
     
         showTextColorPicker() {
             const textCard = this.shadowRoot.getElementById('adjust-text-colors');
@@ -23297,7 +23384,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
     
-        applyTextColor(color) {
+        applyTextColor(color, persist = true) {
     
         
     
@@ -23496,7 +23583,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
     
-        applyBackgroundColor(color) {
+        applyBackgroundColor(color, persist = true) {
             // Apply to html and body so the page background actually changes
             document.documentElement.style.backgroundColor = color;
             document.body.style.backgroundColor = color;
@@ -23554,15 +23641,13 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
-            // Store the selected color
-    
-            this.selectedBackgroundColor = color;
-    
-            this.settings['bg-color'] = color;
-    
-            this.settings['adjust-bg-colors'] = true;
-    
-            this.saveSettings();
+            // Persist the chosen swatch (avoid saveSettings during observer re-apply)
+            if (persist) {
+                this.selectedBackgroundColor = color;
+                this.settings['bg-color'] = color;
+                this.settings['adjust-bg-colors'] = true;
+                this.saveSettings();
+            }
     
          
     
@@ -29020,7 +29105,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
         }
     
-        applyTextColor(color) {
+        applyTextColor(color, persist = true) {
     
            
     
@@ -29036,13 +29121,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
-            // Save the applied color
-    
-            this.settings['text-color'] = color;
-    
-            this.settings['adjust-text-colors'] = true;
-    
-            this.saveSettings();
+            // Persist the chosen swatch (avoid saveSettings during observer re-apply)
+            if (persist) {
+                this.settings['text-color'] = color;
+                this.settings['adjust-text-colors'] = true;
+                this.saveSettings();
+            }
     
             
     
@@ -29100,7 +29184,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
         }
     
-        applyTitleColor(color) {
+        applyTitleColor(color, persist = true) {
     
          
             // Apply color to all title elements
@@ -29115,13 +29199,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
-            // Save the applied color
-    
-            this.settings['title-color'] = color;
-    
-            this.settings['adjust-title-colors'] = true;
-    
-            this.saveSettings();
+            // Persist the chosen swatch (avoid saveSettings during observer re-apply)
+            if (persist) {
+                this.settings['title-color'] = color;
+                this.settings['adjust-title-colors'] = true;
+                this.saveSettings();
+            }
     
             
     
@@ -29317,7 +29400,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             injected.forEach(el => { if (el && el.parentNode) el.parentNode.removeChild(el); });
         }
 
-        applyBackgroundColor(color) {
+        applyBackgroundColor(color, persist = true) {
             // Apply to html and body so the page background actually changes
             document.documentElement.style.backgroundColor = color;
             document.body.style.backgroundColor = color;
@@ -29375,15 +29458,13 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
-            // Store the selected color
-    
-            this.selectedBackgroundColor = color;
-    
-            this.settings['bg-color'] = color;
-    
-            this.settings['adjust-bg-colors'] = true;
-    
-            this.saveSettings();
+            // Store the selected color (only persist when requested)
+            if (persist) {
+                this.selectedBackgroundColor = color;
+                this.settings['bg-color'] = color;
+                this.settings['adjust-bg-colors'] = true;
+                this.saveSettings();
+            }
     
          
     
@@ -34532,10 +34613,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         position: absolute !important;
                         right: 16px !important;
                         top: 50% !important;
-                        transform: translateY(-50%) !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
                         width: 12px !important;
                         height: 12px !important;
-                        border: 2px solid white !important;
+                        border-width: 2px !important;
+                        border: 2px solid #FFFFFF !important;
                         border-radius: 50% !important;
                         background: transparent !important;
                         pointer-events: none !important;
