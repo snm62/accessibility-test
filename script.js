@@ -3590,6 +3590,34 @@ font-family: Archivo;
         .toggle-switch input:checked + .slider:before {
             transform: translateX(26px) !important;
         }
+
+        /* Tablet (~723px): force desktop toggle sizing */
+        @media (max-width: 768px) and (min-width: 721px) {
+            .toggle-switch {
+                width: 80px !important;
+                height: 40px !important;
+                min-width: 80px !important;
+            }
+            .toggle-switch .slider {
+                width: 80px !important;
+                height: 40px !important;
+                border-radius: 99px !important;
+            }
+            .toggle-switch .slider:before {
+                width: 32px !important;
+                height: 32px !important;
+                left: 4px !important;
+                bottom: 4px !important;
+                border-radius: 50% !important;
+            }
+            .toggle-switch input:checked + .slider {
+                background-color: #01CE9C !important;
+            }
+            .toggle-switch input:checked + .slider:before {
+                left: calc(100% - 32px - 2px) !important;
+                transform: translateX(0) !important;
+            }
+        }
         
         /* Medium profile items for medium mobile screens */
         .profile-item {
@@ -5519,7 +5547,7 @@ font-family: Archivo;
                         flex-shrink: 0 !important;
                     }
                     /* When off: show white circle on toggle; when on: show vertical bar; no transition on ::after to avoid flash */
-                    .toggle-switch > input + .slider::after {
+                    .toggle-switch > input:not(:checked) + .slider::after {
                         content: "" !important;
                         display: block !important;
                         visibility: visible !important;
@@ -5554,18 +5582,20 @@ font-family: Archivo;
                         pointer-events: none !important;
                         transition: none !important;
                     }
-                    /* Override: hide ring and | bar inside toggles on mobile/tablet (≤1279px) */
-                    .accessbit-widget-panel .toggle-switch .slider::after,
-                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
-                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
-                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        content: none !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                        overflow: hidden !important;
+                    /* Phone only: hide ring and | bar (tablet 769–1279px shows ring + bar like desktop) */
+                    @media (max-width: 768px) {
+                        .accessbit-widget-panel .toggle-switch .slider::after,
+                        .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                        .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                        .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            content: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            overflow: hidden !important;
+                        }
                     }
                     /* Smaller toggles for Nest Hub (1024x600), Nest Hub Max (1280x800) and tablets */
                     .accessbit-widget-panel .toggle-switch {
@@ -6992,6 +7022,10 @@ font-family: Archivo;
                     leading-trim: cap;
                     text-box-trim: cap;
                 }
+                /* Keyboard second line "(Activates with Screen Reader)" */
+                .profile-item:has(#keyboard-nav) .profile-description p:last-child {
+                    color: #524072 !important;
+                }
                 
                 .profile-item small {
                     font-size: 12px;
@@ -8280,6 +8314,105 @@ font-family: Archivo;
                         order: 2;
                     }
                 }
+
+                /* Tablet-ish: keep desktop toggle sizing on ~590px+ */
+                @media (max-width: 768px) and (min-width: 590px) {
+                    .accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 80px !important;
+                        height: 40px !important;
+                        min-width: 80px !important;
+                        flex-shrink: 0;
+                        margin-left: auto;
+                        margin-right: 12px;
+                        order: 2;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider,
+                    .accessbit-panel-screenshot .toggle-switch .slider {
+                        width: 80px !important;
+                        height: 40px !important;
+                        border-radius: 99px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch .slider:before {
+                        width: 32px !important;
+                        height: 32px !important;
+                        left: 4px !important;
+                        bottom: 4px !important;
+                        border-radius: 50% !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider {
+                        background-color: #01CE9C !important;
+                    }
+                    /* Anchor knob like desktop to keep the ~2px gap */
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before {
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+
+                    /* Ensure desktop ring/bar indicators are visible (undo mobile ring/bar hiding) */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: auto !important;
+                        right: 12px !important;
+                        bottom: auto !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: auto !important;
+                        right: 12px !important;
+                        bottom: auto !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: 22px !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        width: 2px !important;
+                        height: 12px !important;
+                        background: #FFFFFF !important;
+                        border: 0 !important;
+                        border-radius: 0 !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) !important;
+                    }
+                }
                 /* Desktop-only: widen toggle track without changing 100% internals */
                 @media (min-width: 1280px) {
                     #accessbit-widget-panel .toggle-switch,
@@ -8289,6 +8422,74 @@ font-family: Archivo;
                     #accessbit-widget-panel input:checked + .slider:before,
                     .accessbit-panel-screenshot input:checked + .slider:before {
                         transform: translateX(34px) !important;
+                    }
+                }
+
+                /* Desktop: set exact gap between toggle and outer feature box */
+                @media (min-width: 769px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        margin-right: 20px !important;
+                    }
+                }
+
+                /*
+                 * Desktop only (≥1281px): right-hand column for the toggle so it sits at the end of the feature card.
+                 * Third column is fluid (min track for switch, max ~18% of card) — no fixed pixel width on the card.
+                 */
+                @media (min-width: 1281px) {
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch),
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch),
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) {
+                        display: grid !important;
+                        grid-template-columns: auto minmax(0, 1fr) minmax(92px, 18%) !important;
+                        align-items: center !important;
+                        column-gap: 12px !important;
+                        row-gap: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon {
+                        grid-column: 1;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info {
+                        grid-column: 2;
+                        min-width: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch {
+                        grid-column: 3;
+                        justify-self: end !important;
+                        align-self: center !important;
+                        margin-left: 0 !important;
+                        margin-right: 20px !important;
+                    }
+
+                    /* Rows with toggle but no icon (text + switch only) */
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch),
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch),
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) {
+                        display: grid !important;
+                        grid-template-columns: minmax(0, 1fr) minmax(92px, 18%) !important;
+                        align-items: center !important;
+                        column-gap: 12px !important;
+                    }
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info,
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info,
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info {
+                        grid-column: 1;
+                        min-width: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch,
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch,
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch {
+                        grid-column: 2;
+                        justify-self: end !important;
+                        margin-left: 0 !important;
+                        margin-right: 20px !important;
                     }
                 }
                 .toggle-switch {
@@ -8715,7 +8916,7 @@ input:checked + .slider::after {
     
                 .language-dropdown {
     
-                    /* Position set by JS below the \"ENGLISH\" trigger; do not fix top/left here */
+                    /* Position set by JS below the \"english\" language trigger; do not fix top/left here */
                     position: fixed !important;
     
                     background: #FFFFFF !important;
@@ -10473,6 +10674,105 @@ input:checked + .slider::after {
                         line-height: 1.25 !important;
                     }
                 }
+
+                /* Final toggle handle shadow (all toggle switches) */
+                #accessbit-widget-panel .toggle-switch .slider:before,
+                .accessbit-panel-screenshot .toggle-switch .slider:before,
+                :host #accessbit-widget-panel .toggle-switch .slider:before {
+                    box-shadow:
+                        0px 1px 2px 0px #00000033,
+                        0px 4px 4px 0px #0000002B,
+                        0px 10px 6px 0px #0000001A,
+                        0px 17px 7px 0px #00000008,
+                        0px 27px 7px 0px #00000000 !important;
+                }
+
+                /* Final toggle track inner shadow (OFF + ON) */
+                #accessbit-widget-panel .toggle-switch .slider,
+                .accessbit-panel-screenshot .toggle-switch .slider,
+                :host #accessbit-widget-panel .toggle-switch .slider,
+                #accessbit-widget-panel .toggle-switch input:checked + .slider,
+                .accessbit-panel-screenshot .toggle-switch input:checked + .slider,
+                :host #accessbit-widget-panel .toggle-switch input:checked + .slider {
+                    box-shadow: 0px 1px 3px 0px #00000033 inset !important;
+                }
+
+                /* Final ON-state indicators:
+                   - "|" bar on the LEFT
+                   - (ring removed on ON; only bar shown)
+                   (drawn together in the same ::after using gradients) */
+                #accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after,
+                :host #accessbit-widget-panel .toggle-switch input:checked + .slider::after {
+                    content: '' !important;
+                    display: block !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 22px !important;
+                    right: auto !important;
+                    bottom: auto !important;
+                    opacity: 1 !important;
+                    pointer-events: none !important;
+                    width: 2px !important;
+                    height: 12px !important;
+                    background: #FFFFFF !important;
+                    border: 0 !important;
+                    border-radius: 0 !important;
+                    transform: translateY(-50%) !important;
+                }
+
+                /* Mobile: hide ON-state "|" marker */
+                @media (max-width: 589px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider::after {
+                        content: none !important;
+                        display: none !important;
+                        border: 0 !important;
+                    }
+                }
+
+                /* Final OFF-state ring indicator (centered on inactive/left side) */
+                #accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after,
+                :host #accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
+                    content: '' !important;
+                    display: block !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: auto !important;
+                    right: 12px !important;
+                    width: 12px !important;
+                    height: 12px !important;
+                    opacity: 1 !important;
+                    border-width: 2px !important;
+                    border: 2px solid #FFFFFF !important;
+                    border-radius: 50% !important;
+                    background: transparent !important;
+                    transform: translateY(-50%) rotate(0deg) !important;
+                    pointer-events: none !important;
+                }
+
+                /* Desktop: move ON knob to leave ~2px gap (80px track case) */
+                @media (min-width: 769px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        /* Anchor knob by left instead of translate (prevents overflow). */
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+                }
+
+                /* Desktop (wider track): leave ~2px gap (92px track case) */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+                }
     
             `;
     
@@ -10663,7 +10963,7 @@ input:checked + .slider::after {
             const currentLangSpan = document.createElement('span');
             currentLangSpan.id = 'current-language-header';
             currentLangSpan.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,\\"Segoe UI\\",sans-serif;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;';
-            currentLangSpan.textContent = 'ENGLISH';
+            currentLangSpan.textContent = 'English';
             languageSelectorHeader.appendChild(currentLangSpan);
             const arrowWrap = document.createElement('span');
             arrowWrap.className = 'language-dropdown-arrow';
@@ -10868,7 +11168,7 @@ input:checked + .slider::after {
                     <div class="language-dropdown-outer" style="position:absolute;top:0;right:0;width:144px;height:55px;background:rgba(255,255,255,0.15);border-bottom-left-radius:20px;display:flex;align-items:center;justify-content:center;padding:0 8px;box-sizing:border-box;">
                         <button class="language-selector-header" id="language-selector-header" type="button" tabindex="0" role="button" aria-label="Select language" aria-expanded="false" aria-haspopup="listbox" style="width:100%;max-width:128px;height:36px;border:none;background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
                             <span class="language-flag" id="language-flag-header" aria-hidden="true" style="flex-shrink:0;display:inline-block;width:20px;height:14px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="20" height="14"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></span>
-                            <span id="current-language-header" style="font-family:Inter;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;">ENGLISH</span>
+                            <span id="current-language-header" style="font-family:Inter;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center;color:#FFFFFF;">English</span>
                             <span class="language-dropdown-arrow" style="flex-shrink:0;display:inline-flex;align-items:center;"><svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0.666748 0.666666L4.66675 4.66667L8.66675 0.666666" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
                         </button>
                     </div>
@@ -13865,7 +14165,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 dropdown.style.zIndex = '100001';
     
-                // Position dropdown below the "ENGLISH" trigger, right-aligned with it, clamped to panel
+                // Position dropdown below the "english" language trigger, right-aligned with it, clamped to panel
                 const header = this.shadowRoot.getElementById('language-selector-header');
                 const panel = this.shadowRoot.getElementById('accessbit-widget-panel');
                 if (header && panel) {
@@ -14072,7 +14372,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 const languageNames = {
     
-                    'en': 'ENGLISH', 'es': 'ESPAÑOL', 'de': 'DEUTSCH', 'pt': 'PORTUGUÊS', 'fr': 'FRANÇAIS',
+                    'en': 'English', 'es': 'ESPAÑOL', 'de': 'DEUTSCH', 'pt': 'PORTUGUÊS', 'fr': 'FRANÇAIS',
     
                     'it': 'ITALIANO', 'he': 'עברית', 'tw': '繁體中文', 'ru': 'РУССКИЙ', 'ar': 'العربية',
     
@@ -14088,7 +14388,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 };
     
-                currentLangSpan.textContent = languageNames[langCode] || 'ENGLISH';
+                currentLangSpan.textContent = languageNames[langCode] || 'English';
     
             }
     
@@ -14917,7 +15217,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     const languageNames = {
     
-                        'en': 'ENGLISH', 'es': 'ESPAÑOL', 'de': 'DEUTSCH', 'pt': 'PORTUGUÊS', 'fr': 'FRANÇAIS',
+                        'en': 'English', 'es': 'ESPAÑOL', 'de': 'DEUTSCH', 'pt': 'PORTUGUÊS', 'fr': 'FRANÇAIS',
     
                         'it': 'ITALIANO', 'he': 'עברית', 'tw': '繁體中文', 'ru': 'РУССКИЙ', 'ar': 'العربية',
     
@@ -14937,7 +15237,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     const currentLang = this.getCurrentLanguage();
     
-                    currentLangSpan.textContent = languageNames[currentLang] || 'ENGLISH';
+                    currentLangSpan.textContent = languageNames[currentLang] || 'English';
     
                     
     
@@ -34224,7 +34524,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 
                 /* When off: show white circle on toggle; when on: show bar; no transition on ::after to avoid flash */
                 @media (max-width: 1279px) {
-                    .toggle-switch > input + .slider::after {
+                    .toggle-switch > input:not(:checked) + .slider::after {
                         content: "" !important;
                         display: block !important;
                         visibility: visible !important;
@@ -35503,7 +35803,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             const isNarrow = window.innerWidth <= 1024;
     
             if (isNarrow) {
-                // Mobile/tablet: position absolute under the ENGLISH trigger, aligned with it
+                // Mobile/tablet: position absolute under the english language trigger, aligned with it
                 const panelStyle = window.getComputedStyle(panel);
                 const panelPosition = panelStyle.position;
                 if (panelPosition === 'relative' || panelPosition === 'absolute' || panelPosition === 'fixed') {
