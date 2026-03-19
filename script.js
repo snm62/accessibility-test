@@ -21181,10 +21181,25 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 if (data && typeof data === 'object' && data.settings && typeof data.settings === 'object') {
                     // Merge KV settings with existing settings (KV takes precedence)
                     const kvSettings = data.settings;
+
+                    // Prevent stale KV responses from overwriting freshly-picked color swatches
+                    // during SPA navigation (save-to-KV may not have completed yet).
+                    const preserveColorKeysFromLocal = new Set([
+                        'text-color',
+                        'adjust-text-colors',
+                        'title-color',
+                        'adjust-title-colors',
+                        'bg-color',
+                        'adjust-bg-colors'
+                    ]);
                     
                     
                     // Update settings object
                     Object.keys(kvSettings).forEach(key => {
+                        if (preserveColorKeysFromLocal.has(key) && this.settings[key] !== undefined) {
+                            // Local already has a value for this key; keep it.
+                            return;
+                        }
                         this.settings[key] = kvSettings[key];
                     });
                     
@@ -23329,29 +23344,38 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             try {
                 if (this.colorReapplyObserver) return;
 
-                let lastRunAt = 0;
+                let lastApplied = { text: null, title: null, bg: null };
                 let timer = null;
                 const debounceMs = 250;
-                const minGapMs = 700; // prevent heavy loops during large DOM updates
 
                 this.colorReapplyObserver = new MutationObserver(() => {
                     if (timer) clearTimeout(timer);
                     timer = setTimeout(() => {
                         try {
-                            const now = Date.now();
-                            if (now - lastRunAt < minGapMs) return;
-                            lastRunAt = now;
-
                             const s = this.settings || {};
-                            if (s['adjust-text-colors'] && s['text-color'] != null) {
-                                this.applyTextColor(s['text-color'], false);
+
+                            const desired = {
+                                text: (s['adjust-text-colors'] && s['text-color'] != null) ? s['text-color'] : null,
+                                title: (s['adjust-title-colors'] && s['title-color'] != null) ? s['title-color'] : null,
+                                bg: (s['adjust-bg-colors'] && s['bg-color'] != null) ? s['bg-color'] : null
+                            };
+
+                            const changed =
+                                desired.text !== lastApplied.text ||
+                                desired.title !== lastApplied.title ||
+                                desired.bg !== lastApplied.bg;
+
+                            // If nothing changed, we still re-sync the selected ring state.
+                            if (!changed) {
+                                this.syncColorPickerSelectedClasses();
+                                return;
                             }
-                            if (s['adjust-title-colors'] && s['title-color'] != null) {
-                                this.applyTitleColor(s['title-color'], false);
-                            }
-                            if (s['adjust-bg-colors'] && s['bg-color'] != null) {
-                                this.applyBackgroundColor(s['bg-color'], false);
-                            }
+
+                            if (desired.text != null) this.applyTextColor(desired.text, false);
+                            if (desired.title != null) this.applyTitleColor(desired.title, false);
+                            if (desired.bg != null) this.applyBackgroundColor(desired.bg, false);
+
+                            lastApplied = desired;
 
                             // Also refresh picker ring state (in case UI was re-rendered).
                             this.syncColorPickerSelectedClasses();
