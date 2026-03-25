@@ -5188,19 +5188,19 @@ font-family: Archivo;
                         box-sizing: border-box !important;
                     }
                 }
-                /* STATE 1A: SMALL PHONES (max-width: 599px) – panel centered above icon (e.g. 375x812, 414x896) */
-                @media (max-width: 599px) {
+                /* STATE 1A: SMALL PHONES (max-width: 600px) – panel centered above icon (e.g. 375x812, 414x896) */
+                @media (max-width: 600px) {
                     .accessbit-widget-panel {
                         position: fixed !important;
                         width: min(480px, calc(100vw - 24px)) !important;
                         max-width: min(480px, calc(100vw - 24px)) !important;
                         height: calc(100dvh - 30px) !important;
                         max-height: calc(100dvh - 30px) !important;
-                        left: var(--panel-left, auto) !important;
-                        right: var(--panel-right, auto) !important;
+                        left: 50% !important;
+                        right: auto !important;
                         bottom: var(--widget-icon-bottom, 20px) !important;
                         top: auto !important;
-                        transform: none !important;
+                        transform: translateX(-50%) !important;
                         transition: transform 0.3s ease !important;
                         border-radius: 20px !important;
                         margin: 0 !important;
@@ -5209,7 +5209,7 @@ font-family: Archivo;
                     }
                     .accessbit-widget-panel.active,
                     .accessbit-widget-panel.show {
-                        transform: none !important;
+                        transform: translateX(-50%) !important;
                         display: flex !important;
                     }
                 }
@@ -5354,6 +5354,11 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#cognitive-disability),
                 .accessbit-widget-panel .panel-content .profile-item:has(#keyboard-nav),
                 .accessbit-widget-panel .panel-content .profile-item:has(#screen-reader),
+                .accessbit-widget-panel .panel-content .profile-item:has(#older-adults),
+                .accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .panel-content .profile-item:has(#protanopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#deuteranopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
@@ -5369,6 +5374,11 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#cognitive-disability),
                 .accessbit-widget-panel .profile-item:has(#keyboard-nav),
                 .accessbit-widget-panel .profile-item:has(#screen-reader),
+                .accessbit-widget-panel .profile-item:has(#older-adults),
+                .accessbit-widget-panel .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .profile-item:has(#protanopia),
+                .accessbit-widget-panel .profile-item:has(#deuteranopia),
+                .accessbit-widget-panel .profile-item:has(#tritanopia),
                 .accessbit-widget-panel .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .profile-item:has(#adjust-line-height),
@@ -5497,16 +5507,16 @@ font-family: Archivo;
                         transition: transform 0.3s ease !important;
                     }
                 }
-                /* Small phones (≤599px): center panel when mobile-mode */
-                @media (max-width: 599px) {
+                /* Small phones (≤600px): center panel when mobile-mode */
+                @media (max-width: 600px) {
                     .accessbit-widget-panel.mobile-mode {
-                        left: var(--panel-left, auto) !important;
-                        right: var(--panel-right, auto) !important;
-                        transform: none !important;
+                        left: 50% !important;
+                        right: auto !important;
+                        transform: translateX(-50%) !important;
                     }
                     .accessbit-widget-panel.mobile-mode.active,
                     .accessbit-widget-panel.mobile-mode.show {
-                        transform: none !important;
+                        transform: translateX(-50%) !important;
                     }
                 }
                 /* Tablets/base (601px–1279px): dock panel by icon when mobile-mode */
@@ -11070,6 +11080,7 @@ input:checked + .slider::after {
                 { id: 'cognitive-disability', title: 'Cognitive Disability Profile', description: 'Assists with reading & focusing', ariaLabel: 'Cognitive Disability Profile - Simplifies interface and content', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M22.0001 24.5C23.3808 24.5 24.5001 23.3807 24.5001 22C24.5001 20.6193 23.3808 19.5 22.0001 19.5C20.6194 19.5 19.5001 20.6193 19.5001 22C19.5001 23.3807 20.6194 24.5 22.0001 24.5Z" fill="black"/><path d="M22.8334 15.3909V13.6667H21.1667V15.3909C19.7002 15.5778 18.3373 16.2465 17.2919 17.2919C16.2465 18.3372 15.5779 19.7002 15.3909 21.1667H13.6667V22.8334H15.3909C15.5777 24.2999 16.2463 25.6629 17.2918 26.7083C18.3372 27.7538 19.7002 28.4224 21.1667 28.6092V30.3334H22.8334V28.6092C24.3 28.4224 25.663 27.7538 26.7084 26.7083C27.7538 25.6629 28.4224 24.2999 28.6092 22.8334H30.3334V21.1667H28.6092C28.4223 19.7002 27.7536 18.3372 26.7083 17.2919C25.6629 16.2465 24.2999 15.5778 22.8334 15.3909ZM22.0001 27C19.2426 27 17.0001 24.7575 17.0001 22C17.0001 19.2425 19.2426 17 22.0001 17C24.7576 17 27.0001 19.2425 27.0001 22C27.0001 24.7575 24.7576 27 22.0001 27Z" fill="black"/></svg>' },
                 { id: 'keyboard-nav', title: 'Keyboard Navigation (Motor)', description: '', ariaLabel: 'Keyboard Navigation - Enable keyboard-only navigation', extraContent: { type: 'description', text: 'This profile prompts automatically for keyboard users.' }, smallText: '(Activates with Screen Reader)', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
                 { id: 'screen-reader', title: 'Blind Users (Screen Reader)', description: 'Optimize website for screen-readers', ariaLabel: 'Screen Reader - Optimize for screen readers', extraContent: { type: 'description', text: 'Activates with Keyboard Navigation' }, smallText: 'Activates with Keyboard Navigation', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/><path d="M23.0002 22.5H17.0002V15.5H15.0002L15.0002 23.5C15.0002 23.7652 15.1056 24.0196 15.2931 24.2071C15.4807 24.3946 15.735 24.5 16.0002 24.5H23.0002V27.5L28.0002 23.5L23.0002 19.5V22.5Z" fill="black"/></svg>' },
+                { id: 'older-adults', title: 'Older Adults', description: 'Improve readability and reduce distractions', ariaLabel: 'Older Adults - Improve readability and reduce distractions', iconSvg: '<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/><circle cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/></svg>' },
                 { id: 'content-scaling', title: 'Content Scaling', description: 'Scale content with arrow controls', ariaLabel: 'Content Scaling - Adjust content size for better readability', extraContent: { type: 'scaling-controls', className: 'scaling-controls', id: 'content-scaling-controls', style: 'display: none; margin-top: 10px;', decreaseId: 'decrease-content-scale-btn', decreaseLabel: 'Decrease content scale by 2%', decreaseText: '-2%', valueId: 'content-scale-value', valueText: '100%', increaseId: 'increase-content-scale-btn', increaseLabel: 'Increase content scale by 2%', increaseText: '+2%' } },
                 { id: 'readable-font', title: 'Readable Font', description: 'High-legibility fonts', ariaLabel: 'Readable Font - Use dyslexia-friendly fonts' },
                 { id: 'highlight-titles', title: 'Highlight Titles', description: 'Add boxes around heading tags (h1-h6)', ariaLabel: 'Highlight Titles - Emphasize headings and titles' },
@@ -11103,7 +11114,7 @@ input:checked + .slider::after {
                 { id: 'big-white-cursor', title: 'Big White Cursor', description: 'Increases cursor size', ariaLabel: 'Big White Cursor - Larger white mouse cursor', switchFirst: false }
             ];
             
-            const screenshotProfiles = profiles.slice(0, 7);
+            const screenshotProfiles = profiles.slice(0, 8);
             screenshotProfiles.forEach(profileConfig => {
                 const profileItem = this.createProfileItem(profileConfig);
                 whiteContentSection.appendChild(profileItem);
@@ -11404,6 +11415,131 @@ input:checked + .slider::after {
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="screen-reader" tabindex="0" aria-label="Screen Reader - Optimize for screen readers">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 7: Older Adults -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon older-adults-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="older-adults-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="older-adults-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="older-adults-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="older-adults-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Older Adults</h4>
+                                <p>Improve readability and reduce distractions</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="older-adults" tabindex="0" aria-label="Older Adults - Improve readability and reduce distractions">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 8: Dyslexia Friendly -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon dyslexia-friendly-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="dyslexia-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="dyslexia-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="dyslexia-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="dyslexia-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Dyslexia Friendly</h4>
+                                <p>Use OpenDyslexic font for readability</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dyslexia-friendly" tabindex="0" aria-label="Dyslexia Friendly - Use OpenDyslexic font for readability">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 9: Red-Green (Protanopia) -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon protanopia-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="prot-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="prot-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Red-Green (Protanopia)</h4>
+                                <p>Improve color contrast and cues</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="protanopia" tabindex="0" aria-label="Red-Green Color Blind Mode (Protanopia) - Improve color contrast and cues">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 10: Green-Red (Deuteranopia) -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon deuteranopia-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="deut-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="deut-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Green-Red (Deuteranopia)</h4>
+                                <p>Blue vs orange cues; easier green distinction</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="deuteranopia" tabindex="0" aria-label="Green-Red Color Blind Mode (Deuteranopia) - Improve contrast and non-color cues">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 11: Blue-Yellow (Tritanopia) -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon tritanopia-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="trit-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="trit-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Blue-Yellow (Tritanopia)</h4>
+                                <p>Red vs purple cues; avoid blue/yellow reliance</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="tritanopia" tabindex="0" aria-label="Blue-Yellow Color Blind Mode (Tritanopia) - Improve contrast and non-color cues">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -14535,7 +14671,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 'seizure-safe', 'vision-impaired', 'adhd-friendly', 'cognitive-disability',
     
-                'keyboard-nav', 'screen-reader', 'content-scaling', 'readable-font',
+                'keyboard-nav', 'screen-reader', 'older-adults', 'dyslexia-friendly', 'protanopia', 'deuteranopia', 'tritanopia', 'content-scaling', 'readable-font',
     
                 'highlight-titles', 'highlight-links', 'text-magnifier', 'font-sizing',
     
@@ -16095,6 +16231,36 @@ keyboardNav: "Keyboard Navigation (Motor)",
                         this.enableStopAnimation();
     
                         break;
+
+                    case 'older-adults':
+
+                        this.enableOlderAdultsMode();
+
+                        break;
+
+                    case 'dyslexia-friendly':
+
+                        this.enableDyslexiaFriendlyMode();
+
+                        break;
+
+                    case 'protanopia':
+
+                        this.enableProtanopiaMode();
+
+                        break;
+
+                    case 'deuteranopia':
+
+                        this.enableDeuteranopiaMode();
+
+                        break;
+
+                    case 'tritanopia':
+
+                        this.enableTritanopiaMode();
+
+                        break;
     
                     case 'vision-impaired':
     
@@ -16277,6 +16443,36 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                         this.disableStopAnimation();
     
+                        break;
+
+                    case 'older-adults':
+
+                        this.disableOlderAdultsMode();
+
+                        break;
+
+                    case 'dyslexia-friendly':
+
+                        this.disableDyslexiaFriendlyMode();
+
+                        break;
+
+                    case 'protanopia':
+
+                        this.disableProtanopiaMode();
+
+                        break;
+
+                    case 'deuteranopia':
+
+                        this.disableDeuteranopiaMode();
+
+                        break;
+
+                    case 'tritanopia':
+
+                        this.disableTritanopiaMode();
+
                         break;
     
                     case 'vision-impaired':
@@ -21223,6 +21419,21 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             
     
+            if (this.settings['protanopia'] && this.settings['deuteranopia']) {
+                this.settings['deuteranopia'] = false;
+                this.saveSettings();
+            }
+            if (this.settings['tritanopia']) {
+                if (this.settings['protanopia']) {
+                    this.settings['protanopia'] = false;
+                    this.saveSettings();
+                }
+                if (this.settings['deuteranopia']) {
+                    this.settings['deuteranopia'] = false;
+                    this.saveSettings();
+                }
+            }
+
             Object.entries(this.settings).forEach(([feature, enabled]) => {
     
 
@@ -26007,6 +26218,510 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.body.classList.remove('reading-guide-active');
     
     
+        }
+
+        // Older Adults (composite) Mode
+        enableOlderAdultsMode() {
+            // CRITICAL: Don't manipulate Designer DOM
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+
+            document.body.classList.add('older-adults');
+            document.documentElement.classList.add('older-adults');
+
+            // 1) Enlarge text + improve contrast (exclude widget UI)
+            if (!document.getElementById('older-adults-mode-css')) {
+                const style = document.createElement('style');
+                style.id = 'older-adults-mode-css';
+                style.textContent = `
+                    html.older-adults { font-size: 112.5% !important; }
+                    body.older-adults { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+
+                    /* Improve contrast a bit without changing brand colors too aggressively */
+                    html.older-adults body,
+                    body.older-adults {
+                        filter: contrast(1.12) saturate(1.03);
+                    }
+
+                    /* Never filter the widget itself (keeps UI unchanged) */
+                    html.older-adults #accessbit-widget-container,
+                    html.older-adults #accessbit-widget-container *,
+                    body.older-adults #accessbit-widget-container,
+                    body.older-adults #accessbit-widget-container * {
+                        filter: none !important;
+                    }
+
+                    /* Stop animations for calmer browsing (same intent as Stop Animations feature) */
+                    html.older-adults *, html.older-adults *::before, html.older-adults *::after,
+                    body.older-adults *, body.older-adults *::before, body.older-adults *::after,
+                    .older-adults *, .older-adults *::before, .older-adults *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                        animation-play-state: paused !important;
+                    }
+
+                    /* Stop Webflow interactions (data-w-id) */
+                    html.older-adults [data-w-id],
+                    body.older-adults [data-w-id],
+                    .older-adults [data-w-id] {
+                        animation: none !important;
+                        transition: none !important;
+                        transform: none !important;
+                        opacity: 1 !important;
+                    }
+
+                    /* Same as stop-animation: widget container never affected by pause */
+                    body.older-adults #accessbit-widget-container,
+                    body.older-adults #accessbit-widget-container * {
+                        animation-play-state: running !important;
+                        text-decoration: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // 2) Reading guide: reuse existing bar + handler, but boost its styling (do not change reading guide code)
+            try {
+                this.enableReadingGuide && this.enableReadingGuide();
+                if (!document.getElementById('older-adults-reading-guide-boost')) {
+                    const boost = document.createElement('style');
+                    boost.id = 'older-adults-reading-guide-boost';
+                    boost.textContent = `
+                        body.older-adults .reading-guide-bar {
+                            width: 320px !important;
+                            height: 10px !important;
+                            border-radius: 6px !important;
+                            background: linear-gradient(90deg, rgba(99, 102, 241, 1), rgba(99, 102, 241, 0.55)) !important;
+                            box-shadow: 0 0 18px rgba(99, 102, 241, 0.55) !important;
+                            transition: none !important;
+                            transform: none !important;
+                        }
+                    `;
+                    document.head.appendChild(boost);
+                }
+
+                // Older Adults: use our own mousemove positioning so the bar stays centered
+                // and clamped within the viewport for the boosted size (320x10).
+                // We temporarily disable Reading Guide's mousemove handler while Older Adults is on.
+                if (this.readingGuideMouseMoveHandler && !this.olderAdultsReadingGuideOriginalHandler) {
+                    this.olderAdultsReadingGuideOriginalHandler = this.readingGuideMouseMoveHandler;
+                    try { document.removeEventListener('mousemove', this.readingGuideMouseMoveHandler); } catch (_) {}
+                }
+                if (!this.olderAdultsReadingGuideClampHandler) {
+                    this.olderAdultsReadingGuideClampHandler = (e) => {
+                        try {
+                            if (!document.body.classList.contains('older-adults')) return;
+                            const bar = document.getElementById('reading-guide-bar');
+                            if (!bar) return;
+                            const w = bar.offsetWidth || 320;
+                            const h = bar.offsetHeight || 10;
+                            // Keep glow/shadow inside viewport too (prevents horizontal scroll "break")
+                            const pad = 22;
+                            const x = e.clientX - (w / 2);
+                            const y = e.clientY - (h / 2);
+                            const maxX = window.innerWidth - w - pad;
+                            const maxY = window.innerHeight - h - pad;
+                            const clampedX = Math.max(pad, Math.min(x, maxX));
+                            const clampedY = Math.max(pad, Math.min(y, maxY));
+                            bar.style.transform = 'none';
+                            bar.style.left = clampedX + 'px';
+                            bar.style.top = clampedY + 'px';
+                        } catch (_) {}
+                    };
+                    document.addEventListener('mousemove', this.olderAdultsReadingGuideClampHandler, { passive: true });
+                }
+            } catch (_) {}
+
+            // 3) Stop animations: reuse same routines used by Stop Animations feature (without toggling that feature)
+            try { this.stopAnimationLibraries && this.stopAnimationLibraries(); } catch (_) {}
+            try { this.startLottieGSAPPolling && this.startLottieGSAPPolling(); } catch (_) {}
+            try { this.stopAutoplayMedia && this.stopAutoplayMedia(); } catch (_) {}
+            try { this.stopJavaScriptAnimations && this.stopJavaScriptAnimations(); } catch (_) {}
+            try { this.preserveManualSliderNavigation && this.preserveManualSliderNavigation(); } catch (_) {}
+            try { this.stopLottieAnimations && this.stopLottieAnimations(); } catch (_) {}
+            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
+        }
+
+        disableOlderAdultsMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+
+            document.body.classList.remove('older-adults');
+            document.documentElement.classList.remove('older-adults');
+
+            const style = document.getElementById('older-adults-mode-css');
+            if (style) style.remove();
+
+            const boost = document.getElementById('older-adults-reading-guide-boost');
+            if (boost) boost.remove();
+
+            if (this.olderAdultsReadingGuideClampHandler) {
+                try { document.removeEventListener('mousemove', this.olderAdultsReadingGuideClampHandler); } catch (_) {}
+                this.olderAdultsReadingGuideClampHandler = null;
+            }
+            if (this.olderAdultsReadingGuideOriginalHandler) {
+                // Restore Reading Guide's original handler (if Reading Guide is enabled)
+                const readingGuideEnabled = !!(this.settings && this.settings['reading-guide']);
+                if (readingGuideEnabled) {
+                    try { document.addEventListener('mousemove', this.olderAdultsReadingGuideOriginalHandler); } catch (_) {}
+                }
+                this.olderAdultsReadingGuideOriginalHandler = null;
+            }
+
+            // Only remove the reading guide bar if the user didn't enable Reading Guide separately.
+            const readingGuideEnabled = !!(this.settings && this.settings['reading-guide']);
+            if (!readingGuideEnabled) {
+                try { this.disableReadingGuide && this.disableReadingGuide(); } catch (_) {}
+            }
+        }
+
+        ensureOpenDyslexicFontImported() {
+            if (document.getElementById('accessbit-opendyslexic-font')) return;
+            const link = document.createElement('link');
+            link.id = 'accessbit-opendyslexic-font';
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5.2.5/index.css';
+            document.head.appendChild(link);
+        }
+
+        enableDyslexiaFriendlyMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+            this.ensureOpenDyslexicFontImported();
+            document.documentElement.classList.add('ab-dyslexia');
+            document.body.classList.add('ab-dyslexia');
+            if (!document.getElementById('ab-dyslexia-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-dyslexia-css';
+                style.textContent = `
+                    html.ab-dyslexia body {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    /* Keep widget UI unchanged */
+                    html.ab-dyslexia #accessbit-widget-container,
+                    html.ab-dyslexia #accessbit-widget-container * {
+                        font-family: inherit !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        disableDyslexiaFriendlyMode() {
+            document.documentElement.classList.remove('ab-dyslexia');
+            document.body.classList.remove('ab-dyslexia');
+            const style = document.getElementById('ab-dyslexia-css');
+            if (style) style.remove();
+        }
+
+        enableProtanopiaMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+            if (this.settings && this.settings['deuteranopia']) {
+                this.settings['deuteranopia'] = false;
+                const du = this.shadowRoot && this.shadowRoot.getElementById('deuteranopia');
+                if (du) du.checked = false;
+                this.disableDeuteranopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['tritanopia']) {
+                this.settings['tritanopia'] = false;
+                const tr = this.shadowRoot && this.shadowRoot.getElementById('tritanopia');
+                if (tr) tr.checked = false;
+                this.disableTritanopiaMode();
+                this.saveSettings();
+            }
+            document.documentElement.classList.add('ab-protanopia');
+            if (!document.getElementById('ab-protanopia-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-protanopia-css';
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-protanopia {
+                        --ab-error: #003366;
+                        --ab-success: #ffcc00;
+                        filter: saturate(0.92) contrast(1.06) brightness(1.02);
+                    }
+
+                    /* Safe heuristic selectors for common sites */
+                    .ab-protanopia [style*="red" i],
+                    .ab-protanopia .error,
+                    .ab-protanopia .danger,
+                    .ab-protanopia .alert-danger,
+                    .ab-protanopia .text-danger {
+                        color: #003366 !important;
+                        background-color: #cce0ff !important;
+                        border-color: #003366 !important;
+                    }
+                    .ab-protanopia [style*="green" i],
+                    .ab-protanopia .success,
+                    .ab-protanopia .alert-success,
+                    .ab-protanopia .text-success {
+                        color: #663300 !important;
+                        background-color: #ffebcc !important;
+                        border-color: #663300 !important;
+                    }
+
+                    /* Avoid affecting widget */
+                    .ab-protanopia #accessbit-widget-container,
+                    .ab-protanopia #accessbit-widget-container * {
+                        filter: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Optional: add non-color cues to common classes (reversible)
+            if (!this._abProtanopiaCueApplied) {
+                this._abProtanopiaCueApplied = true;
+                this._abProtanopiaCuedEls = this._abProtanopiaCuedEls || [];
+                try {
+                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
+                    errors.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('❌')) {
+                            el.textContent = `❌ ${t}`;
+                            this._abProtanopiaCuedEls.push(el);
+                        }
+                    });
+                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
+                    success.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('✅')) {
+                            el.textContent = `✅ ${t}`;
+                            this._abProtanopiaCuedEls.push(el);
+                        }
+                    });
+                } catch (_) {}
+            }
+        }
+
+        disableProtanopiaMode() {
+            document.documentElement.classList.remove('ab-protanopia');
+            const style = document.getElementById('ab-protanopia-css');
+            if (style) style.remove();
+
+            // Remove cues only if we added them (best-effort)
+            if (this._abProtanopiaCuedEls && this._abProtanopiaCuedEls.length) {
+                this._abProtanopiaCuedEls.forEach((el) => {
+                    try {
+                        const t = (el.textContent || '');
+                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '');
+                    } catch (_) {}
+                });
+            }
+            this._abProtanopiaCuedEls = [];
+            this._abProtanopiaCueApplied = false;
+        }
+
+        enableDeuteranopiaMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+            if (this.settings && this.settings['protanopia']) {
+                this.settings['protanopia'] = false;
+                const pr = this.shadowRoot && this.shadowRoot.getElementById('protanopia');
+                if (pr) pr.checked = false;
+                this.disableProtanopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['tritanopia']) {
+                this.settings['tritanopia'] = false;
+                const tr = this.shadowRoot && this.shadowRoot.getElementById('tritanopia');
+                if (tr) tr.checked = false;
+                this.disableTritanopiaMode();
+                this.saveSettings();
+            }
+            document.documentElement.classList.add('ab-deuteranopia');
+            if (!document.getElementById('ab-deuteranopia-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-deuteranopia-css';
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-deuteranopia {
+                        --ab-error: #1a237e;
+                        --ab-success: #bf360c;
+                        filter: contrast(1.1) brightness(1.05) saturate(0.95);
+                    }
+
+                    .ab-deuteranopia [style*="red" i],
+                    .ab-deuteranopia .error,
+                    .ab-deuteranopia .danger,
+                    .ab-deuteranopia .alert-danger,
+                    .ab-deuteranopia .text-danger {
+                        color: #1a237e !important;
+                        background-color: #e3f2fd !important;
+                        border-color: #1a237e !important;
+                    }
+                    .ab-deuteranopia [style*="green" i],
+                    .ab-deuteranopia .success,
+                    .ab-deuteranopia .alert-success,
+                    .ab-deuteranopia .text-success {
+                        color: #bf360c !important;
+                        background-color: #ffe0b2 !important;
+                        border-color: #bf360c !important;
+                    }
+
+                    .ab-deuteranopia #accessbit-widget-container,
+                    .ab-deuteranopia #accessbit-widget-container * {
+                        filter: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            if (!this._abDeuteranopiaCueApplied) {
+                this._abDeuteranopiaCueApplied = true;
+                this._abDeuteranopiaCuedEls = this._abDeuteranopiaCuedEls || [];
+                try {
+                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
+                    errors.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('❌')) {
+                            el.textContent = `❌ ${t}`;
+                            this._abDeuteranopiaCuedEls.push(el);
+                        }
+                    });
+                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
+                    success.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('✅')) {
+                            el.textContent = `✅ ${t}`;
+                            this._abDeuteranopiaCuedEls.push(el);
+                        }
+                    });
+                } catch (_) {}
+            }
+        }
+
+        disableDeuteranopiaMode() {
+            document.documentElement.classList.remove('ab-deuteranopia');
+            const style = document.getElementById('ab-deuteranopia-css');
+            if (style) style.remove();
+
+            if (this._abDeuteranopiaCuedEls && this._abDeuteranopiaCuedEls.length) {
+                this._abDeuteranopiaCuedEls.forEach((el) => {
+                    try {
+                        const t = (el.textContent || '');
+                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '');
+                    } catch (_) {}
+                });
+            }
+            this._abDeuteranopiaCuedEls = [];
+            this._abDeuteranopiaCueApplied = false;
+        }
+
+        enableTritanopiaMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+            if (this.settings && this.settings['protanopia']) {
+                this.settings['protanopia'] = false;
+                const pr = this.shadowRoot && this.shadowRoot.getElementById('protanopia');
+                if (pr) pr.checked = false;
+                this.disableProtanopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['deuteranopia']) {
+                this.settings['deuteranopia'] = false;
+                const du = this.shadowRoot && this.shadowRoot.getElementById('deuteranopia');
+                if (du) du.checked = false;
+                this.disableDeuteranopiaMode();
+                this.saveSettings();
+            }
+            document.documentElement.classList.add('ab-tritanopia');
+            if (!document.getElementById('ab-tritanopia-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-tritanopia-css';
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-tritanopia {
+                        --ab-error: #b71c1c;
+                        --ab-success: #4a148c;
+                        filter: contrast(1.1) brightness(1.05) saturate(0.9);
+                    }
+
+                    .ab-tritanopia .error,
+                    .ab-tritanopia .danger,
+                    .ab-tritanopia .alert-danger,
+                    .ab-tritanopia .text-danger,
+                    .ab-tritanopia [role="alert"] {
+                        color: #b71c1c !important;
+                        background-color: #ffebee !important;
+                        border-color: #b71c1c !important;
+                    }
+                    .ab-tritanopia .success,
+                    .ab-tritanopia .alert-success,
+                    .ab-tritanopia .text-success {
+                        color: #4a148c !important;
+                        background-color: #f3e5f5 !important;
+                        border-color: #4a148c !important;
+                    }
+
+                    .ab-tritanopia #accessbit-widget-container,
+                    .ab-tritanopia #accessbit-widget-container * {
+                        filter: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            if (!this._abTritanopiaCueApplied) {
+                this._abTritanopiaCueApplied = true;
+                this._abTritanopiaCuedEls = this._abTritanopiaCuedEls || [];
+                try {
+                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
+                    errors.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('❌')) {
+                            el.textContent = `❌ ${t}`;
+                            this._abTritanopiaCuedEls.push(el);
+                        }
+                    });
+                    const alerts = Array.from(document.querySelectorAll('[role="alert"]')).slice(0, 200);
+                    alerts.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('⚠')) {
+                            el.textContent = `⚠ ${t}`;
+                            this._abTritanopiaCuedEls.push(el);
+                        }
+                    });
+                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
+                    success.forEach((el) => {
+                        if (el.closest && el.closest('#accessbit-widget-container')) return;
+                        const t = (el.textContent || '').trim();
+                        if (!t.startsWith('✅')) {
+                            el.textContent = `✅ ${t}`;
+                            this._abTritanopiaCuedEls.push(el);
+                        }
+                    });
+                } catch (_) {}
+            }
+        }
+
+        disableTritanopiaMode() {
+            document.documentElement.classList.remove('ab-tritanopia');
+            const style = document.getElementById('ab-tritanopia-css');
+            if (style) style.remove();
+
+            if (this._abTritanopiaCuedEls && this._abTritanopiaCuedEls.length) {
+                this._abTritanopiaCuedEls.forEach((el) => {
+                    try {
+                        const t = (el.textContent || '');
+                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '').replace(/^⚠\s+/, '');
+                    } catch (_) {}
+                });
+            }
+            this._abTritanopiaCuedEls = [];
+            this._abTritanopiaCueApplied = false;
         }
 
 
@@ -35276,43 +35991,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (vars.top !== undefined) host.style.setProperty('--widget-icon-top', vars.top);
             if (vars.bottom !== undefined) host.style.setProperty('--widget-icon-bottom', vars.bottom);
             if (vars.transform !== undefined) host.style.setProperty('--widget-icon-transform', vars.transform);
-            this.syncPanelSideWithTrigger();
-        }
-
-        // Keep panel side anchored to the actual trigger side vars (including offsets).
-        syncPanelSideWithTrigger() {
-            const host = this.shadowRoot?.host;
-            if (!host) return;
-
-            const iconLeft = (host.style.getPropertyValue('--widget-icon-left') || '').trim();
-            const iconRight = (host.style.getPropertyValue('--widget-icon-right') || '').trim();
-            const hasLeft = !!iconLeft && iconLeft !== 'auto';
-            const hasRight = !!iconRight && iconRight !== 'auto';
-
-            if (hasLeft && !hasRight) {
-                host.style.setProperty('--panel-left', iconLeft);
-                host.style.setProperty('--panel-right', 'auto');
-                return;
-            }
-            if (hasRight && !hasLeft) {
-                host.style.setProperty('--panel-right', iconRight);
-                host.style.setProperty('--panel-left', 'auto');
-                return;
-            }
-
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
-            const configuredSide = isMobile
-                ? (this.customizationData?.mobileTriggerHorizontalPosition || this.customizationData?.triggerHorizontalPosition || 'Right')
-                : (this.customizationData?.triggerHorizontalPosition || 'Right');
-            const isRight = String(configuredSide).toLowerCase().includes('right');
-
-            if (isRight) {
-                host.style.setProperty('--panel-right', '20px');
-                host.style.setProperty('--panel-left', 'auto');
-            } else {
-                host.style.setProperty('--panel-left', '20px');
-                host.style.setProperty('--panel-right', 'auto');
-            }
         }
 
         updateTriggerOffset(direction, offset) {
@@ -35465,8 +36143,17 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             panel.style.removeProperty('height');
             panel.style.removeProperty('transform');
 
-            this.syncPanelSideWithTrigger();
-            host.style.setProperty('--panel-top', '20px');
+            const margin = 20;
+            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
+            const isRight = hPos.includes('right');
+            if (isRight) {
+                host.style.setProperty('--panel-right', margin + 'px');
+                host.style.setProperty('--panel-left', 'auto');
+            } else {
+                host.style.setProperty('--panel-left', margin + 'px');
+                host.style.setProperty('--panel-right', 'auto');
+            }
+            host.style.setProperty('--panel-top', margin + 'px');
             host.style.setProperty('--panel-width', '480px');
         }
     
