@@ -26308,7 +26308,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     try { document.removeEventListener('mousemove', this.readingGuideMouseMoveHandler); } catch (_) {}
                 }
                 if (!this.olderAdultsReadingGuideClampHandler) {
-                    this.olderAdultsReadingGuideClampHandler = (e) => {
+                    const updateBarPosition = (clientX, clientY) => {
                         try {
                             if (!document.body.classList.contains('older-adults')) return;
                             const bar = document.getElementById('reading-guide-bar');
@@ -26317,18 +26317,50 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                             const h = bar.offsetHeight || 10;
                             // Keep glow/shadow inside viewport too (prevents horizontal scroll "break")
                             const pad = 22;
-                            const x = e.clientX - (w / 2);
-                            const y = e.clientY - (h / 2);
+                            const x = clientX - (w / 2);
+                            const y = clientY - (h / 2);
                             const maxX = window.innerWidth - w - pad;
                             const maxY = window.innerHeight - h - pad;
                             const clampedX = Math.max(pad, Math.min(x, maxX));
                             const clampedY = Math.max(pad, Math.min(y, maxY));
                             bar.style.transform = 'none';
+                            bar.style.display = 'block';
                             bar.style.left = clampedX + 'px';
                             bar.style.top = clampedY + 'px';
                         } catch (_) {}
                     };
+
+                    this.olderAdultsReadingGuideClampHandler = (e) => {
+                        // Mouse-driven positioning (desktop)
+                        this._olderAdultsRGLastClientX = e.clientX;
+                        this._olderAdultsRGLastClientY = e.clientY;
+                        updateBarPosition(e.clientX, e.clientY);
+                    };
+
+                    this.olderAdultsReadingGuideTouchHandler = (e) => {
+                        // Touch-driven positioning (mobile)
+                        try {
+                            const t = e && e.touches && e.touches[0];
+                            if (!t) return;
+                            this._olderAdultsRGLastClientX = t.clientX;
+                            this._olderAdultsRGLastClientY = t.clientY;
+                            updateBarPosition(t.clientX, t.clientY);
+                        } catch (_) {}
+                    };
+
+                    this.olderAdultsReadingGuideScrollHandler = () => {
+                        // On scroll, there may be no mousemove/touchmove event.
+                        // Re-position using last known pointer location, or a safe default.
+                        const x = (typeof this._olderAdultsRGLastClientX === 'number') ? this._olderAdultsRGLastClientX : Math.round(window.innerWidth * 0.5);
+                        const y = (typeof this._olderAdultsRGLastClientY === 'number') ? this._olderAdultsRGLastClientY : Math.round(window.innerHeight * 0.33);
+                        updateBarPosition(x, y);
+                    };
+
                     document.addEventListener('mousemove', this.olderAdultsReadingGuideClampHandler, { passive: true });
+                    document.addEventListener('touchmove', this.olderAdultsReadingGuideTouchHandler, { passive: true });
+                    window.addEventListener('scroll', this.olderAdultsReadingGuideScrollHandler, { passive: true });
+                    // Ensure it's placed at least once immediately (helps when user enables after scrolling)
+                    this.olderAdultsReadingGuideScrollHandler();
                 }
             } catch (_) {}
 
@@ -26358,6 +26390,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 try { document.removeEventListener('mousemove', this.olderAdultsReadingGuideClampHandler); } catch (_) {}
                 this.olderAdultsReadingGuideClampHandler = null;
             }
+            if (this.olderAdultsReadingGuideTouchHandler) {
+                try { document.removeEventListener('touchmove', this.olderAdultsReadingGuideTouchHandler); } catch (_) {}
+                this.olderAdultsReadingGuideTouchHandler = null;
+            }
+            if (this.olderAdultsReadingGuideScrollHandler) {
+                try { window.removeEventListener('scroll', this.olderAdultsReadingGuideScrollHandler); } catch (_) {}
+                this.olderAdultsReadingGuideScrollHandler = null;
+            }
+            this._olderAdultsRGLastClientX = undefined;
+            this._olderAdultsRGLastClientY = undefined;
             if (this.olderAdultsReadingGuideOriginalHandler) {
                 // Restore Reading Guide's original handler (if Reading Guide is enabled)
                 const readingGuideEnabled = !!(this.settings && this.settings['reading-guide']);
@@ -26412,6 +26454,172 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (style) style.remove();
         }
 
+        _abParseRgb(colorStr) {
+            try {
+                if (!colorStr || typeof colorStr !== 'string') return null;
+                // rgb(r, g, b) or rgba(r, g, b, a)
+                const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+                if (!m) return null;
+                return [Number(m[1]), Number(m[2]), Number(m[3])];
+            } catch (_) {
+                return null;
+            }
+        }
+
+        _abIsRedish(rgb) {
+            const [r, g, b] = rgb;
+            return r >= 180 && g <= 140 && b <= 140;
+        }
+        _abIsGreenish(rgb) {
+            const [r, g, b] = rgb;
+            return g >= 165 && r <= 150 && b <= 150;
+        }
+        _abIsBlueish(rgb) {
+            const [r, g, b] = rgb;
+            return b >= 165 && r <= 160 && g <= 170;
+        }
+        _abIsYellowish(rgb) {
+            const [r, g, b] = rgb;
+            return r >= 190 && g >= 190 && b <= 150;
+        }
+
+        _abStartColorRemapObserver(mode) {
+            try {
+                if (this._abColorRemapObserver) return;
+                this._abColorRemapMode = mode;
+                this._abColorRemapScheduled = false;
+                this._abColorRemapPending = [];
+
+                const schedule = () => {
+                    if (this._abColorRemapScheduled) return;
+                    this._abColorRemapScheduled = true;
+                    requestAnimationFrame(() => {
+                        this._abColorRemapScheduled = false;
+                        const pending = this._abColorRemapPending.splice(0, 200);
+                        if (pending.length) this._abRemapInlineColorsForMode(mode, pending);
+                    });
+                };
+
+                this._abColorRemapObserver = new MutationObserver((mutations) => {
+                    try {
+                        if (!document.documentElement.classList.contains(`ab-${mode}`)) return;
+                        for (const m of mutations) {
+                            if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) {
+                                m.addedNodes.forEach((n) => {
+                                    if (!n) return;
+                                    if (n.nodeType === 1) {
+                                        this._abColorRemapPending.push(n);
+                                    }
+                                });
+                            }
+                        }
+                        schedule();
+                    } catch (_) {}
+                });
+                this._abColorRemapObserver.observe(document.documentElement, { childList: true, subtree: true });
+            } catch (_) {}
+        }
+
+        _abStopColorRemapObserver() {
+            try {
+                if (this._abColorRemapObserver) {
+                    this._abColorRemapObserver.disconnect();
+                }
+            } catch (_) {}
+            this._abColorRemapObserver = null;
+            this._abColorRemapPending = [];
+            this._abColorRemapScheduled = false;
+            this._abColorRemapMode = null;
+        }
+
+        _abGetModeColorMapping(mode, rgb) {
+            // Only remap **already-semantic** colors (red/green/blue/yellow-ish)
+            // without touching neutral/brand text colors.
+            try {
+                if (!rgb) return null;
+                if (mode === 'protanopia') {
+                    // red/green confusion → push into blue/yellow
+                    if (this._abIsRedish(rgb)) return '#003366';      // deep blue
+                    if (this._abIsGreenish(rgb)) return '#ffcc00';    // yellow
+                    return null;
+                }
+                if (mode === 'deuteranopia') {
+                    // green weak → replace green with orange, red with blue
+                    if (this._abIsRedish(rgb)) return '#1a237e';      // deep blue
+                    if (this._abIsGreenish(rgb)) return '#bf360c';    // orange/brown
+                    return null;
+                }
+                if (mode === 'tritanopia') {
+                    // blue/yellow confusion → avoid both; map to red/green
+                    if (this._abIsBlueish(rgb)) return '#b71c1c';     // red
+                    if (this._abIsYellowish(rgb)) return '#2e7d32';   // green
+                    return null;
+                }
+                return null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        _abRemapInlineColorsForMode(mode, roots) {
+            try {
+                if (!roots || !roots.length) return;
+                if (!this._abColorRemapStore) this._abColorRemapStore = new Map();
+
+                const maxEls = 1800;
+                let processed = 0;
+
+                const processEl = (el) => {
+                    if (!el || el.nodeType !== 1) return;
+                    if (processed++ > maxEls) return;
+                    if (el.closest && el.closest('#accessbit-widget-container')) return;
+
+                    const cs = window.getComputedStyle(el);
+                    if (!cs) return;
+
+                    const rgb = this._abParseRgb(cs.color);
+                    const mapped = this._abGetModeColorMapping(mode, rgb);
+                    if (!mapped) return;
+
+                    // Store original inline style so we can revert exactly
+                    if (!this._abColorRemapStore.has(el)) {
+                        this._abColorRemapStore.set(el, {
+                            color: el.style.color,
+                            hadColor: el.style.color !== '',
+                        });
+                    }
+                    el.style.setProperty('color', mapped, 'important');
+                };
+
+                roots.forEach((root) => {
+                    if (!root || root.nodeType !== 1) return;
+                    processEl(root);
+                    // Query descendants (cheap-ish, but bounded)
+                    const nodes = root.querySelectorAll ? root.querySelectorAll('*') : [];
+                    for (let i = 0; i < nodes.length && processed <= maxEls; i++) {
+                        processEl(nodes[i]);
+                    }
+                });
+            } catch (_) {}
+        }
+
+        _abRestoreInlineColorRemap() {
+            try {
+                if (!this._abColorRemapStore) return;
+                this._abColorRemapStore.forEach((prev, el) => {
+                    try {
+                        if (!el || !el.style) return;
+                        if (prev && prev.hadColor) {
+                            el.style.color = prev.color;
+                        } else {
+                            el.style.removeProperty('color');
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
+            this._abColorRemapStore = new Map();
+        }
+
         enableProtanopiaMode() {
             if (this.isDesignerMode && this.isDesignerMode()) return;
             if (this.settings && this.settings['deuteranopia']) {
@@ -26429,6 +26637,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 this.saveSettings();
             }
             document.documentElement.classList.add('ab-protanopia');
+            // Remap only red/green-ish text colors across the page (brand/neutral text untouched)
+            this._abRemapInlineColorsForMode('protanopia', [document.body]);
+            this._abStartColorRemapObserver('protanopia');
             if (!document.getElementById('ab-protanopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-protanopia-css';
@@ -26502,6 +26713,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.documentElement.classList.remove('ab-protanopia');
             const style = document.getElementById('ab-protanopia-css');
             if (style) style.remove();
+            this._abStopColorRemapObserver();
+            this._abRestoreInlineColorRemap();
 
             // Remove cues only if we added them (best-effort)
             if (this._abProtanopiaCuedEls && this._abProtanopiaCuedEls.length) {
@@ -26533,6 +26746,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 this.saveSettings();
             }
             document.documentElement.classList.add('ab-deuteranopia');
+            this._abRemapInlineColorsForMode('deuteranopia', [document.body]);
+            this._abStartColorRemapObserver('deuteranopia');
             if (!document.getElementById('ab-deuteranopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-deuteranopia-css';
@@ -26603,6 +26818,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.documentElement.classList.remove('ab-deuteranopia');
             const style = document.getElementById('ab-deuteranopia-css');
             if (style) style.remove();
+            this._abStopColorRemapObserver();
+            this._abRestoreInlineColorRemap();
 
             if (this._abDeuteranopiaCuedEls && this._abDeuteranopiaCuedEls.length) {
                 this._abDeuteranopiaCuedEls.forEach((el) => {
@@ -26633,6 +26850,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 this.saveSettings();
             }
             document.documentElement.classList.add('ab-tritanopia');
+            // Remap only blue/yellow-ish text colors across the page (brand/neutral text untouched)
+            this._abRemapInlineColorsForMode('tritanopia', [document.body]);
+            this._abStartColorRemapObserver('tritanopia');
             if (!document.getElementById('ab-tritanopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-tritanopia-css';
@@ -26711,6 +26931,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.documentElement.classList.remove('ab-tritanopia');
             const style = document.getElementById('ab-tritanopia-css');
             if (style) style.remove();
+            this._abStopColorRemapObserver();
+            this._abRestoreInlineColorRemap();
 
             if (this._abTritanopiaCuedEls && this._abTritanopiaCuedEls.length) {
                 this._abTritanopiaCuedEls.forEach((el) => {
