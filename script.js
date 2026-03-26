@@ -5359,6 +5359,8 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#protanopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#deuteranopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#color-blind),
+                .accessbit-widget-panel .panel-content .profile-item:has(#inverted-colors),
                 .accessbit-widget-panel .panel-content .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
@@ -5379,6 +5381,8 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#protanopia),
                 .accessbit-widget-panel .profile-item:has(#deuteranopia),
                 .accessbit-widget-panel .profile-item:has(#tritanopia),
+                .accessbit-widget-panel .profile-item:has(#color-blind),
+                .accessbit-widget-panel .profile-item:has(#inverted-colors),
                 .accessbit-widget-panel .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .profile-item:has(#adjust-line-height),
@@ -11543,6 +11547,56 @@ input:checked + .slider::after {
                             <span class="slider"></span>
                         </label>
                     </div>
+
+                    <!-- Module 12: Color Blind (general) -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon colorblind-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="cb-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="cb-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Color Blind</h4>
+                                <p>Slight contrast + desaturation; remap red/green/blue/yellow text</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="color-blind" tabindex="0" aria-label="Color Blind - Slight contrast, desaturation, and semantic color remapping">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 13: Inverted Colors -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon invert-colors-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="inv-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="inv-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Inverted Colors</h4>
+                                <p>Completely invert colors (white ↔ black)</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="inverted-colors" tabindex="0" aria-label="Inverted Colors - Invert all page colors">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
     
     
     
@@ -14671,7 +14725,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 'seizure-safe', 'vision-impaired', 'adhd-friendly', 'cognitive-disability',
     
-                'keyboard-nav', 'screen-reader', 'older-adults', 'dyslexia-friendly', 'protanopia', 'deuteranopia', 'tritanopia', 'content-scaling', 'readable-font',
+                'keyboard-nav', 'screen-reader', 'older-adults', 'dyslexia-friendly', 'protanopia', 'deuteranopia', 'tritanopia', 'color-blind', 'inverted-colors', 'content-scaling', 'readable-font',
     
                 'highlight-titles', 'highlight-links', 'text-magnifier', 'font-sizing',
     
@@ -16261,6 +16315,18 @@ keyboardNav: "Keyboard Navigation (Motor)",
                         this.enableTritanopiaMode();
 
                         break;
+
+                    case 'color-blind':
+
+                        this.enableColorBlindMode();
+
+                        break;
+
+                    case 'inverted-colors':
+
+                        this.enableInvertedColorsMode();
+
+                        break;
     
                     case 'vision-impaired':
     
@@ -16472,6 +16538,18 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     case 'tritanopia':
 
                         this.disableTritanopiaMode();
+
+                        break;
+
+                    case 'color-blind':
+
+                        this.disableColorBlindMode();
+
+                        break;
+
+                    case 'inverted-colors':
+
+                        this.disableInvertedColorsMode();
 
                         break;
     
@@ -20206,6 +20284,106 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
     
+        enableColorBlindMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+
+            // Avoid stacking with other color transform modes
+            if (this.settings && this.settings['protanopia']) {
+                this.settings['protanopia'] = false;
+                const pr = this.shadowRoot && this.shadowRoot.getElementById('protanopia');
+                if (pr) pr.checked = false;
+                this.disableProtanopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['deuteranopia']) {
+                this.settings['deuteranopia'] = false;
+                const du = this.shadowRoot && this.shadowRoot.getElementById('deuteranopia');
+                if (du) du.checked = false;
+                this.disableDeuteranopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['tritanopia']) {
+                this.settings['tritanopia'] = false;
+                const tr = this.shadowRoot && this.shadowRoot.getElementById('tritanopia');
+                if (tr) tr.checked = false;
+                this.disableTritanopiaMode();
+                this.saveSettings();
+            }
+            if (this.settings && this.settings['inverted-colors']) {
+                this.settings['inverted-colors'] = false;
+                const inv = this.shadowRoot && this.shadowRoot.getElementById('inverted-colors');
+                if (inv) inv.checked = false;
+                this.disableInvertedColorsMode();
+                this.saveSettings();
+            }
+
+            document.documentElement.classList.add('ab-colorblind');
+
+            if (!document.getElementById('ab-colorblind-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-colorblind-css';
+                style.textContent = `
+                    .ab-colorblind { filter: contrast(1.1) brightness(1.05) saturate(0.9); }
+                    .ab-colorblind #accessbit-widget-container,
+                    .ab-colorblind #accessbit-widget-container * { filter: none !important; }
+                `;
+                document.head.appendChild(style);
+            }
+
+            this._abRemapInlineColorsForMode('color-blind', [document.body]);
+            this._abStartColorRemapObserver('color-blind');
+        }
+
+        disableColorBlindMode() {
+            document.documentElement.classList.remove('ab-colorblind');
+            const style = document.getElementById('ab-colorblind-css');
+            if (style) style.remove();
+            this._abStopColorRemapObserver();
+            this._abRestoreInlineColorRemap();
+        }
+
+        enableInvertedColorsMode() {
+            if (this.isDesignerMode && this.isDesignerMode()) return;
+
+            // Invert should not stack with other filter/remap modes
+            const toDisable = ['protanopia', 'deuteranopia', 'tritanopia', 'color-blind'];
+            toDisable.forEach((k) => {
+                try {
+                    if (this.settings && this.settings[k]) {
+                        this.settings[k] = false;
+                        const el = this.shadowRoot && this.shadowRoot.getElementById(k);
+                        if (el) el.checked = false;
+                        if (k === 'protanopia') this.disableProtanopiaMode();
+                        if (k === 'deuteranopia') this.disableDeuteranopiaMode();
+                        if (k === 'tritanopia') this.disableTritanopiaMode();
+                        if (k === 'color-blind') this.disableColorBlindMode();
+                        this.saveSettings();
+                    }
+                } catch (_) {}
+            });
+
+            document.documentElement.classList.add('ab-inverted-colors');
+            document.body.classList.add('ab-inverted-colors');
+
+            if (!document.getElementById('ab-inverted-colors-css')) {
+                const style = document.createElement('style');
+                style.id = 'ab-inverted-colors-css';
+                style.textContent = `
+                    body.ab-inverted-colors { filter: invert(1); }
+                    body.ab-inverted-colors #accessbit-widget-container,
+                    body.ab-inverted-colors #accessbit-widget-container * { filter: invert(1) !important; }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        disableInvertedColorsMode() {
+            document.documentElement.classList.remove('ab-inverted-colors');
+            document.body.classList.remove('ab-inverted-colors');
+            const style = document.getElementById('ab-inverted-colors-css');
+            if (style) style.remove();
+        }
+
         // Highlight Focus Methods
     
         enableHighlightFocus() {
@@ -26239,7 +26417,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     /* Improve contrast a bit without changing brand colors too aggressively */
                     html.older-adults body,
                     body.older-adults {
-                        filter: contrast(1.12) saturate(1.03);
+                        /* IMPORTANT: do NOT use filter here.
+                           filter creates a new containing block and breaks position:fixed children on many sites,
+                           which causes the Reading Guide bar to scroll away/vanish. */
+                        filter: none !important;
                     }
 
                     /* Never filter the widget itself (keeps UI unchanged) */
@@ -26468,19 +26649,22 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
         _abIsRedish(rgb) {
             const [r, g, b] = rgb;
-            return r >= 180 && g <= 140 && b <= 140;
+            // tolerant: catches #ff0000, pinkish reds, dark reds
+            return r >= 150 && (r - g) >= 55 && (r - b) >= 55;
         }
         _abIsGreenish(rgb) {
             const [r, g, b] = rgb;
-            return g >= 165 && r <= 150 && b <= 150;
+            // tolerant: catches bright and mid greens
+            return g >= 145 && (g - r) >= 35 && (g - b) >= 25;
         }
         _abIsBlueish(rgb) {
             const [r, g, b] = rgb;
-            return b >= 165 && r <= 160 && g <= 170;
+            return b >= 145 && (b - r) >= 35 && (b - g) >= 20;
         }
         _abIsYellowish(rgb) {
             const [r, g, b] = rgb;
-            return r >= 190 && g >= 190 && b <= 150;
+            // tolerant: catches #ff0, golds, light yellows
+            return r >= 170 && g >= 160 && b <= 160 && Math.abs(r - g) <= 90;
         }
 
         _abStartColorRemapObserver(mode) {
@@ -26553,6 +26737,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     // blue/yellow confusion → avoid both; map to red/green
                     if (this._abIsBlueish(rgb)) return '#b71c1c';     // red
                     if (this._abIsYellowish(rgb)) return '#2e7d32';   // green
+                    return null;
+                }
+                if (mode === 'color-blind') {
+                    // General mode: remap only the most confusing semantic hues to distinct, darker hues.
+                    // red -> deep red, green -> deep green, blue -> purple, yellow -> orange/brown
+                    if (this._abIsRedish(rgb)) return '#b71c1c';
+                    if (this._abIsGreenish(rgb)) return '#1b5e20';
+                    if (this._abIsBlueish(rgb)) return '#4a148c';
+                    if (this._abIsYellowish(rgb)) return '#bf360c';
                     return null;
                 }
                 return null;
@@ -26651,7 +26844,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     .ab-protanopia {
                         --ab-error: #003366;
                         --ab-success: #ffcc00;
-                        filter: saturate(0.92) contrast(1.06) brightness(1.02);
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
                     }
 
                     /* Safe heuristic selectors for common sites */
@@ -26759,7 +26952,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     .ab-deuteranopia {
                         --ab-error: #1a237e;
                         --ab-success: #bf360c;
-                        filter: contrast(1.1) brightness(1.05) saturate(0.95);
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
                     }
 
                     .ab-deuteranopia [style*="red" i],
@@ -26864,7 +27057,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     .ab-tritanopia {
                         --ab-error: #b71c1c;
                         --ab-success: #4a148c;
-                        filter: contrast(1.1) brightness(1.05) saturate(0.9);
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
                     }
 
                     .ab-tritanopia .error,
