@@ -3381,6 +3381,8 @@ font-family: Archivo;
     
             
     
+            
+    
             // Auto-remove after 3 seconds
     
             setTimeout(() => {
@@ -5356,6 +5358,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#screen-reader),
                 .accessbit-widget-panel .panel-content .profile-item:has(#older-adults),
                 .accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-font),
                 .accessbit-widget-panel .panel-content .profile-item:has(#protanopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#deuteranopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),
@@ -5378,6 +5381,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#screen-reader),
                 .accessbit-widget-panel .profile-item:has(#older-adults),
                 .accessbit-widget-panel .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .profile-item:has(#dyslexia-font),
                 .accessbit-widget-panel .profile-item:has(#protanopia),
                 .accessbit-widget-panel .profile-item:has(#deuteranopia),
                 .accessbit-widget-panel .profile-item:has(#tritanopia),
@@ -7479,6 +7483,15 @@ font-family: Archivo;
                     height: 43px;
                 }
                 .ht-ring-on { display: none; }
+                .ps-ring-on, .vn-ring-on { display: none; }
+                .contrast-style-card.page-structure-on .ps-ring-off,
+                .contrast-style-card.voice-navigation-on .vn-ring-off { display: none; }
+                .contrast-style-card.page-structure-on .ps-ring-on,
+                .contrast-style-card.voice-navigation-on .vn-ring-on { display: block; }
+                .contrast-style-card.page-structure-on .ps-icon-off,
+                .contrast-style-card.voice-navigation-on .vn-icon-off { display: none; }
+                .contrast-style-card.page-structure-on .ps-icon-on,
+                .contrast-style-card.voice-navigation-on .vn-icon-on { display: block; }
                 /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
                 /* Safari-safe: highlight titles icon recolor via class */
                 .accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
@@ -8085,6 +8098,11 @@ font-family: Archivo;
                 /* Highlight Titles icon: off/on rings and paths */
                 .ht-ring-on,
                 .ht-icon-on { display: none; }
+                /* Page Structure / Voice Navigation icons */
+                .ps-ring-on,
+                .ps-icon-on,
+                .vn-ring-on,
+                .vn-icon-on { display: none; }
                 /* Highlight Focus icon: explicit on/off ring + icon – hide off, show on when checked */
                 .hl-focus-ring-on,
                 .hl-focus-icon-on { display: none; }
@@ -11088,6 +11106,8 @@ input:checked + .slider::after {
                 { id: 'content-scaling', title: 'Content Scaling', description: 'Scale content with arrow controls', ariaLabel: 'Content Scaling - Adjust content size for better readability', extraContent: { type: 'scaling-controls', className: 'scaling-controls', id: 'content-scaling-controls', style: 'display: none; margin-top: 10px;', decreaseId: 'decrease-content-scale-btn', decreaseLabel: 'Decrease content scale by 2%', decreaseText: '-2%', valueId: 'content-scale-value', valueText: '100%', increaseId: 'increase-content-scale-btn', increaseLabel: 'Increase content scale by 2%', increaseText: '+2%' } },
                 { id: 'readable-font', title: 'Readable Font', description: 'High-legibility fonts', ariaLabel: 'Readable Font - Use dyslexia-friendly fonts' },
                 { id: 'highlight-titles', title: 'Highlight Titles', description: 'Add boxes around heading tags (h1-h6)', ariaLabel: 'Highlight Titles - Emphasize headings and titles' },
+                { id: 'page-structure', title: 'Page Structure', description: 'Overview of headings and page regions', ariaLabel: 'Page Structure - Show outline of headings and page regions' },
+                { id: 'voice-navigation', title: 'Voice Navigation', description: 'Scroll, show numbered controls, and activate by voice (HTTPS + mic)', ariaLabel: 'Voice Navigation - Control the page with your voice. Requires HTTPS and microphone.' },
                 { id: 'highlight-links', title: 'Highlight Links', description: 'Add boxes around links', ariaLabel: 'Highlight Links - Emphasize clickable links' },
                 { id: 'text-magnifier', title: 'Text Magnifier', description: 'Floating magnifying glass tool', ariaLabel: 'Text Magnifier - Enlarge text on hover' },
                 { id: 'font-sizing', title: 'Adjust Font Sizing', description: 'Font size with arrow controls', descriptionId: 'font-sizing-desc', ariaLabel: 'Adjust Font Sizing - Font size with arrow controls', ariaDescribedBy: 'font-sizing-desc', extraContent: { type: 'scaling-controls', className: 'scaling-controls', id: 'font-sizing-controls', style: 'display: none; margin-top: 10px;', decreaseId: 'decrease-font-size-btn', decreaseLabel: 'Decrease font size by 5%', decreaseText: '-5%', valueId: 'font-size-value', valueText: '100%', increaseId: 'increase-font-size-btn', increaseLabel: 'Increase font size by 5%', increaseText: '+5%' } },
@@ -11473,6 +11493,31 @@ input:checked + .slider::after {
                         </label>
                     </div>
 
+                    <!-- Module 8b: Dyslexia Font (sitewide OpenDyslexic) -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon dyslexia-font-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="df-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                <circle class="df-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="df-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(15,15)">
+                                    <path class="df-path" d="" fill="black"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Dyslexia Font</h4>
+                                <p>OpenDyslexic on all page text</p>
+                                <small class="profile-activates-label">&nbsp;</small>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dyslexia-font" tabindex="0" aria-label="Dyslexia Font - Apply OpenDyslexic to all website text">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
                     <!-- Module 9: Red-Green (Protanopia) -->
                     <div class="profile-item">
                         <div class="profile-item-icon protanopia-icon" aria-hidden="true">
@@ -11658,6 +11703,38 @@ input:checked + .slider::after {
                                 <label class="toggle-switch"><input type="checkbox" id="highlight-titles" tabindex="0" aria-label="Highlight Titles - Emphasize headings and titles"><span class="slider"></span></label>
                             </div>
                             <h4>Highlight Titles</h4>
+                        </div>
+                    </div>
+                    <div class="content-adjustments-grid">
+                        <div class="contrast-style-card profile-item">
+                            <div class="card-top">
+                                <div class="content-card-icon page-structure-icon">
+                                    <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                        <circle class="ps-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                        <g class="ps-icon-off" transform="translate(11, 13)"><path d="M4 4H15V5.5H4V4ZM4 8.5H20V10H4V8.5ZM4 13H17V14.5H4V13Z" fill="black"/><path d="M2 1.5H19C19.8284 1.5 20.5 2.17157 20.5 3V16C20.5 16.8284 19.8284 17.5 19 17.5H2C1.17157 17.5 0.5 16.8284 0.5 16V3C0.5 2.17157 1.17157 1.5 2 1.5Z" stroke="black" stroke-width="1.2"/></g>
+                                        <g class="ps-icon-on" transform="translate(11, 13)"><path d="M4 4H15V5.5H4V4ZM4 8.5H20V10H4V8.5ZM4 13H17V14.5H4V13Z" fill="#01CE9C"/><path d="M2 1.5H19C19.8284 1.5 20.5 2.17157 20.5 3V16C20.5 16.8284 19.8284 17.5 19 17.5H2C1.17157 17.5 0.5 16.8284 0.5 16V3C0.5 2.17157 1.17157 1.5 2 1.5Z" stroke="#01CE9C" stroke-width="1.2"/></g>
+                                    </svg>
+                                </div>
+                                <label class="toggle-switch"><input type="checkbox" id="page-structure" tabindex="0" aria-label="Page Structure - Show outline of headings and page regions"><span class="slider"></span></label>
+                            </div>
+                            <h4>Page Structure</h4>
+                        </div>
+                        <div class="contrast-style-card profile-item">
+                            <div class="card-top">
+                                <div class="content-card-icon voice-navigation-icon">
+                                    <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                        <circle class="vn-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                        <g class="vn-icon-off" transform="translate(12, 12)"><path d="M15.5 9.5C15.5 12.5376 13.0376 15 10 15C6.96243 15 4.5 12.5376 4.5 9.5C4.5 6.46243 6.96243 4 10 4C13.0376 4 15.5 6.46243 15.5 9.5Z" stroke="black" stroke-width="1.3"/><path d="M3 11.5V7.5" stroke="black" stroke-width="1.3" stroke-linecap="round"/><path d="M17 11.5V7.5" stroke="black" stroke-width="1.3" stroke-linecap="round"/><path d="M10 15V18" stroke="black" stroke-width="1.3" stroke-linecap="round"/></g>
+                                        <g class="vn-icon-on" transform="translate(12, 12)"><path d="M15.5 9.5C15.5 12.5376 13.0376 15 10 15C6.96243 15 4.5 12.5376 4.5 9.5C4.5 6.46243 6.96243 4 10 4C13.0376 4 15.5 6.46243 15.5 9.5Z" stroke="#01CE9C" stroke-width="1.3"/><path d="M3 11.5V7.5" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/><path d="M17 11.5V7.5" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/><path d="M10 15V18" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/></g>
+                                    </svg>
+                                </div>
+                                <label class="toggle-switch"><input type="checkbox" id="voice-navigation" tabindex="0" aria-label="Voice Navigation - Control the page with your voice. Requires HTTPS and microphone."><span class="slider"></span></label>
+                            </div>
+                            <h4>Voice Navigation</h4>
                         </div>
                     </div>
                     <div class="content-adjustments-grid">
@@ -12062,6 +12139,21 @@ input:checked + .slider::after {
                         </div>
                         <h4>Highlight Hover</h4>
                     </div>
+                    <!-- Module 38: Large Clickable Areas -->
+                    <div class="contrast-style-card profile-item">
+                        <div class="card-top">
+                            <div class="content-card-icon large-clickable-area-icon">
+                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
+                                    <circle cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
+                                    <rect x="12" y="12" width="19" height="19" rx="4" stroke="black" stroke-width="2"/>
+                                    <rect x="16" y="16" width="11" height="11" rx="2.5" fill="black"/>
+                                </svg>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="large-clickable-area" tabindex="0" aria-label="Large Clickable Areas - Increase hit area of interactive elements"><span class="slider"></span></label>
+                        </div>
+                        <h4>Large Clickable Areas</h4>
+                    </div>
                         </div>
                     </div>
                     <!-- Module 32: Useful Links -->
@@ -12279,6 +12371,10 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     readableFontDesc: "High-legibility fonts",
     
+                    dyslexiaFont: "Dyslexia Font",
+    
+                    dyslexiaFontDesc: "OpenDyslexic on all page text (same font as Dyslexia Friendly)",
+    
                     highlightTitles: "Highlight Titles",
     
                     highlightTitlesDesc: "Add boxes around heading tags (h1-h6)",
@@ -12286,6 +12382,14 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     highlightLinks: "Highlight Links",
     
                     highlightLinksDesc: "Add boxes around links",
+    
+                    pageStructure: "Page Structure",
+    
+                    pageStructureDesc: "Overview of headings and page regions",
+    
+                    voiceNavigation: "Voice Navigation",
+    
+                    voiceNavigationDesc: "Scroll, show numbered controls, and activate by voice (HTTPS + mic)",
     
                     textMagnifier: "Text Magnifier",
     
@@ -14725,9 +14829,9 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 'seizure-safe', 'vision-impaired', 'adhd-friendly', 'cognitive-disability',
     
-                'keyboard-nav', 'screen-reader', 'older-adults', 'dyslexia-friendly', 'protanopia', 'deuteranopia', 'tritanopia', 'color-blind', 'inverted-colors', 'content-scaling', 'readable-font',
+                'keyboard-nav', 'screen-reader', 'older-adults', 'dyslexia-friendly', 'dyslexia-font', 'protanopia', 'deuteranopia', 'tritanopia', 'color-blind', 'inverted-colors', 'content-scaling', 'readable-font',
     
-                'highlight-titles', 'highlight-links', 'text-magnifier', 'font-sizing',
+                'highlight-titles', 'highlight-links', 'page-structure', 'voice-navigation', 'text-magnifier', 'font-sizing',
     
                 'align-center', 'adjust-line-height', 'adjust-letter-spacing', 'align-left',
     
@@ -14741,7 +14845,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                 'reading-mask', 'highlight-hover', 'highlight-focus', 'big-black-cursor',
     
-                'big-white-cursor'
+                'big-white-cursor', 'large-clickable-area'
     
             ];
     
@@ -14852,6 +14956,14 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                         break;
     
+                    case 'dyslexia-font':
+    
+                        if (title) title.textContent = this.getTranslation(langCode, 'dyslexiaFont', 'Dyslexia Font');
+    
+                        if (desc) desc.textContent = this.getTranslation(langCode, 'dyslexiaFontDesc', 'OpenDyslexic on all page text (same font as Dyslexia Friendly)');
+    
+                        break;
+    
                     case 'highlight-titles':
     
                         if (title) title.textContent = this.getTranslation(langCode, 'highlightTitles', 'Highlight Titles');
@@ -14865,6 +14977,22 @@ keyboardNav: "Keyboard Navigation (Motor)",
                         if (title) title.textContent = this.getTranslation(langCode, 'highlightLinks', 'Highlight Links');
     
                         if (desc) desc.textContent = this.getTranslation(langCode, 'highlightLinksDesc', 'Add boxes around links');
+    
+                        break;
+    
+                    case 'page-structure':
+    
+                        if (title) title.textContent = this.getTranslation(langCode, 'pageStructure', 'Page Structure');
+    
+                        if (desc) desc.textContent = this.getTranslation(langCode, 'pageStructureDesc', 'Overview of headings and page regions');
+    
+                        break;
+    
+                    case 'voice-navigation':
+    
+                        if (title) title.textContent = this.getTranslation(langCode, 'voiceNavigation', 'Voice Navigation');
+    
+                        if (desc) desc.textContent = this.getTranslation(langCode, 'voiceNavigationDesc', 'Scroll, show numbered controls, and activate by voice (HTTPS + mic)');
     
                         break;
     
@@ -15511,7 +15639,13 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     'high-saturation': 'High saturation mode',
     
-                    'low-saturation': 'Low saturation mode'
+                    'low-saturation': 'Low saturation mode',
+    
+                    'page-structure': 'Page structure',
+    
+                    'voice-navigation': 'Voice navigation',
+    
+                    'dyslexia-font': 'Dyslexia font'
     
                 };
     
@@ -16153,6 +16287,18 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                         break;
     
+                    case 'page-structure':
+    
+                        this.enablePageStructure();
+    
+                        break;
+    
+                    case 'voice-navigation':
+    
+                        this.enableVoiceNavigation();
+    
+                        break;
+    
                     case 'adjust-text-colors':
     
                         this.showTextColorPicker();
@@ -16298,6 +16444,12 @@ keyboardNav: "Keyboard Navigation (Motor)",
 
                         break;
 
+                    case 'dyslexia-font':
+
+                        this.enableDyslexiaFontMode();
+
+                        break;
+
                     case 'protanopia':
 
                         this.enableProtanopiaMode();
@@ -16325,6 +16477,12 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     case 'inverted-colors':
 
                         this.enableInvertedColorsMode();
+
+                        break;
+
+                    case 'large-clickable-area':
+
+                        this.enableLargeClickableArea();
 
                         break;
     
@@ -16445,6 +16603,18 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                         break;
     
+                    case 'page-structure':
+    
+                        this.disablePageStructure();
+    
+                        break;
+    
+                    case 'voice-navigation':
+    
+                        this.disableVoiceNavigation();
+    
+                        break;
+    
                     case 'adhd-friendly':
     
                         this.disableADHDFriendly();
@@ -16523,6 +16693,12 @@ keyboardNav: "Keyboard Navigation (Motor)",
 
                         break;
 
+                    case 'dyslexia-font':
+
+                        this.disableDyslexiaFontMode();
+
+                        break;
+
                     case 'protanopia':
 
                         this.disableProtanopiaMode();
@@ -16550,6 +16726,12 @@ keyboardNav: "Keyboard Navigation (Motor)",
                     case 'inverted-colors':
 
                         this.disableInvertedColorsMode();
+
+                        break;
+
+                    case 'large-clickable-area':
+
+                        this.disableLargeClickableArea();
 
                         break;
     
@@ -19409,8 +19591,862 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
     
+        speakVoiceNavigation(text) {
+    
+            if (!text || !this.settings || !this.settings['voice-navigation']) return;
+    
+            try {
+    
+                if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+                window.speechSynthesis.cancel();
+    
+                const u = new SpeechSynthesisUtterance(String(text).slice(0, 500));
+    
+                u.rate = 1;
+    
+                window.speechSynthesis.speak(u);
+    
+            } catch (_) {}
+    
+        }
+    
+    
+    
+        enableVoiceNavigation() {
+    
+            if (typeof this.isDesignerMode === 'function' && this.isDesignerMode()) return;
+    
+            if (typeof window === 'undefined' || !window.isSecureContext) {
+    
+                try { this.announceToScreenReader('Voice navigation needs a secure H T T P S connection.'); } catch (_) {}
+    
+                return;
+    
+            }
+    
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+            if (!SR) {
+    
+                try { this.announceToScreenReader('Voice recognition is not supported in this browser.'); } catch (_) {}
+    
+                return;
+    
+            }
+    
+            this._voiceNavStopping = false;
+    
+            this._voiceNavNumbersActive = false;
+    
+            this._voiceNavNumberMap = {};
+    
+            this._voiceNavElements = [];
+    
+            this._voiceNavBadges = [];
+    
+            this._injectVoiceNavUi();
+    
+            this._startVoiceNavRecognition(SR);
+    
+        }
+    
+    
+    
+        disableVoiceNavigation() {
+    
+            this._voiceNavStopping = true;
+    
+            if (this._voiceNavRestartTimer) {
+    
+                try { clearTimeout(this._voiceNavRestartTimer); } catch (_) {}
+    
+                this._voiceNavRestartTimer = null;
+    
+            }
+    
+            try {
+    
+                if (this._voiceNavRecognition) {
+    
+                    this._voiceNavRecognition.onend = null;
+    
+                    try { this._voiceNavRecognition.stop(); } catch (_) {}
+    
+                    try { this._voiceNavRecognition.abort && this._voiceNavRecognition.abort(); } catch (_) {}
+    
+                }
+    
+            } catch (_) {}
+    
+            this._voiceNavRecognition = null;
+    
+            this._removeVoiceNavScrollListener();
+    
+            this._removeVoiceNavNumberOverlays();
+    
+            this._hideVoiceNavHelp();
+    
+            this._removeVoiceNavStatusBar();
+    
+            try {
+    
+                if (typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
+    
+            } catch (_) {}
+    
+        }
+    
+    
+    
+        _injectVoiceNavUi() {
+    
+            if (document.getElementById('accessbit-voice-nav-css')) return;
+    
+            const st = document.createElement('style');
+    
+            st.id = 'accessbit-voice-nav-css';
+    
+            st.textContent = '#accessbit-voice-nav-status{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:2147483646;background:#1e293b;color:#e2e8f0;padding:10px 18px;border-radius:10px;font-family:system-ui,sans-serif;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px)}#accessbit-voice-nav-status .accessbit-vn-mic{width:12px;height:12px;background:#01CE9C;border-radius:50%;animation:accessbit-vn-pulse 1.2s ease infinite}@keyframes accessbit-vn-pulse{0%,100%{opacity:1}50%{opacity:.4}}.accessbit-vn-badge{position:fixed;z-index:2147483645;min-width:28px;height:28px;padding:0 6px;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#5eead4;border:2px solid #2dd4bf;border-radius:6px;font:700 14px system-ui,sans-serif;pointer-events:none;box-sizing:border-box}#accessbit-voice-nav-help{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;max-width:min(420px,calc(100vw - 32px));max-height:min(80vh,560px);overflow:auto;background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;border:1px solid #334155;font-family:system-ui,sans-serif;font-size:13px;box-shadow:0 16px 48px rgba(0,0,0,.35)}#accessbit-voice-nav-help h2{margin:0 0 12px;font-size:16px;color:#fff}#accessbit-voice-nav-help .accessbit-vn-cmd{margin:14px 0 6px;color:#2dd4bf;font-weight:600}#accessbit-voice-nav-help button{margin-top:12px;padding:8px 14px;border-radius:8px;border:1px solid #475569;background:#334155;color:#fff;cursor:pointer}';
+    
+            document.head.appendChild(st);
+    
+        }
+    
+    
+    
+        _ensureVoiceNavStatusBar() {
+    
+            let el = document.getElementById('accessbit-voice-nav-status');
+    
+            if (!el) {
+    
+                el = document.createElement('div');
+    
+                el.id = 'accessbit-voice-nav-status';
+    
+                el.setAttribute('role', 'status');
+    
+                el.setAttribute('aria-live', 'polite');
+    
+                el.innerHTML = '<span class="accessbit-vn-mic" aria-hidden="true"></span><span>Listening. Say scroll down, scroll up, show numbers, or show help.</span>';
+    
+                document.body.appendChild(el);
+    
+            }
+    
+        }
+    
+    
+    
+        _removeVoiceNavStatusBar() {
+    
+            const el = document.getElementById('accessbit-voice-nav-status');
+    
+            if (el) el.remove();
+    
+        }
+    
+    
+    
+        _getVoiceNavExcludeSelector() {
+    
+            return '.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, #accessbit-widget-container, #accessbit-page-structure-panel, #accessbit-voice-nav-help, #accessbit-voice-nav-status, .accessbit-vn-badge';
+    
+        }
+    
+    
+    
+        _collectVoiceNavFocusables() {
+    
+            const exclude = this._getVoiceNavExcludeSelector();
+    
+            const candidates = document.querySelectorAll('a[href], button, input:not([type="hidden"]), select, textarea, [role="button"], [role="link"], [role="tab"], summary');
+    
+            const out = [];
+    
+            const max = 99;
+    
+            candidates.forEach((el) => {
+    
+                if (out.length >= max) return;
+    
+                if (!el || !el.isConnected) return;
+    
+                if (el.closest(exclude)) return;
+    
+                try {
+    
+                    if (el.disabled || el.getAttribute('aria-hidden') === 'true') return;
+    
+                    const rect = el.getBoundingClientRect();
+    
+                    const style = window.getComputedStyle(el);
+    
+                    if (style.visibility === 'hidden' || style.display === 'none') return;
+    
+                    if (rect.width < 1 && rect.height < 1) return;
+    
+                } catch (_) { return; }
+    
+                out.push(el);
+    
+            });
+    
+            return out;
+    
+        }
+    
+    
+    
+        _removeVoiceNavNumberOverlays() {
+    
+            (this._voiceNavBadges || []).forEach((b) => { try { b.remove(); } catch (_) {} });
+    
+            this._voiceNavBadges = [];
+    
+            this._voiceNavNumberMap = {};
+    
+            this._voiceNavElements = [];
+    
+            this._voiceNavNumbersActive = false;
+    
+            this._removeVoiceNavScrollListener();
+    
+        }
+    
+    
+    
+        _removeVoiceNavScrollListener() {
+    
+            if (this._voiceNavScrollHandler) {
+    
+                try { window.removeEventListener('scroll', this._voiceNavScrollHandler, true); } catch (_) {}
+    
+                try { window.removeEventListener('resize', this._voiceNavScrollHandler); } catch (_) {}
+    
+                this._voiceNavScrollHandler = null;
+    
+            }
+    
+        }
+    
+    
+    
+        _updateVoiceNavBadgePositions() {
+    
+            if (!this._voiceNavNumbersActive || !this._voiceNavElements || !this._voiceNavBadges) return;
+    
+            this._voiceNavElements.forEach((el, i) => {
+    
+                const badge = this._voiceNavBadges[i];
+    
+                if (!el || !badge || !el.isConnected) return;
+    
+                try {
+    
+                    const r = el.getBoundingClientRect();
+    
+                    badge.style.left = `${Math.max(4, Math.round(r.left))}px`;
+    
+                    badge.style.top = `${Math.max(4, Math.round(r.top - 6))}px`;
+    
+                } catch (_) {}
+    
+            });
+    
+        }
+    
+    
+    
+        showVoiceNavNumbers() {
+    
+            this._removeVoiceNavNumberOverlays();
+    
+            const els = this._collectVoiceNavFocusables();
+    
+            this._voiceNavElements = els;
+    
+            this._voiceNavNumberMap = {};
+    
+            this._voiceNavBadges = [];
+    
+            els.forEach((el, idx) => {
+    
+                const n = idx + 1;
+    
+                this._voiceNavNumberMap[n] = el;
+    
+                const b = document.createElement('div');
+    
+                b.className = 'accessbit-vn-badge';
+    
+                b.textContent = String(n);
+    
+                b.setAttribute('aria-hidden', 'true');
+    
+                document.body.appendChild(b);
+    
+                this._voiceNavBadges.push(b);
+    
+            });
+    
+            this._voiceNavNumbersActive = true;
+    
+            this._updateVoiceNavBadgePositions();
+    
+            const self = this;
+    
+            this._voiceNavScrollHandler = function () {
+    
+                if (self._voiceNavScrollRaf) cancelAnimationFrame(self._voiceNavScrollRaf);
+    
+                self._voiceNavScrollRaf = requestAnimationFrame(() => { try { self._updateVoiceNavBadgePositions(); } catch (_) {} });
+    
+            };
+    
+            window.addEventListener('scroll', this._voiceNavScrollHandler, true);
+    
+            window.addEventListener('resize', this._voiceNavScrollHandler);
+    
+            this.speakVoiceNavigation(`${els.length} controls numbered. Say a number or click followed by the number.`);
+    
+            try { this.announceToScreenReader(`${els.length} controls numbered on screen. Say the number to activate.`); } catch (_) {}
+    
+        }
+    
+    
+    
+        activateVoiceNavNumber(num) {
+    
+            const el = this._voiceNavNumberMap && this._voiceNavNumberMap[num];
+    
+            if (!el) {
+    
+                this.speakVoiceNavigation(`No item ${num}. Say show numbers first.`);
+    
+                try { this.announceToScreenReader(`No control number ${num}. Say show numbers.`); } catch (_) {}
+    
+                return;
+    
+            }
+    
+            try {
+    
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+            } catch (_) {}
+    
+            const tag = (el.tagName || '').toLowerCase();
+    
+            try {
+    
+                if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+    
+                    el.focus();
+    
+                } else {
+    
+                    el.focus({ preventScroll: true });
+    
+                    if (typeof el.click === 'function') el.click();
+    
+                }
+    
+            } catch (_) {
+    
+                try { el.click(); } catch (_) {}
+    
+            }
+    
+            this.speakVoiceNavigation(`Activated ${num}`);
+    
+            try { this.announceToScreenReader(`Activated control ${num}`); } catch (_) {}
+    
+        }
+    
+    
+    
+        _hideVoiceNavHelp() {
+    
+            const h = document.getElementById('accessbit-voice-nav-help');
+    
+            if (h) h.remove();
+    
+        }
+    
+    
+    
+        _showVoiceNavHelp() {
+    
+            this._hideVoiceNavHelp();
+    
+            const d = document.createElement('div');
+    
+            d.id = 'accessbit-voice-nav-help';
+    
+            d.setAttribute('role', 'dialog');
+    
+            d.setAttribute('aria-label', 'Voice navigation help');
+    
+            d.innerHTML = '<h2>Voice navigation</h2><p>Say commands clearly. Microphone access is required.</p><div class="accessbit-vn-cmd">Scroll down</div><p>Scroll down, Page down, Go down, or Down.</p><div class="accessbit-vn-cmd">Scroll up</div><p>Scroll up, Page up, Go up, or Up.</p><div class="accessbit-vn-cmd">Show numbers</div><p>Show numbers, Display numbers, Numbers, Generate numbers, See numbers.</p><div class="accessbit-vn-cmd">Activate</div><p>Click 3, Open 5, Press 2, Select 4, Go to 6, Pick 7, or say the number alone.</p><div class="accessbit-vn-cmd">Hide numbers</div><p>Hide numbers, Clear numbers, Remove numbers.</p><div class="accessbit-vn-cmd">Help</div><p>Show help or What can I say.</p><button type="button">Close</button>';
+    
+            const btn = d.querySelector('button');
+    
+            if (btn) btn.addEventListener('click', () => this._hideVoiceNavHelp());
+    
+            document.body.appendChild(d);
+    
+            try { btn && btn.focus(); } catch (_) {}
+    
+        }
+    
+    
+    
+        _handleVoiceNavTranscript(raw) {
+    
+            if (!raw || !this.settings || !this.settings['voice-navigation']) return;
+    
+            const t = String(raw).toLowerCase().replace(/\s+/g, ' ').trim();
+    
+            if (!t) return;
+    
+            if (this._voiceNavLastTranscript === t && Date.now() - (this._voiceNavLastTranscriptTime || 0) < 900) return;
+    
+            this._voiceNavLastTranscript = t;
+    
+            this._voiceNavLastTranscriptTime = Date.now();
+    
+            const helpPhrases = ['show help', 'voice help', 'what can i say', 'commands'];
+    
+            if (helpPhrases.some((p) => t.includes(p))) {
+    
+                this._showVoiceNavHelp();
+    
+                return;
+    
+            }
+    
+            if (t.includes('hide help') || t.includes('close help')) {
+    
+                this._hideVoiceNavHelp();
+    
+                return;
+    
+            }
+    
+            const hideNumPhrases = ['hide numbers', 'clear numbers', 'remove numbers', 'hide labels'];
+    
+            if (hideNumPhrases.some((p) => t.includes(p))) {
+    
+                this._removeVoiceNavNumberOverlays();
+    
+                this.speakVoiceNavigation('Numbers hidden');
+    
+                return;
+    
+            }
+    
+            const showNumPhrases = ['show numbers', 'display numbers', 'generate numbers', 'see numbers'];
+    
+            if (showNumPhrases.some((p) => t.includes(p)) || t === 'numbers') {
+    
+                this.showVoiceNavNumbers();
+    
+                return;
+    
+            }
+    
+            if (['scroll down', 'page down', 'go down'].some((p) => t.includes(p)) || t === 'down') {
+    
+                const dy = Math.round(window.innerHeight * 0.85);
+    
+                try { window.scrollBy({ top: dy, left: 0, behavior: 'smooth' }); } catch (_) { window.scrollBy(0, dy); }
+    
+                this.speakVoiceNavigation('Scrolling down');
+    
+                return;
+    
+            }
+    
+            if (['scroll up', 'page up', 'go up'].some((p) => t.includes(p)) || t === 'up') {
+    
+                const dy = Math.round(window.innerHeight * 0.85);
+    
+                try { window.scrollBy({ top: -dy, left: 0, behavior: 'smooth' }); } catch (_) { window.scrollBy(0, -dy); }
+    
+                this.speakVoiceNavigation('Scrolling up');
+    
+                return;
+    
+            }
+    
+            let numMatch = t.match(/\b(?:click|open|press|select|pick)\s*(\d{1,3})\b/);
+    
+            if (!numMatch) numMatch = t.match(/\bgo\s+to\s*(\d{1,3})\b/);
+    
+            if (!numMatch) numMatch = t.match(/^\s*(\d{1,3})\s*$/);
+    
+            if (numMatch) {
+    
+                const n = parseInt(numMatch[1], 10);
+    
+                if (n >= 1 && n <= 99) this.activateVoiceNavNumber(n);
+    
+            }
+    
+        }
+    
+    
+    
+        _startVoiceNavRecognition(SR) {
+    
+            const self = this;
+    
+            try {
+    
+                if (self._voiceNavRecognition) {
+    
+                    try { self._voiceNavRecognition.stop(); } catch (_) {}
+    
+                }
+    
+            } catch (_) {}
+    
+            const rec = new SR();
+    
+            rec.continuous = true;
+    
+            rec.interimResults = false;
+    
+            rec.lang = navigator.language || 'en-US';
+    
+            rec.onresult = function (event) {
+    
+                let transcript = '';
+    
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+    
+                    transcript += event.results[i][0].transcript;
+    
+                }
+    
+                if (transcript) self._handleVoiceNavTranscript(transcript);
+    
+            };
+    
+            rec.onerror = function (e) {
+    
+                if (e && e.error === 'not-allowed') {
+    
+                    try { self.announceToScreenReader('Microphone blocked. Allow microphone for voice navigation.'); } catch (_) {}
+    
+                    self._voiceNavStopping = true;
+    
+                }
+    
+            };
+    
+            rec.onend = function () {
+    
+                if (!self._voiceNavStopping && self.settings && self.settings['voice-navigation']) {
+    
+                    self._voiceNavRestartTimer = setTimeout(() => {
+    
+                        try {
+    
+                            if (!self._voiceNavStopping && self.settings && self.settings['voice-navigation']) rec.start();
+    
+                        } catch (_) {}
+    
+                    }, 350);
+    
+                }
+    
+            };
+    
+            self._voiceNavRecognition = rec;
+    
+            self._injectVoiceNavUi();
+    
+            self._ensureVoiceNavStatusBar();
+    
+            try {
+    
+                rec.start();
+    
+            } catch (_) {
+    
+                try { self.announceToScreenReader('Could not start voice recognition. Try again or reload the page.'); } catch (_) {}
+    
+            }
+    
+        }
+    
+    
+    
+        _accessbitLandmarkLabel(el) {
+    
+            try {
+    
+                const aria = el.getAttribute && el.getAttribute('aria-label');
+    
+                if (aria && aria.trim()) return aria.trim();
+    
+                const labelledby = el.getAttribute && el.getAttribute('aria-labelledby');
+    
+                if (labelledby) {
+    
+                    const parts = labelledby.split(/\s+/).map((id) => {
+    
+                        const node = document.getElementById(id);
+    
+                        return node ? (node.textContent || '').trim() : '';
+    
+                    }).filter(Boolean);
+    
+                    if (parts.length) return parts.join(' ');
+    
+                }
+    
+            } catch (_) {}
+    
+            return '';
+    
+        }
+    
+    
+    
+        refreshPageStructureList() {
+    
+            if (!this._pageStructureList || !this.settings || !this.settings['page-structure']) return;
+    
+            const list = this._pageStructureList;
+    
+            const widgetSel = '.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, #accessbit-widget-container, #accessbit-page-structure-panel';
+    
+            list.innerHTML = '';
+    
+            const seen = new WeakSet();
+    
+            const addBtn = (label, targetEl) => {
+    
+                if (!targetEl || seen.has(targetEl)) return;
+    
+                seen.add(targetEl);
+    
+                const btn = document.createElement('button');
+    
+                btn.type = 'button';
+    
+                btn.className = 'accessbit-ps-item';
+    
+                btn.setAttribute('role', 'listitem');
+    
+                btn.textContent = label;
+    
+                btn.addEventListener('click', () => {
+    
+                    try {
+    
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+                        try { targetEl.focus({ preventScroll: true }); } catch (_) {}
+    
+                        if (this.settings['voice-navigation']) this.speakVoiceNavigation(label);
+    
+                    } catch (_) {}
+    
+                });
+    
+                list.appendChild(btn);
+    
+            };
+    
+            try {
+    
+                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((h) => {
+    
+                    if (h.closest(widgetSel)) return;
+    
+                    const t = (h.textContent || '').trim();
+    
+                    if (!t) return;
+    
+                    try { if (h.offsetParent === null && !h.getClientRects().length) return; } catch (_) {}
+    
+                    addBtn(`${h.tagName}: ${t.slice(0, 120)}`, h);
+    
+                });
+    
+            } catch (_) {}
+    
+            try {
+    
+                document.querySelectorAll('main, nav, aside, footer, [role="main"], [role="navigation"], [role="complementary"], [role="contentinfo"]').forEach((el) => {
+    
+                    if (el.closest(widgetSel)) return;
+    
+                    try { if (el.offsetParent === null && !el.getClientRects().length) return; } catch (_) {}
+    
+                    const tag = (el.tagName || '').toLowerCase();
+    
+                    const role = el.getAttribute && el.getAttribute('role');
+    
+                    const name = this._accessbitLandmarkLabel(el);
+    
+                    const label = name ? `${role || tag}: ${name.slice(0, 100)}` : `${role || tag} region`;
+    
+                    addBtn(label, el);
+    
+                });
+    
+            } catch (_) {}
+    
+        }
+    
+    
+    
+        enablePageStructure() {
+    
+            if (typeof this.isDesignerMode === 'function' && this.isDesignerMode()) return;
+    
+            this.disablePageStructure();
+    
+            if (!document.getElementById('accessbit-page-structure-css')) {
+    
+                const st = document.createElement('style');
+    
+                st.id = 'accessbit-page-structure-css';
+    
+                st.textContent = `
+    
+                    #accessbit-page-structure-panel { position: fixed; top: 88px; left: 12px; width: min(300px, calc(100vw - 24px)); max-height: min(55vh, 420px); overflow: auto; z-index: 2147483640; background: #fff; border: 2px solid #34A2AB; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); font-family: Archivo, system-ui, sans-serif; font-size: 13px; }
+    
+                    .accessbit-ps-header { padding: 10px 12px; font-weight: 600; background: #EAECF2; border-radius: 10px 10px 0 0; color: #1E2939; }
+    
+                    .accessbit-ps-list { padding: 0; margin: 0; }
+    
+                    .accessbit-ps-item { display: block; width: 100%; text-align: left; padding: 10px 12px; border: none; border-bottom: 1px solid #E5E7EB; background: #fff; cursor: pointer; color: #171a2a; font-size: 13px; line-height: 1.35; }
+    
+                    .accessbit-ps-item:hover, .accessbit-ps-item:focus { background: #D9F8F0; outline: 2px solid #01CE9C; outline-offset: -2px; }
+    
+                    .accessbit-ps-item:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+    
+                `;
+    
+                document.head.appendChild(st);
+    
+            }
+    
+            const wrap = document.createElement('div');
+    
+            wrap.id = 'accessbit-page-structure-panel';
+    
+            wrap.setAttribute('role', 'complementary');
+    
+            wrap.setAttribute('aria-label', 'Page structure outline');
+    
+            const header = document.createElement('div');
+    
+            header.className = 'accessbit-ps-header';
+    
+            header.textContent = 'Page structure';
+    
+            const list = document.createElement('div');
+    
+            list.className = 'accessbit-ps-list';
+    
+            list.setAttribute('role', 'list');
+    
+            wrap.appendChild(header);
+    
+            wrap.appendChild(list);
+    
+            document.body.appendChild(wrap);
+    
+            this._pageStructureList = list;
+    
+            this._pageStructureWrap = wrap;
+    
+            this.refreshPageStructureList();
+    
+            try {
+    
+                this._pageStructureObserver = new MutationObserver((mutations) => {
+    
+                    try {
+    
+                        const touchesPanel = mutations.some((m) => {
+    
+                            const n = m.target;
+    
+                            return n && n.nodeType === 1 && n.closest && n.closest('#accessbit-page-structure-panel');
+    
+                        });
+    
+                        if (touchesPanel) return;
+    
+                    } catch (_) {}
+    
+                    if (this._pageStructureDebounce) clearTimeout(this._pageStructureDebounce);
+    
+                    this._pageStructureDebounce = setTimeout(() => {
+    
+                        try { this.refreshPageStructureList(); } catch (_) {}
+    
+                    }, 200);
+    
+                });
+    
+                this._pageStructureObserver.observe(document.body, { childList: true, subtree: true });
+    
+            } catch (_) {}
+    
+            try { document.body.classList.add('page-structure-active'); } catch (_) {}
+    
+        }
+    
+    
+    
+        disablePageStructure() {
+    
+            try {
+    
+                if (this._pageStructureObserver) {
+    
+                    this._pageStructureObserver.disconnect();
+    
+                    this._pageStructureObserver = null;
+    
+                }
+    
+            } catch (_) {}
+    
+            if (this._pageStructureDebounce) {
+    
+                try { clearTimeout(this._pageStructureDebounce); } catch (_) {}
+    
+                this._pageStructureDebounce = null;
+    
+            }
+    
+            const w = document.getElementById('accessbit-page-structure-panel');
+    
+            if (w) w.remove();
+    
+            this._pageStructureList = null;
+    
+            this._pageStructureWrap = null;
+    
+            try { document.body.classList.remove('page-structure-active'); } catch (_) {}
+    
+        }
+    
+    
+    
         // Useful Links Methods
-
+    
         enableUsefulLinks() {
 
             this.initUsefulLinksSelect();
@@ -20323,9 +21359,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const style = document.createElement('style');
                 style.id = 'ab-colorblind-css';
                 style.textContent = `
-                    .ab-colorblind { filter: contrast(1.1) brightness(1.05) saturate(0.9); }
-                    .ab-colorblind #accessbit-widget-container,
-                    .ab-colorblind #accessbit-widget-container * { filter: none !important; }
+                    .ab-colorblind { filter: contrast(1.04) brightness(1.02) saturate(0.82); }
                 `;
                 document.head.appendChild(style);
             }
@@ -20369,9 +21403,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const style = document.createElement('style');
                 style.id = 'ab-inverted-colors-css';
                 style.textContent = `
-                    body.ab-inverted-colors { filter: invert(1); }
-                    body.ab-inverted-colors #accessbit-widget-container,
-                    body.ab-inverted-colors #accessbit-widget-container * { filter: invert(1) !important; }
+                    html.ab-inverted-colors { filter: invert(1) !important; }
                 `;
                 document.head.appendChild(style);
             }
@@ -20381,6 +21413,61 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.documentElement.classList.remove('ab-inverted-colors');
             document.body.classList.remove('ab-inverted-colors');
             const style = document.getElementById('ab-inverted-colors-css');
+            if (style) style.remove();
+        }
+
+        enableLargeClickableArea() {
+            document.body.classList.add('large-clickable-area');
+            document.documentElement.classList.add('large-clickable-area');
+            if (!document.getElementById('large-clickable-area-css')) {
+                const style = document.createElement('style');
+                style.id = 'large-clickable-area-css';
+                style.textContent = `
+                    /* Increase target size without breaking layout aggressively */
+                    html.large-clickable-area a,
+                    html.large-clickable-area button,
+                    html.large-clickable-area [role="button"],
+                    html.large-clickable-area input[type="button"],
+                    html.large-clickable-area input[type="submit"],
+                    html.large-clickable-area input[type="reset"],
+                    html.large-clickable-area select,
+                    html.large-clickable-area summary,
+                    html.large-clickable-area label,
+                    body.large-clickable-area a,
+                    body.large-clickable-area button,
+                    body.large-clickable-area [role="button"],
+                    body.large-clickable-area input[type="button"],
+                    body.large-clickable-area input[type="submit"],
+                    body.large-clickable-area input[type="reset"],
+                    body.large-clickable-area select,
+                    body.large-clickable-area summary,
+                    body.large-clickable-area label {
+                        min-height: 44px !important;
+                        min-width: 44px !important;
+                        padding-top: max(8px, 0.35em) !important;
+                        padding-bottom: max(8px, 0.35em) !important;
+                        padding-left: max(10px, 0.55em) !important;
+                        padding-right: max(10px, 0.55em) !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    html.large-clickable-area a + a,
+                    html.large-clickable-area button + button,
+                    html.large-clickable-area [role="button"] + [role="button"],
+                    body.large-clickable-area a + a,
+                    body.large-clickable-area button + button,
+                    body.large-clickable-area [role="button"] + [role="button"] {
+                        margin-left: 6px !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        disableLargeClickableArea() {
+            document.body.classList.remove('large-clickable-area');
+            document.documentElement.classList.remove('large-clickable-area');
+            const style = document.getElementById('large-clickable-area-css');
             if (style) style.remove();
         }
 
@@ -20879,13 +21966,13 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 'dark-contrast', 'light-contrast', 'high-saturation', 'low-saturation',
     
-                'readable-font', 'align-center', 'align-left', 'align-right',
+                'readable-font', 'dyslexia-font', 'align-center', 'align-left', 'align-right',
     
                 'big-black-cursor', 'big-white-cursor',
     
                 'content-scaling', 'font-sizing', 'adjust-line-height', 'adjust-letter-spacing',
     
-                'highlight-titles', 'highlight-links', 'adjust-text-colors', 'adjust-title-colors',
+                'highlight-titles', 'highlight-links', 'page-structure', 'voice-navigation', 'adjust-text-colors', 'adjust-title-colors',
     
                 'adjust-bg-colors', 'mute-sound', 'read-mode', 'reading-guide',
     
@@ -20978,6 +22065,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this.removeTitleHighlights();
     
             this.removeLinkHighlights();
+
+            this.disablePageStructure();
+
+            this.disableVoiceNavigation();
     
             
     
@@ -21023,6 +22114,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this.disableCognitiveDisability();
             
             this.disableReadableFont();
+    
+            this.disableDyslexiaFontMode();
     
             
     
@@ -21610,6 +22703,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     this.settings['deuteranopia'] = false;
                     this.saveSettings();
                 }
+            }
+            if (this.settings['color-blind']) {
+                if (this.settings['protanopia']) this.settings['protanopia'] = false;
+                if (this.settings['deuteranopia']) this.settings['deuteranopia'] = false;
+                if (this.settings['tritanopia']) this.settings['tritanopia'] = false;
+                this.saveSettings();
+            }
+            if (this.settings['inverted-colors']) {
+                if (this.settings['protanopia']) this.settings['protanopia'] = false;
+                if (this.settings['deuteranopia']) this.settings['deuteranopia'] = false;
+                if (this.settings['tritanopia']) this.settings['tritanopia'] = false;
+                if (this.settings['color-blind']) this.settings['color-blind'] = false;
+                this.saveSettings();
             }
 
             Object.entries(this.settings).forEach(([feature, enabled]) => {
@@ -26635,6 +27741,105 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (style) style.remove();
         }
 
+        enableDyslexiaFontMode() {
+            if (typeof this.isDesignerMode === 'function' && this.isDesignerMode()) return;
+            this.ensureOpenDyslexicFontImported();
+            this.settings['dyslexia-font'] = true;
+            if (!document.getElementById('dyslexia-font-css')) {
+                const style = document.createElement('style');
+                style.id = 'dyslexia-font-css';
+                style.textContent = `
+                    /* OpenDyslexic sitewide — same stack as Dyslexia Friendly; !important overrides host CSS */
+                    .dyslexia-font h1,
+                    .dyslexia-font h2,
+                    .dyslexia-font h3,
+                    .dyslexia-font h4,
+                    .dyslexia-font h5,
+                    .dyslexia-font h6 {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font p,
+                    .dyslexia-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),
+                    .dyslexia-font li,
+                    .dyslexia-font td,
+                    .dyslexia-font th,
+                    .dyslexia-font label,
+                    .dyslexia-font small,
+                    .dyslexia-font em,
+                    .dyslexia-font strong,
+                    .dyslexia-font b,
+                    .dyslexia-font i,
+                    .dyslexia-font article,
+                    .dyslexia-font blockquote,
+                    .dyslexia-font figcaption,
+                    .dyslexia-font cite,
+                    .dyslexia-font div:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]):not([class*="swiper"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font input,
+                    .dyslexia-font textarea,
+                    .dyslexia-font select,
+                    .dyslexia-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font code,
+                    .dyslexia-font pre,
+                    .dyslexia-font kbd,
+                    .dyslexia-font samp {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font .accessbit-widget,
+                    .dyslexia-font #accessbit-widget,
+                    .dyslexia-font .accessbit-widget-panel,
+                    .dyslexia-font .accessbit-widget-icon,
+                    .dyslexia-font [data-ck-widget],
+                    .dyslexia-font [class*="accessbit"],
+                    .dyslexia-font .accessbit-widget *,
+                    .dyslexia-font #accessbit-widget *,
+                    .dyslexia-font .accessbit-widget-panel * {
+                        font-family: revert !important;
+                    }
+                    .dyslexia-font [class*="slider"],
+                    .dyslexia-font [class*="carousel"],
+                    .dyslexia-font [class*="swiper"],
+                    .dyslexia-font [data-slider],
+                    .dyslexia-font [data-carousel],
+                    .dyslexia-font [id*="slider"],
+                    .dyslexia-font [id*="carousel"],
+                    .dyslexia-font [id*="swiper"],
+                    .dyslexia-font [class*="slider"] *,
+                    .dyslexia-font [class*="carousel"] *,
+                    .dyslexia-font [class*="swiper"] *,
+                    .dyslexia-font [data-slider] *,
+                    .dyslexia-font [data-carousel] * {
+                        font-family: revert !important;
+                    }
+                    .dyslexia-font [class*="icon"],
+                    .dyslexia-font [class*="symbol"],
+                    .dyslexia-font [class*="arrow"],
+                    .dyslexia-font [class*="fa-"],
+                    .dyslexia-font [class*="glyphicon"],
+                    .dyslexia-font [class*="material-icons"],
+                    .dyslexia-font .w-icon-dropdown-toggle,
+                    .dyslexia-font svg * {
+                        font-family: initial !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            this.saveSettings();
+        }
+
+        disableDyslexiaFontMode() {
+            this.settings['dyslexia-font'] = false;
+            const existingStyle = document.getElementById('dyslexia-font-css');
+            if (existingStyle) existingStyle.remove();
+            this.saveSettings();
+        }
+
         _abParseRgb(colorStr) {
             try {
                 if (!colorStr || typeof colorStr !== 'string') return null;
@@ -26765,8 +27970,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const processEl = (el) => {
                     if (!el || el.nodeType !== 1) return;
                     if (processed++ > maxEls) return;
-                    if (el.closest && el.closest('#accessbit-widget-container')) return;
-
                     const cs = window.getComputedStyle(el);
                     if (!cs) return;
 
@@ -26866,11 +28069,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         border-color: #663300 !important;
                     }
 
-                    /* Avoid affecting widget */
-                    .ab-protanopia #accessbit-widget-container,
-                    .ab-protanopia #accessbit-widget-container * {
-                        filter: none !important;
-                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -26882,7 +28080,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 try {
                     const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
                     errors.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('❌')) {
                             el.textContent = `❌ ${t}`;
@@ -26891,7 +28088,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                     const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
                     success.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('✅')) {
                             el.textContent = `✅ ${t}`;
@@ -26973,10 +28169,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         border-color: #bf360c !important;
                     }
 
-                    .ab-deuteranopia #accessbit-widget-container,
-                    .ab-deuteranopia #accessbit-widget-container * {
-                        filter: none !important;
-                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -26987,7 +28179,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 try {
                     const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
                     errors.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('❌')) {
                             el.textContent = `❌ ${t}`;
@@ -26996,7 +28187,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                     const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
                     success.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('✅')) {
                             el.textContent = `✅ ${t}`;
@@ -27077,10 +28267,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         border-color: #4a148c !important;
                     }
 
-                    .ab-tritanopia #accessbit-widget-container,
-                    .ab-tritanopia #accessbit-widget-container * {
-                        filter: none !important;
-                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -27091,7 +28277,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 try {
                     const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
                     errors.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('❌')) {
                             el.textContent = `❌ ${t}`;
@@ -27100,7 +28285,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                     const alerts = Array.from(document.querySelectorAll('[role="alert"]')).slice(0, 200);
                     alerts.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('⚠')) {
                             el.textContent = `⚠ ${t}`;
@@ -27109,7 +28293,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                     const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
                     success.forEach((el) => {
-                        if (el.closest && el.closest('#accessbit-widget-container')) return;
                         const t = (el.textContent || '').trim();
                         if (!t.startsWith('✅')) {
                             el.textContent = `✅ ${t}`;
@@ -35186,7 +36369,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             } else {
 
             }
-            
             // Update action buttons
             const resetBtn = this.shadowRoot?.querySelector('#reset-settings');
             if (resetBtn) {
@@ -35242,7 +36424,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this.updateProfileItem('screen-reader', content.screenReader, content.screenReaderDesc);
             this.updateProfileItem('content-scaling', content.contentScaling, content.contentScalingDesc);
             this.updateProfileItem('readable-font', content.readableFont, content.readableFontDesc);
+            this.updateProfileItem('dyslexia-font', content.dyslexiaFont || this.getTranslation(language, 'dyslexiaFont', 'Dyslexia Font'), content.dyslexiaFontDesc || this.getTranslation(language, 'dyslexiaFontDesc', 'OpenDyslexic on all page text (same font as Dyslexia Friendly)'));
             this.updateProfileItem('highlight-titles', content.highlightTitles, content.highlightTitlesDesc);
+            this.updateProfileItem('page-structure', content.pageStructure, content.pageStructureDesc);
+            this.updateProfileItem('voice-navigation', content.voiceNavigation, content.voiceNavigationDesc);
             this.updateProfileItem('highlight-links', content.highlightLinks, content.highlightLinksDesc);
             this.updateProfileItem('text-magnifier', content.textMagnifier, content.textMagnifierDesc);
             this.updateProfileItem('font-sizing', content.fontSizing, content.fontSizingDesc);
