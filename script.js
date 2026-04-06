@@ -20222,86 +20222,65 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!this._pageStructureList || !this.settings || !this.settings['page-structure']) return;
     
             const list = this._pageStructureList;
-    
+            const tab = this._pageStructureActiveTab || 'headings';
             const widgetSel = '.accessbit-widget-panel, #accessbit-widget-icon, .accessbit-widget-icon, #accessbit-widget-container, #accessbit-page-structure-panel';
-    
+
             list.innerHTML = '';
-    
+
             const seen = new WeakSet();
-    
             const addBtn = (label, targetEl) => {
-    
                 if (!targetEl || seen.has(targetEl)) return;
-    
                 seen.add(targetEl);
-    
+
                 const btn = document.createElement('button');
-    
                 btn.type = 'button';
-    
                 btn.className = 'accessbit-ps-item';
-    
                 btn.setAttribute('role', 'listitem');
-    
                 btn.textContent = label;
-    
                 btn.addEventListener('click', () => {
-    
                     try {
-    
                         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
                         try { targetEl.focus({ preventScroll: true }); } catch (_) {}
-    
                         if (this.settings['voice-navigation']) this.speakVoiceNavigation(label);
-    
                     } catch (_) {}
-    
                 });
-    
                 list.appendChild(btn);
-    
             };
-    
-            try {
-    
-                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((h) => {
-    
-                    if (h.closest(widgetSel)) return;
-    
-                    const t = (h.textContent || '').trim();
-    
-                    if (!t) return;
-    
-                    try { if (h.offsetParent === null && !h.getClientRects().length) return; } catch (_) {}
-    
-                    addBtn(`${h.tagName}: ${t.slice(0, 120)}`, h);
-    
-                });
-    
-            } catch (_) {}
-    
-            try {
-    
-                document.querySelectorAll('main, nav, aside, footer, [role="main"], [role="navigation"], [role="complementary"], [role="contentinfo"]').forEach((el) => {
-    
-                    if (el.closest(widgetSel)) return;
-    
-                    try { if (el.offsetParent === null && !el.getClientRects().length) return; } catch (_) {}
-    
-                    const tag = (el.tagName || '').toLowerCase();
-    
-                    const role = el.getAttribute && el.getAttribute('role');
-    
-                    const name = this._accessbitLandmarkLabel(el);
-    
-                    const label = name ? `${role || tag}: ${name.slice(0, 100)}` : `${role || tag} region`;
-    
-                    addBtn(label, el);
-    
-                });
-    
-            } catch (_) {}
+
+            if (tab === 'headings') {
+                try {
+                    document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((h) => {
+                        if (h.closest(widgetSel)) return;
+                        const t = (h.textContent || '').trim();
+                        if (!t) return;
+                        try { if (h.offsetParent === null && !h.getClientRects().length) return; } catch (_) {}
+                        addBtn(`${h.tagName}: ${t.slice(0, 120)}`, h);
+                    });
+                } catch (_) {}
+            } else if (tab === 'landmarks') {
+                try {
+                    document.querySelectorAll('main, nav, aside, footer, header, [role="main"], [role="navigation"], [role="complementary"], [role="contentinfo"], [role="banner"]').forEach((el) => {
+                        if (el.closest(widgetSel)) return;
+                        try { if (el.offsetParent === null && !el.getClientRects().length) return; } catch (_) {}
+                        const tag = (el.tagName || '').toLowerCase();
+                        const role = el.getAttribute && el.getAttribute('role');
+                        const name = this._accessbitLandmarkLabel(el);
+                        const label = name ? `${role || tag}: ${name.slice(0, 100)}` : `${role || tag} region`;
+                        addBtn(label, el);
+                    });
+                } catch (_) {}
+            } else if (tab === 'links') {
+                try {
+                    document.querySelectorAll('a[href]').forEach((a) => {
+                        if (a.closest(widgetSel)) return;
+                        const t = (a.textContent || '').trim();
+                        const href = a.getAttribute('href') || '';
+                        const label = t ? t.slice(0, 140) : (href ? href.slice(0, 140) : 'Link');
+                        try { if (a.offsetParent === null && !a.getClientRects().length) return; } catch (_) {}
+                        addBtn(label, a);
+                    });
+                } catch (_) {}
+            }
     
         }
     
@@ -20321,17 +20300,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 st.textContent = `
     
-                    #accessbit-page-structure-panel { position: fixed; top: 88px; left: 12px; width: min(300px, calc(100vw - 24px)); max-height: min(55vh, 420px); overflow: auto; z-index: 2147483640; background: #fff; border: 2px solid #34A2AB; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); font-family: Archivo, system-ui, sans-serif; font-size: 13px; }
-    
-                    .accessbit-ps-header { padding: 10px 12px; font-weight: 600; background: #EAECF2; border-radius: 10px 10px 0 0; color: #1E2939; }
-    
+                    #accessbit-page-structure-overlay { position: fixed; inset: 0; z-index: 2147483639; background: rgba(15, 23, 42, 0.35); }
+                    #accessbit-page-structure-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(720px, calc(100vw - 24px)); max-height: min(78vh, 620px); overflow: hidden; z-index: 2147483640; background: #fff; border: 2px solid #34A2AB; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.25); font-family: Archivo, system-ui, sans-serif; font-size: 13px; }
+                    .accessbit-ps-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-weight: 600; background: #1E2939; color: #fff; }
+                    .accessbit-ps-close { appearance: none; border: none; background: transparent; color: #fff; font-size: 18px; line-height: 1; cursor: pointer; padding: 6px 10px; border-radius: 8px; }
+                    .accessbit-ps-close:hover, .accessbit-ps-close:focus { outline: 2px solid #01CE9C; outline-offset: 2px; }
+                    .accessbit-ps-tabs { display: flex; gap: 0; padding: 0; margin: 0; background: #EAECF2; border-bottom: 1px solid #E5E7EB; }
+                    .accessbit-ps-tab { flex: 1; padding: 10px 12px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #1E2939; }
+                    .accessbit-ps-tab[aria-selected="true"] { background: #fff; border-bottom: 2px solid #01CE9C; }
+                    .accessbit-ps-body { overflow: auto; max-height: calc(min(78vh, 620px) - 92px); }
                     .accessbit-ps-list { padding: 0; margin: 0; }
-    
                     .accessbit-ps-item { display: block; width: 100%; text-align: left; padding: 10px 12px; border: none; border-bottom: 1px solid #E5E7EB; background: #fff; cursor: pointer; color: #171a2a; font-size: 13px; line-height: 1.35; }
-    
                     .accessbit-ps-item:hover, .accessbit-ps-item:focus { background: #D9F8F0; outline: 2px solid #01CE9C; outline-offset: -2px; }
-    
-                    .accessbit-ps-item:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+                    .accessbit-ps-item:last-child { border-bottom: none; }
     
                 `;
     
@@ -20339,30 +20320,64 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             }
     
+            const overlay = document.createElement('div');
+            overlay.id = 'accessbit-page-structure-overlay';
+            overlay.addEventListener('click', () => { try { this.disablePageStructure(); } catch (_) {} });
+
             const wrap = document.createElement('div');
-    
             wrap.id = 'accessbit-page-structure-panel';
-    
-            wrap.setAttribute('role', 'complementary');
-    
-            wrap.setAttribute('aria-label', 'Page structure outline');
-    
-            const header = document.createElement('div');
-    
-            header.className = 'accessbit-ps-header';
-    
-            header.textContent = 'Page structure';
-    
+            wrap.setAttribute('role', 'dialog');
+            wrap.setAttribute('aria-label', 'Page structure');
+
+            const topbar = document.createElement('div');
+            topbar.className = 'accessbit-ps-topbar';
+            const title = document.createElement('div');
+            title.textContent = 'Page Structure';
+            const close = document.createElement('button');
+            close.type = 'button';
+            close.className = 'accessbit-ps-close';
+            close.setAttribute('aria-label', 'Close page structure');
+            close.textContent = '×';
+            close.addEventListener('click', () => { try { this.disablePageStructure(); } catch (_) {} });
+            topbar.appendChild(title);
+            topbar.appendChild(close);
+
+            const tabs = document.createElement('div');
+            tabs.className = 'accessbit-ps-tabs';
+            const makeTab = (id, label) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'accessbit-ps-tab';
+                b.dataset.tab = id;
+                b.setAttribute('role', 'tab');
+                b.setAttribute('aria-selected', id === (this._pageStructureActiveTab || 'headings') ? 'true' : 'false');
+                b.textContent = label;
+                b.addEventListener('click', () => {
+                    this._pageStructureActiveTab = id;
+                    try {
+                        tabs.querySelectorAll('.accessbit-ps-tab').forEach((t) => t.setAttribute('aria-selected', t.dataset.tab === id ? 'true' : 'false'));
+                    } catch (_) {}
+                    try { this.refreshPageStructureList(); } catch (_) {}
+                });
+                return b;
+            };
+            if (!this._pageStructureActiveTab) this._pageStructureActiveTab = 'headings';
+            tabs.appendChild(makeTab('headings', 'Headings'));
+            tabs.appendChild(makeTab('landmarks', 'Landmarks'));
+            tabs.appendChild(makeTab('links', 'Links'));
+
+            const body = document.createElement('div');
+            body.className = 'accessbit-ps-body';
             const list = document.createElement('div');
-    
             list.className = 'accessbit-ps-list';
-    
             list.setAttribute('role', 'list');
-    
-            wrap.appendChild(header);
-    
-            wrap.appendChild(list);
-    
+            body.appendChild(list);
+
+            wrap.appendChild(topbar);
+            wrap.appendChild(tabs);
+            wrap.appendChild(body);
+
+            document.body.appendChild(overlay);
             document.body.appendChild(wrap);
     
             this._pageStructureList = list;
@@ -20432,8 +20447,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
     
             const w = document.getElementById('accessbit-page-structure-panel');
-    
             if (w) w.remove();
+            const o = document.getElementById('accessbit-page-structure-overlay');
+            if (o) o.remove();
     
             this._pageStructureList = null;
     
