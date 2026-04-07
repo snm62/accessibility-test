@@ -20285,7 +20285,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             d.setAttribute('aria-label', 'Voice navigation help');
     
-            d.innerHTML = '<h2>Voice navigation</h2><p>Say commands clearly. Microphone access is required.</p><div class="accessbit-vn-cmd">Scroll</div><p>Scroll down/up, page down/up.</p><div class="accessbit-vn-cmd">Numbers</div><p>Show numbers. Click 3. Hide/remove numbers.</p><div class="accessbit-vn-cmd">Activate by label</div><p>Click "Book a meeting", open contact.</p><div class="accessbit-vn-cmd">Forms</div><p>Focus email field. Type john@example.com into email. Clear field. Submit form.</p><div class="accessbit-vn-cmd">Video</div><p>Play video, pause video, mute, unmute, volume up, volume down.</p><div class="accessbit-vn-cmd">Help</div><p>Show help or what can I say.</p><button type="button">Close</button>';
+            d.innerHTML = '<h2>Voice navigation</h2><p>Say commands clearly. Microphone access is required.</p><div class="accessbit-vn-cmd">Scroll</div><p>Scroll down/up, page down/up.</p><div class="accessbit-vn-cmd">Numbers</div><p>Show numbers. Click 3. Hide/remove numbers.</p><div class="accessbit-vn-cmd">Activate by label</div><p>Click "Book a meeting", open contact.</p><div class="accessbit-vn-cmd">Forms</div><p>Focus email field. Type john@example.com into email. Clear field. Submit form.</p><div class="accessbit-vn-cmd">Help</div><p>Show help or what can I say.</p><button type="button">Close</button>';
     
             const btn = d.querySelector('button');
     
