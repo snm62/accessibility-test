@@ -20327,7 +20327,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             const wrap = document.createElement('div');
             wrap.id = 'accessbit-page-structure-panel';
             wrap.setAttribute('role', 'dialog');
+            wrap.setAttribute('aria-modal', 'true');
             wrap.setAttribute('aria-label', 'Page structure');
+            wrap.tabIndex = -1;
 
             const topbar = document.createElement('div');
             topbar.className = 'accessbit-ps-topbar';
@@ -20344,6 +20346,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const tabs = document.createElement('div');
             tabs.className = 'accessbit-ps-tabs';
+            tabs.setAttribute('role', 'tablist');
+            tabs.setAttribute('aria-label', 'Page structure sections');
+            const panelId = 'accessbit-ps-tabpanel';
             const makeTab = (id, label) => {
                 const b = document.createElement('button');
                 b.type = 'button';
@@ -20351,13 +20356,40 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 b.dataset.tab = id;
                 b.setAttribute('role', 'tab');
                 b.setAttribute('aria-selected', id === (this._pageStructureActiveTab || 'headings') ? 'true' : 'false');
+                b.setAttribute('aria-controls', panelId);
+                b.id = `accessbit-ps-tab-${id}`;
                 b.textContent = label;
                 b.addEventListener('click', () => {
                     this._pageStructureActiveTab = id;
                     try {
-                        tabs.querySelectorAll('.accessbit-ps-tab').forEach((t) => t.setAttribute('aria-selected', t.dataset.tab === id ? 'true' : 'false'));
+                        tabs.querySelectorAll('.accessbit-ps-tab').forEach((t) => {
+                            const isActive = t.dataset.tab === id;
+                            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                            t.tabIndex = isActive ? 0 : -1;
+                        });
+                    } catch (_) {}
+                    try {
+                        const panel = document.getElementById(panelId);
+                        if (panel) panel.setAttribute('aria-labelledby', `accessbit-ps-tab-${id}`);
                     } catch (_) {}
                     try { this.refreshPageStructureList(); } catch (_) {}
+                });
+                b.addEventListener('keydown', (e) => {
+                    try {
+                        const key = e.key;
+                        const tabEls = Array.from(tabs.querySelectorAll('.accessbit-ps-tab'));
+                        const idx = tabEls.indexOf(b);
+                        if (idx < 0) return;
+                        let next = idx;
+                        if (key === 'ArrowRight' || key === 'ArrowDown') next = (idx + 1) % tabEls.length;
+                        else if (key === 'ArrowLeft' || key === 'ArrowUp') next = (idx - 1 + tabEls.length) % tabEls.length;
+                        else if (key === 'Home') next = 0;
+                        else if (key === 'End') next = tabEls.length - 1;
+                        else return;
+                        e.preventDefault();
+                        tabEls[next].focus();
+                        tabEls[next].click();
+                    } catch (_) {}
                 });
                 return b;
             };
@@ -20368,6 +20400,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const body = document.createElement('div');
             body.className = 'accessbit-ps-body';
+            body.id = panelId;
+            body.setAttribute('role', 'tabpanel');
+            body.setAttribute('aria-labelledby', `accessbit-ps-tab-${this._pageStructureActiveTab || 'headings'}`);
             const list = document.createElement('div');
             list.className = 'accessbit-ps-list';
             list.setAttribute('role', 'list');
@@ -20379,12 +20414,53 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             document.body.appendChild(overlay);
             document.body.appendChild(wrap);
+            this._pageStructurePreviouslyFocused = document.activeElement;
     
             this._pageStructureList = list;
     
             this._pageStructureWrap = wrap;
+            this._pageStructureCloseBtn = close;
     
             this.refreshPageStructureList();
+            try {
+                tabs.querySelectorAll('.accessbit-ps-tab').forEach((t) => {
+                    const isActive = t.getAttribute('aria-selected') === 'true';
+                    t.tabIndex = isActive ? 0 : -1;
+                });
+            } catch (_) {}
+            try { close.focus(); } catch (_) {}
+
+            // Escape + focus trap for modal dialog behavior
+            this._pageStructureKeydownHandler = (e) => {
+                try {
+                    if (!this._pageStructureWrap || !document.body.contains(this._pageStructureWrap)) return;
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        this.disablePageStructure();
+                        return;
+                    }
+                    if (e.key !== 'Tab') return;
+                    const focusables = Array.from(this._pageStructureWrap.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'))
+                        .filter((el) => {
+                            try {
+                                const cs = window.getComputedStyle(el);
+                                return cs.display !== 'none' && cs.visibility !== 'hidden';
+                            } catch (_) { return true; }
+                        });
+                    if (!focusables.length) return;
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    const active = document.activeElement;
+                    if (e.shiftKey && active === first) {
+                        e.preventDefault();
+                        last.focus();
+                    } else if (!e.shiftKey && active === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                } catch (_) {}
+            };
+            document.addEventListener('keydown', this._pageStructureKeydownHandler, true);
     
             try {
     
@@ -20450,10 +20526,20 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (w) w.remove();
             const o = document.getElementById('accessbit-page-structure-overlay');
             if (o) o.remove();
+            if (this._pageStructureKeydownHandler) {
+                try { document.removeEventListener('keydown', this._pageStructureKeydownHandler, true); } catch (_) {}
+                this._pageStructureKeydownHandler = null;
+            }
     
             this._pageStructureList = null;
     
             this._pageStructureWrap = null;
+            this._pageStructureCloseBtn = null;
+            const prevFocused = this._pageStructurePreviouslyFocused;
+            this._pageStructurePreviouslyFocused = null;
+            if (prevFocused && prevFocused.focus) {
+                try { prevFocused.focus(); } catch (_) {}
+            }
     
             try { document.body.classList.remove('page-structure-active'); } catch (_) {}
     
@@ -27553,10 +27639,13 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         filter: none !important;
                     }
 
-                    /* Stop animations for calmer browsing (same intent as Stop Animations feature) */
-                    html.older-adults *, html.older-adults *::before, html.older-adults *::after,
-                    body.older-adults *, body.older-adults *::before, body.older-adults *::after,
-                    .older-adults *, .older-adults *::before, .older-adults *::after {
+                    /* Stop motion in common animated regions without freezing the whole page */
+                    html.older-adults [data-w-id], html.older-adults [data-w-id]::before, html.older-adults [data-w-id]::after,
+                    body.older-adults [data-w-id], body.older-adults [data-w-id]::before, body.older-adults [data-w-id]::after,
+                    html.older-adults [style*="animation"], html.older-adults [style*="transition"],
+                    body.older-adults [style*="animation"], body.older-adults [style*="transition"],
+                    html.older-adults [class*="lottie"], html.older-adults [class*="swiper"], html.older-adults [class*="slick"], html.older-adults [class*="splide"], html.older-adults [class*="glide"],
+                    body.older-adults [class*="lottie"], body.older-adults [class*="swiper"], body.older-adults [class*="slick"], body.older-adults [class*="splide"], body.older-adults [class*="glide"] {
                         animation: none !important;
                         transition: none !important;
                         scroll-behavior: auto !important;
@@ -27572,6 +27661,28 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 `;
                 document.head.appendChild(style);
             }
+
+            // Some Webflow/GSAP pages keep main wrappers at opacity:0 until an intro animation runs.
+            // Older Adults intentionally disables animations, so we selectively reveal only those
+            // elements that are hidden by opacity but not intentionally hidden by display/visibility.
+            try {
+                const candidates = document.querySelectorAll('[data-w-id], [style*="opacity"], main, section, article, [role="main"]');
+                candidates.forEach((el) => {
+                    try {
+                        const cs = window.getComputedStyle(el);
+                        const hiddenByLayout = cs.display === 'none' || cs.visibility === 'hidden';
+                        const opacity = parseFloat(cs.opacity || '1');
+                        if (!hiddenByLayout && opacity === 0) {
+                            if (!el.hasAttribute('data-ab-older-adults-opacity-fixed')) {
+                                const inlineOpacity = el.style && typeof el.style.opacity === 'string' ? el.style.opacity : '';
+                                el.setAttribute('data-ab-older-adults-prev-opacity', inlineOpacity || '');
+                                el.setAttribute('data-ab-older-adults-opacity-fixed', '1');
+                            }
+                            el.style.opacity = '1';
+                        }
+                    } catch (_) {}
+                });
+            } catch (_) {}
 
             // 2) Reading guide: reuse existing bar + handler, but boost its styling (do not change reading guide code)
             try {
@@ -27703,6 +27814,22 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!readingGuideEnabled) {
                 try { this.disableReadingGuide && this.disableReadingGuide(); } catch (_) {}
             }
+
+            // Restore any inline opacity values we touched while enabling Older Adults.
+            try {
+                document.querySelectorAll('[data-ab-older-adults-opacity-fixed="1"]').forEach((el) => {
+                    try {
+                        const prev = el.getAttribute('data-ab-older-adults-prev-opacity');
+                        if (prev === null || prev === '') {
+                            el.style.removeProperty('opacity');
+                        } else {
+                            el.style.opacity = prev;
+                        }
+                        el.removeAttribute('data-ab-older-adults-prev-opacity');
+                        el.removeAttribute('data-ab-older-adults-opacity-fixed');
+                    } catch (_) {}
+                });
+            } catch (_) {}
         }
 
         ensureOpenDyslexicFontImported() {
@@ -27725,11 +27852,48 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 style.textContent = `
                     html.ab-dyslexia body {
                         font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                        line-height: 1.6 !important;
+                        letter-spacing: 0.04em !important;
+                        word-spacing: 0.12em !important;
+                    }
+                    html.ab-dyslexia p,
+                    html.ab-dyslexia li,
+                    html.ab-dyslexia dt,
+                    html.ab-dyslexia dd,
+                    html.ab-dyslexia blockquote {
+                        line-height: 1.8 !important;
+                        margin-bottom: 1em !important;
+                        max-width: 70ch !important;
+                    }
+                    html.ab-dyslexia h1,
+                    html.ab-dyslexia h2,
+                    html.ab-dyslexia h3,
+                    html.ab-dyslexia h4,
+                    html.ab-dyslexia h5,
+                    html.ab-dyslexia h6 {
+                        line-height: 1.3 !important;
+                        letter-spacing: 0.02em !important;
+                        margin-top: 1em !important;
+                        margin-bottom: 0.5em !important;
+                    }
+                    html.ab-dyslexia p,
+                    html.ab-dyslexia li,
+                    html.ab-dyslexia td,
+                    html.ab-dyslexia th {
+                        text-align: left !important;
+                    }
+                    html.ab-dyslexia a {
+                        text-decoration-thickness: 0.12em !important;
+                        text-underline-offset: 0.18em !important;
                     }
                     /* Keep widget UI unchanged */
                     html.ab-dyslexia #accessbit-widget-container,
                     html.ab-dyslexia #accessbit-widget-container * {
                         font-family: inherit !important;
+                        line-height: normal !important;
+                        letter-spacing: normal !important;
+                        word-spacing: normal !important;
+                        max-width: none !important;
                     }
                 `;
                 document.head.appendChild(style);
@@ -28075,29 +28239,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 document.head.appendChild(style);
             }
 
-            // Optional: add non-color cues to common classes (reversible)
-            if (!this._abProtanopiaCueApplied) {
-                this._abProtanopiaCueApplied = true;
-                this._abProtanopiaCuedEls = this._abProtanopiaCuedEls || [];
-                try {
-                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
-                    errors.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('❌')) {
-                            el.textContent = `❌ ${t}`;
-                            this._abProtanopiaCuedEls.push(el);
-                        }
-                    });
-                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
-                    success.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('✅')) {
-                            el.textContent = `✅ ${t}`;
-                            this._abProtanopiaCuedEls.push(el);
-                        }
-                    });
-                } catch (_) {}
-            }
         }
 
         disableProtanopiaMode() {
@@ -28107,17 +28248,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._abStopColorRemapObserver();
             this._abRestoreInlineColorRemap();
 
-            // Remove cues only if we added them (best-effort)
-            if (this._abProtanopiaCuedEls && this._abProtanopiaCuedEls.length) {
-                this._abProtanopiaCuedEls.forEach((el) => {
-                    try {
-                        const t = (el.textContent || '');
-                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '');
-                    } catch (_) {}
-                });
-            }
-            this._abProtanopiaCuedEls = [];
-            this._abProtanopiaCueApplied = false;
         }
 
         enableDeuteranopiaMode() {
@@ -28175,28 +28305,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 document.head.appendChild(style);
             }
 
-            if (!this._abDeuteranopiaCueApplied) {
-                this._abDeuteranopiaCueApplied = true;
-                this._abDeuteranopiaCuedEls = this._abDeuteranopiaCuedEls || [];
-                try {
-                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
-                    errors.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('❌')) {
-                            el.textContent = `❌ ${t}`;
-                            this._abDeuteranopiaCuedEls.push(el);
-                        }
-                    });
-                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
-                    success.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('✅')) {
-                            el.textContent = `✅ ${t}`;
-                            this._abDeuteranopiaCuedEls.push(el);
-                        }
-                    });
-                } catch (_) {}
-            }
         }
 
         disableDeuteranopiaMode() {
@@ -28206,16 +28314,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._abStopColorRemapObserver();
             this._abRestoreInlineColorRemap();
 
-            if (this._abDeuteranopiaCuedEls && this._abDeuteranopiaCuedEls.length) {
-                this._abDeuteranopiaCuedEls.forEach((el) => {
-                    try {
-                        const t = (el.textContent || '');
-                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '');
-                    } catch (_) {}
-                });
-            }
-            this._abDeuteranopiaCuedEls = [];
-            this._abDeuteranopiaCueApplied = false;
         }
 
         enableTritanopiaMode() {
@@ -28273,36 +28371,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 document.head.appendChild(style);
             }
 
-            if (!this._abTritanopiaCueApplied) {
-                this._abTritanopiaCueApplied = true;
-                this._abTritanopiaCuedEls = this._abTritanopiaCuedEls || [];
-                try {
-                    const errors = Array.from(document.querySelectorAll('.error, .danger, .alert-danger, .text-danger')).slice(0, 200);
-                    errors.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('❌')) {
-                            el.textContent = `❌ ${t}`;
-                            this._abTritanopiaCuedEls.push(el);
-                        }
-                    });
-                    const alerts = Array.from(document.querySelectorAll('[role="alert"]')).slice(0, 200);
-                    alerts.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('⚠')) {
-                            el.textContent = `⚠ ${t}`;
-                            this._abTritanopiaCuedEls.push(el);
-                        }
-                    });
-                    const success = Array.from(document.querySelectorAll('.success, .alert-success, .text-success')).slice(0, 200);
-                    success.forEach((el) => {
-                        const t = (el.textContent || '').trim();
-                        if (!t.startsWith('✅')) {
-                            el.textContent = `✅ ${t}`;
-                            this._abTritanopiaCuedEls.push(el);
-                        }
-                    });
-                } catch (_) {}
-            }
         }
 
         disableTritanopiaMode() {
@@ -28312,16 +28380,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._abStopColorRemapObserver();
             this._abRestoreInlineColorRemap();
 
-            if (this._abTritanopiaCuedEls && this._abTritanopiaCuedEls.length) {
-                this._abTritanopiaCuedEls.forEach((el) => {
-                    try {
-                        const t = (el.textContent || '');
-                        el.textContent = t.replace(/^✅\s+/, '').replace(/^❌\s+/, '').replace(/^⚠\s+/, '');
-                    } catch (_) {}
-                });
-            }
-            this._abTritanopiaCuedEls = [];
-            this._abTritanopiaCueApplied = false;
         }
 
 
