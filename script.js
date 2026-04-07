@@ -19684,6 +19684,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._removeVoiceNavScrollListener();
     
             this._removeVoiceNavNumberOverlays();
+            this._setVoiceNavNumbersPersistent(false);
     
             this._hideVoiceNavHelp();
     
@@ -19814,6 +19815,300 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._removeVoiceNavScrollListener();
     
         }
+
+        _getVoiceNavNumbersPersistenceKey() {
+            return 'accessbit-voice-nav-show-numbers';
+        }
+
+        _setVoiceNavNumbersPersistent(enabled) {
+            try {
+                const key = this._getVoiceNavNumbersPersistenceKey();
+                if (enabled) sessionStorage.setItem(key, '1');
+                else sessionStorage.removeItem(key);
+            } catch (_) {}
+        }
+
+        _isVoiceNavNumbersPersistent() {
+            try {
+                const key = this._getVoiceNavNumbersPersistenceKey();
+                return sessionStorage.getItem(key) === '1';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _getVoiceNavElementName(el) {
+            try {
+                if (!el) return '';
+                const aria = (el.getAttribute && el.getAttribute('aria-label')) || '';
+                if (aria && aria.trim()) return aria.trim();
+                const labelledby = (el.getAttribute && el.getAttribute('aria-labelledby')) || '';
+                if (labelledby) {
+                    const txt = labelledby
+                        .split(/\s+/)
+                        .map((id) => {
+                            const n = document.getElementById(id);
+                            return n ? (n.textContent || '').trim() : '';
+                        })
+                        .filter(Boolean)
+                        .join(' ')
+                        .trim();
+                    if (txt) return txt;
+                }
+                if (el.alt && String(el.alt).trim()) return String(el.alt).trim();
+                if (el.title && String(el.title).trim()) return String(el.title).trim();
+                const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+                if (text) return text;
+                const ph = el.getAttribute && el.getAttribute('placeholder');
+                if (ph && ph.trim()) return ph.trim();
+            } catch (_) {}
+            return '';
+        }
+
+        _activateVoiceNavByLabel(query) {
+            try {
+                const q = String(query || '').toLowerCase().replace(/["'`]/g, '').trim();
+                if (!q) return false;
+                const els = this._collectVoiceNavFocusables();
+                if (!els || !els.length) return false;
+
+                let best = null;
+                let bestScore = -1;
+                els.forEach((el) => {
+                    const name = this._getVoiceNavElementName(el);
+                    if (!name) return;
+                    const n = name.toLowerCase();
+                    let score = -1;
+                    if (n === q) score = 100;
+                    else if (n.startsWith(q)) score = 80;
+                    else if (n.includes(q)) score = 60;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = el;
+                    }
+                });
+                if (!best || bestScore < 0) return false;
+
+                const tag = (best.tagName || '').toLowerCase();
+                try { best.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+                try {
+                    if (tag === 'input' || tag === 'select' || tag === 'textarea') best.focus();
+                    else {
+                        best.focus({ preventScroll: true });
+                        if (typeof best.click === 'function') best.click();
+                    }
+                } catch (_) {
+                    try { best.click(); } catch (_) {}
+                }
+                this.speakVoiceNavigation(`Activated ${this._getVoiceNavElementName(best) || 'item'}`);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _collectVoiceNavFormFields() {
+            try {
+                const exclude = this._getVoiceNavExcludeSelector();
+                const els = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="reset"]):not([type="button"]), textarea, select'))
+                    .filter((el) => {
+                        try {
+                            if (!el || !el.isConnected) return false;
+                            if (el.closest(exclude)) return false;
+                            if (el.disabled || el.getAttribute('aria-hidden') === 'true') return false;
+                            const cs = window.getComputedStyle(el);
+                            if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+                            const r = el.getBoundingClientRect();
+                            return r.width > 1 || r.height > 1;
+                        } catch (_) { return false; }
+                    });
+                return els;
+            } catch (_) {
+                return [];
+            }
+        }
+
+        _getVoiceNavFieldName(el) {
+            try {
+                if (!el) return '';
+                const aria = el.getAttribute && el.getAttribute('aria-label');
+                if (aria && aria.trim()) return aria.trim();
+                const labelledby = el.getAttribute && el.getAttribute('aria-labelledby');
+                if (labelledby) {
+                    const txt = labelledby
+                        .split(/\s+/)
+                        .map((id) => {
+                            const node = document.getElementById(id);
+                            return node ? (node.textContent || '').trim() : '';
+                        })
+                        .filter(Boolean)
+                        .join(' ')
+                        .trim();
+                    if (txt) return txt;
+                }
+                const id = el.id;
+                if (id) {
+                    const l = document.querySelector(`label[for="${id.replace(/"/g, '\\"')}"]`);
+                    if (l) {
+                        const t = (l.textContent || '').trim();
+                        if (t) return t;
+                    }
+                }
+                const ph = el.getAttribute && el.getAttribute('placeholder');
+                if (ph && ph.trim()) return ph.trim();
+                const name = el.getAttribute && el.getAttribute('name');
+                if (name && name.trim()) return name.trim();
+                if (id && id.trim()) return id.trim();
+            } catch (_) {}
+            return '';
+        }
+
+        _focusVoiceNavField(query) {
+            try {
+                const q = String(query || '').toLowerCase().replace(/["'`]/g, '').trim();
+                if (!q) return false;
+                const fields = this._collectVoiceNavFormFields();
+                if (!fields.length) return false;
+                let best = null;
+                let bestScore = -1;
+                fields.forEach((el) => {
+                    const n = this._getVoiceNavFieldName(el).toLowerCase();
+                    if (!n) return;
+                    let score = -1;
+                    if (n === q) score = 100;
+                    else if (n.startsWith(q)) score = 80;
+                    else if (n.includes(q)) score = 60;
+                    if (score > bestScore) { best = el; bestScore = score; }
+                });
+                if (!best) return false;
+                try { best.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+                try { best.focus(); } catch (_) {}
+                this.speakVoiceNavigation(`Focused ${this._getVoiceNavFieldName(best) || 'field'}`);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _typeIntoVoiceNav(text, fieldQuery) {
+            try {
+                const value = String(text || '').trim();
+                if (!value) return false;
+                if (fieldQuery) this._focusVoiceNavField(fieldQuery);
+                const el = document.activeElement;
+                if (!el) return false;
+                const tag = (el.tagName || '').toLowerCase();
+                if (tag === 'select') {
+                    const q = value.toLowerCase();
+                    const opt = Array.from(el.options || []).find((o) => (o.textContent || '').toLowerCase().includes(q) || String(o.value || '').toLowerCase() === q);
+                    if (!opt) return false;
+                    el.value = opt.value;
+                    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                    this.speakVoiceNavigation(`Selected ${opt.textContent || opt.value}`);
+                    return true;
+                }
+                if (tag === 'input' || tag === 'textarea') {
+                    el.value = value;
+                    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                    this.speakVoiceNavigation('Typed');
+                    return true;
+                }
+                return false;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _clearVoiceNavField(fieldQuery) {
+            try {
+                if (fieldQuery) this._focusVoiceNavField(fieldQuery);
+                const el = document.activeElement;
+                if (!el) return false;
+                const tag = (el.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea') {
+                    el.value = '';
+                    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                    this.speakVoiceNavigation('Cleared');
+                    return true;
+                }
+                if (tag === 'select') {
+                    el.selectedIndex = -1;
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+                    this.speakVoiceNavigation('Cleared');
+                    return true;
+                }
+                return false;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _submitVoiceNavForm(query) {
+            try {
+                let form = null;
+                const q = String(query || '').toLowerCase().trim();
+                const active = document.activeElement;
+                if (active && active.form) form = active.form;
+                if (!form && q) {
+                    const forms = Array.from(document.querySelectorAll('form'));
+                    form = forms.find((f) => {
+                        const name = [
+                            f.getAttribute('aria-label') || '',
+                            f.getAttribute('name') || '',
+                            f.getAttribute('id') || ''
+                        ].join(' ').toLowerCase();
+                        return name.includes(q);
+                    }) || null;
+                }
+                if (!form) form = document.querySelector('form');
+                if (!form) return false;
+                const submitEl = form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+                if (submitEl && typeof submitEl.click === 'function') submitEl.click();
+                else if (typeof form.requestSubmit === 'function') form.requestSubmit();
+                else form.submit();
+                this.speakVoiceNavigation('Submitting form');
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        _getVoiceNavVideoTarget() {
+            try {
+                const active = document.activeElement;
+                if (active && active.tagName && String(active.tagName).toLowerCase() === 'video') return active;
+                const vids = Array.from(document.querySelectorAll('video')).filter((v) => {
+                    try {
+                        const cs = window.getComputedStyle(v);
+                        if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+                        const r = v.getBoundingClientRect();
+                        return r.width > 16 && r.height > 16;
+                    } catch (_) { return false; }
+                });
+                return vids[0] || null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        _controlVoiceNavVideo(action) {
+            try {
+                const v = this._getVoiceNavVideoTarget();
+                if (!v) return false;
+                if (action === 'play') { try { v.play && v.play(); } catch (_) {} this.speakVoiceNavigation('Playing video'); return true; }
+                if (action === 'pause') { try { v.pause && v.pause(); } catch (_) {} this.speakVoiceNavigation('Paused video'); return true; }
+                if (action === 'mute') { v.muted = true; this.speakVoiceNavigation('Muted'); return true; }
+                if (action === 'unmute') { v.muted = false; this.speakVoiceNavigation('Unmuted'); return true; }
+                if (action === 'volume-up') { v.volume = Math.min(1, (v.volume || 0) + 0.1); this.speakVoiceNavigation('Volume up'); return true; }
+                if (action === 'volume-down') { v.volume = Math.max(0, (v.volume || 0) - 0.1); this.speakVoiceNavigation('Volume down'); return true; }
+                return false;
+            } catch (_) {
+                return false;
+            }
+        }
     
     
     
@@ -19892,6 +20187,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             });
     
             this._voiceNavNumbersActive = true;
+            this._setVoiceNavNumbersPersistent(true);
     
             this._updateVoiceNavBadgePositions();
     
@@ -19989,7 +20285,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             d.setAttribute('aria-label', 'Voice navigation help');
     
-            d.innerHTML = '<h2>Voice navigation</h2><p>Say commands clearly. Microphone access is required.</p><div class="accessbit-vn-cmd">Scroll down</div><p>Scroll down, Page down, Go down, or Down.</p><div class="accessbit-vn-cmd">Scroll up</div><p>Scroll up, Page up, Go up, or Up.</p><div class="accessbit-vn-cmd">Show numbers</div><p>Show numbers, Display numbers, Numbers, Generate numbers, See numbers.</p><div class="accessbit-vn-cmd">Activate</div><p>Click 3, Open 5, Press 2, Select 4, Go to 6, Pick 7, or say the number alone.</p><div class="accessbit-vn-cmd">Hide numbers</div><p>Hide numbers, Clear numbers, Remove numbers.</p><div class="accessbit-vn-cmd">Help</div><p>Show help or What can I say.</p><button type="button">Close</button>';
+            d.innerHTML = '<h2>Voice navigation</h2><p>Say commands clearly. Microphone access is required.</p><div class="accessbit-vn-cmd">Scroll</div><p>Scroll down/up, page down/up.</p><div class="accessbit-vn-cmd">Numbers</div><p>Show numbers. Click 3. Hide/remove numbers.</p><div class="accessbit-vn-cmd">Activate by label</div><p>Click "Book a meeting", open contact.</p><div class="accessbit-vn-cmd">Forms</div><p>Focus email field. Type john@example.com into email. Clear field. Submit form.</p><div class="accessbit-vn-cmd">Video</div><p>Play video, pause video, mute, unmute, volume up, volume down.</p><div class="accessbit-vn-cmd">Help</div><p>Show help or what can I say.</p><button type="button">Close</button>';
     
             const btn = d.querySelector('button');
     
@@ -20040,6 +20336,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (hideNumPhrases.some((p) => t.includes(p))) {
     
                 this._removeVoiceNavNumberOverlays();
+                this._setVoiceNavNumbersPersistent(false);
     
                 this.speakVoiceNavigation('Numbers hidden');
     
@@ -20080,6 +20377,61 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 return;
     
             }
+
+            // Media controls
+            if (t.includes('play video') || t === 'play') {
+                if (this._controlVoiceNavVideo('play')) return;
+            }
+            if (t.includes('pause video') || t === 'pause') {
+                if (this._controlVoiceNavVideo('pause')) return;
+            }
+            if (t.includes('unmute')) {
+                if (this._controlVoiceNavVideo('unmute')) return;
+            }
+            if (t === 'mute' || t.includes('mute video')) {
+                if (this._controlVoiceNavVideo('mute')) return;
+            }
+            if (t.includes('volume up')) {
+                if (this._controlVoiceNavVideo('volume-up')) return;
+            }
+            if (t.includes('volume down')) {
+                if (this._controlVoiceNavVideo('volume-down')) return;
+            }
+
+            // Form controls
+            const focusMatch = t.match(/^(?:focus|select)\s+(.+?)(?:\s+field)?$/);
+            if (focusMatch && focusMatch[1]) {
+                const ok = this._focusVoiceNavField(focusMatch[1]);
+                if (!ok) this.speakVoiceNavigation(`Couldn't find field ${focusMatch[1]}`);
+                return;
+            }
+
+            const typeIntoMatch = t.match(/^(?:type|enter|fill)\s+(.+?)\s+(?:in|into)\s+(.+)$/);
+            if (typeIntoMatch && typeIntoMatch[1] && typeIntoMatch[2]) {
+                const ok = this._typeIntoVoiceNav(typeIntoMatch[1], typeIntoMatch[2]);
+                if (!ok) this.speakVoiceNavigation('Could not type there');
+                return;
+            }
+            const typeMatch = t.match(/^(?:type|enter|fill)\s+(.+)$/);
+            if (typeMatch && typeMatch[1]) {
+                const ok = this._typeIntoVoiceNav(typeMatch[1]);
+                if (!ok) this.speakVoiceNavigation('Focus a field first');
+                return;
+            }
+
+            const clearMatch = t.match(/^clear(?:\s+(.+))?$/);
+            if (clearMatch) {
+                const ok = this._clearVoiceNavField(clearMatch[1] || '');
+                if (!ok) this.speakVoiceNavigation('Focus a field first');
+                return;
+            }
+
+            const submitMatch = t.match(/^(?:submit|send)(?:\s+form)?(?:\s+(.+))?$/);
+            if (submitMatch) {
+                const ok = this._submitVoiceNavForm(submitMatch[1] || '');
+                if (!ok) this.speakVoiceNavigation('No form found');
+                return;
+            }
     
             let numMatch = t.match(/\b(?:click|open|press|select|pick)\s*(\d{1,3})\b/);
     
@@ -20093,6 +20445,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 if (n >= 1 && n <= 99) this.activateVoiceNavNumber(n);
     
+            }
+
+            // Label-based activation: "click book a meeting", "open contact", "select submit"
+            const labelMatch = t.match(/\b(?:click|open|press|select|pick|go to)\s+(.+)$/);
+            if (labelMatch && labelMatch[1]) {
+                const q = labelMatch[1].trim();
+                if (q && !/^\d{1,3}$/.test(q)) {
+                    const ok = this._activateVoiceNavByLabel(q);
+                    if (!ok) this.speakVoiceNavigation(`Couldn't find ${q}`);
+                }
             }
     
         }
@@ -20170,6 +20532,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             self._injectVoiceNavUi();
     
             self._ensureVoiceNavStatusBar();
+
+            // Persist "show numbers" across navigations until user says hide/remove numbers.
+            try {
+                if (self._isVoiceNavNumbersPersistent()) {
+                    const restore = () => {
+                        try {
+                            if (!self._voiceNavStopping && self.settings && self.settings['voice-navigation']) {
+                                self.showVoiceNavNumbers();
+                            }
+                        } catch (_) {}
+                    };
+                    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                        setTimeout(restore, 120);
+                    } else {
+                        window.addEventListener('load', restore, { once: true });
+                    }
+                }
+            } catch (_) {}
     
             try {
     
@@ -27806,6 +28186,25 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch (_) {}
 
+            // 2.5) Older Adults preset: also apply High Contrast + Text Magnifier
+            // Track what we auto-enabled so we can safely roll it back.
+            this._olderAdultsAutoEnabledHighContrast = false;
+            this._olderAdultsAutoEnabledTextMagnifier = false;
+            try {
+                const userHasHighContrast = !!(this.settings && this.settings['high-contrast']);
+                if (!userHasHighContrast) {
+                    this.enableHighContrast && this.enableHighContrast();
+                    this._olderAdultsAutoEnabledHighContrast = true;
+                }
+            } catch (_) {}
+            try {
+                const userHasTextMagnifier = !!(this.settings && this.settings['text-magnifier']);
+                if (!userHasTextMagnifier) {
+                    this.enableTextMagnifier && this.enableTextMagnifier();
+                    this._olderAdultsAutoEnabledTextMagnifier = true;
+                }
+            } catch (_) {}
+
             // 3) Keep Older Adults mode non-destructive.
             // Avoid heavy slider/IX teardown here because it can collapse page layouts on some sites.
             // We only pause autoplay media and rely on CSS animation/transition disabling above.
@@ -27852,6 +28251,29 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!readingGuideEnabled) {
                 try { this.disableReadingGuide && this.disableReadingGuide(); } catch (_) {}
             }
+
+            // If Older Adults auto-enabled High Contrast/Text Magnifier, disable them
+            // only when user didn't explicitly keep them enabled.
+            try {
+                if (this._olderAdultsAutoEnabledHighContrast) {
+                    const toggle = this.shadowRoot && this.shadowRoot.getElementById('high-contrast');
+                    const userStillWants = !!(this.settings && this.settings['high-contrast']) || !!(toggle && toggle.checked);
+                    if (!userStillWants) {
+                        this.disableHighContrast && this.disableHighContrast();
+                    }
+                }
+                this._olderAdultsAutoEnabledHighContrast = false;
+            } catch (_) {}
+            try {
+                if (this._olderAdultsAutoEnabledTextMagnifier) {
+                    const toggle = this.shadowRoot && this.shadowRoot.getElementById('text-magnifier');
+                    const userStillWants = !!(this.settings && this.settings['text-magnifier']) || !!(toggle && toggle.checked);
+                    if (!userStillWants) {
+                        this.disableTextMagnifier && this.disableTextMagnifier();
+                    }
+                }
+                this._olderAdultsAutoEnabledTextMagnifier = false;
+            } catch (_) {}
 
             // Restore any inline opacity values we touched while enabling Older Adults.
             try {
