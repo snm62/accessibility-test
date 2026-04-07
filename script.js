@@ -27563,16 +27563,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         animation-play-state: paused !important;
                     }
 
-                    /* Stop Webflow interactions (data-w-id) */
-                    html.older-adults [data-w-id],
-                    body.older-adults [data-w-id],
-                    .older-adults [data-w-id] {
-                        animation: none !important;
-                        transition: none !important;
-                        transform: none !important;
-                        opacity: 1 !important;
-                    }
-
                     /* Same as stop-animation: widget container never affected by pause */
                     body.older-adults #accessbit-widget-container,
                     body.older-adults #accessbit-widget-container * {
