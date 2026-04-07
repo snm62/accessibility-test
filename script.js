@@ -27667,14 +27667,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch (_) {}
 
-            // 3) Stop animations: reuse same routines used by Stop Animations feature (without toggling that feature)
-            try { this.stopAnimationLibraries && this.stopAnimationLibraries(); } catch (_) {}
-            try { this.startLottieGSAPPolling && this.startLottieGSAPPolling(); } catch (_) {}
+            // 3) Keep Older Adults mode non-destructive.
+            // Avoid heavy slider/IX teardown here because it can collapse page layouts on some sites.
+            // We only pause autoplay media and rely on CSS animation/transition disabling above.
             try { this.stopAutoplayMedia && this.stopAutoplayMedia(); } catch (_) {}
-            try { this.stopJavaScriptAnimations && this.stopJavaScriptAnimations(); } catch (_) {}
-            try { this.preserveManualSliderNavigation && this.preserveManualSliderNavigation(); } catch (_) {}
-            try { this.stopLottieAnimations && this.stopLottieAnimations(); } catch (_) {}
-            try { this.stopWebflowInteractions && this.stopWebflowInteractions(); } catch (_) {}
         }
 
         disableOlderAdultsMode() {
