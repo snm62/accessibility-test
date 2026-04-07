@@ -5364,6 +5364,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),
                 .accessbit-widget-panel .panel-content .profile-item:has(#color-blind),
                 .accessbit-widget-panel .panel-content .profile-item:has(#inverted-colors),
+                .accessbit-widget-panel .panel-content .profile-item:has(#large-clickable-area),
                 .accessbit-widget-panel .panel-content .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
@@ -5387,6 +5388,7 @@ font-family: Archivo;
                 .accessbit-widget-panel .profile-item:has(#tritanopia),
                 .accessbit-widget-panel .profile-item:has(#color-blind),
                 .accessbit-widget-panel .profile-item:has(#inverted-colors),
+                .accessbit-widget-panel .profile-item:has(#large-clickable-area),
                 .accessbit-widget-panel .profile-item:has(#content-scale-range),
                 .accessbit-widget-panel .profile-item:has(#font-sizing),
                 .accessbit-widget-panel .profile-item:has(#adjust-line-height),
@@ -6557,7 +6559,7 @@ font-family: Archivo;
                 .accessbit-panel-screenshot .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
                 .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
                 .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
-                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon svg circle:first-of-type,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,
                 .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
                 /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
                 @media (min-width: 769px) {
@@ -7378,6 +7380,8 @@ font-family: Archivo;
                 .contrast-style-card .content-card-icon.highlight-titles-icon svg,
                 .contrast-style-card .content-card-icon.highlight-links-icon svg,
                 .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
+                .contrast-style-card .content-card-icon.page-structure-icon svg,
+                .contrast-style-card .content-card-icon.voice-navigation-icon svg { width: 43px !important; height: 43px !important; max-width: 98% !important; max-height: 98% !important; }
                 /* No icons hidden – Highlight Links, Text Magnifier, Text align use ring/icon styling */
                 .contrast-style-card .content-card-icon.text-magnifier-icon { min-width: 43px; min-height: 43px; border: 1px solid rgba(0,0,0,0.12); box-sizing: border-box; }
                 .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px !important; height: 43px !important; min-width: 43px; min-height: 43px; display: block !important; }
@@ -8162,6 +8166,55 @@ font-family: Archivo;
                 .profile-item.screen-reader-on .blind-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
                 .profile-item.screen-reader-on .blind-ring-on { display: block; }
                 .profile-item.screen-reader-on .blind-path { fill: #01CE9C; }
+                .accessbit-widget-panel .profile-item:has(#older-adults) .older-adults-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .oa-ring-on { display: none; }
+                .profile-item.older-adults-on .oa-ring-off { display: none; }
+                .profile-item.older-adults-on .oa-ring-on { display: block; }
+                .profile-item.older-adults-on .oa-stroke { stroke: #01CE9C; }
+                .profile-item.older-adults-on .oa-fill { fill: #01CE9C; }
+                .dfy-ring-on, .dff-ring-on, .prot-ring-on, .deut-ring-on, .trit-ring-on, .cb-ring-on { display: none; }
+                .profile-item.dyslexia-friendly-on .dfy-ring-off { display: none; }
+                .profile-item.dyslexia-friendly-on .dfy-ring-on { display: block; }
+                .profile-item.dyslexia-friendly-on .dfy-stroke { stroke: #01CE9C; }
+                .profile-item.dyslexia-font-on .dff-ring-off { display: none; }
+                .profile-item.dyslexia-font-on .dff-ring-on { display: block; }
+                .profile-item.dyslexia-font-on .dff-stroke { stroke: #01CE9C; }
+                .profile-item.protanopia-on .prot-ring-off { display: none; }
+                .profile-item.protanopia-on .prot-ring-on { display: block; }
+                .profile-item.deuteranopia-on .deut-ring-off { display: none; }
+                .profile-item.deuteranopia-on .deut-ring-on { display: block; }
+                .profile-item.tritanopia-on .trit-ring-off { display: none; }
+                .profile-item.tritanopia-on .trit-ring-on { display: block; }
+                /* Keep color-dot icons unchanged when active */
+                .profile-item .protanopia-icon g circle:first-child,
+                .profile-item .deuteranopia-icon g circle:first-child { fill: #6ABD47 !important; }
+                .profile-item .protanopia-icon g circle:last-child,
+                .profile-item .deuteranopia-icon g circle:last-child { fill: #E8322F !important; }
+                .profile-item .tritanopia-icon g circle:first-child { fill: #E3C10A !important; }
+                .profile-item .tritanopia-icon g circle:last-child { fill: #1047E3 !important; }
+                .profile-item.color-blind-on .cb-ring-off { display: none; }
+                .profile-item.color-blind-on .cb-ring-on { display: block; }
+                .profile-item.color-blind-on .cb-stroke { stroke: #01CE9C; }
+                .profile-item.color-blind-on .cb-fill { fill: #01CE9C; }
+                .inv-ring-on, .lca-ring-on { display: none; }
+                .profile-item.inverted-colors-on .inv-ring-off { display: none; }
+                .profile-item.inverted-colors-on .inv-ring-on { display: block; }
+                .profile-item.inverted-colors-on .inv-stroke { stroke: #01CE9C; }
+                .profile-item.inverted-colors-on .inv-fill { fill: #01CE9C; }
+                .profile-item.large-clickable-area-on .lca-ring-off { display: none; }
+                .profile-item.large-clickable-area-on .lca-ring-on { display: block; }
+                .profile-item.large-clickable-area-on .lca-stroke { stroke: #01CE9C; }
+                .profile-item.large-clickable-area-on .lca-fill { fill: #01CE9C; }
+                .profile-item.page-structure-on .ps-ring-off { display: none; }
+                .profile-item.page-structure-on .ps-ring-on { display: block; }
+                .profile-item.page-structure-on .ps-stroke { stroke: #01CE9C; }
+                .profile-item.page-structure-on .ps-fill { fill: #01CE9C; }
+                .profile-item.voice-navigation-on .vn-ring-off { display: none; }
+                .profile-item.voice-navigation-on .vn-ring-on { display: block; }
+                .profile-item.voice-navigation-on .vn-stroke { stroke: #01CE9C; }
                 /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
                 .profile-item:has(#reduce-motion),
                 .profile-item:has(#vision-impaired),
@@ -8252,7 +8305,7 @@ font-family: Archivo;
                 }
                 .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
                 .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent; background: transparent; }
-                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon svg circle:first-of-type,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,
                 .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
                 .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
                 .profile-item-icon svg {
@@ -8499,6 +8552,7 @@ font-family: Archivo;
                     :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon,
                     .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon {
                         grid-column: 1;
+                        align-self: center !important;
                     }
                     #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
                     :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
@@ -11447,19 +11501,20 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon older-adults-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="older-adults-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="older-adults-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="older-adults-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="older-adults-path" d="" fill="black"/>
+                                <circle class="oa-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="oa-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="oa-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(11,11)">
+                                    <path class="oa-stroke" d="M7.58562 14.2714C11.278 14.2714 14.2713 11.2781 14.2713 7.58571C14.2713 3.89329 11.278 0.899994 7.58562 0.899994C3.8932 0.899994 0.899902 3.89329 0.899902 7.58571C0.899902 11.2781 3.8932 14.2714 7.58562 14.2714Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="oa-stroke" d="M12.7285 12.7285L18.9 18.9" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="oa-fill" d="M5.95284 10.6714H4.5L6.7137 4.5H8.46086L10.6714 10.6714H9.21859L7.61233 5.91027H7.56223L5.95284 10.6714ZM5.86204 8.24565H9.29374V9.26418H5.86204V8.24565Z" fill="black"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Older Adults</h4>
-                                <p>Improve readability and reduce distractions</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Improved readability and visibility for older adults</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11472,19 +11527,23 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon dyslexia-friendly-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="dyslexia-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="dyslexia-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="dyslexia-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="dyslexia-path" d="" fill="black"/>
+                                <circle class="dfy-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="dfy-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="dfy-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(10.5,10.5)">
+                                    <path class="dfy-stroke" d="M1.8335 3.66667C1.8335 3.66667 4.5835 2.75 6.87516 2.75C9.16683 2.75 11.0002 3.66667 11.0002 3.66667C11.0002 3.66667 14.2085 2.75 15.1252 2.75C16.0418 2.75 20.1668 3.66667 20.1668 3.66667V16.5C20.1668 16.5 17.4168 15.5833 15.1252 15.5833C12.8335 15.5833 11.0002 16.5 11.0002 16.5C11.0002 16.5 9.16683 15.5833 6.87516 15.5833C4.5835 15.5833 1.8335 16.5 1.8335 16.5V3.66667Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dfy-stroke" d="M11 3.66667V16.5" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dfy-stroke" d="M5.0415 7.33333C5.95817 7.60833 6.87484 7.60833 7.7915 7.33333" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dfy-stroke" d="M5.0415 10.5417C5.95817 10.8167 6.87484 10.8167 7.7915 10.5417" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dfy-stroke" d="M14.2085 7.33333C15.1252 7.60833 16.0418 7.60833 16.9585 7.33333" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dfy-stroke" d="M14.2085 10.5417C15.1252 10.8167 16.0418 10.8167 16.9585 10.5417" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Dyslexia Friendly</h4>
-                                <p>Use OpenDyslexic font for readability</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Easier text & layout</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11497,19 +11556,21 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon dyslexia-font-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="df-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="df-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="df-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="df-path" d="" fill="black"/>
+                                <circle class="dff-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="dff-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="dff-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(10,10)">
+                                    <path class="dff-stroke" d="M4.7915 18.2083L11.4998 3.83333L18.2082 18.2083" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dff-stroke" d="M7.6665 12.4583H15.3332" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dff-stroke" d="M3.8335 18.2083H7.66683" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="dff-stroke" d="M15.3335 18.2083H19.1668" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Dyslexia Font</h4>
-                                <p>OpenDyslexic on all page text</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Distinct, readable letters</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11522,19 +11583,19 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon protanopia-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="prot-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="prot-path" d="" fill="black"/>
+                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="prot-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="prot-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(8,13.5)">
+                                    <circle cx="18.7057" cy="7.79412" r="7.79412" fill="#6ABD47"/>
+                                    <circle cx="7.79412" cy="7.79412" r="7.79412" fill="#E8322F"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Red-Green (Protanopia)</h4>
-                                <p>Improve color contrast and cues</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Adjust colors for red-light blindness</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11547,19 +11608,19 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon deuteranopia-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="deut-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="deut-path" d="" fill="black"/>
+                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="deut-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="deut-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(8,13.5)">
+                                    <circle cx="18.7057" cy="7.79412" r="7.79412" fill="#6ABD47"/>
+                                    <circle cx="7.79412" cy="7.79412" r="7.79412" fill="#E8322F"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Green-Red (Deuteranopia)</h4>
-                                <p>Blue vs orange cues; easier green distinction</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Adjust colors for reduced green sensitivity</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11572,19 +11633,19 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon tritanopia-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="trit-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="trit-path" d="" fill="black"/>
+                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="trit-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="trit-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(8,13.5)">
+                                    <circle cx="18.7057" cy="7.79412" r="7.79412" fill="#E3C10A"/>
+                                    <circle cx="7.79412" cy="7.79412" r="7.79412" fill="#1047E3"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Blue-Yellow (Tritanopia)</h4>
-                                <p>Red vs purple cues; avoid blue/yellow reliance</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Adjust colors for blue-light sensitivity</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11597,19 +11658,21 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon colorblind-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="cb-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="cb-path" d="" fill="black"/>
+                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="cb-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="cb-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(10.5,10.5)">
+                                    <path class="cb-stroke" d="M0.916504 11C0.916504 11 4.58317 3.66669 10.9998 3.66669C17.4165 3.66669 21.0832 11 21.0832 11C21.0832 11 17.4165 18.3334 10.9998 18.3334C4.58317 18.3334 0.916504 11 0.916504 11Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="cb-stroke" d="M10.9998 14.2084C12.7718 14.2084 14.2082 12.7719 14.2082 11C14.2082 9.22811 12.7718 7.79169 10.9998 7.79169C9.22792 7.79169 7.7915 9.22811 7.7915 11C7.7915 12.7719 9.22792 14.2084 10.9998 14.2084Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="cb-stroke" d="M11 7.79169V14.2084" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="cb-fill" opacity="0.35" d="M10.9998 7.79169C10.1489 7.79169 9.33288 8.12971 8.7312 8.73139C8.12952 9.33307 7.7915 10.1491 7.7915 11C7.7915 11.8509 8.12952 12.667 8.7312 13.2687C9.33288 13.8703 10.1489 14.2084 10.9998 14.2084" fill="black"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Color Blind</h4>
-                                <p>Slight contrast + desaturation; remap red/green/blue/yellow text</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Enhance contrast for color-impaired users</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -11622,23 +11685,52 @@ input:checked + .slider::after {
                     <div class="profile-item">
                         <div class="profile-item-icon invert-colors-icon" aria-hidden="true">
                             <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                <circle class="inv-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                <g transform="translate(15,15)">
-                                    <path class="inv-path" d="" fill="black"/>
+                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="inv-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="inv-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(10,10)">
+                                    <path class="inv-stroke" d="M11.5 20.125C16.2635 20.125 20.125 16.2635 20.125 11.5C20.125 6.73654 16.2635 2.875 11.5 2.875C6.73654 2.875 2.875 6.73654 2.875 11.5C2.875 16.2635 6.73654 20.125 11.5 20.125Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path class="inv-fill" opacity="0.85" d="M11.5 2.875C13.7875 2.875 15.9813 3.7837 17.5988 5.4012C19.2163 7.0187 20.125 9.21251 20.125 11.5C20.125 13.7875 19.2163 15.9813 17.5988 17.5988C15.9813 19.2163 13.7875 20.125 11.5 20.125" fill="black"/>
+                                    <path class="inv-stroke" d="M11.5 2.875V20.125" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                 </g>
                             </svg>
                         </div>
                         <div class="profile-info">
                             <div>
                                 <h4>Inverted Colors</h4>
-                                <p>Completely invert colors (white ↔ black)</p>
-                                <small class="profile-activates-label">&nbsp;</small>
+                                <p>Swap light and dark to reduce eye strain</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="inverted-colors" tabindex="0" aria-label="Inverted Colors - Invert all page colors">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 38: Large Clickable Areas -->
+                    <div class="profile-item">
+                        <div class="profile-item-icon large-clickable-area-icon" aria-hidden="true">
+                            <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="lca-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                <circle class="lca-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                <circle class="lca-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                <g transform="translate(11.5,10.5)">
+                                    <path class="lca-stroke" d="M13.2076 0.899994H4.59221C2.553 0.899994 0.899902 2.5531 0.899902 4.5923V13.2077C0.899902 15.2469 2.553 16.9 4.59221 16.9H13.2076C15.2468 16.9 16.8999 15.2469 16.8999 13.2077V4.5923C16.8999 2.5531 15.2468 0.899994 13.2076 0.899994Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <g clip-path="url(#clip0_lca_custom)">
+                                        <path class="lca-fill" d="M19.8851 16.1563C19.9124 16.0372 19.902 15.9131 19.8551 15.7993C19.8082 15.6856 19.7269 15.5873 19.6211 15.5163L10.2877 9.26635C10.1827 9.19554 10.058 9.15495 9.92872 9.14952C9.79949 9.14409 9.67137 9.17407 9.56001 9.23578C9.44865 9.29749 9.35887 9.38827 9.30164 9.49703C9.24441 9.60579 9.2222 9.72782 9.23773 9.84822L10.5711 20.4732C10.5864 20.595 10.6396 20.7099 10.7241 20.8036C10.8086 20.8972 10.9207 20.9655 11.0462 20.9999C11.1718 21.0342 11.3054 21.0332 11.4304 20.9969C11.5554 20.9606 11.6662 20.8906 11.7491 20.7957L14.1571 18.0357L16.4084 21.4482L17.5424 20.7907L15.3044 17.3982L19.3637 16.637C19.4913 16.6136 19.6087 16.5555 19.7014 16.4701C19.7941 16.3846 19.858 16.2755 19.8851 16.1563ZM11.0462 15.7993C10.2877 16.1563 11.144 16.9549 11.0462 17.0668L11.7117 18.8651L10.7377 11.1045L10.7241 14.8446L11.0462 15.7993Z" fill="black"/>
+                                    </g>
+                                    <defs><clipPath id="clip0_lca_custom"><rect width="14" height="14" fill="white" transform="translate(5.8999 7.89999)"/></clipPath></defs>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <div>
+                                <h4>Large Clickable Areas</h4>
+                                <p>Bigger buttons & links</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="large-clickable-area" tabindex="0" aria-label="Large Clickable Areas - Increase hit area of interactive elements">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -11710,11 +11802,18 @@ input:checked + .slider::after {
                             <div class="card-top">
                                 <div class="content-card-icon page-structure-icon">
                                     <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                        <circle class="ps-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                        <g class="ps-icon-off" transform="translate(11, 13)"><path d="M4 4H15V5.5H4V4ZM4 8.5H20V10H4V8.5ZM4 13H17V14.5H4V13Z" fill="black"/><path d="M2 1.5H19C19.8284 1.5 20.5 2.17157 20.5 3V16C20.5 16.8284 19.8284 17.5 19 17.5H2C1.17157 17.5 0.5 16.8284 0.5 16V3C0.5 2.17157 1.17157 1.5 2 1.5Z" stroke="black" stroke-width="1.2"/></g>
-                                        <g class="ps-icon-on" transform="translate(11, 13)"><path d="M4 4H15V5.5H4V4ZM4 8.5H20V10H4V8.5ZM4 13H17V14.5H4V13Z" fill="#01CE9C"/><path d="M2 1.5H19C19.8284 1.5 20.5 2.17157 20.5 3V16C20.5 16.8284 19.8284 17.5 19 17.5H2C1.17157 17.5 0.5 16.8284 0.5 16V3C0.5 2.17157 1.17157 1.5 2 1.5Z" stroke="#01CE9C" stroke-width="1.2"/></g>
+                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                        <circle class="ps-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                        <circle class="ps-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                        <g transform="translate(10.5,10.5)">
+                                            <path class="ps-stroke" d="M17.4167 1.83334H4.58333C3.57081 1.83334 2.75 2.65415 2.75 3.66667V18.3333C2.75 19.3459 3.57081 20.1667 4.58333 20.1667H17.4167C18.4292 20.1667 19.25 19.3459 19.25 18.3333V3.66667C19.25 2.65415 18.4292 1.83334 17.4167 1.83334Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="ps-stroke" d="M6.4165 5.5H15.5832" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="ps-stroke" d="M6.4165 9.16666H12.8332" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="ps-stroke" d="M9 12.8333H15.5833" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="ps-stroke" d="M9 16.5H12.8333" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="ps-fill" d="M6.41667 13.75C6.92293 13.75 7.33333 13.3396 7.33333 12.8333C7.33333 12.3271 6.92293 11.9167 6.41667 11.9167C5.91041 11.9167 5.5 12.3271 5.5 12.8333C5.5 13.3396 5.91041 13.75 6.41667 13.75Z" fill="black"/>
+                                            <path class="ps-fill" d="M6.41667 17.4167C6.92293 17.4167 7.33333 17.0063 7.33333 16.5C7.33333 15.9937 6.92293 15.5833 6.41667 15.5833C5.91041 15.5833 5.5 15.9937 5.5 16.5C5.5 17.0063 5.91041 17.4167 6.41667 17.4167Z" fill="black"/>
+                                        </g>
                                     </svg>
                                 </div>
                                 <label class="toggle-switch"><input type="checkbox" id="page-structure" tabindex="0" aria-label="Page Structure - Show outline of headings and page regions"><span class="slider"></span></label>
@@ -11725,11 +11824,15 @@ input:checked + .slider::after {
                             <div class="card-top">
                                 <div class="content-card-icon voice-navigation-icon">
                                     <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                        <circle class="vn-ring-on" cx="21.5" cy="21.5" r="19.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
-                                        <g class="vn-icon-off" transform="translate(12, 12)"><path d="M15.5 9.5C15.5 12.5376 13.0376 15 10 15C6.96243 15 4.5 12.5376 4.5 9.5C4.5 6.46243 6.96243 4 10 4C13.0376 4 15.5 6.46243 15.5 9.5Z" stroke="black" stroke-width="1.3"/><path d="M3 11.5V7.5" stroke="black" stroke-width="1.3" stroke-linecap="round"/><path d="M17 11.5V7.5" stroke="black" stroke-width="1.3" stroke-linecap="round"/><path d="M10 15V18" stroke="black" stroke-width="1.3" stroke-linecap="round"/></g>
-                                        <g class="vn-icon-on" transform="translate(12, 12)"><path d="M15.5 9.5C15.5 12.5376 13.0376 15 10 15C6.96243 15 4.5 12.5376 4.5 9.5C4.5 6.46243 6.96243 4 10 4C13.0376 4 15.5 6.46243 15.5 9.5Z" stroke="#01CE9C" stroke-width="1.3"/><path d="M3 11.5V7.5" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/><path d="M17 11.5V7.5" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/><path d="M10 15V18" stroke="#01CE9C" stroke-width="1.3" stroke-linecap="round"/></g>
+                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="21.5" fill="#ECEDED"/>
+                                        <circle class="vn-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
+                                        <circle class="vn-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
+                                        <g transform="translate(10,10)">
+                                            <path class="vn-stroke" d="M14.375 4.79169C14.375 3.20387 13.0878 1.91669 11.5 1.91669C9.91218 1.91669 8.625 3.20387 8.625 4.79169V9.58335C8.625 11.1712 9.91218 12.4584 11.5 12.4584C13.0878 12.4584 14.375 11.1712 14.375 9.58335V4.79169Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="vn-stroke" d="M4.7915 9.58331C4.7915 11.3625 5.49827 13.0688 6.75633 14.3268C8.01439 15.5849 9.72068 16.2916 11.4998 16.2916C13.279 16.2916 14.9853 15.5849 16.2433 14.3268C17.5014 13.0688 18.2082 11.3625 18.2082 9.58331" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="vn-stroke" d="M11.5 16.2917V20.125" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path class="vn-stroke" d="M8.625 20.125H14.375" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </g>
                                     </svg>
                                 </div>
                                 <label class="toggle-switch"><input type="checkbox" id="voice-navigation" tabindex="0" aria-label="Voice Navigation - Control the page with your voice. Requires HTTPS and microphone."><span class="slider"></span></label>
@@ -12139,21 +12242,6 @@ input:checked + .slider::after {
                         </div>
                         <h4>Highlight Hover</h4>
                     </div>
-                    <!-- Module 38: Large Clickable Areas -->
-                    <div class="contrast-style-card profile-item">
-                        <div class="card-top">
-                            <div class="content-card-icon large-clickable-area-icon">
-                                <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="21.5" cy="21.5" r="20.5" fill="#ECEDED"/>
-                                    <circle cx="21.5" cy="21.5" r="20" stroke="black" stroke-opacity="0.1"/>
-                                    <rect x="12" y="12" width="19" height="19" rx="4" stroke="black" stroke-width="2"/>
-                                    <rect x="16" y="16" width="11" height="11" rx="2.5" fill="black"/>
-                                </svg>
-                            </div>
-                            <label class="toggle-switch"><input type="checkbox" id="large-clickable-area" tabindex="0" aria-label="Large Clickable Areas - Increase hit area of interactive elements"><span class="slider"></span></label>
-                        </div>
-                        <h4>Large Clickable Areas</h4>
-                    </div>
                         </div>
                     </div>
                     <!-- Module 32: Useful Links -->
@@ -12373,7 +12461,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                     dyslexiaFont: "Dyslexia Font",
     
-                    dyslexiaFontDesc: "OpenDyslexic on all page text (same font as Dyslexia Friendly)",
+                    dyslexiaFontDesc: "Distinct, readable letters",
     
                     highlightTitles: "Highlight Titles",
     
@@ -14960,7 +15048,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
                         if (title) title.textContent = this.getTranslation(langCode, 'dyslexiaFont', 'Dyslexia Font');
     
-                        if (desc) desc.textContent = this.getTranslation(langCode, 'dyslexiaFontDesc', 'OpenDyslexic on all page text (same font as Dyslexia Friendly)');
+                        if (desc) desc.textContent = this.getTranslation(langCode, 'dyslexiaFontDesc', 'Distinct, readable letters');
     
                         break;
     
@@ -36944,7 +37032,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this.updateProfileItem('screen-reader', content.screenReader, content.screenReaderDesc);
             this.updateProfileItem('content-scaling', content.contentScaling, content.contentScalingDesc);
             this.updateProfileItem('readable-font', content.readableFont, content.readableFontDesc);
-            this.updateProfileItem('dyslexia-font', content.dyslexiaFont || this.getTranslation(language, 'dyslexiaFont', 'Dyslexia Font'), content.dyslexiaFontDesc || this.getTranslation(language, 'dyslexiaFontDesc', 'OpenDyslexic on all page text (same font as Dyslexia Friendly)'));
+            this.updateProfileItem('dyslexia-font', content.dyslexiaFont || this.getTranslation(language, 'dyslexiaFont', 'Dyslexia Font'), content.dyslexiaFontDesc || this.getTranslation(language, 'dyslexiaFontDesc', 'Distinct, readable letters'));
             this.updateProfileItem('highlight-titles', content.highlightTitles, content.highlightTitlesDesc);
             this.updateProfileItem('page-structure', content.pageStructure, content.pageStructureDesc);
             this.updateProfileItem('voice-navigation', content.voiceNavigation, content.voiceNavigationDesc);
