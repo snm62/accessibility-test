@@ -22031,53 +22031,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const style = document.createElement('style');
                 style.id = 'large-clickable-area-css';
                 style.textContent = `
-                    /* Increase clickable hit-area without changing visual size/layout */
-                    html.large-clickable-area a,
-                    html.large-clickable-area button,
-                    html.large-clickable-area [role="button"],
-                    html.large-clickable-area input[type="button"],
-                    html.large-clickable-area input[type="submit"],
-                    html.large-clickable-area input[type="reset"],
-                    html.large-clickable-area select,
-                    html.large-clickable-area summary,
-                    html.large-clickable-area label,
-                    body.large-clickable-area a,
-                    body.large-clickable-area button,
-                    body.large-clickable-area [role="button"],
-                    body.large-clickable-area input[type="button"],
-                    body.large-clickable-area input[type="submit"],
-                    body.large-clickable-area input[type="reset"],
-                    body.large-clickable-area select,
-                    body.large-clickable-area summary,
-                    body.large-clickable-area label {
-                        position: relative !important;
-                    }
-
-                    html.large-clickable-area a::before,
-                    html.large-clickable-area button::before,
-                    html.large-clickable-area [role="button"]::before,
-                    html.large-clickable-area input[type="button"]::before,
-                    html.large-clickable-area input[type="submit"]::before,
-                    html.large-clickable-area input[type="reset"]::before,
-                    html.large-clickable-area select::before,
-                    html.large-clickable-area summary::before,
-                    html.large-clickable-area label::before,
-                    body.large-clickable-area a::before,
-                    body.large-clickable-area button::before,
-                    body.large-clickable-area [role="button"]::before,
-                    body.large-clickable-area input[type="button"]::before,
-                    body.large-clickable-area input[type="submit"]::before,
-                    body.large-clickable-area input[type="reset"]::before,
-                    body.large-clickable-area select::before,
-                    body.large-clickable-area summary::before,
-                    body.large-clickable-area label::before {
-                        content: "";
-                        position: absolute;
-                        top: -8px;
-                        right: -8px;
-                        bottom: -8px;
-                        left: -8px;
-                        pointer-events: none;
+                    /* Increase hit area of controls while preserving layout as much as possible */
+                    html.large-clickable-area :where(a[href], button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], summary, label):not(#accessbit-widget-container *),
+                    body.large-clickable-area :where(a[href], button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], summary, label):not(#accessbit-widget-container *) {
+                        min-height: 44px !important;
+                        min-width: 44px !important;
+                        padding-top: max(6px, 0.3em) !important;
+                        padding-bottom: max(6px, 0.3em) !important;
+                        padding-left: max(8px, 0.45em) !important;
+                        padding-right: max(8px, 0.45em) !important;
+                        box-sizing: border-box !important;
                     }
                 `;
                 document.head.appendChild(style);
