@@ -22036,11 +22036,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     body.large-clickable-area :where(a[href], button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], summary, label):not(#accessbit-widget-container *) {
                         min-height: 44px !important;
                         min-width: 44px !important;
-                        padding-top: max(6px, 0.3em) !important;
-                        padding-bottom: max(6px, 0.3em) !important;
-                        padding-left: max(8px, 0.45em) !important;
-                        padding-right: max(8px, 0.45em) !important;
-                        box-sizing: border-box !important;
                     }
                 `;
                 document.head.appendChild(style);
