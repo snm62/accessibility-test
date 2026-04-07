@@ -22031,7 +22031,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const style = document.createElement('style');
                 style.id = 'large-clickable-area-css';
                 style.textContent = `
-                    /* Increase target size without breaking layout aggressively */
+                    /* Increase clickable hit-area without changing visual size/layout */
                     html.large-clickable-area a,
                     html.large-clickable-area button,
                     html.large-clickable-area [role="button"],
@@ -22050,22 +22050,34 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     body.large-clickable-area select,
                     body.large-clickable-area summary,
                     body.large-clickable-area label {
-                        min-height: 44px !important;
-                        min-width: 44px !important;
-                        padding-top: max(8px, 0.35em) !important;
-                        padding-bottom: max(8px, 0.35em) !important;
-                        padding-left: max(10px, 0.55em) !important;
-                        padding-right: max(10px, 0.55em) !important;
-                        line-height: 1.25 !important;
+                        position: relative !important;
                     }
 
-                    html.large-clickable-area a + a,
-                    html.large-clickable-area button + button,
-                    html.large-clickable-area [role="button"] + [role="button"],
-                    body.large-clickable-area a + a,
-                    body.large-clickable-area button + button,
-                    body.large-clickable-area [role="button"] + [role="button"] {
-                        margin-left: 6px !important;
+                    html.large-clickable-area a::before,
+                    html.large-clickable-area button::before,
+                    html.large-clickable-area [role="button"]::before,
+                    html.large-clickable-area input[type="button"]::before,
+                    html.large-clickable-area input[type="submit"]::before,
+                    html.large-clickable-area input[type="reset"]::before,
+                    html.large-clickable-area select::before,
+                    html.large-clickable-area summary::before,
+                    html.large-clickable-area label::before,
+                    body.large-clickable-area a::before,
+                    body.large-clickable-area button::before,
+                    body.large-clickable-area [role="button"]::before,
+                    body.large-clickable-area input[type="button"]::before,
+                    body.large-clickable-area input[type="submit"]::before,
+                    body.large-clickable-area input[type="reset"]::before,
+                    body.large-clickable-area select::before,
+                    body.large-clickable-area summary::before,
+                    body.large-clickable-area label::before {
+                        content: "";
+                        position: absolute;
+                        top: -8px;
+                        right: -8px;
+                        bottom: -8px;
+                        left: -8px;
+                        pointer-events: none;
                     }
                 `;
                 document.head.appendChild(style);
