@@ -22031,7 +22031,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const style = document.createElement('style');
                 style.id = 'large-clickable-area-css';
                 style.textContent = `
-                    /* Controls + button-styled links only—do not set min-height on every a[href] or nav text links stretch the whole bar */
+                    /* Proportional enlargement for button-like controls only; avoid stretching plain nav text links */
                     html.large-clickable-area :where(
                         button,
                         [role="button"],
@@ -22041,7 +22041,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         input[type="image"],
                         a.w-button,
                         a.button,
-                        a.btn
+                        a.btn,
+                        a[class*="button"],
+                        a[class*="btn"]
                     ):not(#accessbit-widget-container *),
                     body.large-clickable-area :where(
                         button,
@@ -22052,21 +22054,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         input[type="image"],
                         a.w-button,
                         a.button,
-                        a.btn
+                        a.btn,
+                        a[class*="button"],
+                        a[class*="btn"]
                     ):not(#accessbit-widget-container *) {
-                        box-sizing: border-box !important;
                         min-height: 44px !important;
                         min-width: 44px !important;
-                        padding-block: max(0.375em, 6px) !important;
-                        padding-inline: max(0.625em, 10px) !important;
+                        transform: scale(1.06);
+                        transform-origin: center center;
                     }
                     html.large-clickable-area :where(summary):not(#accessbit-widget-container *),
                     body.large-clickable-area :where(summary):not(#accessbit-widget-container *) {
                         min-height: 44px !important;
                         min-width: 44px !important;
-                        box-sizing: border-box !important;
-                        padding-block: max(0.25em, 4px) !important;
-                        padding-inline: max(0.5em, 8px) !important;
                     }
                 `;
                 document.head.appendChild(style);
