@@ -20228,7 +20228,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             list.innerHTML = '';
 
             const seen = new WeakSet();
-            const addBtn = (label, targetEl) => {
+            const addBtn = (label, targetEl, mode = 'default') => {
                 if (!targetEl || seen.has(targetEl)) return;
                 seen.add(targetEl);
 
@@ -20239,8 +20239,46 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 btn.textContent = label;
                 btn.addEventListener('click', () => {
                     try {
-                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        try { targetEl.focus({ preventScroll: true }); } catch (_) {}
+                        if (mode === 'link' && targetEl.tagName === 'A') {
+                            const rawHref = (targetEl.getAttribute('href') || '').trim();
+                            const href = targetEl.href || rawHref;
+                            // Close panel first so navigation is not visually blocked.
+                            try { this.disablePageStructure(); } catch (_) {}
+
+                            if (!rawHref || rawHref === '#') {
+                                // No navigable target; keep previous behavior.
+                                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                try { targetEl.focus({ preventScroll: true }); } catch (_) {}
+                            } else if (rawHref.startsWith('#')) {
+                                // In-page anchor navigation.
+                                try {
+                                    const id = rawHref.slice(1);
+                                    const anchorTarget = id ? document.getElementById(id) : null;
+                                    if (anchorTarget) {
+                                        anchorTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        try { anchorTarget.focus({ preventScroll: true }); } catch (_) {}
+                                    }
+                                    window.location.hash = rawHref;
+                                } catch (_) {}
+                            } else if (!/^javascript:/i.test(rawHref)) {
+                                // Trigger native click first (preserves handlers/target attributes).
+                                let navigated = false;
+                                try {
+                                    targetEl.click();
+                                    navigated = true;
+                                } catch (_) {}
+                                if (!navigated && href) {
+                                    if (targetEl.target === '_blank') {
+                                        window.open(href, '_blank', 'noopener,noreferrer');
+                                    } else {
+                                        window.location.assign(href);
+                                    }
+                                }
+                            }
+                        } else {
+                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            try { targetEl.focus({ preventScroll: true }); } catch (_) {}
+                        }
                         if (this.settings['voice-navigation']) this.speakVoiceNavigation(label);
                     } catch (_) {}
                 });
@@ -20277,7 +20315,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         const href = a.getAttribute('href') || '';
                         const label = t ? t.slice(0, 140) : (href ? href.slice(0, 140) : 'Link');
                         try { if (a.offsetParent === null && !a.getClientRects().length) return; } catch (_) {}
-                        addBtn(label, a);
+                        addBtn(label, a, 'link');
                     });
                 } catch (_) {}
             }
