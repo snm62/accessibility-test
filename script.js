@@ -11612,8 +11612,8 @@ input:checked + .slider::after {
                                 <circle class="deut-ring-off" cx="21.5" cy="21.5" r="21" stroke="black" stroke-opacity="0.1"/>
                                 <circle class="deut-ring-on" cx="21.5" cy="21.5" r="20.5" fill="#D9F8F0" stroke="#01CE9C" stroke-width="2"/>
                                 <g transform="translate(8,13.5)">
-                                    <circle cx="18.7057" cy="7.79412" r="7.79412" fill="#6ABD47"/>
-                                    <circle cx="7.79412" cy="7.79412" r="7.79412" fill="#E8322F"/>
+                                    <circle cx="7.79412" cy="7.79412" r="7.79412" transform="matrix(-1 0 0 1 15.5884 0)" fill="#6ABD47"/>
+                                    <circle cx="7.79412" cy="7.79412" r="7.79412" transform="matrix(-1 0 0 1 26.5 0)" fill="#E8322F"/>
                                 </g>
                             </svg>
                         </div>
@@ -20682,6 +20682,76 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             return '';
     
         }
+
+        _getPageStructureNavPersistenceKey() {
+            return 'accessbit-page-structure-nav-intent';
+        }
+
+        _setPageStructureNavIntent(payload) {
+            try {
+                sessionStorage.setItem(this._getPageStructureNavPersistenceKey(), JSON.stringify(payload));
+            } catch (_) {}
+        }
+
+        _clearPageStructureNavIntent() {
+            try {
+                sessionStorage.removeItem(this._getPageStructureNavPersistenceKey());
+            } catch (_) {}
+        }
+
+        /** Read intent after a full navigation; drop stale entries (e.g. SPA same-URL). */
+        _consumePageStructureNavIntent() {
+            try {
+                const key = this._getPageStructureNavPersistenceKey();
+                const raw = sessionStorage.getItem(key);
+                if (!raw) return null;
+                const o = JSON.parse(raw);
+                try { sessionStorage.removeItem(key); } catch (_) {}
+                if (o && o.sourcePage && o.sourcePage === window.location.href) {
+                    return null;
+                }
+                if (o && o.tab && !['headings', 'landmarks', 'links'].includes(o.tab)) {
+                    o.tab = 'headings';
+                }
+                return o;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        _applyPageStructurePendingHighlight() {
+            const href = this._pageStructurePendingHighlightHref;
+            this._pageStructurePendingHighlightHref = null;
+            if (!href || !this._pageStructureList) return null;
+            const norm = (u) => {
+                try {
+                    const x = new URL(u, window.location.href);
+                    return x.href.replace(/\/$/, '');
+                } catch (_) {
+                    return String(u || '').replace(/\/$/, '');
+                }
+            };
+            const want = norm(href);
+            const items = Array.from(this._pageStructureList.querySelectorAll('.accessbit-ps-item[data-ps-href]'));
+            let matched = items.find((btn) => norm(btn.getAttribute('data-ps-href') || '') === want);
+            if (!matched) {
+                matched = items.find((btn) => (btn.getAttribute('data-ps-href') || '') === href);
+            }
+            if (matched) {
+                try {
+                    this._pageStructureList.querySelectorAll('.accessbit-ps-item-active').forEach((el) => {
+                        el.classList.remove('accessbit-ps-item-active');
+                        el.removeAttribute('aria-current');
+                    });
+                } catch (_) {}
+                matched.classList.add('accessbit-ps-item-active');
+                matched.setAttribute('aria-current', 'true');
+                try { matched.scrollIntoView({ block: 'nearest' }); } catch (_) {}
+                try { matched.focus(); } catch (_) {}
+                return matched;
+            }
+            return null;
+        }
     
     
     
@@ -20705,19 +20775,26 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 btn.className = 'accessbit-ps-item';
                 btn.setAttribute('role', 'listitem');
                 btn.textContent = label;
+                if (mode === 'link') {
+                    try {
+                        if (targetEl.href) btn.setAttribute('data-ps-href', targetEl.href);
+                    } catch (_) {}
+                }
                 btn.addEventListener('click', () => {
                     try {
                         if (mode === 'link' && targetEl.tagName === 'A') {
                             const rawHref = (targetEl.getAttribute('href') || '').trim();
                             const href = targetEl.href || rawHref;
-                            // Close panel first so navigation is not visually blocked.
-                            try { this.disablePageStructure(); } catch (_) {}
+                            const closePanel = (keepNavIntent) => {
+                                try { this.disablePageStructure(keepNavIntent); } catch (_) {}
+                            };
 
                             if (!rawHref || rawHref === '#') {
-                                // No navigable target; keep previous behavior.
+                                closePanel(false);
                                 targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 try { targetEl.focus({ preventScroll: true }); } catch (_) {}
                             } else if (rawHref.startsWith('#')) {
+                                closePanel(false);
                                 // In-page anchor navigation.
                                 try {
                                     const id = rawHref.slice(1);
@@ -20729,6 +20806,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                                     window.location.hash = rawHref;
                                 } catch (_) {}
                             } else if (!/^javascript:/i.test(rawHref)) {
+                                try {
+                                    this._setPageStructureNavIntent({
+                                        tab: this._pageStructureActiveTab || 'headings',
+                                        highlightHref: targetEl.href || href || '',
+                                        sourcePage: window.location.href
+                                    });
+                                } catch (_) {}
+                                closePanel(true);
                                 // Trigger native click first (preserves handlers/target attributes).
                                 let navigated = false;
                                 try {
@@ -20795,8 +20880,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
         enablePageStructure() {
     
             if (typeof this.isDesignerMode === 'function' && this.isDesignerMode()) return;
+
+            const navIntent = this._consumePageStructureNavIntent();
+            if (navIntent && navIntent.tab && ['headings', 'landmarks', 'links'].includes(navIntent.tab)) {
+                this._pageStructureActiveTab = navIntent.tab;
+            }
+            this._pageStructurePendingHighlightHref = (navIntent && navIntent.highlightHref) ? String(navIntent.highlightHref) : null;
     
-            this.disablePageStructure();
+            this.disablePageStructure(true);
     
             if (!document.getElementById('accessbit-page-structure-css')) {
     
@@ -20818,6 +20909,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     .accessbit-ps-list { padding: 0; margin: 0; }
                     .accessbit-ps-item { display: block; width: 100%; text-align: left; padding: 10px 12px; border: none; border-bottom: 1px solid #E5E7EB; background: #fff; cursor: pointer; color: #171a2a; font-size: 13px; line-height: 1.35; }
                     .accessbit-ps-item:hover, .accessbit-ps-item:focus { background: #D9F8F0; outline: 2px solid #01CE9C; outline-offset: -2px; }
+                    .accessbit-ps-item.accessbit-ps-item-active { background: #c5f0e6; box-shadow: inset 0 0 0 2px #01CE9C; }
                     .accessbit-ps-item:last-child { border-bottom: none; }
     
                 `;
@@ -20828,7 +20920,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             const overlay = document.createElement('div');
             overlay.id = 'accessbit-page-structure-overlay';
-            overlay.addEventListener('click', () => { try { this.disablePageStructure(); } catch (_) {} });
+            overlay.addEventListener('click', () => { try { this.disablePageStructure(false); } catch (_) {} });
 
             const wrap = document.createElement('div');
             wrap.id = 'accessbit-page-structure-panel';
@@ -20846,7 +20938,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             close.className = 'accessbit-ps-close';
             close.setAttribute('aria-label', 'Close page structure');
             close.textContent = '×';
-            close.addEventListener('click', () => { try { this.disablePageStructure(); } catch (_) {} });
+            close.addEventListener('click', () => { try { this.disablePageStructure(false); } catch (_) {} });
             topbar.appendChild(title);
             topbar.appendChild(close);
 
@@ -20928,13 +21020,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             this._pageStructureCloseBtn = close;
     
             this.refreshPageStructureList();
+            const highlighted = this._applyPageStructurePendingHighlight();
             try {
                 tabs.querySelectorAll('.accessbit-ps-tab').forEach((t) => {
                     const isActive = t.getAttribute('aria-selected') === 'true';
                     t.tabIndex = isActive ? 0 : -1;
                 });
             } catch (_) {}
-            try { close.focus(); } catch (_) {}
+            try {
+                if (!highlighted) close.focus();
+            } catch (_) {}
 
             // Escape + focus trap for modal dialog behavior
             this._pageStructureKeydownHandler = (e) => {
@@ -20942,7 +21037,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     if (!this._pageStructureWrap || !document.body.contains(this._pageStructureWrap)) return;
                     if (e.key === 'Escape') {
                         e.preventDefault();
-                        this.disablePageStructure();
+                        this.disablePageStructure(false);
                         return;
                     }
                     if (e.key !== 'Tab') return;
@@ -21006,7 +21101,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     
     
-        disablePageStructure() {
+        disablePageStructure(keepNavIntent = false) {
+    
+            if (!keepNavIntent) {
+                try { this._clearPageStructureNavIntent(); } catch (_) {}
+            }
     
             try {
     
