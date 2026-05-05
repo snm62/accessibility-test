@@ -1539,7 +1539,22 @@ class AccessibilityWidget {
                 }
                 
                 const paymentData = await response.json();
-                
+
+                // After a domain transfer, customDomain in the customer record points to
+                // the NEW domain. If it doesn't match the current hostname the widget must
+                // hide on the old domain — without deleting anything from KV.
+                if (paymentData && paymentData.customDomain) {
+                    const recordDomain = paymentData.customDomain
+                        .replace(/^https?:\/\//, '')
+                        .replace(/\/$/, '')
+                        .replace(/^www\./, '')
+                        .toLowerCase();
+                    const currentHost = host.replace(/^www\./, '').toLowerCase();
+                    if (recordDomain && recordDomain !== currentHost) {
+                        return false; // This domain's license was transferred away
+                    }
+                }
+
                 return this.processPaymentResponse(paymentData);
                 
             } catch (error) {
