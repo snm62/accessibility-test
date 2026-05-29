@@ -199,8 +199,13 @@ const seizureState = {
 };
 // Universal Stop Motion helper: CSS + Lottie + GSAP + GIF/APNG handling
 
-                    const applyWAAPIStopMotion = function(_enabled) {};
-seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
+                    // No-op: do not pause WAAPI or stop Lottie/GSAP – keeps user animations visible
+                    const applyWAAPIStopMotion = function(_enabled) {
+                        if (isDesignerModeStandalone()) return;
+                        /* REMOVED: WAAPI pause, Lottie stop, GSAP kill – was making animations invisible */
+                    };
+                    
+                    seizureState.applyWAAPIStopMotion = applyWAAPIStopMotion;
 
 function applyUniversalStopMotion(enabled) {
     // CRITICAL: Don't manipulate Designer DOM
@@ -2064,7 +2069,8 @@ class AccessibilityWidget {
     
             
     
-            if (icon) {
+            if (icon && !icon._ab_bound) {
+                icon._ab_bound = true;
                
                 // Click event
                 icon.addEventListener('click', (e) => {
@@ -4270,7 +4276,31 @@ font-family: Archivo;
     
     
     
-            // Create panel inside Shadow DOM (single container = .accessbit-panel-screenshot, no outer wrapper)
+            // Screen-reader live-region (must exist from the moment the widget loads)
+            const srAnnouncements = document.createElement('div');
+            srAnnouncements.id  = 'sr-announcements';
+            srAnnouncements.className = 'sr-only';
+            srAnnouncements.setAttribute('aria-live', 'polite');
+            srAnnouncements.setAttribute('aria-atomic', 'true');
+            shadowRoot.appendChild(srAnnouncements);
+
+            // Apply vision-impaired CSS immediately if previously saved
+            try {
+                const viEnabled = localStorage.getItem('accessbit-widget-vision-impaired') === 'true';
+                applyVisionImpaired(viEnabled);
+            } catch (_) {}
+
+            // Panel DOM is built lazily on first open — keeps initial JS execution off the critical path
+            this._panelReady = false;
+
+        }
+
+        // Lazily builds the panel the first time the user opens it.
+        _initPanel() {
+            if (this._panelReady) return;
+
+            const shadowRoot = this.shadowRoot;
+
     
             const panelOuter = document.createElement('div');
     
@@ -4490,7 +4520,14 @@ font-family: Archivo;
                 } catch (_) {}
             } catch (_) {}
     
+
+            // Bind panel-specific event listeners now that all panel elements exist
+            this.bindEvents();
+
+            this._panelReady = true;
+
         }
+
     
     
     
@@ -36499,6 +36536,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
         togglePanel() {
            
+            // Build panel on first open (lazy init — keeps initial load off the critical path)
+            if (!this._panelReady) {
+                this._initPanel();
+            }
+
             // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
             const elements = this.getCachedElements(true); // Force refresh to get current elements
             const panel = elements.panel || this.shadowRoot?.getElementById('accessbit-widget-panel');
@@ -39370,7 +39412,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
     // Add global error handler for accessibilityWidget
     
+    window.addEventListener('error', (e) => {
     
+        if (e.message.includes('accessibilityWidget')) {
+    
+    
+        }
+        
+    });
 
     // Payment Status Check - Added functionality
     (function() {
