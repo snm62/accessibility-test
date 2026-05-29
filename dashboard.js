@@ -50,7 +50,45 @@
             // Apply immediate CSS to stop all animations
             const immediateReduceMotionStyle = document.createElement('style');
             immediateReduceMotionStyle.id = 'accessbit-reduce-motion-immediate-early';
-            immediateReduceMotionStyle.textContent = __CSS_CONST_0;
+            immediateReduceMotionStyle.textContent = `
+                /* Per Webflow Security recommendations: Global CSS kill switch for Reduce Motion */
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                    animation: none !important;
+                    transition: none !important;
+                    scroll-behavior: auto !important;
+                }
+                
+                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) */
+                body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
+                body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
+                body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
+                body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
+                html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
+                html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
+                html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
+                html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                    animation: none !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                
+                /* Remove blinking caret effects */
+                body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
+                body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
+                body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
+                body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
+                html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
+                html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
+                html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
+                html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                    caret-color: transparent !important;
+                }
+            `;
             // SECURITY: Protected by Designer mode check at line 20 - all DOM operations in this IIFE are safe
             try {
                 if (document.head) document.head.appendChild(immediateReduceMotionStyle);
@@ -66,7 +104,37 @@
             if (document.body) document.body.classList.add('seizure-safe');
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-immediate-early';
-            style.textContent = `html.seizure-safe::before,body.seizure-safe::before{content:"" !important;position:fixed !important;inset:0 !important;background:rgba(128,128,128,0.15) !important;z-index:2147483640 !important;pointer-events:none !important;}#accessbit-widget-container,#accessbit-widget-container *{animation-play-state:running !important;text-decoration:none !important;}html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]){animation-play-state:paused !important;transition:none !important;}#accessbit-widget-container,[id*="accessbit-widget"],.accessbit-widget-panel{opacity:1 !important;visibility:visible !important;transition:opacity 0.25s ease,transform 0.25s ease !important;}`;
+            style.textContent = `
+                /* Subtle grey overlay when seizure-safe is on */
+                html.seizure-safe::before,
+                body.seizure-safe::before {
+                    content: "" !important;
+                    position: fixed !important;
+                    inset: 0 !important;
+                    background: rgba(128, 128, 128, 0.15) !important;
+                    z-index: 2147483640 !important;
+                    pointer-events: none !important;
+                }
+                /* Widget container never affected by pause */
+                #accessbit-widget-container,
+                #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
+                }
+                /* Freeze the site's motion (exclude widget container first) */
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+                /* Protect widget panel/icon WITHOUT forcing layout */
+                #accessbit-widget-container,
+                [id*="accessbit-widget"],
+                .accessbit-widget-panel {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transition: opacity 0.25s ease, transform 0.25s ease !important;
+                }
+            `;
             try {
                 if (document.head) document.head.appendChild(style);
             } catch (_) {}
@@ -149,7 +217,31 @@ function applyUniversalStopMotion(enabled) {
                 css.id = 'a11y-universal-motion-block';
                 document.head.appendChild(css);
             }
-            css.textContent = `html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]),body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before,body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after{animation-duration:0s !important;animation-delay:0s !important;animation-fill-mode:forwards !important;animation-iteration-count:1 !important;animation-play-state:paused !important;transition-duration:0s !important;transition-delay:0s !important;}`;
+            css.textContent = `
+                /* Exclude nav/header to preserve sticky positioning and layout */
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                html.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                body.seizure-safe *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                html.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after,
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]), 
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::before, 
+                body.stop-animation *:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"])::after {
+                    /* Force animations to final state immediately - either prevent from starting or jump to final state */
+                    animation-duration: 0s !important;
+                    animation-delay: 0s !important;
+                    animation-fill-mode: forwards !important;
+                    animation-iteration-count: 1 !important;
+                    animation-play-state: paused !important;
+                    transition-duration: 0s !important;
+                    transition-delay: 0s !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
+                }
+            `;
         } else if (css) {
             css.remove();
         }
@@ -260,7 +352,65 @@ function applyVisionImpaired(on) {
         
         if (!on) return;
         
-        style.textContent = `html.vision-impaired{overflow-x:hidden !important;}body.vision-impaired{filter:brightness(1.06) !important;}body.vision-impaired nav,body.vision-impaired header,body.vision-impaired .navbar,body.vision-impaired [role="navigation"],body.vision-impaired [class*="nav"],body.vision-impaired [class*="header"],body.vision-impaired [class*="navbar"],body.vision-impaired [data-sticky],body.vision-impaired [data-fixed],body.vision-impaired [style*="position:sticky"],body.vision-impaired [style*="position:fixed"],body.vision-impaired [style*="position:fixed"]{filter:none !important;-webkit-filter:none !important;}body.vision-impaired .accessbit-widget,body.vision-impaired #accessbit-widget,body.vision-impaired .accessbit-widget-panel,.accessbit-widget-panel{filter:none !important;z-index:2147483646 !important;}body.vision-impaired .accessbit-widget-icon,body.vision-impaired #accessbit-widget-icon,.accessbit-widget-icon,#accessbit-widget-icon{filter:none !important;z-index:2147483645 !important;}body.vision-impaired .accessbit-widget,body.vision-impaired #accessbit-widget,.accessbit-widget,#accessbit-widget{filter:none !important;z-index:2147483647 !important;}`;
+        style.textContent = `
+            /* VISION IMPAIRED: Brightness only, no layout changes */
+            
+            html.vision-impaired {
+                /* Prevent horizontal scrollbar without affecting page height */
+                overflow-x: hidden !important;
+            }
+            
+            body.vision-impaired {
+                /* Slightly brighten the page for low-vision users */
+                filter: brightness(1.06) !important;
+                /* Don't set overflow-x on body to avoid layout recalculation that might increase page height */
+            }
+            
+            /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+            body.vision-impaired nav,
+            body.vision-impaired header,
+            body.vision-impaired .navbar,
+            body.vision-impaired [role="navigation"],
+            body.vision-impaired [class*="nav"],
+            body.vision-impaired [class*="header"],
+            body.vision-impaired [class*="navbar"],
+            body.vision-impaired [data-sticky],
+            body.vision-impaired [data-fixed],
+            body.vision-impaired [style*="position: sticky"],
+            body.vision-impaired [style*="position:fixed"],
+            body.vision-impaired [style*="position: fixed"] {
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+            
+            /* Exclude widget from brightness adjustments */
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            body.vision-impaired .accessbit-widget-panel,
+            .accessbit-widget-panel {
+                filter: none !important;
+                z-index: 2147483646 !important;
+            }
+            
+            body.vision-impaired .accessbit-widget-icon,
+            body.vision-impaired #accessbit-widget-icon,
+            .accessbit-widget-icon,
+            #accessbit-widget-icon {
+                filter: none !important;
+                z-index: 2147483645 !important;
+            }
+            
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            .accessbit-widget,
+            #accessbit-widget {
+                filter: none !important;
+                z-index: 2147483647 !important;
+            }
+            
+            /* NOTE: Vision Impaired no longer applies a transform-based zoom to avoid extra scrollbars.
+               Zoom and sizing are handled by dedicated font/spacing controls instead. */
+        `;
     } catch (_) {}
 }
 
@@ -295,7 +445,40 @@ function applyVisionImpaired(on) {
                             return s;
                         })();
                         if (style && !style.textContent) {
-                            style.textContent = __CSS_CONST_0;
+                            style.textContent = `
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                                html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,
+                                body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after {
+                                    animation: none !important;
+                                    transition: none !important;
+                                    scroll-behavior: auto !important;
+                                }
+                                body.reduce-motion *[class*="blink"], body.reduce-motion *[class*="shimmer"], 
+                                body.reduce-motion *[class*="pulse"], body.reduce-motion *[class*="caret"], 
+                                body.reduce-motion *[class*="cursor-blink"], body.reduce-motion *[class*="skeleton"],
+                                body.reduce-motion *[class*="pulsing"], body.reduce-motion *[class*="flashing"],
+                                html.reduce-motion *[class*="blink"], html.reduce-motion *[class*="shimmer"], 
+                                html.reduce-motion *[class*="pulse"], html.reduce-motion *[class*="caret"], 
+                                html.reduce-motion *[class*="cursor-blink"], html.reduce-motion *[class*="skeleton"],
+                                html.reduce-motion *[class*="pulsing"], html.reduce-motion *[class*="flashing"] {
+                                    animation: none !important;
+                                    visibility: visible !important;
+                                    opacity: 1 !important;
+                                }
+                                body.reduce-motion input[type="text"], body.reduce-motion input[type="email"], 
+                                body.reduce-motion input[type="search"], body.reduce-motion input[type="tel"], 
+                                body.reduce-motion input[type="url"], body.reduce-motion input[type="password"], 
+                                body.reduce-motion textarea, body.reduce-motion [contenteditable="true"],
+                                html.reduce-motion input[type="text"], html.reduce-motion input[type="email"], 
+                                html.reduce-motion input[type="search"], html.reduce-motion input[type="tel"], 
+                                html.reduce-motion input[type="url"], html.reduce-motion input[type="password"], 
+                                html.reduce-motion textarea, html.reduce-motion [contenteditable="true"] {
+                                    caret-color: transparent !important;
+                                }
+                            `;
                         }
                         // Use WAAPI to pause animations
                         try {
@@ -529,7 +712,37 @@ function __abInstallToggleCardClassSync(root) {
             if (!document.getElementById('accessbit-vision-impaired-immediate-early')) {
                 const viStyle = document.createElement('style');
                 viStyle.id = 'accessbit-vision-impaired-immediate-early';
-                viStyle.textContent = `html.vision-impaired{overflow-x:hidden !important;}body.vision-impaired{filter:brightness(1.06) !important;}body.vision-impaired nav,body.vision-impaired header,body.vision-impaired .navbar,body.vision-impaired [role="navigation"],body.vision-impaired [class*="nav"],body.vision-impaired [class*="header"],body.vision-impaired [class*="navbar"],body.vision-impaired [data-sticky],body.vision-impaired [data-fixed],body.vision-impaired [style*="position:sticky"],body.vision-impaired [style*="position:fixed"],body.vision-impaired [style*="position:fixed"]{filter:none !important;-webkit-filter:none !important;}`;
+                viStyle.textContent = `
+                    /* VISION IMPAIRED: Brightness only, no layout changes */
+                    
+                    html.vision-impaired {
+                        /* Prevent horizontal scrollbar without affecting page height */
+                        overflow-x: hidden !important;
+                    }
+                    
+                    body.vision-impaired {
+                        /* Slight brightness bump only, no extra contrast or font changes */
+                        filter: brightness(1.06) !important;
+                        /* Don't set overflow-x on body to avoid layout recalculation that might increase page height */
+                    }
+                    
+                    /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                    body.vision-impaired nav,
+                    body.vision-impaired header,
+                    body.vision-impaired .navbar,
+                    body.vision-impaired [role="navigation"],
+                    body.vision-impaired [class*="nav"],
+                    body.vision-impaired [class*="header"],
+                    body.vision-impaired [class*="navbar"],
+                    body.vision-impaired [data-sticky],
+                    body.vision-impaired [data-fixed],
+                    body.vision-impaired [style*="position: sticky"],
+                    body.vision-impaired [style*="position:fixed"],
+                    body.vision-impaired [style*="position: fixed"] {
+                        filter: none !important;
+                        -webkit-filter: none !important;
+                    }
+                `;
                 document.head.appendChild(viStyle);
             }
         }
@@ -595,10 +808,6 @@ function __abInstallToggleCardClassSync(root) {
         
     }
 })();
-
-
-// === PERF: Shared CSS constants (deduplicated) ===
-const __CSS_CONST_0 = `html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,html.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after,body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget]),body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::before,body.reduce-motion *:not(nav):not(header):not(.navbar):not([class*="nav"]):not(#accessbit-widget-container):not([id*="accessbit-widget"]):not([class*="accessbit-widget"]):not([data-ck-widget])::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}body.reduce-motion *[class*="blink"],body.reduce-motion *[class*="shimmer"],body.reduce-motion *[class*="pulse"],body.reduce-motion *[class*="caret"],body.reduce-motion *[class*="cursor-blink"],body.reduce-motion *[class*="skeleton"],body.reduce-motion *[class*="pulsing"],body.reduce-motion *[class*="flashing"],html.reduce-motion *[class*="blink"],html.reduce-motion *[class*="shimmer"],html.reduce-motion *[class*="pulse"],html.reduce-motion *[class*="caret"],html.reduce-motion *[class*="cursor-blink"],html.reduce-motion *[class*="skeleton"],html.reduce-motion *[class*="pulsing"],html.reduce-motion *[class*="flashing"]{animation:none !important;visibility:visible !important;opacity:1 !important;}body.reduce-motion input[type="text"],body.reduce-motion input[type="email"],body.reduce-motion input[type="search"],body.reduce-motion input[type="tel"],body.reduce-motion input[type="url"],body.reduce-motion input[type="password"],body.reduce-motion textarea,body.reduce-motion [contenteditable="true"],html.reduce-motion input[type="text"],html.reduce-motion input[type="email"],html.reduce-motion input[type="search"],html.reduce-motion input[type="tel"],html.reduce-motion input[type="url"],html.reduce-motion input[type="password"],html.reduce-motion textarea,html.reduce-motion [contenteditable="true"]{caret-color:transparent !important;}`;
 
 class AccessibilityWidget {
     constructor() {
@@ -3106,7 +3315,7 @@ class AccessibilityWidget {
     
             label.className = 'keyboard-highlight-label';
     
-            label.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)}${current}of${total}`;
+            label.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} ${current} of ${total}`;
     
             label.style.cssText = `
     
@@ -4287,7 +4496,6380 @@ font-family: Archivo;
     
         getWidgetCSS() {
     
-            return `.accessbit-widget-icon{}.accessbit-widget-icon[data-shape="circle"]{border-radius:50% !important;-webkit-border-radius:50% !important;-moz-border-radius:50% !important;}.accessbit-widget-icon[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon[data-shape="square"]{border-radius:0px !important;-webkit-border-radius:0px !important;-moz-border-radius:0px !important;}.accessbit-widget-icon.rounded,.accessbit-widget-icon[data-shape="rounded"],.accessbit-widget-icon.rounded[data-shape="rounded"],.accessbit-widget-icon[data-shape="rounded"].rounded{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon.rounded[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]){border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon.rounded,.accessbit-widget-icon[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]){border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon.rounded[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon[data-shape="rounded"].rounded{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-icon[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}.accessbit-widget-panel{position:fixed !important;z-index:2147483646 !important;display:none !important;flex-direction:column !important;overflow:hidden !important;background:transparent !important;box-shadow:0 10px 25px rgba(0,0,0,0.2) !important;box-sizing:border-box !important;width:var(--widget-width) !important;height:calc(100vh - (var(--widget-spacing) * 2)) !important;max-height:calc(100dvh - (var(--widget-spacing) * 2)) !important;border-radius:20px !important;background-clip:padding-box !important;}@supports (height:100dvh){.accessbit-widget-panel{height:calc(100dvh - (var(--widget-spacing) * 2)) !important;max-height:calc(100dvh - (var(--widget-spacing) * 2)) !important;}}.accessbit-widget-panel.show,.accessbit-widget-panel.active{display:flex !important;visibility:visible !important;opacity:1 !important;}.accessbit-widget-panel .panel-header,.accessbit-widget-panel .widget-header{flex-shrink:0 !important;overflow:hidden !important;overflow-x:hidden !important;border-radius:20px 20px 0 0 !important;}.accessbit-widget-panel .panel-header *,.accessbit-widget-panel .widget-header *{overflow:visible !important;}.accessbit-widget-panel,.accessbit-widget-panel *{box-sizing:border-box !important;}.accessbit-widget-panel .profile-item,.accessbit-widget-panel .profile-info,.accessbit-widget-panel .profile-item h4,.accessbit-widget-panel .profile-item p,.accessbit-widget-panel .profile-info h4,.accessbit-widget-panel .profile-info p,.accessbit-widget-panel p,.accessbit-widget-panel h3,.accessbit-widget-panel h4,.accessbit-widget-panel .feature-card,.accessbit-widget-panel .action-btn,.accessbit-widget-panel .panel-header,.accessbit-widget-panel .widget-header,.accessbit-widget-panel .header-content,.accessbit-widget-panel .language-dropdown,.accessbit-widget-panel [class*="dropdown"]{max-width:100% !important;overflow-wrap:break-word !important;word-wrap:break-word !important;overflow-x:hidden !important;white-space:normal !important;}.accessbit-widget-panel.show,.accessbit-widget-panel.active{display:flex !important;visibility:visible !important;}@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');:host{background:transparent !important;background-color:transparent !important;}.accessbit-widget-panel{border-radius:20px !important;background:transparent !important;background-color:transparent !important;overflow:hidden !important;background-clip:padding-box !important;}.accessbit-widget-panel .accessbit-panel-screenshot,.accessbit-widget-panel>.accessbit-panel-screenshot{background:#EAECF2 !important;background-color:#EAECF2 !important;border-radius:20px !important;overflow:hidden !important;}.accessbit-panel-screenshot{overflow-x:visible !important;overflow-y:auto !important;background-color:transparent !important;}:host{--widget-width:min(480px,94vw);--widget-spacing:15px;position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645 !important;isolation:isolate;contain:layout style paint;background:transparent !important;}.accessbit-widget-panel .accessbit-panel-screenshot,.accessbit-widget-panel>.accessbit-panel-screenshot{background:#EAECF2 !important;}.accessbit-widget-icon{position:fixed !important;z-index:2147483645 !important;bottom:var(--widget-icon-bottom,20px) !important;right:var(--widget-icon-right,20px) !important;left:var(--widget-icon-left,auto) !important;top:var(--widget-icon-top,auto) !important;transform:var(--widget-icon-transform,none) !important;width:clamp(40px,10vw,60px) !important;height:clamp(40px,10vw,60px) !important;display:block !important;overflow:hidden !important;text-indent:-9999px !important;font-size:0;line-height:0;cursor:pointer;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);will-change:transform;transition:transform 0.3s ease,opacity 0.3s ease;pointer-events:auto;}.accessbit-widget-icon .sr-only{position:absolute !important;left:-9999px !important;top:0 !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0,0,0,0) !important;clip-path:inset(50%) !important;white-space:nowrap !important;border:0 !important;}.accessbit-widget-icon:hover{transform:var(--widget-icon-transform,none) scale(1.05);}.accessbit-widget-icon i,.accessbit-widget-icon img{display:block !important;position:absolute !important;left:50% !important;top:50% !important;transform:translate(-50%,-50%) !important;margin:0 !important;text-indent:0 !important;font-style:normal;width:60% !important;height:auto !important;font-size:clamp(18px,4vw,24px);color:#ffffff;}.accessbit-widget-icon svg{display:block !important;position:absolute !important;left:50% !important;top:50% !important;transform:translate(-50%,-50%) !important;width:60% !important;height:60% !important;max-width:100% !important;max-height:100% !important;margin:0 !important;fill:#ffffff;color:#ffffff;}.accessbit-widget-icon:focus{}body.highlight-focus .accessbit-widget-icon:focus{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;}body.highlight-focus #accessbit-widget-icon:focus{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;box-shadow:0 0 0 3px rgba(99,102,241,0.3) !important;}body.highlight-focus input:focus-visible,body.highlight-focus button:focus-visible,body.highlight-focus select:focus-visible,body.highlight-focus label:focus-visible{outline:2px solid #6366f1 !important;outline-offset:2px !important;box-shadow:0 0 0 2px rgba(99,102,241,0.2) !important;}body.highlight-focus .action-btn:focus-visible{outline:none !important;outline-offset:0 !important;box-shadow:inset 0 0 0 2px #6366f1 !important;border-radius:inherit !important;}body.highlight-focus .accessbit-widget-panel .panel-header .action-btn:focus-visible,body.highlight-focus .accessbit-panel-screenshot .panel-header .action-btn:focus-visible{outline:none !important;box-shadow:inset 0 0 0 2px #6366f1 !important;border-radius:10px !important;}:host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus,:host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus-visible,:host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus,:host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible{outline:none !important;outline-offset:0 !important;box-shadow:inset 0 0 0 2px #6366f1 !important;border-radius:10px !important;background:rgba(99,102,241,0.1) !important;}.accessbit-widget-panel .panel-header .action-btn:focus,.accessbit-widget-panel .panel-header .action-btn:focus-visible,.accessbit-panel-screenshot .panel-header .action-btn:focus,.accessbit-panel-screenshot .panel-header .action-btn:focus-visible{outline:none !important;box-shadow:none !important;}:host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus,:host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus-visible,:host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus,:host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible{outline:none !important;box-shadow:none !important;background:inherit !important;}:host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus,:host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus-visible{outline:none !important;box-shadow:none !important;background:inherit !important;}@media (max-width:1024px){#accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .content-adjustments-card h4,#accessbit-widget-panel .contrast-style-card h4,#accessbit-widget-panel .useful-links-card h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,#accessbit-widget-panel .content-adjustments-card p,#accessbit-widget-panel .contrast-style-card p{font-size:13px !important;line-height:1.35 !important;}#accessbit-widget-panel .profile-item .profile-info h4,#accessbit-widget-panel .profile-item .profile-info p{font-size:inherit !important;line-height:inherit !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,#accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,#accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,#accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,#accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,#accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value{font-size:13px !important;line-height:1.35 !important;white-space:nowrap !important;}#accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,#accessbit-widget-panel .useful-links-card #useful-links-select,#accessbit-widget-panel .useful-links-card .useful-links-select-wrap select{font-size:16px !important;line-height:1.35 !important;}#accessbit-widget-panel .panel-header .action-btn,#accessbit-widget-panel .widget-header .action-btn{font-size:13px !important;min-height:28px !important;padding:6px 12px !important;}}body:not(.highlight-focus) .accessbit-panel-screenshot button:focus-visible,body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus-visible,body:not(.highlight-focus) #accessbit-widget-panel button:focus-visible,body:not(.highlight-focus) #accessbit-widget-panel input:focus-visible,body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus-visible{outline:none !important;box-shadow:none !important;}body:not(.highlight-focus) .accessbit-panel-screenshot button:focus,body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus,body:not(.highlight-focus) #accessbit-widget-panel button:focus,body:not(.highlight-focus) #accessbit-widget-panel input:focus,body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus{outline:none !important;box-shadow:none !important;}.scaling-btn{text-align:center !important;line-height:1.2;height:auto !important;white-space:nowrap !important;padding:5px 10px !important;}.scaling-btn i.fas{display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;margin:0;padding:0;}.scaling-btn span{display:inline;line-height:1;margin:0;padding:0;}.scaling-btn:focus-visible,.close-btn:focus-visible,body.highlight-focus .language-selector-header:focus-visible,body.highlight-focus .language-option:focus-visible{outline:2px solid #6366f1 !important;outline-offset:2px !important;box-shadow:0 0 0 2px rgba(99,102,241,0.2) !important;}*:focus:not(:focus-visible){outline:none !important;box-shadow:none !important;}.language-dropdown:focus-visible,.language-dropdown-content:focus-visible{outline:none !important;box-shadow:none !important;}.language-dropdown,.language-dropdown-content{overflow:hidden !important;border-radius:8px !important;}.language-dropdown-content{text-align:center;}.language-option:focus-visible{outline-offset:-2px !important;border-radius:8px !important;}.toggle-switch input:focus+.slider{outline:none !important;}body.highlight-focus .accessbit-widget-icon:focus,body.highlight-focus #accessbit-widget-icon:focus{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;box-shadow:0 0 0 3px rgba(99,102,241,0.3) !important;}.profile-item:focus,.profile-item:focus-within{outline:none !important;outline-offset:0 !important;background:inherit !important;border-radius:4px !important;}.profile-item:focus{outline:none !important;outline-offset:0 !important;background:inherit !important;border-radius:4px !important;}.sr-only{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0,0,0,0) !important;white-space:nowrap !important;border:0 !important;}.accessbit-widget-icon:focus,.accessbit-widget-panel button:focus,.accessbit-widget-panel input:focus,.accessbit-widget-panel label:focus{outline-offset:0px !important;box-shadow:none !important;}body.highlight-focus .accessbit-widget-icon:focus,body.highlight-focus .accessbit-widget-panel button:focus,body.highlight-focus .accessbit-widget-panel input:focus,body.highlight-focus .accessbit-widget-panel label:focus{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;}:host-context(.highlight-focus) #accessbit-widget-icon:focus,:host-context(.highlight-focus) .accessbit-widget-icon:focus,:host-context(.highlight-focus) .accessbit-widget-panel button:focus,:host-context(.highlight-focus) .accessbit-widget-panel input:focus,:host-context(.highlight-focus) .accessbit-widget-panel label:focus{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;}body:not(.highlight-focus) .accessbit-widget-icon:focus-visible,body:not(.highlight-focus) .accessbit-widget-panel button:focus-visible,body:not(.highlight-focus) .accessbit-widget-panel input:focus-visible{outline:none !important;box-shadow:none !important;}@media (min-width:601px) and (max-width:1280px){.accessbit-widget-panel{position:fixed !important;width:min(576px,calc(100vw - 24px)) !important;max-width:min(576px,calc(100vw - 24px)) !important;height:calc(100dvh - 30px) !important;max-height:calc(100dvh - 30px) !important;bottom:var(--widget-icon-bottom,20px) !important;right:var(--panel-right,auto) !important;left:var(--panel-left,auto) !important;top:var(--widget-icon-top,auto) !important;transform:none !important;transition:transform 0.3s ease !important;border-radius:20px !important;margin:0 !important;box-sizing:border-box !important;overflow-x:hidden !important;}.accessbit-widget-panel.active,.accessbit-widget-panel.show{transform:none !important;display:flex !important;}.accessbit-widget-panel .useful-links-card,.accessbit-panel-screenshot .useful-links-card{width:100% !important;max-width:100% !important;min-width:0 !important;box-sizing:border-box !important;}.accessbit-widget-panel .useful-links-card .useful-links-select-wrap,.accessbit-widget-panel .useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap,.accessbit-panel-screenshot .useful-links-card #useful-links-select,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select{width:100% !important;max-width:100% !important;min-width:0 !important;box-sizing:border-box !important;}}@media (max-width:600px){.accessbit-widget-panel{position:fixed !important;width:min(480px,calc(100vw - 24px)) !important;max-width:min(480px,calc(100vw - 24px)) !important;height:calc(100dvh - 30px) !important;max-height:calc(100dvh - 30px) !important;left:50% !important;right:auto !important;bottom:var(--widget-icon-bottom,20px) !important;top:auto !important;transform:translateX(-50%) !important;transition:transform 0.3s ease !important;border-radius:20px !important;margin:0 !important;box-sizing:border-box !important;overflow-x:hidden !important;}.accessbit-widget-panel.active,.accessbit-widget-panel.show{transform:translateX(-50%) !important;display:flex !important;}}@media (min-width:1281px){.accessbit-widget-panel{width:576px !important;height:calc(100dvh - 40px) !important;max-height:calc(100dvh - 40px) !important;top:var(--panel-top,20px) !important;right:var(--panel-right,20px) !important;left:var(--panel-left,auto) !important;transform:none !important;bottom:auto !important;border-radius:16px !important;}}@media (min-width:1921px){.accessbit-widget-panel{height:calc(100vh - 40px) !important;max-height:calc(100dvh - 40px) !important;top:var(--panel-top,20px) !important;transform:none !important;overflow-y:auto !important;overflow-x:hidden !important;}}@supports (height:100dvh){@media (min-width:1921px){.accessbit-widget-panel{height:calc(100dvh - 40px) !important;max-height:calc(100dvh - 40px) !important;}}}.accessbit-widget-panel,.accessbit-widget-panel>.white-content-section,.accessbit-widget-panel .accessbit-panel-screenshot>.white-content-section,.accessbit-widget-panel>.accessbit-widget-content,.accessbit-widget-panel>.panel-content{scrollbar-width:none !important;-ms-overflow-style:none !important;}.accessbit-widget-panel::-webkit-scrollbar,.accessbit-widget-panel>.white-content-section::-webkit-scrollbar,.accessbit-widget-panel .accessbit-panel-screenshot>.white-content-section::-webkit-scrollbar,.accessbit-widget-panel>.accessbit-widget-content::-webkit-scrollbar,.accessbit-widget-panel>.panel-content::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}#accessbit-widget-panel.accessbit-hide-scrollbar,.accessbit-hide-scrollbar{scrollbar-width:none !important;-ms-overflow-style:none !important;}#accessbit-widget-panel.accessbit-hide-scrollbar{overflow:hidden !important;overflow-y:hidden !important;}#accessbit-widget-panel.accessbit-hide-scrollbar::-webkit-scrollbar,.accessbit-hide-scrollbar::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;visibility:hidden !important;background:transparent !important;}.accessbit-widget-panel *{scroll-behavior:auto !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.accessbit-widget-panel *::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;visibility:hidden !important;}.accessbit-widget-panel>.white-content-section,.accessbit-widget-panel .accessbit-panel-screenshot>.white-content-section,.accessbit-widget-panel>.accessbit-widget-content,.accessbit-widget-panel>.panel-content{flex:1 1 auto !important;overflow-y:auto !important;overflow-x:hidden !important;min-height:0 !important;min-width:0 !important;-webkit-overflow-scrolling:touch !important;scrollbar-gutter:stable !important;}.accessbit-widget-panel .white-content-section .white-content-section{overflow-y:visible !important;overflow-x:hidden !important;}.accessbit-widget-panel .accessbit-widget-content,.accessbit-widget-panel .panel-content,.accessbit-widget-panel .white-content-section{display:block !important;padding:20px 0 0 0;width:100% !important;max-width:100% !important;background-color:rgb(234,236,242) !important;border-radius:0 !important;box-sizing:border-box !important;overflow-x:visible !important;margin:0 !important;}.accessbit-widget-panel .white-content-section>h3,.accessbit-widget-panel .white-content-section .content-adjustments-title,.accessbit-widget-panel .white-content-section .color-adjustments-title,.accessbit-widget-panel .white-content-section .interface-controls-title{max-width:min(528px,100%) !important;width:100% !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important;box-sizing:border-box !important;text-align:left !important;}.accessbit-widget-panel .white-content-section>h3:first-child,.accessbit-widget-panel .white-content-section>h3.placeholder-title{margin:16px 0 18px 0 !important;}.accessbit-widget-panel .white-content-section .content-adjustments-title{margin:43px 0 23px 0 !important;}.accessbit-widget-panel .white-content-section .color-adjustments-title{margin:26px 0 28px 0 !important;}.accessbit-widget-panel .white-content-section .interface-controls-title{margin:36px 0 18px 0 !important;}.accessbit-widget-content *,.accessbit-widget-panel .panel-content *{max-width:100% !important;}.accessbit-widget-panel .panel-content .profile-item:has(#seizure-safe),.accessbit-widget-panel .panel-content .profile-item:has(#reduce-motion),.accessbit-widget-panel .panel-content .profile-item:has(#vision-impaired),.accessbit-widget-panel .panel-content .profile-item:has(#adhd-friendly),.accessbit-widget-panel .panel-content .profile-item:has(#cognitive-disability),.accessbit-widget-panel .panel-content .profile-item:has(#keyboard-nav),.accessbit-widget-panel .panel-content .profile-item:has(#screen-reader),.accessbit-widget-panel .panel-content .profile-item:has(#older-adults),.accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-friendly),.accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-font),.accessbit-widget-panel .panel-content .profile-item:has(#protanopia),.accessbit-widget-panel .panel-content .profile-item:has(#deuteranopia),.accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),.accessbit-widget-panel .panel-content .profile-item:has(#color-blind),.accessbit-widget-panel .panel-content .profile-item:has(#inverted-colors),.accessbit-widget-panel .panel-content .profile-item:has(#large-clickable-area),.accessbit-widget-panel .panel-content .profile-item:has(#content-scale-range),.accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),.accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),.accessbit-widget-panel .panel-content .profile-item:has(#adjust-letter-spacing){max-width:min(528px,100%) !important;}.accessbit-widget-panel .profile-item{min-width:0 !important;overflow-x:visible !important;overflow-y:visible !important;background:#FFFFFF !important;border-radius:7px !important;min-height:84px !important;max-width:min(440px,100%) !important;width:100% !important;opacity:1 !important;margin-left:auto !important;margin-right:auto !important;box-sizing:border-box !important;padding:15px 22px !important;}.accessbit-widget-panel .white-content-section>.profile-item{margin-bottom:0 !important;}.accessbit-widget-panel .profile-item:has(#seizure-safe){width:528px !important;max-width:min(528px,100%) !important;overflow:visible !important;overflow-x:visible !important;}.accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon{overflow:visible !important;}.accessbit-widget-panel .profile-item:has(#reduce-motion),.accessbit-widget-panel .profile-item:has(#vision-impaired),.accessbit-widget-panel .profile-item:has(#adhd-friendly),.accessbit-widget-panel .profile-item:has(#cognitive-disability),.accessbit-widget-panel .profile-item:has(#keyboard-nav),.accessbit-widget-panel .profile-item:has(#screen-reader),.accessbit-widget-panel .profile-item:has(#older-adults),.accessbit-widget-panel .profile-item:has(#dyslexia-friendly),.accessbit-widget-panel .profile-item:has(#dyslexia-font),.accessbit-widget-panel .profile-item:has(#protanopia),.accessbit-widget-panel .profile-item:has(#deuteranopia),.accessbit-widget-panel .profile-item:has(#tritanopia),.accessbit-widget-panel .profile-item:has(#color-blind),.accessbit-widget-panel .profile-item:has(#inverted-colors),.accessbit-widget-panel .profile-item:has(#large-clickable-area),.accessbit-widget-panel .profile-item:has(#content-scale-range),.accessbit-widget-panel .profile-item:has(#font-sizing),.accessbit-widget-panel .profile-item:has(#adjust-line-height),.accessbit-widget-panel .profile-item:has(#adjust-letter-spacing){width:528px !important;max-width:min(528px,100%) !important;overflow:visible !important;overflow-x:visible !important;}@media (min-width:1281px){.accessbit-widget-panel .white-content-section,.accessbit-widget-panel .accessbit-panel-screenshot>.white-content-section{padding-top:0 !important;}.accessbit-widget-panel .color-adjustments-section{margin-top:12px !important;}.accessbit-widget-panel .panel-content .profile-item:has(#dark-contrast),.accessbit-widget-panel .panel-content .profile-item:has(#light-contrast),.accessbit-widget-panel .panel-content .profile-item:has(#high-contrast),.accessbit-widget-panel .panel-content .profile-item:has(#high-saturation),.accessbit-widget-panel .panel-content .profile-item:has(#low-saturation),.accessbit-widget-panel .panel-content .profile-item:has(#monochrome){max-width:min(257px,100%) !important;}.accessbit-widget-panel .profile-item:has(#dark-contrast),.accessbit-widget-panel .profile-item:has(#light-contrast),.accessbit-widget-panel .profile-item:has(#high-contrast),.accessbit-widget-panel .profile-item:has(#high-saturation),.accessbit-widget-panel .profile-item:has(#low-saturation),.accessbit-widget-panel .profile-item:has(#monochrome){width:257px !important;max-width:min(257px,100%) !important;}.accessbit-widget-panel .color-adjustments-section{max-width:min(526px,100%) !important;overflow-x:visible !important;}.accessbit-widget-panel .color-adjustments-toggles-grid{grid-template-columns:257px 257px !important;}.accessbit-widget-panel .profile-item:has(#dark-contrast),.accessbit-widget-panel .profile-item:has(#light-contrast),.accessbit-widget-panel .profile-item:has(#high-contrast),.accessbit-widget-panel .profile-item:has(#high-saturation),.accessbit-widget-panel .profile-item:has(#low-saturation),.accessbit-widget-panel .profile-item:has(#monochrome){overflow:visible !important;overflow-x:visible !important;}.accessbit-widget-panel .panel-content .profile-item:has(#mute-sound),.accessbit-widget-panel .panel-content .profile-item:has(#hide-images),.accessbit-widget-panel .panel-content .profile-item:has(#read-mode),.accessbit-widget-panel .panel-content .profile-item:has(#reading-guide),.accessbit-widget-panel .panel-content .profile-item:has(#stop-animation),.accessbit-widget-panel .panel-content .profile-item:has(#reading-mask),.accessbit-widget-panel .panel-content .profile-item:has(#highlight-focus),.accessbit-widget-panel .panel-content .profile-item:has(#highlight-hover){max-width:min(257px,100%) !important;}.accessbit-widget-panel .profile-item:has(#mute-sound),.accessbit-widget-panel .profile-item:has(#hide-images),.accessbit-widget-panel .profile-item:has(#read-mode),.accessbit-widget-panel .profile-item:has(#reading-guide),.accessbit-widget-panel .profile-item:has(#stop-animation),.accessbit-widget-panel .profile-item:has(#reading-mask),.accessbit-widget-panel .profile-item:has(#highlight-focus),.accessbit-widget-panel .profile-item:has(#highlight-hover){width:257px !important;max-width:min(257px,100%) !important;}.accessbit-widget-panel .panel-content .profile-item:has(#big-black-cursor),.accessbit-widget-panel .panel-content .profile-item:has(#big-white-cursor){max-width:min(257px,100%) !important;}.accessbit-widget-panel .profile-item:has(#big-black-cursor),.accessbit-widget-panel .profile-item:has(#big-white-cursor){width:257px !important;max-width:min(257px,100%) !important;}.accessbit-widget-panel .cursor-cards-grid{max-width:min(526px,100%) !important;grid-template-columns:257px 257px !important;}.accessbit-widget-panel .profile-item:has(#big-black-cursor),.accessbit-widget-panel .profile-item:has(#big-white-cursor){overflow:visible !important;overflow-x:visible !important;}.accessbit-widget-panel .interface-controls-section{max-width:min(526px,100%) !important;overflow-x:visible !important;}.accessbit-widget-panel .interface-controls-grid{grid-template-columns:257px 257px !important;}.accessbit-widget-panel .profile-item:has(#mute-sound),.accessbit-widget-panel .profile-item:has(#hide-images),.accessbit-widget-panel .profile-item:has(#read-mode),.accessbit-widget-panel .profile-item:has(#reading-guide),.accessbit-widget-panel .profile-item:has(#stop-animation),.accessbit-widget-panel .profile-item:has(#reading-mask),.accessbit-widget-panel .profile-item:has(#highlight-focus),.accessbit-widget-panel .profile-item:has(#highlight-hover){overflow:visible !important;overflow-x:visible !important;}.accessbit-widget-panel .panel-content #adjust-text-colors,.accessbit-widget-panel .panel-content #adjust-title-colors,.accessbit-widget-panel .panel-content #adjust-bg-colors{max-width:min(528px,100%) !important;}.accessbit-widget-panel #adjust-text-colors,.accessbit-widget-panel #adjust-title-colors,.accessbit-widget-panel #adjust-bg-colors{width:528px !important;max-width:min(528px,100%) !important;}.accessbit-widget-panel .panel-content .useful-links-card,.accessbit-widget-panel .panel-content .profile-item.useful-links-card{max-width:min(528px,100%) !important;}.accessbit-widget-panel .useful-links-card,.accessbit-widget-panel .profile-item.useful-links-card{width:528px !important;max-width:min(528px,100%) !important;}}.accessbit-widget-panel .profile-item .profile-info,.accessbit-widget-panel .profile-item .profile-item-icon{overflow:visible !important;}.accessbit-widget-panel .profile-item .profile-item-icon{width:44px !important;height:43px !important;min-width:44px !important;flex:0 0 44px !important;flex-shrink:0 !important;box-sizing:content-box !important;padding:0 !important;overflow:visible !important;display:flex !important;align-items:center !important;justify-content:center !important;}.accessbit-widget-panel .profile-item .profile-item-icon svg{width:43px !important;height:43px !important;max-width:98% !important;height:auto !important;flex-shrink:0 !important;display:block !important;}.accessbit-widget-panel .profile-item *{overflow-y:visible !important;}.accessbit-widget-panel .profile-item,.accessbit-widget-panel .profile-item *{scrollbar-width:none !important;-ms-overflow-style:none !important;}.accessbit-widget-panel .profile-item::-webkit-scrollbar,.accessbit-widget-panel .profile-item *::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.accessbit-widget-panel .profile-item .toggle-switch{margin-right:0px !important;}.accessbit-widget-panel .profile-item{border:2px solid transparent !important;}.accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on){border:2px solid #01CE9C !important;}@media (max-width:1279px){.accessbit-widget-panel.mobile-mode{width:min(480px,calc(100vw - 24px)) !important;max-width:min(480px,calc(100vw - 24px)) !important;height:calc(100dvh - 30px) !important;max-height:calc(100dvh - 30px) !important;top:auto !important;bottom:var(--widget-icon-bottom,20px) !important;margin:0 !important;border-radius:20px !important;box-sizing:border-box !important;transition:transform 0.3s ease !important;}}@media (max-width:600px){.accessbit-widget-panel.mobile-mode{left:50% !important;right:auto !important;transform:translateX(-50%) !important;}.accessbit-widget-panel.mobile-mode.active,.accessbit-widget-panel.mobile-mode.show{transform:translateX(-50%) !important;}}@media (min-width:601px) and (max-width:1279px){.accessbit-widget-panel.mobile-mode,.accessbit-widget-panel.mobile-mode.side-left,.accessbit-widget-panel.mobile-mode.side-right{left:var(--panel-left,auto) !important;right:var(--panel-right,auto) !important;transform:none !important;}.accessbit-widget-panel.mobile-mode.active,.accessbit-widget-panel.mobile-mode.show{transform:none !important;}}@media (max-width:1279px){.accessbit-widget-panel.mobile-mode:not(.active){transition:none !important;}.accessbit-widget-panel.mobile-mode>.white-content-section,.accessbit-widget-panel.mobile-mode .accessbit-panel-screenshot>.white-content-section,.accessbit-widget-panel.mobile-mode>.accessbit-widget-content,.accessbit-widget-panel.mobile-mode>.panel-content{flex:1 1 auto !important;height:auto !important;overflow-y:auto !important;overflow-x:hidden !important;display:block !important;-webkit-overflow-scrolling:touch !important;scrollbar-gutter:stable !important;padding:16px !important;padding-left:16px !important;padding-right:16px !important;padding-bottom:16px !important;}.accessbit-widget-panel.mobile-mode .panel-header,.accessbit-widget-panel.mobile-mode .widget-header{padding:20px 16px !important;padding-left:16px !important;padding-right:16px !important;font-size:1.2rem;flex-shrink:0 !important;}.toggle-switch>input:not(:checked)+.slider::after{content:"" !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;right:16px !important;top:50% !important;transform:translateY(-50%) rotate(0deg) !important;width:12px !important;height:12px !important;border-width:2px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;pointer-events:none !important;transition:none !important;}.toggle-switch>input:checked+.slider::after{content:"" !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;left:22px !important;right:auto !important;top:50% !important;transform:translateY(-50%) !important;width:2px !important;height:12px !important;background:white !important;border:none !important;border-radius:0 !important;pointer-events:none !important;transition:none !important;}@media (max-width:768px){.accessbit-widget-panel .toggle-switch .slider::after,.accessbit-widget-panel .toggle-switch>input+.slider::after,.accessbit-widget-panel .toggle-switch input:checked+.slider::after,.accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after{display:none !important;visibility:hidden !important;opacity:0 !important;content:none !important;width:0 !important;height:0 !important;overflow:hidden !important;}}.accessbit-widget-panel .toggle-switch{width:32px !important;height:18px !important;min-width:32px !important;}.accessbit-widget-panel .profile-item .toggle-switch{margin-left:auto !important;margin-right:12px !important;}.accessbit-widget-panel .toggle-switch .slider{height:18px !important;border-radius:18px !important;}.accessbit-widget-panel .toggle-switch .slider:before{width:14px !important;height:14px !important;left:2px !important;bottom:2px !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider:before{transform:translateX(14px) !important;}.accessbit-widget-panel .action-btn{font-size:11px;padding:4px 10px !important;min-height:26px !important;}@media (min-width:1281px){.accessbit-widget-panel .action-btn{font-size:15px;padding:10px 22px !important;min-height:44px !important;}}@media (min-width:768px) and (max-width:1280px){#accessbit-widget-panel .panel-header #reset-settings,#accessbit-widget-panel .panel-header #statement,#accessbit-widget-panel .panel-header #hide-interface,#accessbit-widget-panel .widget-header #reset-settings,#accessbit-widget-panel .widget-header #statement,#accessbit-widget-panel .widget-header #hide-interface{font-size:15px !important;}}.accessbit-widget-panel .profile-item{padding:8px 10px !important;margin-bottom:6px !important;}.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2{font-size:16px;line-height:20px;}.accessbit-widget-panel .profile-item h4{font-size:12px;line-height:1.3;}.accessbit-widget-panel .profile-item p{font-size:10px;line-height:1.2;}.accessbit-widget-panel h3{font-size:14px;line-height:1.3;}}@media (min-width:481px) and (max-width:1279px){.accessbit-widget-panel{font-size:13px;padding:14px !important;}.accessbit-widget-panel .action-btn{padding:8px 12px !important;min-height:32px !important;}}@media (orientation:landscape) and (max-width:768px){.accessbit-widget-panel{overflow-y:auto !important;scroll-behavior:smooth !important;-webkit-overflow-scrolling:touch !important;overscroll-behavior:contain !important;}}@media (max-width:400px){.accessbit-widget-panel{padding:14px !important;overflow-y:auto !important;scroll-behavior:smooth !important;-webkit-overflow-scrolling:touch !important;overscroll-behavior:contain !important;}.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2{margin-bottom:6px !important;}.accessbit-widget-panel h3{margin-bottom:4px !important;}.accessbit-widget-panel .action-btn{padding:8px 12px !important;min-height:32px !important;}.accessbit-widget-panel .scaling-btn{padding:2px 4px !important;min-height:20px !important;display:flex !important;align-items:center !important;justify-content:center !important;gap:4px !important;}.accessbit-widget-panel .toggle-switch{width:32px !important;height:18px !important;}.accessbit-widget-panel .toggle-switch .slider{width:32px !important;height:18px !important;border-radius:18px !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider{background-color:#01CE9C !important;}.accessbit-widget-panel .toggle-switch .slider:before{width:12px !important;height:12px !important;left:3px !important;bottom:3px !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider:before{transform:translateX(13px) !important;}.accessbit-widget-panel .toggle-switch .slider::after,.accessbit-widget-panel .toggle-switch>input+.slider::after,.accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after,.accessbit-widget-panel .toggle-switch input:checked+.slider::after{display:none !important;}.accessbit-widget-panel .profile-item{padding:2px !important;margin-bottom:2px !important;}.accessbit-widget-panel .profile-item h4{margin-bottom:1px !important;}.accessbit-widget-panel .profile-item p{margin-bottom:1px !important;}.accessbit-widget-panel .close-btn{display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;}.accessbit-widget-panel .close-btn svg{display:block !important;margin:0 auto !important;}.accessbit-widget-icon[data-shape="rounded"]{border-radius:12px !important;-webkit-border-radius:12px !important;-moz-border-radius:12px !important;}}@media (max-width:819px) and (min-width:769px){.accessbit-widget-panel{padding:16px !important;overflow-y:auto !important;}.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2{font-size:24px !important;margin-bottom:12px !important;}.accessbit-widget-panel h3{margin-bottom:10px !important;}.accessbit-widget-panel .profile-item{padding:10px !important;margin-bottom:8px !important;}.accessbit-widget-panel .action-btn{padding:8px 12px !important;}}@media (max-width:1279px){:host{outline:none !important;outline-offset:0 !important;border:none !important;box-shadow:none !important;padding:0 !important;margin:0 !important;-webkit-box-shadow:none !important;background:transparent !important;}:host .accessbit-widget-panel,:host #accessbit-widget-panel,.accessbit-widget-panel,#accessbit-widget-panel.accessbit-widget-panel,.accessbit-widget-panel:focus,#accessbit-widget-panel:focus{outline:none !important;outline-offset:0 !important;border:none !important;box-shadow:none !important;-webkit-box-shadow:none !important;}.accessbit-widget-panel .panel-header::before,.accessbit-widget-panel .widget-header::before{border-radius:20px 20px 0 0 !important;}.accessbit-widget-panel .panel-content,.accessbit-widget-panel .accessbit-widget-content{padding-left:12px !important;padding-right:12px !important;}:host .accessbit-widget-icon,.accessbit-widget-icon,#accessbit-widget-icon{outline:none !important;border:none !important;box-shadow:none !important;-webkit-box-shadow:none !important;}}@media (max-width:320px){.accessbit-widget-panel .panel-header,.accessbit-widget-panel .widget-header{position:relative !important;z-index:10 !important;flex-shrink:0 !important;}.accessbit-widget-panel>.panel-content,.accessbit-widget-panel>.accessbit-widget-content{padding-top:12px !important;}.accessbit-widget-panel .color-adjustments-pickers,.accessbit-widget-panel #adjust-bg-colors{margin-bottom:16px !important;}}@media (max-width:240px){.accessbit-widget-panel .panel-header,.accessbit-widget-panel .widget-header{z-index:25 !important;isolation:isolate !important;position:relative !important;}.accessbit-widget-panel .color-adjustments-pickers{position:relative !important;z-index:1 !important;margin-top:8px !important;}}@media (max-width:768px){.accessbit-widget-panel .action-buttons,.accessbit-panel-screenshot .panel-header .action-buttons,.accessbit-panel-screenshot .action-buttons{flex-direction:column !important;flex-wrap:wrap !important;align-items:flex-start !important;justify-content:center !important;gap:6px !important;}.accessbit-widget-panel .panel-header .action-buttons{margin-bottom:4px !important;}.accessbit-widget-panel .panel-header .action-btn,.accessbit-widget-panel .widget-header .action-btn,.accessbit-panel-screenshot .panel-header .action-btn{width:auto !important;max-width:max-content !important;min-width:0 !important;align-self:flex-start !important;}.accessbit-widget-panel .toggle-switch,.accessbit-panel-screenshot .toggle-switch{width:38px !important;height:20px !important;min-width:38px !important;}.accessbit-widget-panel .toggle-switch .slider,.accessbit-panel-screenshot .toggle-switch .slider{width:38px !important;height:20px !important;border-radius:20px !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider,.accessbit-panel-screenshot .toggle-switch input:checked+.slider{background-color:#01CE9C !important;}.accessbit-widget-panel .toggle-switch .slider:before,.accessbit-panel-screenshot .toggle-switch .slider:before{width:14px !important;height:14px !important;left:3px !important;bottom:3px !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider:before,.accessbit-panel-screenshot .toggle-switch input:checked+.slider:before{transform:translateX(18px) !important;}.accessbit-widget-panel .toggle-switch .slider::after,.accessbit-panel-screenshot .toggle-switch .slider::after,.accessbit-widget-panel .toggle-switch>input+.slider::after,.accessbit-panel-screenshot .toggle-switch>input+.slider::after,.accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after,.accessbit-panel-screenshot .toggle-switch input:not(:checked)+.slider::after,.accessbit-widget-panel .toggle-switch input:checked+.slider::after,.accessbit-panel-screenshot .toggle-switch input:checked+.slider::after{display:none !important;}.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2,.accessbit-panel-screenshot .panel-header h2{font-size:18px;line-height:22px;}.accessbit-widget-panel h3,.accessbit-widget-panel .content-adjustments-title,.accessbit-widget-panel .color-adjustments-title,.accessbit-widget-panel .interface-controls-title,.accessbit-widget-panel .placeholder-title,.accessbit-panel-screenshot .white-content-section .content-adjustments-title,.accessbit-panel-screenshot .white-content-section>h3{font-size:15px;line-height:19px;}:host .accessbit-widget-panel .panel-header h2,:host .accessbit-widget-panel .widget-header h2{font-size:18px !important;line-height:22px !important;}:host .accessbit-widget-panel .content-adjustments-title,:host .accessbit-widget-panel .color-adjustments-title,:host .accessbit-widget-panel .interface-controls-title,:host .accessbit-widget-panel .placeholder-title,:host .accessbit-widget-panel h3{font-size:15px !important;line-height:19px !important;}.accessbit-widget-panel .white-content-section>h3:first-child,.accessbit-widget-panel .white-content-section>h3.placeholder-title{margin:12px 0 6px 0 !important;}.accessbit-widget-panel .white-content-section .content-adjustments-title,.accessbit-widget-panel .white-content-section .color-adjustments-title{margin:10px 0 6px 0 !important;}.accessbit-widget-panel .white-content-section .interface-controls-title{margin:6px 0 10px 0 !important;}.accessbit-widget-panel .profile-item-icon,.accessbit-panel-screenshot .profile-item .profile-item-icon{width:43px !important;height:43px !important;min-width:43px !important;min-height:43px !important;flex:0 0 43px !important;flex-shrink:0 !important;box-sizing:content-box !important;padding:0 !important;}.accessbit-widget-panel .profile-item-icon svg,.accessbit-panel-screenshot .profile-item .profile-item-icon svg{width:43px !important;height:43px !important;}.accessbit-widget-panel .content-card-icon,.accessbit-widget-panel .color-adjustments-card .content-card-icon,.accessbit-widget-panel .contrast-style-card .content-card-icon,.accessbit-widget-panel .color-adjustments-picker-card .content-card-icon{width:43px !important;height:43px !important;min-width:43px !important;min-height:43px !important;flex:0 0 43px !important;flex-shrink:0 !important;box-sizing:content-box !important;padding:0 !important;}.accessbit-widget-panel .content-card-icon svg,.accessbit-widget-panel .color-adjustments-card .content-card-icon svg,.accessbit-widget-panel .contrast-style-card .content-card-icon svg{width:43px !important;height:43px !important;}.accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg{width:43px !important;height:43px !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-option{width:18px !important;height:18px !important;min-width:18px !important;min-height:18px !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-option svg{width:18px !important;height:18px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{height:18px !important;min-height:18px !important;gap:4px !important;padding-left:0 !important;align-items:center !important;display:flex !important;flex-wrap:nowrap !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{gap:4px !important;flex-wrap:nowrap !important;align-items:center !important;height:18px !important;min-height:18px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn{width:18px !important;height:18px !important;min-width:18px !important;min-height:18px !important;margin:0 !important;padding:0 !important;align-self:center !important;display:flex !important;align-items:center !important;justify-content:center !important;line-height:0 !important;flex-shrink:0 !important;vertical-align:middle !important;border:none !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg{width:18px !important;height:18px !important;display:block !important;vertical-align:middle !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4{font-size:14px;line-height:1.25;}.accessbit-widget-panel .scaling-slider-track .scaling-slider-thumb{width:28px !important;height:28px !important;margin-left:-14px !important;margin-top:-14px !important;}.accessbit-widget-panel .scaling-slider-track .scaling-thumb-circle{width:28px !important;height:28px !important;}.accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb{width:16px !important;height:16px !important;}.accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb{width:16px !important;height:16px !important;}.accessbit-widget-panel .content-adjustments-card.align-left-card,.accessbit-widget-panel .content-adjustments-card.align-center-card,.accessbit-widget-panel .content-adjustments-card.align-right-card{min-height:auto !important;height:auto !important;padding:8px 12px !important;}.accessbit-widget-panel .align-left-card .align-left-label,.accessbit-widget-panel .align-center-card .align-center-label,.accessbit-widget-panel .align-right-card .align-right-label{padding:8px 12px !important;margin:-8px -12px !important;}.accessbit-widget-panel .align-left-card h4,.accessbit-widget-panel .align-center-card h4,.accessbit-widget-panel .align-right-card h4{margin-top:4px !important;}.accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,.accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,.accessbit-panel-screenshot .content-adjustments-card.slider-card .content-card-body h4,.accessbit-panel-screenshot .content-adjustments-card.slider-card .content-scaling-header h4{font-size:12px !important;line-height:1.25 !important;}.accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,.accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,.accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,.accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,.accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value,.accessbit-panel-screenshot .content-adjustments-card.slider-card .content-adjustments-slider-value{font-size:11px !important;line-height:1.3 !important;white-space:nowrap !important;}.accessbit-widget-panel .profile-item:has(#keyboard-nav) p,.accessbit-widget-panel .profile-item:has(#screen-reader) p,.accessbit-widget-panel .profile-item:has(#keyboard-nav) small,.accessbit-widget-panel .profile-item:has(#screen-reader) small{font-size:14px !important;line-height:20px !important;}.accessbit-widget-panel .panel-header .reset-settings-icon svg,.accessbit-widget-panel .panel-header .statement-btn-icon svg,.accessbit-widget-panel .panel-header .hide-interface-btn-icon svg,.accessbit-panel-screenshot .panel-header .reset-settings-icon svg,.accessbit-panel-screenshot .panel-header .statement-btn-icon svg,.accessbit-panel-screenshot .panel-header .hide-interface-btn-icon svg{width:12px !important;height:12px !important;}.accessbit-widget-panel .useful-links-card,.accessbit-panel-screenshot .useful-links-card{width:100% !important;max-width:100% !important;min-width:0 !important;box-sizing:border-box !important;overflow-x:hidden !important;}.accessbit-widget-panel .useful-links-card .useful-links-select-wrap,.accessbit-widget-panel .useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap,.accessbit-panel-screenshot .useful-links-card #useful-links-select,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select{width:100% !important;max-width:100% !important;min-width:0 !important;box-sizing:border-box !important;}.accessbit-widget-panel .useful-links-card .useful-links-select-wrap,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap{overflow:hidden !important;}.accessbit-widget-panel .useful-links-card .useful-links-header h4,.accessbit-panel-screenshot .useful-links-card .useful-links-header h4,.accessbit-widget-panel .useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,.accessbit-panel-screenshot .useful-links-card #useful-links-select,.accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select{font-size:11px !important;line-height:1.3 !important;}.accessbit-widget-panel .useful-links-card{padding:10px 14px !important;min-height:110px !important;gap:8px !important;}.accessbit-widget-panel .useful-links-card .useful-links-header h4{font-size:14px !important;line-height:18px !important;}.accessbit-widget-panel .useful-links-custom-trigger,.accessbit-panel-screenshot .useful-links-custom-trigger{height:34px !important;font-size:12px !important;padding-left:10px !important;padding-right:10px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{display:flex !important;align-items:center !important;justify-content:flex-start !important;gap:4px !important;padding-left:55px !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{flex:0 0 auto !important;display:flex !important;flex-wrap:nowrap !important;gap:4px !important;padding-left:0 !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn{flex-shrink:0 !important;}.accessbit-widget-panel .useful-links-custom-dropdown,.accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown,.accessbit-widget-panel .useful-links-custom-dropdown,.accessbit-panel-screenshot .useful-links-custom-dropdown{width:calc(100% - 55px) !important;max-width:calc(100% - 55px) !important;min-width:0 !important;margin-left:55px !important;box-sizing:border-box !important;}.accessbit-widget-panel .useful-links-custom-trigger,.accessbit-panel-screenshot .useful-links-custom-trigger{width:100% !important;max-width:100% !important;min-width:0 !important;font-size:12px !important;padding-left:10px !important;padding-right:10px !important;box-sizing:border-box !important;}.accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,.accessbit-widget-panel .useful-links-card .useful-links-custom-trigger{width:100% !important;max-width:none !important;min-width:0 !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{align-items:center !important;min-height:20px !important;height:20px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn{align-self:center !important;margin-bottom:0 !important;}}@media (max-width:400px){.accessbit-widget-panel .panel-header{position:relative !important;z-index:5 !important;flex-shrink:0 !important;min-height:auto !important;}.accessbit-widget-panel .color-adjustments-pickers{margin-top:4px !important;}.accessbit-widget-panel .color-adjustments-picker-card:last-child,.accessbit-widget-panel #adjust-bg-colors{margin-bottom:16px !important;}}@media (max-width:375px){.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon,.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg{width:26px !important;height:26px !important;min-width:26px !important;min-height:26px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon{flex:0 0 26px !important;max-width:26px !important;border-radius:50% !important;overflow:hidden !important;padding:0 !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg{width:100% !important;height:100% !important;display:block !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{padding-left:38px !important;gap:4px !important;min-height:18px !important;justify-content:flex-start !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{gap:3px !important;flex:0 0 auto !important;min-width:0 !important;padding-left:0 !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-option,.accessbit-widget-panel .color-adjustments-picker-card .color-option svg{width:14px !important;height:14px !important;min-width:14px !important;min-height:14px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg{width:16px !important;height:16px !important;min-width:16px !important;min-height:16px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn{flex-shrink:0 !important;margin-left:2px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4{font-size:11px !important;}.accessbit-widget-panel .panel-header .action-btn,.accessbit-widget-panel .widget-header .action-btn,.accessbit-widget-panel .reset-settings-btn{padding:3px 6px !important;min-height:20px !important;font-size:10px !important;gap:8px !important;}.accessbit-widget-panel .panel-header .reset-settings-icon svg,.accessbit-widget-panel .widget-header .reset-settings-icon svg{width:12px !important;height:12px !important;}.accessbit-widget-panel .panel-header .action-buttons,.accessbit-widget-panel .widget-header .action-buttons{gap:4px !important;}}@media (max-width:420px){.accessbit-widget-panel .color-adjustments-picker-card .color-option,.accessbit-widget-panel .color-adjustments-picker-card .color-option svg{width:14px !important;height:14px !important;min-width:14px !important;min-height:14px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{height:14px !important;min-height:14px !important;gap:2px !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{gap:2px !important;height:14px !important;min-height:14px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg{width:14px !important;height:14px !important;min-width:14px !important;min-height:14px !important;}.accessbit-widget-panel .panel-header .reset-settings-icon svg,.accessbit-widget-panel .widget-header .reset-settings-icon svg{width:12px !important;height:12px !important;}.accessbit-widget-panel .panel-header .action-btn,.accessbit-widget-panel .widget-header .action-btn,.accessbit-widget-panel .reset-settings-btn{padding:2px 4px !important;min-height:18px !important;font-size:8px !important;gap:6px !important;}}@media (max-width:768px) and (min-width:601px){.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2,.accessbit-panel-screenshot .panel-header h2,:host .accessbit-widget-panel .panel-header h2,:host .accessbit-widget-panel .widget-header h2{font-size:20px !important;line-height:24px !important;}.accessbit-widget-panel h3,.accessbit-widget-panel .content-adjustments-title,.accessbit-widget-panel .color-adjustments-title,.accessbit-widget-panel .interface-controls-title,.accessbit-widget-panel .placeholder-title,:host .accessbit-widget-panel .content-adjustments-title,:host .accessbit-widget-panel .color-adjustments-title,:host .accessbit-widget-panel .interface-controls-title,:host .accessbit-widget-panel .placeholder-title,:host .accessbit-widget-panel h3{font-size:17px !important;line-height:21px !important;}.accessbit-widget-panel .profile-item h4,.accessbit-panel-screenshot .profile-item h4,.accessbit-widget-panel .content-adjustments-card h4,.accessbit-widget-panel .contrast-style-card h4{font-size:16px !important;line-height:1.25 !important;}.accessbit-widget-panel .profile-item p,.accessbit-panel-screenshot .profile-item p{font-size:14px !important;line-height:1.35 !important;}.accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}.accessbit-widget-panel .profile-item .profile-info p{font-size:14px !important;line-height:1.35 !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,#accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,#accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,#accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,#accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,#accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value{font-size:13px !important;line-height:1.35 !important;white-space:nowrap !important;}#accessbit-widget-panel .useful-links-card h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,#accessbit-widget-panel .useful-links-card #useful-links-select,#accessbit-widget-panel .useful-links-card .useful-links-select-wrap select{font-size:16px !important;line-height:1.35 !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-option,.accessbit-widget-panel .color-adjustments-picker-card .color-option svg{width:22px !important;height:22px !important;min-width:22px !important;min-height:22px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg{width:22px !important;height:22px !important;min-width:22px !important;min-height:22px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{height:22px !important;min-height:22px !important;gap:6px !important;padding-left:55px !important;justify-content:flex-start !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{gap:6px !important;padding-left:0 !important;}.accessbit-widget-panel .panel-header .action-btn,.accessbit-widget-panel .widget-header .action-btn,.accessbit-widget-panel .reset-settings-btn{padding:6px 10px !important;min-height:30px !important;font-size:12px !important;gap:10px !important;}.accessbit-widget-panel .panel-header .reset-settings-icon svg,.accessbit-widget-panel .widget-header .reset-settings-icon svg{width:14px !important;height:14px !important;}}@media (max-width:1280px) and (min-width:769px){.accessbit-widget-panel .white-content-section .content-adjustments-title,.accessbit-widget-panel .white-content-section .color-adjustments-title,.accessbit-widget-panel .white-content-section .interface-controls-title,.accessbit-widget-panel .white-content-section>h3.placeholder-title{margin:18px 0 10px 0 !important;}.accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p,.accessbit-widget-panel .profile-item:has(#screen-reader) .profile-description p,.accessbit-widget-panel .profile-item:has(#screen-reader) .profile-info>div>p:first-of-type,.accessbit-widget-panel .profile-item:has(#keyboard-nav) small,.accessbit-widget-panel .profile-item:has(#screen-reader) small{font-size:14px !important;line-height:20px !important;}.accessbit-widget-panel .profile-item h4,.accessbit-panel-screenshot .profile-item h4{font-size:16px !important;line-height:1.25 !important;}.accessbit-widget-panel .profile-item p,.accessbit-panel-screenshot .profile-item p{font-size:13px !important;line-height:1.35 !important;}.accessbit-widget-panel .profile-item .profile-info h4,.accessbit-widget-panel .profile-item .profile-info p{font-size:inherit !important;line-height:inherit !important;}.accessbit-widget-panel .color-adjustments-picker-card .content-card-icon,.accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg{width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4{font-size:16px !important;line-height:1.25 !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-row{display:flex !important;align-items:center !important;justify-content:flex-start !important;gap:6px !important;padding-left:0 !important;height:28px !important;min-height:28px !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-options{flex:0 0 auto !important;display:flex !important;flex-wrap:nowrap !important;gap:6px !important;align-items:center !important;height:28px !important;min-height:28px !important;padding-left:48px !important;box-sizing:border-box !important;}.accessbit-widget-panel .color-adjustments-picker-card .color-option,.accessbit-widget-panel .color-adjustments-picker-card .color-option svg{width:26px !important;height:26px !important;min-width:26px !important;min-height:26px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg{width:26px !important;height:26px !important;min-width:26px !important;min-height:26px !important;}.accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn{flex-shrink:0 !important;align-self:center !important;margin:0 !important;padding:0 !important;}.accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,.accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4{font-size:14px !important;line-height:1.25 !important;}.accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,.accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,.accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,.accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,.accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value{font-size:12px !important;line-height:1.3 !important;}.accessbit-widget-panel .useful-links-card h4,.accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,.accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,.accessbit-widget-panel .useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card .useful-links-select-wrap select{font-size:16px !important;line-height:1.3 !important;}}.panel-header{display:flex;flex-direction:column;padding:10px 20px 14px 20px;background:transparent !important;color:#ffffff !important;border-radius:20px 20px 0 0 !important;border:none !important;position:relative;z-index:1002;overflow:hidden;min-height:210px;}.panel-header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#262E84,#2AA2F1);border-radius:20px 20px 0 0;z-index:-1;}.panel-header.accessbit-screenshot-header::before{display:none !important;}.panel-header.accessbit-screenshot-header{background:#34A2AB !important;border:none !important;padding-bottom:54px !important;border-radius:20px 20px 0 0 !important;}.accessbit-widget-panel .accessbit-panel-screenshot{min-width:0;width:100%;max-width:100%;box-sizing:border-box;}.accessbit-panel-screenshot>.white-content-section{scrollbar-width:none !important;-ms-overflow-style:none !important;}.accessbit-panel-screenshot>.white-content-section::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.accessbit-panel-screenshot .white-content-section .profile-item{display:flex !important;align-items:center !important;gap:12px !important;padding:12px 10px !important;background:#fff !important;border-radius:8px !important;margin-bottom:6px !important;border:2px solid transparent !important;}.accessbit-panel-screenshot .white-content-section>.profile-item{margin-bottom:5px !important;}.accessbit-panel-screenshot .white-content-section .profile-item.color-adjustments-picker-card{flex-direction:column !important;align-items:stretch !important;}.accessbit-panel-screenshot .white-content-section .profile-item.contrast-style-card{flex-direction:column !important;align-items:stretch !important;}.accessbit-panel-screenshot .white-content-section .profile-item.useful-links-card{flex-direction:column !important;align-items:flex-start !important;}.accessbit-panel-screenshot .white-content-section .profile-item.slider-card{align-items:flex-start !important;}.accessbit-panel-screenshot .profile-item .profile-info{flex:1;min-width:0;}.accessbit-panel-screenshot .white-content-section .profile-item:has(#keyboard-nav),.accessbit-panel-screenshot .white-content-section .profile-item:has(#screen-reader){align-items:flex-start !important;}.accessbit-panel-screenshot .white-content-section>h3:first-child,.accessbit-panel-screenshot .white-content-section>h3.placeholder-title{margin:16px 0 18px 0 !important;}.accessbit-panel-screenshot .white-content-section .content-adjustments-title{margin:43px 0 23px 0 !important;max-width:min(528px,100%) !important;width:100% !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important;box-sizing:border-box !important;font-family:Archivo;font-weight:600;font-size:26px;line-height:27px;letter-spacing:-1px;}.accessbit-panel-screenshot .white-content-section .color-adjustments-title{margin:26px 0 28px 0 !important;}.accessbit-panel-screenshot .white-content-section .interface-controls-title{margin:36px 0 18px 0 !important;}.accessbit-panel-screenshot .white-content-section>h3:first-child,.accessbit-panel-screenshot .white-content-section>h3.placeholder-title{max-width:min(528px,100%) !important;width:100% !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important;box-sizing:border-box !important;font-family:Archivo;font-weight:600;font-size:26px;line-height:27px;letter-spacing:-1px;}.accessbit-panel-screenshot .profile-item .toggle-switch{flex-shrink:0;margin-left:auto;margin-right:12px;}.accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on){border-color:#01CE9C !important;}.accessbit-panel-screenshot .profile-item .profile-item-icon,.accessbit-panel-screenshot .profile-item .content-card-icon{border:2px solid transparent !important;box-sizing:border-box !important;}.accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,.accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon{border:2px solid transparent !important;background:transparent !important;}.accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,.accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type{fill:#D9F8F0 !important;stroke:#01CE9C !important;stroke-width:2px !important;}@media (min-width:769px){.accessbit-panel-screenshot .toggle-switch{width:80px !important;height:40px !important;}.accessbit-panel-screenshot .toggle-switch .slider{width:80px !important;height:40px !important;border-radius:99px !important;box-shadow:0px 1px 3px 0px #00000033 inset !important;}.accessbit-panel-screenshot .toggle-switch .slider:before{height:32px !important;width:32px !important;left:4px !important;bottom:4px !important;border-radius:50% !important;}.accessbit-panel-screenshot .toggle-switch input:checked+.slider{background-color:#00CE9C !important;}.accessbit-panel-screenshot .toggle-switch input:checked+.slider:before{transform:translateX(40px) !important;}}.accessbit-panel-screenshot .toggle-switch input:not(:checked)+.slider::after{content:"" !important;display:block !important;right:16px !important;top:50% !important;transform:translateY(-50%) rotate(0deg) !important;width:12px !important;height:12px !important;opacity:1 !important;border-width:2px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;transition:none !important;}.accessbit-panel-screenshot .toggle-switch input:checked+.slider::after{content:"" !important;display:block !important;left:22px !important;right:auto !important;top:50% !important;transform:translateY(-50%) !important;width:2px !important;height:12px !important;background:white !important;border:none !important;border-radius:0 !important;pointer-events:none !important;transition:none !important;opacity:1 !important;}.accessbit-panel-screenshot .panel-header .header-center{align-items:center !important;padding-left:0 !important;padding-right:0 !important;overflow:visible !important;}.accessbit-panel-screenshot .panel-header .header-center h2{font-family:Archivo;font-weight:600;font-style:normal;font-size:30px;line-height:36px;letter-spacing:-0.6px;color:#FFFFFF !important;text-align:center !important;margin-bottom:0 !important;leading-trim:cap;text-box-trim:cap;}.accessbit-panel-screenshot .panel-header .header-center .action-buttons{margin-top:19px !important;}.accessbit-panel-screenshot .panel-header .action-buttons{justify-content:center !important;align-items:center !important;gap:12px !important;width:100%;overflow:hidden !important;}.accessbit-panel-screenshot .action-buttons{max-width:100% !important;flex-wrap:wrap !important;min-width:0 !important;}.accessbit-panel-screenshot .panel-header .action-btn{flex:0 0 auto !important;min-width:0 !important;max-width:100% !important;height:36px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;}.accessbit-panel-screenshot .panel-header #reset-settings,.accessbit-panel-screenshot .panel-header .reset-settings-btn{min-width:152.1015625px !important;width:max-content !important;max-width:100% !important;height:36px !important;border-radius:10px !important;border:1px solid #FFFFFF4D !important;background:#FFFFFF33 !important;opacity:1 !important;display:inline-flex !important;flex-direction:row !important;flex-wrap:nowrap !important;align-items:center !important;justify-content:center !important;gap:10px !important;padding-left:14px !important;padding-right:19.1px !important;box-sizing:border-box !important;font-family:Archivo;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center !important;color:#FFFFFF !important;}.accessbit-panel-screenshot .panel-header #reset-settings .reset-settings-icon,.accessbit-panel-screenshot .panel-header .reset-settings-btn .reset-settings-icon{display:inline-flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;line-height:0;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header #reset-settings .reset-settings-icon svg,.accessbit-panel-screenshot .panel-header .reset-settings-btn .reset-settings-icon svg{display:block !important;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header #statement,.accessbit-panel-screenshot .panel-header .statement-btn{min-width:124.6328125px !important;width:max-content !important;max-width:100% !important;height:36px !important;border-radius:10px !important;border:1px solid #FFFFFF4D !important;background:#FFFFFF33 !important;opacity:1 !important;display:inline-flex !important;flex-direction:row !important;flex-wrap:nowrap !important;align-items:center !important;justify-content:center !important;gap:9px !important;padding-left:14px !important;padding-right:18.63px !important;box-sizing:border-box !important;font-family:Archivo;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center !important;color:#FFFFFF !important;}.accessbit-panel-screenshot .panel-header #statement .statement-btn-icon,.accessbit-panel-screenshot .panel-header .statement-btn .statement-btn-icon{display:inline-flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;line-height:0;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header #statement .statement-btn-icon svg,.accessbit-panel-screenshot .panel-header .statement-btn .statement-btn-icon svg{display:block !important;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header #hide-interface,.accessbit-panel-screenshot .panel-header .hide-interface-btn{min-width:149.6171875px !important;width:max-content !important;height:36px !important;border-radius:10px !important;border:1px solid #FFFFFF4D !important;background:#FFFFFF33 !important;opacity:1 !important;display:inline-flex !important;flex-direction:row !important;flex-wrap:nowrap !important;align-items:center !important;justify-content:center !important;gap:11px !important;padding-left:14px !important;padding-right:14px !important;box-sizing:border-box !important;font-family:Archivo;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;text-align:center !important;color:#FFFFFF !important;}.accessbit-panel-screenshot .panel-header #hide-interface .hide-interface-btn-icon,.accessbit-panel-screenshot .panel-header .hide-interface-btn .hide-interface-btn-icon{display:inline-flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;line-height:0;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header #hide-interface .hide-interface-btn-icon svg,.accessbit-panel-screenshot .panel-header .hide-interface-btn .hide-interface-btn-icon svg{display:block !important;vertical-align:middle !important;}.accessbit-panel-screenshot .panel-header .close-btn-container{width:55px !important;height:55px !important;margin-right:17px !important;border-bottom-right-radius:20px !important;background:rgba(255,255,255,0.15) !important;transform:rotate(0deg) !important;}.accessbit-panel-screenshot .panel-header .close-btn-container .close-btn{position:absolute !important;top:0 !important;left:0 !important;width:100% !important;height:100% !important;min-width:0 !important;min-height:0 !important;max-width:none !important;max-height:none !important;padding:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;border-radius:0 !important;}.close-btn{cursor:pointer !important;font-size:24px;padding:0 !important;position:absolute !important;top:50% !important;left:50% !important;right:auto !important;transform:translate(-50%,-50%) !important;z-index:1005 !important;background:transparent !important;border:none !important;color:white;width:48px !important;height:48px !important;min-width:48px !important;min-height:48px !important;max-width:48px !important;max-height:48px !important;display:flex !important;align-items:center !important;justify-content:center !important;box-sizing:border-box !important;margin:0 !important;outline:none !important;border-radius:8px !important;transition:background-color 0.2s ease !important;overflow:visible !important;line-height:1 !important;text-align:center !important;}.accessbit-widget-panel .panel-header .close-btn-container,.accessbit-panel-screenshot .panel-header .close-btn-container{position:absolute !important;top:0 !important;left:0 !important;width:55px !important;height:55px !important;display:flex !important;align-items:center !important;justify-content:center !important;overflow:hidden !important;}.accessbit-widget-panel .panel-header .close-btn-container .close-btn,.accessbit-panel-screenshot .panel-header .close-btn-container .close-btn{position:absolute !important;top:50% !important;left:50% !important;right:auto !important;transform:translate(-50%,-50%) !important;}.close-btn svg,.accessbit-widget-panel .close-btn svg,.accessbit-panel-screenshot .close-btn svg{display:block !important;margin:0 auto !important;}.close-btn:hover{color:white;background-color:rgba(255,255,255,0.1) !important;}.accessbit-panel-screenshot .panel-header .close-btn-container .close-btn:hover{border-bottom-right-radius:20px !important;}.close-btn *{pointer-events:none !important;}.close-btn{pointer-events:auto !important;cursor:pointer !important;}.close-btn::before,.close-btn::after{pointer-events:none !important;}.close-btn{background-color:transparent !important;background-image:none !important;}.close-btn i,.close-btn span,.close-btn div{pointer-events:none !important;user-select:none !important;position:relative !important;z-index:2 !important;}.close-btn::before{content:'' !important;position:absolute !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;width:100% !important;height:100% !important;pointer-events:auto !important;z-index:1 !important;}.header-content{display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:10px;position:relative;z-index:1005;}.accessbit-widget-panel h2{text-align:center;margin:0 0 10px 0;color:#ffffff;font-family:Archivo;font-weight:600 !important;font-style:normal;font-size:30px;line-height:36px;letter-spacing:-0.6px;leading-trim:cap;text-box-trim:cap;position:relative;z-index:1005;white-space:nowrap;}@media (min-width:1281px){.accessbit-widget-panel h2{font-size:24px !important;}}@media (min-width:768px) and (max-width:1280px){.accessbit-widget-panel h2{font-size:24px !important;}}@media (min-width:1281px){#accessbit-widget-panel .white-content-section h3{font-size:18px !important;}.white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){font-size:18px !important;}#accessbit-widget-panel .profile-item h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p{font-size:14px !important;line-height:1.35 !important;}#accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p{font-family:Archivo;font-weight:400;font-style:italic;font-size:14px !important;color:#4A5565 !important;line-height:20px !important;letter-spacing:-0.15px;}#accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p:last-child{color:#524072 !important;}}@media (min-width:768px) and (max-width:1280px){#accessbit-widget-panel .white-content-section h3{font-size:18px !important;}.white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){font-size:18px !important;}}.accessbit-widget-panel .panel-header h2,.accessbit-widget-panel .widget-header h2{font-family:Archivo;font-weight:600 !important;font-style:normal;}.profile-description{word-wrap:break-word;word-break:break-word;overflow-wrap:break-word;hyphens:auto;line-height:1.4;margin:8px 0;}.profile-description p{margin:4px 0;font-size:13px;color:#64748b;}.profile-item:has(#screen-reader) .profile-info>div>p:first-of-type{font-family:Archivo;font-weight:400;font-style:normal;font-size:16px;line-height:20px;letter-spacing:-0.15px;vertical-align:bottom;color:#4A5565;leading-trim:cap;text-box-trim:cap;}.profile-item:has(#keyboard-nav) .profile-description p,.profile-item:has(#screen-reader) .profile-description p{font-family:Archivo;font-weight:400;font-style:italic;font-size:14px;line-height:20px;letter-spacing:-0.15px;vertical-align:bottom;color:#524072;leading-trim:cap;text-box-trim:cap;}.profile-item:has(#keyboard-nav) .profile-description p:last-child{color:#524072 !important;}.profile-item small{font-size:12px;font-weight:normal;}.profile-item small.profile-activates-label{font-family:Archivo;font-weight:400;font-style:italic;font-size:14px;line-height:20px;letter-spacing:-0.15px;vertical-align:bottom;color:#524072;leading-trim:cap;text-box-trim:cap;}.profile-item{word-wrap:break-word !important;overflow-wrap:break-word !important;word-break:break-word !important;hyphens:auto !important;}.profile-info{flex:1;min-width:0;}.profile-info div{min-width:0;word-wrap:break-word !important;word-break:break-word !important;overflow-wrap:break-word !important;hyphens:auto !important;}.profile-item:has(#keyboard-nav),.profile-item:has(#screen-reader){align-items:flex-start;}.action-buttons{display:flex !important;flex-direction:row !important;flex-wrap:nowrap !important;gap:12px;justify-content:center;align-items:center;width:100%;}.button-row{display:flex;flex-direction:row;gap:10px;justify-content:center;align-items:center;}.action-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(217,217,217,0.3) !important;border:2px solid rgba(217,217,217,0.3) !important;color:#ffffff !important;border-radius:60px;cursor:pointer;font-weight:600;transition:all 0.3s ease;white-space:nowrap;font-size:12px;justify-content:center;}.action-btn:hover{background:#6366f1;color:#ffffff;transform:none;box-shadow:none;}.white-content-section{padding:0 0 20px 0;background:#EAECF2 !important;border-radius:0 !important;margin-top:-20px !important;position:relative;z-index:1003;padding-top:12px;}@media (max-width:1279px){#accessbit-widget-panel.accessbit-widget-panel{background:rgb(52,162,171) !important;background-color:rgb(52,162,171) !important;border-radius:20px !important;overflow:hidden !important;padding:0 !important;}.accessbit-panel-screenshot{background:rgb(52,162,171) !important;background-color:rgb(52,162,171) !important;border-radius:20px !important;overflow:hidden !important;width:100% !important;}.panel-header.accessbit-screenshot-header{border-radius:20px 20px 0 0 !important;width:100% !important;margin:0 !important;box-shadow:0 0 0 1px rgb(52,162,171) !important;position:relative !important;z-index:2 !important;}.white-content-section{border-radius:0 !important;margin:0 !important;width:100% !important;z-index:1 !important;}.accessbit-widget-panel .panel-footer{border-radius:0 0 20px 20px !important;}}.white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){color:#334155;margin-top:12px;margin-bottom:12px;font-size:18px;font-weight:600;text-align:left;max-width:min(528px,100%);margin-left:auto;margin-right:auto;padding-left:0;padding-right:0;box-sizing:border-box;}.content-adjustments-section{margin-top:16px;margin-bottom:8px;max-width:min(528px,100%);margin-left:auto;margin-right:auto;width:100%;overflow:visible !important;overflow-x:visible !important;overflow-y:visible !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.content-adjustments-section::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.content-adjustments-title,.color-adjustments-title,.interface-controls-title,.placeholder-title{font-family:Archivo !important;font-weight:600 !important;font-style:normal;font-size:26px;line-height:27px;letter-spacing:-1px;leading-trim:cap;text-box-trim:cap;color:#524072 !important;margin:0 0 12px 0 !important;text-align:left !important;outline:none !important;box-shadow:none !important;display:block !important;min-height:27px !important;contain:layout !important;user-select:none !important;pointer-events:none !important;}.content-adjustments-title:hover,.content-adjustments-title:focus,.color-adjustments-title:hover,.color-adjustments-title:focus,.interface-controls-title:hover,.interface-controls-title:focus,.placeholder-title:hover,.placeholder-title:focus{outline:none !important;box-shadow:none !important;}:host .accessbit-widget-panel .content-adjustments-title,:host .accessbit-widget-panel .color-adjustments-title,:host .accessbit-widget-panel .interface-controls-title,:host .accessbit-widget-panel .placeholder-title{font-family:Archivo;font-weight:600;font-style:normal;font-size:26px;line-height:27px;letter-spacing:-1px;leading-trim:cap;text-box-trim:cap;color:#524072 !important;text-align:left !important;}.content-adjustments-title,.placeholder-title{opacity:1 !important;min-height:27px !important;white-space:nowrap !important;overflow:visible !important;}.color-adjustments-section{margin-top:16px;margin-bottom:8px;max-width:min(440px,100%);margin-left:auto;margin-right:auto;width:100%;overflow:visible !important;overflow-x:hidden !important;overflow-y:visible !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.color-adjustments-section::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.color-adjustments-toggles-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;}.color-adjustments-card{background:#FFFFFF;border-radius:7px;padding:15px 22px;min-height:84px;display:flex;align-items:center;gap:12px;border:2px solid transparent;box-sizing:border-box;}.color-adjustments-card .content-card-icon{width:44px !important;height:44px !important;min-width:44px !important;min-height:44px !important;flex:0 0 44px !important;flex-shrink:0 !important;border-radius:50%;background:transparent !important;display:flex;align-items:center;justify-content:center;box-sizing:content-box !important;padding:0 !important;overflow:hidden !important;}.color-adjustments-card .content-card-icon svg{width:24px;height:24px;}.color-adjustments-card .content-card-body{flex:1;min-width:0;}.color-adjustments-card .content-card-body h4{margin:0;font-family:Archivo;font-size:21px;font-weight:500;line-height:27px;letter-spacing:-0.44px;color:#1E2939;}.color-adjustments-card .toggle-switch{margin-left:auto;flex-shrink:0;}.color-adjustments-card.dark-contrast-card{flex-direction:column;align-items:stretch;width:257px;min-height:84px;border-radius:7px;opacity:1;box-sizing:border-box;border:1px solid rgba(0,0,0,0.1);overflow:visible;}.color-adjustments-card .content-card-icon.dark-contrast-icon svg{width:43px;height:43px;}.dark-contrast-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.dark-contrast-top .toggle-switch{margin-left:auto;flex-shrink:0;}.dark-contrast-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;}.color-adjustments-card.light-contrast-card{flex-direction:column;align-items:stretch;width:257px;min-height:84px;border-radius:7px;opacity:1;box-sizing:border-box;border:1px solid rgba(0,0,0,0.1);overflow:visible;}.color-adjustments-card .content-card-icon.light-contrast-icon svg{width:43px;height:43px;}.light-contrast-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.light-contrast-top .toggle-switch{margin-left:auto;flex-shrink:0;}.light-contrast-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;}.color-adjustments-card.high-contrast-card,.color-adjustments-card.high-saturation-card,.color-adjustments-card.low-saturation-card,.color-adjustments-card.monochrome-card{flex-direction:column;align-items:stretch;width:257px;min-height:84px;border-radius:7px;opacity:1;box-sizing:border-box;border:1px solid rgba(0,0,0,0.1);overflow:visible;}.high-contrast-top,.high-saturation-top,.low-saturation-top,.monochrome-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.high-contrast-top .toggle-switch,.high-saturation-top .toggle-switch,.low-saturation-top .toggle-switch,.monochrome-top .toggle-switch{margin-left:auto;flex-shrink:0;}.color-adjustments-card .content-card-icon.high-contrast-icon svg{width:43px;height:43px;}.color-adjustments-card .content-card-icon.high-saturation-icon svg{width:43px;height:43px;}.color-adjustments-card .content-card-icon.low-saturation-icon svg{width:43px;height:43px;}.color-adjustments-card .content-card-icon.monochrome-icon svg{width:43px;height:43px;}.high-contrast-card h4,.high-saturation-card h4,.low-saturation-card h4,.monochrome-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;}.contrast-style-card{display:flex;flex-direction:column;align-items:stretch;width:257px;min-height:84px;border-radius:7px;opacity:1;box-sizing:border-box;border:1px solid rgba(0,0,0,0.1);overflow:hidden;background:#FFFFFF;padding:15px 22px;}.contrast-style-card .card-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.contrast-style-card .card-top .toggle-switch{margin-left:auto;flex-shrink:0;}.contrast-style-card .card-top .content-card-icon{width:44px !important;height:44px !important;min-width:44px !important;min-height:44px !important;flex:0 0 44px !important;flex-shrink:0 !important;border-radius:50%;background:transparent !important;display:flex;align-items:center;justify-content:center;box-sizing:content-box !important;padding:0 !important;overflow:hidden !important;}.contrast-style-card .card-top .content-card-icon svg{width:24px;height:24px;}.contrast-style-card .content-card-icon.mute-sound-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.hide-images-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.read-mode-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.reading-guide-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.stop-animation-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.reading-mask-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.highlight-focus-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.highlight-hover-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.big-black-cursor-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.big-white-cursor-icon svg{width:43px;height:43px;}.contrast-style-card .content-card-icon.readable-font-icon svg,.contrast-style-card .content-card-icon.highlight-titles-icon svg,.contrast-style-card .content-card-icon.highlight-links-icon svg,.contrast-style-card .content-card-icon.text-magnifier-icon svg{width:43px;height:43px;max-width:98% !important;max-height:98% !important;height:auto !important;}.contrast-style-card .content-card-icon.page-structure-icon svg,.contrast-style-card .content-card-icon.voice-navigation-icon svg{width:43px !important;height:43px !important;max-width:98% !important;max-height:98% !important;}.contrast-style-card .content-card-icon.text-magnifier-icon{min-width:43px;min-height:43px;border:1px solid rgba(0,0,0,0.12);box-sizing:border-box;}.contrast-style-card .content-card-icon.text-magnifier-icon svg{width:43px !important;height:43px !important;min-width:43px;min-height:43px;display:block !important;}.contrast-style-card .content-card-icon.dark-contrast-icon svg,.contrast-style-card .content-card-icon.light-contrast-icon svg,.contrast-style-card .content-card-icon.high-contrast-icon svg,.contrast-style-card .content-card-icon.high-saturation-icon svg,.contrast-style-card .content-card-icon.low-saturation-icon svg,.contrast-style-card .content-card-icon.monochrome-icon svg{width:43px;height:43px;max-width:98% !important;max-height:98% !important;height:auto !important;}.contrast-style-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;white-space:normal;overflow-wrap:anywhere;word-break:break-word;hyphens:auto;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}#accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4{font-size:17px;line-height:21px;-webkit-line-clamp:4;}#accessbit-widget-panel[data-lang="ru"] .contrast-style-card{min-height:118px;padding:12px 18px;}#accessbit-widget-panel[data-lang="ru"] .contrast-style-card .card-top{min-height:40px;}#accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4{margin-top:6px;}.cursor-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;margin-bottom:16px;max-width:min(440px,100%);margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}.interface-controls-section{margin-top:16px;margin-bottom:8px;max-width:min(440px,100%);margin-left:auto;margin-right:auto;width:100%;overflow:visible !important;overflow-x:hidden !important;overflow-y:visible !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.interface-controls-section::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.interface-controls-title{font-family:Archivo;font-weight:600;font-style:normal;font-size:26px;line-height:27px;letter-spacing:-1px;color:#524072 !important;margin:36px 0 18px 0 !important;text-align:left !important;display:block !important;min-height:27px !important;contain:layout !important;}@media (max-width:768px){:host .accessbit-widget-panel .content-adjustments-title,:host .accessbit-widget-panel .color-adjustments-title,:host .accessbit-widget-panel .interface-controls-title,:host .accessbit-widget-panel .placeholder-title{font-size:15px !important;line-height:19px !important;}}.interface-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}.color-adjustments-pickers{display:flex;flex-direction:column;gap:12px;}.color-adjustments-picker-card{background:#FFFFFF;border-radius:7px;padding:15px 22px;min-height:84px;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(0,0,0,0.1);box-sizing:border-box;}.color-adjustments-picker-card .content-card-icon{width:43px;height:43px;flex-shrink:0;border-radius:50%;background:transparent !important;display:flex;align-items:center;justify-content:center;overflow:hidden !important;}.color-adjustments-picker-card .content-card-icon svg{width:43px;height:43px;}.color-adjustments-picker-card .picker-card-header{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:nowrap;width:100%;}.color-adjustments-picker-card .picker-card-header h4{margin:0;font-family:Archivo;font-size:21px;font-weight:500;line-height:27px;letter-spacing:-0.44px;color:#1E2939;flex-shrink:0;}.color-adjustments-picker-card .picker-row{display:flex;align-items:center;justify-content:flex-start;gap:15.95px;flex-wrap:nowrap;width:100%;min-width:0;height:34px;min-height:34px;}.color-adjustments-picker-card .color-options{display:flex;align-items:center;gap:15px;flex-wrap:nowrap;flex:0 0 auto;min-width:0;height:34px;align-self:stretch;padding-left:55px;box-sizing:border-box;}.color-adjustments-picker-card .color-option{width:34px;height:34px;border-radius:50%;border:2px solid #ddd;cursor:pointer;flex-shrink:0;box-sizing:border-box;transition:border-color 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;overflow:hidden;}.color-adjustments-picker-card .color-option svg{width:34px;height:34px;display:block;flex-shrink:0;}.color-adjustments-picker-card .color-option:hover{border-color:#999;}.color-adjustments-picker-card .color-option.selected{border-color:#14b8a6;outline:2px solid #14b8a6;outline-offset:2px;box-shadow:none !important;}.color-adjustments-picker-card .picker-clear-btn{width:34px;height:34px;min-height:34px;padding:0;margin:0;border:none;background:transparent;cursor:pointer;flex-shrink:0;align-self:center;display:flex;align-items:center;justify-content:center;border-radius:50%;line-height:0;vertical-align:middle;}.color-adjustments-picker-card .picker-clear-btn:hover{background:rgba(0,0,0,0.06);}.color-adjustments-picker-card .picker-clear-btn svg{width:34px;height:34px;display:block;vertical-align:middle;}.content-adjustments-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;}.content-adjustments-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px;}.content-adjustments-card{background:#FFFFFF;border-radius:7px;padding:15px 22px;min-height:84px;display:flex;align-items:center;gap:15px;border:2px solid transparent;transition:all 0.2s ease;box-sizing:border-box;}.content-adjustments-card.profile-item{margin-bottom:0;max-width:none;}@media (max-width:768px){.content-adjustments-card{padding:12px !important;}}.content-adjustments-card.card-active-green{border-color:#00CE9C;background:rgba(0,206,156,0.06);}.content-adjustments-card.card-active-blue{border-color:#3B82F6;background:rgba(59,130,246,0.06);}.content-adjustments-card.highlight-titles-card{flex-direction:column;align-items:stretch;width:257px;height:111px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:111px;}.accessbit-widget-panel .content-adjustments-card.highlight-titles-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.highlight-titles-icon svg{width:43px;height:43px;}.highlight-titles-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.highlight-titles-top .toggle-switch{margin-left:auto;flex-shrink:0;}.highlight-titles-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}.accessbit-widget-panel .content-adjustments-card.highlight-titles-card .highlight-titles-icon svg{width:43px;height:43px;}.ht-ring-on{display:none;}.ps-ring-on,.vn-ring-on{display:none;}.contrast-style-card.page-structure-on .ps-ring-off,.contrast-style-card.voice-navigation-on .vn-ring-off{display:none;}.contrast-style-card.page-structure-on .ps-ring-on,.contrast-style-card.voice-navigation-on .vn-ring-on{display:block;}.contrast-style-card.page-structure-on .ps-icon-off,.contrast-style-card.voice-navigation-on .vn-icon-off{display:none;}.contrast-style-card.page-structure-on .ps-icon-on,.contrast-style-card.voice-navigation-on .vn-icon-on{display:block;}.accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-ring-off{fill:#D9F8F0;stroke:#01CE9C;}.accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-icon-off path{fill:#01CE9C;stroke:#01CE9C;}.content-adjustments-card.highlight-links-card{flex-direction:column;align-items:stretch;width:257px;height:111px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:111px;}.accessbit-widget-panel .content-adjustments-card.highlight-links-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.highlight-links-icon svg{width:43px;height:43px;}.highlight-links-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.highlight-links-top .toggle-switch{margin-left:auto;flex-shrink:0;}.highlight-links-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}.content-adjustments-card.text-magnifier-card{flex-direction:column;align-items:stretch;width:257px;height:111px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:111px;}.accessbit-widget-panel .content-adjustments-card.text-magnifier-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.text-magnifier-icon svg{width:43px;height:43px;}.text-magnifier-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.text-magnifier-top .toggle-switch{margin-left:auto;flex-shrink:0;}.text-magnifier-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}.content-adjustments-card.align-left-card{flex-direction:column;align-items:stretch;width:166px;height:140px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:140px;}.accessbit-widget-panel .content-adjustments-card.align-left-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.align-left-icon svg{width:43px;height:43px;}.align-left-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.align-left-card .align-left-label{display:flex;flex-direction:column;flex:1;min-height:0;cursor:pointer;margin:-15px -22px;padding:15px 22px;box-sizing:border-box;}.align-left-card .toggle-switch-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.align-left-card .align-left-checkbox-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;pointer-events:none;}.align-left-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-style:normal;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;leading-trim:cap;text-box-trim:cap;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;text-align:left !important;}.content-adjustments-card.align-center-card{flex-direction:column;align-items:stretch;width:166px;height:140px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:140px;}.accessbit-widget-panel .content-adjustments-card.align-center-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.align-center-icon svg{width:43px;height:43px;}.align-center-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.align-center-card .align-center-label{display:flex;flex-direction:column;flex:1;min-height:0;cursor:pointer;margin:-15px -22px;padding:15px 22px;box-sizing:border-box;}.align-center-card .toggle-switch-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.align-center-card .align-center-checkbox-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;pointer-events:none;}.align-center-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-style:normal;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;leading-trim:cap;text-box-trim:cap;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;text-align:left !important;}.content-adjustments-card.align-right-card{flex-direction:column;align-items:stretch;width:166px;height:140px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:visible !important;min-height:140px;}.accessbit-widget-panel .content-adjustments-card.align-right-card{overflow:visible !important;}.content-adjustments-card .content-card-icon.align-right-icon svg{width:43px;height:43px;}.align-right-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:visible !important;min-height:44px;}.align-right-card .align-right-label{display:flex;flex-direction:column;flex:1;min-height:0;cursor:pointer;margin:-15px -22px;padding:15px 22px;box-sizing:border-box;}.align-right-card .toggle-switch-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.align-right-card .align-right-checkbox-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;pointer-events:none;}.align-right-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-style:normal;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;leading-trim:cap;text-box-trim:cap;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;text-align:left !important;}#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-left-card,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-center-card,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-right-card{height:auto !important;min-height:176px !important;overflow:hidden !important;}#accessbit-widget-panel[data-lang="ru"] .align-left-card h4,#accessbit-widget-panel[data-lang="ru"] .align-center-card h4,#accessbit-widget-panel[data-lang="ru"] .align-right-card h4{font-size:17px !important;line-height:21px !important;white-space:normal !important;overflow-wrap:anywhere !important;word-break:break-word !important;display:-webkit-box !important;-webkit-box-orient:vertical !important;-webkit-line-clamp:5 !important;overflow:hidden !important;text-overflow:ellipsis !important;}#accessbit-widget-panel[data-lang="ru"] .content-scaling-header .content-adjustments-slider-value,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card .content-adjustments-slider-value,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #content-scale-value,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #font-size-value,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #letter-spacing-value,#accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #line-height-value{white-space:nowrap !important;flex-shrink:0 !important;}.content-adjustments-card.highlight-titles-on{border-color:#00CE9C;background:rgba(0,206,156,0.06);}.content-adjustments-card.highlight-links-on{border-color:#3B82F6;background:rgba(59,130,246,0.06);}.content-adjustments-card .content-card-icon{width:44px !important;height:44px !important;min-width:44px !important;min-height:44px !important;flex:0 0 44px !important;flex-shrink:0 !important;border-radius:50%;background:transparent !important;display:flex;align-items:center;justify-content:center;box-sizing:content-box !important;padding:0 !important;overflow:hidden !important;}.content-adjustments-card .content-card-icon svg{width:24px;height:24px;max-width:98% !important;max-height:98% !important;height:auto !important;}.content-adjustments-card .content-card-icon.content-scaling-icon svg{width:43px;height:43px;}.content-adjustments-card.content-scaling-card{display:flex;flex-direction:row;align-items:flex-start;flex-wrap:nowrap;gap:15px;margin-bottom:14px !important;padding:15px 22px;}.content-adjustments-card.content-scaling-card .content-scaling-header{display:flex;flex-direction:row;align-items:center;gap:12px;flex-wrap:nowrap;}.content-adjustments-card.slider-card{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;overflow:visible !important;overflow-x:visible !important;padding-right:0;}.content-adjustments-card.slider-card .content-scaling-header{display:flex;flex-direction:row;align-items:center;gap:12px;flex-wrap:nowrap;min-height:43px;}.accessbit-panel-screenshot .content-adjustments-card.slider-card{margin-bottom:14px !important;}.content-adjustments-card.slider-card .content-scaling-header h4,.content-adjustments-card.slider-card .content-card-body h4{display:flex;align-items:center;margin:0;}.accessbit-widget-panel .content-adjustments-card.content-scaling-card{margin-bottom:14px !important;}.content-adjustments-card .content-card-icon.readable-font-icon svg{width:43px;height:43px;}.content-adjustments-card.readable-font-card{flex-direction:column;align-items:stretch;width:257px;height:111px;border-radius:7px;opacity:1;box-sizing:border-box;overflow:hidden !important;min-height:111px;}.accessbit-widget-panel .content-adjustments-card.readable-font-card{overflow:hidden !important;}.readable-font-top{display:flex;align-items:center;gap:12px;flex-shrink:0;overflow:hidden;min-height:0;}.readable-font-top .toggle-switch{margin-left:auto;flex-shrink:0;}.readable-font-card h4{margin:0;margin-top:8px;font-family:Archivo;font-weight:500;font-style:normal;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;leading-trim:cap;text-box-trim:cap;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}.accessbit-widget-panel .content-adjustments-card.readable-font-card .readable-font-icon svg{width:43px;height:43px;}.readable-font-ring-on,.readable-font-icon-on{display:none;}.contrast-style-card.readable-font-on .readable-font-ring-off,.contrast-style-card.readable-font-on .readable-font-icon-off{display:none;}.contrast-style-card.readable-font-on .readable-font-ring-on,.contrast-style-card.readable-font-on .readable-font-icon-on{display:block;}.content-scaling-header{display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;}.label-with-icon-gap{display:flex;align-items:center;position:relative;padding-left:58px;}.label-with-icon-gap h4{margin:0;white-space:nowrap;}.content-scaling-header .content-adjustments-slider-value{margin:0;line-height:1;text-align:right;white-space:nowrap;display:inline-flex;align-items:baseline;flex-shrink:0;}.content-adjustments-card.slider-card .toggle-switch-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.content-adjustments-card:not(.slider-card) .content-card-icon{width:43px !important;height:43px !important;min-width:43px !important;flex:0 0 43px !important;flex-shrink:0 !important;border-radius:50%;background:#ECEDED;display:flex;align-items:center;justify-content:center;box-sizing:content-box !important;padding:0 !important;}.content-adjustments-card.slider-card .content-card-icon{position:absolute;left:0;top:50%;transform:translateY(-50%);width:43px;height:43px;background:transparent;border-radius:0;display:flex;align-items:center;justify-content:center;}.content-adjustments-card .content-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;align-items:stretch !important;}.content-adjustments-card .content-card-body h4{margin:0;font-family:Archivo;font-size:21px;font-weight:500;line-height:27px;letter-spacing:-0.44px;color:#1E2939;}.content-adjustments-card.content-scaling-card .content-card-body h4,.content-adjustments-card.slider-card .content-card-body h4{margin-top:0;line-height:23px;}.content-adjustments-card.slider-card .content-card-body{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;}.content-adjustments-card .content-card-body p{margin:0;font-family:Archivo;font-size:16px;font-weight:400;color:#4A5565;}.content-adjustments-card.slider-card .content-card-body{flex:1;}.content-adjustments-slider-row{display:flex;align-items:center;gap:12px;margin-top:14px;margin-bottom:14px;overflow:visible !important;}.scaling-slider-svg-wrap{margin-top:12px;display:block;overflow:visible !important;margin-left:58px !important;width:calc(100% - 58px) !important;}.scaling-slider-track{position:relative;height:12px !important;min-height:12px !important;margin:0 !important;padding:0 !important;direction:ltr;overflow:visible !important;background:transparent;width:100% !important;display:block;}.scaling-slider-track::before{content:none !important;}.scaling-track-left,.scaling-track-right{display:none !important;}.accessbit-widget-panel .profile-item.slider-card{overflow:visible !important;overflow-x:visible !important;}.accessbit-widget-panel .profile-item.slider-card .content-card-body{overflow:visible !important;}.scaling-slider-track .scaling-range-overlay{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:100% !important;max-width:100%;height:12px !important;min-height:12px !important;margin:0 !important;background:#EAECF2 !important;border-radius:37px !important;cursor:pointer;z-index:0;direction:ltr;-webkit-appearance:none;appearance:none;}@media (min-width:1280px){.content-card-body{width:391px !important;max-width:391px !important;}.content-adjustments-card.slider-card .content-card-body{width:440px !important;max-width:440px !important;}.content-adjustments-card.slider-card .content-card-icon svg{width:43px !important;height:43px !important;}}@media (max-width:1279px){.content-card-body{width:100%;}.content-adjustments-card{padding:15px 12px;}}#content-scale-range{direction:ltr !important;}.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track,.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay,.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track .scaling-range-overlay{direction:ltr !important;}.scaling-slider-track .scaling-range-overlay::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:transparent;cursor:pointer;border:none;}.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-webkit-slider-thumb{width:36px !important;height:36px !important;cursor:grab !important;}.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-moz-range-thumb{width:36px !important;height:36px !important;cursor:grab !important;}.accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-thumb{transition:none !important;}.scaling-slider-track .scaling-range-overlay::-webkit-slider-runnable-track{height:12px !important;background:#EAECF2 !important;border-radius:37px;cursor:pointer;-webkit-appearance:none;}.scaling-slider-track .scaling-range-overlay::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:transparent;cursor:pointer;border:none;}.scaling-slider-track .scaling-range-overlay::-moz-range-track{height:12px !important;background:#EAECF2 !important;border-radius:37px;cursor:pointer;}.scaling-slider-track .scaling-pointer-overlay{position:absolute;left:0;right:0;top:0;bottom:0;z-index:2;cursor:pointer;pointer-events:none;}.scaling-slider-track .scaling-range-overlay{pointer-events:auto !important;cursor:pointer;}.scaling-slider-track{overflow:visible !important;}.scaling-slider-track .scaling-slider-thumb{position:absolute;top:50%;left:50%;width:36px;height:36px;margin-left:-18px;margin-top:-18px;pointer-events:none;transition:left 0.12s ease;}.scaling-slider-track .scaling-thumb-circle{width:36px;height:36px;border-radius:99px;background:linear-gradient(180deg,#00CE9C 0%,#01B086 100%);box-shadow:0px 1px 2px 0px #00000033,0px 4px 4px 0px #0000002B,0px 10px 6px 0px #0000001A,0px 17px 7px 0px #00000008,0px 27px 27px 0px #00000000,0.25px -2px 20px 0px #0000000D inset,0.5px 0.5px 1px 0px #FFFFFF inset;display:flex;align-items:center;justify-content:center;}.scaling-slider-track .scaling-thumb-circle svg{width:7px;height:14px;display:block;}.content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay){flex:1;min-width:0;height:6px !important;-webkit-appearance:none;appearance:none;background:#E2E8F0 !important;border-radius:3px;}.content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-runnable-track{height:6px !important;background:#E2E8F0 !important;border-radius:3px;-webkit-appearance:none;}.content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-track{height:6px !important;background:#E2E8F0 !important;border-radius:3px;}.content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#00CE9C;cursor:pointer;box-shadow:0 0 0 2px #fff;}.content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#00CE9C;cursor:pointer;border:none;}.content-adjustments-slider-value{font-family:Archivo;font-weight:700;font-size:21px;line-height:27px;letter-spacing:-0.44px;color:#1E2939;min-width:44px;text-align:right;}@media (max-width:768px){.accessbit-widget-panel .content-adjustments-slider-value{font-size:16px !important;line-height:22px !important;min-width:36px !important;white-space:nowrap !important;display:inline-block !important;}}.content-adjustments-card .toggle-switch{margin-left:auto;flex-shrink:0;}.profile-item{display:flex;flex-direction:row;align-items:center;padding:15px 22px;background:#FFFFFF;border-radius:7px;margin-bottom:12px;margin-left:auto;margin-right:auto;transition:all 0.3s ease;border:2px solid transparent;min-height:84px;max-width:min(440px,100%);width:100%;min-width:0;gap:12px;opacity:1;box-sizing:border-box;}.profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on){border:2px solid #01CE9C;}.profile-item:has(#seizure-safe){width:528px;max-width:min(528px,100%);}.profile-item .seizure-icon svg{width:43px;height:43px;}.seizure-ring-on{display:none;}.accessbit-widget-panel .profile-item:has(#seizure-safe),.accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon,.accessbit-widget-panel .profile-item:has(#seizure-safe) .seizure-icon{overflow:visible !important;}.accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon{margin-left:4px;}.accessbit-widget-panel .profile-item:has(#reduce-motion) .reduce-motion-icon svg{width:43px;height:43px;}.reduce-ring-on{display:none;}.accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg{width:43px;height:43px;}.vision-eye-path{fill:black;}.vision-ring-on{display:none;}.profile-item.vision-impaired-on .vision-ring-off{display:none;}.profile-item.vision-impaired-on .vision-ring-on{display:block;}.profile-item.vision-impaired-on .vision-eye-path{fill:#01CE9C !important;}.profile-item.seizure-safe-on .seizure-ring-off{fill:#D9F8F0;stroke:#01CE9C;}.profile-item.seizure-safe-on .seizure-icon-path{stroke:#01CE9C;}.profile-item.reduce-motion-on .reduce-ring-off{display:none;fill:#D9F8F0;stroke:#01CE9C;}.profile-item.reduce-motion-on .reduce-ring-on{display:block;}.profile-item.reduce-motion-on .reduce-motion-path,.profile-item.reduce-motion-on .reduce-motion-dot{fill:#01CE9C;}.profile-item.dark-contrast-on .dark-contrast-ring-off,.profile-item.dark-contrast-on .dark-contrast-icon-off,.color-adjustments-card.dark-contrast-on .dark-contrast-ring-off,.color-adjustments-card.dark-contrast-on .dark-contrast-icon-off{display:none;}.profile-item.dark-contrast-on .dark-contrast-ring-on,.profile-item.dark-contrast-on .dark-contrast-icon-on,.color-adjustments-card.dark-contrast-on .dark-contrast-ring-on,.color-adjustments-card.dark-contrast-on .dark-contrast-icon-on{display:block;}.profile-item.light-contrast-on .light-contrast-ring-off,.profile-item.light-contrast-on .light-contrast-icon-off,.color-adjustments-card.light-contrast-on .light-contrast-ring-off,.color-adjustments-card.light-contrast-on .light-contrast-icon-off{display:none;}.profile-item.light-contrast-on .light-contrast-ring-on,.profile-item.light-contrast-on .light-contrast-icon-on,.color-adjustments-card.light-contrast-on .light-contrast-ring-on,.color-adjustments-card.light-contrast-on .light-contrast-icon-on{display:block;}.profile-item.high-contrast-on .high-contrast-ring-off,.profile-item.high-contrast-on .high-contrast-icon-off,.color-adjustments-card.high-contrast-on .high-contrast-ring-off,.color-adjustments-card.high-contrast-on .high-contrast-icon-off{display:none;}.profile-item.high-contrast-on .high-contrast-ring-on,.profile-item.high-contrast-on .high-contrast-icon-on,.color-adjustments-card.high-contrast-on .high-contrast-ring-on,.color-adjustments-card.high-contrast-on .high-contrast-icon-on{display:block;}.contrast-style-card.high-saturation-on .high-sat-ring-off,.contrast-style-card.high-saturation-on .high-sat-icon-off{display:none;}.contrast-style-card.high-saturation-on .high-sat-ring-on,.contrast-style-card.high-saturation-on .high-sat-icon-on{display:block;}.contrast-style-card.low-saturation-on .low-sat-ring-off,.contrast-style-card.low-saturation-on .low-sat-icon-off{display:none;}.contrast-style-card.low-saturation-on .low-sat-ring-on,.contrast-style-card.low-saturation-on .low-sat-icon-on{display:block;}.contrast-style-card.monochrome-on .mono-ring-off,.contrast-style-card.monochrome-on .mono-icon-off{display:none;}.contrast-style-card.monochrome-on .mono-ring-on,.contrast-style-card.monochrome-on .mono-icon-on{display:block;}.contrast-style-card.mute-sound-on .mute-ring-off,.contrast-style-card.mute-sound-on .mute-icon-off{display:none;}.contrast-style-card.mute-sound-on .mute-ring-on,.contrast-style-card.mute-sound-on .mute-icon-on{display:block;}.contrast-style-card.hide-images-on .hide-img-ring-off,.contrast-style-card.hide-images-on .hide-img-icon-off{display:none;}.contrast-style-card.hide-images-on .hide-img-ring-on,.contrast-style-card.hide-images-on .hide-img-icon-on{display:block;}.contrast-style-card.read-mode-on .read-mode-ring-off,.contrast-style-card.read-mode-on .read-mode-icon-off{display:none;}.contrast-style-card.read-mode-on .read-mode-ring-on,.contrast-style-card.read-mode-on .read-mode-icon-on{display:block;}.contrast-style-card.reading-guide-on .reading-guide-ring-off,.contrast-style-card.reading-guide-on .reading-guide-icon-off{display:none;}.contrast-style-card.reading-guide-on .reading-guide-ring-on,.contrast-style-card.reading-guide-on .reading-guide-icon-on{display:block;}.contrast-style-card.stop-animation-on .stop-anim-ring-off,.contrast-style-card.stop-animation-on .stop-anim-icon-off{display:none;}.contrast-style-card.stop-animation-on .stop-anim-ring-on,.contrast-style-card.stop-animation-on .stop-anim-icon-on{display:block;}.contrast-style-card.reading-mask-on .reading-mask-ring-off,.contrast-style-card.reading-mask-on .reading-mask-icon-off{display:none;}.contrast-style-card.reading-mask-on .reading-mask-ring-on,.contrast-style-card.reading-mask-on .reading-mask-icon-on{display:block;}.contrast-style-card.readable-font-on .readable-font-ring-off,.contrast-style-card.readable-font-on .readable-font-icon-off{display:none;}.contrast-style-card.readable-font-on .readable-font-ring-on,.contrast-style-card.readable-font-on .readable-font-icon-on{display:block;}.contrast-style-card.highlight-titles-on .ht-ring-off,.contrast-style-card.highlight-titles-on .ht-icon-off{display:none;}.contrast-style-card.highlight-titles-on .ht-ring-on,.contrast-style-card.highlight-titles-on .ht-icon-on{display:block;}.contrast-style-card.highlight-focus-on .hl-focus-ring-off,.contrast-style-card.highlight-focus-on .hl-focus-icon-off{display:none;}.contrast-style-card.highlight-focus-on .hl-focus-ring-on,.contrast-style-card.highlight-focus-on .hl-focus-icon-on{display:block;}.contrast-style-card.highlight-hover-on .hl-hover-ring-off,.contrast-style-card.highlight-hover-on .hl-hover-icon-off{display:none;}.contrast-style-card.highlight-hover-on .hl-hover-ring-on,.contrast-style-card.highlight-hover-on .hl-hover-icon-on{display:block;}.contrast-style-card.big-black-cursor-on .bbc-ring-off,.contrast-style-card.big-black-cursor-on .bbc-icon-off{display:none;}.contrast-style-card.big-black-cursor-on .bbc-ring-on,.contrast-style-card.big-black-cursor-on .bbc-icon-on{display:block;}.contrast-style-card.big-white-cursor-on .bwc-ring-off,.contrast-style-card.big-white-cursor-on .bwc-icon-off{display:none;}.contrast-style-card.big-white-cursor-on .bwc-ring-on,.contrast-style-card.big-white-cursor-on .bwc-icon-on{display:block;}.contrast-style-card.highlight-links-on .hl-links-ring-off,.contrast-style-card.highlight-links-on .hl-links-icon-off{display:none;}.contrast-style-card.highlight-links-on .hl-links-ring-on,.contrast-style-card.highlight-links-on .hl-links-icon-on{display:block;}.contrast-style-card.text-magnifier-on .tm-ring-off,.contrast-style-card.text-magnifier-on .tm-icon-off{display:none;}.contrast-style-card.text-magnifier-on .tm-ring-on,.contrast-style-card.text-magnifier-on .tm-icon-on{display:block;}.content-adjustments-card.align-left-on .align-left-ring-off,.content-adjustments-card.align-left-on .align-left-icon-off{display:none;}.content-adjustments-card.align-left-on .align-left-ring-on,.content-adjustments-card.align-left-on .align-left-icon-on{display:block;}.content-adjustments-card.align-center-on .align-center-ring-off,.content-adjustments-card.align-center-on .align-center-icon-off{display:none;}.content-adjustments-card.align-center-on .align-center-ring-on,.content-adjustments-card.align-center-on .align-center-icon-on{display:block;}.content-adjustments-card.align-right-on .align-right-ring-off,.content-adjustments-card.align-right-on .align-right-icon-off{display:none;}.content-adjustments-card.align-right-on .align-right-ring-on,.content-adjustments-card.align-right-on .align-right-icon-on{display:block;}.profile-item.adhd-friendly-on .adhd-ring-off{display:none;fill:#D9F8F0;stroke:#01CE9C;}.profile-item.adhd-friendly-on .adhd-ring-on{display:block;}.profile-item.adhd-friendly-on .adhd-path{stroke:#01CE9C;}.profile-item.cognitive-disability-on .cog-ring-off{display:none;fill:#D9F8F0;stroke:#01CE9C;}.profile-item.cognitive-disability-on .cog-ring-on{display:block;}.profile-item.cognitive-disability-on .cog-path{fill:#01CE9C;}.dark-contrast-ring-on,.dark-contrast-icon-on{display:none;}.light-contrast-ring-on,.light-contrast-icon-on{display:none;}.high-contrast-ring-on,.high-contrast-icon-on{display:none;}.high-sat-ring-on,.high-sat-icon-on{display:none;}.low-sat-ring-on,.low-sat-icon-on{display:none;}.mono-ring-on,.mono-icon-on{display:none;}.mute-ring-on,.mute-icon-on{display:none;}.hide-img-ring-on,.hide-img-icon-on{display:none;}.read-mode-ring-on,.read-mode-icon-on{display:none;}.reading-guide-ring-on,.reading-guide-icon-on{display:none;}.stop-anim-ring-on,.stop-anim-icon-on{display:none;}.reading-mask-ring-on,.reading-mask-icon-on{display:none;}.ht-ring-on,.ht-icon-on{display:none;}.ps-ring-on,.ps-icon-on,.vn-ring-on,.vn-icon-on{display:none;}.hl-focus-ring-on,.hl-focus-icon-on{display:none;}.hl-hover-ring-on,.hl-hover-icon-on{display:none;}.bbc-ring-on,.bbc-icon-on{display:none;}.bwc-ring-on,.bwc-icon-on{display:none;}.hl-links-ring-on,.hl-links-icon-on{display:none;}.tm-ring-on,.tm-icon-on{display:none;}.align-left-ring-on,.align-left-icon-on{display:none;}.align-center-ring-on,.align-center-icon-on{display:none;}.align-right-ring-on,.align-right-icon-on{display:none;}.accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg{width:43px;height:43px;}.adhd-ring-on{display:none;}.accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg{width:43px;height:43px;}.cog-ring-on{display:none;}.accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg{width:43px;height:43px;}.kb-ring-on{display:none;}.profile-item.keyboard-nav-on .kb-ring-off{display:none;fill:#D9F8F0;stroke:#01CE9C;}.profile-item.keyboard-nav-on .kb-ring-on{display:block;}.profile-item.keyboard-nav-on .kb-path{fill:#01CE9C;}.accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg{width:43px;height:43px;}.blind-ring-on{display:none;}.profile-item.screen-reader-on .blind-ring-off{display:none;fill:#D9F8F0;stroke:#01CE9C;}.profile-item.screen-reader-on .blind-ring-on{display:block;}.profile-item.screen-reader-on .blind-path{fill:#01CE9C;}.accessbit-widget-panel .profile-item:has(#older-adults) .older-adults-icon svg{width:43px;height:43px;}.oa-ring-on{display:none;}.profile-item.older-adults-on .oa-ring-off{display:none;}.profile-item.older-adults-on .oa-ring-on{display:block;}.profile-item.older-adults-on .oa-stroke{stroke:#01CE9C;}.profile-item.older-adults-on .oa-fill{fill:#01CE9C;}.dfy-ring-on,.dff-ring-on,.prot-ring-on,.deut-ring-on,.trit-ring-on,.cb-ring-on{display:none;}.profile-item.dyslexia-friendly-on .dfy-ring-off{display:none;}.profile-item.dyslexia-friendly-on .dfy-ring-on{display:block;}.profile-item.dyslexia-friendly-on .dfy-stroke{stroke:#01CE9C;}.profile-item.dyslexia-font-on .dff-ring-off{display:none;}.profile-item.dyslexia-font-on .dff-ring-on{display:block;}.profile-item.dyslexia-font-on .dff-stroke{stroke:#01CE9C;}.profile-item.protanopia-on .prot-ring-off{display:none;}.profile-item.protanopia-on .prot-ring-on{display:block;}.profile-item.deuteranopia-on .deut-ring-off{display:none;}.profile-item.deuteranopia-on .deut-ring-on{display:block;}.profile-item.tritanopia-on .trit-ring-off{display:none;}.profile-item.tritanopia-on .trit-ring-on{display:block;}.profile-item .protanopia-icon g circle:first-child,.profile-item .deuteranopia-icon g circle:first-child{fill:#6ABD47 !important;}.profile-item .protanopia-icon g circle:last-child,.profile-item .deuteranopia-icon g circle:last-child{fill:#E8322F !important;}.profile-item .tritanopia-icon g circle:first-child{fill:#E3C10A !important;}.profile-item .tritanopia-icon g circle:last-child{fill:#1047E3 !important;}.profile-item.color-blind-on .cb-ring-off{display:none;}.profile-item.color-blind-on .cb-ring-on{display:block;}.profile-item.color-blind-on .cb-stroke{stroke:#01CE9C;}.profile-item.color-blind-on .cb-fill{fill:#01CE9C;}.inv-ring-on,.lca-ring-on{display:none;}.profile-item.inverted-colors-on .inv-ring-off{display:none;}.profile-item.inverted-colors-on .inv-ring-on{display:block;}.profile-item.inverted-colors-on .inv-stroke{stroke:#01CE9C;}.profile-item.inverted-colors-on .inv-fill{fill:#01CE9C;}.profile-item.large-clickable-area-on .lca-ring-off{display:none;}.profile-item.large-clickable-area-on .lca-ring-on{display:block;}.profile-item.large-clickable-area-on .lca-stroke{stroke:#01CE9C;}.profile-item.large-clickable-area-on .lca-fill{fill:#01CE9C;}.profile-item.page-structure-on .ps-ring-off{display:none;}.profile-item.page-structure-on .ps-ring-on{display:block;}.profile-item.page-structure-on .ps-stroke{stroke:#01CE9C;}.profile-item.page-structure-on .ps-fill{fill:#01CE9C;}.profile-item.voice-navigation-on .vn-ring-off{display:none;}.profile-item.voice-navigation-on .vn-ring-on{display:block;}.profile-item.voice-navigation-on .vn-stroke{stroke:#01CE9C;}.profile-item:has(#reduce-motion),.profile-item:has(#vision-impaired),.profile-item:has(#adhd-friendly),.profile-item:has(#cognitive-disability),.profile-item:has(#keyboard-nav),.profile-item:has(#screen-reader),.profile-item:has(#content-scale-range),.profile-item:has(#font-sizing),.profile-item:has(#adjust-line-height),.profile-item:has(#adjust-letter-spacing){width:528px;max-width:min(528px,100%);}.profile-item:first-child{margin-top:0;}.profile-item:last-child{margin-bottom:0;}.profile-item:hover{background:rgba(99,102,241,0.05);border-top-color:#e2e8f0;border-bottom-color:#e2e8f0;transform:none;box-shadow:none;}.profile-info{display:flex;flex-direction:column;flex:1;min-width:0;order:1;}.profile-info i{font-size:20px;color:#6366f1;width:24px;flex-shrink:0;}.profile-item-icon{width:43px;height:43px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid transparent;box-sizing:border-box;background:transparent;}.profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,.profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon{border:2px solid transparent;background:transparent;}.profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,.profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type{fill:#D9F8F0;stroke:#01CE9C;stroke-width:2px;}.profile-item .content-card-icon{border:2px solid transparent;box-sizing:border-box;}.profile-item-icon svg{width:36px;height:36px;display:block;}.profile-info h4{margin:0;font-family:Archivo;font-weight:500;font-size:21px;line-height:27px;letter-spacing:-0.44px;leading-trim:cap;color:#1E2939;white-space:normal !important;overflow:visible !important;text-overflow:unset !important;word-wrap:break-word !important;word-break:break-word !important;overflow-wrap:break-word !important;hyphens:auto !important;}.profile-info p{margin:5px 0 0 !important;font-family:Archivo;font-weight:400;font-size:16px;line-height:20px;letter-spacing:-0.15px;leading-trim:cap;vertical-align:bottom;color:#4A5565;white-space:normal !important;overflow:visible !important;text-overflow:unset !important;word-wrap:break-word !important;word-break:break-word !important;overflow-wrap:break-word !important;hyphens:auto !important;}.profile-info small{display:block;margin:3px 0 0;font-size:12px;color:#6366f1;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}@media (min-width:769px){.toggle-switch{position:relative;display:inline-block;width:80px !important;height:40px !important;flex-shrink:0;margin-left:auto;margin-right:12px;order:2;}}@media (max-width:768px) and (min-width:590px){.accessbit-widget-panel .toggle-switch,.accessbit-panel-screenshot .toggle-switch{position:relative;display:inline-block;width:80px !important;height:40px !important;min-width:80px !important;flex-shrink:0;margin-left:auto;margin-right:12px;order:2;}.accessbit-widget-panel .toggle-switch .slider,.accessbit-panel-screenshot .toggle-switch .slider{width:80px !important;height:40px !important;border-radius:99px !important;}.accessbit-widget-panel .toggle-switch .slider:before,.accessbit-panel-screenshot .toggle-switch .slider:before{width:32px !important;height:32px !important;left:4px !important;bottom:4px !important;border-radius:50% !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider,.accessbit-panel-screenshot .toggle-switch input:checked+.slider{background-color:#01CE9C !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider:before,.accessbit-panel-screenshot .toggle-switch input:checked+.slider:before{left:calc(100% - 32px - 2px) !important;transform:translateX(0) !important;}.accessbit-widget-panel .toggle-switch .slider::after,.accessbit-panel-screenshot .toggle-switch .slider::after{content:'' !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;top:50% !important;left:auto !important;right:12px !important;bottom:auto !important;width:12px !important;height:12px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;pointer-events:none !important;transform:translateY(-50%) rotate(0deg) !important;}.accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after,.accessbit-panel-screenshot .toggle-switch input:not(:checked)+.slider::after{content:'' !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;top:50% !important;left:auto !important;right:12px !important;bottom:auto !important;width:12px !important;height:12px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;pointer-events:none !important;transform:translateY(-50%) rotate(0deg) !important;}.accessbit-widget-panel .toggle-switch input:checked+.slider::after,.accessbit-panel-screenshot .toggle-switch input:checked+.slider::after{content:'' !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;top:50% !important;left:22px !important;right:auto !important;bottom:auto !important;width:2px !important;height:12px !important;background:#FFFFFF !important;border:0 !important;border-radius:0 !important;pointer-events:none !important;transform:translateY(-50%) !important;}}@media (min-width:1280px){#accessbit-widget-panel .toggle-switch,.accessbit-panel-screenshot .toggle-switch{width:92px !important;}#accessbit-widget-panel input:checked+.slider:before,.accessbit-panel-screenshot input:checked+.slider:before{transform:translateX(34px) !important;}}@media (min-width:769px){#accessbit-widget-panel .toggle-switch,.accessbit-panel-screenshot .toggle-switch{margin-right:0px !important;}}@media (min-width:1280px){#accessbit-widget-panel .toggle-switch,.accessbit-panel-screenshot .toggle-switch{margin-right:0px !important;}}@media (min-width:1281px){#accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch),:host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch),.accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(>label.toggle-switch){display:grid !important;grid-template-columns:auto minmax(0,1fr) minmax(92px,18%) !important;align-items:center !important;column-gap:12px !important;row-gap:0 !important;}#accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-item-icon,:host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-item-icon,.accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-item-icon{grid-column:1;align-self:center !important;}#accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-info,:host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-info,.accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>.profile-info{grid-column:2;min-width:0 !important;}#accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>label.toggle-switch,:host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>label.toggle-switch,.accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(>label.toggle-switch)>label.toggle-switch{grid-column:3;justify-self:end !important;align-self:center !important;margin-left:0 !important;margin-right:0px !important;}#accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch),:host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch),.accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch){display:grid !important;grid-template-columns:minmax(0,1fr) minmax(92px,18%) !important;align-items:center !important;column-gap:12px !important;}#accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>.profile-info,:host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>.profile-info,.accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>.profile-info{grid-column:1;min-width:0 !important;}#accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>label.toggle-switch,:host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>label.toggle-switch,.accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(>label.toggle-switch)>label.toggle-switch{grid-column:2;justify-self:end !important;margin-left:0 !important;margin-right:0px !important;}}.toggle-switch{position:relative;display:inline-block;flex-shrink:0;margin-left:auto;margin-right:12px;order:2;}.toggle-switch input{opacity:0;width:0;height:0;}.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#e5e7eb;transition:0.3s;border-radius:20px !important;}.slider:before{position:absolute;content:"";height:32px;width:32px;left:4px;bottom:4px;background-color:#ffffff;transition:0.3s;box-shadow:0.25px -2px 20px 0px #0000000D inset,0.5px 0.5px 1px 0px #FFFFFF inset;}input:checked+.slider{background-color:#e5e7eb !important;}input:checked+.slider:before{transform:translateX(26px) !important;}.slider::after{content:"";position:absolute;top:50%;right:12px;transform:translateY(-50%);width:12px;height:12px;border:2px solid white;border-radius:50%;background:transparent;pointer-events:none;transition:none;}.slider:before{position:absolute;content:"";height:32px;width:50px;left:4px;bottom:4px;background-color:#ffffff;transition:0.3s;border-radius:16px;box-shadow:0.25px -2px 20px 0px #0000000D inset,0.5px 0.5px 1px 0px #FFFFFF inset;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#374151;font-family:Archivo;}input:checked+.slider::after{content:"";position:absolute;left:22px;right:auto;top:50%;transform:translateY(-50%);width:2px;height:12px;background:white;border:none;border-radius:0;pointer-events:none;transition:none;}input:checked+.slider:before{background-color:#ffffff;color:#374151;}.panel-footer{position:sticky;bottom:0;width:576px;max-width:100%;height:auto;opacity:1;background:#FFFFFF !important;color:#1E2939;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;font-size:14px;border-radius:0 0 8px 8px !important;z-index:1001;box-sizing:border-box;}.panel-footer .panel-footer-link{display:inline-flex;align-items:center;text-decoration:none;color:inherit;}.panel-footer .panel-footer-link svg{display:block;}.panel-footer .learn-more{color:#1E2939;text-decoration:none;font-weight:600;}.language-dropdown-outer{width:168px !important;height:55px !important;right:0 !important;left:auto !important;border-bottom-left-radius:20px !important;background:rgba(255,255,255,0.15) !important;display:flex !important;align-items:center !important;justify-content:center !important;}.accessbit-panel-screenshot #current-language-header{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;font-size:15px;line-height:20px;letter-spacing:-0.15px;text-align:center !important;color:#FFFFFF !important;}.accessbit-panel-screenshot .language-dropdown-outer .language-selector-header{position:static !important;top:auto !important;right:auto !important;justify-content:center !important;}.language-selector-header{display:flex;align-items:center;gap:3px;cursor:pointer;padding:5px;border-radius:6px;transition:background-color 0.2s ease;color:#ffffff;font-size:12px;font-weight:500;font-family:Archivo,sans-serif;position:absolute;top:5px;right:10px;z-index:1002;}.language-selector-header{justify-content:flex-start !important;padding-left:6px !important;padding-right:6px !important;max-width:none !important;}.language-selector-header #current-language-header{min-width:0 !important;flex:0 1 auto !important;white-space:nowrap !important;text-align:left !important;}.language-selector-header .language-dropdown-arrow{flex:0 0 auto !important;margin-left:3px !important;}@media (max-width:768px){.language-selector-header #current-language-header{font-size:13px !important;}}@media (max-width:480px){.language-selector-header #current-language-header{font-size:12px !important;}}.language-selector-header:hover{background:rgba(255,255,255,0.1);}.language-selector-header .language-flag,.language-selector-header #language-flag-header{display:inline-block !important;width:20px !important;height:14px !important;flex-shrink:0 !important;vertical-align:middle;}.language-selector-header .language-flag svg,.language-selector-header #language-flag-header svg{display:block;width:20px;height:14px;}.language-selector-header .current-flag{font-size:16px;}.language-selector-header i.fa-chevron-down{font-size:10px;transition:transform 0.2s ease;opacity:0.8;}.language-selector-header:hover i.fa-chevron-down{transform:translateY(1px);}.language-dropdown{position:fixed !important;background:#FFFFFF !important;border-radius:10px !important;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1) !important;border:1px solid #e5e7eb !important;z-index:100001 !important;width:192px !important;max-height:400px !important;overflow-y:auto !important;overflow-x:hidden !important;animation:none !important;clip:none !important;display:none !important;font-family:Archivo,sans-serif !important;pointer-events:auto !important;margin:0 !important;padding:0 !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.language-dropdown::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.language-dropdown[style*="display:block"]{display:block !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;}@media (max-width:1024px){.accessbit-widget-panel{position:relative !important;}.accessbit-widget-panel .language-dropdown,#language-dropdown.language-dropdown{width:min(192px,100%) !important;max-width:100% !important;box-sizing:border-box !important;max-height:min(60vh,280px) !important;overflow-y:auto !important;overflow-x:hidden !important;}}@keyframes dropdownSlideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}.language-dropdown-content{padding:5px !important;background:#ffffff !important;min-height:100px !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;}.language-option{display:flex !important;align-items:center;justify-content:flex-start;gap:5px !important;width:100% !important;min-width:0 !important;margin:0 0 4px 0 !important;padding:8px 12px !important;border:none;border-radius:6px;background:transparent;cursor:pointer;transition:none;font-size:14px;font-weight:500;color:#374151;text-align:left;height:35px;box-sizing:border-box !important;font-family:Archivo,sans-serif;pointer-events:auto !important;user-select:none;}.language-option:last-child{margin-bottom:0 !important;}.language-option:hover{background:#DEDEDE !important;}.language-option.selected,.language-option[aria-selected="true"]{background:#6366f1 !important;color:#ffffff !important;}.language-option.selected:hover,.language-option[aria-selected="true"]:hover{background:#4f46e5 !important;}.language-option .flag{font-size:16px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;margin:0 !important;}.language-option .flag svg{width:20px;height:14px;display:block;}.language-option .language-name{flex:0 0 auto;margin:0 !important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;font-weight:500;font-size:14px;line-height:20px;letter-spacing:-0.15px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;}:host,:host(.seizure-safe),:host(.seizure-safe) .accessbit-widget-icon,:host(.seizure-safe) .accessbit-widget-panel,:host(.seizure-safe) *{filter:none !important;-webkit-filter:none !important;}:host(.seizure-safe) .accessbit-widget-icon{position:fixed !important;z-index:2147483645 !important;}:host(.adhd-friendly) .accessbit-widget-icon,:host(.adhd-friendly) .accessbit-widget-panel{filter:saturate(0.9) brightness(0.9) !important;}:host(.cognitive-disability) .accessbit-widget-icon,:host(.cognitive-disability) .accessbit-widget-panel{filter:saturate(1.05) brightness(1.03) !important;}:host(.monochrome) .accessbit-widget-icon,:host(.monochrome) .accessbit-widget-panel{filter:grayscale(1) !important;}:host(.dark-contrast) .accessbit-widget-icon,:host(.dark-contrast) .accessbit-widget-panel{filter:saturate(1.2) brightness(0.8) contrast(1.3) !important;}:host(.light-contrast) .accessbit-widget-icon,:host(.light-contrast) .accessbit-widget-panel{filter:none !important;}:host(.high-contrast) .accessbit-widget-icon,:host(.high-contrast) .accessbit-widget-panel,:host(.high-contrast) .accessbit-widget-panel *{filter:none !important;-webkit-filter:none !important;}:host(:not(.readable-font)) .accessbit-widget-icon,:host(:not(.readable-font)) .accessbit-widget-panel{font-family:"Archivo",sans-serif;font-optical-sizing:auto;font-weight:normal;font-style:normal;font-variation-settings:"wdth" 100;letter-spacing:normal;}:host(:not(.readable-font)) .accessbit-widget-panel h2,:host(:not(.readable-font)) .accessbit-widget-panel h3,:host(:not(.readable-font)) .accessbit-widget-panel h4,:host(:not(.readable-font)) .accessbit-widget-panel p,:host(:not(.readable-font)) .accessbit-widget-panel .action-btn,:host(:not(.readable-font)) .accessbit-widget-panel button,:host(:not(.readable-font)) .accessbit-widget-panel input,:host(:not(.readable-font)) .accessbit-widget-panel label{font-family:"Archivo",sans-serif;font-optical-sizing:auto;font-weight:normal;font-style:normal;font-variation-settings:"wdth" 100;letter-spacing:normal;}:host(.readable-font) .accessbit-widget-icon,:host(.readable-font) .accessbit-widget-panel,:host .accessbit-widget-icon,:host .accessbit-widget-panel{font-family:"Archivo",sans-serif;font-optical-sizing:auto;font-weight:normal;font-style:normal;font-variation-settings:"wdth" 100;letter-spacing:normal;}:host(.readable-font) .accessbit-widget-panel h2,:host(.readable-font) .accessbit-widget-panel h3,:host(.readable-font) .accessbit-widget-panel h4,:host(.readable-font) .accessbit-widget-panel p,:host(.readable-font) .accessbit-widget-panel .action-btn,:host(.readable-font) .accessbit-widget-panel button,:host(.readable-font) .accessbit-widget-panel input,:host(.readable-font) .accessbit-widget-panel label,:host .accessbit-widget-panel h2,:host .accessbit-widget-panel h3,:host .accessbit-widget-panel h4,:host .accessbit-widget-panel p,:host .accessbit-widget-panel .action-btn,:host .accessbit-widget-panel button,:host .accessbit-widget-panel input,:host .accessbit-widget-panel label{font-family:Archivo;font-weight:normal;letter-spacing:normal;}:host(.high-saturation) .accessbit-widget-icon,:host(.high-saturation) .accessbit-widget-panel{filter:saturate(1.2) !important;}.fas{font-family:'Font Awesome 5 Free';font-weight:900;}.fa-universal-access:before{content:"\\f29a";}.fa-times:before{content:"\\f00d";}.fa-flag:before{content:"\\f024";}.fa-redo:before{content:"\\f01e";}.fa-file-alt:before{content:"\\f15c";}.fa-eye-slash:before{content:"\\f070";}.fa-bolt:before{content:"\\f0e7";}.fa-eye:before{content:"\\f06e";}.fa-brain:before{content:"\\f5dc";}.fa-keyboard:before{content:"\\f11c";}.fa-user:before{content:"\\f007";}.fa-search-plus:before{content:"\\f00e";}.fa-font:before{content:"\\f031";}.fa-heading:before{content:"\\f1dc";}.fa-link:before{content:"\\f0c1";}.fa-search:before{content:"\\f002";}.fa-align-center:before{content:"\\f037";}.fa-arrows-alt-v:before{content:"\\f07d";}.fa-text-width:before{content:"\\f035";}.fa-palette:before{content:"\\f53f";}.fa-volume-mute:before{content:"\\f6a9";}.fa-image:before{content:"\\f03e";}.fa-book-open:before{content:"\\f518";}.fa-compass:before{content:"\\f14e";}.fa-list:before{content:"\\f03a";}.fa-play:before{content:"\\f04b";}.fa-mask:before{content:"\\f6fa";}.fa-mouse-pointer:before{content:"\\f245";}.color-picker-inline{margin:8px 0;padding:12px;background:#f8f9fa;border-radius:6px;border:1px solid #e2e8f0;width:100%;box-sizing:border-box;}.color-picker-content{text-align:center;}.color-picker-content h4{margin:0 0 12px 0;color:#333;font-size:14px;font-weight:600;}.color-options{display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}.color-adjustments-picker-card .picker-row{justify-content:flex-start;gap:15.95px;}.color-adjustments-picker-card .color-options{justify-content:flex-start;gap:15px;margin-bottom:0;padding-left:55px;}@media (max-width:480px){.color-adjustments-picker-card .color-options{flex-wrap:wrap;gap:8px;padding-left:0;justify-content:flex-start;}}.color-option{width:28px;height:28px;cursor:pointer;border:2px solid transparent;transition:all 0.2s ease;position:relative;flex-shrink:0;}.color-option:hover{transform:scale(1.05);border-color:#6366f1;}.color-adjustments-picker-card .color-option.selected{border-color:#14b8a6 !important;outline:2px solid #14b8a6 !important;outline-offset:2px !important;box-shadow:none !important;}.cancel-btn{background:#6b7280;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:500;transition:background-color 0.2s ease;}.cancel-btn:hover{background:#4b5563;}.profile-item.has-dropdown{position:relative !important;}.profile-item.has-dropdown .toggle-switch{flex-shrink:0 !important;}.profile-item.has-dropdown .profile-info{padding-left:0 !important;margin-bottom:0 !important;}.useful-links-card{width:100%;min-width:0;min-height:136px;height:auto;max-width:100%;box-sizing:border-box;border-radius:10px;opacity:1;background:#FFFFFF;border:none;padding:15px 22px;display:flex;flex-direction:column;gap:12px;}.useful-links-card .useful-links-header{display:flex;align-items:center;justify-content:flex-start;gap:12px;text-align:left;width:100%;}.useful-links-card .useful-links-header h4{margin:0;font-family:Archivo;font-size:21px;font-weight:500;line-height:27px;letter-spacing:-0.44px;color:#1E2939;text-align:left;}.useful-links-card .content-card-icon.useful-links-icon{width:43px;height:43px;flex-shrink:0;border-radius:50%;background:transparent !important;overflow:hidden !important;display:flex;align-items:center;justify-content:center;}.useful-links-card .content-card-icon.useful-links-icon svg{width:43px;height:43px;}.useful-links-card{position:relative !important;}.useful-links-card .useful-links-select-wrap{position:absolute !important;left:-9999px !important;width:1px !important;height:1px !important;overflow:hidden !important;opacity:0 !important;pointer-events:none !important;}.useful-links-card .useful-links-select-wrap select,.useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card #useful-links-select,.accessbit-widget-panel .useful-links-card .useful-links-select-wrap select{width:1px !important;height:1px !important;min-height:0 !important;opacity:0 !important;pointer-events:none !important;}.useful-links-custom-dropdown{position:relative !important;display:block !important;margin-top:12px !important;margin-left:55px !important;max-width:calc(100% - 55px) !important;width:calc(100% - 55px) !important;z-index:10 !important;pointer-events:auto !important;}@media (max-width:480px){.useful-links-custom-dropdown{margin-left:55px !important;max-width:calc(100% - 55px) !important;}.useful-links-custom-trigger{width:100% !important;max-width:100% !important;height:34px !important;font-size:16px !important;}}.useful-links-custom-trigger{pointer-events:auto !important;position:relative !important;z-index:2 !important;width:422px !important;max-width:100% !important;height:48px !important;border-radius:33px !important;border:1px solid #E0E0E0 !important;background:#E0E0E0 !important;opacity:1 !important;cursor:pointer !important;font-family:Archivo,sans-serif !important;font-weight:500 !important;font-size:16px !important;line-height:27px !important;letter-spacing:-0.44px !important;color:#000000 !important;text-align:left !important;padding:0 20px !important;box-sizing:border-box !important;appearance:none !important;display:flex !important;align-items:center !important;}.useful-links-custom-trigger::after{content:'' !important;margin-left:auto !important;width:14px !important;height:14px !important;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;background-repeat:no-repeat !important;background-position:center !important;}.useful-links-custom-list{position:absolute;top:100%;left:0;right:0;margin-top:4px !important;background:#FFFFFF !important;border-radius:10px !important;border:1px solid #E0E0E0 !important;box-shadow:0 4px 12px rgba(0,0,0,0.1) !important;z-index:2147483647 !important;overflow-y:auto !important;overflow-x:hidden !important;min-width:0 !important;max-width:100vw !important;box-sizing:border-box !important;display:block !important;font-family:Archivo,sans-serif !important;pointer-events:auto !important;scrollbar-width:none !important;-ms-overflow-style:none !important;}.useful-links-custom-list::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}.useful-links-custom-list[hidden]{display:none !important;}.useful-links-card,.useful-links-custom-dropdown{overflow:visible !important;}@media (max-width:768px) and (min-width:601px){#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p{font-size:14px !important;line-height:1.35 !important;}}@media (max-width:768px){#accessbit-widget-panel .panel-header h2,#accessbit-widget-panel .widget-header h2,:host #accessbit-widget-panel .panel-header h2,:host #accessbit-widget-panel .widget-header h2{font-size:20px !important;line-height:24px !important;}#accessbit-widget-panel .panel-header #reset-settings,#accessbit-widget-panel .panel-header #statement,#accessbit-widget-panel .panel-header #hide-interface,#accessbit-widget-panel .widget-header #reset-settings,#accessbit-widget-panel .widget-header #statement,#accessbit-widget-panel .widget-header #hide-interface,:host #accessbit-widget-panel .panel-header #reset-settings,:host #accessbit-widget-panel .panel-header #statement,:host #accessbit-widget-panel .panel-header #hide-interface,:host #accessbit-widget-panel .widget-header #reset-settings,:host #accessbit-widget-panel .widget-header #statement,:host #accessbit-widget-panel .widget-header #hide-interface{font-size:15px !important;}#accessbit-widget-panel .white-content-section>h3,#accessbit-widget-panel .white-content-section h3,:host #accessbit-widget-panel .white-content-section>h3,:host #accessbit-widget-panel .white-content-section h3{font-size:16px !important;line-height:20px !important;}#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:15px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p{font-size:14px !important;line-height:1.35 !important;}}.accessbit-widget-panel .useful-links-card,.accessbit-widget-panel .profile-item.useful-links-card{overflow:visible !important;overflow-x:visible !important;overflow-y:visible !important;}.useful-links-custom-option{padding:12px 20px !important;font-family:Archivo,sans-serif !important;font-size:16px !important;color:#1E2939 !important;cursor:pointer !important;background:#FFFFFF !important;}.useful-links-custom-option:hover{background:#DEDEDE !important;}.useful-links-dropdown{margin:10px 0;padding:0;width:100%;display:block;background:#f8fafc;border-radius:10px;border:none;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:all 0.3s ease;}.useful-links-dropdown:hover{box-shadow:0 4px 10px rgba(99,102,241,0.12);}.useful-links-content{padding:10px;}.useful-links-content select{width:100%;padding:10px 14px;border:1px solid #6366f1;border-radius:6px;background:white;color:#374151;font-size:13px;font-weight:500;font-family:Archivo;cursor:pointer;transition:all 0.3s ease;box-shadow:0 1px 3px rgba(0,0,0,0.08);appearance:none;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");background-position:right 10px center;background-repeat:no-repeat;background-size:14px;padding-right:35px;}.useful-links-content select:focus{outline:3px solid #4f46e5 !important;outline-offset:2px !important;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(99,102,241,0.1),0 4px 12px rgba(0,0,0,0.15);transform:translateY(-1px);}.useful-links-content select:hover,.useful-links-card #useful-links-select:hover,.accessbit-widget-panel .useful-links-card #useful-links-select:hover{background:#DEDEDE !important;border-color:#4f46e5;box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(-1px);}.useful-links-content select option{padding:12px 16px;background:white;color:#374151;font-weight:500;border:none;}.useful-links-content select option:hover,.accessbit-widget-panel .useful-links-card #useful-links-select option:hover{background:#DEDEDE !important;color:#1f2937;}.useful-links-content select option:selected,.useful-links-card #useful-links-select option:checked,.useful-links-card #useful-links-select option:selected,.accessbit-widget-panel .useful-links-card #useful-links-select option:checked,.accessbit-widget-panel .useful-links-card #useful-links-select option:selected{background:#DEDEDE !important;color:#1E2939 !important;}body.big-black-cursor,html body.big-black-cursor,body.big-black-cursor *,html body.big-black-cursor *{cursor:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjMDAwMDAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1ibGFjaykiLz48L3N2Zz4=') 20 10,auto !important;}body.big-black-cursor a,body.big-black-cursor a *,body.big-black-cursor button,body.big-black-cursor button *,body.big-black-cursor [role="button"],body.big-black-cursor [role="button"] *,body.big-black-cursor [onclick],body.big-black-cursor [onclick] *,body.big-black-cursor [tabindex]:not([tabindex="-1"]),body.big-black-cursor [tabindex]:not([tabindex="-1"]) *,body.big-black-cursor input[type="button"],body.big-black-cursor input[type="submit"],body.big-black-cursor input[type="reset"],body.big-black-cursor .btn,body.big-black-cursor [class*="button"],body.big-black-cursor [class*="link"]{cursor:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtYmxhY2siIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC4zIi8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLWJsYWNrKSIvPjwvc3ZnPg==') 24 10,pointer !important;}body.big-white-cursor,html body.big-white-cursor,body.big-white-cursor *,html body.big-white-cursor *{cursor:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy13aGl0ZSkiLz48L3N2Zz4=') 20 10,auto !important;}body.big-white-cursor a,body.big-white-cursor a *,body.big-white-cursor button,body.big-white-cursor button *,body.big-white-cursor [role="button"],body.big-white-cursor [role="button"] *,body.big-white-cursor [onclick],body.big-white-cursor [onclick] *,body.big-white-cursor [tabindex]:not([tabindex="-1"]),body.big-white-cursor [tabindex]:not([tabindex="-1"]) *,body.big-white-cursor input[type="button"],body.big-white-cursor input[type="submit"],body.big-white-cursor input[type="reset"],body.big-white-cursor .btn,body.big-white-cursor [class*="button"],body.big-white-cursor [class*="link"]{cursor:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtd2hpdGUiIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC41Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLXdoaXRlKSIvPjwvc3ZnPg==') 24 10,pointer !important;}.hide-interface-modal{position:absolute !important;inset:0 !important;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:100001;width:100% !important;height:100% !important;overflow:hidden;}.hide-interface-modal .modal-content{background:white;border-radius:12px;box-shadow:0 10px 12px rgba(0,0,0,0.3);position:relative;transform:none;margin:16px;width:min(400px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;-webkit-overflow-scrolling:touch;font-family:Archivo,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;}.hide-interface-modal .modal-header{padding:20px 20px 10px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;}.hide-interface-modal .modal-header h3{margin:0;color:#1f2937;font-size:18px;font-weight:600;font-family:Archivo,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;}.hide-interface-modal .modal-close{background:none;border:none;font-size:24px;color:#6b7280;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;}.hide-interface-modal .modal-close:hover{color:#374151;}.hide-interface-modal .modal-body{padding:20px;}.hide-interface-modal .modal-body p{margin:0;color:#374151;line-height:1.5;font-size:14px;font-family:Archivo,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;}.hide-interface-modal .modal-footer{padding:10px 20px 20px 20px;display:flex;gap:12px;justify-content:flex-end;}.hide-interface-modal .modal-btn{padding:10px 20px;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s ease;font-family:Archivo,Inter,system-ui,-apple-system,"Segoe UI",sans-serif;}.hide-interface-modal .accept-btn{background:#01CE9C;color:white;}.hide-interface-modal .accept-btn:hover{background:#00b88a;}.hide-interface-modal .cancel-btn{background:white;color:#374151;border:1px solid #d1d5db;}.hide-interface-modal .cancel-btn:hover{background:#f9fafb;}@media (max-width:768px){#accessbit-widget-panel .panel-header .action-buttons,#accessbit-widget-panel .widget-header .action-buttons,:host #accessbit-widget-panel .panel-header .action-buttons,:host #accessbit-widget-panel .widget-header .action-buttons{width:auto !important;max-width:none !important;align-items:stretch !important;}#accessbit-widget-panel .panel-header .action-buttons .action-btn,#accessbit-widget-panel .widget-header .action-buttons .action-btn,:host #accessbit-widget-panel .panel-header .action-buttons .action-btn,:host #accessbit-widget-panel .widget-header .action-buttons .action-btn{width:min(240px,calc(100vw - 80px)) !important;max-width:min(240px,calc(100vw - 80px)) !important;min-width:0 !important;box-sizing:border-box !important;align-self:stretch !important;}#accessbit-widget-panel .panel-header h2,#accessbit-widget-panel .widget-header h2,:host #accessbit-widget-panel .panel-header h2,:host #accessbit-widget-panel .widget-header h2{font-size:20px !important;line-height:24px !important;}#accessbit-widget-panel .panel-header #reset-settings,#accessbit-widget-panel .panel-header #statement,#accessbit-widget-panel .panel-header #hide-interface,#accessbit-widget-panel .widget-header #reset-settings,#accessbit-widget-panel .widget-header #statement,#accessbit-widget-panel .widget-header #hide-interface,:host #accessbit-widget-panel .panel-header #reset-settings,:host #accessbit-widget-panel .panel-header #statement,:host #accessbit-widget-panel .panel-header #hide-interface,:host #accessbit-widget-panel .widget-header #reset-settings,:host #accessbit-widget-panel .widget-header #statement,:host #accessbit-widget-panel .widget-header #hide-interface{font-size:15px !important;}#accessbit-widget-panel .white-content-section>h3:first-child,#accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),:host #accessbit-widget-panel .white-content-section>h3:first-child,:host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){font-size:16px !important;line-height:20px !important;}#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:15px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p,#accessbit-widget-panel .profile-item .profile-description p,:host #accessbit-widget-panel .profile-item .profile-description p{font-size:14px !important;line-height:1.35 !important;}}@media (max-width:768px) and (min-width:601px){#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p,#accessbit-widget-panel .profile-item .profile-description p,:host #accessbit-widget-panel .profile-item .profile-description p{font-size:14px !important;line-height:1.35 !important;}}@media (max-width:819px) and (min-width:769px){#accessbit-widget-panel .panel-header h2,#accessbit-widget-panel .widget-header h2,:host #accessbit-widget-panel .panel-header h2,:host #accessbit-widget-panel .widget-header h2{font-size:24px !important;line-height:28px !important;}#accessbit-widget-panel .panel-header #reset-settings,#accessbit-widget-panel .panel-header #statement,#accessbit-widget-panel .panel-header #hide-interface,#accessbit-widget-panel .widget-header #reset-settings,#accessbit-widget-panel .widget-header #statement,#accessbit-widget-panel .widget-header #hide-interface,:host #accessbit-widget-panel .panel-header #reset-settings,:host #accessbit-widget-panel .panel-header #statement,:host #accessbit-widget-panel .panel-header #hide-interface,:host #accessbit-widget-panel .widget-header #reset-settings,:host #accessbit-widget-panel .widget-header #statement,:host #accessbit-widget-panel .widget-header #hide-interface{font-size:15px !important;}#accessbit-widget-panel .white-content-section>h3:first-child,#accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),:host #accessbit-widget-panel .white-content-section>h3:first-child,:host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){font-size:18px !important;line-height:22px !important;}#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p,#accessbit-widget-panel .profile-item .profile-description p,:host #accessbit-widget-panel .profile-item .profile-description p{font-size:14px !important;line-height:1.35 !important;}}@media (max-width:1024px) and (min-width:820px){#accessbit-widget-panel .panel-header h2,#accessbit-widget-panel .widget-header h2,:host #accessbit-widget-panel .panel-header h2,:host #accessbit-widget-panel .widget-header h2{font-size:24px !important;line-height:28px !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,#accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,:host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,:host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p,#accessbit-widget-panel .profile-item .profile-description p,:host #accessbit-widget-panel .profile-item .profile-description p{font-size:14px !important;line-height:1.35 !important;}}@media (max-width:1279px) and (min-width:1014px){#accessbit-widget-panel .panel-header h2,#accessbit-widget-panel .widget-header h2,:host #accessbit-widget-panel .panel-header h2,:host #accessbit-widget-panel .widget-header h2{font-size:24px !important;line-height:28px !important;}#accessbit-widget-panel .panel-header #reset-settings,#accessbit-widget-panel .panel-header #statement,#accessbit-widget-panel .panel-header #hide-interface,#accessbit-widget-panel .widget-header #reset-settings,#accessbit-widget-panel .widget-header #statement,#accessbit-widget-panel .widget-header #hide-interface,:host #accessbit-widget-panel .panel-header #reset-settings,:host #accessbit-widget-panel .panel-header #statement,:host #accessbit-widget-panel .panel-header #hide-interface,:host #accessbit-widget-panel .widget-header #reset-settings,:host #accessbit-widget-panel .widget-header #statement,:host #accessbit-widget-panel .widget-header #hide-interface{font-size:15px !important;}#accessbit-widget-panel .white-content-section h3,.white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title){font-size:18px !important;}#accessbit-widget-panel .profile-item h4,:host #accessbit-widget-panel .profile-item h4,#accessbit-widget-panel .profile-item .profile-info h4,:host #accessbit-widget-panel .profile-item .profile-info h4{font-size:16px !important;line-height:1.25 !important;}#accessbit-widget-panel .profile-item p,:host #accessbit-widget-panel .profile-item p,#accessbit-widget-panel .profile-item .profile-info p,:host #accessbit-widget-panel .profile-item .profile-info p,#accessbit-widget-panel .profile-item .profile-description p,:host #accessbit-widget-panel .profile-item .profile-description p{font-size:14px !important;line-height:1.35 !important;}#accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,#accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,:host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,:host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4{font-size:16px !important;line-height:1.25 !important;}}#accessbit-widget-panel .toggle-switch .slider:before,.accessbit-panel-screenshot .toggle-switch .slider:before,:host #accessbit-widget-panel .toggle-switch .slider:before{box-shadow:0px 1px 2px 0px #00000033,0px 4px 4px 0px #0000002B,0px 10px 6px 0px #0000001A,0px 17px 7px 0px #00000008,0px 27px 7px 0px #00000000 !important;}#accessbit-widget-panel .toggle-switch .slider,.accessbit-panel-screenshot .toggle-switch .slider,:host #accessbit-widget-panel .toggle-switch .slider,#accessbit-widget-panel .toggle-switch input:checked+.slider,.accessbit-panel-screenshot .toggle-switch input:checked+.slider,:host #accessbit-widget-panel .toggle-switch input:checked+.slider{box-shadow:0px 1px 3px 0px #00000033 inset !important;}#accessbit-widget-panel .toggle-switch input:checked+.slider::after,.accessbit-panel-screenshot .toggle-switch input:checked+.slider::after,:host #accessbit-widget-panel .toggle-switch input:checked+.slider::after{content:'' !important;display:block !important;position:absolute !important;top:50% !important;left:22px !important;right:auto !important;bottom:auto !important;opacity:1 !important;pointer-events:none !important;width:2px !important;height:12px !important;background:#FFFFFF !important;border:0 !important;border-radius:0 !important;transform:translateY(-50%) !important;}@media (max-width:589px){#accessbit-widget-panel .toggle-switch input:checked+.slider::after,.accessbit-panel-screenshot .toggle-switch input:checked+.slider::after,:host #accessbit-widget-panel .toggle-switch input:checked+.slider::after{content:none !important;display:none !important;border:0 !important;}}#accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after,.accessbit-panel-screenshot .toggle-switch input:not(:checked)+.slider::after,:host #accessbit-widget-panel .toggle-switch input:not(:checked)+.slider::after{content:'' !important;display:block !important;position:absolute !important;top:50% !important;left:auto !important;right:12px !important;width:12px !important;height:12px !important;opacity:1 !important;border-width:2px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;transform:translateY(-50%) rotate(0deg) !important;pointer-events:none !important;}@media (min-width:769px){#accessbit-widget-panel .toggle-switch input:checked+.slider:before,.accessbit-panel-screenshot .toggle-switch input:checked+.slider:before,:host #accessbit-widget-panel .toggle-switch input:checked+.slider:before{left:calc(100% - 32px - 2px) !important;transform:translateX(0) !important;}}@media (min-width:1280px){#accessbit-widget-panel .toggle-switch input:checked+.slider:before,.accessbit-panel-screenshot .toggle-switch input:checked+.slider:before,:host #accessbit-widget-panel .toggle-switch input:checked+.slider:before{left:calc(100% - 32px - 2px) !important;transform:translateX(0) !important;}}`;
+            return `
+            /* Force icon shape overrides - must come first */
+            .accessbit-widget-icon {
+                /* REMOVED empty rule that was potentially conflicting */
+            }
+            
+            /* Override external CSS with maximum specificity */
+            .accessbit-widget-icon[data-shape="circle"] {
+                border-radius: 50% !important;
+                -webkit-border-radius: 50% !important;
+                -moz-border-radius: 50% !important;
+            }
+            
+            .accessbit-widget-icon[data-shape="rounded"] {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            .accessbit-widget-icon[data-shape="square"] {
+                border-radius: 0px !important;
+                -webkit-border-radius: 0px !important;
+                -moz-border-radius: 0px !important;
+            }
+            
+            /* ULTRA-AGGRESSIVE OVERRIDE FOR ROUNDED SHAPE */
+            .accessbit-widget-icon.rounded,
+            .accessbit-widget-icon[data-shape="rounded"],
+            .accessbit-widget-icon.rounded[data-shape="rounded"],
+            .accessbit-widget-icon[data-shape="rounded"].rounded {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Force rounded shape with absolute maximum specificity */
+            .accessbit-widget-icon.rounded[data-shape="rounded"] {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Override any external CSS that might be forcing circle shape */
+            .accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Force rounded shape with absolute maximum specificity */
+            .accessbit-widget-icon.rounded,
+            .accessbit-widget-icon[data-shape="rounded"] {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Override any external CSS that might be forcing circle shape */
+            .accessbit-widget-icon[data-shape="rounded"]:not([data-shape="circle"]) {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Maximum specificity override for rounded shape */
+            .accessbit-widget-icon.rounded[data-shape="rounded"] {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Force rounded shape with absolute maximum specificity */
+            .accessbit-widget-icon[data-shape="rounded"].rounded {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Override any external CSS with maximum force */
+            .accessbit-widget-icon[data-shape="rounded"] {
+                border-radius: 12px !important;
+                -webkit-border-radius: 12px !important;
+                -moz-border-radius: 12px !important;
+            }
+            
+            /* Panel base: fluid width/height (single source of truth, no fixed px) */
+            .accessbit-widget-panel {
+                position: fixed !important;
+                z-index: 2147483646 !important;
+                display: none !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                background: transparent !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+                box-sizing: border-box !important;
+                width: var(--widget-width) !important;
+                height: calc(100vh - (var(--widget-spacing) * 2)) !important;
+                max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                border-radius: 20px !important;
+                background-clip: padding-box !important;
+            }
+            @supports (height: 100dvh) {
+                .accessbit-widget-panel {
+                    height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                    max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
+                }
+            }
+            .accessbit-widget-panel.show,
+            .accessbit-widget-panel.active {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            /* Header must not scroll – no scrollbar near "Accessibility Controls" */
+            .accessbit-widget-panel .panel-header,
+            .accessbit-widget-panel .widget-header {
+                flex-shrink: 0 !important;
+                overflow: hidden !important;
+                overflow-x: hidden !important;
+                border-radius: 20px 20px 0 0 !important;
+            }
+            .accessbit-widget-panel .panel-header *,
+            .accessbit-widget-panel .widget-header * {
+                overflow: visible !important;
+            }
+            /* Responsive drag: keep all content inside panel – no spill onto page */
+            .accessbit-widget-panel,
+            .accessbit-widget-panel * {
+                box-sizing: border-box !important;
+            }
+            .accessbit-widget-panel .profile-item,
+            .accessbit-widget-panel .profile-info,
+            .accessbit-widget-panel .profile-item h4,
+            .accessbit-widget-panel .profile-item p,
+            .accessbit-widget-panel .profile-info h4,
+            .accessbit-widget-panel .profile-info p,
+            .accessbit-widget-panel p,
+            .accessbit-widget-panel h3,
+            .accessbit-widget-panel h4,
+            .accessbit-widget-panel .feature-card,
+            .accessbit-widget-panel .action-btn,
+            .accessbit-widget-panel .panel-header,
+            .accessbit-widget-panel .widget-header,
+            .accessbit-widget-panel .header-content,
+            .accessbit-widget-panel .language-dropdown,
+            .accessbit-widget-panel [class*="dropdown"] {
+                max-width: 100% !important;
+                overflow-wrap: break-word !important;
+                word-wrap: break-word !important;
+                overflow-x: hidden !important;
+                white-space: normal !important;
+            }
+            .accessbit-widget-panel.show,
+            .accessbit-widget-panel.active {
+                display: flex !important;
+                visibility: visible !important;
+            }
+            
+                /* Accessibility Widget Styles - Shadow DOM */
+
+                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+    
+                /* Prevent white peeking in corners: outermost panel and inner wrapper share same 20px radius */
+                :host { background: transparent !important; background-color: transparent !important; }
+                .accessbit-widget-panel { border-radius: 20px !important; background: transparent !important; background-color: transparent !important; overflow: hidden !important; background-clip: padding-box !important; }
+                .accessbit-widget-panel .accessbit-panel-screenshot,
+                .accessbit-widget-panel > .accessbit-panel-screenshot {
+                    background: #EAECF2 !important;
+                    background-color: #EAECF2 !important;
+                    border-radius: 20px !important;
+                    overflow: hidden !important;
+                }
+                /* Screenshot wrapper: allow icon overflow so 1px stroke is not clipped */
+                .accessbit-panel-screenshot {
+                    overflow-x: visible !important;
+                    overflow-y: auto !important;
+                    background-color: transparent !important;
+                }
+                :host {
+                    --widget-width: min(480px, 94vw);
+                    --widget-spacing: 15px;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: 2147483645 !important;
+                    isolation: isolate;
+                    contain: layout style paint;
+                    background: transparent !important;
+                }
+                .accessbit-widget-panel .accessbit-panel-screenshot,
+                .accessbit-widget-panel > .accessbit-panel-screenshot { background: #EAECF2 !important; }
+    
+    
+                /* Icon: block layout so sr-only span cannot affect centering; graphic absolutely centered */
+                .accessbit-widget-icon {
+                    position: fixed !important;
+                    z-index: 2147483645 !important;
+                    bottom: var(--widget-icon-bottom, 20px) !important;
+                    right: var(--widget-icon-right, 20px) !important;
+                    left: var(--widget-icon-left, auto) !important;
+                    top: var(--widget-icon-top, auto) !important;
+                    transform: var(--widget-icon-transform, none) !important;
+                    width: clamp(40px, 10vw, 60px) !important;
+                    height: clamp(40px, 10vw, 60px) !important;
+                    display: block !important;
+                    overflow: hidden !important;
+                    text-indent: -9999px !important;
+                    font-size: 0;
+                    line-height: 0;
+                    /* Background color is controlled by JS (updateTriggerButtonColor);
+                       fall back to default there when app doesn't send a color */
+                    cursor: pointer;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    will-change: transform;
+                    transition: transform 0.3s ease, opacity 0.3s ease;
+                    pointer-events: auto;
+                }
+                .accessbit-widget-icon .sr-only {
+                    position: absolute !important;
+                    left: -9999px !important;
+                    top: 0 !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    padding: 0 !important;
+                    margin: -1px !important;
+                    overflow: hidden !important;
+                    clip: rect(0, 0, 0, 0) !important;
+                    clip-path: inset(50%) !important;
+                    white-space: nowrap !important;
+                    border: 0 !important;
+                }
+                .accessbit-widget-icon:hover {
+                    transform: var(--widget-icon-transform, none) scale(1.05);
+                }
+                .accessbit-widget-icon i,
+                .accessbit-widget-icon img {
+                    display: block !important;
+                    position: absolute !important;
+                    left: 50% !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    margin: 0 !important;
+                    text-indent: 0 !important;
+                    font-style: normal;
+                    width: 60% !important;
+                    height: auto !important;
+                    font-size: clamp(18px, 4vw, 24px);
+                    color: #ffffff;
+                }
+                .accessbit-widget-icon svg {
+                    display: block !important;
+                    position: absolute !important;
+                    left: 50% !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    width: 60% !important;
+                    height: 60% !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                    margin: 0 !important;
+                    fill: #ffffff;
+                    color: #ffffff;
+                }
+    
+    
+    
+                /* CRITICAL: Focus indicators for keyboard navigation in Shadow DOM */
+    
+                .accessbit-widget-icon:focus {
+    
+                    
+                }
+    
+                /* Allow focus indicators when highlight-focus is active */
+                body.highlight-focus .accessbit-widget-icon:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
+                
+                /* Additional focus styles for accessibility icon when keyboard navigation is active */
+                body.highlight-focus #accessbit-widget-icon:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                }
+    
+    
+    
+                /* Focus indicators for interactive elements when Highlight Focus is ON */
+    
+                body.highlight-focus input:focus-visible,
+    
+                body.highlight-focus button:focus-visible,
+    
+                body.highlight-focus select:focus-visible,
+    
+                body.highlight-focus label:focus-visible {
+                    outline: 2px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+                }
+                
+                body.highlight-focus .action-btn:focus-visible {
+                    /* Use an inset ring so it isn't clipped by overflow:hidden on header/button containers */
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: inherit !important;
+                }
+
+                /* Header action buttons ("Reset Settings", "Statement", "Hide Interface") often have overflow hidden for ellipsis.
+                   Ensure focus ring is still visible and covers the full button. */
+                body.highlight-focus .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                body.highlight-focus .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: 10px !important;
+                }
+
+                /* Shadow DOM equivalent: on desktop the header row uses overflow:hidden, so force inset ring */
+                :host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus,
+                :host-context(body.highlight-focus) .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                :host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                :host-context(body.highlight-focus) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    box-shadow: inset 0 0 0 2px #6366f1 !important;
+                    border-radius: 10px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                }
+
+                /* Base (always): prevent any default focus ring on header action buttons.
+                   Highlight Focus ON rule above will add the desired ring back. */
+                .accessbit-widget-panel .panel-header .action-btn:focus,
+                .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+
+                /* When Highlight Focus is OFF, ensure header action buttons don't retain any ring */
+                :host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus,
+                :host-context(body:not(.highlight-focus)) .accessbit-widget-panel .panel-header .action-btn:focus-visible,
+                :host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus,
+                :host-context(body:not(.highlight-focus)) .accessbit-panel-screenshot .panel-header .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    background: inherit !important;
+                }
+
+                /* Highlight Focus OFF (Shadow DOM safe): suppress focus rings inside widget UI */
+                :host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus,
+                :host-context(body:not(.highlight-focus)) #accessbit-widget-panel *:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    background: inherit !important;
+                }
+
+                /* Unified mobile + tablet feature text sizing (≤1024px).
+                   Makes ALL feature cards (profiles, sliders, useful links) consistent, without touching desktop. */
+                @media (max-width: 1024px) {
+                    /* Primary feature titles: Seizure, Vision, ADHD, Cognitive, Keyboard, Blind Users, etc. */
+                    #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .content-adjustments-card h4,
+                    #accessbit-widget-panel .contrast-style-card h4,
+                    #accessbit-widget-panel .useful-links-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature descriptions / secondary text */
+                    #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .content-adjustments-card p,
+                    #accessbit-widget-panel .contrast-style-card p {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Profile cards that wrap text in .profile-info */
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: inherit !important;
+                        line-height: inherit !important;
+                    }
+
+                    /* Slider cards: Content Scaling / Font Size / Letter Spacing / Line Height labels and 100% values */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Useful Links select/trigger text */
+                    #accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    #accessbit-widget-panel .useful-links-card #useful-links-select,
+                    #accessbit-widget-panel .useful-links-card .useful-links-select-wrap select {
+                        font-size: 16px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Header action buttons: make them readable on mobile + tablet */
+                    #accessbit-widget-panel .panel-header .action-btn,
+                    #accessbit-widget-panel .widget-header .action-btn {
+                        font-size: 13px !important;
+                        min-height: 28px !important;
+                        padding: 6px 12px !important;
+                    }
+                }
+
+                /* When Highlight Focus is OFF, suppress custom purple focus ring inside widget UI */
+                body:not(.highlight-focus) .accessbit-panel-screenshot button:focus-visible,
+                body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel button:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel input:focus-visible,
+                body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+                body:not(.highlight-focus) .accessbit-panel-screenshot button:focus,
+                body:not(.highlight-focus) .accessbit-panel-screenshot .action-btn:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel button:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel input:focus,
+                body:not(.highlight-focus) #accessbit-widget-panel .action-btn:focus {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+    
+                /* Ensure icons inside scaling buttons align properly */
+                .scaling-btn {
+                    text-align: center !important;
+                    line-height: 1.2;
+                    height: auto !important;
+                    white-space: nowrap !important;
+                    padding: 5px 10px !important;
+                }
+                
+                .scaling-btn i.fas {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1;
+                    flex-shrink: 0;
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                .scaling-btn span {
+                    display: inline;
+                    line-height: 1;
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                /* Removed vertical-align - it interferes with flex alignment */
+                
+                .scaling-btn:focus-visible,
+    
+                .close-btn:focus-visible,
+    
+                body.highlight-focus .language-selector-header:focus-visible,
+                body.highlight-focus .language-option:focus-visible {
+    
+            
+                 outline: 2px solid #6366f1 !important;
+                 outline-offset: 2px !important;
+                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;   
+    
+                }
+    
+                /* Suppress focus ring for mouse interactions */
+                *:focus:not(:focus-visible) {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+    
+                /* Prevent container focus outlines that span the dropdown */
+                .language-dropdown:focus-visible,
+                .language-dropdown-content:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+    
+                /* Clip any child outlines to dropdown bounds */
+                .language-dropdown,
+                .language-dropdown-content {
+                    overflow: hidden !important;
+                    border-radius: 8px !important;
+                }
+                /* Center language options horizontally inside the dropdown */
+                .language-dropdown-content {
+                    text-align: center;
+                }
+    
+                /* Keep option focus ring tight to the option */
+                .language-option:focus-visible {
+                    outline-offset: -2px !important;
+                    border-radius: 8px !important;
+                }
+    
+    
+    
+                .toggle-switch input:focus + .slider {
+    
+                     outline: none !important;
+                }
+                
+                /* Override for accessibility icon to show focus when keyboard navigation is active */
+                body.highlight-focus .accessbit-widget-icon:focus,
+                body.highlight-focus #accessbit-widget-icon:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                }
+    
+    
+    
+                /* No blue/purple highlight on profile items (toggle rows) */
+    
+                .profile-item:focus,
+    
+                .profile-item:focus-within {
+    
+                    outline: none !important;
+                    outline-offset: 0 !important;
+                    background: inherit !important;
+                    border-radius: 4px !important;
+                }
+    
+    
+    
+                .profile-item:focus {
+    
+                   outline: none !important;
+                   outline-offset: 0 !important;
+                   background: inherit !important;
+                   border-radius: 4px !important;
+                }
+    
+    
+    
+                /* Screen reader only content */
+    
+                .sr-only {
+    
+                    position: absolute !important;
+    
+                    width: 1px !important;
+    
+                    height: 1px !important;
+    
+                    padding: 0 !important;
+    
+                    margin: -1px !important;
+    
+                    overflow: hidden !important;
+    
+                    clip: rect(0, 0, 0, 0) !important;
+    
+                    white-space: nowrap !important;
+    
+                    border: 0 !important;
+    
+                }
+    
+    
+    
+                /* Focus indicators for keyboard navigation */
+    
+                .accessbit-widget-icon:focus,
+    
+                .accessbit-widget-panel button:focus,
+    
+                .accessbit-widget-panel input:focus,
+    
+                .accessbit-widget-panel label:focus {
+    
+                    
+                    outline-offset: 0px !important;
+                    box-shadow: none !important;
+    
+                }
+    
+                /* Allow focus indicators when highlight-focus is active (document scope) */
+                body.highlight-focus .accessbit-widget-icon:focus,
+                body.highlight-focus .accessbit-widget-panel button:focus,
+                body.highlight-focus .accessbit-widget-panel input:focus,
+                body.highlight-focus .accessbit-widget-panel label:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
+    
+                /* Ensure focus styles work inside Shadow DOM when body has highlight-focus */
+                :host-context(.highlight-focus) #accessbit-widget-icon:focus,
+                :host-context(.highlight-focus) .accessbit-widget-icon:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel button:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel input:focus,
+                :host-context(.highlight-focus) .accessbit-widget-panel label:focus {
+                    outline: 3px solid #6366f1 !important;
+                    outline-offset: 2px !important;
+                    background: rgba(99, 102, 241, 0.1) !important;
+                    border-radius: 4px !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
+                }
+    
+                /* Inside the widget: only show custom focus when Highlight Focus is ON */
+                body:not(.highlight-focus) .accessbit-widget-icon:focus-visible,
+                body:not(.highlight-focus) .accessbit-widget-panel button:focus-visible,
+                body:not(.highlight-focus) .accessbit-widget-panel input:focus-visible {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+    
+    
+    
+                /* --- CSS-ONLY responsive: no JS resize logic; browser handles 1280/1281 transition --- */
+                /* STATE 1: TABLET/BASE VIEWPORT (601px–1280px) – panel docked to same side as widget icon; wider 800–1280 */
+                @media (min-width: 601px) and (max-width: 1280px) {
+                    .accessbit-widget-panel {
+                        position: fixed !important;
+                        width: min(576px, calc(100vw - 24px)) !important;
+                        max-width: min(576px, calc(100vw - 24px)) !important;
+                        height: calc(100dvh - 30px) !important;
+                        max-height: calc(100dvh - 30px) !important;
+                        bottom: var(--widget-icon-bottom, 20px) !important;
+                        right: var(--panel-right, auto) !important;
+                        left: var(--panel-left, auto) !important;
+                        top: var(--widget-icon-top, auto) !important;
+                        transform: none !important;
+                        transition: transform 0.3s ease !important;
+                        border-radius: 20px !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                    }
+                    .accessbit-widget-panel.active,
+                    .accessbit-widget-panel.show {
+                        transform: none !important;
+                        display: flex !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card,
+                    .accessbit-panel-screenshot .useful-links-card {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap,
+                    .accessbit-widget-panel .useful-links-card #useful-links-select,
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap,
+                    .accessbit-panel-screenshot .useful-links-card #useful-links-select,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                    }
+                }
+                /* STATE 1A: SMALL PHONES (max-width: 600px) – panel centered above icon (e.g. 375x812, 414x896) */
+                @media (max-width: 600px) {
+                    .accessbit-widget-panel {
+                        position: fixed !important;
+                        width: min(480px, calc(100vw - 24px)) !important;
+                        max-width: min(480px, calc(100vw - 24px)) !important;
+                        height: calc(100dvh - 30px) !important;
+                        max-height: calc(100dvh - 30px) !important;
+                        left: 50% !important;
+                        right: auto !important;
+                        bottom: var(--widget-icon-bottom, 20px) !important;
+                        top: auto !important;
+                        transform: translateX(-50%) !important;
+                        transition: transform 0.3s ease !important;
+                        border-radius: 20px !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                    }
+                    .accessbit-widget-panel.active,
+                    .accessbit-widget-panel.show {
+                        transform: translateX(-50%) !important;
+                        display: flex !important;
+                    }
+                }
+                /* STATE 2: DESKTOP FLOATING (min-width: 1281px) - vars set once by JS on load/settings */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel {
+                        width: 576px !important;
+                        height: calc(100dvh - 40px) !important;
+                        max-height: calc(100dvh - 40px) !important;
+                        top: var(--panel-top, 20px) !important;
+                        right: var(--panel-right, 20px) !important;
+                        left: var(--panel-left, auto) !important;
+                        transform: none !important;
+                        bottom: auto !important;
+                        border-radius: 16px !important;
+                    }
+                }
+                /* [Ultra-wide: > 1921px] – panel fills viewport height, no small box */
+                @media (min-width: 1921px) {
+                    .accessbit-widget-panel {
+                        height: calc(100vh - 40px) !important;
+                        max-height: calc(100dvh - 40px) !important;
+                        top: var(--panel-top, 20px) !important;
+                        transform: none !important;
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                    }
+                }
+                @supports (height: 100dvh) {
+                    @media (min-width: 1921px) {
+                        .accessbit-widget-panel {
+                            height: calc(100dvh - 40px) !important;
+                            max-height: calc(100dvh - 40px) !important;
+                        }
+                    }
+                }
+                /* Hide scrollbar on panel and main content – panel gets overflow-y:auto in some media queries and becomes scroll container */
+                .accessbit-widget-panel,
+                .accessbit-widget-panel > .white-content-section,
+                .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section,
+                .accessbit-widget-panel > .accessbit-widget-content,
+                .accessbit-widget-panel > .panel-content {
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                .accessbit-widget-panel::-webkit-scrollbar,
+                .accessbit-widget-panel > .white-content-section::-webkit-scrollbar,
+                .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section::-webkit-scrollbar,
+                .accessbit-widget-panel > .accessbit-widget-content::-webkit-scrollbar,
+                .accessbit-widget-panel > .panel-content::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }
+                /* Force scrollbar hidden via class (JS-applied) and ID – overrides everything */
+                #accessbit-widget-panel.accessbit-hide-scrollbar,
+                .accessbit-hide-scrollbar {
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                #accessbit-widget-panel.accessbit-hide-scrollbar {
+                    overflow: hidden !important;
+                    overflow-y: hidden !important;
+                }
+                #accessbit-widget-panel.accessbit-hide-scrollbar::-webkit-scrollbar,
+                .accessbit-hide-scrollbar::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    visibility: hidden !important;
+                    background: transparent !important;
+                }
+                /* Do NOT style scrollbars for panel content – was causing visible scrollbar on Accessibility Profiles, Color Adjustments, Interface Controls. Hide only. */
+                /* Universal: hide scrollbar on ANY element inside panel (catches shared scroll container for all sections) */
+                .accessbit-widget-panel * {
+                    scroll-behavior: auto !important;
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                .accessbit-widget-panel *::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    visibility: hidden !important;
+                }
+                /* Only the direct scroll container scrolls – panel is now single container so > .white-content-section is the scroll area */
+                .accessbit-widget-panel > .white-content-section,
+                .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section,
+                .accessbit-widget-panel > .accessbit-widget-content,
+                .accessbit-widget-panel > .panel-content {
+                    flex: 1 1 auto !important;
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    min-height: 0 !important;
+                    min-width: 0 !important;
+                    -webkit-overflow-scrolling: touch !important;
+                    scrollbar-gutter: stable !important;
+                }
+.accessbit-widget-panel .white-content-section .white-content-section {
+                    overflow-y: visible !important;
+                    overflow-x: hidden !important;
+                }
+                .accessbit-widget-panel .accessbit-widget-content,
+                .accessbit-widget-panel .panel-content,
+                .accessbit-widget-panel .white-content-section {
+                    display: block !important;
+                    padding: 20px 0 0 0;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    background-color: rgb(234, 236, 242) !important;
+                    border-radius: 0 !important;
+                    box-sizing: border-box !important;
+                    overflow-x: visible !important;
+                    margin: 0 !important;
+                }
+                /* Section headers (e.g. Accessibility Profiles) start at same left edge as feature containers (Seizure Safe box) */
+                .accessbit-widget-panel .white-content-section > h3,
+                .accessbit-widget-panel .white-content-section .content-adjustments-title,
+                .accessbit-widget-panel .white-content-section .color-adjustments-title,
+                .accessbit-widget-panel .white-content-section .interface-controls-title {
+                    max-width: min(528px, 100%) !important;
+                    width: 100% !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    box-sizing: border-box !important;
+                    text-align: left !important;
+                }
+                .accessbit-widget-panel .white-content-section > h3:first-child,
+                .accessbit-widget-panel .white-content-section > h3.placeholder-title { margin: 16px 0 18px 0 !important; }
+                .accessbit-widget-panel .white-content-section .content-adjustments-title { margin: 43px 0 23px 0 !important; }
+                .accessbit-widget-panel .white-content-section .color-adjustments-title { margin: 26px 0 28px 0 !important; }
+                .accessbit-widget-panel .white-content-section .interface-controls-title { margin: 36px 0 18px 0 !important; }
+                .accessbit-widget-content *,
+                .accessbit-widget-panel .panel-content * { max-width: 100% !important; }
+                /* Exclude 528px profile items so their width: 528px is not overridden by the * rule */
+                .accessbit-widget-panel .panel-content .profile-item:has(#seizure-safe),
+                .accessbit-widget-panel .panel-content .profile-item:has(#reduce-motion),
+                .accessbit-widget-panel .panel-content .profile-item:has(#vision-impaired),
+                .accessbit-widget-panel .panel-content .profile-item:has(#adhd-friendly),
+                .accessbit-widget-panel .panel-content .profile-item:has(#cognitive-disability),
+                .accessbit-widget-panel .panel-content .profile-item:has(#keyboard-nav),
+                .accessbit-widget-panel .panel-content .profile-item:has(#screen-reader),
+                .accessbit-widget-panel .panel-content .profile-item:has(#older-adults),
+                .accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .panel-content .profile-item:has(#dyslexia-font),
+                .accessbit-widget-panel .panel-content .profile-item:has(#protanopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#deuteranopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#tritanopia),
+                .accessbit-widget-panel .panel-content .profile-item:has(#color-blind),
+                .accessbit-widget-panel .panel-content .profile-item:has(#inverted-colors),
+                .accessbit-widget-panel .panel-content .profile-item:has(#large-clickable-area),
+                .accessbit-widget-panel .panel-content .profile-item:has(#content-scale-range),
+                .accessbit-widget-panel .panel-content .profile-item:has(#font-sizing),
+                .accessbit-widget-panel .panel-content .profile-item:has(#adjust-line-height),
+                .accessbit-widget-panel .panel-content .profile-item:has(#adjust-letter-spacing) { max-width: min(528px, 100%) !important; }
+                .accessbit-widget-panel .profile-item { min-width: 0 !important; overflow-x: visible !important; overflow-y: visible !important; background: #FFFFFF !important; border-radius: 7px !important; min-height: 84px !important; max-width: min(440px, 100%) !important; width: 100% !important; opacity: 1 !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; padding: 15px 22px !important; }
+                /* First block (Seizure → Screen Reader): spacing handled by individual cards (e.g. content-scaling-card) */
+                .accessbit-widget-panel .white-content-section > .profile-item { margin-bottom: 0 !important; }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon { overflow: visible !important; }
+                .accessbit-widget-panel .profile-item:has(#reduce-motion),
+                .accessbit-widget-panel .profile-item:has(#vision-impaired),
+                .accessbit-widget-panel .profile-item:has(#adhd-friendly),
+                .accessbit-widget-panel .profile-item:has(#cognitive-disability),
+                .accessbit-widget-panel .profile-item:has(#keyboard-nav),
+                .accessbit-widget-panel .profile-item:has(#screen-reader),
+                .accessbit-widget-panel .profile-item:has(#older-adults),
+                .accessbit-widget-panel .profile-item:has(#dyslexia-friendly),
+                .accessbit-widget-panel .profile-item:has(#dyslexia-font),
+                .accessbit-widget-panel .profile-item:has(#protanopia),
+                .accessbit-widget-panel .profile-item:has(#deuteranopia),
+                .accessbit-widget-panel .profile-item:has(#tritanopia),
+                .accessbit-widget-panel .profile-item:has(#color-blind),
+                .accessbit-widget-panel .profile-item:has(#inverted-colors),
+                .accessbit-widget-panel .profile-item:has(#large-clickable-area),
+                .accessbit-widget-panel .profile-item:has(#content-scale-range),
+                .accessbit-widget-panel .profile-item:has(#font-sizing),
+                .accessbit-widget-panel .profile-item:has(#adjust-line-height),
+                .accessbit-widget-panel .profile-item:has(#adjust-letter-spacing) { width: 528px !important; max-width: min(528px, 100%) !important; overflow: visible !important; overflow-x: visible !important; }
+                /* Desktop: dark/light/high contrast, high/low saturation, monochrome = 257px width; gap last colour picker to reset = same as gap between pickers (12px) */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel .white-content-section,
+                    .accessbit-widget-panel .accessbit-panel-screenshot > .white-content-section { padding-top: 0 !important; }
+                    .accessbit-widget-panel .color-adjustments-section { margin-top: 12px !important; }
+                    .accessbit-widget-panel .panel-content .profile-item:has(#dark-contrast),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#light-contrast),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#high-contrast),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#high-saturation),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#low-saturation),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#monochrome) { max-width: min(257px, 100%) !important; }
+                    .accessbit-widget-panel .profile-item:has(#dark-contrast),
+                    .accessbit-widget-panel .profile-item:has(#light-contrast),
+                    .accessbit-widget-panel .profile-item:has(#high-contrast),
+                    .accessbit-widget-panel .profile-item:has(#high-saturation),
+                    .accessbit-widget-panel .profile-item:has(#low-saturation),
+                    .accessbit-widget-panel .profile-item:has(#monochrome) { width: 257px !important; max-width: min(257px, 100%) !important; }
+                    /* Color Adjustments section: widen so 2×257px columns + gap fit; grid columns fixed to 257px to prevent clipping */
+                    .accessbit-widget-panel .color-adjustments-section { max-width: min(526px, 100%) !important; overflow-x: visible !important; }
+                    .accessbit-widget-panel .color-adjustments-toggles-grid { grid-template-columns: 257px 257px !important; }
+                    .accessbit-widget-panel .profile-item:has(#dark-contrast),
+                    .accessbit-widget-panel .profile-item:has(#light-contrast),
+                    .accessbit-widget-panel .profile-item:has(#high-contrast),
+                    .accessbit-widget-panel .profile-item:has(#high-saturation),
+                    .accessbit-widget-panel .profile-item:has(#low-saturation),
+                    .accessbit-widget-panel .profile-item:has(#monochrome) { overflow: visible !important; overflow-x: visible !important; }
+                    /* Desktop: mute sound, hide images, read mode, reading guide, stop animation, reading mask, highlight focus, highlight hover = 257px width */
+                    .accessbit-widget-panel .panel-content .profile-item:has(#mute-sound),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#hide-images),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#read-mode),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#reading-guide),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#stop-animation),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#reading-mask),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#highlight-focus),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#highlight-hover) { max-width: min(257px, 100%) !important; }
+                    .accessbit-widget-panel .profile-item:has(#mute-sound),
+                    .accessbit-widget-panel .profile-item:has(#hide-images),
+                    .accessbit-widget-panel .profile-item:has(#read-mode),
+                    .accessbit-widget-panel .profile-item:has(#reading-guide),
+                    .accessbit-widget-panel .profile-item:has(#stop-animation),
+                    .accessbit-widget-panel .profile-item:has(#reading-mask),
+                    .accessbit-widget-panel .profile-item:has(#highlight-focus),
+                    .accessbit-widget-panel .profile-item:has(#highlight-hover) { width: 257px !important; max-width: min(257px, 100%) !important; }
+                    /* Desktop: big black cursor, big white cursor = 257px width */
+                    .accessbit-widget-panel .panel-content .profile-item:has(#big-black-cursor),
+                    .accessbit-widget-panel .panel-content .profile-item:has(#big-white-cursor) { max-width: min(257px, 100%) !important; }
+                    .accessbit-widget-panel .profile-item:has(#big-black-cursor),
+                    .accessbit-widget-panel .profile-item:has(#big-white-cursor) { width: 257px !important; max-width: min(257px, 100%) !important; }
+                    /* Cursor cards grid: widen so 2×257px columns + gap fit; grid columns fixed to 257px */
+                    .accessbit-widget-panel .cursor-cards-grid { max-width: min(526px, 100%) !important; grid-template-columns: 257px 257px !important; }
+                    .accessbit-widget-panel .profile-item:has(#big-black-cursor),
+                    .accessbit-widget-panel .profile-item:has(#big-white-cursor) { overflow: visible !important; overflow-x: visible !important; }
+                    /* Interface Controls section: widen so 2×257px columns + gap fit; grid columns fixed to 257px to prevent clipping */
+                    .accessbit-widget-panel .interface-controls-section { max-width: min(526px, 100%) !important; overflow-x: visible !important; }
+                    .accessbit-widget-panel .interface-controls-grid { grid-template-columns: 257px 257px !important; }
+                    .accessbit-widget-panel .profile-item:has(#mute-sound),
+                    .accessbit-widget-panel .profile-item:has(#hide-images),
+                    .accessbit-widget-panel .profile-item:has(#read-mode),
+                    .accessbit-widget-panel .profile-item:has(#reading-guide),
+                    .accessbit-widget-panel .profile-item:has(#stop-animation),
+                    .accessbit-widget-panel .profile-item:has(#reading-mask),
+                    .accessbit-widget-panel .profile-item:has(#highlight-focus),
+                    .accessbit-widget-panel .profile-item:has(#highlight-hover) { overflow: visible !important; overflow-x: visible !important; }
+                    /* Desktop: Adjust Text Colors, Adjust Title Colors, Adjust Background Colors = 528px width */
+                    .accessbit-widget-panel .panel-content #adjust-text-colors,
+                    .accessbit-widget-panel .panel-content #adjust-title-colors,
+                    .accessbit-widget-panel .panel-content #adjust-bg-colors { max-width: min(528px, 100%) !important; }
+                    .accessbit-widget-panel #adjust-text-colors,
+                    .accessbit-widget-panel #adjust-title-colors,
+                    .accessbit-widget-panel #adjust-bg-colors { width: 528px !important; max-width: min(528px, 100%) !important; }
+                    /* Desktop: Useful Links = 528px width */
+                    .accessbit-widget-panel .panel-content .useful-links-card,
+                    .accessbit-widget-panel .panel-content .profile-item.useful-links-card { max-width: min(528px, 100%) !important; }
+                    .accessbit-widget-panel .useful-links-card,
+                    .accessbit-widget-panel .profile-item.useful-links-card { width: 528px !important; max-width: min(528px, 100%) !important; }
+                }
+                .accessbit-widget-panel .profile-item .profile-info,
+                .accessbit-widget-panel .profile-item .profile-item-icon { overflow: visible !important; }
+                /* Icon container: prevent flex compression; 44px gives 1px buffer so SVG stroke is never clipped on the right */
+                .accessbit-widget-panel .profile-item .profile-item-icon {
+                    width: 44px !important;
+                    height: 43px !important;
+                    min-width: 44px !important;
+                    flex: 0 0 44px !important;
+                    flex-shrink: 0 !important;
+                    box-sizing: content-box !important;
+                    padding: 0 !important;
+                    overflow: visible !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .accessbit-widget-panel .profile-item .profile-item-icon svg {
+                    width: 43px !important;
+                    height: 43px !important;
+                    max-width: 98% !important;
+                    height: auto !important;
+                    flex-shrink: 0 !important;
+                    display: block !important;
+                }
+                .accessbit-widget-panel .profile-item * { overflow-y: visible !important; }
+                .accessbit-widget-panel .profile-item,
+                .accessbit-widget-panel .profile-item * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .accessbit-widget-panel .profile-item::-webkit-scrollbar,
+                .accessbit-widget-panel .profile-item *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+                .accessbit-widget-panel .profile-item .toggle-switch { margin-right: 0px !important; }
+                /* Toggle on: highlight card with border; icon ring handled purely inside SVG (exclude font-size, line-height, letter-spacing) */
+                .accessbit-widget-panel .profile-item { border: 2px solid transparent !important; }
+                .accessbit-widget-panel .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border: 2px solid #01CE9C !important; }
+                /* --- ≤1279px: drawer mode (mobile-mode) – width/height; position set by viewport below --- */
+                @media (max-width: 1279px) {
+                    .accessbit-widget-panel.mobile-mode {
+                        width: min(480px, calc(100vw - 24px)) !important;
+                        max-width: min(480px, calc(100vw - 24px)) !important;
+                        height: calc(100dvh - 30px) !important;
+                        max-height: calc(100dvh - 30px) !important;
+                        top: auto !important;
+                        bottom: var(--widget-icon-bottom, 20px) !important;
+                        margin: 0 !important;
+                        border-radius: 20px !important;
+                        box-sizing: border-box !important;
+                        transition: transform 0.3s ease !important;
+                    }
+                }
+                /* Small phones (≤600px): center panel when mobile-mode */
+                @media (max-width: 600px) {
+                    .accessbit-widget-panel.mobile-mode {
+                        left: 50% !important;
+                        right: auto !important;
+                        transform: translateX(-50%) !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.active,
+                    .accessbit-widget-panel.mobile-mode.show {
+                        transform: translateX(-50%) !important;
+                    }
+                }
+                /* Tablets/base (601px–1279px): dock panel by icon when mobile-mode */
+                @media (min-width: 601px) and (max-width: 1279px) {
+                    .accessbit-widget-panel.mobile-mode,
+                    .accessbit-widget-panel.mobile-mode.side-left,
+                    .accessbit-widget-panel.mobile-mode.side-right {
+                        left: var(--panel-left, auto) !important;
+                        right: var(--panel-right, auto) !important;
+                        transform: none !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode.active,
+                    .accessbit-widget-panel.mobile-mode.show {
+                        transform: none !important;
+                    }
+                }
+                /* Shared mobile-mode layout/scroll (all ≤1279px) */
+                @media (max-width: 1279px) {
+                    .accessbit-widget-panel.mobile-mode:not(.active) {
+                        transition: none !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode > .white-content-section,
+                    .accessbit-widget-panel.mobile-mode .accessbit-panel-screenshot > .white-content-section,
+                    .accessbit-widget-panel.mobile-mode > .accessbit-widget-content,
+                    .accessbit-widget-panel.mobile-mode > .panel-content {
+                        flex: 1 1 auto !important;
+                        height: auto !important;
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                        display: block !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        scrollbar-gutter: stable !important;
+                        padding: 16px !important;
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
+                        padding-bottom: 16px !important;
+                    }
+                    .accessbit-widget-panel.mobile-mode .panel-header,
+                    .accessbit-widget-panel.mobile-mode .widget-header {
+                        padding: 20px 16px !important;
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
+                        font-size: 1.2rem;
+                        flex-shrink: 0 !important;
+                    }
+                    /* When off: show white circle on toggle; when on: show vertical bar; no transition on ::after to avoid flash */
+                    .toggle-switch > input:not(:checked) + .slider::after {
+                        content: "" !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        right: 16px !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border-width: 2px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transition: none !important;
+                    }
+                    .toggle-switch > input:checked + .slider::after {
+                        content: "" !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        left: 22px !important;
+                        right: auto !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                        width: 2px !important;
+                        height: 12px !important;
+                        background: white !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        pointer-events: none !important;
+                        transition: none !important;
+                    }
+                    /* Phone only: hide ring and | bar (tablet 769–1279px shows ring + bar like desktop) */
+                    @media (max-width: 768px) {
+                        .accessbit-widget-panel .toggle-switch .slider::after,
+                        .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                        .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                        .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            content: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            overflow: hidden !important;
+                        }
+                    }
+                    /* Smaller toggles for Nest Hub (1024x600), Nest Hub Max (1280x800) and tablets */
+                    .accessbit-widget-panel .toggle-switch {
+                        width: 32px !important;
+                        height: 18px !important;
+                        min-width: 32px !important;
+                    }
+                    .accessbit-widget-panel .profile-item .toggle-switch {
+                        margin-left: auto !important;
+                        margin-right: 12px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider {
+                        height: 18px !important;
+                        border-radius: 18px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider:before {
+                        width: 14px !important;
+                        height: 14px !important;
+                        left: 2px !important;
+                        bottom: 2px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        transform: translateX(14px) !important;
+                    }
+                    /* Fluid size reductions – CSS as source of truth (no JS inline layout) */
+                    .accessbit-widget-panel .action-btn {
+                        font-size: 11px;
+                        padding: 4px 10px !important;
+                        min-height: 26px !important;
+                    }
+
+                    /* Desktop: larger primary action buttons (Reset / Statement / Hide Interface) */
+                    @media (min-width: 1281px) {
+                        .accessbit-widget-panel .action-btn {
+                            font-size: 15px;
+                            padding: 10px 22px !important;
+                            min-height: 44px !important;
+                        }
+                    }
+
+                    /* Tablet (>=768px): keep header primary action buttons at 15px */
+                    @media (min-width: 768px) and (max-width: 1280px) {
+                        #accessbit-widget-panel .panel-header #reset-settings,
+                        #accessbit-widget-panel .panel-header #statement,
+                        #accessbit-widget-panel .panel-header #hide-interface,
+                        #accessbit-widget-panel .widget-header #reset-settings,
+                        #accessbit-widget-panel .widget-header #statement,
+                        #accessbit-widget-panel .widget-header #hide-interface {
+                            font-size: 15px !important;
+                        }
+                    }
+                    .accessbit-widget-panel .profile-item {
+                        padding: 8px 10px !important;
+                        margin-bottom: 6px !important;
+                    }
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2 {
+                        font-size: 16px;
+                        line-height: 20px;
+                    }
+                    .accessbit-widget-panel .profile-item h4 {
+                        font-size: 12px;
+                        line-height: 1.3;
+                    }
+                    .accessbit-widget-panel .profile-item p {
+                        font-size: 10px;
+                        line-height: 1.2;
+                    }
+                    .accessbit-widget-panel h3 {
+                        font-size: 14px;
+                        line-height: 1.3;
+                    }
+                }
+
+                /* --- Same responsive logic as old UI (CSS-only) – applied to current panel --- */
+                /* Tablet (481px–1279px): panel typography & action buttons */
+                @media (min-width: 481px) and (max-width: 1279px) {
+                    .accessbit-widget-panel { font-size: 13px; padding: 14px !important; }
+                    .accessbit-widget-panel .action-btn { padding: 8px 12px !important; min-height: 32px !important; }
+                }
+                /* Mobile landscape: smooth scroll & touch */
+                @media (orientation: landscape) and (max-width: 768px) {
+                    .accessbit-widget-panel {
+                        overflow-y: auto !important;
+                        scroll-behavior: smooth !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        overscroll-behavior: contain !important;
+                    }
+                }
+                /* Small mobile (≤400px): tighter layout, smaller toggles & close */
+                @media (max-width: 400px) {
+                    .accessbit-widget-panel {
+                        padding: 14px !important;
+                        overflow-y: auto !important;
+                        scroll-behavior: smooth !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        overscroll-behavior: contain !important;
+                    }
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2 { margin-bottom: 6px !important; }
+                    .accessbit-widget-panel h3 { margin-bottom: 4px !important; }
+                    .accessbit-widget-panel .action-btn { padding: 8px 12px !important; min-height: 32px !important; }
+                    .accessbit-widget-panel .scaling-btn {
+                        padding: 2px 4px !important;
+                        min-height: 20px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 4px !important;
+                    }
+                    /* Toggles on very small mobile: compact (32x18), green when on */
+                    .accessbit-widget-panel .toggle-switch { width: 32px !important; height: 18px !important; }
+                    .accessbit-widget-panel .toggle-switch .slider { width: 32px !important; height: 18px !important; border-radius: 18px !important; }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider { background-color: #01CE9C !important; }
+                    .accessbit-widget-panel .toggle-switch .slider:before {
+                        width: 12px !important; height: 12px !important; left: 3px !important; bottom: 3px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before { transform: translateX(13px) !important; }
+                    /* Ensure inner ring/bar is hidden in widget toggles on very small mobile */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after { display: none !important; }
+                    .accessbit-widget-panel .profile-item { padding: 2px !important; margin-bottom: 2px !important; }
+                    .accessbit-widget-panel .profile-item h4 { margin-bottom: 1px !important; }
+                    .accessbit-widget-panel .profile-item p { margin-bottom: 1px !important; }
+                    .accessbit-widget-panel .close-btn {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        padding: 0 !important;
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        min-height: 36px !important;
+                    }
+                    .accessbit-widget-panel .close-btn svg {
+                        display: block !important;
+                        margin: 0 auto !important;
+                    }
+                    .accessbit-widget-icon[data-shape="rounded"] {
+                        border-radius: 12px !important;
+                        -webkit-border-radius: 12px !important;
+                        -moz-border-radius: 12px !important;
+                    }
+                }
+                /* iPad / tablet (769px–819px): typography & spacing */
+                @media (max-width: 819px) and (min-width: 769px) {
+                    .accessbit-widget-panel { padding: 16px !important; overflow-y: auto !important; }
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        margin-bottom: 12px !important;
+                    }
+                    .accessbit-widget-panel h3 { margin-bottom: 10px !important; }
+                    .accessbit-widget-panel .profile-item { padding: 10px !important; margin-bottom: 8px !important; }
+                    .accessbit-widget-panel .action-btn { padding: 8px 12px !important; }
+                }
+
+                /* Tablet and mobile: remove outline; panel/screenshot radius+overflow in master-frame block below */
+                @media (max-width: 1279px) {
+                    :host {
+                        outline: none !important;
+                        outline-offset: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        -webkit-box-shadow: none !important;
+                        background: transparent !important;
+                    }
+                    :host .accessbit-widget-panel,
+                    :host #accessbit-widget-panel,
+                    .accessbit-widget-panel,
+                    #accessbit-widget-panel.accessbit-widget-panel,
+                    .accessbit-widget-panel:focus,
+                    #accessbit-widget-panel:focus {
+                        outline: none !important;
+                        outline-offset: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        -webkit-box-shadow: none !important;
+                    }
+                    .accessbit-widget-panel .panel-header::before,
+                    .accessbit-widget-panel .widget-header::before {
+                        border-radius: 20px 20px 0 0 !important;
+                    }
+                    .accessbit-widget-panel .panel-content,
+                    .accessbit-widget-panel .accessbit-widget-content {
+                        padding-left: 12px !important;
+                        padding-right: 12px !important;
+                    }
+                    :host .accessbit-widget-icon,
+                    .accessbit-widget-icon,
+                    #accessbit-widget-icon {
+                        outline: none !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        -webkit-box-shadow: none !important;
+                    }
+                }
+                /* Very narrow (e.g. 210px): prevent last colour picker overlapping reset icon in header */
+                @media (max-width: 320px) {
+                    .accessbit-widget-panel .panel-header,
+                    .accessbit-widget-panel .widget-header {
+                        position: relative !important;
+                        z-index: 10 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    .accessbit-widget-panel > .panel-content,
+                    .accessbit-widget-panel > .accessbit-widget-content {
+                        padding-top: 12px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers,
+                    .accessbit-widget-panel #adjust-bg-colors {
+                        margin-bottom: 16px !important;
+                    }
+                }
+                @media (max-width: 240px) {
+                    .accessbit-widget-panel .panel-header,
+                    .accessbit-widget-panel .widget-header {
+                        z-index: 25 !important;
+                        isolation: isolate !important;
+                        position: relative !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers {
+                        position: relative !important;
+                        z-index: 1 !important;
+                        margin-top: 8px !important;
+                    }
+                }
+                /* --- Mobile phone (≤768px): stack action buttons, smaller toggles, fonts, icons, color picker --- */
+                @media (max-width: 768px) {
+                    .accessbit-widget-panel .action-buttons,
+                    .accessbit-panel-screenshot .panel-header .action-buttons,
+                    .accessbit-panel-screenshot .action-buttons {
+                        flex-direction: column !important;
+                        flex-wrap: wrap !important;
+                        align-items: flex-start !important;
+                        justify-content: center !important;
+                        gap: 6px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .action-buttons {
+                        margin-bottom: 4px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-panel-screenshot .panel-header .action-btn {
+                        width: auto !important;
+                        max-width: max-content !important;
+                        min-width: 0 !important;
+                        align-self: flex-start !important;
+                    }
+                    /* Toggles on mobile: slightly larger (38x20), green when on; no inner ring/bar */
+                    .accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch { width: 38px !important; height: 20px !important; min-width: 38px !important; }
+                    .accessbit-widget-panel .toggle-switch .slider,
+                    .accessbit-panel-screenshot .toggle-switch .slider { width: 38px !important; height: 20px !important; border-radius: 20px !important; }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #01CE9C !important; }
+                    .accessbit-widget-panel .toggle-switch .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch .slider:before {
+                        width: 14px !important; height: 14px !important; left: 3px !important; bottom: 3px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(18px) !important; }
+                    /* Mobile: hide inner ring and bar inside toggle */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch .slider::after,
+                    .accessbit-widget-panel .toggle-switch > input + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch > input + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after { display: none !important; }
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2,
+                    .accessbit-panel-screenshot .panel-header h2 { font-size: 18px; line-height: 22px; }
+                    .accessbit-widget-panel h3,
+                    .accessbit-widget-panel .content-adjustments-title,
+                    .accessbit-widget-panel .color-adjustments-title,
+                    .accessbit-widget-panel .interface-controls-title,
+                    .accessbit-widget-panel .placeholder-title,
+                    .accessbit-panel-screenshot .white-content-section .content-adjustments-title,
+                    .accessbit-panel-screenshot .white-content-section > h3 { font-size: 15px; line-height: 19px; }
+                    /* Override :host and global section title font-size for mobile */
+                    :host .accessbit-widget-panel .panel-header h2,
+                    :host .accessbit-widget-panel .widget-header h2 { font-size: 18px !important; line-height: 22px !important; }
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel h3 { font-size: 15px !important; line-height: 19px !important; }
+                    /* Mobile: tighter spacing above/below section headers */
+                    .accessbit-widget-panel .white-content-section > h3:first-child,
+                    .accessbit-widget-panel .white-content-section > h3.placeholder-title { margin: 12px 0 6px 0 !important; }
+                    .accessbit-widget-panel .white-content-section .content-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .color-adjustments-title { margin: 10px 0 6px 0 !important; }
+                    .accessbit-widget-panel .white-content-section .interface-controls-title { margin: 6px 0 10px 0 !important; }
+                    /* Feature text font-size/line-height for mobile is controlled by unified ≤1024px block below. */
+                    .accessbit-widget-panel .profile-item-icon,
+                    .accessbit-panel-screenshot .profile-item .profile-item-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; flex: 0 0 43px !important; flex-shrink: 0 !important; box-sizing: content-box !important; padding: 0 !important; }
+                    .accessbit-widget-panel .profile-item-icon svg,
+                    .accessbit-panel-screenshot .profile-item .profile-item-icon svg { width: 43px !important; height: 43px !important; }
+                    .accessbit-widget-panel .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-card .content-card-icon,
+                    .accessbit-widget-panel .contrast-style-card .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon { width: 43px !important; height: 43px !important; min-width: 43px !important; min-height: 43px !important; flex: 0 0 43px !important; flex-shrink: 0 !important; box-sizing: content-box !important; padding: 0 !important; }
+                    /* Same icon and container as desktop on mobile: no extra outer layer; icon SVG fills 43px */
+                    .accessbit-widget-panel .content-card-icon svg,
+                    .accessbit-widget-panel .color-adjustments-card .content-card-icon svg,
+                    .accessbit-widget-panel .contrast-style-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg { width: 43px !important; height: 43px !important; }
+                    /* 768px tablet: keep controls comfortably sized */
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg { width: 18px !important; height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { height: 18px !important; min-height: 18px !important; gap: 4px !important; padding-left: 0 !important; align-items: center !important; display: flex !important; flex-wrap: nowrap !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options { gap: 4px !important; flex-wrap: nowrap !important; align-items: center !important; height: 18px !important; min-height: 18px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; margin: 0 !important; padding: 0 !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; line-height: 0 !important; flex-shrink: 0 !important; vertical-align: middle !important; border: none !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg { width: 18px !important; height: 18px !important; display: block !important; vertical-align: middle !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 14px; line-height: 1.25; }
+                    /* Slider thumbs: slightly smaller green circle on mobile */
+                    .accessbit-widget-panel .scaling-slider-track .scaling-slider-thumb {
+                        width: 28px !important;
+                        height: 28px !important;
+                        margin-left: -14px !important;
+                        margin-top: -14px !important;
+                    }
+                    .accessbit-widget-panel .scaling-slider-track .scaling-thumb-circle {
+                        width: 28px !important;
+                        height: 28px !important;
+                    }
+                    .accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    .accessbit-widget-panel .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    /* Text align left/center/right: reduce container height on mobile */
+                    .accessbit-widget-panel .content-adjustments-card.align-left-card,
+                    .accessbit-widget-panel .content-adjustments-card.align-center-card,
+                    .accessbit-widget-panel .content-adjustments-card.align-right-card { min-height: auto !important; height: auto !important; padding: 8px 12px !important; }
+                    .accessbit-widget-panel .align-left-card .align-left-label,
+                    .accessbit-widget-panel .align-center-card .align-center-label,
+                    .accessbit-widget-panel .align-right-card .align-right-label { padding: 8px 12px !important; margin: -8px -12px !important; }
+                    .accessbit-widget-panel .align-left-card h4,
+                    .accessbit-widget-panel .align-center-card h4,
+                    .accessbit-widget-panel .align-right-card h4 { margin-top: 4px !important; }
+                    /* Slider cards (Content Scaling, Letter Spacing, Line Height, Font Size): decrease title and value on mobile; override any global font-size */
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-scaling-header h4 { font-size: 12px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value,
+                    .accessbit-panel-screenshot .content-adjustments-card.slider-card .content-adjustments-slider-value { font-size: 11px !important; line-height: 1.3 !important; white-space: nowrap !important; }
+                    /* Mobile: smaller description text for Keyboard Nav + Blind Users (all text under those cards) */
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) p,
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) small {
+                        font-size: 14px !important;
+                        line-height: 20px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .panel-header .statement-btn-icon svg,
+                    .accessbit-widget-panel .panel-header .hide-interface-btn-icon svg,
+                    .accessbit-panel-screenshot .panel-header .reset-settings-icon svg,
+                    .accessbit-panel-screenshot .panel-header .statement-btn-icon svg,
+                    .accessbit-panel-screenshot .panel-header .hide-interface-btn-icon svg { width: 12px !important; height: 12px !important; }
+                    .accessbit-widget-panel .useful-links-card,
+                    .accessbit-panel-screenshot .useful-links-card {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap,
+                    .accessbit-widget-panel .useful-links-card #useful-links-select,
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap,
+                    .accessbit-panel-screenshot .useful-links-card #useful-links-select,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap {
+                        overflow: hidden !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-header h4,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-header h4,
+                    .accessbit-widget-panel .useful-links-card #useful-links-select,
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select,
+                    .accessbit-panel-screenshot .useful-links-card #useful-links-select,
+                    .accessbit-panel-screenshot .useful-links-card .useful-links-select-wrap select { font-size: 11px !important; line-height: 1.3 !important; }
+                    /* Mobile: shrink useful links card & trigger further */
+                    .accessbit-widget-panel .useful-links-card {
+                        padding: 10px 14px !important;
+                        min-height: 110px !important;
+                        gap: 8px !important;
+                    }
+                    .accessbit-widget-panel .useful-links-card .useful-links-header h4 {
+                        font-size: 14px !important;
+                        line-height: 18px !important;
+                    }
+                    .accessbit-widget-panel .useful-links-custom-trigger,
+                    .accessbit-panel-screenshot .useful-links-custom-trigger {
+                        height: 34px !important;
+                        font-size: 12px !important;
+                        padding-left: 10px !important;
+                        padding-right: 10px !important;
+                    }
+                    /* Mobile: color picker circles + reset icon on same row, tight gap */
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: flex-start !important;
+                        gap: 4px !important;
+                        /* start circles under title text (icon width 43 + gap 12) */
+                        padding-left: 55px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                        gap: 4px !important;
+                        padding-left: 0 !important; /* prevent double offset; row already aligns under "Adjust" */
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                    }
+                    /* Useful links dropdown: start under U of USEFUL LINKS (icon 43px + gap 12px = 55px) on mobile/tablet */
+                    .accessbit-widget-panel .useful-links-custom-dropdown,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown,
+                    .accessbit-widget-panel .useful-links-custom-dropdown,
+                    .accessbit-panel-screenshot .useful-links-custom-dropdown { width: calc(100% - 55px) !important; max-width: calc(100% - 55px) !important; min-width: 0 !important; margin-left: 55px !important; box-sizing: border-box !important; }
+                    .accessbit-widget-panel .useful-links-custom-trigger,
+                    .accessbit-panel-screenshot .useful-links-custom-trigger { width: 100% !important; max-width: 100% !important; min-width: 0 !important; font-size: 12px !important; padding-left: 10px !important; padding-right: 10px !important; box-sizing: border-box !important; }
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger { width: 100% !important; max-width: none !important; min-width: 0 !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row { align-items: center !important; min-height: 20px !important; height: 20px !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn { align-self: center !important; margin-bottom: 0 !important; }
+                }
+
+                /* Very narrow (≤400px) and ≤375px: prevent last colour picker overlapping reset icon */
+                @media (max-width: 400px) {
+                    .accessbit-widget-panel .panel-header {
+                        position: relative !important;
+                        z-index: 5 !important;
+                        flex-shrink: 0 !important;
+                        min-height: auto !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-pickers {
+                        margin-top: 4px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card:last-child,
+                    .accessbit-widget-panel #adjust-bg-colors {
+                        margin-bottom: 16px !important;
+                    }
+                }
+                /* Very small mobile (≤375px): prevent colour picker and reset icon overlap – reduce both */
+                @media (max-width: 375px) {
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon {
+                        flex: 0 0 26px !important;
+                        max-width: 26px !important;
+                        border-radius: 50% !important;
+                        overflow: hidden !important;
+                        padding: 0 !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header .content-card-icon svg {
+                        width: 100% !important;
+                        height: 100% !important;
+                        display: block !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        /* align dots under the title text (icon 26px + gap 12px = 38px) */
+                        padding-left: 38px !important;
+                        gap: 4px !important;
+                        min-height: 18px !important;
+                        justify-content: flex-start !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 3px !important;
+                        flex: 0 0 auto !important;
+                        min-width: 0 !important;
+                        padding-left: 0 !important; /* avoid extra desktop offset */
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 16px !important;
+                        height: 16px !important;
+                        min-width: 16px !important;
+                        min-height: 16px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                        margin-left: 2px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 11px !important; }
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn {
+                        padding: 3px 6px !important;
+                        min-height: 20px !important;
+                        font-size: 10px !important;
+                        gap: 8px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 12px !important; height: 12px !important; }
+                    .accessbit-widget-panel .panel-header .action-buttons,
+                    .accessbit-widget-panel .widget-header .action-buttons { gap: 4px !important; }
+                }
+
+                /* Extra small phones: use the tighter sizing */
+                @media (max-width: 420px) {
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        height: 14px !important;
+                        min-height: 14px !important;
+                        gap: 2px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 2px !important;
+                        height: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        min-width: 14px !important;
+                        min-height: 14px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 12px !important; height: 12px !important; }
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn { padding: 2px 4px !important; min-height: 18px !important; font-size: 8px !important; gap: 6px !important; }
+                }
+
+                /* Tablet (601px–768px): keep picker + header controls readable */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    /* 768px consistency: make headings smaller and feature text larger than phone */
+                    .accessbit-widget-panel .panel-header h2,
+                    .accessbit-widget-panel .widget-header h2,
+                    .accessbit-panel-screenshot .panel-header h2,
+                    :host .accessbit-widget-panel .panel-header h2,
+                    :host .accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+                    .accessbit-widget-panel h3,
+                    .accessbit-widget-panel .content-adjustments-title,
+                    .accessbit-widget-panel .color-adjustments-title,
+                    .accessbit-widget-panel .interface-controls-title,
+                    .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title,
+                    :host .accessbit-widget-panel h3 {
+                        font-size: 17px !important;
+                        line-height: 21px !important;
+                    }
+                    .accessbit-widget-panel .profile-item h4,
+                    .accessbit-panel-screenshot .profile-item h4,
+                    .accessbit-widget-panel .content-adjustments-card h4,
+                    .accessbit-widget-panel .contrast-style-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item p,
+                    .accessbit-panel-screenshot .profile-item p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                    /* Some cards use .profile-info wrappers; ensure those match too */
+                    .accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Slider cards (Content Scaling / Font Size / Letter Spacing / Line Height): match feature text sizing */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Useful Links: match feature text sizing */
+                    #accessbit-widget-panel .useful-links-card h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    #accessbit-widget-panel .useful-links-card #useful-links-select,
+                    #accessbit-widget-panel .useful-links-card .useful-links-select-wrap select {
+                        font-size: 16px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 22px !important;
+                        height: 22px !important;
+                        min-width: 22px !important;
+                        min-height: 22px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 22px !important;
+                        height: 22px !important;
+                        min-width: 22px !important;
+                        min-height: 22px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        height: 22px !important;
+                        min-height: 22px !important;
+                        gap: 6px !important;
+                        padding-left: 55px !important; /* align under "Adjust" */
+                        justify-content: flex-start !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        gap: 6px !important;
+                        padding-left: 0 !important; /* avoid double offset; row handles alignment */
+                    }
+
+                    .accessbit-widget-panel .panel-header .action-btn,
+                    .accessbit-widget-panel .widget-header .action-btn,
+                    .accessbit-widget-panel .reset-settings-btn {
+                        padding: 6px 10px !important;
+                        min-height: 30px !important;
+                        font-size: 12px !important;
+                        gap: 10px !important;
+                    }
+                    .accessbit-widget-panel .panel-header .reset-settings-icon svg,
+                    .accessbit-widget-panel .widget-header .reset-settings-icon svg { width: 14px !important; height: 14px !important; }
+                }
+
+                /* Apply some of the same spacing tweaks for small tablets/base screens (769px–1280px) */
+                @media (max-width: 1280px) and (min-width: 769px) {
+                    .accessbit-widget-panel .white-content-section .content-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .color-adjustments-title,
+                    .accessbit-widget-panel .white-content-section .interface-controls-title,
+                    .accessbit-widget-panel .white-content-section > h3.placeholder-title {
+                        margin: 18px 0 10px 0 !important;
+                    }
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) .profile-description p,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) .profile-info > div > p:first-of-type,
+                    .accessbit-widget-panel .profile-item:has(#keyboard-nav) small,
+                    .accessbit-widget-panel .profile-item:has(#screen-reader) small {
+                        font-size: 14px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* 769–1280px (e.g. 783px): increase profile feature text sizes */
+                    .accessbit-widget-panel .profile-item h4,
+                    .accessbit-panel-screenshot .profile-item h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .accessbit-widget-panel .profile-item p,
+                    .accessbit-panel-screenshot .profile-item p {
+                        font-size: 13px !important;
+                        line-height: 1.35 !important;
+                    }
+                    .accessbit-widget-panel .profile-item .profile-info h4,
+                    .accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: inherit !important;
+                        line-height: inherit !important;
+                    }
+                    /* Smaller colour picker and icons at 769–1280px to prevent overlap (e.g. 776px) */
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon,
+                    .accessbit-widget-panel .color-adjustments-picker-card .content-card-icon svg {
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        min-height: 36px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-card-header h4 { font-size: 16px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-row {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: flex-start !important;
+                        gap: 6px !important;
+                        padding-left: 0 !important;
+                        height: 28px !important;
+                        min-height: 28px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-options {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                        gap: 6px !important;
+                        align-items: center !important;
+                        height: 28px !important;
+                        min-height: 28px !important;
+                        /* Align first circle under the "Adjust ..." text (36px icon + 12px gap = 48px) */
+                        padding-left: 48px !important;
+                        box-sizing: border-box !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option,
+                    .accessbit-widget-panel .color-adjustments-picker-card .color-option svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn,
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn svg {
+                        width: 26px !important;
+                        height: 26px !important;
+                        min-width: 26px !important;
+                        min-height: 26px !important;
+                    }
+                    .accessbit-widget-panel .color-adjustments-picker-card .picker-clear-btn {
+                        flex-shrink: 0 !important;
+                        align-self: center !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    /* 769–1280px: smaller font for Content Scaling, Font Size, Letter Spacing, Line Height labels and 100% values, Useful Links */
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 { font-size: 14px !important; line-height: 1.25 !important; }
+                    .accessbit-widget-panel .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #content-scale-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #font-size-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #letter-spacing-value,
+                    .accessbit-widget-panel .content-adjustments-card.slider-card #line-height-value { font-size: 12px !important; line-height: 1.3 !important; }
+                    .accessbit-widget-panel .useful-links-card h4,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card .useful-links-custom-dropdown .useful-links-custom-trigger,
+                    .accessbit-widget-panel .useful-links-card #useful-links-select,
+                    .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select { font-size: 16px !important; line-height: 1.3 !important; }
+                }
+    
+    
+    
+                /* Panel Header */
+    
+                .panel-header {
+
+                    display: flex;
+
+                    flex-direction: column;
+
+                    padding: 10px 20px 14px 20px;
+
+                    background: transparent !important;
+
+                    color: #ffffff !important;
+
+                    border-radius: 20px 20px 0 0 !important;
+
+                    border: none !important;
+
+                    position: relative;
+
+                    z-index: 1002;
+
+                    overflow: hidden;
+
+                    min-height: 210px;
+
+                }
+    
+    
+    
+                .panel-header::before {
+
+                    content: '';
+
+                    position: absolute;
+
+                    top: 0;
+
+                    left: 0;
+
+                    right: 0;
+
+                    bottom: 0;
+
+                    background: linear-gradient(135deg, #262E84, #2AA2F1);
+
+                    border-radius: 20px 20px 0 0;
+
+                    z-index: -1;
+
+                }
+                .panel-header.accessbit-screenshot-header::before { display: none !important; }
+                .panel-header.accessbit-screenshot-header {
+                    background: #34A2AB !important;
+                    border: none !important;
+                    padding-bottom: 54px !important;
+                    border-radius: 20px 20px 0 0 !important;
+                }
+                .accessbit-widget-panel .accessbit-panel-screenshot {
+                    min-width: 0;
+                    width: 100%;
+                    max-width: 100%;
+                    box-sizing: border-box;
+                }
+                /* Prevent scrollbar from showing in Accessibility Profiles / white content area */
+                .accessbit-panel-screenshot > .white-content-section {
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                .accessbit-panel-screenshot > .white-content-section::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }
+                .accessbit-panel-screenshot .white-content-section .profile-item {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 12px !important;
+                    padding: 12px 10px !important;
+                    background: #fff !important;
+                    border-radius: 8px !important;
+                    margin-bottom: 6px !important;
+                    border: 2px solid transparent !important;
+                }
+                /* Hide color-adjustments section in screenshot panel only to avoid duplicate Adjust Text/Title/BG cards */
+                /* First block (Seizure → Screen Reader): 5px vertical space between items */
+                .accessbit-panel-screenshot .white-content-section > .profile-item { margin-bottom: 5px !important; }
+                .accessbit-panel-screenshot .white-content-section .profile-item.color-adjustments-picker-card {
+                    flex-direction: column !important;
+                    align-items: stretch !important;
+                }
+                .accessbit-panel-screenshot .white-content-section .profile-item.contrast-style-card {
+                    flex-direction: column !important;
+                    align-items: stretch !important;
+                }
+                .accessbit-panel-screenshot .white-content-section .profile-item.useful-links-card {
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                }
+                /* Content Scaling, Font Sizing, Letter Spacing, Line Height: icon + title + 100% on first row, slider on second; override .profile-item align-items: center */
+                .accessbit-panel-screenshot .white-content-section .profile-item.slider-card {
+                    align-items: flex-start !important;
+                }
+                .accessbit-panel-screenshot .profile-item .profile-info { flex: 1; min-width: 0; }
+                /* Keyboard Navigation & Screen Reader: icon aligned to top (title) so it doesn’t sit too low with multi-line description */
+                .accessbit-panel-screenshot .white-content-section .profile-item:has(#keyboard-nav),
+                .accessbit-panel-screenshot .white-content-section .profile-item:has(#screen-reader) {
+                    align-items: flex-start !important;
+                }
+                .accessbit-panel-screenshot .white-content-section > h3:first-child,
+                .accessbit-panel-screenshot .white-content-section > h3.placeholder-title {
+                    margin: 16px 0 18px 0 !important;
+                }
+                .accessbit-panel-screenshot .white-content-section .content-adjustments-title {
+                    margin: 43px 0 23px 0 !important;
+                    max-width: min(528px, 100%) !important;
+                    width: 100% !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    box-sizing: border-box !important;
+                    font-family: Archivo;
+                    font-weight: 600;
+                    font-size: 26px;
+                    line-height: 27px;
+                    letter-spacing: -1px;
+                }
+                .accessbit-panel-screenshot .white-content-section .color-adjustments-title {
+                    margin: 26px 0 28px 0 !important;
+                }
+                .accessbit-panel-screenshot .white-content-section .interface-controls-title {
+                    margin: 36px 0 18px 0 !important;
+                }
+                .accessbit-panel-screenshot .white-content-section > h3:first-child,
+                .accessbit-panel-screenshot .white-content-section > h3.placeholder-title {
+                    max-width: min(528px, 100%) !important;
+                    width: 100% !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    box-sizing: border-box !important;
+                    font-family: Archivo;
+                    font-weight: 600;
+                    font-size: 26px;
+                    line-height: 27px;
+                    letter-spacing: -1px;
+                }
+                .accessbit-panel-screenshot .profile-item .toggle-switch { flex-shrink: 0; margin-left: auto; margin-right: 12px; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border-color: #01CE9C !important; }
+                .accessbit-panel-screenshot .profile-item .profile-item-icon,
+                .accessbit-panel-screenshot .profile-item .content-card-icon { border: 2px solid transparent !important; box-sizing: border-box !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent !important; background: transparent !important; }
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,
+                .accessbit-panel-screenshot .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0 !important; stroke: #01CE9C !important; stroke-width: 2px !important; }
+                /* Screenshot panel: desktop toggle size only; mobile uses smaller size from @media (max-width: 768px) above */
+                @media (min-width: 769px) {
+                    .accessbit-panel-screenshot .toggle-switch { width: 80px !important; height: 40px !important; }
+                    .accessbit-panel-screenshot .toggle-switch .slider { width: 80px !important; height: 40px !important; border-radius: 99px !important; box-shadow: 0px 1px 3px 0px #00000033 inset !important; }
+                    .accessbit-panel-screenshot .toggle-switch .slider:before { height: 32px !important; width: 32px !important; left: 4px !important; bottom: 4px !important; border-radius: 50% !important; }
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider { background-color: #00CE9C !important; }
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before { transform: translateX(40px) !important; }
+                }
+                .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after { content: "" !important; display: block !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) rotate(0deg) !important; width: 12px !important; height: 12px !important; opacity: 1 !important; border-width: 2px !important; border: 2px solid #FFFFFF !important; border-radius: 50% !important; background: transparent !important; transition: none !important; }
+                .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after { content: "" !important; display: block !important; left: 22px !important; right: auto !important; top: 50% !important; transform: translateY(-50%) !important; width: 2px !important; height: 12px !important; background: white !important; border: none !important; border-radius: 0 !important; pointer-events: none !important; transition: none !important; opacity: 1 !important; }
+                .accessbit-panel-screenshot .panel-header .header-center { align-items: center !important; padding-left: 0 !important; padding-right: 0 !important; overflow: visible !important; }
+                .accessbit-panel-screenshot .panel-header .header-center h2 {
+                    font-family: Archivo;
+                    font-weight: 600;
+                    font-style: normal;
+                    font-size: 30px;
+                    line-height: 36px;
+                    letter-spacing: -0.6px;
+                    color: #FFFFFF !important;
+                    text-align: center !important;
+                    margin-bottom: 0 !important;
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                }
+                .accessbit-panel-screenshot .panel-header .header-center .action-buttons {
+                    margin-top: 19px !important;
+                }
+                .accessbit-panel-screenshot .panel-header .action-buttons { justify-content: center !important; align-items: center !important; gap: 12px !important; width: 100%; overflow: hidden !important; }
+                /* Default: keep original sizing; translations: allow row wrap instead of overflow */
+                .accessbit-panel-screenshot .action-buttons { max-width: 100% !important; flex-wrap: wrap !important; min-width: 0 !important; }
+                .accessbit-panel-screenshot .panel-header .action-btn {
+                    flex: 0 0 auto !important;
+                    min-width: 0 !important;
+                    max-width: 100% !important;
+                    height: 36px !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
+                .accessbit-panel-screenshot .panel-header #reset-settings,
+                .accessbit-panel-screenshot .panel-header .reset-settings-btn {
+                    min-width: 152.1015625px !important;
+                    width: max-content !important;
+                    max-width: 100% !important;
+                    height: 36px !important;
+                    border-radius: 10px !important;
+                    border: 1px solid #FFFFFF4D !important;
+                    background: #FFFFFF33 !important;
+                    opacity: 1 !important;
+                    display: inline-flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                    padding-left: 14px !important;
+                    padding-right: 19.1px !important;
+                    box-sizing: border-box !important;
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    text-align: center !important;
+                    color: #FFFFFF !important;
+                }
+                .accessbit-panel-screenshot .panel-header #reset-settings .reset-settings-icon,
+                .accessbit-panel-screenshot .panel-header .reset-settings-btn .reset-settings-icon {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    flex-shrink: 0 !important;
+                    line-height: 0;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header #reset-settings .reset-settings-icon svg,
+                .accessbit-panel-screenshot .panel-header .reset-settings-btn .reset-settings-icon svg {
+                    display: block !important;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header #statement,
+                .accessbit-panel-screenshot .panel-header .statement-btn {
+                    min-width: 124.6328125px !important;
+                    width: max-content !important;
+                    max-width: 100% !important;
+                    height: 36px !important;
+                    border-radius: 10px !important;
+                    border: 1px solid #FFFFFF4D !important;
+                    background: #FFFFFF33 !important;
+                    opacity: 1 !important;
+                    display: inline-flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 9px !important;
+                    padding-left: 14px !important;
+                    padding-right: 18.63px !important;
+                    box-sizing: border-box !important;
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    text-align: center !important;
+                    color: #FFFFFF !important;
+                }
+                .accessbit-panel-screenshot .panel-header #statement .statement-btn-icon,
+                .accessbit-panel-screenshot .panel-header .statement-btn .statement-btn-icon {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    flex-shrink: 0 !important;
+                    line-height: 0;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header #statement .statement-btn-icon svg,
+                .accessbit-panel-screenshot .panel-header .statement-btn .statement-btn-icon svg {
+                    display: block !important;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header #hide-interface,
+                .accessbit-panel-screenshot .panel-header .hide-interface-btn {
+                    min-width: 149.6171875px !important;
+                    width: max-content !important;
+                    height: 36px !important;
+                    border-radius: 10px !important;
+                    border: 1px solid #FFFFFF4D !important;
+                    background: #FFFFFF33 !important;
+                    opacity: 1 !important;
+                    display: inline-flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 11px !important;
+                    padding-left: 14px !important;
+                    padding-right: 14px !important;
+                    box-sizing: border-box !important;
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    text-align: center !important;
+                    color: #FFFFFF !important;
+                }
+                .accessbit-panel-screenshot .panel-header #hide-interface .hide-interface-btn-icon,
+                .accessbit-panel-screenshot .panel-header .hide-interface-btn .hide-interface-btn-icon {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    flex-shrink: 0 !important;
+                    line-height: 0;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header #hide-interface .hide-interface-btn-icon svg,
+                .accessbit-panel-screenshot .panel-header .hide-interface-btn .hide-interface-btn-icon svg {
+                    display: block !important;
+                    vertical-align: middle !important;
+                }
+                .accessbit-panel-screenshot .panel-header .close-btn-container {
+                    width: 55px !important;
+                    height: 55px !important;
+                    margin-right: 17px !important;
+                    border-bottom-right-radius: 20px !important;
+                    background: rgba(255,255,255,0.15) !important;
+                    transform: rotate(0deg) !important;
+                }
+                .accessbit-panel-screenshot .panel-header .close-btn-container .close-btn {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    min-width: 0 !important;
+                    min-height: 0 !important;
+                    max-width: none !important;
+                    max-height: none !important;
+                    padding: 0 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    border-radius: 0 !important;
+                }
+                .close-btn {
+                    cursor: pointer !important;
+                    font-size: 24px;
+                    padding: 0 !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    right: auto !important;
+                    transform: translate(-50%, -50%) !important;
+                    z-index: 1005 !important;
+                    background: transparent !important;
+                    border: none !important;
+                    color: white;
+                    width: 48px !important;
+                    height: 48px !important;
+                    min-width: 48px !important;
+                    min-height: 48px !important;
+                    max-width: 48px !important;
+                    max-height: 48px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    box-sizing: border-box !important;
+                    margin: 0 !important;
+                    outline: none !important;
+                    border-radius: 8px !important;
+                    transition: background-color 0.2s ease !important;
+                    overflow: visible !important;
+                    line-height: 1 !important;
+                    text-align: center !important;
+                }
+                /* Keep close X inside its container and centered (main panel and screenshot) */
+                .accessbit-widget-panel .panel-header .close-btn-container,
+                .accessbit-panel-screenshot .panel-header .close-btn-container {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 55px !important;
+                    height: 55px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    overflow: hidden !important;
+                }
+                .accessbit-widget-panel .panel-header .close-btn-container .close-btn,
+                .accessbit-panel-screenshot .panel-header .close-btn-container .close-btn {
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    right: auto !important;
+                    transform: translate(-50%, -50%) !important;
+                }
+                .close-btn svg,
+                .accessbit-widget-panel .close-btn svg,
+                .accessbit-panel-screenshot .close-btn svg {
+                    display: block !important;
+                    margin: 0 auto !important;
+                }
+    
+    
+    
+.close-btn:hover {
+
+                    color: white;
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+
+                }
+                .accessbit-panel-screenshot .panel-header .close-btn-container .close-btn:hover {
+                    border-bottom-right-radius: 20px !important;
+                }
+
+                /* Ensure entire close button area is clickable */
+                .close-btn * {
+                    pointer-events: none !important;
+                }
+    
+                .close-btn {
+                    pointer-events: auto !important;
+                    cursor: pointer !important;
+                }
+                
+                /* Make sure the button itself captures all clicks */
+                .close-btn::before,
+                .close-btn::after {
+                    pointer-events: none !important;
+                }
+                
+                /* Ensure the button background captures all clicks */
+                .close-btn {
+                    background-color: transparent !important;
+                    background-image: none !important;
+                }
+                
+                /* Make sure no child elements interfere with clicks */
+                .close-btn i,
+                .close-btn span,
+                .close-btn div {
+                    pointer-events: none !important;
+                    user-select: none !important;
+                    position: relative !important;
+                    z-index: 2 !important;
+                }
+                
+                /* Create a full-coverage clickable area */
+                .close-btn::before {
+                    content: '' !important;
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    bottom: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    pointer-events: auto !important;
+                    z-index: 1 !important;
+                }
+    
+    
+    
+                .header-content {
+    
+                    display: flex;
+    
+                    flex-direction: column;
+    
+                    align-items: center;
+    
+                    gap: 15px;
+    
+                    margin-top: 10px;
+    
+                    position: relative;
+    
+                    z-index: 1005;
+    
+                }
+    
+    
+    
+    
+    
+                /* Panel Content */
+    
+                .accessbit-widget-panel h2 {
+
+                    text-align: center;
+
+                    margin: 0 0 10px 0;
+
+                    color: #ffffff;
+
+                    font-family: Archivo;
+
+                    font-weight: 600 !important;
+
+                    font-style: normal;
+
+                    font-size: 30px;
+
+                    line-height: 36px;
+
+                    letter-spacing: -0.6px;
+
+                    leading-trim: cap;
+
+                    text-box-trim: cap;
+
+                    position: relative;
+
+                    z-index: 1005;
+
+                    white-space: nowrap;
+
+                }
+
+                /* Desktop: Accessibility Controls title size */
+                @media (min-width: 1281px) {
+                    .accessbit-widget-panel h2 {
+                        font-size: 24px !important;
+                    }
+                }
+
+                /* Tablet (>=768px): Accessibility Controls title size */
+                @media (min-width: 768px) and (max-width: 1280px) {
+                    .accessbit-widget-panel h2 {
+                        font-size: 24px !important;
+                    }
+                }
+
+                /* Desktop: Accessibility Adjustments heading + feature text sizing */
+                @media (min-width: 1281px) {
+                    /* Force "Accessibility Adjustments" heading exact size */
+                    #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 18px !important;
+                    }
+                    /* "Accessibility Adjustments" section title */
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+
+                    /* Feature titles: Seizure / Vision / ADHD / Cognitive / Keyboard / Blind Users etc. */
+                    #accessbit-widget-panel .profile-item h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature descriptions under those titles */
+                    #accessbit-widget-panel .profile-item p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Desktop: Keyboard Navigation prompt line styling */
+                    #accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p {
+                        font-family: Archivo;
+                        font-weight: 400;
+                        font-style: italic;
+                        font-size: 14px !important;
+                        color: #4A5565 !important;
+                        line-height: 20px !important;
+                        letter-spacing: -0.15px;
+                    }
+
+                    /* Desktop: Keyboard Navigation second line color "(Activates with Screen Reader)" */
+                    #accessbit-widget-panel .profile-item:has(#keyboard-nav) .profile-description p:last-child {
+                        color: #524072 !important;
+                    }
+                }
+
+                /* Tablet (>=768px): Accessibility Adjustments heading size */
+                @media (min-width: 768px) and (max-width: 1280px) {
+                    #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 18px !important;
+                    }
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+                }
+    
+                .accessbit-widget-panel .panel-header h2,
+                .accessbit-widget-panel .widget-header h2 {
+                    font-family: Archivo;
+                    font-weight: 600 !important;
+                    font-style: normal;
+                }
+    
+                
+    
+                /* Profile descriptions - ensure text wraps properly */
+    
+                .profile-description {
+    
+                    word-wrap: break-word;
+    
+                    word-break: break-word;
+    
+                    overflow-wrap: break-word;
+    
+                    hyphens: auto;
+    
+                    line-height: 1.4;
+    
+                    margin: 8px 0;
+    
+                }
+    
+                
+    
+.profile-description p {
+
+                    margin: 4px 0;
+
+                    font-size: 13px;
+
+                    color: #64748b;
+
+                }
+                /* "Optimize website for screen-readers" (Screen Reader card short description) */
+                .profile-item:has(#screen-reader) .profile-info > div > p:first-of-type {
+                    font-family: Archivo;
+                    font-weight: 400;
+                    font-style: normal;
+                    font-size: 16px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    vertical-align: bottom;
+                    color: #4A5565;
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                }
+                /* Note text: "This profile prompts automatically for keyboard users." / "This profile prompts automatically to screen-readers." */
+                .profile-item:has(#keyboard-nav) .profile-description p,
+                .profile-item:has(#screen-reader) .profile-description p {
+                    font-family: Archivo;
+                    font-weight: 400;
+                    font-style: italic;
+                    font-size: 14px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    vertical-align: bottom;
+                    color: #524072;
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                }
+                /* Keyboard second line "(Activates with Screen Reader)" */
+                .profile-item:has(#keyboard-nav) .profile-description p:last-child {
+                    color: #524072 !important;
+                }
+                
+                .profile-item small {
+                    font-size: 12px;
+                    font-weight: normal;
+                }
+                .profile-item small.profile-activates-label {
+                    font-family: Archivo;
+                    font-weight: 400;
+                    font-style: italic;
+                    font-size: 14px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    vertical-align: bottom;
+                    color: #524072;
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                }
+    
+                
+    
+                /* Ensure profile items don't overflow */
+    
+                .profile-item {
+    
+                    word-wrap: break-word !important;
+    
+                    overflow-wrap: break-word !important;
+                    
+                    word-break: break-word !important;
+                    
+                    hyphens: auto !important;
+    
+                }
+    
+                
+    
+                .profile-info {
+    
+                    flex: 1;
+    
+                    min-width: 0; /* Allow flex item to shrink */
+    
+                }
+    
+                
+    
+.profile-info div {
+
+                    min-width: 0; /* Allow text to wrap */
+                    
+                    word-wrap: break-word !important;
+                    
+                    word-break: break-word !important;
+                    
+                    overflow-wrap: break-word !important;
+                    
+                    hyphens: auto !important;
+    
+                }
+                /* Keyboard Navigation & Blind Users (Screen Reader): icon and title on same row */
+                .profile-item:has(#keyboard-nav),
+                .profile-item:has(#screen-reader) {
+                    align-items: flex-start;
+                }
+    
+    
+    
+                .action-buttons {
+    
+                    display: flex !important;
+    
+                    flex-direction: row !important;
+    
+                    flex-wrap: nowrap !important;
+    
+                    gap: 12px;
+    
+                    justify-content: center;
+    
+                    align-items: center;
+    
+                    width: 100%;
+    
+                }
+    
+    
+    
+                .button-row {
+    
+                    display: flex;
+    
+                    flex-direction: row;
+    
+                    gap: 10px;
+    
+                    justify-content: center;
+    
+                    align-items: center;
+    
+                }
+    
+    
+    
+                .action-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 11px;
+                    background: rgba(217, 217, 217, 0.3) !important;
+                    border: 2px solid rgba(217, 217, 217, 0.3) !important;
+                    color: #ffffff !important;
+                    border-radius: 60px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                    white-space: nowrap;
+                    font-size: 12px;
+                    justify-content: center;
+                }
+    
+    
+    
+                .action-btn:hover {
+
+                    background: #6366f1;
+
+                    color: #ffffff;
+
+                    /* Remove hover lift animation */
+                    transform: none;
+
+                    box-shadow: none;
+
+                }
+    
+    
+    
+                /* White Content Section */
+    
+                .white-content-section {
+                    padding: 0 0 20px 0;
+                    background: #EAECF2 !important;
+                    border-radius: 0 !important;
+                    margin-top: -20px !important;
+                    position: relative;
+                    z-index: 1003;
+                    padding-top: 12px;
+                }
+    
+                /* Mobile / tablet: Double Seal – override inline background, header stays inside clipping mask */
+                @media (max-width: 1279px) {
+                    /* 1. Override inline background:#EAECF2 – use both background and background-color so teal wins */
+                    #accessbit-widget-panel.accessbit-widget-panel {
+                        background: rgb(52, 162, 171) !important;
+                        background-color: rgb(52, 162, 171) !important;
+                        border-radius: 20px !important;
+                        overflow: hidden !important;
+                        padding: 0 !important;
+                    }
+
+                    /* 2. Double seal: same element gets teal again so no gray can peek */
+                    .accessbit-panel-screenshot {
+                        background: rgb(52, 162, 171) !important;
+                        background-color: rgb(52, 162, 171) !important;
+                        border-radius: 20px !important;
+                        overflow: hidden !important;
+                        width: 100% !important;
+                    }
+
+                    /* 3. Header stays inside clipping mask – 1px box-shadow seal (no expansion outside) */
+                    .panel-header.accessbit-screenshot-header {
+                        border-radius: 20px 20px 0 0 !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        box-shadow: 0 0 0 1px rgb(52, 162, 171) !important;
+                        position: relative !important;
+                        z-index: 2 !important;
+                    }
+
+                    /* 4. White content section stays contained */
+                    .white-content-section {
+                        border-radius: 0 !important;
+                        margin: 0 !important;
+                        width: 100% !important;
+                        z-index: 1 !important;
+                    }
+
+                    /* 5. Footer curve */
+                    .accessbit-widget-panel .panel-footer {
+                        border-radius: 0 0 20px 20px !important;
+                    }
+                }
+    
+    
+    
+.white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+
+                    color: #334155;
+
+                    margin-top: 12px;
+
+                    margin-bottom: 12px;
+
+                    font-size: 18px;
+
+                    font-weight: 600;
+
+                    text-align: left;
+
+                    max-width: min(528px, 100%);
+
+                    margin-left: auto;
+
+                    margin-right: auto;
+
+                    padding-left: 0;
+
+                    padding-right: 0;
+
+                    box-sizing: border-box;
+
+                }
+
+                .content-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(528px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: visible !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .content-adjustments-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+                .content-adjustments-title,
+                .color-adjustments-title,
+                .interface-controls-title,
+                .placeholder-title {
+                    font-family: Archivo !important;
+                    font-weight: 600 !important;
+                    font-style: normal;
+                    font-size: 26px;
+                    line-height: 27px;
+                    letter-spacing: -1px;
+                    /* leading-trim approximation */
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                    color: #524072 !important;
+                    margin: 0 0 12px 0 !important;
+                    text-align: left !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    display: block !important;
+                    min-height: 27px !important;
+                    contain: layout !important;
+                    user-select: none !important;
+                    pointer-events: none !important;
+                }
+                .content-adjustments-title:hover,
+                .content-adjustments-title:focus,
+                .color-adjustments-title:hover,
+                .color-adjustments-title:focus,
+                .interface-controls-title:hover,
+                .interface-controls-title:focus,
+                .placeholder-title:hover,
+                .placeholder-title:focus {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+                :host .accessbit-widget-panel .content-adjustments-title,
+                :host .accessbit-widget-panel .color-adjustments-title,
+                :host .accessbit-widget-panel .interface-controls-title,
+                :host .accessbit-widget-panel .placeholder-title {
+                    font-family: Archivo;
+                    font-weight: 600;
+                    font-style: normal;
+                    font-size: 26px;
+                    line-height: 27px;
+                    letter-spacing: -1px;
+                    leading-trim: cap;
+                    text-box-trim: cap;
+                    color: #524072 !important;
+                    text-align: left !important;
+                }
+                .content-adjustments-title,
+                .placeholder-title { opacity: 1 !important; min-height: 27px !important; white-space: nowrap !important; overflow: visible !important; }
+                .color-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .color-adjustments-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+                .color-adjustments-toggles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+                .color-adjustments-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; box-sizing: border-box; }
+                .color-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: transparent !important; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: hidden !important; }
+                .color-adjustments-card .content-card-icon svg { width: 24px; height: 24px; }
+                .color-adjustments-card .content-card-body { flex: 1; min-width: 0; }
+                .color-adjustments-card .content-card-body h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .color-adjustments-card .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .color-adjustments-card.dark-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
+                .color-adjustments-card .content-card-icon.dark-contrast-icon svg { width: 43px; height: 43px; }
+                .dark-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .dark-contrast-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .dark-contrast-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .color-adjustments-card.light-contrast-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
+                .color-adjustments-card .content-card-icon.light-contrast-icon svg { width: 43px; height: 43px; }
+                .light-contrast-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .light-contrast-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .light-contrast-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .color-adjustments-card.high-contrast-card,
+                .color-adjustments-card.high-saturation-card,
+                .color-adjustments-card.low-saturation-card,
+                .color-adjustments-card.monochrome-card { flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: visible; }
+                .high-contrast-top, .high-saturation-top, .low-saturation-top, .monochrome-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .high-contrast-top .toggle-switch, .high-saturation-top .toggle-switch, .low-saturation-top .toggle-switch, .monochrome-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .color-adjustments-card .content-card-icon.high-contrast-icon svg { width: 43px; height: 43px; }
+                .color-adjustments-card .content-card-icon.high-saturation-icon svg { width: 43px; height: 43px; }
+                .color-adjustments-card .content-card-icon.low-saturation-icon svg { width: 43px; height: 43px; }
+                .color-adjustments-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; }
+                .high-contrast-card h4, .high-saturation-card h4, .low-saturation-card h4, .monochrome-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; background: #FFFFFF; padding: 15px 22px; }
+                .contrast-style-card .card-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .contrast-style-card .card-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                /* Ring is drawn inside SVG — wrapper background would double the #ECEDED disk (extra ash halo) */
+                .contrast-style-card .card-top .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: transparent !important; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: hidden !important; }
+                .contrast-style-card .card-top .content-card-icon svg { width: 24px; height: 24px; }
+                .contrast-style-card .content-card-icon.mute-sound-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.hide-images-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.read-mode-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.reading-guide-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.stop-animation-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.reading-mask-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.highlight-focus-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.highlight-hover-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.big-black-cursor-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.big-white-cursor-icon svg { width: 43px; height: 43px; }
+                .contrast-style-card .content-card-icon.readable-font-icon svg,
+                .contrast-style-card .content-card-icon.highlight-titles-icon svg,
+                .contrast-style-card .content-card-icon.highlight-links-icon svg,
+                .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
+                .contrast-style-card .content-card-icon.page-structure-icon svg,
+                .contrast-style-card .content-card-icon.voice-navigation-icon svg { width: 43px !important; height: 43px !important; max-width: 98% !important; max-height: 98% !important; }
+                /* No icons hidden – Highlight Links, Text Magnifier, Text align use ring/icon styling */
+                .contrast-style-card .content-card-icon.text-magnifier-icon { min-width: 43px; min-height: 43px; border: 1px solid rgba(0,0,0,0.12); box-sizing: border-box; }
+                .contrast-style-card .content-card-icon.text-magnifier-icon svg { width: 43px !important; height: 43px !important; min-width: 43px; min-height: 43px; display: block !important; }
+                .contrast-style-card .content-card-icon.dark-contrast-icon svg,
+                .contrast-style-card .content-card-icon.light-contrast-icon svg,
+                .contrast-style-card .content-card-icon.high-contrast-icon svg,
+                .contrast-style-card .content-card-icon.high-saturation-icon svg,
+                .contrast-style-card .content-card-icon.low-saturation-icon svg,
+                .contrast-style-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
+                .contrast-style-card h4 {
+                    margin: 0;
+                    margin-top: 8px;
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 21px;
+                    line-height: 27px;
+                    letter-spacing: -0.44px;
+                    color: #1E2939;
+                    /* Prevent long translated words (e.g. Russian) from overflowing */
+                    white-space: normal;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                    hyphens: auto;
+                    /* Keep titles from pushing outside the card */
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3;
+                    overflow: hidden;
+                }
+                /* Russian: auto-resize compact card titles */
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4 {
+                    font-size: 17px;
+                    line-height: 21px;
+                    -webkit-line-clamp: 4;
+                }
+                /* Russian: give the compact cards more vertical room */
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card {
+                    min-height: 118px;
+                    padding: 12px 18px;
+                }
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card .card-top { min-height: 40px; }
+                #accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4 { margin-top: 6px; }
+                .cursor-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; margin-bottom: 16px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
+                .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .interface-controls-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+                .interface-controls-title { font-family: Archivo; font-weight: 600; font-style: normal; font-size: 26px; line-height: 27px; letter-spacing: -1px; color: #524072 !important; margin: 36px 0 18px 0 !important; text-align: left !important; display: block !important; min-height: 27px !important; contain: layout !important; }
+                @media (max-width: 768px) {
+                    :host .accessbit-widget-panel .content-adjustments-title,
+                    :host .accessbit-widget-panel .color-adjustments-title,
+                    :host .accessbit-widget-panel .interface-controls-title,
+                    :host .accessbit-widget-panel .placeholder-title { font-size: 15px !important; line-height: 19px !important; }
+                }
+                .interface-controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+                .color-adjustments-pickers { display: flex; flex-direction: column; gap: 12px; }
+                .color-adjustments-picker-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(0,0,0,0.1); box-sizing: border-box; }
+                .color-adjustments-picker-card .content-card-icon { width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: transparent !important; display: flex; align-items: center; justify-content: center; overflow: hidden !important; }
+                .color-adjustments-picker-card .content-card-icon svg { width: 43px; height: 43px; }
+                .color-adjustments-picker-card .picker-card-header { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: nowrap; width: 100%; }
+                .color-adjustments-picker-card .picker-card-header h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; flex-shrink: 0; }
+                .color-adjustments-picker-card .picker-row { display: flex; align-items: center; justify-content: flex-start; gap: 15.95px; flex-wrap: nowrap; width: 100%; min-width: 0; height: 34px; min-height: 34px; }
+                /* Desktop: gap between picker icon (43px) and first color circle = 12px (55px padding - 43px icon) */
+                .color-adjustments-picker-card .color-options { display: flex; align-items: center; gap: 15px; flex-wrap: nowrap; flex: 0 0 auto; min-width: 0; height: 34px; align-self: stretch; padding-left: 55px; box-sizing: border-box; }
+                .color-adjustments-picker-card .color-option { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; flex-shrink: 0; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+                .color-adjustments-picker-card .color-option svg { width: 34px; height: 34px; display: block; flex-shrink: 0; }
+                .color-adjustments-picker-card .color-option:hover { border-color: #999; }
+                .color-adjustments-picker-card .color-option.selected { border-color: #14b8a6; outline: 2px solid #14b8a6; outline-offset: 2px; box-shadow: none !important; }
+                .color-adjustments-picker-card .picker-clear-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; margin: 0; border: none; background: transparent; cursor: pointer; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 0; vertical-align: middle; }
+                .color-adjustments-picker-card .picker-clear-btn:hover { background: rgba(0,0,0,0.06); }
+                .color-adjustments-picker-card .picker-clear-btn svg { width: 34px; height: 34px; display: block; vertical-align: middle; }
+                .content-adjustments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+                .content-adjustments-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+                .content-adjustments-card {
+                    background: #FFFFFF;
+                    border-radius: 7px;
+                    padding: 15px 22px;
+                    min-height: 84px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px; /* 15px gap between icon block and text block */
+                    border: 2px solid transparent;
+                    transition: all 0.2s ease;
+                    box-sizing: border-box;
+                }
+                .content-adjustments-card.profile-item { margin-bottom: 0; max-width: none; }
+
+                /* Mobile: reduce side padding to give more room to the slider */
+                @media (max-width: 768px) {
+                    .content-adjustments-card {
+                        padding: 12px !important;
+                    }
+                }
+                .content-adjustments-card.card-active-green { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
+                .content-adjustments-card.card-active-blue { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
+                .content-adjustments-card.highlight-titles-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.highlight-titles-icon svg { width: 43px; height: 43px; }
+                .highlight-titles-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .highlight-titles-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .highlight-titles-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card .highlight-titles-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .ht-ring-on { display: none; }
+                .ps-ring-on, .vn-ring-on { display: none; }
+                .contrast-style-card.page-structure-on .ps-ring-off,
+                .contrast-style-card.voice-navigation-on .vn-ring-off { display: none; }
+                .contrast-style-card.page-structure-on .ps-ring-on,
+                .contrast-style-card.voice-navigation-on .vn-ring-on { display: block; }
+                .contrast-style-card.page-structure-on .ps-icon-off,
+                .contrast-style-card.voice-navigation-on .vn-icon-off { display: none; }
+                .contrast-style-card.page-structure-on .ps-icon-on,
+                .contrast-style-card.voice-navigation-on .vn-icon-on { display: block; }
+                /* Direct Path Color Swap: keep default icon exactly the same, only recolor when checked */
+                /* Safari-safe: highlight titles icon recolor via class */
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-titles-card.highlight-titles-on .ht-icon-off path { fill: #01CE9C; stroke: #01CE9C; }
+                .content-adjustments-card.highlight-links-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.highlight-links-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.highlight-links-icon svg { width: 43px; height: 43px; }
+                .highlight-links-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .highlight-links-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .highlight-links-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                .content-adjustments-card.text-magnifier-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.text-magnifier-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.text-magnifier-icon svg { width: 43px; height: 43px; }
+                .text-magnifier-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .text-magnifier-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .text-magnifier-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+                .content-adjustments-card.align-left-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-left-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.align-left-icon svg { width: 43px; height: 43px; }
+                .align-left-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .align-left-card .align-left-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
+                .align-left-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+                .align-left-card .align-left-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
+                .align-left-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
+                .content-adjustments-card.align-center-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-center-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.align-center-icon svg { width: 43px; height: 43px; }
+                .align-center-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .align-center-card .align-center-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
+                .align-center-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+                .align-center-card .align-center-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
+                .align-center-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
+                .content-adjustments-card.align-right-card { flex-direction: column; align-items: stretch; width: 166px; height: 140px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: visible !important; min-height: 140px; }
+                .accessbit-widget-panel .content-adjustments-card.align-right-card { overflow: visible !important; }
+                .content-adjustments-card .content-card-icon.align-right-icon svg { width: 43px; height: 43px; }
+                .align-right-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
+                .align-right-card .align-right-label { display: flex; flex-direction: column; flex: 1; min-height: 0; cursor: pointer; margin: -15px -22px; padding: 15px 22px; box-sizing: border-box; }
+                .align-right-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+                .align-right-card .align-right-checkbox-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; pointer-events: none; }
+                .align-right-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; text-align: left !important; }
+                /* Russian: these three cards have long titles – allow wrapping and give more height */
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-left-card,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-center-card,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.align-right-card {
+                    height: auto !important;
+                    min-height: 176px !important;
+                    overflow: hidden !important;
+                }
+                #accessbit-widget-panel[data-lang="ru"] .align-left-card h4,
+                #accessbit-widget-panel[data-lang="ru"] .align-center-card h4,
+                #accessbit-widget-panel[data-lang="ru"] .align-right-card h4 {
+                    font-size: 17px !important;
+                    line-height: 21px !important;
+                    white-space: normal !important;
+                    overflow-wrap: anywhere !important;
+                    word-break: break-word !important;
+                    display: -webkit-box !important;
+                    -webkit-box-orient: vertical !important;
+                    -webkit-line-clamp: 5 !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
+                /* Russian: keep value like 100% on one line */
+                #accessbit-widget-panel[data-lang="ru"] .content-scaling-header .content-adjustments-slider-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card .content-adjustments-slider-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #content-scale-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #font-size-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #letter-spacing-value,
+                #accessbit-widget-panel[data-lang="ru"] .content-adjustments-card.slider-card #line-height-value {
+                    white-space: nowrap !important;
+                    flex-shrink: 0 !important;
+                }
+                .content-adjustments-card.highlight-titles-on { border-color: #00CE9C; background: rgba(0, 206, 156, 0.06); }
+                .content-adjustments-card.highlight-links-on { border-color: #3B82F6; background: rgba(59, 130, 246, 0.06); }
+                /* Same as contrast-style-card icons: SVG paints the gray ring */
+                .content-adjustments-card .content-card-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; flex: 0 0 44px !important; flex-shrink: 0 !important; border-radius: 50%; background: transparent !important; display: flex; align-items: center; justify-content: center; box-sizing: content-box !important; padding: 0 !important; overflow: hidden !important; }
+                .content-adjustments-card .content-card-icon svg { width: 24px; height: 24px; max-width: 98% !important; max-height: 98% !important; height: auto !important; }
+                .content-adjustments-card .content-card-icon.content-scaling-icon svg { width: 43px; height: 43px; }
+                .content-adjustments-card.content-scaling-card { display: flex; flex-direction: row; align-items: flex-start; flex-wrap: nowrap; gap: 15px; margin-bottom: 14px !important; padding: 15px 22px; }
+                .content-adjustments-card.content-scaling-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
+                /* All slider cards (Content Scaling, Font Sizing, Letter Spacing, Line Height): icon + title + value on first row, slider on second */
+                .content-adjustments-card.slider-card { display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; overflow: visible !important; overflow-x: visible !important; padding-right: 0; }
+                .content-adjustments-card.slider-card .content-scaling-header { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; min-height: 43px; }
+                .accessbit-panel-screenshot .content-adjustments-card.slider-card { margin-bottom: 14px !important; }
+                .content-adjustments-card.slider-card .content-scaling-header h4,
+                .content-adjustments-card.slider-card .content-card-body h4 { display: flex; align-items: center; margin: 0; }
+                .accessbit-widget-panel .content-adjustments-card.content-scaling-card { margin-bottom: 14px !important; }
+                .content-adjustments-card .content-card-icon.readable-font-icon svg { width: 43px; height: 43px; }
+                .content-adjustments-card.readable-font-card { flex-direction: column; align-items: stretch; width: 257px; height: 111px; border-radius: 7px; opacity: 1; box-sizing: border-box; overflow: hidden !important; min-height: 111px; }
+                .accessbit-widget-panel .content-adjustments-card.readable-font-card { overflow: hidden !important; }
+                .readable-font-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: hidden; min-height: 0; }
+                .readable-font-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
+                .readable-font-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-style: normal; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; leading-trim: cap; text-box-trim: cap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+
+                .accessbit-widget-panel .content-adjustments-card.readable-font-card .readable-font-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .readable-font-ring-on,
+                .readable-font-icon-on { display: none; }
+                /* Readable Font: swap via JS-added class (Safari-safe) */
+                .contrast-style-card.readable-font-on .readable-font-ring-off,
+                .contrast-style-card.readable-font-on .readable-font-icon-off { display: none; }
+                .contrast-style-card.readable-font-on .readable-font-ring-on,
+                .contrast-style-card.readable-font-on .readable-font-icon-on { display: block; }
+
+                /* --- SHARED STYLES (Mobile & Desktop) --- */
+                .content-scaling-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .label-with-icon-gap {
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    padding-left: 58px; /* 43px icon + 15px gap */
+                }
+                .label-with-icon-gap h4 {
+                    margin: 0;
+                    white-space: nowrap;
+                }
+                .content-scaling-header .content-adjustments-slider-value {
+                    margin: 0;
+                    line-height: 1;
+                    text-align: right;
+                    white-space: nowrap;
+                    display: inline-flex;
+                    align-items: baseline;
+                    flex-shrink: 0;
+                }
+                .content-adjustments-card.slider-card .toggle-switch-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+                /* Base icon layout for NON-slider cards (left/center/right, text-magnifier, etc.) */
+                .content-adjustments-card:not(.slider-card) .content-card-icon {
+                    width: 43px !important;
+                    height: 43px !important;
+                    min-width: 43px !important;
+                    flex: 0 0 43px !important;
+                    flex-shrink: 0 !important;
+                    border-radius: 50%;
+                    background: #ECEDED;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: content-box !important;
+                    padding: 0 !important;
+                }
+
+                /* Slider cards (Content Scaling, Font Size, Letter Spacing, Line Height) use absolute icons inside the header label */
+                .content-adjustments-card.slider-card .content-card-icon {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    /* Match visual size of other icons */
+                    width: 43px;
+                    height: 43px;
+                    /* No extra gray background – let the SVG provide its own shape */
+                    background: transparent;
+                    border-radius: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .content-adjustments-card .content-card-body {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    align-items: stretch !important;
+                }
+                .content-adjustments-card .content-card-body h4 { margin: 0; font-family: Archivo; font-size: 21px; font-weight: 500; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
+                .content-adjustments-card.content-scaling-card .content-card-body h4,
+                .content-adjustments-card.slider-card .content-card-body h4 { margin-top: 0; line-height: 23px; }
+                .content-adjustments-card.slider-card .content-card-body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+                .content-adjustments-card .content-card-body p { margin: 0; font-family: Archivo; font-size: 16px; font-weight: 400; color: #4A5565; }
+                .content-adjustments-card.slider-card .content-card-body { flex: 1; }
+                .content-adjustments-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; margin-bottom: 14px; overflow: visible !important; }
+                .scaling-slider-svg-wrap {
+                    margin-top: 12px;
+                    display: block;
+                    overflow: visible !important;
+                    /* Matches the text padding so it starts under the label */
+                    margin-left: 58px !important;
+                    /* Ends exactly under the percentage */
+                    width: calc(100% - 58px) !important;
+                }
+                /* Simplified slider: use native range track for the path; no absolute overlays so the bar is always visible */
+                .scaling-slider-track {
+                    position: relative;
+                    height: 12px !important;
+                    min-height: 12px !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    direction: ltr;
+                    overflow: visible !important;
+                    background: transparent;
+                    width: 100% !important;
+                    display: block;
+                }
+                .scaling-slider-track::before { content: none !important; }
+                /* Old segmented path – no longer used */
+                .scaling-track-left,
+                .scaling-track-right { display: none !important; }
+                .accessbit-widget-panel .profile-item.slider-card { overflow: visible !important; overflow-x: visible !important; }
+                .accessbit-widget-panel .profile-item.slider-card .content-card-body { overflow: visible !important; }
+                /* Native slider path: 12px bar with 37px radius, always visible */
+                .scaling-slider-track .scaling-range-overlay {
+                    position: relative;
+                    left: auto;
+                    right: auto;
+                    top: auto;
+                    bottom: auto;
+                    width: 100% !important;
+                    max-width: 100%;
+                    height: 12px !important;
+                    min-height: 12px !important;
+                    margin: 0 !important;
+                    background: #EAECF2 !important;
+                    border-radius: 37px !important;
+                    cursor: pointer;
+                    z-index: 0;
+                    direction: ltr;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+
+                /* 4. Desktop Constraint */
+                @media (min-width: 1280px) {
+                    .content-card-body {
+                        width: 391px !important;
+                        max-width: 391px !important;
+                    }
+
+                    /* Desktop only: widen range slider track area without changing 100% widths */
+                    .content-adjustments-card.slider-card .content-card-body {
+                        width: 440px !important;
+                        max-width: 440px !important;
+                    }
+
+                    /* Ensure slider card icons (font size, letter spacing, line height, content scaling)
+                       use the same visual size as other 43x43 icons on desktop */
+                    .content-adjustments-card.slider-card .content-card-icon svg {
+                        width: 43px !important;
+                        height: 43px !important;
+                    }
+                }
+
+                /* --- MOBILE SPECIFIC (≤1279px) --- */
+                @media (max-width: 1279px) {
+                    .content-card-body {
+                        width: 100%;
+                    }
+
+                    .content-adjustments-card {
+                        padding: 15px 12px;
+                    }
+                }
+                #content-scale-range { direction: ltr !important; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track,
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay,
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-track .scaling-range-overlay { direction: ltr !important; }
+                .scaling-slider-track .scaling-range-overlay::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: transparent; cursor: pointer; border: none; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-webkit-slider-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-range-overlay::-moz-range-thumb { width: 36px !important; height: 36px !important; cursor: grab !important; }
+                .accessbit-widget-panel .profile-item:has(#content-scale-range) .scaling-slider-thumb { transition: none !important; }
+                .scaling-slider-track .scaling-range-overlay::-webkit-slider-runnable-track { height: 12px !important; background: #EAECF2 !important; border-radius: 37px; cursor: pointer; -webkit-appearance: none; }
+                .scaling-slider-track .scaling-range-overlay::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: transparent; cursor: pointer; border: none; }
+                .scaling-slider-track .scaling-range-overlay::-moz-range-track { height: 12px !important; background: #EAECF2 !important; border-radius: 37px; cursor: pointer; }
+                .scaling-slider-track .scaling-pointer-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 2; cursor: pointer; pointer-events: none; }
+                .scaling-slider-track .scaling-range-overlay { pointer-events: auto !important; cursor: pointer; }
+                .scaling-slider-track { overflow: visible !important; }
+                .scaling-slider-track .scaling-slider-thumb { position: absolute; top: 50%; left: 50%; width: 36px; height: 36px; margin-left: -18px; margin-top: -18px; pointer-events: none; transition: left 0.12s ease; }
+                .scaling-slider-track .scaling-thumb-circle {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 99px;
+                    background: linear-gradient(180deg, #00CE9C 0%, #01B086 100%);
+                    box-shadow:
+                        0px 1px 2px 0px #00000033,
+                        0px 4px 4px 0px #0000002B,
+                        0px 10px 6px 0px #0000001A,
+                        0px 17px 7px 0px #00000008,
+                        0px 27px 27px 0px #00000000,
+                        0.25px -2px 20px 0px #0000000D inset,
+                        0.5px 0.5px 1px 0px #FFFFFF inset;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .scaling-slider-track .scaling-thumb-circle svg {
+                    width: 7px;
+                    height: 14px;
+                    display: block;
+                }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay) { flex: 1; min-width: 0; height: 6px !important; -webkit-appearance: none; appearance: none; background: #E2E8F0 !important; border-radius: 3px; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-runnable-track { height: 6px !important; background: #E2E8F0 !important; border-radius: 3px; -webkit-appearance: none; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-track { height: 6px !important; background: #E2E8F0 !important; border-radius: 3px; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; box-shadow: 0 0 0 2px #fff; }
+                .content-adjustments-slider-row input[type="range"]:not(.scaling-range-overlay)::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #00CE9C; cursor: pointer; border: none; }
+                .content-adjustments-slider-value {
+                    font-family: Archivo;
+                    font-weight: 700;
+                    font-size: 21px;
+                    line-height: 27px;
+                    letter-spacing: -0.44px;
+                    color: #1E2939;
+                    min-width: 44px;
+                    text-align: right;
+                }
+
+                @media (max-width: 768px) {
+                    .accessbit-widget-panel .content-adjustments-slider-value {
+                        font-size: 16px !important;
+                        line-height: 22px !important;
+                        min-width: 36px !important;
+                        white-space: nowrap !important;
+                        display: inline-block !important;
+                    }
+                }
+                .content-adjustments-card .toggle-switch { margin-left: auto; flex-shrink: 0; }
+
+
+
+                .profile-item {
+
+                    display: flex;
+
+                    flex-direction: row;
+
+                    align-items: center;
+
+                    padding: 15px 22px;
+
+                    background: #FFFFFF;
+
+                    border-radius: 7px;
+
+                    margin-bottom: 12px;
+
+                    margin-left: auto;
+
+                    margin-right: auto;
+
+                    transition: all 0.3s ease;
+
+                    border: 2px solid transparent;
+
+                    min-height: 84px;
+
+                    max-width: min(440px, 100%);
+
+                    width: 100%;
+
+                    min-width: 0;
+    
+                    gap: 12px;
+    
+                    opacity: 1;
+    
+                    box-sizing: border-box;
+    
+                }
+    
+                /* Toggle ON highlight without :has() (Safari-safe) */
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) { border: 2px solid #01CE9C; }
+    
+    
+                /* Seizure Safe container only: 528px width */
+                .profile-item:has(#seizure-safe) {
+                    width: 528px;
+                    max-width: min(528px, 100%);
+                }
+                .profile-item .seizure-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .seizure-ring-on { display: none; }
+                /* Seizure Safe: icon recolor via JS-added class (Safari-safe) */
+                .accessbit-widget-panel .profile-item:has(#seizure-safe),
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon,
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .seizure-icon {
+                    overflow: visible !important;
+                }
+                .accessbit-widget-panel .profile-item:has(#seizure-safe) .profile-item-icon {
+                    margin-left: 4px;
+                }
+                .accessbit-widget-panel .profile-item:has(#reduce-motion) .reduce-motion-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .reduce-ring-on { display: none; }
+                /* Reduce Motion: icon recolor via JS-added class (Safari-safe) */
+                .accessbit-widget-panel .profile-item:has(#vision-impaired) .vision-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                /* Vision Impaired icon: single eye path, color controlled via CSS */
+                .vision-eye-path {
+                    fill: black;
+                }
+                .vision-ring-on {
+                    display: none;
+                }
+                /* Safari fallback (and general robustness): JS toggles class on the card */
+                .profile-item.vision-impaired-on .vision-ring-off {
+                    display: none;
+                }
+                .profile-item.vision-impaired-on .vision-ring-on {
+                    display: block;
+                }
+                .profile-item.vision-impaired-on .vision-eye-path {
+                    fill: #01CE9C !important;
+                }
+
+                /* Safari fallbacks for other toggles (JS adds <id>-on class on the card) */
+                .profile-item.seizure-safe-on .seizure-ring-off { fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.seizure-safe-on .seizure-icon-path { stroke: #01CE9C; }
+
+                .profile-item.reduce-motion-on .reduce-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.reduce-motion-on .reduce-ring-on { display: block; }
+                .profile-item.reduce-motion-on .reduce-motion-path,
+                .profile-item.reduce-motion-on .reduce-motion-dot { fill: #01CE9C; }
+
+                .profile-item.dark-contrast-on .dark-contrast-ring-off,
+                .profile-item.dark-contrast-on .dark-contrast-icon-off,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-ring-off,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-icon-off { display: none; }
+                .profile-item.dark-contrast-on .dark-contrast-ring-on,
+                .profile-item.dark-contrast-on .dark-contrast-icon-on,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-ring-on,
+                .color-adjustments-card.dark-contrast-on .dark-contrast-icon-on { display: block; }
+
+                .profile-item.light-contrast-on .light-contrast-ring-off,
+                .profile-item.light-contrast-on .light-contrast-icon-off,
+                .color-adjustments-card.light-contrast-on .light-contrast-ring-off,
+                .color-adjustments-card.light-contrast-on .light-contrast-icon-off { display: none; }
+                .profile-item.light-contrast-on .light-contrast-ring-on,
+                .profile-item.light-contrast-on .light-contrast-icon-on,
+                .color-adjustments-card.light-contrast-on .light-contrast-ring-on,
+                .color-adjustments-card.light-contrast-on .light-contrast-icon-on { display: block; }
+
+                .profile-item.high-contrast-on .high-contrast-ring-off,
+                .profile-item.high-contrast-on .high-contrast-icon-off,
+                .color-adjustments-card.high-contrast-on .high-contrast-ring-off,
+                .color-adjustments-card.high-contrast-on .high-contrast-icon-off { display: none; }
+                .profile-item.high-contrast-on .high-contrast-ring-on,
+                .profile-item.high-contrast-on .high-contrast-icon-on,
+                .color-adjustments-card.high-contrast-on .high-contrast-ring-on,
+                .color-adjustments-card.high-contrast-on .high-contrast-icon-on { display: block; }
+
+                .contrast-style-card.high-saturation-on .high-sat-ring-off,
+                .contrast-style-card.high-saturation-on .high-sat-icon-off { display: none; }
+                .contrast-style-card.high-saturation-on .high-sat-ring-on,
+                .contrast-style-card.high-saturation-on .high-sat-icon-on { display: block; }
+
+                .contrast-style-card.low-saturation-on .low-sat-ring-off,
+                .contrast-style-card.low-saturation-on .low-sat-icon-off { display: none; }
+                .contrast-style-card.low-saturation-on .low-sat-ring-on,
+                .contrast-style-card.low-saturation-on .low-sat-icon-on { display: block; }
+
+                .contrast-style-card.monochrome-on .mono-ring-off,
+                .contrast-style-card.monochrome-on .mono-icon-off { display: none; }
+                .contrast-style-card.monochrome-on .mono-ring-on,
+                .contrast-style-card.monochrome-on .mono-icon-on { display: block; }
+
+                .contrast-style-card.mute-sound-on .mute-ring-off,
+                .contrast-style-card.mute-sound-on .mute-icon-off { display: none; }
+                .contrast-style-card.mute-sound-on .mute-ring-on,
+                .contrast-style-card.mute-sound-on .mute-icon-on { display: block; }
+
+                .contrast-style-card.hide-images-on .hide-img-ring-off,
+                .contrast-style-card.hide-images-on .hide-img-icon-off { display: none; }
+                .contrast-style-card.hide-images-on .hide-img-ring-on,
+                .contrast-style-card.hide-images-on .hide-img-icon-on { display: block; }
+
+                .contrast-style-card.read-mode-on .read-mode-ring-off,
+                .contrast-style-card.read-mode-on .read-mode-icon-off { display: none; }
+                .contrast-style-card.read-mode-on .read-mode-ring-on,
+                .contrast-style-card.read-mode-on .read-mode-icon-on { display: block; }
+
+                .contrast-style-card.reading-guide-on .reading-guide-ring-off,
+                .contrast-style-card.reading-guide-on .reading-guide-icon-off { display: none; }
+                .contrast-style-card.reading-guide-on .reading-guide-ring-on,
+                .contrast-style-card.reading-guide-on .reading-guide-icon-on { display: block; }
+
+                .contrast-style-card.stop-animation-on .stop-anim-ring-off,
+                .contrast-style-card.stop-animation-on .stop-anim-icon-off { display: none; }
+                .contrast-style-card.stop-animation-on .stop-anim-ring-on,
+                .contrast-style-card.stop-animation-on .stop-anim-icon-on { display: block; }
+
+                .contrast-style-card.reading-mask-on .reading-mask-ring-off,
+                .contrast-style-card.reading-mask-on .reading-mask-icon-off { display: none; }
+                .contrast-style-card.reading-mask-on .reading-mask-ring-on,
+                .contrast-style-card.reading-mask-on .reading-mask-icon-on { display: block; }
+
+                .contrast-style-card.readable-font-on .readable-font-ring-off,
+                .contrast-style-card.readable-font-on .readable-font-icon-off { display: none; }
+                .contrast-style-card.readable-font-on .readable-font-ring-on,
+                .contrast-style-card.readable-font-on .readable-font-icon-on { display: block; }
+
+                .contrast-style-card.highlight-titles-on .ht-ring-off,
+                .contrast-style-card.highlight-titles-on .ht-icon-off { display: none; }
+                .contrast-style-card.highlight-titles-on .ht-ring-on,
+                .contrast-style-card.highlight-titles-on .ht-icon-on { display: block; }
+
+                .contrast-style-card.highlight-focus-on .hl-focus-ring-off,
+                .contrast-style-card.highlight-focus-on .hl-focus-icon-off { display: none; }
+                .contrast-style-card.highlight-focus-on .hl-focus-ring-on,
+                .contrast-style-card.highlight-focus-on .hl-focus-icon-on { display: block; }
+
+                .contrast-style-card.highlight-hover-on .hl-hover-ring-off,
+                .contrast-style-card.highlight-hover-on .hl-hover-icon-off { display: none; }
+                .contrast-style-card.highlight-hover-on .hl-hover-ring-on,
+                .contrast-style-card.highlight-hover-on .hl-hover-icon-on { display: block; }
+
+                .contrast-style-card.big-black-cursor-on .bbc-ring-off,
+                .contrast-style-card.big-black-cursor-on .bbc-icon-off { display: none; }
+                .contrast-style-card.big-black-cursor-on .bbc-ring-on,
+                .contrast-style-card.big-black-cursor-on .bbc-icon-on { display: block; }
+
+                .contrast-style-card.big-white-cursor-on .bwc-ring-off,
+                .contrast-style-card.big-white-cursor-on .bwc-icon-off { display: none; }
+                .contrast-style-card.big-white-cursor-on .bwc-ring-on,
+                .contrast-style-card.big-white-cursor-on .bwc-icon-on { display: block; }
+
+                .contrast-style-card.highlight-links-on .hl-links-ring-off,
+                .contrast-style-card.highlight-links-on .hl-links-icon-off { display: none; }
+                .contrast-style-card.highlight-links-on .hl-links-ring-on,
+                .contrast-style-card.highlight-links-on .hl-links-icon-on { display: block; }
+
+                .contrast-style-card.text-magnifier-on .tm-ring-off,
+                .contrast-style-card.text-magnifier-on .tm-icon-off { display: none; }
+                .contrast-style-card.text-magnifier-on .tm-ring-on,
+                .contrast-style-card.text-magnifier-on .tm-icon-on { display: block; }
+
+                .content-adjustments-card.align-left-on .align-left-ring-off,
+                .content-adjustments-card.align-left-on .align-left-icon-off { display: none; }
+                .content-adjustments-card.align-left-on .align-left-ring-on,
+                .content-adjustments-card.align-left-on .align-left-icon-on { display: block; }
+
+                .content-adjustments-card.align-center-on .align-center-ring-off,
+                .content-adjustments-card.align-center-on .align-center-icon-off { display: none; }
+                .content-adjustments-card.align-center-on .align-center-ring-on,
+                .content-adjustments-card.align-center-on .align-center-icon-on { display: block; }
+
+                .content-adjustments-card.align-right-on .align-right-ring-off,
+                .content-adjustments-card.align-right-on .align-right-icon-off { display: none; }
+                .content-adjustments-card.align-right-on .align-right-ring-on,
+                .content-adjustments-card.align-right-on .align-right-icon-on { display: block; }
+
+                .profile-item.adhd-friendly-on .adhd-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.adhd-friendly-on .adhd-ring-on { display: block; }
+                .profile-item.adhd-friendly-on .adhd-path { stroke: #01CE9C; }
+
+                .profile-item.cognitive-disability-on .cog-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.cognitive-disability-on .cog-ring-on { display: block; }
+                .profile-item.cognitive-disability-on .cog-path { fill: #01CE9C; }
+                /* Dark Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
+                .dark-contrast-ring-on,
+                .dark-contrast-icon-on {
+                    display: none;
+                }
+                /* Light Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
+                .light-contrast-ring-on,
+                .light-contrast-icon-on {
+                    display: none;
+                }
+                /* High Contrast icon: explicit on/off ring + icon – hide off, show on when checked */
+                .high-contrast-ring-on,
+                .high-contrast-icon-on {
+                    display: none;
+                }
+                /* High Saturation icon: off/on rings and droplet */
+                .high-sat-ring-on,
+                .high-sat-icon-on { display: none; }
+                /* Low Saturation icon: off/on rings and droplet */
+                .low-sat-ring-on,
+                .low-sat-icon-on { display: none; }
+                /* Monochrome icon: off/on rings and circle paths */
+                .mono-ring-on,
+                .mono-icon-on { display: none; }
+                /* Mute Sounds icon: off/on rings and speaker */
+                .mute-ring-on,
+                .mute-icon-on { display: none; }
+                /* Hide Images icon: off/on rings and image */
+                .hide-img-ring-on,
+                .hide-img-icon-on { display: none; }
+                /* Read Mode icon: off/on rings and card */
+                .read-mode-ring-on,
+                .read-mode-icon-on { display: none; }
+                /* Reading Guide icon: off/on rings and arrow */
+                .reading-guide-ring-on,
+                .reading-guide-icon-on { display: none; }
+                /* Stop Animations icon: off/on rings and image */
+                .stop-anim-ring-on,
+                .stop-anim-icon-on { display: none; }
+                /* Reading Mask icon: off/on rings and bars */
+                .reading-mask-ring-on,
+                .reading-mask-icon-on { display: none; }
+                /* Highlight Titles icon: off/on rings and paths */
+                .ht-ring-on,
+                .ht-icon-on { display: none; }
+                /* Page Structure / Voice Navigation icons */
+                .ps-ring-on,
+                .ps-icon-on,
+                .vn-ring-on,
+                .vn-icon-on { display: none; }
+                /* Highlight Focus icon: explicit on/off ring + icon – hide off, show on when checked */
+                .hl-focus-ring-on,
+                .hl-focus-icon-on { display: none; }
+                /* Highlight Hover icon: explicit on/off ring + icon – hide off, show on when checked */
+                .hl-hover-ring-on,
+                .hl-hover-icon-on { display: none; }
+                /* Big Black Cursor icon: off/on rings and cursor */
+                .bbc-ring-on,
+                .bbc-icon-on { display: none; }
+                /* Big White Cursor icon: off/on rings and cursor */
+                .bwc-ring-on,
+                .bwc-icon-on { display: none; }
+                /* Highlight Links icon: off/on rings and link paths */
+                .hl-links-ring-on,
+                .hl-links-icon-on { display: none; }
+                /* Text Magnifier icon: off/on rings and magnifier */
+                .tm-ring-on,
+                .tm-icon-on { display: none; }
+                /* Text Left align icon: off/on rings and lines */
+                .align-left-ring-on,
+                .align-left-icon-on { display: none; }
+                /* Text Center align icon: off/on rings and lines */
+                .align-center-ring-on,
+                .align-center-icon-on { display: none; }
+                /* Text Center Align: icon swap via JS-added class (Safari-safe) */
+                /* Text Right align icon: off/on rings and lines */
+                .align-right-ring-on,
+                .align-right-icon-on { display: none; }
+                /* Text Right Align: icon swap via JS-added class (Safari-safe) */
+                .accessbit-widget-panel .profile-item:has(#adhd-friendly) .adhd-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .adhd-ring-on { display: none; }
+                /* ADHD Friendly: icon recolor via JS-added class (Safari-safe) */
+                .accessbit-widget-panel .profile-item:has(#cognitive-disability) .cognitive-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .cog-ring-on { display: none; }
+                /* Cognitive Disability: icon recolor via JS-added class (Safari-safe) */
+                .accessbit-widget-panel .profile-item:has(#keyboard-nav) .keyboard-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .kb-ring-on { display: none; }
+                /* Keyboard Nav: recolor via JS-added class (Safari-safe) */
+                .profile-item.keyboard-nav-on .kb-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.keyboard-nav-on .kb-ring-on { display: block; }
+                .profile-item.keyboard-nav-on .kb-path { fill: #01CE9C; }
+                .accessbit-widget-panel .profile-item:has(#screen-reader) .blind-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .blind-ring-on { display: none; }
+                /* Blind Users (Screen Reader): recolor via JS-added class (Safari-safe) */
+                .profile-item.screen-reader-on .blind-ring-off { display: none; fill: #D9F8F0; stroke: #01CE9C; }
+                .profile-item.screen-reader-on .blind-ring-on { display: block; }
+                .profile-item.screen-reader-on .blind-path { fill: #01CE9C; }
+                .accessbit-widget-panel .profile-item:has(#older-adults) .older-adults-icon svg {
+                    width: 43px;
+                    height: 43px;
+                }
+                .oa-ring-on { display: none; }
+                .profile-item.older-adults-on .oa-ring-off { display: none; }
+                .profile-item.older-adults-on .oa-ring-on { display: block; }
+                .profile-item.older-adults-on .oa-stroke { stroke: #01CE9C; }
+                .profile-item.older-adults-on .oa-fill { fill: #01CE9C; }
+                .dfy-ring-on, .dff-ring-on, .prot-ring-on, .deut-ring-on, .trit-ring-on, .cb-ring-on { display: none; }
+                .profile-item.dyslexia-friendly-on .dfy-ring-off { display: none; }
+                .profile-item.dyslexia-friendly-on .dfy-ring-on { display: block; }
+                .profile-item.dyslexia-friendly-on .dfy-stroke { stroke: #01CE9C; }
+                .profile-item.dyslexia-font-on .dff-ring-off { display: none; }
+                .profile-item.dyslexia-font-on .dff-ring-on { display: block; }
+                .profile-item.dyslexia-font-on .dff-stroke { stroke: #01CE9C; }
+                .profile-item.protanopia-on .prot-ring-off { display: none; }
+                .profile-item.protanopia-on .prot-ring-on { display: block; }
+                .profile-item.deuteranopia-on .deut-ring-off { display: none; }
+                .profile-item.deuteranopia-on .deut-ring-on { display: block; }
+                .profile-item.tritanopia-on .trit-ring-off { display: none; }
+                .profile-item.tritanopia-on .trit-ring-on { display: block; }
+                /* Keep color-dot icons unchanged when active */
+                .profile-item .protanopia-icon g circle:first-child,
+                .profile-item .deuteranopia-icon g circle:first-child { fill: #6ABD47 !important; }
+                .profile-item .protanopia-icon g circle:last-child,
+                .profile-item .deuteranopia-icon g circle:last-child { fill: #E8322F !important; }
+                .profile-item .tritanopia-icon g circle:first-child { fill: #E3C10A !important; }
+                .profile-item .tritanopia-icon g circle:last-child { fill: #1047E3 !important; }
+                .profile-item.color-blind-on .cb-ring-off { display: none; }
+                .profile-item.color-blind-on .cb-ring-on { display: block; }
+                .profile-item.color-blind-on .cb-stroke { stroke: #01CE9C; }
+                .profile-item.color-blind-on .cb-fill { fill: #01CE9C; }
+                .inv-ring-on, .lca-ring-on { display: none; }
+                .profile-item.inverted-colors-on .inv-ring-off { display: none; }
+                .profile-item.inverted-colors-on .inv-ring-on { display: block; }
+                .profile-item.inverted-colors-on .inv-stroke { stroke: #01CE9C; }
+                .profile-item.inverted-colors-on .inv-fill { fill: #01CE9C; }
+                .profile-item.large-clickable-area-on .lca-ring-off { display: none; }
+                .profile-item.large-clickable-area-on .lca-ring-on { display: block; }
+                .profile-item.large-clickable-area-on .lca-stroke { stroke: #01CE9C; }
+                .profile-item.large-clickable-area-on .lca-fill { fill: #01CE9C; }
+                .profile-item.page-structure-on .ps-ring-off { display: none; }
+                .profile-item.page-structure-on .ps-ring-on { display: block; }
+                .profile-item.page-structure-on .ps-stroke { stroke: #01CE9C; }
+                .profile-item.page-structure-on .ps-fill { fill: #01CE9C; }
+                .profile-item.voice-navigation-on .vn-ring-off { display: none; }
+                .profile-item.voice-navigation-on .vn-ring-on { display: block; }
+                .profile-item.voice-navigation-on .vn-stroke { stroke: #01CE9C; }
+                /* Reduce Motion, Vision Impaired, ADHD, Cognitive, Keyboard, Blind User, Content Scaling, Font Sizing, Line Height, Letter Spacing: 528px width */
+                .profile-item:has(#reduce-motion),
+                .profile-item:has(#vision-impaired),
+                .profile-item:has(#adhd-friendly),
+                .profile-item:has(#cognitive-disability),
+                .profile-item:has(#keyboard-nav),
+                .profile-item:has(#screen-reader),
+                .profile-item:has(#content-scale-range),
+                .profile-item:has(#font-sizing),
+                .profile-item:has(#adjust-line-height),
+                .profile-item:has(#adjust-letter-spacing) {
+                    width: 528px;
+                    max-width: min(528px, 100%);
+                }
+
+                .profile-item:first-child {
+
+                    margin-top: 0;
+
+                }
+
+
+                .profile-item:last-child {
+
+                    margin-bottom: 0;
+
+                }
+    
+    
+    
+                .profile-item:hover {
+
+                    background: rgba(99, 102, 241, 0.05);
+
+                    border-top-color: #e2e8f0;
+
+                    border-bottom-color: #e2e8f0;
+
+                    /* Remove hover movement/jump */
+                    transform: none;
+
+                    box-shadow: none;
+
+                }
+    
+    
+    
+                .profile-info {
+    
+                    display: flex;
+    
+                    flex-direction: column;
+    
+                    flex: 1;
+    
+                    min-width: 0;
+    
+                    order: 1;
+    
+                }
+    
+    
+    
+                .profile-info i {
+    
+                    font-size: 20px;
+    
+                    color: #6366f1;
+    
+                    width: 24px;
+    
+                    flex-shrink: 0;
+    
+                }
+    
+    
+    
+                .profile-item-icon {
+                    width: 43px;
+                    height: 43px;
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid transparent;
+                    box-sizing: border-box;
+                    background: transparent;
+                }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .profile-item-icon,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon { border: 2px solid transparent; background: transparent; }
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on):not(:has(#protanopia)):not(:has(#deuteranopia)):not(:has(#tritanopia)) .profile-item-icon svg circle:first-of-type,
+                .profile-item.ab-toggle-on:not(.font-sizing-on):not(.adjust-line-height-on):not(.adjust-letter-spacing-on):not(.content-scaling-on) .content-card-icon svg circle:first-of-type { fill: #D9F8F0; stroke: #01CE9C; stroke-width: 2px; }
+                .profile-item .content-card-icon { border: 2px solid transparent; box-sizing: border-box; }
+                .profile-item-icon svg {
+                    width: 36px;
+                    height: 36px;
+                    display: block;
+                }
+                .profile-info h4 {
+    
+                    margin: 0;
+    
+                    font-family: Archivo;
+                    font-weight: 500;
+                    font-size: 21px;
+                    line-height: 27px;
+                    letter-spacing: -0.44px;
+                    leading-trim: cap;
+                    color: #1E2939;
+    
+                    white-space: normal !important;
+    
+                    overflow: visible !important;
+    
+                    text-overflow: unset !important;
+                    
+                    word-wrap: break-word !important;
+                    
+                    word-break: break-word !important;
+                    
+                    overflow-wrap: break-word !important;
+                    
+                    hyphens: auto !important;
+    
+                }
+    
+    
+    
+                .profile-info p {
+    
+                    margin: 5px 0 0 !important;
+    
+                    font-family: Archivo;
+                    font-weight: 400;
+                    font-size: 16px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    leading-trim: cap;
+                    vertical-align: bottom;
+                    color: #4A5565;
+    
+                    white-space: normal !important;
+    
+                    overflow: visible !important;
+    
+                    text-overflow: unset !important;
+                    
+                    word-wrap: break-word !important;
+                    
+                    word-break: break-word !important;
+                    
+                    overflow-wrap: break-word !important;
+                    
+                    hyphens: auto !important;
+    
+                }
+
+                .profile-info small {
+    
+                    display: block;
+    
+                    margin: 3px 0 0;
+    
+                    font-size: 12px;
+    
+                    color: #6366f1;
+    
+                    font-style: italic;
+    
+                    white-space: nowrap;
+    
+                    overflow: hidden;
+    
+                    text-overflow: ellipsis;
+    
+                }
+    
+    
+    
+                /* Toggle Switch – desktop size only; mobile size set in @media (max-width: 768px) */
+                @media (min-width: 769px) {
+                    .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 80px !important;
+                        height: 40px !important;
+                        flex-shrink: 0;
+                        margin-left: auto;
+                        margin-right: 12px;
+                        order: 2;
+                    }
+                }
+
+                /* Tablet-ish: keep desktop toggle sizing on ~590px+ */
+                @media (max-width: 768px) and (min-width: 590px) {
+                    .accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 80px !important;
+                        height: 40px !important;
+                        min-width: 80px !important;
+                        flex-shrink: 0;
+                        margin-left: auto;
+                        margin-right: 12px;
+                        order: 2;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider,
+                    .accessbit-panel-screenshot .toggle-switch .slider {
+                        width: 80px !important;
+                        height: 40px !important;
+                        border-radius: 99px !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch .slider:before {
+                        width: 32px !important;
+                        height: 32px !important;
+                        left: 4px !important;
+                        bottom: 4px !important;
+                        border-radius: 50% !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider {
+                        background-color: #01CE9C !important;
+                    }
+                    /* Anchor knob like desktop to keep the ~2px gap */
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before {
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+
+                    /* Ensure desktop ring/bar indicators are visible (undo mobile ring/bar hiding) */
+                    .accessbit-widget-panel .toggle-switch .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: auto !important;
+                        right: 12px !important;
+                        bottom: auto !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: auto !important;
+                        right: 12px !important;
+                        bottom: auto !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                    }
+                    .accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after {
+                        content: '' !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: 22px !important;
+                        right: auto !important;
+                        bottom: auto !important;
+                        width: 2px !important;
+                        height: 12px !important;
+                        background: #FFFFFF !important;
+                        border: 0 !important;
+                        border-radius: 0 !important;
+                        pointer-events: none !important;
+                        transform: translateY(-50%) !important;
+                    }
+                }
+                /* Desktop-only: widen toggle track without changing 100% internals */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        width: 92px !important;
+                    }
+                    #accessbit-widget-panel input:checked + .slider:before,
+                    .accessbit-panel-screenshot input:checked + .slider:before {
+                        transform: translateX(34px) !important;
+                    }
+                }
+
+                /* Desktop: set exact gap between toggle and outer feature box */
+                @media (min-width: 769px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        margin-right: 0px !important;
+                    }
+                }
+
+                /* Desktop (>=1280px): reduce right gap to match Figma */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch,
+                    .accessbit-panel-screenshot .toggle-switch {
+                        margin-right: 0px !important;
+                    }
+                }
+
+                /*
+                 * Desktop only (≥1281px): right-hand column for the toggle so it sits at the end of the feature card.
+                 * Third column is fluid (min track for switch, max ~18% of card) — no fixed pixel width on the card.
+                 */
+                @media (min-width: 1281px) {
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch),
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch),
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) {
+                        display: grid !important;
+                        grid-template-columns: auto minmax(0, 1fr) minmax(92px, 18%) !important;
+                        align-items: center !important;
+                        column-gap: 12px !important;
+                        row-gap: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-item-icon {
+                        grid-column: 1;
+                        align-self: center !important;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > .profile-info {
+                        grid-column: 2;
+                        min-width: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch,
+                    :host #accessbit-widget-panel .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch,
+                    .accessbit-panel-screenshot .profile-item:has(.profile-item-icon):has(> label.toggle-switch) > label.toggle-switch {
+                        grid-column: 3;
+                        justify-self: end !important;
+                        align-self: center !important;
+                        margin-left: 0 !important;
+                        margin-right: 0px !important;
+                    }
+
+                    /* Rows with toggle but no icon (text + switch only) */
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch),
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch),
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) {
+                        display: grid !important;
+                        grid-template-columns: minmax(0, 1fr) minmax(92px, 18%) !important;
+                        align-items: center !important;
+                        column-gap: 12px !important;
+                    }
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info,
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info,
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > .profile-info {
+                        grid-column: 1;
+                        min-width: 0 !important;
+                    }
+                    #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch,
+                    :host #accessbit-widget-panel .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch,
+                    .accessbit-panel-screenshot .profile-item:not(:has(.profile-item-icon)):has(> label.toggle-switch) > label.toggle-switch {
+                        grid-column: 2;
+                        justify-self: end !important;
+                        margin-left: 0 !important;
+                        margin-right: 0px !important;
+                    }
+                }
+                .toggle-switch {
+                    position: relative;
+                    display: inline-block;
+                    flex-shrink: 0;
+                    margin-left: auto;
+                    margin-right: 12px;
+                    order: 2;
+                }
+    
+    
+    
+                .toggle-switch input {
+    
+                    opacity: 0;
+    
+                    width: 0;
+    
+                    height: 0;
+    
+                }
+    
+    
+    
+                .slider {
+    
+                    position: absolute;
+    
+                    cursor: pointer;
+    
+                    top: 0;
+    
+                    left: 0;
+    
+                    right: 0;
+    
+                    bottom: 0;
+    
+                    background-color: #e5e7eb;
+    
+                    transition: 0.3s;
+    
+                    border-radius: 20px !important;
+    
+                }
+    
+    
+    
+                .slider:before {
+    
+                    position: absolute;
+    
+                    content: "";
+    
+                    height: 32px;
+    
+                    width: 32px;
+    
+                    left: 4px;
+    
+                    bottom: 4px;
+    
+                    background-color: #ffffff;
+    
+                    transition: 0.3s;
+    
+                    /* border-radius: 50%; REMOVED - conflicts with shape settings */
+    
+                    box-shadow: 0.25px -2px 20px 0px #0000000D inset, 0.5px 0.5px 1px 0px #FFFFFF inset;
+    
+                }
+    
+    
+    
+                input:checked + .slider {
+    
+                    background-color: #e5e7eb !important;
+    
+                }
+    
+    
+    
+                input:checked + .slider:before {
+    
+                    transform: translateX(26px) !important;
+    
+                }
+    
+    
+    
+                /* Toggle Switch: circle when off (white stroke), bar when on – no transition on ::after to avoid flash */
+    
+                .slider::after {
+    
+                    content: "";
+    
+                    position: absolute;
+    
+                    top: 50%;
+    
+                    right: 12px;
+    
+                    transform: translateY(-50%);
+    
+                    width: 12px;
+    
+                    height: 12px;
+    
+                    border: 2px solid white;
+    
+                    border-radius: 50%;
+    
+                    background: transparent;
+    
+                    pointer-events: none;
+    
+                    transition: none;
+    
+                }
+    
+    
+    
+                .slider:before {
+    
+                    position: absolute;
+    
+                    content: "";
+    
+                    height: 32px;
+    
+                    width: 50px;
+    
+                    left: 4px;
+    
+                    bottom: 4px;
+    
+                    background-color: #ffffff;
+    
+                    transition: 0.3s;
+    
+                    border-radius: 16px;
+    
+                    box-shadow: 0.25px -2px 20px 0px #0000000D inset, 0.5px 0.5px 1px 0px #FFFFFF inset;
+    
+                    display: flex;
+    
+                    align-items: center;
+    
+                    justify-content: center;
+    
+                    font-size: 12px;
+    
+                    font-weight: bold;
+    
+                    color: #374151;
+
+                    font-family: Archivo;
+
+                }
+    
+    
+    
+input:checked + .slider::after {
+
+                    content: "";
+
+                    position: absolute;
+
+                    left: 22px;
+
+                    right: auto;
+    
+                    top: 50%;
+    
+                    transform: translateY(-50%);
+    
+                    width: 2px;
+    
+                    height: 12px;
+    
+                    background: white;
+    
+                    border: none;
+    
+                    border-radius: 0;
+    
+                    pointer-events: none;
+
+                    transition: none;
+    
+                }
+    
+    
+    
+                input:checked + .slider:before {
+    
+                    background-color: #ffffff;
+    
+                    color: #374151;
+    
+                }
+    
+    
+    
+                /* Panel Footer */
+    
+                .panel-footer {
+    
+                    position: sticky;
+    
+                    bottom: 0;
+    
+                    width: 576px;
+    
+                    max-width: 100%;
+    
+                    height: auto;
+    
+                    opacity: 1;
+    
+                    background: #FFFFFF !important;
+    
+                    color: #1E2939;
+    
+                    padding: 18px 20px;
+    
+                    display: flex;
+    
+                    justify-content: space-between;
+    
+                    align-items: center;
+    
+                    font-size: 14px;
+    
+                    border-radius: 0 0 8px 8px !important;
+    
+                    z-index: 1001;
+    
+                    box-sizing: border-box;
+    
+                }
+    
+                .panel-footer .panel-footer-link {
+    
+                    display: inline-flex;
+    
+                    align-items: center;
+    
+                    text-decoration: none;
+    
+                    color: inherit;
+    
+                }
+    
+                .panel-footer .panel-footer-link svg {
+    
+                    display: block;
+    
+                }
+    
+    
+    
+                .panel-footer .learn-more {
+    
+                    color: #1E2939;
+    
+                    text-decoration: none;
+    
+                    font-weight: 600;
+    
+                }
+    
+    
+    
+                /* Language dropdown outer container */
+                .language-dropdown-outer {
+                    /* Wider so long names (e.g. PORTUGUÊS) fit */
+                    width: 168px !important;
+                    height: 55px !important;
+                    right: 0 !important;
+                    left: auto !important;
+                    border-bottom-left-radius: 20px !important;
+                    background: rgba(255,255,255,0.15) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .accessbit-panel-screenshot #current-language-header {
+                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                    font-weight: 500;
+                    font-size: 15px;
+                    line-height: 20px;
+                    letter-spacing: -0.15px;
+                    text-align: center !important;
+                    color: #FFFFFF !important;
+                }
+                .accessbit-panel-screenshot .language-dropdown-outer .language-selector-header {
+                    position: static !important;
+                    top: auto !important;
+                    right: auto !important;
+                    justify-content: center !important;
+                }
+    
+                /* Language Selector Header Styles */
+    
+                .language-selector-header {
+
+                    display: flex;
+
+                    align-items: center;
+
+                    gap: 3px;
+    
+                    cursor: pointer;
+    
+                    padding: 5px;
+    
+                    border-radius: 6px;
+    
+                    transition: background-color 0.2s ease;
+    
+                    color: #ffffff;
+    
+                    font-size: 12px;
+    
+                    font-weight: 500;
+    
+                    font-family: Archivo, sans-serif;
+    
+                    position: absolute;
+    
+                    top: 5px;
+    
+                    right: 10px;
+    
+                    z-index: 1002;
+    
+                }
+
+                /* Prevent long language names overlapping chevron (e.g. PORTUGUÊS) */
+                .language-selector-header {
+                    justify-content: flex-start !important;
+                    padding-left: 6px !important;
+                    padding-right: 6px !important;
+                    max-width: none !important;
+                }
+                .language-selector-header #current-language-header {
+                    min-width: 0 !important;
+                    flex: 0 1 auto !important;
+                    white-space: nowrap !important;
+                    text-align: left !important;
+                }
+                .language-selector-header .language-dropdown-arrow {
+                    flex: 0 0 auto !important;
+                    margin-left: 3px !important;
+                }
+
+                /* Responsive font size for placeholder text */
+                @media (max-width: 768px) {
+                    .language-selector-header #current-language-header {
+                        font-size: 13px !important;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .language-selector-header #current-language-header {
+                        font-size: 12px !important;
+                    }
+                }
+    
+    
+    
+                .language-selector-header:hover {
+    
+                    background: rgba(255, 255, 255, 0.1);
+    
+                }
+    
+    
+    
+                .language-selector-header .language-flag,
+                .language-selector-header #language-flag-header {
+                    display: inline-block !important;
+                    width: 20px !important;
+                    height: 14px !important;
+                    flex-shrink: 0 !important;
+                    vertical-align: middle;
+                }
+                .language-selector-header .language-flag svg,
+                .language-selector-header #language-flag-header svg {
+                    display: block;
+                    width: 20px;
+                    height: 14px;
+                }
+                .language-selector-header .current-flag {
+    
+                    font-size: 16px;
+    
+                }
+    
+    
+    
+                .language-selector-header i.fa-chevron-down {
+    
+                    font-size: 10px;
+    
+                    transition: transform 0.2s ease;
+    
+                    opacity: 0.8;
+    
+                }
+    
+    
+    
+                .language-selector-header:hover i.fa-chevron-down {
+    
+                    transform: translateY(1px);
+    
+                }
+    
+    
+    
+                /* Language Dropdown Styles */
+    
+                .language-dropdown {
+    
+                    /* Position set by JS below the \"english\" language trigger; do not fix top/left here */
+                    position: fixed !important;
+    
+                    background: #FFFFFF !important;
+    
+                    border-radius: 10px !important;
+    
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    
+                    border: 1px solid #e5e7eb !important;
+    
+                    z-index: 100001 !important;
+    
+                    width: 192px !important;
+    
+                    max-height: 400px !important;
+    
+                    overflow-y: auto !important;
+    
+                    overflow-x: hidden !important;
+    
+                    /* Remove slide-in animation for no movement when hovering */
+                    animation: none !important;
+    
+                    clip: none !important;
+    
+                    display: none !important;
+    
+                    font-family: Archivo, sans-serif !important;
+    
+                    pointer-events: auto !important;
+    
+                    /* Ensure dropdown is positioned relative to panel */
+    
+                    margin: 0 !important;
+    
+                    padding: 0 !important;
+    
+                    scrollbar-width: none !important;
+    
+                    -ms-overflow-style: none !important;
+    
+                }
+    
+                .language-dropdown::-webkit-scrollbar {
+    
+                    display: none !important;
+    
+                    width: 0 !important;
+    
+                    height: 0 !important;
+    
+                }
+    
+                
+    
+                /* Force dropdown to be visible when shown */
+    
+                .language-dropdown[style*="display: block"] {
+    
+                    display: block !important;
+    
+                    visibility: visible !important;
+    
+                    opacity: 1 !important;
+    
+                    pointer-events: auto !important;
+    
+                }
+    
+                /* Language dropdown: stay inside widget on mobile/tablet, visible and responsive */
+                @media (max-width: 1024px) {
+                    .accessbit-widget-panel { position: relative !important; }
+                    .accessbit-widget-panel .language-dropdown,
+                    #language-dropdown.language-dropdown {
+                        width: min(192px, 100%) !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                        max-height: min(60vh, 280px) !important;
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                    }
+                }
+    
+    
+                @keyframes dropdownSlideIn {
+    
+                    from {
+    
+                        opacity: 0;
+    
+                        transform: translateY(-10px);
+    
+                    }
+    
+                    to {
+    
+                        opacity: 1;
+    
+                        transform: translateY(0);
+    
+                    }
+    
+                }
+    
+    
+    
+                .language-dropdown-content {
+                    padding: 5px !important;
+                    background: #ffffff !important;
+                    min-height: 100px !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: stretch !important; /* left-aligned full-width list */
+                }
+
+                .language-option {
+                    display: flex !important;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 5px !important;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    margin: 0 0 4px 0 !important;
+                    padding: 8px 12px !important;
+                    border: none;
+                    border-radius: 6px;
+                    background: transparent;
+                    cursor: pointer;
+                    transition: none;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #374151;
+                    text-align: left;
+                    height: 35px;
+                    box-sizing: border-box !important;
+                    font-family: Archivo, sans-serif;
+                    pointer-events: auto !important;
+                    user-select: none;
+                }
+
+                .language-option:last-child {
+                    margin-bottom: 0 !important;
+                }
+
+                .language-option:hover {
+                    background: #DEDEDE !important;
+                }
+    
+    
+    
+                .language-option.selected,
+                .language-option[aria-selected="true"] {
+    
+                    background: #6366f1 !important;
+    
+                    color: #ffffff !important;
+    
+                }
+    
+                .language-option.selected:hover,
+                .language-option[aria-selected="true"]:hover {
+    
+                    background: #4f46e5 !important;
+    
+                }
+    
+    
+    
+                .language-option .flag {
+
+                    font-size: 16px;
+
+                    flex-shrink: 0;
+
+                    display: inline-flex;
+
+                    align-items: center;
+
+                    justify-content: center;
+
+                    margin: 0 !important;
+
+                }
+                .language-option .flag svg {
+                    width: 20px;
+                    height: 14px;
+                    display: block;
+                }
+    
+    
+    
+                .language-option .language-name {
+                    flex: 0 0 auto;             /* don't stretch and create extra space */
+                    margin: 0 !important;
+                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+                    font-weight: 500;
+    
+                    font-size: 14px;
+    
+                    line-height: 20px;
+    
+                    letter-spacing: -0.15px;
+    
+                    white-space: nowrap;
+    
+                    min-width: 0;
+    
+                    overflow: hidden;
+    
+                    text-overflow: ellipsis;
+    
+                }
+    
+    
+    
+                /* Global Accessibility Feature Classes - These will sync with main page */
+    
+                /* Exclude widget from seizure-safe filter - widget should never have greyscale */
+                :host,
+                :host(.seizure-safe),
+                :host(.seizure-safe) .accessbit-widget-icon,
+                :host(.seizure-safe) .accessbit-widget-panel,
+                :host(.seizure-safe) * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+    
+                
+    
+                /* Ensure seizure safe icon stays in correct position */
+    
+                :host(.seizure-safe) .accessbit-widget-icon {
+    
+                    position: fixed !important;
+    
+                    z-index: 2147483645 !important;
+    
+                }
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Vision impaired feature removed */
+    
+    
+    
+                /* Panel elements use specific font sizes above - no general scaling */
+    
+    
+    
+                /* Panel font sizes are handled by specific rules above - no additional scaling needed */
+    
+    
+    
+                :host(.adhd-friendly) .accessbit-widget-icon,
+    
+                :host(.adhd-friendly) .accessbit-widget-panel {
+    
+                    filter: saturate(0.9) brightness(0.9) !important;
+    
+                }
+    
+    
+    
+                :host(.cognitive-disability) .accessbit-widget-icon,
+    
+                :host(.cognitive-disability) .accessbit-widget-panel {
+    
+                    /* Softer effect so widget colors remain readable */
+                    filter: saturate(1.05) brightness(1.03) !important;
+    
+                }
+    
+    
+    
+    
+    
+    
+    
+                :host(.monochrome) .accessbit-widget-icon,
+    
+                :host(.monochrome) .accessbit-widget-panel {
+    
+                    filter: grayscale(1) !important;
+    
+                }
+    
+    
+    
+                :host(.dark-contrast) .accessbit-widget-icon,
+    
+                :host(.dark-contrast) .accessbit-widget-panel {
+    
+                    filter: saturate(1.2) brightness(0.8) contrast(1.3) !important;
+    
+                }
+    
+    
+    
+                :host(.light-contrast) .accessbit-widget-icon,
+                :host(.light-contrast) .accessbit-widget-panel {
+                    filter: none !important;
+                }
+    
+    
+    
+                /* Reduce high contrast intensity for Shadow DOM content */
+    
+                /* High contrast should NOT affect widget - remove any filters */
+                :host(.high-contrast) .accessbit-widget-icon,
+                :host(.high-contrast) .accessbit-widget-panel,
+                :host(.high-contrast) .accessbit-widget-panel * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+    
+    
+    
+    
+    
+                /* Default font styles for widget elements (when readable font is disabled) */
+    
+                :host(:not(.readable-font)) .accessbit-widget-icon,
+
+                :host(:not(.readable-font)) .accessbit-widget-panel {
+
+                    font-family: "Archivo", sans-serif;
+
+                    font-optical-sizing: auto;
+
+                    font-weight: normal;
+
+                    font-style: normal;
+
+                    font-variation-settings: "wdth" 100;
+
+                    letter-spacing: normal;
+
+                }
+    
+    
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel h2,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel h3,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel h4,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel p,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel .action-btn,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel button,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel input,
+    
+                :host(:not(.readable-font)) .accessbit-widget-panel label {
+
+                    font-family: "Archivo", sans-serif;
+
+                    font-optical-sizing: auto;
+
+                    font-weight: normal;
+
+                    font-style: normal;
+
+                    font-variation-settings: "wdth" 100;
+
+                    letter-spacing: normal;
+
+                }
+    
+    
+    
+                /* Widget panel font should NOT change when readable font is active */
+                /* Explicitly set widget font even when readable-font class is on body */
+                :host(.readable-font) .accessbit-widget-icon,
+                :host(.readable-font) .accessbit-widget-panel,
+                :host .accessbit-widget-icon,
+                :host .accessbit-widget-panel {
+                    font-family: "Archivo", sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: normal;
+                    font-style: normal;
+                    font-variation-settings: "wdth" 100;
+                    letter-spacing: normal;
+                }
+                
+                :host(.readable-font) .accessbit-widget-panel h2,
+                :host(.readable-font) .accessbit-widget-panel h3,
+                :host(.readable-font) .accessbit-widget-panel h4,
+                :host(.readable-font) .accessbit-widget-panel p,
+                :host(.readable-font) .accessbit-widget-panel .action-btn,
+                :host(.readable-font) .accessbit-widget-panel button,
+                :host(.readable-font) .accessbit-widget-panel input,
+                :host(.readable-font) .accessbit-widget-panel label,
+                :host .accessbit-widget-panel h2,
+                :host .accessbit-widget-panel h3,
+                :host .accessbit-widget-panel h4,
+                :host .accessbit-widget-panel p,
+                :host .accessbit-widget-panel .action-btn,
+                :host .accessbit-widget-panel button,
+                :host .accessbit-widget-panel input,
+                :host .accessbit-widget-panel label {
+                    font-family: Archivo;
+                    font-weight: normal;
+                    letter-spacing: normal;
+                }
+    
+    
+    
+                :host(.high-saturation) .accessbit-widget-icon,
+    
+                :host(.high-saturation) .accessbit-widget-panel {
+    
+                    filter: saturate(1.2) !important;
+    
+                }
+    
+    
+    
+                /* Font Awesome Icons */
+    
+                .fas {
+    
+                    font-family: 'Font Awesome 5 Free';
+    
+                    font-weight: 900;
+    
+                }
+    
+    
+    
+    
+    
+    
+    
+                .fa-universal-access:before {
+    
+                    content: "\\f29a";
+    
+                }
+    
+    
+    
+                .fa-times:before {
+    
+                    content: "\\f00d";
+    
+                }
+    
+    
+    
+                .fa-flag:before {
+    
+                    content: "\\f024";
+    
+                }
+    
+    
+    
+                .fa-redo:before {
+    
+                    content: "\\f01e";
+    
+                }
+    
+    
+    
+                .fa-file-alt:before {
+    
+                    content: "\\f15c";
+    
+                }
+    
+    
+    
+                .fa-eye-slash:before {
+    
+                    content: "\\f070";
+    
+                }
+    
+    
+    
+                .fa-bolt:before {
+    
+                    content: "\\f0e7";
+    
+                }
+    
+    
+    
+                .fa-eye:before {
+    
+                    content: "\\f06e";
+    
+                }
+    
+    
+    
+                .fa-brain:before {
+    
+                    content: "\\f5dc";
+    
+                }
+    
+    
+    
+                .fa-keyboard:before {
+    
+                    content: "\\f11c";
+    
+                }
+    
+    
+    
+                .fa-user:before {
+    
+                    content: "\\f007";
+    
+                }
+    
+    
+    
+                .fa-search-plus:before {
+    
+                    content: "\\f00e";
+    
+                }
+    
+    
+    
+                .fa-font:before {
+    
+                    content: "\\f031";
+    
+                }
+    
+    
+    
+                .fa-heading:before {
+    
+                    content: "\\f1dc";
+    
+                }
+    
+    
+    
+                .fa-link:before {
+    
+                    content: "\\f0c1";
+    
+                }
+    
+    
+    
+                .fa-search:before {
+    
+                    content: "\\f002";
+    
+                }
+    
+    
+    
+                .fa-align-center:before {
+    
+                    content: "\\f037";
+    
+                }
+    
+    
+    
+                .fa-arrows-alt-v:before {
+    
+                    content: "\\f07d";
+    
+                }
+    
+    
+    
+                .fa-text-width:before {
+    
+                    content: "\\f035";
+    
+                }
+    
+    
+    
+                .fa-palette:before {
+    
+                    content: "\\f53f";
+    
+                }
+    
+    
+    
+                .fa-volume-mute:before {
+    
+                    content: "\\f6a9";
+    
+                }
+    
+    
+    
+                .fa-image:before {
+    
+                    content: "\\f03e";
+    
+                }
+    
+    
+    
+                .fa-book-open:before {
+    
+                    content: "\\f518";
+    
+                }
+    
+    
+    
+                .fa-compass:before {
+    
+                    content: "\\f14e";
+    
+                }
+    
+    
+    
+                .fa-list:before {
+    
+                    content: "\\f03a";
+    
+                }
+    
+    
+    
+                .fa-play:before {
+    
+                    content: "\\f04b";
+    
+                }
+    
+    
+    
+                .fa-mask:before {
+    
+                    content: "\\f6fa";
+    
+                }
+    
+    
+    
+                .fa-mouse-pointer:before {
+    
+                    content: "\\f245";
+    
+                }
+    
+    
+    
+                /* Color Picker Inline */
+    
+                .color-picker-inline {
+    
+                    margin: 8px 0;
+    
+                    padding: 12px;
+    
+                    background: #f8f9fa;
+    
+                    border-radius: 6px;
+    
+                    border: 1px solid #e2e8f0;
+    
+                    width: 100%;
+    
+                    box-sizing: border-box;
+    
+                }
+    
+    
+    
+                .color-picker-content {
+    
+                    text-align: center;
+    
+                }
+    
+    
+    
+                .color-picker-content h4 {
+    
+                    margin: 0 0 12px 0;
+    
+                    color: #333;
+    
+                    font-size: 14px;
+    
+                    font-weight: 600;
+    
+                }
+    
+    
+    
+                .color-options {
+    
+                    display: flex;
+    
+                    justify-content: center;
+    
+                    gap: 8px;
+    
+                    margin-bottom: 12px;
+    
+                    flex-wrap: wrap;
+    
+                }
+                /* Override generic color-options for Adjust Text/Title/Background pickers */
+                .color-adjustments-picker-card .picker-row {
+                    justify-content: flex-start;
+                    gap: 15.95px;
+                }
+                .color-adjustments-picker-card .color-options {
+                    justify-content: flex-start;
+                    gap: 15px;
+                    margin-bottom: 0;
+                    padding-left: 55px;
+                }
+
+                /* Small-screen override: allow color options to wrap so they don't overlap reset icon */
+                @media (max-width: 480px) {
+                    .color-adjustments-picker-card .color-options {
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        padding-left: 0;
+                        justify-content: flex-start;
+                    }
+                }
+    
+    
+    
+                .color-option {
+    
+                    width: 28px;
+    
+                    height: 28px;
+    
+                    /* border-radius: 50%; REMOVED - conflicts with shape settings */
+    
+                    cursor: pointer;
+    
+                    border: 2px solid transparent;
+    
+                    transition: all 0.2s ease;
+    
+                    position: relative;
+    
+                    flex-shrink: 0;
+    
+                }
+    
+    
+    
+                .color-option:hover {
+    
+                    transform: scale(1.05);
+    
+                    border-color: #6366f1;
+    
+                }
+    
+    
+    
+.color-adjustments-picker-card .color-option.selected {
+
+                    border-color: #14b8a6 !important;
+
+                    outline: 2px solid #14b8a6 !important;
+
+                    outline-offset: 2px !important;
+
+                    box-shadow: none !important;
+
+                }
+    
+    
+    
+                .cancel-btn {
+    
+                    background: #6b7280;
+    
+                    color: white;
+    
+                    border: none;
+    
+                    padding: 8px 16px;
+    
+                    border-radius: 4px;
+    
+                    cursor: pointer;
+    
+                    font-size: 12px;
+    
+                    font-weight: 500;
+    
+                    transition: background-color 0.2s ease;
+    
+                }
+    
+    
+    
+                .cancel-btn:hover {
+    
+                    background: #4b5563;
+    
+                }
+    
+    
+    
+                /* Ensure profile item has relative positioning for absolute toggle */
+    
+                .profile-item.has-dropdown {
+    
+                    position: relative !important;
+    
+                }
+    
+    
+    
+                /* Ensure toggle switch stays in position when dropdown is present */
+    
+                .profile-item.has-dropdown .toggle-switch {
+    
+                    flex-shrink: 0 !important;
+    
+                }
+    
+    
+    
+                .profile-item.has-dropdown .profile-info {
+    
+                    padding-left: 0 !important;
+                    margin-bottom: 0 !important;
+    
+                }
+    
+    
+    
+                /* Enhanced dropdown styling */
+    
+                .useful-links-card {
+
+                    width: 100%;
+
+                    min-width: 0;
+
+                    min-height: 136px;
+
+                    height: auto;
+
+                    max-width: 100%;
+
+                    box-sizing: border-box;
+
+                    border-radius: 10px;
+
+                    opacity: 1;
+
+                    background: #FFFFFF;
+
+                    border: none;
+
+                    padding: 15px 22px;
+
+                    display: flex;
+
+                    flex-direction: column;
+
+                    gap: 12px;
+
+                }
+
+                .useful-links-card .useful-links-header {
+
+                    display: flex;
+
+                    align-items: center;
+
+                    justify-content: flex-start;
+
+                    gap: 12px;
+
+                    text-align: left;
+
+                    width: 100%;
+
+                }
+
+                .useful-links-card .useful-links-header h4 {
+
+                    margin: 0;
+
+                    font-family: Archivo;
+
+                    font-size: 21px;
+
+                    font-weight: 500;
+
+                    line-height: 27px;
+
+                    letter-spacing: -0.44px;
+
+                    color: #1E2939;
+
+                    text-align: left;
+
+                }
+
+                .useful-links-card .content-card-icon.useful-links-icon {
+
+                    width: 43px;
+
+                    height: 43px;
+
+                    flex-shrink: 0;
+
+                    border-radius: 50%;
+
+                    background: transparent !important;
+
+                    overflow: hidden !important;
+
+                    display: flex;
+
+                    align-items: center;
+
+                    justify-content: center;
+
+                }
+
+                .useful-links-card .content-card-icon.useful-links-icon svg {
+
+                    width: 43px;
+
+                    height: 43px;
+
+                }
+
+                /* Useful Links: native select hidden (keep for a11y/sync); custom dropdown visible */
+                .useful-links-card {
+                    position: relative !important;
+                }
+                .useful-links-card .useful-links-select-wrap {
+                    position: absolute !important;
+                    left: -9999px !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    overflow: hidden !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                }
+                .useful-links-card .useful-links-select-wrap select,
+                .useful-links-card #useful-links-select,
+                .accessbit-widget-panel .useful-links-card #useful-links-select,
+                .accessbit-widget-panel .useful-links-card .useful-links-select-wrap select {
+                    width: 1px !important;
+                    height: 1px !important;
+                    min-height: 0 !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                }
+                /* Useful Links custom dropdown: trigger 422x48, radius 33px, border #E0E0E0 */
+                .useful-links-custom-dropdown {
+                    position: relative !important;
+                    display: block !important;
+                    margin-top: 12px !important;
+                    margin-left: 55px !important;
+                    max-width: calc(100% - 55px) !important;
+                    width: calc(100% - 55px) !important;
+                    z-index: 10 !important;
+                    pointer-events: auto !important;
+                }
+
+                @media (max-width: 480px) {
+                    .useful-links-custom-dropdown {
+                        margin-left: 55px !important;
+                        max-width: calc(100% - 55px) !important;
+                    }
+                    .useful-links-custom-trigger {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        height: 34px !important;
+                        font-size: 16px !important;
+                    }
+                }
+                .useful-links-custom-trigger {
+                    pointer-events: auto !important;
+                    position: relative !important;
+                    z-index: 2 !important;
+                    width: 422px !important;
+                    max-width: 100% !important;
+                    height: 48px !important;
+                    border-radius: 33px !important;
+                    border: 1px solid #E0E0E0 !important;
+                    background: #E0E0E0 !important;
+                    opacity: 1 !important;
+                    cursor: pointer !important;
+                    font-family: Archivo, sans-serif !important;
+                    font-weight: 500 !important;
+                    font-size: 16px !important;
+                    line-height: 27px !important;
+                    letter-spacing: -0.44px !important;
+                    color: #000000 !important;
+                    text-align: left !important;
+                    padding: 0 20px !important;
+                    box-sizing: border-box !important;
+                    appearance: none !important;
+                    display: flex !important;
+                    align-items: center !important;
+                }
+                .useful-links-custom-trigger::after {
+                    content: '' !important;
+                    margin-left: auto !important;
+                    width: 14px !important;
+                    height: 14px !important;
+                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+                    background-repeat: no-repeat !important;
+                    background-position: center !important;
+                }
+                /* Useful Links: list position set by JS (fixed below trigger), stays inside panel */
+                .useful-links-custom-list {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    margin-top: 4px !important;
+                    background: #FFFFFF !important;
+                    border-radius: 10px !important;
+                    border: 1px solid #E0E0E0 !important;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+                    z-index: 2147483647 !important;
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    min-width: 0 !important;
+                    max-width: 100vw !important;
+                    box-sizing: border-box !important;
+                    display: block !important;
+                    font-family: Archivo, sans-serif !important;
+                    pointer-events: auto !important;
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                .useful-links-custom-list::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }
+                .useful-links-custom-list[hidden] {
+                    display: none !important;
+                }
+                .useful-links-card,
+                .useful-links-custom-dropdown {
+                    overflow: visible !important;
+                }
+
+                /* FINAL tablet (601–768px) override: force profile titles/descriptions */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* FINAL mobile (≤768px, including 420/400/375/320/240): force all requested typography */
+                @media (max-width: 768px) {
+                    /* Accessibility Controls (panel header title) */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+
+                    /* Header action buttons: Reset Settings / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments heading (profilesTitle) */
+                    #accessbit-widget-panel .white-content-section > h3,
+                    #accessbit-widget-panel .white-content-section h3,
+                    :host #accessbit-widget-panel .white-content-section > h3,
+                    :host #accessbit-widget-panel .white-content-section h3 {
+                        font-size: 16px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* Feature titles + descriptions (profiles) */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 15px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+                /* Override .profile-item overflow so dropdown list can open downward (profile-item sets overflow-x: hidden which forces overflow-y to auto and clips the list) */
+                .accessbit-widget-panel .useful-links-card,
+                .accessbit-widget-panel .profile-item.useful-links-card {
+                    overflow: visible !important;
+                    overflow-x: visible !important;
+                    overflow-y: visible !important;
+                }
+                .useful-links-custom-option {
+                    padding: 12px 20px !important;
+                    font-family: Archivo, sans-serif !important;
+                    font-size: 16px !important;
+                    color: #1E2939 !important;
+                    cursor: pointer !important;
+                    background: #FFFFFF !important;
+                }
+                .useful-links-custom-option:hover {
+                    background: #DEDEDE !important;
+                }
+
+                .useful-links-dropdown {
+
+                    margin: 10px 0;
+
+                    padding: 0;
+
+                    width: 100%;
+
+                    display: block;
+
+                    background: #f8fafc;
+
+                    border-radius: 10px;
+
+                    border: none;
+
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
+                    transition: all 0.3s ease;
+
+                }
+    
+    
+    
+                .useful-links-dropdown:hover {
+
+                    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.12);
+
+                }
+    
+    
+    
+                .useful-links-content {
+    
+                    padding: 10px;
+    
+                }
+    
+    
+    
+                .useful-links-content select {
+    
+                    width: 100%;
+    
+                    padding: 10px 14px;
+    
+                    border: 1px solid #6366f1;
+    
+                    border-radius: 6px;
+    
+                    background: white;
+    
+                    color: #374151;
+    
+                    font-size: 13px;
+    
+                    font-weight: 500;
+
+                    font-family: Archivo;
+
+                    cursor: pointer;
+    
+                    transition: all 0.3s ease;
+    
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    
+                    appearance: none;
+    
+                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    
+                    background-position: right 10px center;
+    
+                    background-repeat: no-repeat;
+    
+                    background-size: 14px;
+    
+                    padding-right: 35px;
+    
+                }
+    
+    
+    
+                .useful-links-content select:focus {
+    
+                    outline: 3px solid #4f46e5 !important;
+    
+                    outline-offset: 2px !important;
+    
+                    border-color: #4f46e5;
+    
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+                    transform: translateY(-1px);
+    
+                }
+    
+    
+    
+                .useful-links-content select:hover,
+                .useful-links-card #useful-links-select:hover,
+                .accessbit-widget-panel .useful-links-card #useful-links-select:hover {
+
+                    background: #DEDEDE !important;
+
+                    border-color: #4f46e5;
+
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+                    transform: translateY(-1px);
+
+                }
+    
+    
+    
+                .useful-links-content select option {
+    
+                    padding: 12px 16px;
+    
+                    background: white;
+    
+                    color: #374151;
+    
+                    font-weight: 500;
+    
+                    border: none;
+    
+                }
+    
+    
+    
+.useful-links-content select option:hover,
+
+                .accessbit-widget-panel .useful-links-card #useful-links-select option:hover {
+
+                    background: #DEDEDE !important;
+
+                    color: #1f2937;
+
+                }
+    
+    
+    
+                .useful-links-content select option:selected,
+
+                .useful-links-card #useful-links-select option:checked,
+
+                .useful-links-card #useful-links-select option:selected,
+
+                .accessbit-widget-panel .useful-links-card #useful-links-select option:checked,
+
+                .accessbit-widget-panel .useful-links-card #useful-links-select option:selected {
+
+                    background: #DEDEDE !important;
+
+                    color: #1E2939 !important;
+
+                }
+    
+                /* Big Black Cursor - Clean Arrow Cursor Shape - MAXIMUM SPECIFICITY */
+    /* Big Black Cursor - Arrow Cursor (default) */
+    body.big-black-cursor,
+    html body.big-black-cursor,
+    body.big-black-cursor *,
+    html body.big-black-cursor * {
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy1ibGFjayIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjMiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjMDAwMDAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1ibGFjaykiLz48L3N2Zz4=') 20 10, auto !important;
+    }
+    
+    /* Big Black Cursor - Hand Pointer for Links - Higher specificity to override default */
+    body.big-black-cursor a,
+    body.big-black-cursor a *,
+    body.big-black-cursor button,
+    body.big-black-cursor button *,
+    body.big-black-cursor [role="button"],
+    body.big-black-cursor [role="button"] *,
+    body.big-black-cursor [onclick],
+    body.big-black-cursor [onclick] *,
+    body.big-black-cursor [tabindex]:not([tabindex="-1"]),
+    body.big-black-cursor [tabindex]:not([tabindex="-1"]) *,
+    body.big-black-cursor input[type="button"],
+    body.big-black-cursor input[type="submit"],
+    body.big-black-cursor input[type="reset"],
+    body.big-black-cursor .btn,
+    body.big-black-cursor [class*="button"],
+    body.big-black-cursor [class*="link"] {
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtYmxhY2siIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC4zIi8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiMwMDAwMDAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLWJsYWNrKSIvPjwvc3ZnPg==') 24 10, pointer !important;
+    }
+    
+    /* Big White Cursor - Arrow Cursor (default) */
+    body.big-white-cursor,
+    html body.big-white-cursor,
+    body.big-white-cursor *,
+    html body.big-white-cursor * {
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9InNoYWRvdy13aGl0ZSIgeD0iLTUwJSIgeT0iLTUwJSIgd2lkdGg9IjIwMCUiIGhlaWdodD0iMjAwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMiIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMyIgZmxvb2RPcGFjaXR5PSIwLjUiLz48L2ZpbHRlcj48L2RlZnM+PHBhdGggZD0iTSAyMCAxMCBMIDIwIDgwIEwgNDAgNjAgTCA1MCA4NSBMIDU4IDgyIEwgNDggNTcgTCA3MCA1MCBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIgZmlsdGVyPSJ1cmwoI3NoYWRvdy13aGl0ZSkiLz48L3N2Zz4=') 20 10, auto !important;
+    }
+    
+    /* Big White Cursor - Hand Pointer for Links - Higher specificity to override default */
+    body.big-white-cursor a,
+    body.big-white-cursor a *,
+    body.big-white-cursor button,
+    body.big-white-cursor button *,
+    body.big-white-cursor [role="button"],
+    body.big-white-cursor [role="button"] *,
+    body.big-white-cursor [onclick],
+    body.big-white-cursor [onclick] *,
+    body.big-white-cursor [tabindex]:not([tabindex="-1"]),
+    body.big-white-cursor [tabindex]:not([tabindex="-1"]) *,
+    body.big-white-cursor input[type="button"],
+    body.big-white-cursor input[type="submit"],
+    body.big-white-cursor input[type="reset"],
+    body.big-white-cursor .btn,
+    body.big-white-cursor [class*="button"],
+    body.big-white-cursor [class*="link"] {
+        cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA4MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGZpbHRlciBpZD0ic2hhZG93LWhhbmQtd2hpdGUiIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjIiIGR5PSIyIiBzdGREZXZpYXRpb249IjMiIGZsb29kT3BhY2l0eT0iMC41Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik0gMjggOCBRIDI2IDggMjUgOSBRIDI0IDEwIDI0IDEyIEwgMjQgNDIgQyAyMiA0MCAyMCAzOCAxOCAzNyBDIDE2IDM2IDEzIDM2IDExIDM3LjUgQyA5IDM5IDguNSA0MSA5LjUgNDMgQyAxMC41IDQ1LjUgMTMgNDguNSAxNCA0OS41IEMgMTUgNTEgMTcuNSA1NiAxOS41IDU3LjUgQyAyMSA1OC44IDIyIDYyIDIyLjUgNjUgTCAyMi41IDY4IEwgNTIgNjggTCA1MiA2MyBDIDUyLjUgNjEuOCA1My41IDYwIDU0LjUgNTkgQyA1Ni41IDU3IDU3IDUzIDU3IDUxLjUgTCA1NyAzNiBRIDU3IDM0LjUgNTUuNSAzMyBDIDU0LjUgMzIgNTIuNSAzMS41IDUwIDMxLjMgQyA0OS44IDMxIDQ5LjUgMzAuNSA0OSAzMC4yIEMgNDcuNSAyOS4yIDQ1IDI4LjggNDIuNSAyOC43IEMgNDIuMyAyOC41IDQyIDI4LjIgNDEuNSAyNy45IEMgNDAgMjcgMzggMjYuNiAzNiAyNi41IEwgMzYgMTIgUSAzNiAxMCAzNSA5IFEgMzQgOCAzMiA4IFEgMzAgOCAyOCA4IFoiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoYWRvdy1oYW5kLXdoaXRlKSIvPjwvc3ZnPg==') 24 10, pointer !important;
+    }
+                /* Hide Interface Modal Styles */
+                /* Render as an overlay INSIDE the widget panel (responsive) */
+                .hide-interface-modal {
+                    position: absolute !important;
+                    inset: 0 !important;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 100001;
+                    width: 100% !important;
+                    height: 100% !important;
+                    overflow: hidden;
+                }
+    
+                .hide-interface-modal .modal-content {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
+                    position: relative;
+                    transform: none;
+                    margin: 16px;
+                    width: min(400px, calc(100% - 32px));
+                    max-height: calc(100% - 32px);
+                    overflow: auto;
+                    -webkit-overflow-scrolling: touch;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+                }
+    
+                .hide-interface-modal .modal-header {
+                    padding: 20px 20px 10px 20px;
+                    border-bottom: 1px solid #e5e7eb;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+    
+                .hide-interface-modal .modal-header h3 {
+                    margin: 0;
+                    color: #1f2937;
+                    font-size: 18px;
+                    font-weight: 600;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+                }
+    
+                .hide-interface-modal .modal-close {
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    color: #6b7280;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+    
+                .hide-interface-modal .modal-close:hover {
+                    color: #374151;
+                }
+    
+                .hide-interface-modal .modal-body {
+                    padding: 20px;
+                }
+    
+                .hide-interface-modal .modal-body p {
+                    margin: 0;
+                    color: #374151;
+                    line-height: 1.5;
+                    font-size: 14px;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+                }
+    
+                .hide-interface-modal .modal-footer {
+                    padding: 10px 20px 20px 20px;
+                    display: flex;
+                    gap: 12px;
+                    justify-content: flex-end;
+                }
+    
+                .hide-interface-modal .modal-btn {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+                }
+    
+                .hide-interface-modal .accept-btn {
+                    background: #01CE9C;
+                    color: white;
+                }
+    
+                .hide-interface-modal .accept-btn:hover {
+                    background: #00b88a;
+                }
+    
+                .hide-interface-modal .cancel-btn {
+                    background: white;
+                    color: #374151;
+                    border: 1px solid #d1d5db;
+                }
+    
+                .hide-interface-modal .cancel-btn:hover {
+                    background: #f9fafb;
+                }
+
+                /* === ABSOLUTE FINAL TYPOGRAPHY OVERRIDES (must be last in CSS) === */
+                /* Mobile (≤768px, including 420/400/375/320/240) */
+                @media (max-width: 768px) {
+                    /* When action buttons stack vertically, do NOT force full width */
+                    #accessbit-widget-panel .panel-header .action-buttons,
+                    #accessbit-widget-panel .widget-header .action-buttons,
+                    :host #accessbit-widget-panel .panel-header .action-buttons,
+                    :host #accessbit-widget-panel .widget-header .action-buttons {
+                        width: auto !important;
+                        max-width: none !important;
+                        align-items: stretch !important;
+                    }
+                    #accessbit-widget-panel .panel-header .action-buttons .action-btn,
+                    #accessbit-widget-panel .widget-header .action-buttons .action-btn,
+                    :host #accessbit-widget-panel .panel-header .action-buttons .action-btn,
+                    :host #accessbit-widget-panel .widget-header .action-buttons .action-btn {
+                        /* Same width for all stacked buttons (not full-width) */
+                        width: min(240px, calc(100vw - 80px)) !important;
+                        max-width: min(240px, calc(100vw - 80px)) !important;
+                        min-width: 0 !important;
+                        box-sizing: border-box !important;
+                        align-self: stretch !important;
+                    }
+
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 20px !important;
+                        line-height: 24px !important;
+                    }
+
+                    /* Reset / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments (only the main section title in white content area) */
+                    #accessbit-widget-panel .white-content-section > h3:first-child,
+                    #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),
+                    :host #accessbit-widget-panel .white-content-section > h3:first-child,
+                    :host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 16px !important;
+                        line-height: 20px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 15px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* Tablet prompt sizing (601–768px): force profile titles/descriptions */
+                @media (max-width: 768px) and (min-width: 601px) {
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* iPad / tablet (769–819px): requested typography */
+                @media (max-width: 819px) and (min-width: 769px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Header action buttons */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments (main section title) */
+                    #accessbit-widget-panel .white-content-section > h3:first-child,
+                    #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title),
+                    :host #accessbit-widget-panel .white-content-section > h3:first-child,
+                    :host #accessbit-widget-panel .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                        line-height: 22px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* Tablet/base (820–1024px): requested typography (covers 1024px screens) */
+                @media (max-width: 1024px) and (min-width: 820px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Slider titles: Font Sizing / Line Height / Letter Spacing */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+                }
+
+                /* Tablet/base (1014px–1279px): match desktop typography */
+                @media (max-width: 1279px) and (min-width: 1014px) {
+                    /* Accessibility Controls */
+                    #accessbit-widget-panel .panel-header h2,
+                    #accessbit-widget-panel .widget-header h2,
+                    :host #accessbit-widget-panel .panel-header h2,
+                    :host #accessbit-widget-panel .widget-header h2 {
+                        font-size: 24px !important;
+                        line-height: 28px !important;
+                    }
+
+                    /* Reset / Statement / Hide Interface */
+                    #accessbit-widget-panel .panel-header #reset-settings,
+                    #accessbit-widget-panel .panel-header #statement,
+                    #accessbit-widget-panel .panel-header #hide-interface,
+                    #accessbit-widget-panel .widget-header #reset-settings,
+                    #accessbit-widget-panel .widget-header #statement,
+                    #accessbit-widget-panel .widget-header #hide-interface,
+                    :host #accessbit-widget-panel .panel-header #reset-settings,
+                    :host #accessbit-widget-panel .panel-header #statement,
+                    :host #accessbit-widget-panel .panel-header #hide-interface,
+                    :host #accessbit-widget-panel .widget-header #reset-settings,
+                    :host #accessbit-widget-panel .widget-header #statement,
+                    :host #accessbit-widget-panel .widget-header #hide-interface {
+                        font-size: 15px !important;
+                    }
+
+                    /* Accessibility Adjustments heading */
+                    #accessbit-widget-panel .white-content-section h3,
+                    .white-content-section h3:not(.content-adjustments-title):not(.color-adjustments-title):not(.interface-controls-title):not(.placeholder-title) {
+                        font-size: 18px !important;
+                    }
+
+                    /* Feature titles + descriptions */
+                    #accessbit-widget-panel .profile-item h4,
+                    :host #accessbit-widget-panel .profile-item h4,
+                    #accessbit-widget-panel .profile-item .profile-info h4,
+                    :host #accessbit-widget-panel .profile-item .profile-info h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                    #accessbit-widget-panel .profile-item p,
+                    :host #accessbit-widget-panel .profile-item p,
+                    #accessbit-widget-panel .profile-item .profile-info p,
+                    :host #accessbit-widget-panel .profile-item .profile-info p,
+                    #accessbit-widget-panel .profile-item .profile-description p,
+                    :host #accessbit-widget-panel .profile-item .profile-description p {
+                        font-size: 14px !important;
+                        line-height: 1.35 !important;
+                    }
+
+                    /* Slider titles (Font Size / Line Height / Letter Spacing) */
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-card-body h4,
+                    :host #accessbit-widget-panel .content-adjustments-card.slider-card .content-scaling-header h4 {
+                        font-size: 16px !important;
+                        line-height: 1.25 !important;
+                    }
+                }
+
+                /* Final toggle handle shadow (all toggle switches) */
+                #accessbit-widget-panel .toggle-switch .slider:before,
+                .accessbit-panel-screenshot .toggle-switch .slider:before,
+                :host #accessbit-widget-panel .toggle-switch .slider:before {
+                    box-shadow:
+                        0px 1px 2px 0px #00000033,
+                        0px 4px 4px 0px #0000002B,
+                        0px 10px 6px 0px #0000001A,
+                        0px 17px 7px 0px #00000008,
+                        0px 27px 7px 0px #00000000 !important;
+                }
+
+                /* Final toggle track inner shadow (OFF + ON) */
+                #accessbit-widget-panel .toggle-switch .slider,
+                .accessbit-panel-screenshot .toggle-switch .slider,
+                :host #accessbit-widget-panel .toggle-switch .slider,
+                #accessbit-widget-panel .toggle-switch input:checked + .slider,
+                .accessbit-panel-screenshot .toggle-switch input:checked + .slider,
+                :host #accessbit-widget-panel .toggle-switch input:checked + .slider {
+                    box-shadow: 0px 1px 3px 0px #00000033 inset !important;
+                }
+
+                /* Final ON-state indicators:
+                   - "|" bar on the LEFT
+                   - (ring removed on ON; only bar shown)
+                   (drawn together in the same ::after using gradients) */
+                #accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after,
+                :host #accessbit-widget-panel .toggle-switch input:checked + .slider::after {
+                    content: '' !important;
+                    display: block !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 22px !important;
+                    right: auto !important;
+                    bottom: auto !important;
+                    opacity: 1 !important;
+                    pointer-events: none !important;
+                    width: 2px !important;
+                    height: 12px !important;
+                    background: #FFFFFF !important;
+                    border: 0 !important;
+                    border-radius: 0 !important;
+                    transform: translateY(-50%) !important;
+                }
+
+                /* Mobile: hide ON-state "|" marker */
+                @media (max-width: 589px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider::after,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider::after,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider::after {
+                        content: none !important;
+                        display: none !important;
+                        border: 0 !important;
+                    }
+                }
+
+                /* Final OFF-state ring indicator (centered on inactive/left side) */
+                #accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after,
+                .accessbit-panel-screenshot .toggle-switch input:not(:checked) + .slider::after,
+                :host #accessbit-widget-panel .toggle-switch input:not(:checked) + .slider::after {
+                    content: '' !important;
+                    display: block !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: auto !important;
+                    right: 12px !important;
+                    width: 12px !important;
+                    height: 12px !important;
+                    opacity: 1 !important;
+                    border-width: 2px !important;
+                    border: 2px solid #FFFFFF !important;
+                    border-radius: 50% !important;
+                    background: transparent !important;
+                    transform: translateY(-50%) rotate(0deg) !important;
+                    pointer-events: none !important;
+                }
+
+                /* Desktop: move ON knob to leave ~2px gap (80px track case) */
+                @media (min-width: 769px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        /* Anchor knob by left instead of translate (prevents overflow). */
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+                }
+
+                /* Desktop (wider track): leave ~2px gap (92px track case) */
+                @media (min-width: 1280px) {
+                    #accessbit-widget-panel .toggle-switch input:checked + .slider:before,
+                    .accessbit-panel-screenshot .toggle-switch input:checked + .slider:before,
+                    :host #accessbit-widget-panel .toggle-switch input:checked + .slider:before {
+                        left: calc(100% - 32px - 2px) !important;
+                        transform: translateX(0) !important;
+                    }
+                }
+    
+            `;
     
         }
     
@@ -9831,7 +16413,7 @@ keyboardNav: "Keyboard Navigation (Motor)",
     
             label.className = 'keyboard-highlight-label';
     
-            label.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)}${this.currentElementIndex[type] + 1}`;
+            label.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} ${this.currentElementIndex[type] + 1}`;
     
             label.style.cssText = `
     
@@ -11901,7 +18483,31 @@ keyboardNav: "Keyboard Navigation (Motor)",
             const inverseScale = 1 / scale;
             const safeInverse = Number.isFinite(inverseScale) ? Math.min(2, Math.max(0.6667, inverseScale)) : 1;
             
-            style.textContent = `html{zoom:${scale}!important;}html,body{overflow-x:hidden !important;overflow-y:auto !important;}#accessbit-widget-container,#accessbit-widget,[id*="accessbit-widget"],.accessbit-widget-panel,#accessbit-widget-icon{zoom:${safeInverse}!important;transition:none !important;will-change:auto !important;contain:layout style !important;isolation:isolate !important;}`;
+            style.textContent = `
+                /* Content scaling using zoom - works in Chrome, Safari, Edge, Firefox 110+ */
+                html {
+                    zoom: ${scale} !important;
+                }
+                
+                /* Ensure body and html can scroll properly */
+                html, body {
+                    overflow-x: hidden !important;
+                    overflow-y: auto !important;
+                }
+
+                /* Prevent widget container and panel from being scaled by content scaling */
+                #accessbit-widget-container,
+                #accessbit-widget,
+                [id*="accessbit-widget"],
+                .accessbit-widget-panel,
+                #accessbit-widget-icon {
+                    zoom: ${safeInverse} !important;
+                    transition: none !important;
+                    will-change: auto !important;
+                    contain: layout style !important;
+                    isolation: isolate !important;
+                }
+            `;
             
             // Counter-scale widget from inside Shadow DOM so host is unaffected by html zoom
             this.applyWidgetCounterScale(safeInverse);
@@ -11921,7 +18527,24 @@ keyboardNav: "Keyboard Navigation (Motor)",
             }
             
             // Use zoom on host so the entire widget (host + shadow contents) counter-scales; inner elements stay 1:1
-            counterStyle.textContent = `:host{zoom:${safeInverse}!important;transition:none !important;contain:layout style !important;isolation:isolate !important;}#accessbit-widget-panel,#accessbit-widget-icon{zoom:1 !important;transition:none !important;will-change:auto !important;}#accessbit-widget-panel{min-height:auto !important;height:auto !important;}`;
+            counterStyle.textContent = `
+                :host {
+                    zoom: ${safeInverse} !important;
+                    transition: none !important;
+                    contain: layout style !important;
+                    isolation: isolate !important;
+                }
+                #accessbit-widget-panel,
+                #accessbit-widget-icon {
+                    zoom: 1 !important;
+                    transition: none !important;
+                    will-change: auto !important;
+                }
+                #accessbit-widget-panel {
+                    min-height: auto !important;
+                    height: auto !important;
+                }
+            `;
         }
         
         // Reset widget scale when content scaling is disabled
@@ -14657,7 +21280,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 st.id = 'accessbit-page-structure-css';
     
-                st.textContent = `#accessbit-page-structure-overlay{position:fixed;inset:0;z-index:2147483639;background:rgba(15,23,42,0.35);}#accessbit-page-structure-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(720px,calc(100vw - 24px));max-height:min(78vh,620px);overflow:hidden;z-index:2147483640;background:#fff;border:2px solid #34A2AB;border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,0.25);font-family:Archivo,system-ui,sans-serif;font-size:13px;}.accessbit-ps-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;font-weight:600;background:#1E2939;color:#fff;}.accessbit-ps-close{appearance:none;border:none;background:transparent;color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:6px 10px;border-radius:8px;}.accessbit-ps-close:hover,.accessbit-ps-close:focus{outline:2px solid #01CE9C;outline-offset:2px;}.accessbit-ps-tabs{display:flex;gap:0;padding:0;margin:0;background:#EAECF2;border-bottom:1px solid #E5E7EB;}.accessbit-ps-tab{flex:1;padding:10px 12px;border:none;background:transparent;cursor:pointer;font-weight:600;color:#1E2939;}.accessbit-ps-tab[aria-selected="true"]{background:#fff;border-bottom:2px solid #01CE9C;}.accessbit-ps-body{overflow:auto;max-height:calc(min(78vh,620px) - 92px);}.accessbit-ps-list{padding:0;margin:0;}.accessbit-ps-item{display:block;width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid #E5E7EB;background:#fff;cursor:pointer;color:#171a2a;font-size:13px;line-height:1.35;}.accessbit-ps-item:hover,.accessbit-ps-item:focus{background:#D9F8F0;outline:2px solid #01CE9C;outline-offset:-2px;}.accessbit-ps-item.accessbit-ps-item-active{background:#c5f0e6;box-shadow:inset 0 0 0 2px #01CE9C;}.accessbit-ps-item:last-child{border-bottom:none;}`;
+                st.textContent = `
+    
+                    #accessbit-page-structure-overlay { position: fixed; inset: 0; z-index: 2147483639; background: rgba(15, 23, 42, 0.35); }
+                    #accessbit-page-structure-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(720px, calc(100vw - 24px)); max-height: min(78vh, 620px); overflow: hidden; z-index: 2147483640; background: #fff; border: 2px solid #34A2AB; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.25); font-family: Archivo, system-ui, sans-serif; font-size: 13px; }
+                    .accessbit-ps-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-weight: 600; background: #1E2939; color: #fff; }
+                    .accessbit-ps-close { appearance: none; border: none; background: transparent; color: #fff; font-size: 18px; line-height: 1; cursor: pointer; padding: 6px 10px; border-radius: 8px; }
+                    .accessbit-ps-close:hover, .accessbit-ps-close:focus { outline: 2px solid #01CE9C; outline-offset: 2px; }
+                    .accessbit-ps-tabs { display: flex; gap: 0; padding: 0; margin: 0; background: #EAECF2; border-bottom: 1px solid #E5E7EB; }
+                    .accessbit-ps-tab { flex: 1; padding: 10px 12px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #1E2939; }
+                    .accessbit-ps-tab[aria-selected="true"] { background: #fff; border-bottom: 2px solid #01CE9C; }
+                    .accessbit-ps-body { overflow: auto; max-height: calc(min(78vh, 620px) - 92px); }
+                    .accessbit-ps-list { padding: 0; margin: 0; }
+                    .accessbit-ps-item { display: block; width: 100%; text-align: left; padding: 10px 12px; border: none; border-bottom: 1px solid #E5E7EB; background: #fff; cursor: pointer; color: #171a2a; font-size: 13px; line-height: 1.35; }
+                    .accessbit-ps-item:hover, .accessbit-ps-item:focus { background: #D9F8F0; outline: 2px solid #01CE9C; outline-offset: -2px; }
+                    .accessbit-ps-item.accessbit-ps-item-active { background: #c5f0e6; box-shadow: inset 0 0 0 2px #01CE9C; }
+                    .accessbit-ps-item:last-child { border-bottom: none; }
+    
+                `;
     
                 document.head.appendChild(st);
     
@@ -15723,7 +22363,30 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('highlight-hover-css')) {
                 const style = document.createElement('style');
                 style.id = 'highlight-hover-css';
-                style.textContent = `.highlight-hover *:hover{outline:2px solid #0066ff !important;outline-offset:2px !important;}.highlight-hover a:hover{outline:2px solid #0066ff !important;outline-offset:2px !important;}.highlight-hover button:hover,.highlight-hover input:hover,.highlight-hover select:hover,.highlight-hover textarea:hover{outline:2px solid #0066ff !important;outline-offset:2px !important;}.highlight-hover img:hover{outline:3px solid #0066ff !important;outline-offset:3px !important;}`;
+                style.textContent = `
+                    .highlight-hover *:hover {
+                        outline: 2px solid #0066ff !important;
+                        outline-offset: 2px !important;
+                    }
+                    
+                    .highlight-hover a:hover {
+                        outline: 2px solid #0066ff !important;
+                        outline-offset: 2px !important;
+                    }
+                    
+                    .highlight-hover button:hover,
+                    .highlight-hover input:hover,
+                    .highlight-hover select:hover,
+                    .highlight-hover textarea:hover {
+                        outline: 2px solid #0066ff !important;
+                        outline-offset: 2px !important;
+                    }
+                    
+                    .highlight-hover img:hover {
+                        outline: 3px solid #0066ff !important;
+                        outline-offset: 3px !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
             
@@ -15787,7 +22450,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-colorblind-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-colorblind-css';
-                style.textContent = `.ab-colorblind{filter:contrast(1.04) brightness(1.02) saturate(0.82);}`;
+                style.textContent = `
+                    .ab-colorblind { filter: contrast(1.04) brightness(1.02) saturate(0.82); }
+                `;
                 document.head.appendChild(style);
             }
 
@@ -15829,7 +22494,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-inverted-colors-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-inverted-colors-css';
-                style.textContent = `html.ab-inverted-colors{filter:invert(1) !important;}`;
+                style.textContent = `
+                    html.ab-inverted-colors { filter: invert(1) !important; }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -15847,7 +22514,45 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('large-clickable-area-css')) {
                 const style = document.createElement('style');
                 style.id = 'large-clickable-area-css';
-                style.textContent = `html.large-clickable-area:where( button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"],input[type="image"],a.w-button,a.button,a.btn,a[class*="button"],a[class*="btn"] ):not(#accessbit-widget-container *),body.large-clickable-area:where( button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"],input[type="image"],a.w-button,a.button,a.btn,a[class*="button"],a[class*="btn"] ):not(#accessbit-widget-container *){min-height:44px !important;min-width:44px !important;transform:scale(1.06);transform-origin:center center;}html.large-clickable-area:where(summary):not(#accessbit-widget-container *),body.large-clickable-area:where(summary):not(#accessbit-widget-container *){min-height:44px !important;min-width:44px !important;}`;
+                style.textContent = `
+                    /* Proportional enlargement for button-like controls only; avoid stretching plain nav text links */
+                    html.large-clickable-area :where(
+                        button,
+                        [role="button"],
+                        input[type="button"],
+                        input[type="submit"],
+                        input[type="reset"],
+                        input[type="image"],
+                        a.w-button,
+                        a.button,
+                        a.btn,
+                        a[class*="button"],
+                        a[class*="btn"]
+                    ):not(#accessbit-widget-container *),
+                    body.large-clickable-area :where(
+                        button,
+                        [role="button"],
+                        input[type="button"],
+                        input[type="submit"],
+                        input[type="reset"],
+                        input[type="image"],
+                        a.w-button,
+                        a.button,
+                        a.btn,
+                        a[class*="button"],
+                        a[class*="btn"]
+                    ):not(#accessbit-widget-container *) {
+                        min-height: 44px !important;
+                        min-width: 44px !important;
+                        transform: scale(1.06);
+                        transform-origin: center center;
+                    }
+                    html.large-clickable-area :where(summary):not(#accessbit-widget-container *),
+                    body.large-clickable-area :where(summary):not(#accessbit-widget-container *) {
+                        min-height: 44px !important;
+                        min-width: 44px !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -15881,7 +22586,53 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('highlight-focus-css')) {
                 const style = document.createElement('style');
                 style.id = 'highlight-focus-css';
-                style.textContent = `body.highlight-focus *:focus,body.highlight-focus *:focus-visible{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;transition:outline 0.2s ease,background 0.2s ease !important;}body.highlight-focus a:focus,body.highlight-focus a:focus-visible,body.highlight-focus button:focus,body.highlight-focus button:focus-visible,body.highlight-focus input:focus,body.highlight-focus input:focus-visible,body.highlight-focus select:focus,body.highlight-focus select:focus-visible,body.highlight-focus textarea:focus,body.highlight-focus textarea:focus-visible,body.highlight-focus [tabindex]:focus,body.highlight-focus [tabindex]:focus-visible,body.highlight-focus [role="button"]:focus,body.highlight-focus [role="button"]:focus-visible,body.highlight-focus [role="link"]:focus,body.highlight-focus [role="link"]:focus-visible,body.highlight-focus [contenteditable="true"]:focus,body.highlight-focus [contenteditable="true"]:focus-visible{outline:3px solid #6366f1 !important;outline-offset:2px !important;background:rgba(99,102,241,0.1) !important;border-radius:4px !important;box-shadow:0 0 0 3px rgba(99,102,241,0.3) !important;transition:outline 0.2s ease,background 0.2s ease,box-shadow 0.2s ease !important;}body.highlight-focus .accessbit-widget-panel *:focus,body.highlight-focus .accessbit-widget-icon:focus{outline:inherit !important;outline-offset:inherit !important;background:inherit !important;border-radius:inherit !important;box-shadow:inherit !important;}`;
+                style.textContent = `
+                    /* Highlight Focus - Show prominent focus indicators */
+                    body.highlight-focus *:focus,
+                    body.highlight-focus *:focus-visible {
+                        outline: 3px solid #6366f1 !important;
+                        outline-offset: 2px !important;
+                        background: rgba(99, 102, 241, 0.1) !important;
+                        border-radius: 4px !important;
+                        transition: outline 0.2s ease, background 0.2s ease !important;
+                    }
+                    
+                    body.highlight-focus a:focus,
+                    body.highlight-focus a:focus-visible,
+                    body.highlight-focus button:focus,
+                    body.highlight-focus button:focus-visible,
+                    body.highlight-focus input:focus,
+                    body.highlight-focus input:focus-visible,
+                    body.highlight-focus select:focus,
+                    body.highlight-focus select:focus-visible,
+                    body.highlight-focus textarea:focus,
+                    body.highlight-focus textarea:focus-visible,
+                    body.highlight-focus [tabindex]:focus,
+                    body.highlight-focus [tabindex]:focus-visible,
+                    body.highlight-focus [role="button"]:focus,
+                    body.highlight-focus [role="button"]:focus-visible,
+                    body.highlight-focus [role="link"]:focus,
+                    body.highlight-focus [role="link"]:focus-visible,
+                    body.highlight-focus [contenteditable="true"]:focus,
+                    body.highlight-focus [contenteditable="true"]:focus-visible {
+                        outline: 3px solid #6366f1 !important;
+                        outline-offset: 2px !important;
+                        background: rgba(99, 102, 241, 0.1) !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                        transition: outline 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
+                    }
+                    
+                    /* Exclude accessibility widget from highlight focus */
+                    body.highlight-focus .accessbit-widget-panel *:focus,
+                    body.highlight-focus .accessbit-widget-icon:focus {
+                        outline: inherit !important;
+                        outline-offset: inherit !important;
+                        background: inherit !important;
+                        border-radius: inherit !important;
+                        box-shadow: inherit !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
     
@@ -17479,7 +24230,83 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             const style = document.createElement('style');
             style.id = 'accessbit-high-contrast-fix';
-            style.textContent = `body.high-contrast main img,body.high-contrast main video,body.high-contrast main picture,body.high-contrast main canvas,body.high-contrast main svg,body.high-contrast section img,body.high-contrast section video,body.high-contrast section picture,body.high-contrast section canvas,body.high-contrast section svg,body.high-contrast article img,body.high-contrast article video,body.high-contrast article picture,body.high-contrast article canvas,body.high-contrast article svg{filter:contrast(1.9) brightness(1.15) !important;-webkit-filter:contrast(1.9) brightness(1.15) !important;}body.high-contrast nav,body.high-contrast nav *,body.high-contrast header,body.high-contrast header *,body.high-contrast .navbar,body.high-contrast .navbar *,body.high-contrast [role="navigation"],body.high-contrast [role="navigation"] *,body.high-contrast [class*="nav"],body.high-contrast [class*="nav"] *,body.high-contrast [class*="header"],body.high-contrast [class*="header"] *,body.high-contrast [class*="navbar"],body.high-contrast [class*="navbar"] *,body.high-contrast [data-sticky],body.high-contrast [data-sticky] *,body.high-contrast [data-fixed],body.high-contrast [data-fixed] *,body.high-contrast [style*="position:sticky"],body.high-contrast [style*="position:sticky"] *,body.high-contrast [style*="position:fixed"],body.high-contrast [style*="position:fixed"] *,body.high-contrast [style*="position:fixed"],body.high-contrast [style*="position:fixed"] *{filter:none !important;-webkit-filter:none !important;}body.high-contrast .accessbit-widget,body.high-contrast .accessbit-widget *,body.high-contrast .accessbit-widget-panel,body.high-contrast .accessbit-widget-panel *,body.high-contrast .accessbit-widget-icon,body.high-contrast .accessbit-widget-icon *,body.high-contrast #accessbit-widget,body.high-contrast #accessbit-widget *,body.high-contrast #accessbit-widget-panel,body.high-contrast #accessbit-widget-panel *,body.high-contrast #accessbit-widget-icon,body.high-contrast #accessbit-widget-icon *,body.high-contrast [data-ck-widget],body.high-contrast [data-ck-widget] *,body.high-contrast [class*="accessbit"],body.high-contrast [class*="accessbit"] *{filter:none !important;-webkit-filter:none !important;}`;
+            style.textContent = `
+                /* Simple High Contrast Mode - Only increase contrast, preserve everything else */
+                /* CRITICAL: Apply filters ONLY to media inside main content areas - NEVER to nav/header or their ancestors */
+                /* Dark/Light contrast work because they use color/background properties, NOT filters */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+                
+                /* Apply filter ONLY to media elements inside main content areas (main, section, article) */
+                /* These are guaranteed to not contain nav elements, preventing stacking context issues */
+                body.high-contrast main img,
+                body.high-contrast main video,
+                body.high-contrast main picture,
+                body.high-contrast main canvas,
+                body.high-contrast main svg,
+                body.high-contrast section img,
+                body.high-contrast section video,
+                body.high-contrast section picture,
+                body.high-contrast section canvas,
+                body.high-contrast section svg,
+                body.high-contrast article img,
+                body.high-contrast article video,
+                body.high-contrast article picture,
+                body.high-contrast article canvas,
+                body.high-contrast article svg {
+                    filter: contrast(1.9) brightness(1.15) !important;
+                    -webkit-filter: contrast(1.9) brightness(1.15) !important;
+                }
+                
+                /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
+                body.high-contrast nav,
+                body.high-contrast nav *,
+                body.high-contrast header,
+                body.high-contrast header *,
+                body.high-contrast .navbar,
+                body.high-contrast .navbar *,
+                body.high-contrast [role="navigation"],
+                body.high-contrast [role="navigation"] *,
+                body.high-contrast [class*="nav"],
+                body.high-contrast [class*="nav"] *,
+                body.high-contrast [class*="header"],
+                body.high-contrast [class*="header"] *,
+                body.high-contrast [class*="navbar"],
+                body.high-contrast [class*="navbar"] *,
+                body.high-contrast [data-sticky],
+                body.high-contrast [data-sticky] *,
+                body.high-contrast [data-fixed],
+                body.high-contrast [data-fixed] *,
+                body.high-contrast [style*="position: sticky"],
+                body.high-contrast [style*="position: sticky"] *,
+                body.high-contrast [style*="position:fixed"],
+                body.high-contrast [style*="position:fixed"] *,
+                body.high-contrast [style*="position: fixed"],
+                body.high-contrast [style*="position: fixed"] * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Preserve accessibility widget from contrast filters */
+                body.high-contrast .accessbit-widget,
+                body.high-contrast .accessbit-widget *,
+                body.high-contrast .accessbit-widget-panel,
+                body.high-contrast .accessbit-widget-panel *,
+                body.high-contrast .accessbit-widget-icon,
+                body.high-contrast .accessbit-widget-icon *,
+                body.high-contrast #accessbit-widget,
+                body.high-contrast #accessbit-widget *,
+                body.high-contrast #accessbit-widget-panel,
+                body.high-contrast #accessbit-widget-panel *,
+                body.high-contrast #accessbit-widget-icon,
+                body.high-contrast #accessbit-widget-icon *,
+                body.high-contrast [data-ck-widget],
+                body.high-contrast [data-ck-widget] *,
+                body.high-contrast [class*="accessbit"],
+                body.high-contrast [class*="accessbit"] * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
     
             document.head.appendChild(style);
           
@@ -17812,7 +24639,83 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const style = document.createElement('style');
             style.id = 'accessbit-high-saturation-css';
-            style.textContent = `body.high-saturation main img,body.high-saturation main video,body.high-saturation main picture,body.high-saturation main canvas,body.high-saturation main svg,body.high-saturation section img,body.high-saturation section video,body.high-saturation section picture,body.high-saturation section canvas,body.high-saturation section svg,body.high-saturation article img,body.high-saturation article video,body.high-saturation article picture,body.high-saturation article canvas,body.high-saturation article svg{filter:saturate(2.3) contrast(1.1) brightness(1.05) !important;-webkit-filter:saturate(2.3) contrast(1.1) brightness(1.05) !important;}body.high-saturation nav,body.high-saturation nav *,body.high-saturation header,body.high-saturation header *,body.high-saturation .navbar,body.high-saturation .navbar *,body.high-saturation [role="navigation"],body.high-saturation [role="navigation"] *,body.high-saturation [class*="nav"],body.high-saturation [class*="nav"] *,body.high-saturation [class*="header"],body.high-saturation [class*="header"] *,body.high-saturation [class*="navbar"],body.high-saturation [class*="navbar"] *,body.high-saturation [data-sticky],body.high-saturation [data-sticky] *,body.high-saturation [data-fixed],body.high-saturation [data-fixed] *,body.high-saturation [style*="position:sticky"],body.high-saturation [style*="position:sticky"] *,body.high-saturation [style*="position:fixed"],body.high-saturation [style*="position:fixed"] *,body.high-saturation [style*="position:fixed"],body.high-saturation [style*="position:fixed"] *{filter:none !important;-webkit-filter:none !important;}body.high-saturation .accessbit-widget,body.high-saturation .accessbit-widget *,body.high-saturation .accessbit-widget-panel,body.high-saturation .accessbit-widget-panel *,body.high-saturation .accessbit-widget-icon,body.high-saturation .accessbit-widget-icon *,body.high-saturation #accessbit-widget,body.high-saturation #accessbit-widget *,body.high-saturation #accessbit-widget-panel,body.high-saturation #accessbit-widget-panel *,body.high-saturation #accessbit-widget-icon,body.high-saturation #accessbit-widget-icon *,body.high-saturation [data-ck-widget],body.high-saturation [data-ck-widget] *,body.high-saturation [class*="accessbit"],body.high-saturation [class*="accessbit"] *{filter:none !important;-webkit-filter:none !important;}`;
+            style.textContent = `
+                /* Simple High Saturation Mode - Only increase saturation, preserve everything else */
+                /* CRITICAL: Apply filters ONLY to media inside main content areas - NEVER to nav/header or their ancestors */
+                /* Dark/Light contrast work because they use color/background properties, NOT filters */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+                
+                /* Apply filter ONLY to media elements inside main content areas (main, section, article) */
+                /* These are guaranteed to not contain nav elements, preventing stacking context issues */
+                body.high-saturation main img,
+                body.high-saturation main video,
+                body.high-saturation main picture,
+                body.high-saturation main canvas,
+                body.high-saturation main svg,
+                body.high-saturation section img,
+                body.high-saturation section video,
+                body.high-saturation section picture,
+                body.high-saturation section canvas,
+                body.high-saturation section svg,
+                body.high-saturation article img,
+                body.high-saturation article video,
+                body.high-saturation article picture,
+                body.high-saturation article canvas,
+                body.high-saturation article svg {
+                    filter: saturate(2.3) contrast(1.1) brightness(1.05) !important;
+                    -webkit-filter: saturate(2.3) contrast(1.1) brightness(1.05) !important;
+                }
+                
+                /* CRITICAL: Ensure navigation elements and their children NEVER get filters */
+                body.high-saturation nav,
+                body.high-saturation nav *,
+                body.high-saturation header,
+                body.high-saturation header *,
+                body.high-saturation .navbar,
+                body.high-saturation .navbar *,
+                body.high-saturation [role="navigation"],
+                body.high-saturation [role="navigation"] *,
+                body.high-saturation [class*="nav"],
+                body.high-saturation [class*="nav"] *,
+                body.high-saturation [class*="header"],
+                body.high-saturation [class*="header"] *,
+                body.high-saturation [class*="navbar"],
+                body.high-saturation [class*="navbar"] *,
+                body.high-saturation [data-sticky],
+                body.high-saturation [data-sticky] *,
+                body.high-saturation [data-fixed],
+                body.high-saturation [data-fixed] *,
+                body.high-saturation [style*="position: sticky"],
+                body.high-saturation [style*="position: sticky"] *,
+                body.high-saturation [style*="position:fixed"],
+                body.high-saturation [style*="position:fixed"] *,
+                body.high-saturation [style*="position: fixed"],
+                body.high-saturation [style*="position: fixed"] * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Preserve accessibility widget from saturation filters */
+                body.high-saturation .accessbit-widget,
+                body.high-saturation .accessbit-widget *,
+                body.high-saturation .accessbit-widget-panel,
+                body.high-saturation .accessbit-widget-panel *,
+                body.high-saturation .accessbit-widget-icon,
+                body.high-saturation .accessbit-widget-icon *,
+                body.high-saturation #accessbit-widget,
+                body.high-saturation #accessbit-widget *,
+                body.high-saturation #accessbit-widget-panel,
+                body.high-saturation #accessbit-widget-panel *,
+                body.high-saturation #accessbit-widget-icon,
+                body.high-saturation #accessbit-widget-icon *,
+                body.high-saturation [data-ck-widget],
+                body.high-saturation [data-ck-widget] *,
+                body.high-saturation [class*="accessbit"],
+                body.high-saturation [class*="accessbit"] * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
             document.head.appendChild(style);
            
         }
@@ -17831,7 +24734,43 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const style = document.createElement('style');
             style.id = 'accessbit-low-saturation-css';
-            style.textContent = `body.low-saturation{filter:saturate(0.6) !important;-webkit-filter:saturate(0.6) !important;}body.low-saturation nav,body.low-saturation header,body.low-saturation .navbar,body.low-saturation [role="navigation"],body.low-saturation [class*="nav"],body.low-saturation [class*="header"],body.low-saturation [class*="navbar"],body.low-saturation [data-sticky],body.low-saturation [data-fixed],body.low-saturation [style*="position:sticky"],body.low-saturation [style*="position:fixed"],body.low-saturation [style*="position:fixed"]{filter:none !important;-webkit-filter:none !important;}body.low-saturation .accessbit-widget,body.low-saturation .accessbit-widget-panel,body.low-saturation .accessbit-widget-icon,body.low-saturation #accessbit-widget,body.low-saturation #accessbit-widget-panel,body.low-saturation #accessbit-widget-icon,body.low-saturation [data-ck-widget],body.low-saturation [class*="accessbit"]{filter:none !important;-webkit-filter:none !important;}`;
+            style.textContent = `
+                /* Low Saturation Mode - Simple filter overlay approach */
+                body.low-saturation {
+                    filter: saturate(0.6) !important;
+                    -webkit-filter: saturate(0.6) !important;
+                }
+                
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.low-saturation nav,
+                body.low-saturation header,
+                body.low-saturation .navbar,
+                body.low-saturation [role="navigation"],
+                body.low-saturation [class*="nav"],
+                body.low-saturation [class*="header"],
+                body.low-saturation [class*="navbar"],
+                body.low-saturation [data-sticky],
+                body.low-saturation [data-fixed],
+                body.low-saturation [style*="position: sticky"],
+                body.low-saturation [style*="position:fixed"],
+                body.low-saturation [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Preserve accessibility widget from low saturation filters */
+                body.low-saturation .accessbit-widget,
+                body.low-saturation .accessbit-widget-panel,
+                body.low-saturation .accessbit-widget-icon,
+                body.low-saturation #accessbit-widget,
+                body.low-saturation #accessbit-widget-panel,
+                body.low-saturation #accessbit-widget-icon,
+                body.low-saturation [data-ck-widget],
+                body.low-saturation [class*="accessbit"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
             document.head.appendChild(style);
         }
 
@@ -17860,7 +24799,43 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             style.id = 'accessbit-monochrome-styles';
     
-            style.textContent = `body.monochrome{filter:grayscale(100%) !important;-webkit-filter:grayscale(100%) !important;}body.monochrome nav,body.monochrome header,body.monochrome .navbar,body.monochrome [role="navigation"],body.monochrome [class*="nav"],body.monochrome [class*="header"],body.monochrome [class*="navbar"],body.monochrome [data-sticky],body.monochrome [data-fixed],body.monochrome [style*="position:sticky"],body.monochrome [style*="position:fixed"],body.monochrome [style*="position:fixed"]{filter:none !important;-webkit-filter:none !important;}body.monochrome .accessbit-widget,body.monochrome .accessbit-widget-panel,body.monochrome .accessbit-widget-icon,body.monochrome #accessbit-widget,body.monochrome #accessbit-widget-panel,body.monochrome #accessbit-widget-icon,body.monochrome [data-ck-widget],body.monochrome [class*="accessbit"]{filter:none !important;-webkit-filter:none !important;}`;
+            style.textContent = `
+                /* Monochrome effect - Simple filter overlay approach */
+                body.monochrome {
+                    filter: grayscale(100%) !important;
+                    -webkit-filter: grayscale(100%) !important;
+                }
+                
+                /* CRITICAL: Exclude navigation elements from filter to preserve sticky/fixed positioning */
+                body.monochrome nav,
+                body.monochrome header,
+                body.monochrome .navbar,
+                body.monochrome [role="navigation"],
+                body.monochrome [class*="nav"],
+                body.monochrome [class*="header"],
+                body.monochrome [class*="navbar"],
+                body.monochrome [data-sticky],
+                body.monochrome [data-fixed],
+                body.monochrome [style*="position: sticky"],
+                body.monochrome [style*="position:fixed"],
+                body.monochrome [style*="position: fixed"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Preserve accessibility widget from monochrome filters */
+                body.monochrome .accessbit-widget,
+                body.monochrome .accessbit-widget-panel,
+                body.monochrome .accessbit-widget-icon,
+                body.monochrome #accessbit-widget,
+                body.monochrome #accessbit-widget-panel,
+                body.monochrome #accessbit-widget-icon,
+                body.monochrome [data-ck-widget],
+                body.monochrome [class*="accessbit"] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
     
             document.head.appendChild(style);
     
@@ -18012,7 +24987,457 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const style = document.createElement('style');
             style.id = 'accessbit-dark-contrast-css';
-            style.textContent = `body.dark-contrast{background:#000000 !important;color:#ffffff !important;}body.dark-contrast p,body.dark-contrast h1,body.dark-contrast h2,body.dark-contrast h3,body.dark-contrast h4,body.dark-contrast h5,body.dark-contrast h6,body.dark-contrast span,body.dark-contrast li,body.dark-contrast td,body.dark-contrast th,body.dark-contrast label,body.dark-contrast small,body.dark-contrast em,body.dark-contrast strong,body.dark-contrast i,body.dark-contrast b,body.dark-contrast a{color:#ffffff !important;}body.dark-contrast main,body.dark-contrast section,body.dark-contrast article{background:#000000 !important;}body.dark-contrast .container,body.dark-contrast .wrapper,body.dark-contrast .content,body.dark-contrast .page-wrapper,body.dark-contrast .smooth-content,body.dark-contrast .smooth-wrapper,body.dark-contrast .padding-global,body.dark-contrast .container-large,body.dark-contrast .section-hero,body.dark-contrast .portfolio-hero,body.dark-contrast .nav_component,body.dark-contrast .nav_container,body.dark-contrast .footer,body.dark-contrast .header,body.dark-contrast .navbar,body.dark-contrast .navigation,body.dark-contrast .w-nav,body.dark-contrast .w-dropdown,body.dark-contrast .w-button,body.dark-contrast .w-embed,body.dark-contrast .w-background-video,body.dark-contrast .w-slider,body.dark-contrast .w-tabs,body.dark-contrast .w-accordion,body.dark-contrast .w-lightbox,body.dark-contrast .w-richtext,body.dark-contrast .w-form,body.dark-contrast .w-input,body.dark-contrast .w-select,body.dark-contrast .w-textarea,body.dark-contrast .w-checkbox,body.dark-contrast .w-radio{background:inherit !important;color:inherit !important;}body.dark-contrast div{background:transparent !important;}body.dark-contrast div[class*="text"],body.dark-contrast div[class*="content"],body.dark-contrast div[class*="description"],body.dark-contrast div[class*="paragraph"],body.dark-contrast div[class*="heading"],body.dark-contrast div[class*="title"],body.dark-contrast div[class*="subtitle"],body.dark-contrast div[class*="caption"],body.dark-contrast div[class*="label"]{background:#000000 !important;color:#ffffff !important;}body.dark-contrast .service-card,body.dark-contrast .color-box,body.dark-contrast .test-block{background:#000000 !important;border:2px solid #ffffff !important;color:#ffffff !important;}body.dark-contrast .service-card *,body.dark-contrast .color-box *,body.dark-contrast .test-block *{background:#000000 !important;color:#ffffff !important;}body.dark-contrast input,body.dark-contrast textarea,body.dark-contrast select,body.dark-contrast button,body.dark-contrast .btn,body.dark-contrast .button,body.dark-contrast .form-control{background:#000000 !important;color:#ffffff !important;border:1px solid #ffffff !important;}body.dark-contrast input::placeholder,body.dark-contrast textarea::placeholder{color:#cccccc !important;}body.dark-contrast .form-group,body.dark-contrast .contact-form,body.dark-contrast .test-form{background:#000000 !important;color:#ffffff !important;}body.dark-contrast header,body.dark-contrast nav,body.dark-contrast .header,body.dark-contrast .navbar,body.dark-contrast .navigation,body.dark-contrast .logo,body.dark-contrast .menu,body.dark-contrast .nav-menu,body.dark-contrast .card,body.dark-contrast .modal,body.dark-contrast .dropdown,body.dark-contrast .tooltip,body.dark-contrast .badge,body.dark-contrast .alert{color:inherit !important;background:inherit !important;}body.dark-contrast [class*="flip"],body.dark-contrast [class*="card-flip"],body.dark-contrast [class*="flip-card"],body.dark-contrast [class*="flip-container"],body.dark-contrast [class*="flip-inner"],body.dark-contrast [class*="flip-front"],body.dark-contrast [class*="flip-back"],body.dark-contrast [class*="flip-hover"],body.dark-contrast [class*="card-hover"],body.dark-contrast [class*="hover-flip"],body.dark-contrast [class*="rotate"],body.dark-contrast [class*="transform"],body.dark-contrast [class*="perspective"],body.dark-contrast [class*="3d"],body.dark-contrast [class*="three-d"],body.dark-contrast .logo,body.dark-contrast [class*="logo"],body.dark-contrast .brand,body.dark-contrast [class*="brand"],body.dark-contrast .emoji,body.dark-contrast [class*="emoji"],body.dark-contrast .symbol,body.dark-contrast [class*="symbol"],body.dark-contrast .glyph,body.dark-contrast [class*="glyph"],body.dark-contrast .pictogram,body.dark-contrast [class*="pictogram"],body.dark-contrast .decoration,body.dark-contrast [class*="decoration"],body.dark-contrast .ornament,body.dark-contrast [class*="ornament"],body.dark-contrast .pattern,body.dark-contrast [class*="pattern"],body.dark-contrast .texture,body.dark-contrast [class*="texture"],body.dark-contrast .overlay,body.dark-contrast [class*="overlay"],body.dark-contrast .background,body.dark-contrast [class*="background"],body.dark-contrast .hero,body.dark-contrast [class*="hero"],body.dark-contrast .banner,body.dark-contrast [class*="banner"],body.dark-contrast .visual,body.dark-contrast [class*="visual"],body.dark-contrast .graphic,body.dark-contrast [class*="graphic"],body.dark-contrast .illustration,body.dark-contrast [class*="illustration"],body.dark-contrast .photo,body.dark-contrast [class*="photo"],body.dark-contrast .picture,body.dark-contrast [class*="picture"],body.dark-contrast .media,body.dark-contrast [class*="media"],body.dark-contrast .asset,body.dark-contrast [class*="asset"],body.dark-contrast .element,body.dark-contrast [class*="element"],body.dark-contrast .component,body.dark-contrast [class*="component"],body.dark-contrast .widget,body.dark-contrast [class*="widget"],body.dark-contrast .module,body.dark-contrast [class*="module"],body.dark-contrast .block,body.dark-contrast [class*="block"],body.dark-contrast .section,body.dark-contrast [class*="section"],body.dark-contrast .area,body.dark-contrast [class*="area"],body.dark-contrast .zone,body.dark-contrast [class*="zone"],body.dark-contrast .region,body.dark-contrast [class*="region"],body.dark-contrast .space,body.dark-contrast [class*="space"],body.dark-contrast .container,body.dark-contrast [class*="container"],body.dark-contrast .wrapper,body.dark-contrast [class*="wrapper"],body.dark-contrast .holder,body.dark-contrast [class*="holder"],body.dark-contrast .box,body.dark-contrast [class*="box"],body.dark-contrast .panel,body.dark-contrast [class*="panel"],body.dark-contrast .frame,body.dark-contrast [class*="frame"],body.dark-contrast .border,body.dark-contrast [class*="border"],body.dark-contrast .outline,body.dark-contrast [class*="outline"],body.dark-contrast .stroke,body.dark-contrast [class*="stroke"],body.dark-contrast .line,body.dark-contrast [class*="line"],body.dark-contrast .divider,body.dark-contrast [class*="divider"],body.dark-contrast .separator,body.dark-contrast [class*="separator"],body.dark-contrast .spacer,body.dark-contrast [class*="spacer"],body.dark-contrast .gap,body.dark-contrast [class*="gap"],body.dark-contrast .margin,body.dark-contrast [class*="margin"],body.dark-contrast .padding,body.dark-contrast [class*="padding"],body.dark-contrast .spacing,body.dark-contrast [class*="spacing"],body.dark-contrast .layout,body.dark-contrast [class*="layout"],body.dark-contrast .grid,body.dark-contrast [class*="grid"],body.dark-contrast .flex,body.dark-contrast [class*="flex"],body.dark-contrast .row,body.dark-contrast [class*="row"],body.dark-contrast .col,body.dark-contrast [class*="col"],body.dark-contrast .column,body.dark-contrast [class*="column"],body.dark-contrast .cell,body.dark-contrast [class*="cell"],body.dark-contrast .item,body.dark-contrast [class*="item"],body.dark-contrast .entry,body.dark-contrast [class*="entry"],body.dark-contrast .node,body.dark-contrast [class*="node"],body.dark-contrast .leaf,body.dark-contrast [class*="leaf"],body.dark-contrast .branch,body.dark-contrast [class*="branch"],body.dark-contrast .root,body.dark-contrast [class*="root"],body.dark-contrast .parent,body.dark-contrast [class*="parent"],body.dark-contrast .child,body.dark-contrast [class*="child"],body.dark-contrast .sibling,body.dark-contrast [class*="sibling"],body.dark-contrast .ancestor,body.dark-contrast [class*="ancestor"],body.dark-contrast .descendant,body.dark-contrast [class*="descendant"],body.dark-contrast .relative,body.dark-contrast [class*="relative"],body.dark-contrast .absolute,body.dark-contrast [class*="absolute"],body.dark-contrast .fixed,body.dark-contrast [class*="fixed"],body.dark-contrast .sticky,body.dark-contrast [class*="sticky"],body.dark-contrast .static,body.dark-contrast [class*="static"],body.dark-contrast .relative,body.dark-contrast [class*="relative"],body.dark-contrast .absolute,body.dark-contrast [class*="absolute"],body.dark-contrast .fixed,body.dark-contrast [class*="fixed"],body.dark-contrast .sticky,body.dark-contrast [class*="sticky"],body.dark-contrast .static,body.dark-contrast [class*="static"]{color:inherit !important;background:inherit !important;}body.dark-contrast .modal,body.dark-contrast .dropdown,body.dark-contrast .tooltip,body.dark-contrast .badge,body.dark-contrast .alert{color:inherit !important;background:inherit !important;}body.dark-contrast [class*="flip"] *,body.dark-contrast [class*="card-flip"] *,body.dark-contrast [class*="flip-card"] *,body.dark-contrast [class*="flip-container"] *,body.dark-contrast [class*="flip-inner"] *,body.dark-contrast [class*="flip-front"] *,body.dark-contrast [class*="flip-back"] *,body.dark-contrast [class*="flip-hover"] *,body.dark-contrast [class*="card-hover"] *,body.dark-contrast [class*="hover-flip"] *{color:#ffffff !important;background:transparent !important;}body.dark-contrast [class*="flip"],body.dark-contrast [class*="card-flip"],body.dark-contrast [class*="flip-card"],body.dark-contrast [class*="flip-container"],body.dark-contrast [class*="flip-inner"]{background:inherit !important;color:inherit !important;}.dark-contrast .accessbit-widget-panel,.dark-contrast .accessbit-widget-icon,.dark-contrast #accessbit-widget-panel,.dark-contrast #accessbit-widget-icon{background:#1a1a1a !important;color:#ffffff !important;border:2px solid #ffffff !important;}.dark-contrast .accessbit-widget-panel *,.dark-contrast .accessbit-widget-icon *,.dark-contrast #accessbit-widget-panel *,.dark-contrast #accessbit-widget-icon *{background:inherit !important;color:inherit !important;}.dark-contrast .accessbit-widget-panel p,.dark-contrast .accessbit-widget-panel h1,.dark-contrast .accessbit-widget-panel h2,.dark-contrast .accessbit-widget-panel h3,.dark-contrast .accessbit-widget-panel h4,.dark-contrast .accessbit-widget-panel h5,.dark-contrast .accessbit-widget-panel h6,.dark-contrast .accessbit-widget-panel span,.dark-contrast .accessbit-widget-panel div,.dark-contrast .accessbit-widget-panel li,.dark-contrast .accessbit-widget-panel td,.dark-contrast .accessbit-widget-panel th,.dark-contrast .accessbit-widget-panel label,.dark-contrast .accessbit-widget-panel small,.dark-contrast .accessbit-widget-panel em,.dark-contrast .accessbit-widget-panel strong,.dark-contrast .accessbit-widget-panel i,.dark-contrast .accessbit-widget-panel b,.dark-contrast .accessbit-widget-panel a{color:#ffffff !important;}.dark-contrast .accessbit-widget-panel .panel-header{background:#2a2a2a !important;color:#ffffff !important;border-bottom:1px solid #ffffff !important;}.dark-contrast .accessbit-widget-panel .action-btn{background:#2a2a2a !important;color:#ffffff !important;border:1px solid #ffffff !important;}.dark-contrast .accessbit-widget-panel .action-btn:hover{background:#3a3a3a !important;color:#ffffff !important;}.dark-contrast .accessbit-widget-panel .panel-footer{background:#2a2a2a !important;color:#ffffff !important;border-top:1px solid #ffffff !important;}.dark-contrast .accessbit-widget-panel .toggle-switch{background:#2a2a2a !important;border:1px solid #ffffff !important;}.dark-contrast .accessbit-widget-panel .toggle-switch .slider{background:#ffffff !important;}.dark-contrast .accessbit-widget-panel .toggle-switch input:checked+.slider{background:#6366f1 !important;}.dark-contrast .accessbit-widget-panel .profile-item{background:#2a2a2a !important;color:#ffffff !important;border:1px solid #ffffff !important;margin:5px 0 !important;}.dark-contrast .accessbit-widget-panel .profile-item:hover{background:#3a3a3a !important;}`;
+            style.textContent = `
+                /* Contrast Modes */
+                body.dark-contrast {
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                }
+
+                /* Apply dark contrast to text elements only - no background changes */
+                body.dark-contrast p,
+                body.dark-contrast h1,
+                body.dark-contrast h2,
+                body.dark-contrast h3,
+                body.dark-contrast h4,
+                body.dark-contrast h5,
+                body.dark-contrast h6,
+                body.dark-contrast span,
+                body.dark-contrast li,
+                body.dark-contrast td,
+                body.dark-contrast th,
+                body.dark-contrast label,
+                body.dark-contrast small,
+                body.dark-contrast em,
+                body.dark-contrast strong,
+                body.dark-contrast i,
+                body.dark-contrast b,
+                body.dark-contrast a {
+                    color: #ffffff !important;
+                }
+
+                /* Apply dark background to main content areas only */
+                body.dark-contrast main,
+                body.dark-contrast section,
+                body.dark-contrast article {
+                    background: #000000 !important;
+                }
+
+                /* Exclude layout containers and Webflow classes from dark backgrounds */
+                body.dark-contrast .container,
+                body.dark-contrast .wrapper,
+                body.dark-contrast .content,
+                body.dark-contrast .page-wrapper,
+                body.dark-contrast .smooth-content,
+                body.dark-contrast .smooth-wrapper,
+                body.dark-contrast .padding-global,
+                body.dark-contrast .container-large,
+                body.dark-contrast .section-hero,
+                body.dark-contrast .portfolio-hero,
+                body.dark-contrast .nav_component,
+                body.dark-contrast .nav_container,
+                body.dark-contrast .footer,
+                body.dark-contrast .header,
+                body.dark-contrast .navbar,
+                body.dark-contrast .navigation,
+                body.dark-contrast .w-nav,
+                body.dark-contrast .w-dropdown,
+                body.dark-contrast .w-button,
+                body.dark-contrast .w-embed,
+                body.dark-contrast .w-background-video,
+                body.dark-contrast .w-slider,
+                body.dark-contrast .w-tabs,
+                body.dark-contrast .w-accordion,
+                body.dark-contrast .w-lightbox,
+                body.dark-contrast .w-richtext,
+                body.dark-contrast .w-form,
+                body.dark-contrast .w-input,
+                body.dark-contrast .w-select,
+                body.dark-contrast .w-textarea,
+                body.dark-contrast .w-checkbox,
+                body.dark-contrast .w-radio {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+
+                /* Prevent all divs from getting black backgrounds by default */
+                body.dark-contrast div {
+                    background: transparent !important;
+                }
+
+                /* Only apply dark backgrounds to specific content divs */
+                body.dark-contrast div[class*="text"],
+                body.dark-contrast div[class*="content"],
+                body.dark-contrast div[class*="description"],
+                body.dark-contrast div[class*="paragraph"],
+                body.dark-contrast div[class*="heading"],
+                body.dark-contrast div[class*="title"],
+                body.dark-contrast div[class*="subtitle"],
+                body.dark-contrast div[class*="caption"],
+                body.dark-contrast div[class*="label"] {
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                }
+
+                /* Style ONLY actual service cards and specific content boxes in dark contrast */
+                body.dark-contrast .service-card,
+                body.dark-contrast .color-box,
+                body.dark-contrast .test-block {
+                    background: #000000 !important;
+                    border: 2px solid #ffffff !important;
+                    color: #ffffff !important;
+                }
+
+                /* Ensure text inside specific cards is white */
+                body.dark-contrast .service-card *,
+                body.dark-contrast .color-box *,
+                body.dark-contrast .test-block * {
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                }
+
+                /* Style form elements for dark contrast */
+                body.dark-contrast input,
+                body.dark-contrast textarea,
+                body.dark-contrast select,
+                body.dark-contrast button,
+                body.dark-contrast .btn,
+                body.dark-contrast .button,
+                body.dark-contrast .form-control {
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                }
+
+                /* Style form placeholders for dark contrast */
+                body.dark-contrast input::placeholder,
+                body.dark-contrast textarea::placeholder {
+                    color: #cccccc !important;
+                }
+
+                /* Style form groups and containers for dark contrast */
+                body.dark-contrast .form-group,
+                body.dark-contrast .contact-form,
+                body.dark-contrast .test-form {
+                    background: #000000 !important;
+                    color: #ffffff !important;
+                }
+
+                /* Exclude UI elements from dark contrast text changes */
+                body.dark-contrast header,
+                body.dark-contrast nav,
+                body.dark-contrast .header,
+                body.dark-contrast .navbar,
+                body.dark-contrast .navigation,
+                body.dark-contrast .logo,
+                body.dark-contrast .menu,
+                body.dark-contrast .nav-menu,
+                body.dark-contrast .card,
+                body.dark-contrast .modal,
+                body.dark-contrast .dropdown,
+                body.dark-contrast .tooltip,
+                body.dark-contrast .badge,
+                body.dark-contrast .alert { color: inherit !important; background: inherit !important; }
+                
+                /* Exclude card flip animations and their content */
+                body.dark-contrast [class*="flip"],
+                body.dark-contrast [class*="card-flip"],
+                body.dark-contrast [class*="flip-card"],
+                body.dark-contrast [class*="flip-container"],
+                body.dark-contrast [class*="flip-inner"],
+                body.dark-contrast [class*="flip-front"],
+                body.dark-contrast [class*="flip-back"],
+                body.dark-contrast [class*="flip-hover"],
+                body.dark-contrast [class*="card-hover"],
+                body.dark-contrast [class*="hover-flip"],
+                body.dark-contrast [class*="rotate"],
+                body.dark-contrast [class*="transform"],
+                body.dark-contrast [class*="perspective"],
+                body.dark-contrast [class*="3d"],
+                body.dark-contrast [class*="three-d"],
+                body.dark-contrast .logo,
+                body.dark-contrast [class*="logo"],
+                body.dark-contrast .brand,
+                body.dark-contrast [class*="brand"],
+                body.dark-contrast .emoji,
+                body.dark-contrast [class*="emoji"],
+                body.dark-contrast .symbol,
+                body.dark-contrast [class*="symbol"],
+                body.dark-contrast .glyph,
+                body.dark-contrast [class*="glyph"],
+                body.dark-contrast .pictogram,
+                body.dark-contrast [class*="pictogram"],
+                body.dark-contrast .decoration,
+                body.dark-contrast [class*="decoration"],
+                body.dark-contrast .ornament,
+                body.dark-contrast [class*="ornament"],
+                body.dark-contrast .pattern,
+                body.dark-contrast [class*="pattern"],
+                body.dark-contrast .texture,
+                body.dark-contrast [class*="texture"],
+                body.dark-contrast .overlay,
+                body.dark-contrast [class*="overlay"],
+                body.dark-contrast .background,
+                body.dark-contrast [class*="background"],
+                body.dark-contrast .hero,
+                body.dark-contrast [class*="hero"],
+                body.dark-contrast .banner,
+                body.dark-contrast [class*="banner"],
+                body.dark-contrast .visual,
+                body.dark-contrast [class*="visual"],
+                body.dark-contrast .graphic,
+                body.dark-contrast [class*="graphic"],
+                body.dark-contrast .illustration,
+                body.dark-contrast [class*="illustration"],
+                body.dark-contrast .photo,
+                body.dark-contrast [class*="photo"],
+                body.dark-contrast .picture,
+                body.dark-contrast [class*="picture"],
+                body.dark-contrast .media,
+                body.dark-contrast [class*="media"],
+                body.dark-contrast .asset,
+                body.dark-contrast [class*="asset"],
+                body.dark-contrast .element,
+                body.dark-contrast [class*="element"],
+                body.dark-contrast .component,
+                body.dark-contrast [class*="component"],
+                body.dark-contrast .widget,
+                body.dark-contrast [class*="widget"],
+                body.dark-contrast .module,
+                body.dark-contrast [class*="module"],
+                body.dark-contrast .block,
+                body.dark-contrast [class*="block"],
+                body.dark-contrast .section,
+                body.dark-contrast [class*="section"],
+                body.dark-contrast .area,
+                body.dark-contrast [class*="area"],
+                body.dark-contrast .zone,
+                body.dark-contrast [class*="zone"],
+                body.dark-contrast .region,
+                body.dark-contrast [class*="region"],
+                body.dark-contrast .space,
+                body.dark-contrast [class*="space"],
+                body.dark-contrast .container,
+                body.dark-contrast [class*="container"],
+                body.dark-contrast .wrapper,
+                body.dark-contrast [class*="wrapper"],
+                body.dark-contrast .holder,
+                body.dark-contrast [class*="holder"],
+                body.dark-contrast .box,
+                body.dark-contrast [class*="box"],
+                body.dark-contrast .panel,
+                body.dark-contrast [class*="panel"],
+                body.dark-contrast .frame,
+                body.dark-contrast [class*="frame"],
+                body.dark-contrast .border,
+                body.dark-contrast [class*="border"],
+                body.dark-contrast .outline,
+                body.dark-contrast [class*="outline"],
+                body.dark-contrast .stroke,
+                body.dark-contrast [class*="stroke"],
+                body.dark-contrast .line,
+                body.dark-contrast [class*="line"],
+                body.dark-contrast .divider,
+                body.dark-contrast [class*="divider"],
+                body.dark-contrast .separator,
+                body.dark-contrast [class*="separator"],
+                body.dark-contrast .spacer,
+                body.dark-contrast [class*="spacer"],
+                body.dark-contrast .gap,
+                body.dark-contrast [class*="gap"],
+                body.dark-contrast .margin,
+                body.dark-contrast [class*="margin"],
+                body.dark-contrast .padding,
+                body.dark-contrast [class*="padding"],
+                body.dark-contrast .spacing,
+                body.dark-contrast [class*="spacing"],
+                body.dark-contrast .layout,
+                body.dark-contrast [class*="layout"],
+                body.dark-contrast .grid,
+                body.dark-contrast [class*="grid"],
+                body.dark-contrast .flex,
+                body.dark-contrast [class*="flex"],
+                body.dark-contrast .row,
+                body.dark-contrast [class*="row"],
+                body.dark-contrast .col,
+                body.dark-contrast [class*="col"],
+                body.dark-contrast .column,
+                body.dark-contrast [class*="column"],
+                body.dark-contrast .cell,
+                body.dark-contrast [class*="cell"],
+                body.dark-contrast .item,
+                body.dark-contrast [class*="item"],
+                body.dark-contrast .entry,
+                body.dark-contrast [class*="entry"],
+                body.dark-contrast .node,
+                body.dark-contrast [class*="node"],
+                body.dark-contrast .leaf,
+                body.dark-contrast [class*="leaf"],
+                body.dark-contrast .branch,
+                body.dark-contrast [class*="branch"],
+                body.dark-contrast .root,
+                body.dark-contrast [class*="root"],
+                body.dark-contrast .parent,
+                body.dark-contrast [class*="parent"],
+                body.dark-contrast .child,
+                body.dark-contrast [class*="child"],
+                body.dark-contrast .sibling,
+                body.dark-contrast [class*="sibling"],
+                body.dark-contrast .ancestor,
+                body.dark-contrast [class*="ancestor"],
+                body.dark-contrast .descendant,
+                body.dark-contrast [class*="descendant"],
+                body.dark-contrast .relative,
+                body.dark-contrast [class*="relative"],
+                body.dark-contrast .absolute,
+                body.dark-contrast [class*="absolute"],
+                body.dark-contrast .fixed,
+                body.dark-contrast [class*="fixed"],
+                body.dark-contrast .sticky,
+                body.dark-contrast [class*="sticky"],
+                body.dark-contrast .static,
+                body.dark-contrast [class*="static"],
+                body.dark-contrast .relative,
+                body.dark-contrast [class*="relative"],
+                body.dark-contrast .absolute,
+                body.dark-contrast [class*="absolute"],
+                body.dark-contrast .fixed,
+                body.dark-contrast [class*="fixed"],
+                body.dark-contrast .sticky,
+                body.dark-contrast [class*="sticky"],
+                body.dark-contrast .static,
+                body.dark-contrast [class*="static"] {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+                
+                body.dark-contrast .modal,
+                body.dark-contrast .dropdown,
+                body.dark-contrast .tooltip,
+                body.dark-contrast .badge,
+                body.dark-contrast .alert {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+                
+                /* Special styling for card flip animations to ensure text visibility */
+                body.dark-contrast [class*="flip"] *,
+                body.dark-contrast [class*="card-flip"] *,
+                body.dark-contrast [class*="flip-card"] *,
+                body.dark-contrast [class*="flip-container"] *,
+                body.dark-contrast [class*="flip-inner"] *,
+                body.dark-contrast [class*="flip-front"] *,
+                body.dark-contrast [class*="flip-back"] *,
+                body.dark-contrast [class*="flip-hover"] *,
+                body.dark-contrast [class*="card-hover"] *,
+                body.dark-contrast [class*="hover-flip"] * {
+                    color: #ffffff !important;
+                    background: transparent !important;
+                }
+                
+                /* Ensure card flip containers maintain their original styling */
+                body.dark-contrast [class*="flip"],
+                body.dark-contrast [class*="card-flip"],
+                body.dark-contrast [class*="flip-card"],
+                body.dark-contrast [class*="flip-container"],
+                body.dark-contrast [class*="flip-inner"] {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+
+                /* Style accessibility widget for dark contrast */
+                .dark-contrast .accessbit-widget-panel,
+                .dark-contrast .accessbit-widget-icon,
+                .dark-contrast #accessbit-widget-panel,
+                .dark-contrast #accessbit-widget-icon {
+                    background: #1a1a1a !important;
+                    color: #ffffff !important;
+                    border: 2px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessbit-widget-panel *,
+                .dark-contrast .accessbit-widget-icon *,
+                .dark-contrast #accessbit-widget-panel *,
+                .dark-contrast #accessbit-widget-icon * {
+                    background: inherit !important;
+                    color: inherit !important;
+                }
+
+                /* Override text color for accessibility widget elements */
+                .dark-contrast .accessbit-widget-panel p,
+                .dark-contrast .accessbit-widget-panel h1,
+                .dark-contrast .accessbit-widget-panel h2,
+                .dark-contrast .accessbit-widget-panel h3,
+                .dark-contrast .accessbit-widget-panel h4,
+                .dark-contrast .accessbit-widget-panel h5,
+                .dark-contrast .accessbit-widget-panel h6,
+                .dark-contrast .accessbit-widget-panel span,
+                .dark-contrast .accessbit-widget-panel div,
+                .dark-contrast .accessbit-widget-panel li,
+                .dark-contrast .accessbit-widget-panel td,
+                .dark-contrast .accessbit-widget-panel th,
+                .dark-contrast .accessbit-widget-panel label,
+                .dark-contrast .accessbit-widget-panel small,
+                .dark-contrast .accessbit-widget-panel em,
+                .dark-contrast .accessbit-widget-panel strong,
+                .dark-contrast .accessbit-widget-panel i,
+                .dark-contrast .accessbit-widget-panel b,
+                .dark-contrast .accessbit-widget-panel a {
+                    color: #ffffff !important;
+                }
+
+                /* Style accessibility panel header for dark contrast */
+                .dark-contrast .accessbit-widget-panel .panel-header {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border-bottom: 1px solid #ffffff !important;
+                }
+
+                /* Style accessibility panel buttons for dark contrast */
+                .dark-contrast .accessbit-widget-panel .action-btn {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessbit-widget-panel .action-btn:hover {
+                    background: #3a3a3a !important;
+                    color: #ffffff !important;
+                }
+
+                /* Style accessibility panel footer for dark contrast */
+                .dark-contrast .accessbit-widget-panel .panel-footer {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border-top: 1px solid #ffffff !important;
+                }
+
+                /* Style toggle switches for dark contrast */
+                .dark-contrast .accessbit-widget-panel .toggle-switch {
+                    background: #2a2a2a !important;
+                    border: 1px solid #ffffff !important;
+                }
+
+                .dark-contrast .accessbit-widget-panel .toggle-switch .slider {
+                    background: #ffffff !important;
+                }
+
+                .dark-contrast .accessbit-widget-panel .toggle-switch input:checked + .slider {
+                    background: #6366f1 !important;
+                }
+
+                /* Style profile items for dark contrast */
+                .dark-contrast .accessbit-widget-panel .profile-item {
+                    background: #2a2a2a !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                    margin: 5px 0 !important;
+                }
+
+                .dark-contrast .accessbit-widget-panel .profile-item:hover {
+                    background: #3a3a3a !important;
+                }
+            `;
             document.head.appendChild(style);
         }
 
@@ -18030,7 +25455,290 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             const style = document.createElement('style');
             style.id = 'accessbit-light-contrast-css';
-            style.textContent = `body.light-contrast{background:#ffffff !important;color:#000000 !important;filter:brightness(1.01) contrast(1.01) !important;}body.light-contrast p,body.light-contrast h1,body.light-contrast h2,body.light-contrast h3,body.light-contrast h4,body.light-contrast h5,body.light-contrast h6,body.light-contrast span,body.light-contrast div,body.light-contrast li,body.light-contrast td,body.light-contrast th,body.light-contrast label,body.light-contrast small,body.light-contrast em,body.light-contrast strong,body.light-contrast i,body.light-contrast b,body.light-contrast a{color:#000000 !important;}body.light-contrast #accessbit-widget-container,body.light-contrast .accessbit-widget,body.light-contrast #accessbit-widget,body.light-contrast .accessbit-widget-panel,body.light-contrast #accessbit-widget-icon{filter:none !important;}body.light-contrast *[style*="background-color:#000"],body.light-contrast *[style*="background-color:#000"],body.light-contrast *[style*="background-color:#000000"],body.light-contrast *[style*="background-color:#000000"],body.light-contrast *[style*="background:#000"],body.light-contrast *[style*="background:#000"],body.light-contrast *[style*="background:#000000"],body.light-contrast *[style*="background:#000000"],body.light-contrast *[style*="color:#000"],body.light-contrast *[style*="color:#000"],body.light-contrast *[style*="color:#000000"],body.light-contrast *[style*="color:#000000"]{background:#ffffff !important;color:#000000 !important;}body.light-contrast .dark,body.light-contrast .dark-theme,body.light-contrast .dark-mode,body.light-contrast .night-mode,body.light-contrast .black,body.light-contrast .bg-dark,body.light-contrast .bg-black,body.light-contrast [class*="dark"],body.light-contrast [class*="black"],body.light-contrast [class*="night"]{background:#ffffff !important;color:#000000 !important;}body.light-contrast .content,body.light-contrast .container,body.light-contrast .wrapper,body.light-contrast .section,body.light-contrast .article,body.light-contrast .main,body.light-contrast .page,body.light-contrast .body,body.light-contrast .app,body.light-contrast .root{background:#ffffff !important;}body.light-contrast main,body.light-contrast section,body.light-contrast article,body.light-contrast .content,body.light-contrast .container,body.light-contrast .wrapper{background:#ffffff !important;}body.light-contrast .service-card,body.light-contrast .color-box,body.light-contrast .test-block{background:#ffffff !important;border:2px solid #000000 !important;color:#000000 !important;}body.light-contrast .service-card *,body.light-contrast .color-box *,body.light-contrast .test-block *{color:#000000 !important;}body.light-contrast .card,body.light-contrast .service-card,body.light-contrast .color-box,body.light-contrast .test-block,body.light-contrast .bg-blue,body.light-contrast .bg-red,body.light-contrast .bg-green,body.light-contrast .bg-yellow,body.light-contrast .bg-purple,body.light-contrast .bg-orange,body.light-contrast .bg-pink,body.light-contrast .bg-gray,body.light-contrast .bg-dark,body.light-contrast .bg-light,body.light-contrast [class*="bg-"],body.light-contrast [class*="background"],body.light-contrast [class*="color-"],body.light-contrast [style*="background-color"],body.light-contrast [style*="background:"]{background:#ffffff !important;color:#000000 !important;}body.light-contrast .card *,body.light-contrast .service-card *,body.light-contrast .color-box *,body.light-contrast .test-block *,body.light-contrast .bg-blue *,body.light-contrast .bg-red *,body.light-contrast .bg-green *,body.light-contrast .bg-yellow *,body.light-contrast .bg-purple *,body.light-contrast .bg-orange *,body.light-contrast .bg-pink *,body.light-contrast .bg-gray *,body.light-contrast .bg-dark *,body.light-contrast .bg-light *,body.light-contrast [class*="bg-"] *,body.light-contrast [class*="background"] *,body.light-contrast [class*="color-"] *,body.light-contrast [style*="background-color"] *,body.light-contrast [style*="background:"] *{color:#000000 !important;}body.light-contrast header,body.light-contrast nav,body.light-contrast .header,body.light-contrast .navbar,body.light-contrast .navigation,body.light-contrast .logo,body.light-contrast [class*="logo"],body.light-contrast [id*="logo"],body.light-contrast [data-logo],body.light-contrast .menu,body.light-contrast .nav-menu,body.light-contrast button,body.light-contrast .button,body.light-contrast .btn,body.light-contrast input,body.light-contrast textarea,body.light-contrast select,body.light-contrast .form-control,body.light-contrast .modal,body.light-contrast .dropdown,body.light-contrast .tooltip,body.light-contrast .badge,body.light-contrast .alert,body.light-contrast .accessbit-widget-panel,body.light-contrast .accessbit-widget-icon,body.light-contrast #accessbit-widget-panel,body.light-contrast #accessbit-widget-icon,body.light-contrast #accessbit-widget-container,body.light-contrast .accessbit-widget-container{color:inherit !important;background:inherit !important;}body.light-contrast .logo,body.light-contrast [class*="logo"],body.light-contrast [id*="logo"],body.light-contrast [data-logo],body.light-contrast div:has(.logo),body.light-contrast div:has([class*="logo"]),body.light-contrast div:has([id*="logo"]),body.light-contrast header .logo,body.light-contrast nav .logo,body.light-contrast .header .logo,body.light-contrast .navbar .logo{background:inherit !important;background-color:inherit !important;background-image:inherit !important;}.light-contrast .accessbit-widget-panel,.light-contrast .accessbit-widget-icon,.light-contrast #accessbit-widget-panel,.light-contrast #accessbit-widget-icon,.light-contrast .accessbit-widget-panel *,.light-contrast .accessbit-widget-icon *,.light-contrast #accessbit-widget-panel *,.light-contrast #accessbit-widget-icon *{filter:none !important;-webkit-filter:none !important;background:inherit !important;color:inherit !important;border:inherit !important;box-shadow:inherit !important;}body.light-contrast .logo,body.light-contrast [class*="logo"],body.light-contrast [id*="logo"],body.light-contrast [data-logo],body.light-contrast img.logo,body.light-contrast svg.logo,body.light-contrast .logo img,body.light-contrast .logo svg,body.light-contrast [class*="logo"] img,body.light-contrast [class*="logo"] svg,body.light-contrast div[class*="logo"],body.light-contrast div[id*="logo"],body.light-contrast a[class*="logo"],body.light-contrast a[id*="logo"]{border:2px solid #000000 !important;box-shadow:0 0 4px rgba(0,0,0,0.3) !important;filter:none !important;-webkit-filter:none !important;background:inherit !important;}body.light-contrast header img,body.light-contrast nav img,body.light-contrast .header img,body.light-contrast .navbar img,body.light-contrast [role="navigation"] img{background:inherit !important;filter:none !important;-webkit-filter:none !important;border:2px solid #000000 !important;box-shadow:0 0 4px rgba(0,0,0,0.3) !important;}body.light-contrast img:not(.logo):not([class*="logo"]):not([id*="logo"]),body.light-contrast picture:not([class*="logo"]):not([id*="logo"]),body.light-contrast [class*="image"]:not([class*="logo"]):not([id*="logo"]),body.light-contrast [class*="img"]:not([class*="logo"]):not([id*="logo"]),body.light-contrast [class*="photo"]:not([class*="logo"]):not([id*="logo"]),body.light-contrast [class*="picture"]:not([class*="logo"]):not([id*="logo"]){border:1px solid #cccccc !important;box-shadow:0 0 2px rgba(0,0,0,0.1) !important;}body.light-contrast img[src*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),body.light-contrast img[src*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]),body.light-contrast img[class*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),body.light-contrast img[class*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]){border:2px solid #000000 !important;box-shadow:0 0 4px rgba(0,0,0,0.3) !important;}`;
+            style.textContent = `
+                body.light-contrast {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                    filter: brightness(1.01) contrast(1.01) !important;
+                }
+
+                /* Apply light contrast to all text elements - comprehensive coverage */
+                body.light-contrast p,
+                body.light-contrast h1,
+                body.light-contrast h2,
+                body.light-contrast h3,
+                body.light-contrast h4,
+                body.light-contrast h5,
+                body.light-contrast h6,
+                body.light-contrast span,
+                body.light-contrast div,
+                body.light-contrast li,
+                body.light-contrast td,
+                body.light-contrast th,
+                body.light-contrast label,
+                body.light-contrast small,
+                body.light-contrast em,
+                body.light-contrast strong,
+                body.light-contrast i,
+                body.light-contrast b,
+                body.light-contrast a {
+                    color: #000000 !important;
+                }
+                
+                /* Do NOT apply light-contrast filter to the widget itself */
+                body.light-contrast #accessbit-widget-container,
+                body.light-contrast .accessbit-widget,
+                body.light-contrast #accessbit-widget,
+                body.light-contrast .accessbit-widget-panel,
+                body.light-contrast #accessbit-widget-icon {
+                    filter: none !important;
+                }
+                
+                /* Comprehensive coverage for dynamically loaded dark elements */
+                body.light-contrast *[style*="background-color: #000"],
+                body.light-contrast *[style*="background-color:#000"],
+                body.light-contrast *[style*="background-color: #000000"],
+                body.light-contrast *[style*="background-color:#000000"],
+                body.light-contrast *[style*="background: #000"],
+                body.light-contrast *[style*="background:#000"],
+                body.light-contrast *[style*="background: #000000"],
+                body.light-contrast *[style*="background:#000000"],
+                body.light-contrast *[style*="color: #000"],
+                body.light-contrast *[style*="color:#000"],
+                body.light-contrast *[style*="color: #000000"],
+                body.light-contrast *[style*="color:#000000"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+                
+                /* Target common dark theme classes that might be added dynamically */
+                body.light-contrast .dark,
+                body.light-contrast .dark-theme,
+                body.light-contrast .dark-mode,
+                body.light-contrast .night-mode,
+                body.light-contrast .black,
+                body.light-contrast .bg-dark,
+                body.light-contrast .bg-black,
+                body.light-contrast [class*="dark"],
+                body.light-contrast [class*="black"],
+                body.light-contrast [class*="night"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+                
+                /* Target dynamically loaded content containers */
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper,
+                body.light-contrast .section,
+                body.light-contrast .article,
+                body.light-contrast .main,
+                body.light-contrast .page,
+                body.light-contrast .body,
+                body.light-contrast .app,
+                body.light-contrast .root {
+                    background: #ffffff !important;
+                }
+
+                /* Apply light background to main content areas only */
+                body.light-contrast main,
+                body.light-contrast section,
+                body.light-contrast article,
+                body.light-contrast .content,
+                body.light-contrast .container,
+                body.light-contrast .wrapper {
+                    background: #ffffff !important;
+                }
+
+                /* Style ONLY actual service cards and specific content boxes in light contrast */
+                body.light-contrast .service-card,
+                body.light-contrast .color-box,
+                body.light-contrast .test-block {
+                    background: #ffffff !important;
+                    border: 2px solid #000000 !important;
+                    color: #000000 !important;
+                }
+
+                /* Ensure text inside specific cards is black */
+                body.light-contrast .service-card *,
+                body.light-contrast .color-box *,
+                body.light-contrast .test-block * {
+                    color: #000000 !important;
+                }
+
+                /* Force all cards and elements with background colors to white */
+                body.light-contrast .card,
+                body.light-contrast .service-card,
+                body.light-contrast .color-box,
+                body.light-contrast .test-block,
+                body.light-contrast .bg-blue,
+                body.light-contrast .bg-red,
+                body.light-contrast .bg-green,
+                body.light-contrast .bg-yellow,
+                body.light-contrast .bg-purple,
+                body.light-contrast .bg-orange,
+                body.light-contrast .bg-pink,
+                body.light-contrast .bg-gray,
+                body.light-contrast .bg-dark,
+                body.light-contrast .bg-light,
+                body.light-contrast [class*="bg-"],
+                body.light-contrast [class*="background"],
+                body.light-contrast [class*="color-"],
+                body.light-contrast [style*="background-color"],
+                body.light-contrast [style*="background:"] {
+                    background: #ffffff !important;
+                    color: #000000 !important;
+                }
+
+                /* Force all text inside cards to be black */
+                body.light-contrast .card *,
+                body.light-contrast .service-card *,
+                body.light-contrast .color-box *,
+                body.light-contrast .test-block *,
+                body.light-contrast .bg-blue *,
+                body.light-contrast .bg-red *,
+                body.light-contrast .bg-green *,
+                body.light-contrast .bg-yellow *,
+                body.light-contrast .bg-purple *,
+                body.light-contrast .bg-orange *,
+                body.light-contrast .bg-pink *,
+                body.light-contrast .bg-gray *,
+                body.light-contrast .bg-dark *,
+                body.light-contrast .bg-light *,
+                body.light-contrast [class*="bg-"] *,
+                body.light-contrast [class*="background"] *,
+                body.light-contrast [class*="color-"] *,
+                body.light-contrast [style*="background-color"] *,
+                body.light-contrast [style*="background:"] * {
+                    color: #000000 !important;
+                }
+
+                /* Exclude UI elements and accessibility widget from light contrast text changes */
+                body.light-contrast header,
+                body.light-contrast nav,
+                body.light-contrast .header,
+                body.light-contrast .navbar,
+                body.light-contrast .navigation,
+                body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
+                body.light-contrast .menu,
+                body.light-contrast .nav-menu,
+                body.light-contrast button,
+                body.light-contrast .button,
+                body.light-contrast .btn,
+                body.light-contrast input,
+                body.light-contrast textarea,
+                body.light-contrast select,
+                body.light-contrast .form-control,
+                body.light-contrast .modal,
+                body.light-contrast .dropdown,
+                body.light-contrast .tooltip,
+                body.light-contrast .badge,
+                body.light-contrast .alert,
+                body.light-contrast .accessbit-widget-panel,
+                body.light-contrast .accessbit-widget-icon,
+                body.light-contrast #accessbit-widget-panel,
+                body.light-contrast #accessbit-widget-icon,
+                body.light-contrast #accessbit-widget-container,
+                body.light-contrast .accessbit-widget-container {
+                    color: inherit !important;
+                    background: inherit !important;
+                }
+                
+                /* CRITICAL: Preserve logo container backgrounds (like black boxes with white logos) */
+                body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
+                body.light-contrast div:has(.logo),
+                body.light-contrast div:has([class*="logo"]),
+                body.light-contrast div:has([id*="logo"]),
+                body.light-contrast header .logo,
+                body.light-contrast nav .logo,
+                body.light-contrast .header .logo,
+                body.light-contrast .navbar .logo {
+                    background: inherit !important;
+                    background-color: inherit !important;
+                    background-image: inherit !important;
+                }
+
+                /* Completely exclude accessibility widget from light contrast effects */
+                .light-contrast .accessbit-widget-panel,
+                .light-contrast .accessbit-widget-icon,
+                .light-contrast #accessbit-widget-panel,
+                .light-contrast #accessbit-widget-icon,
+                .light-contrast .accessbit-widget-panel *,
+                .light-contrast .accessbit-widget-icon *,
+                .light-contrast #accessbit-widget-panel *,
+                .light-contrast #accessbit-widget-icon * {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    background: inherit !important;
+                    color: inherit !important;
+                    border: inherit !important;
+                    box-shadow: inherit !important;
+                }
+                
+                /* Ensure logos are visible on white backgrounds - add border/shadow for white logos */
+                body.light-contrast .logo,
+                body.light-contrast [class*="logo"],
+                body.light-contrast [id*="logo"],
+                body.light-contrast [data-logo],
+                body.light-contrast img.logo,
+                body.light-contrast svg.logo,
+                body.light-contrast .logo img,
+                body.light-contrast .logo svg,
+                body.light-contrast [class*="logo"] img,
+                body.light-contrast [class*="logo"] svg,
+                body.light-contrast div[class*="logo"],
+                body.light-contrast div[id*="logo"],
+                body.light-contrast a[class*="logo"],
+                body.light-contrast a[id*="logo"] {
+                    /* Add a border to make white logos visible on white backgrounds */
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    background: inherit !important;
+                }
+                
+                /* Preserve navigation images but ensure they're visible */
+                body.light-contrast header img,
+                body.light-contrast nav img,
+                body.light-contrast .header img,
+                body.light-contrast .navbar img,
+                body.light-contrast [role="navigation"] img {
+                    background: inherit !important;
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                    /* Add border for visibility if logo */
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                }
+                
+                /* Ensure images are visible on white backgrounds - add border/shadow for white images */
+                body.light-contrast img:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast picture:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="image"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="img"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="photo"]:not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast [class*="picture"]:not([class*="logo"]):not([id*="logo"]) {
+                    /* Add a subtle border to make white images visible on white backgrounds */
+                    border: 1px solid #cccccc !important;
+                    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1) !important;
+                }
+                
+                /* For images that might be completely white, add a stronger border */
+                body.light-contrast img[src*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[src*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[class*="white"]:not(.logo):not([class*="logo"]):not([id*="logo"]),
+                body.light-contrast img[class*="light"]:not(.logo):not([class*="logo"]):not([id*="logo"]) {
+                    border: 2px solid #000000 !important;
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3) !important;
+                }
+            `;
             document.head.appendChild(style);
         }
 
@@ -19908,7 +27616,102 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('hide-images-css')) {
                 const style = document.createElement('style');
                 style.id = 'hide-images-css';
-                style.textContent = `.hide-images img,.hide-images picture,.hide-images svg,.hide-images video,.hide-images canvas,.hide-images iframe[src*="image"],.hide-images iframe[src*="img"],.hide-images embed[type*="image"],.hide-images object[type*="image"]{display:none !important;visibility:hidden !important;opacity:0 !important;width:0 !important;height:0 !important;max-width:0 !important;max-height:0 !important;}.hide-images [style*="background-image"],.hide-images [style*="background:url"],.hide-images [style*="background:url"]{background-image:none !important;background:none !important;}.hide-images *[class*="bg-"],.hide-images *[class*="background"],.hide-images *[class*="image"],.hide-images *[class*="img"],.hide-images *[class*="photo"],.hide-images *[class*="picture"],.hide-images *[class*="banner"],.hide-images *[class*="hero"],.hide-images *[class*="cover"]{background-image:none !important;background:none !important;}.hide-images .image-container,.hide-images .img-container,.hide-images .photo-container,.hide-images .picture-container,.hide-images .media-container,.hide-images .gallery,.hide-images .carousel,.hide-images .slider,.hide-images .banner,.hide-images .hero,.hide-images .cover{display:none !important;visibility:hidden !important;}.hide-images img[data-src],.hide-images img[data-lazy],.hide-images img[loading="lazy"],.hide-images picture[data-src],.hide-images picture[data-lazy]{display:none !important;visibility:hidden !important;}.hide-images source,.hide-images img[srcset],.hide-images picture>img{display:none !important;visibility:hidden !important;}.hide-images [class*="icon"],.hide-images [class*="fa-"],.hide-images [class*="fas"],.hide-images [class*="far"],.hide-images [class*="fab"],.hide-images [class*="material-icons"]{display:none !important;visibility:hidden !important;}.hide-images .decoration,.hide-images .ornament,.hide-images .pattern,.hide-images .texture{display:none !important;visibility:hidden !important;}`;
+                style.textContent = `
+                    /* Hide all standard image elements */
+                    .hide-images img,
+                    .hide-images picture,
+                    .hide-images svg,
+                    .hide-images video,
+                    .hide-images canvas,
+                    .hide-images iframe[src*="image"],
+                    .hide-images iframe[src*="img"],
+                    .hide-images embed[type*="image"],
+                    .hide-images object[type*="image"] {
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                        max-width: 0 !important;
+                        max-height: 0 !important;
+                    }
+                    
+                    /* Hide background images */
+                    .hide-images [style*="background-image"],
+                    .hide-images [style*="background: url"],
+                    .hide-images [style*="background:url"] {
+                        background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide CSS background images */
+                    .hide-images *[class*="bg-"],
+                    .hide-images *[class*="background"],
+                    .hide-images *[class*="image"],
+                    .hide-images *[class*="img"],
+                    .hide-images *[class*="photo"],
+                    .hide-images *[class*="picture"],
+                    .hide-images *[class*="banner"],
+                    .hide-images *[class*="hero"],
+                    .hide-images *[class*="cover"] {
+                        background-image: none !important;
+                        background: none !important;
+                    }
+                    
+                    /* Hide image containers and wrappers */
+                    .hide-images .image-container,
+                    .hide-images .img-container,
+                    .hide-images .photo-container,
+                    .hide-images .picture-container,
+                    .hide-images .media-container,
+                    .hide-images .gallery,
+                    .hide-images .carousel,
+                    .hide-images .slider,
+                    .hide-images .banner,
+                    .hide-images .hero,
+                    .hide-images .cover {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide lazy-loaded images */
+                    .hide-images img[data-src],
+                    .hide-images img[data-lazy],
+                    .hide-images img[loading="lazy"],
+                    .hide-images picture[data-src],
+                    .hide-images picture[data-lazy] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide responsive images */
+                    .hide-images source,
+                    .hide-images img[srcset],
+                    .hide-images picture > img {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide icon fonts and icon images */
+                    .hide-images [class*="icon"],
+                    .hide-images [class*="fa-"],
+                    .hide-images [class*="fas"],
+                    .hide-images [class*="far"],
+                    .hide-images [class*="fab"],
+                    .hide-images [class*="material-icons"] {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Hide decorative elements that might be images */
+                    .hide-images .decoration,
+                    .hide-images .ornament,
+                    .hide-images .pattern,
+                    .hide-images .texture {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
             
@@ -20648,7 +28451,47 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             style.id = 'reading-guide-styles';
     
-            style.textContent = `.reading-guide{position:relative;}.reading-guide-active{cursor:none;}.reading-guide-bar{position:fixed;width:200px;height:4px;background:linear-gradient(90deg,rgba(99,102,241,0.8),rgba(99,102,241,0.4));border-radius:2px;pointer-events:none;z-index:100000;transition:all 0.1s ease;box-shadow:0 0 10px rgba(99,102,241,0.3);}`;
+            style.textContent = `
+    
+                .reading-guide {
+    
+                    position: relative;
+    
+                }
+    
+                
+    
+                .reading-guide-active {
+    
+                    cursor: none;
+    
+                }
+    
+                
+    
+                .reading-guide-bar {
+    
+                    position: fixed;
+    
+                    width: 200px;
+    
+                    height: 4px;
+    
+                    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(99, 102, 241, 0.4));
+    
+                    border-radius: 2px;
+    
+                    pointer-events: none;
+    
+                    z-index: 100000;
+    
+                    transition: all 0.1s ease;
+    
+                    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    
+                }
+    
+            `;
     
             document.head.appendChild(style);
     
@@ -20766,7 +28609,47 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('older-adults-mode-css')) {
                 const style = document.createElement('style');
                 style.id = 'older-adults-mode-css';
-                style.textContent = `html.older-adults{font-size:112.5% !important;}body.older-adults{text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;}html.older-adults body,body.older-adults{filter:none !important;}html.older-adults #accessbit-widget-container,html.older-adults #accessbit-widget-container *,body.older-adults #accessbit-widget-container,body.older-adults #accessbit-widget-container *{filter:none !important;}html.older-adults [data-w-id],html.older-adults [data-w-id]::before,html.older-adults [data-w-id]::after,body.older-adults [data-w-id],body.older-adults [data-w-id]::before,body.older-adults [data-w-id]::after,html.older-adults [style*="animation"],html.older-adults [style*="transition"],body.older-adults [style*="animation"],body.older-adults [style*="transition"],html.older-adults [class*="lottie"],html.older-adults [class*="swiper"],html.older-adults [class*="slick"],html.older-adults [class*="splide"],html.older-adults [class*="glide"],body.older-adults [class*="lottie"],body.older-adults [class*="swiper"],body.older-adults [class*="slick"],body.older-adults [class*="splide"],body.older-adults [class*="glide"]{animation:none !important;transition:none !important;scroll-behavior:auto !important;animation-play-state:paused !important;}body.older-adults #accessbit-widget-container,body.older-adults #accessbit-widget-container *{animation-play-state:running !important;text-decoration:none !important;}`;
+                style.textContent = `
+                    html.older-adults { font-size: 112.5% !important; }
+                    body.older-adults { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+
+                    /* Improve contrast a bit without changing brand colors too aggressively */
+                    html.older-adults body,
+                    body.older-adults {
+                        /* IMPORTANT: do NOT use filter here.
+                           filter creates a new containing block and breaks position:fixed children on many sites,
+                           which causes the Reading Guide bar to scroll away/vanish. */
+                        filter: none !important;
+                    }
+
+                    /* Never filter the widget itself (keeps UI unchanged) */
+                    html.older-adults #accessbit-widget-container,
+                    html.older-adults #accessbit-widget-container *,
+                    body.older-adults #accessbit-widget-container,
+                    body.older-adults #accessbit-widget-container * {
+                        filter: none !important;
+                    }
+
+                    /* Stop motion in common animated regions without freezing the whole page */
+                    html.older-adults [data-w-id], html.older-adults [data-w-id]::before, html.older-adults [data-w-id]::after,
+                    body.older-adults [data-w-id], body.older-adults [data-w-id]::before, body.older-adults [data-w-id]::after,
+                    html.older-adults [style*="animation"], html.older-adults [style*="transition"],
+                    body.older-adults [style*="animation"], body.older-adults [style*="transition"],
+                    html.older-adults [class*="lottie"], html.older-adults [class*="swiper"], html.older-adults [class*="slick"], html.older-adults [class*="splide"], html.older-adults [class*="glide"],
+                    body.older-adults [class*="lottie"], body.older-adults [class*="swiper"], body.older-adults [class*="slick"], body.older-adults [class*="splide"], body.older-adults [class*="glide"] {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                        animation-play-state: paused !important;
+                    }
+
+                    /* Same as stop-animation: widget container never affected by pause */
+                    body.older-adults #accessbit-widget-container,
+                    body.older-adults #accessbit-widget-container * {
+                        animation-play-state: running !important;
+                        text-decoration: none !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
 
@@ -20798,7 +28681,17 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 if (!document.getElementById('older-adults-reading-guide-boost')) {
                     const boost = document.createElement('style');
                     boost.id = 'older-adults-reading-guide-boost';
-                    boost.textContent = `body.older-adults .reading-guide-bar{width:320px !important;height:10px !important;border-radius:6px !important;background:linear-gradient(90deg,rgba(99,102,241,1),rgba(99,102,241,0.55)) !important;box-shadow:0 0 18px rgba(99,102,241,0.55) !important;transition:none !important;transform:none !important;}`;
+                    boost.textContent = `
+                        body.older-adults .reading-guide-bar {
+                            width: 320px !important;
+                            height: 10px !important;
+                            border-radius: 6px !important;
+                            background: linear-gradient(90deg, rgba(99, 102, 241, 1), rgba(99, 102, 241, 0.55)) !important;
+                            box-shadow: 0 0 18px rgba(99, 102, 241, 0.55) !important;
+                            transition: none !important;
+                            transform: none !important;
+                        }
+                    `;
                     document.head.appendChild(boost);
                 }
 
@@ -20989,7 +28882,53 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-dyslexia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-dyslexia-css';
-                style.textContent = `html.ab-dyslexia body{font-family:'OpenDyslexic',Arial,sans-serif !important;line-height:1.6 !important;letter-spacing:0.04em !important;word-spacing:0.12em !important;}html.ab-dyslexia p,html.ab-dyslexia li,html.ab-dyslexia dt,html.ab-dyslexia dd,html.ab-dyslexia blockquote{line-height:1.8 !important;margin-bottom:1em !important;max-width:70ch !important;}html.ab-dyslexia h1,html.ab-dyslexia h2,html.ab-dyslexia h3,html.ab-dyslexia h4,html.ab-dyslexia h5,html.ab-dyslexia h6{line-height:1.3 !important;letter-spacing:0.02em !important;margin-top:1em !important;margin-bottom:0.5em !important;}html.ab-dyslexia p,html.ab-dyslexia li,html.ab-dyslexia td,html.ab-dyslexia th{text-align:left !important;}html.ab-dyslexia a{text-decoration-thickness:0.12em !important;text-underline-offset:0.18em !important;}html.ab-dyslexia #accessbit-widget-container,html.ab-dyslexia #accessbit-widget-container *{font-family:inherit !important;line-height:normal !important;letter-spacing:normal !important;word-spacing:normal !important;max-width:none !important;}`;
+                style.textContent = `
+                    html.ab-dyslexia body {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                        line-height: 1.6 !important;
+                        letter-spacing: 0.04em !important;
+                        word-spacing: 0.12em !important;
+                    }
+                    html.ab-dyslexia p,
+                    html.ab-dyslexia li,
+                    html.ab-dyslexia dt,
+                    html.ab-dyslexia dd,
+                    html.ab-dyslexia blockquote {
+                        line-height: 1.8 !important;
+                        margin-bottom: 1em !important;
+                        max-width: 70ch !important;
+                    }
+                    html.ab-dyslexia h1,
+                    html.ab-dyslexia h2,
+                    html.ab-dyslexia h3,
+                    html.ab-dyslexia h4,
+                    html.ab-dyslexia h5,
+                    html.ab-dyslexia h6 {
+                        line-height: 1.3 !important;
+                        letter-spacing: 0.02em !important;
+                        margin-top: 1em !important;
+                        margin-bottom: 0.5em !important;
+                    }
+                    html.ab-dyslexia p,
+                    html.ab-dyslexia li,
+                    html.ab-dyslexia td,
+                    html.ab-dyslexia th {
+                        text-align: left !important;
+                    }
+                    html.ab-dyslexia a {
+                        text-decoration-thickness: 0.12em !important;
+                        text-underline-offset: 0.18em !important;
+                    }
+                    /* Keep widget UI unchanged */
+                    html.ab-dyslexia #accessbit-widget-container,
+                    html.ab-dyslexia #accessbit-widget-container * {
+                        font-family: inherit !important;
+                        line-height: normal !important;
+                        letter-spacing: normal !important;
+                        word-spacing: normal !important;
+                        max-width: none !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -21008,7 +28947,86 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('dyslexia-font-css')) {
                 const style = document.createElement('style');
                 style.id = 'dyslexia-font-css';
-                style.textContent = `.dyslexia-font h1,.dyslexia-font h2,.dyslexia-font h3,.dyslexia-font h4,.dyslexia-font h5,.dyslexia-font h6{font-family:'OpenDyslexic',Arial,sans-serif !important;}.dyslexia-font p,.dyslexia-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),.dyslexia-font li,.dyslexia-font td,.dyslexia-font th,.dyslexia-font label,.dyslexia-font small,.dyslexia-font em,.dyslexia-font strong,.dyslexia-font b,.dyslexia-font i,.dyslexia-font article,.dyslexia-font blockquote,.dyslexia-font figcaption,.dyslexia-font cite,.dyslexia-font div:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]):not([class*="swiper"]){font-family:'OpenDyslexic',Arial,sans-serif !important;}.dyslexia-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]){font-family:'OpenDyslexic',Arial,sans-serif !important;}.dyslexia-font input,.dyslexia-font textarea,.dyslexia-font select,.dyslexia-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]){font-family:'OpenDyslexic',Arial,sans-serif !important;}.dyslexia-font code,.dyslexia-font pre,.dyslexia-font kbd,.dyslexia-font samp{font-family:'OpenDyslexic',Arial,sans-serif !important;}.dyslexia-font .accessbit-widget,.dyslexia-font #accessbit-widget,.dyslexia-font .accessbit-widget-panel,.dyslexia-font .accessbit-widget-icon,.dyslexia-font [data-ck-widget],.dyslexia-font [class*="accessbit"],.dyslexia-font .accessbit-widget *,.dyslexia-font #accessbit-widget *,.dyslexia-font .accessbit-widget-panel *{font-family:revert !important;}.dyslexia-font [class*="slider"],.dyslexia-font [class*="carousel"],.dyslexia-font [class*="swiper"],.dyslexia-font [data-slider],.dyslexia-font [data-carousel],.dyslexia-font [id*="slider"],.dyslexia-font [id*="carousel"],.dyslexia-font [id*="swiper"],.dyslexia-font [class*="slider"] *,.dyslexia-font [class*="carousel"] *,.dyslexia-font [class*="swiper"] *,.dyslexia-font [data-slider] *,.dyslexia-font [data-carousel] *{font-family:revert !important;}.dyslexia-font [class*="icon"],.dyslexia-font [class*="symbol"],.dyslexia-font [class*="arrow"],.dyslexia-font [class*="fa-"],.dyslexia-font [class*="glyphicon"],.dyslexia-font [class*="material-icons"],.dyslexia-font .w-icon-dropdown-toggle,.dyslexia-font svg *{font-family:initial !important;}`;
+                style.textContent = `
+                    /* OpenDyslexic sitewide — same stack as Dyslexia Friendly; !important overrides host CSS */
+                    .dyslexia-font h1,
+                    .dyslexia-font h2,
+                    .dyslexia-font h3,
+                    .dyslexia-font h4,
+                    .dyslexia-font h5,
+                    .dyslexia-font h6 {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font p,
+                    .dyslexia-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),
+                    .dyslexia-font li,
+                    .dyslexia-font td,
+                    .dyslexia-font th,
+                    .dyslexia-font label,
+                    .dyslexia-font small,
+                    .dyslexia-font em,
+                    .dyslexia-font strong,
+                    .dyslexia-font b,
+                    .dyslexia-font i,
+                    .dyslexia-font article,
+                    .dyslexia-font blockquote,
+                    .dyslexia-font figcaption,
+                    .dyslexia-font cite,
+                    .dyslexia-font div:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]):not([class*="swiper"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font input,
+                    .dyslexia-font textarea,
+                    .dyslexia-font select,
+                    .dyslexia-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]) {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font code,
+                    .dyslexia-font pre,
+                    .dyslexia-font kbd,
+                    .dyslexia-font samp {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                    }
+                    .dyslexia-font .accessbit-widget,
+                    .dyslexia-font #accessbit-widget,
+                    .dyslexia-font .accessbit-widget-panel,
+                    .dyslexia-font .accessbit-widget-icon,
+                    .dyslexia-font [data-ck-widget],
+                    .dyslexia-font [class*="accessbit"],
+                    .dyslexia-font .accessbit-widget *,
+                    .dyslexia-font #accessbit-widget *,
+                    .dyslexia-font .accessbit-widget-panel * {
+                        font-family: revert !important;
+                    }
+                    .dyslexia-font [class*="slider"],
+                    .dyslexia-font [class*="carousel"],
+                    .dyslexia-font [class*="swiper"],
+                    .dyslexia-font [data-slider],
+                    .dyslexia-font [data-carousel],
+                    .dyslexia-font [id*="slider"],
+                    .dyslexia-font [id*="carousel"],
+                    .dyslexia-font [id*="swiper"],
+                    .dyslexia-font [class*="slider"] *,
+                    .dyslexia-font [class*="carousel"] *,
+                    .dyslexia-font [class*="swiper"] *,
+                    .dyslexia-font [data-slider] *,
+                    .dyslexia-font [data-carousel] * {
+                        font-family: revert !important;
+                    }
+                    .dyslexia-font [class*="icon"],
+                    .dyslexia-font [class*="symbol"],
+                    .dyslexia-font [class*="arrow"],
+                    .dyslexia-font [class*="fa-"],
+                    .dyslexia-font [class*="glyphicon"],
+                    .dyslexia-font [class*="material-icons"],
+                    .dyslexia-font .w-icon-dropdown-toggle,
+                    .dyslexia-font svg * {
+                        font-family: initial !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
             this.saveSettings();
@@ -21220,7 +29238,37 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-protanopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-protanopia-css';
-                style.textContent = `:root{--ab-error:#d32f2f;--ab-success:#2e7d32;}.ab-protanopia{--ab-error:#003366;--ab-success:#ffcc00;filter:contrast(1.08) brightness(1.03) saturate(0.9);}.ab-protanopia [style*="red" i],.ab-protanopia .error,.ab-protanopia .danger,.ab-protanopia .alert-danger,.ab-protanopia .text-danger{color:#003366 !important;background-color:#cce0ff !important;border-color:#003366 !important;}.ab-protanopia [style*="green" i],.ab-protanopia .success,.ab-protanopia .alert-success,.ab-protanopia .text-success{color:#663300 !important;background-color:#ffebcc !important;border-color:#663300 !important;}`;
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-protanopia {
+                        --ab-error: #003366;
+                        --ab-success: #ffcc00;
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
+                    }
+
+                    /* Safe heuristic selectors for common sites */
+                    .ab-protanopia [style*="red" i],
+                    .ab-protanopia .error,
+                    .ab-protanopia .danger,
+                    .ab-protanopia .alert-danger,
+                    .ab-protanopia .text-danger {
+                        color: #003366 !important;
+                        background-color: #cce0ff !important;
+                        border-color: #003366 !important;
+                    }
+                    .ab-protanopia [style*="green" i],
+                    .ab-protanopia .success,
+                    .ab-protanopia .alert-success,
+                    .ab-protanopia .text-success {
+                        color: #663300 !important;
+                        background-color: #ffebcc !important;
+                        border-color: #663300 !important;
+                    }
+
+                `;
                 document.head.appendChild(style);
             }
 
@@ -21257,7 +29305,36 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-deuteranopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-deuteranopia-css';
-                style.textContent = `:root{--ab-error:#d32f2f;--ab-success:#2e7d32;}.ab-deuteranopia{--ab-error:#1a237e;--ab-success:#bf360c;filter:contrast(1.08) brightness(1.03) saturate(0.9);}.ab-deuteranopia [style*="red" i],.ab-deuteranopia .error,.ab-deuteranopia .danger,.ab-deuteranopia .alert-danger,.ab-deuteranopia .text-danger{color:#1a237e !important;background-color:#e3f2fd !important;border-color:#1a237e !important;}.ab-deuteranopia [style*="green" i],.ab-deuteranopia .success,.ab-deuteranopia .alert-success,.ab-deuteranopia .text-success{color:#bf360c !important;background-color:#ffe0b2 !important;border-color:#bf360c !important;}`;
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-deuteranopia {
+                        --ab-error: #1a237e;
+                        --ab-success: #bf360c;
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
+                    }
+
+                    .ab-deuteranopia [style*="red" i],
+                    .ab-deuteranopia .error,
+                    .ab-deuteranopia .danger,
+                    .ab-deuteranopia .alert-danger,
+                    .ab-deuteranopia .text-danger {
+                        color: #1a237e !important;
+                        background-color: #e3f2fd !important;
+                        border-color: #1a237e !important;
+                    }
+                    .ab-deuteranopia [style*="green" i],
+                    .ab-deuteranopia .success,
+                    .ab-deuteranopia .alert-success,
+                    .ab-deuteranopia .text-success {
+                        color: #bf360c !important;
+                        background-color: #ffe0b2 !important;
+                        border-color: #bf360c !important;
+                    }
+
+                `;
                 document.head.appendChild(style);
             }
 
@@ -21295,7 +29372,35 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('ab-tritanopia-css')) {
                 const style = document.createElement('style');
                 style.id = 'ab-tritanopia-css';
-                style.textContent = `:root{--ab-error:#d32f2f;--ab-success:#2e7d32;}.ab-tritanopia{--ab-error:#b71c1c;--ab-success:#4a148c;filter:contrast(1.08) brightness(1.03) saturate(0.9);}.ab-tritanopia .error,.ab-tritanopia .danger,.ab-tritanopia .alert-danger,.ab-tritanopia .text-danger,.ab-tritanopia [role="alert"]{color:#b71c1c !important;background-color:#ffebee !important;border-color:#b71c1c !important;}.ab-tritanopia .success,.ab-tritanopia .alert-success,.ab-tritanopia .text-success{color:#4a148c !important;background-color:#f3e5f5 !important;border-color:#4a148c !important;}`;
+                style.textContent = `
+                    :root {
+                        --ab-error: #d32f2f;
+                        --ab-success: #2e7d32;
+                    }
+                    .ab-tritanopia {
+                        --ab-error: #b71c1c;
+                        --ab-success: #4a148c;
+                        filter: contrast(1.08) brightness(1.03) saturate(0.9);
+                    }
+
+                    .ab-tritanopia .error,
+                    .ab-tritanopia .danger,
+                    .ab-tritanopia .alert-danger,
+                    .ab-tritanopia .text-danger,
+                    .ab-tritanopia [role="alert"] {
+                        color: #b71c1c !important;
+                        background-color: #ffebee !important;
+                        border-color: #b71c1c !important;
+                    }
+                    .ab-tritanopia .success,
+                    .ab-tritanopia .alert-success,
+                    .ab-tritanopia .text-success {
+                        color: #4a148c !important;
+                        background-color: #f3e5f5 !important;
+                        border-color: #4a148c !important;
+                    }
+
+                `;
                 document.head.appendChild(style);
             }
 
@@ -21703,7 +29808,93 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('readable-font-css')) {
                 const style = document.createElement('style');
                 style.id = 'readable-font-css';
-                style.textContent = `.readable-font h1,.readable-font h2,.readable-font h3,.readable-font h4,.readable-font h5,.readable-font h6{font-family:'Arial','Open Sans','Helvetica';}.readable-font p,.readable-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),.readable-font li,.readable-font td,.readable-font th,.readable-font label,.readable-font small,.readable-font em,.readable-font strong,.readable-font b{font-family:'Arial','Open Sans','Helvetica';}.readable-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]){font-family:'Arial','Open Sans','Helvetica';}.readable-font input,.readable-font textarea,.readable-font select{font-family:'Arial','Open Sans','Helvetica';}.readable-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]){font-family:'Arial','Open Sans','Helvetica';}.readable-font .accessbit-widget,.readable-font #accessbit-widget,.readable-font .accessbit-widget-panel,.readable-font .accessbit-widget-icon,.readable-font [data-ck-widget],.readable-font [class*="accessbit"],.readable-font .accessbit-widget *,.readable-font #accessbit-widget *,.readable-font .accessbit-widget-panel *{font-family:revert;}.readable-font [class*="slider"],.readable-font [class*="carousel"],.readable-font [class*="swiper"],.readable-font [data-slider],.readable-font [data-carousel],.readable-font [id*="slider"],.readable-font [id*="carousel"],.readable-font [id*="swiper"],.readable-font [class*="slider"] *,.readable-font [class*="carousel"] *,.readable-font [class*="swiper"] *,.readable-font [data-slider] *,.readable-font [data-carousel] *{font-family:revert;}.readable-font i,.readable-font [class*="icon"],.readable-font [class*="symbol"],.readable-font [class*="arrow"],.readable-font [class*="fa-"],.readable-font [class*="glyphicon"],.readable-font [class*="material-icons"],.readable-font .w-icon-dropdown-toggle,.readable-font svg *{font-family:initial;}`;
+                style.textContent = `
+                    /* READABLE FONT: ONLY change font-family, nothing else */
+                    
+                    /* 1. HEADINGS - Only font-family */
+                    .readable-font h1,
+                    .readable-font h2,
+                    .readable-font h3,
+                    .readable-font h4,
+                    .readable-font h5,
+                    .readable-font h6 {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica';
+                    }
+                    
+                    /* 2. TEXT CONTENT - Only font-family */
+                    .readable-font p,
+                    .readable-font span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),
+                    .readable-font li,
+                    .readable-font td,
+                    .readable-font th,
+                    .readable-font label,
+                    .readable-font small,
+                    .readable-font em,
+                    .readable-font strong,
+                    .readable-font b {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica';
+                    }
+                    
+                    /* 3. LINKS - Only font-family */
+                    .readable-font a:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]) {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica';
+                    }
+                    
+                    /* 4. FORM ELEMENTS - Only font-family */
+                    .readable-font input,
+                    .readable-font textarea,
+                    .readable-font select {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica';
+                    }
+                    
+                    /* 5. BUTTON TEXT - Only font-family */
+                    .readable-font button:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]) {
+                        font-family: 'Arial', 'Open Sans', 'Helvetica';
+                    }
+                    
+                    /* EXCLUDE WIDGET - Never apply readable font to widget */
+                    .readable-font .accessbit-widget,
+                    .readable-font #accessbit-widget,
+                    .readable-font .accessbit-widget-panel,
+                    .readable-font .accessbit-widget-icon,
+                    .readable-font [data-ck-widget],
+                    .readable-font [class*="accessbit"],
+                    .readable-font .accessbit-widget *,
+                    .readable-font #accessbit-widget *,
+                    .readable-font .accessbit-widget-panel * {
+                        font-family: revert;
+                    }
+                    
+                    /* EXCLUDE SLIDERS AND CAROUSELS - Never apply readable font to slider content */
+                    .readable-font [class*="slider"],
+                    .readable-font [class*="carousel"],
+                    .readable-font [class*="swiper"],
+                    .readable-font [data-slider],
+                    .readable-font [data-carousel],
+                    .readable-font [id*="slider"],
+                    .readable-font [id*="carousel"],
+                    .readable-font [id*="swiper"],
+                    .readable-font [class*="slider"] *,
+                    .readable-font [class*="carousel"] *,
+                    .readable-font [class*="swiper"] *,
+                    .readable-font [data-slider] *,
+                    .readable-font [data-carousel] * {
+                        font-family: revert;
+                    }
+                    
+                    /* EXCLUDE ICONS AND SYMBOLS */
+                    .readable-font i,
+                    .readable-font [class*="icon"],
+                    .readable-font [class*="symbol"],
+                    .readable-font [class*="arrow"],
+                    .readable-font [class*="fa-"],
+                    .readable-font [class*="glyphicon"],
+                    .readable-font [class*="material-icons"],
+                    .readable-font .w-icon-dropdown-toggle,
+                    .readable-font svg * {
+                        font-family: initial;
+                    }
+                `;
                 document.head.appendChild(style);
             }
             
@@ -22186,7 +30377,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
             style.id = 'reset-cursor-styles';
     
-            style.textContent = `body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget-panel *,body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget *,body:not(.big-white-cursor):not(.big-black-cursor) #accessbit-widget *{cursor:auto !important;}`;
+            style.textContent = `
+    
+                /* Only apply auto cursor when big cursors are NOT active */
+                body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget-panel *,
+                body:not(.big-white-cursor):not(.big-black-cursor) .accessbit-widget *,
+                body:not(.big-white-cursor):not(.big-black-cursor) #accessbit-widget * {
+    
+                    cursor: auto !important;
+    
+                }
+    
+            `;
     
             document.head.appendChild(style);
     
@@ -22376,7 +30578,122 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (document.getElementById('stop-animation-css')) return;
             const style = document.createElement('style');
             style.id = 'stop-animation-css';
-            style.textContent = `@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}}html.stop-animation *,html.stop-animation *::before,html.stop-animation *::after,body.stop-animation *,body.stop-animation *::before,body.stop-animation *::after,.stop-animation *,.stop-animation *::before,.stop-animation *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;animation-play-state:paused !important;}html.stop-animation *[class*="blink"],html.stop-animation *[class*="shimmer"],html.stop-animation *[class*="pulse"],html.stop-animation *[class*="caret"],html.stop-animation *[class*="cursor-blink"],html.stop-animation *[class*="skeleton"],html.stop-animation *[class*="pulsing"],html.stop-animation *[class*="flashing"],body.stop-animation *[class*="blink"],body.stop-animation *[class*="shimmer"],body.stop-animation *[class*="pulse"],body.stop-animation *[class*="caret"],body.stop-animation *[class*="cursor-blink"],body.stop-animation *[class*="skeleton"],body.stop-animation *[class*="pulsing"],body.stop-animation *[class*="flashing"]{animation:none !important;}html.stop-animation [data-w-id],body.stop-animation [data-w-id],.stop-animation [data-w-id]{animation:none !important;transition:none !important;transform:none !important;opacity:1 !important;}html.stop-animation a,html.stop-animation button,html.stop-animation [role="button"],body.stop-animation a,body.stop-animation button,body.stop-animation [role="button"],.stop-animation a,.stop-animation button,.stop-animation [role="button"]{transition:none !important;transform:none !important;}html.stop-animation a:hover,html.stop-animation button:hover,html.stop-animation [role="button"]:hover,body.stop-animation a:hover,body.stop-animation button:hover,body.stop-animation [role="button"]:hover,.stop-animation a:hover,.stop-animation button:hover,.stop-animation [role="button"]:hover{transition:none !important;transform:none !important;}body.stop-animation #accessbit-widget-container,body.stop-animation #accessbit-widget-container *{animation-play-state:running !important;text-decoration:none !important;}html.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]),body.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]){animation-play-state:paused !important;transition:none !important;}html.stop-animation lottie-player:not([id*="accessbit"]),html.stop-animation dotlottie-player:not([id*="accessbit"]),html.stop-animation canvas:not([id*="accessbit"]),body.stop-animation lottie-player:not([id*="accessbit"]),body.stop-animation dotlottie-player:not([id*="accessbit"]),body.stop-animation canvas:not([id*="accessbit"]){pointer-events:none !important;}body.stop-animation #accessbit-widget-container,body.stop-animation [id*="accessbit-widget"],body.stop-animation .accessbit-widget-panel{opacity:1 !important;visibility:visible !important;transition:opacity 0.25s ease,transform 0.25s ease !important;}body.stop-animation video,body.stop-animation audio,body.stop-animation iframe,body.stop-animation embed,body.stop-animation object,body.stop-animation [autoplay],body.stop-animation [data-autoplay],body.stop-animation [class*="autoplay"],body.stop-animation [class*="video"]{animation:none !important;transition:none !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.stop-animation .swiper,body.stop-animation .swiper-container,body.stop-animation .slick-slider,body.stop-animation .carousel,body.stop-animation [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),body.stop-animation [class*="carousel"],body.stop-animation [data-slider],body.stop-animation [data-carousel]{animation:none !important;pointer-events:auto !important;cursor:default !important;transition:transform 0.3s ease !important;}body.stop-animation .swiper-slide,body.stop-animation .slick-slide,body.stop-animation .carousel-item{animation:none !important;transition:transform 0.3s ease !important;pointer-events:auto !important;}`;
+            style.textContent = `
+                /* Respect user/system reduce motion */
+                @media (prefers-reduced-motion: reduce) {
+                    *, *::before, *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                    }
+                }
+                /* Explicit stop-animation toggle */
+                html.stop-animation *, html.stop-animation *::before, html.stop-animation *::after,
+                body.stop-animation *, body.stop-animation *::before, body.stop-animation *::after,
+                .stop-animation *, .stop-animation *::before, .stop-animation *::after {
+                    animation: none !important;
+                    transition: none !important;
+                    scroll-behavior: auto !important;
+                    animation-play-state: paused !important;
+                }
+                /* Remove common flash triggers - animation only so sliders with pulse/shimmer in class are not forced visible */
+                html.stop-animation *[class*="blink"], html.stop-animation *[class*="shimmer"], 
+                html.stop-animation *[class*="pulse"], html.stop-animation *[class*="caret"], 
+                html.stop-animation *[class*="cursor-blink"], html.stop-animation *[class*="skeleton"],
+                html.stop-animation *[class*="pulsing"], html.stop-animation *[class*="flashing"],
+                body.stop-animation *[class*="blink"], body.stop-animation *[class*="shimmer"], 
+                body.stop-animation *[class*="pulse"], body.stop-animation *[class*="caret"], 
+                body.stop-animation *[class*="cursor-blink"], body.stop-animation *[class*="skeleton"],
+                body.stop-animation *[class*="pulsing"], body.stop-animation *[class*="flashing"] {
+                    animation: none !important;
+                }
+
+                /* Stop Webflow interactions (data-w-id) */
+                html.stop-animation [data-w-id],
+                body.stop-animation [data-w-id],
+                .stop-animation [data-w-id] {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    opacity: 1 !important;
+                }
+
+                /* Stop hover-driven transforms on buttons/links */
+                html.stop-animation a, html.stop-animation button, html.stop-animation [role="button"],
+                body.stop-animation a, body.stop-animation button, body.stop-animation [role="button"],
+                .stop-animation a, .stop-animation button, .stop-animation [role="button"] {
+                    transition: none !important;
+                    transform: none !important;
+                }
+
+                html.stop-animation a:hover, html.stop-animation button:hover, html.stop-animation [role="button"]:hover,
+                body.stop-animation a:hover, body.stop-animation button:hover, body.stop-animation [role="button"]:hover,
+                .stop-animation a:hover, .stop-animation button:hover, .stop-animation [role="button"]:hover {
+                    transition: none !important;
+                    transform: none !important;
+                }
+
+                /* Same as seizure: widget container never affected by pause */
+                body.stop-animation #accessbit-widget-container,
+                body.stop-animation #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
+                }
+                /* Same as seizure: freeze site motion excluding widget */
+                html.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]),
+                body.stop-animation *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+                /* Same as seizure: Lottie/Canvas visible but unclickable */
+                html.stop-animation lottie-player:not([id*="accessbit"]),
+                html.stop-animation dotlottie-player:not([id*="accessbit"]),
+                html.stop-animation canvas:not([id*="accessbit"]),
+                body.stop-animation lottie-player:not([id*="accessbit"]),
+                body.stop-animation dotlottie-player:not([id*="accessbit"]),
+                body.stop-animation canvas:not([id*="accessbit"]) {
+                    pointer-events: none !important;
+                }
+                /* Same as seizure: protect widget panel/icon */
+                body.stop-animation #accessbit-widget-container,
+                body.stop-animation [id*="accessbit-widget"],
+                body.stop-animation .accessbit-widget-panel {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transition: opacity 0.25s ease, transform 0.25s ease !important;
+                }
+                /* AUTOPLAY MEDIA: Stop autoplay (exclude [class*="media"] to avoid forcing visibility on slider wrappers like slide-media) */
+                body.stop-animation video, body.stop-animation audio, body.stop-animation iframe, body.stop-animation embed, body.stop-animation object, body.stop-animation [autoplay], body.stop-animation [data-autoplay], body.stop-animation [class*="autoplay"], body.stop-animation [class*="video"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                /* SLIDERS: Block auto-play animations only - do NOT override transform on slides (Swiper/Slick use transform for positioning) */
+                /* SLIDERS: Block auto-play animations but allow manual navigation */
+                body.stop-animation .swiper,
+                body.stop-animation .swiper-container,
+                body.stop-animation .slick-slider,
+                body.stop-animation .carousel,
+                body.stop-animation [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
+                body.stop-animation [class*="carousel"],
+                body.stop-animation [data-slider],
+                body.stop-animation [data-carousel] {
+                    animation: none !important;
+                    pointer-events: auto !important;
+                    cursor: default !important;
+                    transition: transform 0.3s ease !important;
+                }
+                /* Slider slides: block auto-animations but allow manual slide changes */
+                body.stop-animation .swiper-slide,
+                body.stop-animation .slick-slide,
+                body.stop-animation .carousel-item {
+                    animation: none !important;
+                    transition: transform 0.3s ease !important;
+                    pointer-events: auto !important;
+                }
+            `;
             document.head.appendChild(style);
         }
         
@@ -22644,7 +30961,78 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('reduce-motion-css')) {
                 const style = document.createElement('style');
                 style.id = 'reduce-motion-css';
-                style.textContent = `html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after,body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}body.reduce-motion *[class*="blink"],body.reduce-motion *[class*="shimmer"],body.reduce-motion *[class*="pulse"],body.reduce-motion *[class*="caret"],body.reduce-motion *[class*="cursor-blink"],body.reduce-motion *[class*="skeleton"],body.reduce-motion *[class*="pulsing"],body.reduce-motion *[class*="flashing"],html.reduce-motion *[class*="blink"],html.reduce-motion *[class*="shimmer"],html.reduce-motion *[class*="pulse"],html.reduce-motion *[class*="caret"],html.reduce-motion *[class*="cursor-blink"],html.reduce-motion *[class*="skeleton"],html.reduce-motion *[class*="pulsing"],html.reduce-motion *[class*="flashing"]{animation:none !important;}body.reduce-motion input[type="text"],body.reduce-motion input[type="email"],body.reduce-motion input[type="search"],body.reduce-motion input[type="tel"],body.reduce-motion input[type="url"],body.reduce-motion input[type="password"],body.reduce-motion textarea,body.reduce-motion [contenteditable="true"],html.reduce-motion input[type="text"],html.reduce-motion input[type="email"],html.reduce-motion input[type="search"],html.reduce-motion input[type="tel"],html.reduce-motion input[type="url"],html.reduce-motion input[type="password"],html.reduce-motion textarea,html.reduce-motion [contenteditable="true"]{caret-color:transparent !important;}html.reduce-motion #accessbit-widget-container,html.reduce-motion [id*="accessbit-widget"],html.reduce-motion [class*="accessbit-widget"],html.reduce-motion [data-ck-widget],html.reduce-motion accessbit-widget,body.reduce-motion #accessbit-widget-container,body.reduce-motion [id*="accessbit-widget"],body.reduce-motion [class*="accessbit-widget"],body.reduce-motion [data-ck-widget],body.reduce-motion accessbit-widget{animation:revert !important;transition:revert !important;}`;
+                style.textContent = `
+                    /* Per Webflow Security recommendations: Global CSS kill switch for Reduce Motion */
+                    /* This provides stricter controls than prefers-reduced-motion for users who need it */
+                    /* Simplified selector - let layout system do its job, just kill motion */
+                    html.reduce-motion *, 
+                    html.reduce-motion *::before, 
+                    html.reduce-motion *::after,
+                    body.reduce-motion *, 
+                    body.reduce-motion *::before, 
+                    body.reduce-motion *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                    }
+                    
+                    /* Stop common flash triggers (blinking, shimmer, pulsing) - but don't force visibility */
+                    /* This prevents animations without breaking modals, tabs, sliders, or skeleton loaders */
+                    body.reduce-motion *[class*="blink"], 
+                    body.reduce-motion *[class*="shimmer"], 
+                    body.reduce-motion *[class*="pulse"], 
+                    body.reduce-motion *[class*="caret"], 
+                    body.reduce-motion *[class*="cursor-blink"], 
+                    body.reduce-motion *[class*="skeleton"],
+                    body.reduce-motion *[class*="pulsing"], 
+                    body.reduce-motion *[class*="flashing"],
+                    html.reduce-motion *[class*="blink"], 
+                    html.reduce-motion *[class*="shimmer"], 
+                    html.reduce-motion *[class*="pulse"], 
+                    html.reduce-motion *[class*="caret"], 
+                    html.reduce-motion *[class*="cursor-blink"], 
+                    html.reduce-motion *[class*="skeleton"],
+                    html.reduce-motion *[class*="pulsing"], 
+                    html.reduce-motion *[class*="flashing"] {
+                        animation: none !important;
+                        /* Removed visibility: visible and opacity: 1 to prevent breaking modals/tabs/sliders */
+                    }
+                    
+                    /* Remove blinking caret effects */
+                    body.reduce-motion input[type="text"], 
+                    body.reduce-motion input[type="email"], 
+                    body.reduce-motion input[type="search"], 
+                    body.reduce-motion input[type="tel"], 
+                    body.reduce-motion input[type="url"], 
+                    body.reduce-motion input[type="password"], 
+                    body.reduce-motion textarea, 
+                    body.reduce-motion [contenteditable="true"],
+                    html.reduce-motion input[type="text"], 
+                    html.reduce-motion input[type="email"], 
+                    html.reduce-motion input[type="search"], 
+                    html.reduce-motion input[type="tel"], 
+                    html.reduce-motion input[type="url"], 
+                    html.reduce-motion input[type="password"], 
+                    html.reduce-motion textarea, 
+                    html.reduce-motion [contenteditable="true"] {
+                        caret-color: transparent !important;
+                    }
+                    
+                    /* Exclude widget from kill switch */
+                    html.reduce-motion #accessbit-widget-container,
+                    html.reduce-motion [id*="accessbit-widget"],
+                    html.reduce-motion [class*="accessbit-widget"],
+                    html.reduce-motion [data-ck-widget],
+                    html.reduce-motion accessbit-widget,
+                    body.reduce-motion #accessbit-widget-container,
+                    body.reduce-motion [id*="accessbit-widget"],
+                    body.reduce-motion [class*="accessbit-widget"],
+                    body.reduce-motion [data-ck-widget],
+                    body.reduce-motion accessbit-widget {
+                        animation: revert !important;
+                        transition: revert !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -22794,7 +31182,851 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 style.id = 'stop-animation-css';
     
-                style.textContent = `.stop-animation *,.stop-animation *::before,.stop-animation *::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;animation-delay:0s !important;transition-duration:0.01ms !important;}.stop-animation *{animation-play-state:paused !important;}.stop-animation *,.stop-animation *::before,.stop-animation *::after{animation:none !important;transition:none !important;animation-play-state:paused !important;}.stop-animation *{opacity:1 !important;visibility:visible !important;}.stop-animation *[class*="animate"],.stop-animation *[class*="fade"],.stop-animation *[class*="slide"],.stop-animation *[class*="bounce"],.stop-animation *[class*="pulse"],.stop-animation *[class*="shake"],.stop-animation *[class*="flash"],.stop-animation *[class*="blink"],.stop-animation *[class*="glow"],.stop-animation *[class*="spin"],.stop-animation *[class*="rotate"],.stop-animation *[class*="scale"],.stop-animation *[class*="zoom"],.stop-animation *[class*="wiggle"],.stop-animation *[class*="jiggle"],.stop-animation *[class*="twist"],.stop-animation *[class*="flip"],.stop-animation *[class*="swing"],.stop-animation *[class*="wobble"],.stop-animation *[class*="tilt"]{animation:none !important;transition:none !important;animation-play-state:paused !important;}.stop-animation a[href],.stop-animation button,.stop-animation [role="button"],.stop-animation [onclick],.stop-animation input[type="button"],.stop-animation input[type="submit"],.stop-animation input[type="reset"],.stop-animation .btn,.stop-animation .button,.stop-animation [class*="btn"],.stop-animation [class*="button"],.stop-animation [tabindex]:not([tabindex="-1"]){cursor:pointer !important;}.stop-animation input[type="text"],.stop-animation input[type="email"],.stop-animation input[type="search"],.stop-animation input[type="tel"],.stop-animation input[type="url"],.stop-animation input[type="password"],.stop-animation textarea,.stop-animation [contenteditable="true"]{cursor:text !important;}.stop-animation img,.stop-animation video,.stop-animation audio,.stop-animation iframe,.stop-animation embed,.stop-animation object{max-width:100% !important;max-height:100% !important;}.stop-animation h1,.stop-animation h2,.stop-animation h3,.stop-animation h4,.stop-animation h5,.stop-animation h6,.stop-animation p,.stop-animation span,.stop-animation div,.stop-animation a,.stop-animation li,.stop-animation td,.stop-animation th,.stop-animation label{}.stop-animation *[class*="animate"],.stop-animation *[class*="fade"],.stop-animation *[class*="slide"],.stop-animation *[class*="bounce"],.stop-animation *[class*="pulse"],.stop-animation *[class*="shake"],.stop-animation *[class*="flash"],.stop-animation *[class*="blink"],.stop-animation *[class*="glow"],.stop-animation *[class*="spin"],.stop-animation *[class*="rotate"],.stop-animation *[class*="scale"],.stop-animation *[class*="zoom"],.stop-animation *[class*="wiggle"],.stop-animation *[class*="jiggle"],.stop-animation *[class*="twist"],.stop-animation *[class*="flip"],.stop-animation *[class*="swing"],.stop-animation *[class*="wobble"],.stop-animation *[class*="tilt"],.stop-animation *[class*="motion"],.stop-animation *[class*="move"],.stop-animation *[class*="float"],.stop-animation *[class*="drift"],.stop-animation *[class*="sway"],.stop-animation *[class*="rock"],.stop-animation *[class*="wave"],.stop-animation *[class*="flow"],.stop-animation *[class*="glide"],.stop-animation *[class*="sweep"],.stop-animation *[class*="swoop"],.stop-animation *[class*="dive"],.stop-animation *[class*="rise"],.stop-animation *[class*="fall"],.stop-animation *[class*="drop"],.stop-animation *[class*="lift"],.stop-animation *[class*="sink"],.stop-animation *[class*="hover"],.stop-animation *[class*="orbit"],.stop-animation *[class*="revolve"],.stop-animation *[class*="turn"],.stop-animation *[class*="twirl"],.stop-animation *[class*="whirl"],.stop-animation *[class*="spiral"],.stop-animation *[class*="helix"],.stop-animation *[class*="coil"],.stop-animation *[class*="curl"],.stop-animation *[class*="bend"],.stop-animation *[class*="flex"],.stop-animation *[class*="stretch"]{animation:none !important;transition:none !important;animation-play-state:paused !important;}.stop-animation *[class*="animate"],.stop-animation *[class*="fade"],.stop-animation *[class*="slide"],.stop-animation *[class*="bounce"],.stop-animation *[class*="pulse"],.stop-animation *[class*="shake"],.stop-animation *[class*="flash"],.stop-animation *[class*="blink"],.stop-animation *[class*="glow"],.stop-animation *[class*="spin"],.stop-animation *[class*="rotate"],.stop-animation *[class*="scale"],.stop-animation *[class*="zoom"],.stop-animation *[class*="wiggle"],.stop-animation *[class*="jiggle"],.stop-animation *[class*="twist"],.stop-animation *[class*="flip"],.stop-animation *[class*="swing"],.stop-animation *[class*="wobble"],.stop-animation *[class*="tilt"]{}.stop-animation img,.stop-animation video,.stop-animation audio,.stop-animation iframe,.stop-animation embed,.stop-animation object{max-width:100% !important;max-height:100% !important;}.stop-animation h1,.stop-animation h2,.stop-animation h3,.stop-animation h4,.stop-animation h5,.stop-animation h6,.stop-animation p,.stop-animation span,.stop-animation div,.stop-animation a,.stop-animation li,.stop-animation td,.stop-animation th,.stop-animation label{}.stop-animation *[class*="animate"],.stop-animation *[class*="fade"],.stop-animation *[class*="slide"],.stop-animation *[class*="bounce"],.stop-animation *[class*="pulse"],.stop-animation *[class*="shake"],.stop-animation *[class*="flash"],.stop-animation *[class*="blink"],.stop-animation *[class*="glow"],.stop-animation *[class*="spin"],.stop-animation *[class*="rotate"],.stop-animation *[class*="scale"],.stop-animation *[class*="zoom"],.stop-animation *[class*="wiggle"],.stop-animation *[class*="jiggle"],.stop-animation *[class*="twist"],.stop-animation *[class*="flip"],.stop-animation *[class*="swing"],.stop-animation *[class*="wobble"],.stop-animation *[class*="tilt"],.stop-animation *[class*="motion"],.stop-animation *[class*="move"],.stop-animation *[class*="float"],.stop-animation *[class*="drift"],.stop-animation *[class*="sway"],.stop-animation *[class*="rock"],.stop-animation *[class*="wave"],.stop-animation *[class*="flow"],.stop-animation *[class*="glide"],.stop-animation *[class*="sweep"],.stop-animation *[class*="swoop"],.stop-animation *[class*="dive"],.stop-animation *[class*="rise"],.stop-animation *[class*="fall"],.stop-animation *[class*="drop"],.stop-animation *[class*="lift"],.stop-animation *[class*="sink"],.stop-animation *[class*="hover"],.stop-animation *[class*="orbit"],.stop-animation *[class*="revolve"],.stop-animation *[class*="turn"],.stop-animation *[class*="twirl"],.stop-animation *[class*="whirl"],.stop-animation *[class*="spiral"],.stop-animation *[class*="helix"],.stop-animation *[class*="coil"],.stop-animation *[class*="curl"],.stop-animation *[class*="bend"],.stop-animation *[class*="flex"],.stop-animation *[class*="stretch"],.stop-animation *[class*="squash"],.stop-animation *[class*="squeeze"],.stop-animation *[class*="compress"],.stop-animation *[class*="expand"],.stop-animation *[class*="grow"],.stop-animation *[class*="shrink"],.stop-animation *[class*="inflate"],.stop-animation *[class*="deflate"],.stop-animation *[class*="morph"],.stop-animation *[class*="transition"],.stop-animation *[class*="migrate"],.stop-animation *[class*="shift"],.stop-animation *[class*="aos"],.stop-animation *[class*="wow"],.stop-animation *[class*="framer"],.stop-animation *[class*="spring"],.stop-animation *[class*="ease"],.stop-animation *[class*="cubic"],.stop-animation *[class*="bounce-in"],.stop-animation *[class*="bounce-out"],.stop-animation *[class*="fade-in"],.stop-animation *[class*="fade-out"],.stop-animation *[class*="slide-in"],.stop-animation *[class*="slide-out"],.stop-animation *[class*="zoom-in"],.stop-animation *[class*="zoom-out"],.stop-animation *[class*="flip-in"],.stop-animation *[class*="flip-out"],.stop-animation *[class*="rotate-in"],.stop-animation *[class*="rotate-out"],.stop-animation *[class*="scale-in"],.stop-animation *[class*="scale-out"],.stop-animation *[class*="skew"],.stop-animation *[class*="skew-in"],.stop-animation *[class*="skew-out"],.stop-animation *[class*="elastic"],.stop-animation *[class*="back"],.stop-animation *[class*="circ"],.stop-animation *[class*="expo"],.stop-animation *[class*="quad"],.stop-animation *[class*="quart"],.stop-animation *[class*="quint"],.stop-animation *[class*="sine"],.stop-animation *[class*="power"],.stop-animation *[class*="strong"],.stop-animation *[class*="swing"],.stop-animation *[class*="tada"],.stop-animation *[class*="rubber"],.stop-animation *[class*="jello"],.stop-animation *[class*="heartbeat"],.stop-animation *[class*="headshake"],.stop-animation *[class*="hinge"],.stop-animation *[class*="jack"],.stop-animation *[class*="lightSpeed"],.stop-animation *[class*="roll"],.stop-animation *[class*="rotate"],.stop-animation *[class*="slide"],.stop-animation *[class*="zoom"],.stop-animation *[class*="flip"],.stop-animation *[class*="bounce"],.stop-animation *[class*="shake"],.stop-animation *[class*="wobble"],.stop-animation *[class*="pulse"],.stop-animation *[class*="flash"],.stop-animation *[class*="rubberBand"],.stop-animation *[class*="swing"],.stop-animation *[class*="tada"],.stop-animation *[class*="wobble"],.stop-animation *[class*="jello"],.stop-animation *[class*="heartbeat"],.stop-animation *[class*="headShake"],.stop-animation *[class*="hinge"],.stop-animation *[class*="jackInTheBox"],.stop-animation *[class*="lightSpeedIn"],.stop-animation *[class*="lightSpeedOut"],.stop-animation *[class*="rollIn"],.stop-animation *[class*="rollOut"],.stop-animation *[class*="rotateIn"],.stop-animation *[class*="rotateInDownLeft"],.stop-animation *[class*="rotateInDownRight"],.stop-animation *[class*="rotateInUpLeft"],.stop-animation *[class*="rotateInUpRight"],.stop-animation *[class*="rotateOut"],.stop-animation *[class*="rotateOutDownLeft"],.stop-animation *[class*="rotateOutDownRight"],.stop-animation *[class*="rotateOutUpLeft"],.stop-animation *[class*="rotateOutUpRight"],.stop-animation *[class*="slideInDown"],.stop-animation *[class*="slideInLeft"],.stop-animation *[class*="slideInRight"],.stop-animation *[class*="slideInUp"],.stop-animation *[class*="slideOutDown"],.stop-animation *[class*="slideOutLeft"],.stop-animation *[class*="slideOutRight"],.stop-animation *[class*="slideOutUp"],.stop-animation *[class*="zoomIn"],.stop-animation *[class*="zoomInDown"],.stop-animation *[class*="zoomInLeft"],.stop-animation *[class*="zoomInRight"],.stop-animation *[class*="zoomInUp"],.stop-animation *[class*="zoomOut"],.stop-animation *[class*="zoomOutDown"],.stop-animation *[class*="zoomOutLeft"],.stop-animation *[class*="zoomOutRight"],.stop-animation *[class*="zoomOutUp"],.stop-animation *[class*="flipInX"],.stop-animation *[class*="flipInY"],.stop-animation *[class*="flipOutX"],.stop-animation *[class*="flipOutY"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation .fade-up,.stop-animation .fade-left,.stop-animation .fade-right,.stop-animation .fade-in,.stop-animation .slide-in,.stop-animation .scale-in,.stop-animation .zoom-in,.stop-animation [data-splitting],.stop-animation .split,.stop-animation .char,.stop-animation .word{opacity:1 !important;visibility:visible !important;animation:none !important;transition:none !important;}.stop-animation *[style*="animation"],.stop-animation *[style*="transition"],.stop-animation *[style*="opacity"],.stop-animation *[style*="visibility"],.stop-animation *[data-animation],.stop-animation *[data-transition],.stop-animation *[data-opacity],.stop-animation *[data-visibility]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation video,.stop-animation audio,.stop-animation iframe,.stop-animation embed,.stop-animation object,.stop-animation [autoplay],.stop-animation [data-autoplay],.stop-animation [class*="autoplay"],.stop-animation [class*="video"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation *:hover,.stop-animation *:focus,.stop-animation *:active,.stop-animation *[class*="hover"],.stop-animation *[class*="focus"],.stop-animation *[class*="active"],.stop-animation *[data-hover],.stop-animation *[data-focus],.stop-animation *[data-active]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation [data-splitting],.stop-animation .split,.stop-animation .char,.stop-animation .word,.stop-animation [data-splitting] .char,.stop-animation [data-splitting] .word,.stop-animation [class*="split"],.stop-animation [class*="char"],.stop-animation [class*="word"],.stop-animation [class*="letter"],.stop-animation [class*="text-animation"],.stop-animation [class*="typing"],.stop-animation [class*="typewriter"],.stop-animation [class*="reveal"],.stop-animation [class*="unveil"],.stop-animation [class*="show-text"],.stop-animation [class*="text-effect"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation img:hover,.stop-animation [class*="image"]:hover,.stop-animation [class*="img"]:hover,.stop-animation [class*="photo"]:hover,.stop-animation [class*="picture"]:hover,.stop-animation [class*="gallery"]:hover,.stop-animation [class*="portfolio"]:hover,.stop-animation [class*="card"]:hover,.stop-animation [class*="item"]:hover{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation progress,.stop-animation [role="progressbar"],.stop-animation [class*="progress"],.stop-animation [class*="bar"],.stop-animation [class*="indicator"],.stop-animation [class*="track"],.stop-animation [class*="line"],.stop-animation [class*="path"],.stop-animation [class*="stroke"],.stop-animation [class*="fill"],.stop-animation [class*="gradient"],.stop-animation [class*="wave"],.stop-animation [class*="flow"],.stop-animation [class*="stream"],.stop-animation [class*="runner"],.stop-animation [class*="mover"],.stop-animation [class*="slider"],.stop-animation [class*="stopper"],.stop-animation [class*="marker"],.stop-animation [class*="pointer"],.stop-animation [class*="cursor"],.stop-animation [class*="dot"],.stop-animation [class*="circle"],.stop-animation [class*="ring"],.stop-animation [class*="orbit"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation svg,.stop-animation svg path,.stop-animation svg line,.stop-animation svg polyline,.stop-animation svg polygon,.stop-animation svg circle,.stop-animation svg rect,.stop-animation svg ellipse,.stop-animation svg g{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;}.stop-animation *[class*="item"],.stop-animation *[class*="content"],.stop-animation *[class*="count"],.stop-animation *[class*="counter"],.stop-animation *[class*="text"],.stop-animation *[class*="header"],.stop-animation *[class*="connector"],.stop-animation *[class*="dot"],.stop-animation *[class*="timeline"],.stop-animation *[class*="step"],.stop-animation *[class*="stage"],.stop-animation *[class*="phase"],.stop-animation *[class*="card"],.stop-animation *[class*="block"],.stop-animation *[class*="section"],.stop-animation *[class*="container"],.stop-animation *[class*="wrapper"],.stop-animation *[class*="element"],.stop-animation *[class*="component"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;rotate:none !important;scale:none !important;}.stop-animation *[style*="animation"],.stop-animation *[style*="transition"],.stop-animation *[style*="opacity"],.stop-animation *[style*="visibility"],.stop-animation *[data-animation],.stop-animation *[data-transition],.stop-animation *[data-opacity],.stop-animation *[data-visibility]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;rotate:none !important;scale:none !important;}.stop-animation *[class*="stopper"],.stop-animation *[class*="marker"],.stop-animation *[class*="pointer"],.stop-animation *[class*="cursor"],.stop-animation *[class*="dot"],.stop-animation *[class*="circle"],.stop-animation *[class*="ring"],.stop-animation *[class*="orbit"],.stop-animation *[class*="indicator"],.stop-animation *[class*="slider"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;z-index:auto !important;}.stop-animation *:not(body),.stop-animation *::before,.stop-animation *::after{visibility:visible !important;opacity:1 !important;color:inherit !important;text-decoration:none !important;animation:none !important;transition:none !important;animation-duration:0s !important;transition-duration:0s !important;animation-iteration-count:1 !important;animation-play-state:paused !important;display:inherit !important;}.stop-animation *[class*="blink"],.stop-animation *[class*="flash"],.stop-animation *[class*="flicker"],.stop-animation *[class*="pulse"],.stop-animation *[class*="glow"],.stop-animation *[class*="shine"],.stop-animation *[class*="twinkle"],.stop-animation *[class*="sparkle"],.stop-animation *[class*="blink-text"],.stop-animation *[class*="flashing-text"],.stop-animation *[class*="animated-text"],.stop-animation *[class*="text-effect"],.stop-animation *[class*="text-animation"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;color:inherit !important;text-decoration:none !important;animation-duration:0s !important;transition-duration:0s !important;animation-iteration-count:1 !important;animation-play-state:paused !important;}.stop-animation *[style*="animation"],.stop-animation *[style*="transition"],.stop-animation *[style*="opacity"],.stop-animation *[style*="visibility"],.stop-animation *[style*="color"]{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;color:inherit !important;text-decoration:none !important;animation-duration:0s !important;transition-duration:0s !important;animation-iteration-count:1 !important;animation-play-state:paused !important;}.stop-animation h1,.stop-animation h2,.stop-animation h3,.stop-animation h4,.stop-animation h5,.stop-animation h6,.stop-animation p,.stop-animation span,.stop-animation div,.stop-animation a,.stop-animation li,.stop-animation td,.stop-animation th,.stop-animation label,.stop-animation button{animation:none !important;transition:none !important;opacity:1 !important;visibility:visible !important;color:inherit !important;text-decoration:none !important;animation-duration:0s !important;transition-duration:0s !important;animation-iteration-count:1 !important;animation-play-state:paused !important;}`;
+                style.textContent = `
+    
+                    .stop-animation *,
+    
+                    .stop-animation *::before,
+    
+                    .stop-animation *::after {
+    
+                        animation-duration: 0.01ms !important;
+    
+                        animation-iteration-count: 1 !important;
+    
+                        animation-delay: 0s !important;
+    
+                        transition-duration: 0.01ms !important;
+    
+                        /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
+    
+                    }
+    
+                    
+    
+                    .stop-animation * {
+    
+                        animation-play-state: paused !important;
+    
+                    }
+                    
+                    /* ULTIMATE CATCH-ALL: Force ALL elements to final state */
+                    .stop-animation *,
+                    .stop-animation *::before,
+                    .stop-animation *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* CRITICAL: Ensure elements maintain original positions and sizes - Conservative approach */
+                    .stop-animation * {
+                        /* Only ensure visibility, don't reset transforms globally */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                    }
+                    
+                    /* Only reset transform properties for animated elements - don't touch positioning */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"] {
+                        /* Only reset transform properties, preserve positioning */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        animation-play-state: paused !important;
+                    }
+
+                    /* Ensure interactive elements still show pointer cursor in stop-animation mode */
+                    .stop-animation a[href],
+                    .stop-animation button,
+                    .stop-animation [role="button"],
+                    .stop-animation [onclick],
+                    .stop-animation input[type="button"],
+                    .stop-animation input[type="submit"],
+                    .stop-animation input[type="reset"],
+                    .stop-animation .btn,
+                    .stop-animation .button,
+                    .stop-animation [class*="btn"],
+                    .stop-animation [class*="button"],
+                    .stop-animation [tabindex]:not([tabindex="-1"]) {
+                        cursor: pointer !important;
+                    }
+                    /* Keep text cursor for text-editable fields */
+                    .stop-animation input[type="text"],
+                    .stop-animation input[type="email"],
+                    .stop-animation input[type="search"],
+                    .stop-animation input[type="tel"],
+                    .stop-animation input[type="url"],
+                    .stop-animation input[type="password"],
+                    .stop-animation textarea,
+                    .stop-animation [contenteditable="true"] {
+                        cursor: text !important;
+                    }
+                    
+                    /* Preserve original layout for specific elements */
+                    .stop-animation img,
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        max-width: 100% !important;
+                        max-height: 100% !important;
+                    }
+                    
+                    /* Ensure text elements maintain original layout */
+                    .stop-animation h1,
+                    .stop-animation h2,
+                    .stop-animation h3,
+                    .stop-animation h4,
+                    .stop-animation h5,
+                    .stop-animation h6,
+                    .stop-animation p,
+                    .stop-animation span,
+                    .stop-animation div,
+                    .stop-animation a,
+                    .stop-animation li,
+                    .stop-animation td,
+                    .stop-animation th,
+                    .stop-animation label {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* CRITICAL: Force ALL possible animations to their final state immediately */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"],
+                    /* Additional comprehensive animation coverage */
+                    .stop-animation *[class*="motion"],
+                    .stop-animation *[class*="move"],
+                    .stop-animation *[class*="float"],
+                    .stop-animation *[class*="drift"],
+                    .stop-animation *[class*="sway"],
+                    .stop-animation *[class*="rock"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="glide"],
+                    .stop-animation *[class*="sweep"],
+                    .stop-animation *[class*="swoop"],
+                    .stop-animation *[class*="dive"],
+                    .stop-animation *[class*="rise"],
+                    .stop-animation *[class*="fall"],
+                    .stop-animation *[class*="drop"],
+                    .stop-animation *[class*="lift"],
+                    .stop-animation *[class*="sink"],
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="revolve"],
+                    .stop-animation *[class*="turn"],
+                    .stop-animation *[class*="twirl"],
+                    .stop-animation *[class*="whirl"],
+                    .stop-animation *[class*="spiral"],
+                    .stop-animation *[class*="helix"],
+                    .stop-animation *[class*="coil"],
+                    .stop-animation *[class*="curl"],
+                    .stop-animation *[class*="bend"],
+                    .stop-animation *[class*="flex"],
+                    .stop-animation *[class*="stretch"] {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* Only reset positioning for elements that are likely to be animated */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"] {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        /* scale: 1 !important; - REMOVED: This was breaking website layout */
+                        /* rotate: 0deg !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* Preserve original layout for specific elements */
+                    .stop-animation img,
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        max-width: 100% !important;
+                        max-height: 100% !important;
+                    }
+                    
+                    /* Ensure text elements maintain original layout */
+                    .stop-animation h1,
+                    .stop-animation h2,
+                    .stop-animation h3,
+                    .stop-animation h4,
+                    .stop-animation h5,
+                    .stop-animation h6,
+                    .stop-animation p,
+                    .stop-animation span,
+                    .stop-animation div,
+                    .stop-animation a,
+                    .stop-animation li,
+                    .stop-animation td,
+                    .stop-animation th,
+                    .stop-animation label {
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* width: auto !important; - REMOVED: This was breaking website layout */
+                        /* height: auto !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* CRITICAL: Force ALL possible animations to their final state immediately */
+                    .stop-animation *[class*="animate"],
+                    .stop-animation *[class*="fade"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="spin"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="scale"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="wiggle"],
+                    .stop-animation *[class*="jiggle"],
+                    .stop-animation *[class*="twist"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="tilt"],
+                    /* Additional comprehensive animation coverage */
+                    .stop-animation *[class*="motion"],
+                    .stop-animation *[class*="move"],
+                    .stop-animation *[class*="float"],
+                    .stop-animation *[class*="drift"],
+                    .stop-animation *[class*="sway"],
+                    .stop-animation *[class*="rock"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="glide"],
+                    .stop-animation *[class*="sweep"],
+                    .stop-animation *[class*="swoop"],
+                    .stop-animation *[class*="dive"],
+                    .stop-animation *[class*="rise"],
+                    .stop-animation *[class*="fall"],
+                    .stop-animation *[class*="drop"],
+                    .stop-animation *[class*="lift"],
+                    .stop-animation *[class*="sink"],
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="revolve"],
+                    .stop-animation *[class*="turn"],
+                    .stop-animation *[class*="twirl"],
+                    .stop-animation *[class*="whirl"],
+                    .stop-animation *[class*="spiral"],
+                    .stop-animation *[class*="helix"],
+                    .stop-animation *[class*="coil"],
+                    .stop-animation *[class*="curl"],
+                    .stop-animation *[class*="bend"],
+                    .stop-animation *[class*="flex"],
+                    .stop-animation *[class*="stretch"],
+                    .stop-animation *[class*="squash"],
+                    .stop-animation *[class*="squeeze"],
+                    .stop-animation *[class*="compress"],
+                    .stop-animation *[class*="expand"],
+                    .stop-animation *[class*="grow"],
+                    .stop-animation *[class*="shrink"],
+                    .stop-animation *[class*="inflate"],
+                    .stop-animation *[class*="deflate"],
+                    .stop-animation *[class*="morph"],
+                    /* REMOVED: .stop-animation *[class*="transform"], - This was interfering with scroll libraries */
+                    .stop-animation *[class*="transition"],
+                    .stop-animation *[class*="migrate"],
+                    .stop-animation *[class*="shift"],
+                    /* Additional modern animation frameworks and libraries */
+                    .stop-animation *[class*="aos"], /* AOS (Animate On Scroll) */
+                    .stop-animation *[class*="wow"], /* WOW.js */
+                    .stop-animation *[class*="framer"], /* Framer Motion */
+                    .stop-animation *[class*="spring"], /* Spring animations */
+                    .stop-animation *[class*="ease"], /* Easing animations */
+                    .stop-animation *[class*="cubic"], /* Cubic bezier animations */
+                    .stop-animation *[class*="bounce-in"], /* Bounce variations */
+                    .stop-animation *[class*="bounce-out"],
+                    .stop-animation *[class*="fade-in"],
+                    .stop-animation *[class*="fade-out"],
+                    .stop-animation *[class*="slide-in"],
+                    .stop-animation *[class*="slide-out"],
+                    .stop-animation *[class*="zoom-in"],
+                    .stop-animation *[class*="zoom-out"],
+                    .stop-animation *[class*="flip-in"],
+                    .stop-animation *[class*="flip-out"],
+                    .stop-animation *[class*="rotate-in"],
+                    .stop-animation *[class*="rotate-out"],
+                    .stop-animation *[class*="scale-in"],
+                    .stop-animation *[class*="scale-out"],
+                    .stop-animation *[class*="skew"],
+                    .stop-animation *[class*="skew-in"],
+                    .stop-animation *[class*="skew-out"],
+                    .stop-animation *[class*="elastic"],
+                    .stop-animation *[class*="back"],
+                    .stop-animation *[class*="circ"],
+                    .stop-animation *[class*="expo"],
+                    .stop-animation *[class*="quad"],
+                    .stop-animation *[class*="quart"],
+                    .stop-animation *[class*="quint"],
+                    .stop-animation *[class*="sine"],
+                    .stop-animation *[class*="power"],
+                    .stop-animation *[class*="strong"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="tada"],
+                    .stop-animation *[class*="rubber"],
+                    .stop-animation *[class*="jello"],
+                    .stop-animation *[class*="heartbeat"],
+                    .stop-animation *[class*="headshake"],
+                    .stop-animation *[class*="hinge"],
+                    .stop-animation *[class*="jack"],
+                    .stop-animation *[class*="lightSpeed"],
+                    .stop-animation *[class*="roll"],
+                    .stop-animation *[class*="rotate"],
+                    .stop-animation *[class*="slide"],
+                    .stop-animation *[class*="zoom"],
+                    .stop-animation *[class*="flip"],
+                    .stop-animation *[class*="bounce"],
+                    .stop-animation *[class*="shake"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="rubberBand"],
+                    .stop-animation *[class*="swing"],
+                    .stop-animation *[class*="tada"],
+                    .stop-animation *[class*="wobble"],
+                    .stop-animation *[class*="jello"],
+                    .stop-animation *[class*="heartbeat"],
+                    .stop-animation *[class*="headShake"],
+                    .stop-animation *[class*="hinge"],
+                    .stop-animation *[class*="jackInTheBox"],
+                    .stop-animation *[class*="lightSpeedIn"],
+                    .stop-animation *[class*="lightSpeedOut"],
+                    .stop-animation *[class*="rollIn"],
+                    .stop-animation *[class*="rollOut"],
+                    .stop-animation *[class*="rotateIn"],
+                    .stop-animation *[class*="rotateInDownLeft"],
+                    .stop-animation *[class*="rotateInDownRight"],
+                    .stop-animation *[class*="rotateInUpLeft"],
+                    .stop-animation *[class*="rotateInUpRight"],
+                    .stop-animation *[class*="rotateOut"],
+                    .stop-animation *[class*="rotateOutDownLeft"],
+                    .stop-animation *[class*="rotateOutDownRight"],
+                    .stop-animation *[class*="rotateOutUpLeft"],
+                    .stop-animation *[class*="rotateOutUpRight"],
+                    .stop-animation *[class*="slideInDown"],
+                    .stop-animation *[class*="slideInLeft"],
+                    .stop-animation *[class*="slideInRight"],
+                    .stop-animation *[class*="slideInUp"],
+                    .stop-animation *[class*="slideOutDown"],
+                    .stop-animation *[class*="slideOutLeft"],
+                    .stop-animation *[class*="slideOutRight"],
+                    .stop-animation *[class*="slideOutUp"],
+                    .stop-animation *[class*="zoomIn"],
+                    .stop-animation *[class*="zoomInDown"],
+                    .stop-animation *[class*="zoomInLeft"],
+                    .stop-animation *[class*="zoomInRight"],
+                    .stop-animation *[class*="zoomInUp"],
+                    .stop-animation *[class*="zoomOut"],
+                    .stop-animation *[class*="zoomOutDown"],
+                    .stop-animation *[class*="zoomOutLeft"],
+                    .stop-animation *[class*="zoomOutRight"],
+                    .stop-animation *[class*="zoomOutUp"],
+                    .stop-animation *[class*="flipInX"],
+                    .stop-animation *[class*="flipInY"],
+                    .stop-animation *[class*="flipOutX"],
+                    .stop-animation *[class*="flipOutY"] {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* Force GSAP and library animations to final state */
+                    .stop-animation .fade-up,
+                    .stop-animation .fade-left,
+                    .stop-animation .fade-right,
+                    .stop-animation .fade-in,
+                    .stop-animation .slide-in,
+                    .stop-animation .scale-in,
+                    .stop-animation .zoom-in,
+                    .stop-animation [data-splitting],
+                    .stop-animation .split,
+                    .stop-animation .char,
+                    .stop-animation .word {
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        animation: none !important;
+                        transition: none !important;
+                    }
+                    
+                    /* COMPREHENSIVE CATCH-ALL: Force ANY element with animation-related styles to final state */
+                    .stop-animation *[style*="animation"],
+                    .stop-animation *[style*="transition"],
+                    /* REMOVED: .stop-animation *[style*="transform"], - This was interfering with scroll libraries */
+                    .stop-animation *[style*="opacity"],
+                    .stop-animation *[style*="visibility"],
+                    .stop-animation *[data-animation],
+                    .stop-animation *[data-transition],
+                    /* REMOVED: .stop-animation *[data-transform], - This was interfering with scroll libraries */
+                    .stop-animation *[data-opacity],
+                    .stop-animation *[data-visibility] {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* AUTOPLAY MEDIA: Stop all autoplay videos and media */
+                    .stop-animation video,
+                    .stop-animation audio,
+                    .stop-animation iframe,
+                    .stop-animation embed,
+                    .stop-animation object,
+                    .stop-animation [autoplay],
+                    .stop-animation [data-autoplay],
+                    .stop-animation [class*="autoplay"],
+                    .stop-animation [class*="video"] {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* HOVER ANIMATIONS: Disable all hover-triggered animations */
+                    .stop-animation *:hover,
+                    .stop-animation *:focus,
+                    .stop-animation *:active,
+                    .stop-animation *[class*="hover"],
+                    .stop-animation *[class*="focus"],
+                    .stop-animation *[class*="active"],
+                    .stop-animation *[data-hover],
+                    .stop-animation *[data-focus],
+                    .stop-animation *[data-active] {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* LETTER-BY-LETTER ANIMATIONS: Force all text animations to final state */
+                    .stop-animation [data-splitting],
+                    .stop-animation .split,
+                    .stop-animation .char,
+                    .stop-animation .word,
+                    .stop-animation [data-splitting] .char,
+                    .stop-animation [data-splitting] .word,
+                    .stop-animation [class*="split"],
+                    .stop-animation [class*="char"],
+                    .stop-animation [class*="word"],
+                    .stop-animation [class*="letter"],
+                    .stop-animation [class*="text-animation"],
+                    .stop-animation [class*="typing"],
+                    .stop-animation [class*="typewriter"],
+                    .stop-animation [class*="reveal"],
+                    .stop-animation [class*="unveil"],
+                    .stop-animation [class*="show-text"],
+                    .stop-animation [class*="text-effect"] {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* IMAGE HOVER EFFECTS: Disable all image hover animations */
+                    .stop-animation img:hover,
+                    .stop-animation [class*="image"]:hover,
+                    .stop-animation [class*="img"]:hover,
+                    .stop-animation [class*="photo"]:hover,
+                    .stop-animation [class*="picture"]:hover,
+                    .stop-animation [class*="gallery"]:hover,
+                    .stop-animation [class*="portfolio"]:hover,
+                    .stop-animation [class*="card"]:hover,
+                    .stop-animation [class*="item"]:hover {
+                        animation: none !important;
+                        transition: none !important;
+                        /* animation-fill-mode: forwards !important; - REMOVED: This was causing elements to snap to final positions and interfere with scrolling */
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* REMOVED: SCROLL-TRIGGERED ANIMATIONS - This was interfering with scroll animated websites */
+                    /* .stop-animation *[class*="scroll"],
+                    .stop-animation *[class*="progress"],
+                    .stop-animation *[class*="bar"],
+                    .stop-animation *[class*="line"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="track"],
+                    .stop-animation *[class*="path"],
+                    .stop-animation *[class*="stroke"],
+                    .stop-animation *[class*="fill"],
+                    .stop-animation *[class*="gradient"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="stream"],
+                    .stop-animation *[class*="runner"],
+                    .stop-animation *[class*="mover"],
+                    .stop-animation *[class*="slider"],
+                    .stop-animation *[class*="indicator"],
+                    .stop-animation *[class*="stopper"],
+                    .stop-animation *[class*="marker"],
+                    .stop-animation *[class*="pointer"],
+                    .stop-animation *[class*="cursor"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="circle"],
+                    .stop-animation *[class*="ring"],
+                    .stop-animation *[class*="orbit"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                    } */
+                    
+                    /* PROGRESS BARS AND SCROLL INDICATORS: Stop all progress animations */
+                    .stop-animation progress,
+                    .stop-animation [role="progressbar"],
+                    .stop-animation [class*="progress"],
+                    .stop-animation [class*="bar"],
+                    .stop-animation [class*="indicator"],
+                    .stop-animation [class*="track"],
+                    .stop-animation [class*="line"],
+                    .stop-animation [class*="path"],
+                    .stop-animation [class*="stroke"],
+                    .stop-animation [class*="fill"],
+                    .stop-animation [class*="gradient"],
+                    .stop-animation [class*="wave"],
+                    .stop-animation [class*="flow"],
+                    .stop-animation [class*="stream"],
+                    .stop-animation [class*="runner"],
+                    .stop-animation [class*="mover"],
+                    .stop-animation [class*="slider"],
+                    .stop-animation [class*="stopper"],
+                    .stop-animation [class*="marker"],
+                    .stop-animation [class*="pointer"],
+                    .stop-animation [class*="cursor"],
+                    .stop-animation [class*="dot"],
+                    .stop-animation [class*="circle"],
+                    .stop-animation [class*="ring"],
+                    .stop-animation [class*="orbit"] {
+                        animation: none !important;
+                        transition: none !important;
+                        
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* SVG LINE ANIMATIONS: Stop all SVG stroke animations */
+                    .stop-animation svg,
+                    .stop-animation svg path,
+                    .stop-animation svg line,
+                    .stop-animation svg polyline,
+                    .stop-animation svg polygon,
+                    .stop-animation svg circle,
+                    .stop-animation svg rect,
+                    .stop-animation svg ellipse,
+                    .stop-animation svg g {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* REMOVED: SCROLL-TRIGGERED LINE ANIMATIONS - This was interfering with scroll animated websites */
+                    /* .stop-animation *[class*="scroll"],
+                    .stop-animation *[class*="progress"],
+                    .stop-animation *[class*="bar"],
+                    .stop-animation *[class*="line"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="track"],
+                    .stop-animation *[class*="path"],
+                    .stop-animation *[class*="stroke"],
+                    .stop-animation *[class*="fill"],
+                    .stop-animation *[class*="gradient"],
+                    .stop-animation *[class*="wave"],
+                    .stop-animation *[class*="flow"],
+                    .stop-animation *[class*="stream"],
+                    .stop-animation *[class*="runner"],
+                    .stop-animation *[class*="mover"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                    } */
+                    
+                    /* GENERIC ANIMATION CATCH-ALL: Stop all possible animations */
+                    .stop-animation *[class*="item"],
+                    .stop-animation *[class*="content"],
+                    .stop-animation *[class*="count"],
+                    .stop-animation *[class*="counter"],
+                    .stop-animation *[class*="text"],
+                    .stop-animation *[class*="header"],
+                    .stop-animation *[class*="connector"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="timeline"],
+                    .stop-animation *[class*="step"],
+                    .stop-animation *[class*="stage"],
+                    .stop-animation *[class*="phase"],
+                    .stop-animation *[class*="card"],
+                    .stop-animation *[class*="block"],
+                    .stop-animation *[class*="section"],
+                    .stop-animation *[class*="container"],
+                    .stop-animation *[class*="wrapper"],
+                    .stop-animation *[class*="element"],
+                    .stop-animation *[class*="component"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    /* ULTIMATE CATCH-ALL: Stop ANY element with animation properties */
+                    .stop-animation *[style*="animation"],
+                    .stop-animation *[style*="transition"],
+                    /* REMOVED: .stop-animation *[style*="transform"], - This was interfering with scroll libraries */
+                    .stop-animation *[style*="opacity"],
+                    .stop-animation *[style*="visibility"],
+                    .stop-animation *[data-animation],
+                    .stop-animation *[data-transition],
+                    /* REMOVED: .stop-animation *[data-transform], - This was interfering with scroll libraries */
+                    .stop-animation *[data-opacity],
+                    .stop-animation *[data-visibility] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* translate: none !important; - REMOVED: This was breaking website layout */
+                        rotate: none !important;
+                        scale: none !important;
+                    }
+                    
+                    
+                    /* STOPPER AND MARKER ELEMENTS: Stop animations and reset positioning */
+                    .stop-animation *[class*="stopper"],
+                    .stop-animation *[class*="marker"],
+                    .stop-animation *[class*="pointer"],
+                    .stop-animation *[class*="cursor"],
+                    .stop-animation *[class*="dot"],
+                    .stop-animation *[class*="circle"],
+                    .stop-animation *[class*="ring"],
+                    .stop-animation *[class*="orbit"],
+                    .stop-animation *[class*="indicator"],
+                    .stop-animation *[class*="slider"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* top: auto !important; - REMOVED: This was breaking website layout */
+                        /* left: auto !important; - REMOVED: This was breaking website layout */
+                        /* right: auto !important; - REMOVED: This was breaking website layout */
+                        /* bottom: auto !important; - REMOVED: This was breaking website layout */
+                        z-index: auto !important;
+                    }
+                    
+                    /* CSS TEXT EFFECTS (BLINKING AND FLASHING) PREVENTION */
+                    /* Ensure all text is static, stopping any blinking or rapid color changes */
+                    .stop-animation *:not(body), 
+                    .stop-animation *::before, 
+                    .stop-animation *::after {
+                        /* Override CSS rules that cause rapid visibility changes */
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        color: inherit !important; 
+                        text-decoration: none !important; /* Catch legacy/non-standard 'blink' */
+                        
+                        /* Prevent any rapid color changes that could cause flashing */
+                        animation: none !important;
+                        transition: none !important;
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
+                        animation-iteration-count: 1 !important;
+                        animation-play-state: paused !important;
+                        
+                        /* Force text to remain visible and static */
+                        display: inherit !important;
+                        /* position: static !important; - REMOVED: This was breaking website layout */
+                        /* transform: none !important; - REMOVED: This was breaking website layout */
+                    }
+                    
+                    /* Specific targeting of blinking text elements */
+                    .stop-animation *[class*="blink"],
+                    .stop-animation *[class*="flash"],
+                    .stop-animation *[class*="flicker"],
+                    .stop-animation *[class*="pulse"],
+                    .stop-animation *[class*="glow"],
+                    .stop-animation *[class*="shine"],
+                    .stop-animation *[class*="twinkle"],
+                    .stop-animation *[class*="sparkle"],
+                    .stop-animation *[class*="blink-text"],
+                    .stop-animation *[class*="flashing-text"],
+                    .stop-animation *[class*="animated-text"],
+                    .stop-animation *[class*="text-effect"],
+                    .stop-animation *[class*="text-animation"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
+                        animation-iteration-count: 1 !important;
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* Override any CSS animations that could cause rapid visibility changes */
+                    .stop-animation *[style*="animation"],
+                    .stop-animation *[style*="transition"],
+                    .stop-animation *[style*="opacity"],
+                    .stop-animation *[style*="visibility"],
+                    .stop-animation *[style*="color"] {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
+                        animation-iteration-count: 1 !important;
+                        animation-play-state: paused !important;
+                    }
+                    
+                    /* Prevent rapid color changes in text elements */
+                    .stop-animation h1, .stop-animation h2, .stop-animation h3, 
+                    .stop-animation h4, .stop-animation h5, .stop-animation h6,
+                    .stop-animation p, .stop-animation span, .stop-animation div,
+                    .stop-animation a, .stop-animation li, .stop-animation td,
+                    .stop-animation th, .stop-animation label, .stop-animation button {
+                        animation: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        color: inherit !important;
+                        text-decoration: none !important;
+                        animation-duration: 0s !important;
+                        transition-duration: 0s !important;
+                        animation-iteration-count: 1 !important;
+                        animation-play-state: paused !important;
+                    }
+    
+                `;
     
                 document.head.appendChild(style);
     
@@ -23871,7 +33103,85 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 styleEl.id = 'seizure-safe-css';
                 document.head.appendChild(styleEl);
             }
-            styleEl.textContent = `html.seizure-safe::before,body.seizure-safe::before{content:"" !important;position:fixed !important;inset:0 !important;background:rgba(128,128,128,0.15) !important;z-index:2147483640 !important;pointer-events:none !important;}#accessbit-widget-container,#accessbit-widget-container *{animation-play-state:running !important;text-decoration:none !important;}html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]){animation-play-state:paused !important;transition:none !important;}html.seizure-safe lottie-player:not([id*="accessbit"]),html.seizure-safe dotlottie-player:not([id*="accessbit"]),html.seizure-safe canvas:not([id*="accessbit"]){pointer-events:none !important;}#accessbit-widget-container,[id*="accessbit-widget"],.accessbit-widget-panel{opacity:1 !important;visibility:visible !important;transition:opacity 0.25s ease,transform 0.25s ease !important;}body.seizure-safe *[class*="blink"],body.seizure-safe *[class*="shimmer"],body.seizure-safe *[class*="pulse"],body.seizure-safe *[class*="caret"],body.seizure-safe *[class*="cursor-blink"],body.seizure-safe *[class*="skeleton"],body.seizure-safe *[class*="pulsing"],body.seizure-safe *[class*="flashing"],html.seizure-safe *[class*="blink"],html.seizure-safe *[class*="shimmer"],html.seizure-safe *[class*="pulse"],html.seizure-safe *[class*="caret"],html.seizure-safe *[class*="cursor-blink"],html.seizure-safe *[class*="skeleton"],html.seizure-safe *[class*="pulsing"],html.seizure-safe *[class*="flashing"]{animation:none !important;}body.seizure-safe video,body.seizure-safe audio,body.seizure-safe iframe,body.seizure-safe embed,body.seizure-safe object,body.seizure-safe [autoplay],body.seizure-safe [data-autoplay],body.seizure-safe [class*="autoplay"],body.seizure-safe [class*="video"]{animation:none !important;transition:none !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe .swiper,body.seizure-safe .swiper-container,body.seizure-safe .slick-slider,body.seizure-safe .carousel,body.seizure-safe [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),body.seizure-safe [class*="carousel"],body.seizure-safe [data-slider],body.seizure-safe [data-carousel]{animation:none !important;pointer-events:auto !important;cursor:default !important;transition:transform 0.3s ease !important;}body.seizure-safe .swiper-slide,body.seizure-safe .slick-slide,body.seizure-safe .carousel-item{animation:none !important;transition:transform 0.3s ease !important;pointer-events:auto !important;}`;
+            styleEl.textContent = `
+                /* Subtle grey overlay when seizure-safe is on */
+                html.seizure-safe::before,
+                body.seizure-safe::before {
+                    content: "" !important;
+                    position: fixed !important;
+                    inset: 0 !important;
+                    background: rgba(128, 128, 128, 0.15) !important;
+                    z-index: 2147483640 !important;
+                    pointer-events: none !important;
+                }
+                /* Widget container never affected by pause */
+                #accessbit-widget-container,
+                #accessbit-widget-container * {
+                    animation-play-state: running !important;
+                    text-decoration: none !important;
+                }
+                /* Freeze the site's motion (exclude widget container first) */
+                html.seizure-safe *:not(#accessbit-widget-container):not([id*="accessbit"]):not([class*="accessbit"]) {
+                    animation-play-state: paused !important;
+                    transition: none !important;
+                }
+                /* Keep Lottie/Canvas visible but unclickable */
+                html.seizure-safe lottie-player:not([id*="accessbit"]),
+                html.seizure-safe dotlottie-player:not([id*="accessbit"]),
+                html.seizure-safe canvas:not([id*="accessbit"]) {
+                    pointer-events: none !important;
+                }
+                /* Protect widget panel/icon WITHOUT forcing layout */
+                #accessbit-widget-container,
+                [id*="accessbit-widget"],
+                .accessbit-widget-panel {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transition: opacity 0.25s ease, transform 0.25s ease !important;
+                }
+                /* Remove common flash triggers (blinking caret effects, shimmer skeletons, pulsing outlines, etc.) - animation only so sliders with pulse/shimmer in class are not forced visible */
+                body.seizure-safe *[class*="blink"], body.seizure-safe *[class*="shimmer"],
+                body.seizure-safe *[class*="pulse"], body.seizure-safe *[class*="caret"],
+                body.seizure-safe *[class*="cursor-blink"], body.seizure-safe *[class*="skeleton"],
+                body.seizure-safe *[class*="pulsing"], body.seizure-safe *[class*="flashing"],
+                html.seizure-safe *[class*="blink"], html.seizure-safe *[class*="shimmer"],
+                html.seizure-safe *[class*="pulse"], html.seizure-safe *[class*="caret"],
+                html.seizure-safe *[class*="cursor-blink"], html.seizure-safe *[class*="skeleton"],
+                html.seizure-safe *[class*="pulsing"], html.seizure-safe *[class*="flashing"] {
+                    animation: none !important;
+                }
+                /* AUTOPLAY MEDIA: Stop autoplay (exclude [class*="media"] to avoid forcing visibility on slider wrappers like slide-media) */
+                body.seizure-safe video, body.seizure-safe audio, body.seizure-safe iframe, body.seizure-safe embed, body.seizure-safe object, body.seizure-safe [autoplay], body.seizure-safe [data-autoplay], body.seizure-safe [class*="autoplay"], body.seizure-safe [class*="video"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                /* SLIDERS: Block auto-play animations only - do NOT override transform on slides or descendants (Swiper/Slick use transform for positioning) */
+                /* SLIDERS: Block auto-play animations but allow manual navigation */
+                body.seizure-safe .swiper,
+                body.seizure-safe .swiper-container,
+                body.seizure-safe .slick-slider,
+                body.seizure-safe .carousel,
+                body.seizure-safe [class*="slider"]:not([class*="toggle"]):not(.toggle-switch .slider),
+                body.seizure-safe [class*="carousel"],
+                body.seizure-safe [data-slider],
+                body.seizure-safe [data-carousel] {
+                    animation: none !important;
+                    pointer-events: auto !important;
+                    cursor: default !important;
+                    transition: transform 0.3s ease !important;
+                }
+                /* Slider slides: block auto-animations but allow manual slide changes */
+                body.seizure-safe .swiper-slide,
+                body.seizure-safe .slick-slide,
+                body.seizure-safe .carousel-item {
+                    animation: none !important;
+                    transition: transform 0.3s ease !important;
+                    pointer-events: auto !important;
+                }
+            `;
         }
         
         // No-op: do not pause WAAPI – keeps user animations visible
@@ -24202,7 +33512,99 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 
                 if (!on) return;
                 
-                style.textContent = `html.vision-impaired{}body.vision-impaired{overflow-x:hidden !important;}body.vision-impaired main img,body.vision-impaired main video,body.vision-impaired main picture,body.vision-impaired main canvas,body.vision-impaired main svg,body.vision-impaired section img,body.vision-impaired section video,body.vision-impaired section picture,body.vision-impaired section canvas,body.vision-impaired section svg,body.vision-impaired article img,body.vision-impaired article video,body.vision-impaired article picture,body.vision-impaired article canvas,body.vision-impaired article svg{filter:brightness(1.06) !important;-webkit-filter:brightness(1.06) !important;}body.vision-impaired main,body.vision-impaired [role="main"],body.vision-impaired .main-content,body.vision-impaired .page-wrapper{transform:scale(1.02);transform-origin:top center;}body.vision-impaired .accessbit-widget,body.vision-impaired #accessbit-widget,body.vision-impaired .accessbit-widget-panel,.accessbit-widget-panel{font-size:100%;filter:none !important;z-index:2147483646 !important;}body.vision-impaired .accessbit-widget-icon,body.vision-impaired #accessbit-widget-icon,.accessbit-widget-icon,#accessbit-widget-icon{font-size:100%;filter:none !important;z-index:2147483645 !important;}body.vision-impaired .accessbit-widget,body.vision-impaired #accessbit-widget,.accessbit-widget,#accessbit-widget{font-size:100%;filter:none !important;z-index:2147483647 !important;}body.vision-impaired img,html.vision-impaired img{}body.vision-impaired [class*="slider"],body.vision-impaired [id*="slider"],body.vision-impaired [data-slider],body.vision-impaired [class*="swiper"],body.vision-impaired [id*="swiper"],body.vision-impaired [class*="carousel"],body.vision-impaired [id*="carousel"],html.vision-impaired [class*="slider"],html.vision-impaired [id*="slider"],html.vision-impaired [data-slider],html.vision-impaired [class*="swiper"],html.vision-impaired [id*="swiper"],html.vision-impaired [class*="carousel"],html.vision-impaired [id*="carousel"]{}`;
+                style.textContent = `
+            /* VISION IMPAIRED: Keep typography intact; small brightness bump + gentle centered zoom */
+            
+            html.vision-impaired {
+                /* No zoom or layout changes */
+            }
+            
+            body.vision-impaired {
+                overflow-x: hidden !important;
+            }
+            
+            /* CRITICAL: Apply brightness filter ONLY to media inside main content areas - NEVER to nav/header */
+            /* Filters create stacking contexts that break sticky positioning - so we avoid them on nav ancestors */
+            body.vision-impaired main img,
+            body.vision-impaired main video,
+            body.vision-impaired main picture,
+            body.vision-impaired main canvas,
+            body.vision-impaired main svg,
+            body.vision-impaired section img,
+            body.vision-impaired section video,
+            body.vision-impaired section picture,
+            body.vision-impaired section canvas,
+            body.vision-impaired section svg,
+            body.vision-impaired article img,
+            body.vision-impaired article video,
+            body.vision-impaired article picture,
+            body.vision-impaired article canvas,
+            body.vision-impaired article svg {
+                filter: brightness(1.06) !important;
+                -webkit-filter: brightness(1.06) !important;
+            }
+            
+            /* Gentle zoom for main content only, anchored at top to avoid pushing nav off-screen */
+            body.vision-impaired main,
+            body.vision-impaired [role="main"],
+            body.vision-impaired .main-content,
+            body.vision-impaired .page-wrapper {
+                transform: scale(1.02);
+                transform-origin: top center;
+            }
+            
+            /* Exclude widget from scaling and brightness */
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            body.vision-impaired .accessbit-widget-panel,
+            .accessbit-widget-panel {
+                font-size: 100%;
+                filter: none !important;
+                z-index: 2147483646 !important;
+            }
+            
+            body.vision-impaired .accessbit-widget-icon,
+            body.vision-impaired #accessbit-widget-icon,
+            .accessbit-widget-icon,
+            #accessbit-widget-icon {
+                font-size: 100%;
+                filter: none !important;
+                z-index: 2147483645 !important;
+            }
+            
+            body.vision-impaired .accessbit-widget,
+            body.vision-impaired #accessbit-widget,
+            .accessbit-widget,
+            #accessbit-widget {
+                font-size: 100%;
+                filter: none !important;
+                z-index: 2147483647 !important;
+            }
+            
+            /* Keep images at original size (no scaling) */
+            body.vision-impaired img,
+            html.vision-impaired img {
+                /* Images stay at original size */
+            }
+            
+            /* Keep sliders and carousels at original size */
+            body.vision-impaired [class*="slider"],
+            body.vision-impaired [id*="slider"],
+            body.vision-impaired [data-slider],
+            body.vision-impaired [class*="swiper"],
+            body.vision-impaired [id*="swiper"],
+            body.vision-impaired [class*="carousel"],
+            body.vision-impaired [id*="carousel"],
+            html.vision-impaired [class*="slider"],
+            html.vision-impaired [id*="slider"],
+            html.vision-impaired [data-slider],
+            html.vision-impaired [class*="swiper"],
+            html.vision-impaired [id*="swiper"],
+            html.vision-impaired [class*="carousel"],
+            html.vision-impaired [id*="carousel"] {
+                /* Sliders stay at original size */
+            }
+        `;
                 
                 
             } catch (error) {
@@ -24299,7 +33701,17 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('seizure-safe-autoplay-css')) {
                 const style = document.createElement('style');
                 style.id = 'seizure-safe-autoplay-css';
-                style.textContent = `.seizure-safe video[autoplay],.seizure-safe audio[autoplay]{animation-play-state:paused !important;}.seizure-safe video,.seizure-safe audio{animation:none !important;transition:none !important;}`;
+                style.textContent = `
+                    .seizure-safe video[autoplay],
+                    .seizure-safe audio[autoplay] {
+                        animation-play-state: paused !important;
+                    }
+                    .seizure-safe video,
+                    .seizure-safe audio {
+                        animation: none !important;
+                        transition: none !important;
+                    }
+                `;
                 document.head.appendChild(style);
             }
             
@@ -24673,7 +34085,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('lottie-visual-freeze-css')) {
                 const style = document.createElement('style');
                 style.id = 'lottie-visual-freeze-css';
-                style.textContent = `.seizure-safe svg[data-lottie],.seizure-safe [data-lottie] svg,.seizure-safe lottie-player svg,.seizure-safe [class*="lottie"] svg{animation-play-state:paused !important;pointer-events:none !important;}`;
+                style.textContent = `
+                    /* Freeze Lottie SVG animations visually - maintains state, keeps structure intact */
+                    .seizure-safe svg[data-lottie],
+                    .seizure-safe [data-lottie] svg,
+                    .seizure-safe lottie-player svg,
+                    .seizure-safe [class*="lottie"] svg {
+                        animation-play-state: paused !important;
+                        pointer-events: none !important; /* Prevents hover-triggered restarts */
+                    }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -24960,7 +34381,48 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Create style element for grey overlay only
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-safe-grey-overlay';
-            style.textContent = `body.seizure-safe main,body.seizure-safe main *,body.seizure-safe section,body.seizure-safe section *,body.seizure-safe article,body.seizure-safe article *,body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),body.seizure-safe p:not(nav p):not(header p),body.seizure-safe span:not(nav span):not(header span),html.seizure-safe main,html.seizure-safe main *,html.seizure-safe section,html.seizure-safe section *,html.seizure-safe article,html.seizure-safe article *,html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),html.seizure-safe p:not(nav p):not(header p),html.seizure-safe span:not(nav span):not(header span){filter:grayscale(15%) contrast(0.95) brightness(0.98) !important;-webkit-filter:grayscale(15%) contrast(0.95) brightness(0.98) !important;}body.seizure-safe #accessbit-widget-container,body.seizure-safe [id*="accessbit-widget"],body.seizure-safe [class*="accessbit-widget"],body.seizure-safe [data-ck-widget]{filter:none !important;-webkit-filter:none !important;}body.seizure-safe accessbit-widget{filter:none !important;-webkit-filter:none !important;}`;
+            style.textContent = `
+                /* APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
+                /* CRITICAL: Apply filters to content containers, NOT to body/html, to preserve sticky nav */
+                /* Filters create stacking contexts that break sticky positioning - so we avoid them on body/html */
+                /* Apply to main content areas and their children to get the grey muted color effect throughout the page */
+                body.seizure-safe main,
+                body.seizure-safe main *,
+                body.seizure-safe section,
+                body.seizure-safe section *,
+                body.seizure-safe article,
+                body.seizure-safe article *,
+                body.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                body.seizure-safe p:not(nav p):not(header p),
+                body.seizure-safe span:not(nav span):not(header span),
+                html.seizure-safe main,
+                html.seizure-safe main *,
+                html.seizure-safe section,
+                html.seizure-safe section *,
+                html.seizure-safe article,
+                html.seizure-safe article *,
+                html.seizure-safe div:not(nav):not(header):not(.navbar):not([class*="nav"]):not([class*="header"]):not([class*="navbar"]),
+                html.seizure-safe p:not(nav p):not(header p),
+                html.seizure-safe span:not(nav span):not(header span) {
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                }
+                
+                /* Exclude widget container and all its contents from color filter */
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
+                body.seizure-safe [data-ck-widget] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Also exclude any shadow DOM content by targeting the host element */
+                body.seizure-safe accessbit-widget {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+            `;
             document.head.appendChild(style);
         }
         
@@ -24969,7 +34431,136 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             if (!document.getElementById('seizure-safe-animation-css')) {
                 const style = document.createElement('style');
                 style.id = 'seizure-safe-animation-css';
-                style.textContent = `.seizure-safe *,.seizure-safe *::before,.seizure-safe *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;animation-play-state:paused !important;}.seizure-safe *[class*="blink"],.seizure-safe *[class*="shimmer"],.seizure-safe *[class*="pulse"],.seizure-safe *[class*="caret"],.seizure-safe *[class*="cursor-blink"],.seizure-safe *[class*="skeleton"],.seizure-safe *[class*="pulsing"],.seizure-safe *[class*="flashing"]{animation:none !important;visibility:visible !important;opacity:1 !important;}.seizure-safe [data-w-id]{animation:none !important;transition:none !important;}.seizure-safe a,.seizure-safe button,.seizure-safe [role="button"]{transition:none !important;}.seizure-safe a:hover,.seizure-safe button:hover,.seizure-safe [role="button"]:hover{transition:none !important;}body.seizure-safe button>*,body.seizure-safe a>*,body.seizure-safe [role="button"]>*,body.seizure-safe button span,body.seizure-safe a span,body.seizure-safe [role="button"] span,html.seizure-safe button>*,html.seizure-safe a>*,html.seizure-safe [role="button"]>*,html.seizure-safe button span,html.seizure-safe a span,html.seizure-safe [role="button"] span{transition:all 0.3s ease !important;transform:unset !important;}body.seizure-safe button:hover>*,body.seizure-safe a:hover>*,body.seizure-safe [role="button"]:hover>*,body.seizure-safe button:hover span,body.seizure-safe a:hover span,body.seizure-safe [role="button"]:hover span,html.seizure-safe button:hover>*,html.seizure-safe a:hover>*,html.seizure-safe [role="button"]:hover>*,html.seizure-safe button:hover span,html.seizure-safe a:hover span,html.seizure-safe [role="button"]:hover span{transition:all 0.3s ease !important;transform:unset !important;}.seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([class*="wb-swiper"]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]){transform:none !important;}.seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),.seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),.seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),.seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]){opacity:1 !important;filter:none !important;}.seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),.seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),.seizure-safe [data-lottie],.seizure-safe lottie-player,.seizure-safe [class*="lottie"] svg,.seizure-safe [id*="lottie"] svg,.seizure-safe [data-lottie] svg,.seizure-safe lottie-player svg,.seizure-safe svg[data-lottie],.seizure-safe svg.lottie-animation,.seizure-safe svg[id*="lottie"],.seizure-safe svg[class*="lottie"]{transform:none !important;animation:none !important;transition:none !important;}.seizure-safe canvas[data-lottie],.seizure-safe canvas.lottie-animation,.seizure-safe lottie-player canvas,.seizure-safe [data-lottie]>canvas,.seizure-safe lottie-player>canvas{animation:none !important;transition:none !important;transform:none !important;}.seizure-safe [data-lottie],.seizure-safe lottie-player{pointer-events:none !important;}`;
+                style.textContent = `
+                    /* Seizure-safe animation kill switch */
+                    .seizure-safe *, .seizure-safe *::before, .seizure-safe *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        scroll-behavior: auto !important;
+                        animation-play-state: paused !important;
+                    }
+
+                    /* Remove common flash triggers */
+                    .seizure-safe *[class*="blink"], .seizure-safe *[class*="shimmer"], 
+                    .seizure-safe *[class*="pulse"], .seizure-safe *[class*="caret"], 
+                    .seizure-safe *[class*="cursor-blink"], .seizure-safe *[class*="skeleton"],
+                    .seizure-safe *[class*="pulsing"], .seizure-safe *[class*="flashing"] {
+                        animation: none !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+
+                /* Stop Webflow interactions (data-w-id) - but preserve original visibility */
+                .seizure-safe [data-w-id] {
+                    animation: none !important;
+                    transition: none !important;
+                    /* REMOVED: transform: none and opacity: 1 - these were breaking buttons and revealing hidden elements */
+                }
+
+                /* Stop hover-driven transitions on buttons/links - but preserve transforms for layout */
+                .seizure-safe a, .seizure-safe button, .seizure-safe [role="button"] {
+                    transition: none !important;
+                    /* REMOVED: transform: none - this was breaking button layouts */
+                }
+
+                .seizure-safe a:hover, .seizure-safe button:hover, .seizure-safe [role="button"]:hover {
+                    transition: none !important;
+                    /* REMOVED: transform: none - this was breaking button layouts */
+                }
+                
+                /* Allow button text animations to work even in seizure-safe mode */
+                /* This enables text hover effects like text moving from down to up */
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span,
+                html.seizure-safe button > *,
+                html.seizure-safe a > *,
+                html.seizure-safe [role="button"] > *,
+                html.seizure-safe button span,
+                html.seizure-safe a span,
+                html.seizure-safe [role="button"] span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                }
+                
+                /* Allow button text hover animations */
+                body.seizure-safe button:hover > *,
+                body.seizure-safe a:hover > *,
+                body.seizure-safe [role="button"]:hover > *,
+                body.seizure-safe button:hover span,
+                body.seizure-safe a:hover span,
+                body.seizure-safe [role="button"]:hover span,
+                html.seizure-safe button:hover > *,
+                html.seizure-safe a:hover > *,
+                html.seizure-safe [role="button"]:hover > *,
+                html.seizure-safe button:hover span,
+                html.seizure-safe a:hover span,
+                html.seizure-safe [role="button"]:hover span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                }
+                
+                /* CRITICAL: Safe GSAP Visual Freeze - stops movement without breaking scroll or sliders */
+                /* GSAP uses transform and opacity - CSS !important pins elements in place */
+                /* CRITICAL: Exclude scroll containers AND slider containers to prevent breaking layouts */
+                .seizure-safe *:not(.gsap-scroll-container):not([class*="smooth-scroll"]):not([class*="scroll-wrapper"]):not([id*="smooth-scroll"]):not([id*="scroll-wrapper"]):not([data-scroll-container]):not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([class*="wb-swiper"]):not(button):not(a):not([role="button"]):not(nav):not(header):not(.navbar):not([class*="nav"]) {
+                    /* This stops GSAP-driven movement visually, even if GSAP keeps updating values */
+                    transform: none !important;
+                }
+                
+                /* Only apply opacity/filter resets to elements that are ACTUALLY animating */
+                /* Don't force opacity: 1 or filter: none on all elements - this changes colors/shapes */
+                .seizure-safe *[class*="animate"]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-aos]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-scroll]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]),
+                .seizure-safe *[data-w-id]:not([class*="swiper"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]) {
+                    /* Only reset opacity/filter on elements that are actually animating */
+                    opacity: 1 !important;
+                    filter: none !important;
+                }
+                
+                /* CRITICAL: Aggressively stop ALL Lottie animations - comprehensive selectors */
+                /* Target all possible Lottie containers, SVG, and canvas elements */
+                .seizure-safe [class*="lottie"]:not(button):not(a):not([role="button"]),
+                .seizure-safe [id*="lottie"]:not(button):not(a):not([role="button"]),
+                .seizure-safe [data-lottie],
+                .seizure-safe lottie-player,
+                .seizure-safe [class*="lottie"] svg,
+                .seizure-safe [id*="lottie"] svg,
+                .seizure-safe [data-lottie] svg,
+                .seizure-safe lottie-player svg,
+                .seizure-safe svg[data-lottie],
+                .seizure-safe svg.lottie-animation,
+                .seizure-safe svg[id*="lottie"],
+                .seizure-safe svg[class*="lottie"] {
+                    transform: none !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* CRITICAL: Freeze Lottie canvas elements visually without hiding them */
+                /* Use CSS to freeze animations while keeping elements visible */
+                .seizure-safe canvas[data-lottie],
+                .seizure-safe canvas.lottie-animation,
+                .seizure-safe lottie-player canvas,
+                .seizure-safe [data-lottie] > canvas,
+                .seizure-safe lottie-player > canvas {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    /* Keep visible - don't hide */
+                }
+                
+                /* Only disable pointer events on actual Lottie containers */
+                /* Don't use :has() as it's not widely supported - be more specific */
+                .seizure-safe [data-lottie],
+                .seizure-safe lottie-player {
+                    pointer-events: none !important;
+                }
+                `;
                 document.head.appendChild(style);
             }
         }
@@ -24981,7 +34572,428 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // Create style element for seizure-safe overlay
             const style = document.createElement('style');
             style.id = 'accessbit-seizure-safe-styles';
-            style.textContent = `body.seizure-safe,html.seizure-safe{filter:grayscale(15%) contrast(0.95) brightness(0.98) !important;-webkit-filter:grayscale(15%) contrast(0.95) brightness(0.98) !important;}body.seizure-safe #accessbit-widget-container,body.seizure-safe [id*="accessbit-widget"],body.seizure-safe [class*="accessbit-widget"],body.seizure-safe [data-ck-widget]{filter:none !important;-webkit-filter:none !important;}body.seizure-safe accessbit-widget{filter:none !important;-webkit-filter:none !important;}body.seizure-safe *,body.seizure-safe *::before,body.seizure-safe *::after{animation:none !important;animation-name:none !important;animation-duration:0s !important;animation-timing-function:linear !important;animation-delay:0s !important;animation-iteration-count:1 !important;animation-direction:normal !important;animation-fill-mode:forwards !important;animation-play-state:paused !important;}body.seizure-safe *,body.seizure-safe *::before,body.seizure-safe *::after{transition:none !important;transition-property:none !important;transition-duration:0s !important;transition-timing-function:linear !important;transition-delay:0s !important;}body.seizure-safe *:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([data-slider]):not([data-carousel]):not([class*="slider"]):not([class*="carousel"]){transform:none !important;transform-origin:unset !important;scale:1 !important;zoom:1 !important;will-change:auto !important;}body.seizure-safe lottie-player,body.seizure-safe [data-lottie],body.seizure-safe [data-animation],body.seizure-safe .lottie,body.seizure-safe .lottie-animation,body.seizure-safe div[id*="lottie"],body.seizure-safe div[class*="lottie"],body.seizure-safe svg[class*="lottie"],body.seizure-safe canvas[data-lottie],body.seizure-safe canvas.lottie{animation:none !important;transition:none !important;transform:none !important;animation-play-state:paused !important;opacity:0 !important;visibility:hidden !important;}body.seizure-safe *,body.seizure-safe *::before,body.seizure-safe *::after{visibility:visible !important;opacity:1 !important;text-decoration:none !important;animation-duration:0s !important;transition-duration:0s !important;animation-iteration-count:1 !important;animation-play-state:paused !important;}body.seizure-safe video[autoplay],body.seizure-safe audio[autoplay]{animation-play-state:paused !important;}body.seizure-safe video,body.seizure-safe audio{animation:none !important;transition:none !important;}@media (prefers-reduced-motion:reduce){body.seizure-safe *,body.seizure-safe *::before,body.seizure-safe *::after{animation:none !important;transition:none !important;transform:none !important;animation-duration:0.01s !important;transition-duration:0.01s !important;}}body.seizure-safe *{animation-name:none !important;animation-duration:0s !important;animation-timing-function:linear !important;animation-delay:0s !important;animation-iteration-count:1 !important;animation-direction:normal !important;animation-fill-mode:none !important;animation-play-state:paused !important;transition-property:none !important;transition-duration:0s !important;transition-timing-function:linear !important;transition-delay:0s !important;}body.seizure-safe *{transform:none !important;transform-origin:unset !important;scale:1 !important;zoom:1 !important;}body.seizure-safe button>*,body.seizure-safe a>*,body.seizure-safe [role="button"]>*,body.seizure-safe button span,body.seizure-safe a span,body.seizure-safe [role="button"] span{transform:unset !important;transform-origin:unset !important;scale:unset !important;zoom:unset !important;}body.seizure-safe *:hover,body.seizure-safe *:focus,body.seizure-safe *:active{transform:none !important;scale:1 !important;zoom:1 !important;animation:none !important;transition:none !important;}body.seizure-safe button>*,body.seizure-safe a>*,body.seizure-safe [role="button"]>*,body.seizure-safe button span,body.seizure-safe a span,body.seizure-safe [role="button"] span,html.seizure-safe button>*,html.seizure-safe a>*,html.seizure-safe [role="button"]>*,html.seizure-safe button span,html.seizure-safe a span,html.seizure-safe [role="button"] span{transition:all 0.3s ease !important;transform:unset !important;animation:unset !important;}body.seizure-safe button:hover>*,body.seizure-safe a:hover>*,body.seizure-safe [role="button"]:hover>*,body.seizure-safe button:hover span,body.seizure-safe a:hover span,body.seizure-safe [role="button"]:hover span,html.seizure-safe button:hover>*,html.seizure-safe a:hover>*,html.seizure-safe [role="button"]:hover>*,html.seizure-safe button:hover span,html.seizure-safe a:hover span,html.seizure-safe [role="button"]:hover span{transition:all 0.3s ease !important;transform:unset !important;animation:unset !important;}body.seizure-safe *{animation-name:none !important;animation-timing-function:linear !important;animation-fill-mode:none !important;}body.seizure-safe *[class*="animate"],body.seizure-safe *[class*="fade"],body.seizure-safe *[class*="slide"],body.seizure-safe *[class*="bounce"],body.seizure-safe *[class*="pulse"],body.seizure-safe *[class*="shake"],body.seizure-safe *[class*="flash"],body.seizure-safe *[class*="blink"],body.seizure-safe *[class*="glow"],body.seizure-safe *[class*="spin"],body.seizure-safe *[class*="rotate"],body.seizure-safe *[class*="scale"],body.seizure-safe *[class*="zoom"],body.seizure-safe *[class*="wiggle"],body.seizure-safe *[class*="jiggle"],body.seizure-safe *[class*="twist"],body.seizure-safe *[class*="flip"],body.seizure-safe *[class*="swing"],body.seizure-safe *[class*="wobble"],body.seizure-safe *[class*="tilt"],body.seizure-safe *[class*="scroll"]{animation:none !important;transition:none !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe .fade-up,body.seizure-safe .fade-left,body.seizure-safe .fade-right,body.seizure-safe .fade-in,body.seizure-safe .slide-in,body.seizure-safe .scale-in,body.seizure-safe .zoom-in{animation:none !important;transition:none !important;animation-play-state:paused !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe [data-splitting],body.seizure-safe .split,body.seizure-safe .char,body.seizure-safe .word{animation:none !important;transition:none !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe svg,body.seizure-safe svg path,body.seizure-safe svg line,body.seizure-safe svg circle,body.seizure-safe svg rect,body.seizure-safe svg polygon{animation:none !important;transition:none !important;animation-play-state:paused !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe [data-scroll],body.seizure-safe [data-aos],body.seizure-safe [data-animate],body.seizure-safe [data-scroll-speed],body.seizure-safe [data-scroll-direction],body.seizure-safe .aos-init,body.seizure-safe .aos-animate,body.seizure-safe .wow,body.seizure-safe .animated,body.seizure-safe [class*="scroll-trigger"],body.seizure-safe [class*="scroll-animate"],body.seizure-safe [class*="scroll-reveal"],body.seizure-safe [class*="w-"],body.seizure-safe [data-wf-page],body.seizure-safe [data-w-id],body.seizure-safe [class*="w-"]:not([class*="slider"]):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]){animation:none !important;transition:none !important;animation-play-state:paused !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;transform:none !important;will-change:auto !important;}body.seizure-safe *[style*="transform"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]),body.seizure-safe *[style*="opacity"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]){transform:none !important;opacity:1 !important;transition:none !important;}body.seizure-safe [data-lottie],body.seizure-safe .lottie,body.seizure-safe canvas[data-lottie],body.seizure-safe canvas.lottie{animation:none !important;transition:none !important;animation-play-state:paused !important;animation-fill-mode:forwards !important;opacity:0 !important;visibility:hidden !important;}animation-play-state:paused !important;animation-fill-mode:forwards !important;opacity:1 !important;visibility:visible !important;}body.seizure-safe *[class*="scroll"],body.seizure-safe *[class*="progress"],body.seizure-safe *[class*="bar"],body.seizure-safe *[class*="line"],body.seizure-safe *[class*="timeline"],body.seizure-safe *[class*="scroll-progress"],body.seizure-safe *[class*="scroll-indicator"]{animation:none !important;transition:none !important;animation-play-state:paused !important;animation-fill-mode:forwards !important;}body.seizure-safe video,body.seizure-safe audio{animation:none !important;transition:none !important;animation-fill-mode:forwards !important;}body.seizure-safe{overflow:auto !important;overflow-x:auto !important;overflow-y:auto !important;scroll-behavior:auto !important;transform:none !important;scale:1 !important;zoom:1 !important;}body.seizure-safe nav,body.seizure-safe header,body.seizure-safe .navbar,body.seizure-safe [role="navigation"],body.seizure-safe [class*="nav"],body.seizure-safe [class*="header"],body.seizure-safe [class*="navbar"],body.seizure-safe [data-sticky],body.seizure-safe [data-fixed],body.seizure-safe [style*="position:sticky"],body.seizure-safe [style*="position:fixed"],body.seizure-safe [style*="position:fixed"]{position:inherit !important;transform:inherit !important;}body.seizure-safe html{transform:none !important;scale:1 !important;zoom:1 !important;}body.seizure-safe html{overflow:auto !important;overflow-x:auto !important;overflow-y:auto !important;}body.seizure-safe .accessbit-widget,body.seizure-safe .accessbit-widget-panel,body.seizure-safe .toggle-switch{filter:saturate(0.95) !important;}`;
+            style.textContent = `
+                /* COMPREHENSIVE SEIZURE-SAFE STYLES - AccessiBe-style animation stopping */
+                
+                /* 0. APPLY GREYISH COLOR FILTER - Reduce color intensity to prevent seizures */
+                body.seizure-safe,
+                html.seizure-safe {
+                    filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                    -webkit-filter: grayscale(15%) contrast(0.95) brightness(0.98) !important;
+                }
+                
+                /* Exclude widget container and all its contents from color filter */
+                body.seizure-safe #accessbit-widget-container,
+                body.seizure-safe [id*="accessbit-widget"],
+                body.seizure-safe [class*="accessbit-widget"],
+                body.seizure-safe [data-ck-widget] {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* Also exclude any shadow DOM content by targeting the host element */
+                body.seizure-safe accessbit-widget {
+                    filter: none !important;
+                    -webkit-filter: none !important;
+                }
+                
+                /* 1. HALT CSS ANIMATIONS - Stop all CSS animations immediately */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    animation: none !important;
+                    animation-name: none !important;
+                    animation-duration: 0s !important;
+                    animation-timing-function: linear !important;
+                    animation-delay: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-direction: normal !important;
+                    animation-fill-mode: forwards !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* 2. HALT CSS TRANSITIONS - Stop all smooth transitions */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    transition: none !important;
+                    transition-property: none !important;
+                    transition-duration: 0s !important;
+                    transition-timing-function: linear !important;
+                    transition-delay: 0s !important;
+                }
+                
+                /* 3. STOP MOTION EFFECTS - Prevent transform-based animations */
+                /* BUT preserve transforms for slider manual navigation */
+                body.seizure-safe *:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([data-slider]):not([data-carousel]):not([class*="slider"]):not([class*="carousel"]) {
+                    transform: none !important;
+                    transform-origin: unset !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    will-change: auto !important;
+                }
+                
+                /* 4. STOP LOTTIE ANIMATIONS - Universal Lottie stopping (make invisible like stop-animation) */
+                body.seizure-safe lottie-player,
+                body.seizure-safe [data-lottie],
+                body.seizure-safe [data-animation],
+                body.seizure-safe .lottie,
+                body.seizure-safe .lottie-animation,
+                body.seizure-safe div[id*="lottie"],
+                body.seizure-safe div[class*="lottie"],
+                body.seizure-safe svg[class*="lottie"],
+                body.seizure-safe canvas[data-lottie],
+                body.seizure-safe canvas.lottie {
+                    animation: none !important;
+                    transition: none !important;
+                    transform: none !important;
+                    animation-play-state: paused !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                }
+                
+                /* 5. STOP BLINKING TEXT AND FLASHING ELEMENTS - WCAG 2.3.1 compliance */
+                body.seizure-safe *,
+                body.seizure-safe *::before,
+                body.seizure-safe *::after {
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    /* REMOVED: color: inherit !important; - Don't change font colors, only apply overall greyscale filter */
+                    text-decoration: none !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-play-state: paused !important;
+                }
+                
+                /* 6. STOP SMOOTH SCROLLING - Prevent vestibular-triggering motion */
+                /* REMOVED: scroll-behavior: auto - This was blocking Lenis smooth scrolling */
+                /* Lenis handles smooth scrolling and should not be blocked */
+                
+                /* 7. STOP VIDEO AND MEDIA AUTOPLAY */
+                body.seizure-safe video[autoplay],
+                body.seizure-safe audio[autoplay] {
+                    animation-play-state: paused !important;
+                }
+                
+                body.seizure-safe video,
+                body.seizure-safe audio {
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* 8. RESPECT PREFERS-REDUCED-MOTION - WCAG compliance */
+                @media (prefers-reduced-motion: reduce) {
+                    body.seizure-safe *,
+                    body.seizure-safe *::before,
+                    body.seizure-safe *::after {
+                        animation: none !important;
+                        transition: none !important;
+                        transform: none !important;
+                        animation-duration: 0.01s !important;
+                        transition-duration: 0.01s !important;
+                    }
+                }
+                
+                /* ULTIMATE ANIMATION KILLER - Stop everything */
+                body.seizure-safe * {
+                    animation-name: none !important;
+                    animation-duration: 0s !important;
+                    animation-timing-function: linear !important;
+                    animation-delay: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-direction: normal !important;
+                    animation-fill-mode: none !important;
+                    animation-play-state: paused !important;
+                    transition-property: none !important;
+                    transition-duration: 0s !important;
+                    transition-timing-function: linear !important;
+                    transition-delay: 0s !important;
+                }
+                
+                /* PREVENT ZOOMING AND SCALING - No transform effects */
+                body.seizure-safe * {
+                    transform: none !important;
+                    transform-origin: unset !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                /* Allow button text animations to work even in seizure-safe mode */
+                /* This enables text hover effects like text moving from down to up */
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span {
+                    transform: unset !important;
+                    transform-origin: unset !important;
+                    scale: unset !important;
+                    zoom: unset !important;
+                }
+                
+                /* PREVENT HOVER EFFECTS AND INTERACTIONS */
+                /* PREVENT HOVER EFFECTS AND INTERACTIONS */
+                body.seizure-safe *:hover,
+                body.seizure-safe *:focus,
+                body.seizure-safe *:active {
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                    animation: none !important;
+                    transition: none !important;
+                }
+                
+                /* CRITICAL: Allow button text animations to work - must come AFTER the general rules */
+                /* This enables text hover effects like text moving from down to up */
+                body.seizure-safe button > *,
+                body.seizure-safe a > *,
+                body.seizure-safe [role="button"] > *,
+                body.seizure-safe button span,
+                body.seizure-safe a span,
+                body.seizure-safe [role="button"] span,
+                html.seizure-safe button > *,
+                html.seizure-safe a > *,
+                html.seizure-safe [role="button"] > *,
+                html.seizure-safe button span,
+                html.seizure-safe a span,
+                html.seizure-safe [role="button"] span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                    animation: unset !important;
+                }
+                
+                /* Allow button text hover animations to work */
+                body.seizure-safe button:hover > *,
+                body.seizure-safe a:hover > *,
+                body.seizure-safe [role="button"]:hover > *,
+                body.seizure-safe button:hover span,
+                body.seizure-safe a:hover span,
+                body.seizure-safe [role="button"]:hover span,
+                html.seizure-safe button:hover > *,
+                html.seizure-safe a:hover > *,
+                html.seizure-safe [role="button"]:hover > *,
+                html.seizure-safe button:hover span,
+                html.seizure-safe a:hover span,
+                html.seizure-safe [role="button"]:hover span {
+                    transition: all 0.3s ease !important;
+                    transform: unset !important;
+                    animation: unset !important;
+                }
+                
+                /* Stop ALL CSS animations by name */
+                body.seizure-safe * {
+                    animation-name: none !important;
+                    animation-timing-function: linear !important;
+                    animation-fill-mode: none !important;
+                }
+                
+                /* Stop specific animation classes - INCLUDING SCROLL ANIMATIONS */
+                body.seizure-safe *[class*="animate"],
+                body.seizure-safe *[class*="fade"],
+                body.seizure-safe *[class*="slide"],
+                body.seizure-safe *[class*="bounce"],
+                body.seizure-safe *[class*="pulse"],
+                body.seizure-safe *[class*="shake"],
+                body.seizure-safe *[class*="flash"],
+                body.seizure-safe *[class*="blink"],
+                body.seizure-safe *[class*="glow"],
+                body.seizure-safe *[class*="spin"],
+                body.seizure-safe *[class*="rotate"],
+                body.seizure-safe *[class*="scale"],
+                body.seizure-safe *[class*="zoom"],
+                body.seizure-safe *[class*="wiggle"],
+                body.seizure-safe *[class*="jiggle"],
+                body.seizure-safe *[class*="twist"],
+                body.seizure-safe *[class*="flip"],
+                body.seizure-safe *[class*="swing"],
+                body.seizure-safe *[class*="wobble"],
+                body.seizure-safe *[class*="tilt"],
+                body.seizure-safe *[class*="scroll"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* Stop library animations - INCLUDING SCROLL ANIMATIONS */
+                body.seizure-safe .fade-up,
+                body.seizure-safe .fade-left,
+                body.seizure-safe .fade-right,
+                body.seizure-safe .fade-in,
+                body.seizure-safe .slide-in,
+                body.seizure-safe .scale-in,
+                body.seizure-safe .zoom-in {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* Stop text animations - INCLUDING SCROLL ANIMATIONS */
+                body.seizure-safe [data-splitting],
+                body.seizure-safe .split, 
+                body.seizure-safe .char, 
+                body.seizure-safe .word {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* Stop SVG animations - INCLUDING SCROLL ANIMATIONS */
+                body.seizure-safe svg,
+                body.seizure-safe svg path,
+                body.seizure-safe svg line,
+                body.seizure-safe svg circle,
+                body.seizure-safe svg rect,
+                body.seizure-safe svg polygon {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* STOP SCROLL-TRIGGERED ANIMATIONS - AOS, ScrollTrigger, WOW, Webflow interactions, etc. - Generic approach */
+                body.seizure-safe [data-scroll],
+                body.seizure-safe [data-aos],
+                body.seizure-safe [data-animate],
+                body.seizure-safe [data-scroll-speed],
+                body.seizure-safe [data-scroll-direction],
+                body.seizure-safe .aos-init,
+                body.seizure-safe .aos-animate,
+                body.seizure-safe .wow,
+                body.seizure-safe .animated,
+                body.seizure-safe [class*="scroll-trigger"],
+                body.seizure-safe [class*="scroll-animate"],
+                body.seizure-safe [class*="scroll-reveal"],
+                body.seizure-safe [class*="w-"],
+                body.seizure-safe [data-wf-page],
+                body.seizure-safe [data-w-id],
+                body.seizure-safe [class*="w-"]:not([class*="slider"]):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]) {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: none !important;
+                    will-change: auto !important;
+                }
+                
+                /* GENERIC: Freeze any elements with inline transform/opacity styles (common in scroll animations like Webflow) */
+                /* BUT exclude sliders to allow manual navigation */
+                body.seizure-safe *[style*="transform"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]),
+                body.seizure-safe *[style*="opacity"]:not(.swiper-slide):not(.slick-slide):not(.carousel-item):not([class*="swiper"]):not([class*="slick"]):not([class*="carousel"]):not([class*="slider"]):not([data-slider]):not([data-carousel]):not([data-seizure-safe-allow-transform]) {
+                    transform: none !important;
+                    opacity: 1 !important;
+                    transition: none !important;
+                }
+                
+                /* Stop Lottie animations specifically - Make invisible to prevent seizures */
+                body.seizure-safe [data-lottie],
+                body.seizure-safe .lottie,
+                body.seizure-safe canvas[data-lottie],
+                body.seizure-safe canvas.lottie {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                    /* REMOVED: display: none !important; - Don't hide, just stop animations */
+                }
+                
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* STOP SCROLL ANIMATIONS - Stop all scroll-triggered animations */
+                body.seizure-safe *[class*="scroll"],
+                body.seizure-safe *[class*="progress"],
+                body.seizure-safe *[class*="bar"],
+                body.seizure-safe *[class*="line"],
+                body.seizure-safe *[class*="timeline"],
+                body.seizure-safe *[class*="scroll-progress"],
+                body.seizure-safe *[class*="scroll-indicator"] {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-play-state: paused !important;
+                    animation-fill-mode: forwards !important;
+                }
+                
+                /* Stop media animations */
+                body.seizure-safe video,
+                body.seizure-safe audio {
+                    animation: none !important;
+                    transition: none !important;
+                    animation-fill-mode: forwards !important;
+                }
+                
+                /* CRITICAL: Ensure scrolling works properly and prevent zooming */
+                body.seizure-safe {
+                    /* Greyscale filter is applied at html/body level, not here */
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    scroll-behavior: auto !important;
+                    /* Do NOT set position: static on body as it breaks sticky/fixed navigation */
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                /* CRITICAL: Preserve navigation positioning - do not override position for nav elements */
+                body.seizure-safe nav,
+                body.seizure-safe header,
+                body.seizure-safe .navbar,
+                body.seizure-safe [role="navigation"],
+                body.seizure-safe [class*="nav"],
+                body.seizure-safe [class*="header"],
+                body.seizure-safe [class*="navbar"],
+                body.seizure-safe [data-sticky],
+                body.seizure-safe [data-fixed],
+                body.seizure-safe [style*="position: sticky"],
+                body.seizure-safe [style*="position:fixed"],
+                body.seizure-safe [style*="position: fixed"] {
+                    position: inherit !important;
+                    transform: inherit !important;
+                }
+                
+                body.seizure-safe html {
+                    transform: none !important;
+                    scale: 1 !important;
+                    zoom: 1 !important;
+                }
+                
+                body.seizure-safe html {
+                    overflow: auto !important;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    /* REMOVED: scroll-behavior: auto !important; - This was blocking website scroll animations */
+                }
+                
+                /* REMOVED: Force all containers to allow scrolling - This was blocking website scroll animations */
+                /* body.seizure-safe * {
+                    scroll-behavior: auto !important;
+                } */
+                
+                /* Preserve accessibility widget */
+                body.seizure-safe .accessbit-widget,
+                body.seizure-safe .accessbit-widget-panel,
+                body.seizure-safe .toggle-switch {
+                    filter: saturate(0.95) !important;
+                }
+            `;
     
             document.head.appendChild(style);
             
@@ -25208,7 +35220,75 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 const style = document.createElement('style');
                 style.id = 'adhd-contrast-enhancement';
-                style.textContent = `html.adhd-friendly{filter:contrast(1.15) brightness(1.08) saturate(1.1) !important;transition:filter 0.3s ease-in-out !important;}body.adhd-friendly button,body.adhd-friendly input[type="button"],body.adhd-friendly input[type="submit"],body.adhd-friendly input[type="reset"],body.adhd-friendly .btn{background-color:#0066cc !important;color:#ffffff !important;border:2px solid #004499 !important;font-weight:600;text-shadow:none !important;transition:all 0.3s ease-in-out !important;}body.adhd-friendly button:hover,body.adhd-friendly input[type="button"]:hover,body.adhd-friendly input[type="submit"]:hover,body.adhd-friendly input[type="reset"]:hover,body.adhd-friendly .btn:hover{background-color:#004499 !important;border-color:#003366 !important;}body.adhd-friendly input,body.adhd-friendly textarea,body.adhd-friendly select{border:2px solid #666666 !important;background-color:#ffffff !important;color:#1a1a1a !important;font-weight:500;transition:all 0.3s ease-in-out !important;}body.adhd-friendly input:focus,body.adhd-friendly textarea:focus,body.adhd-friendly select:focus{border-color:#0066cc !important;box-shadow:0 0 5px rgba(0,102,204,0.3) !important;}body.adhd-friendly *:focus{outline:3px solid #0066cc !important;outline-offset:2px !important;transition:outline 0.2s ease-in-out !important;}body.adhd-friendly img{filter:contrast(1.1) brightness(1.05) !important;transition:filter 0.3s ease-in-out !important;}`;
+                style.textContent = `
+                    /* ADHD FRIENDLY: Enhanced Contrast for Better Focus */
+                    
+                    /* 1. GLOBAL CONTRAST ENHANCEMENT - Increase overall contrast */
+                    html.adhd-friendly {
+                        filter: contrast(1.15) brightness(1.08) saturate(1.1) !important;
+                        transition: filter 0.3s ease-in-out !important;
+                    }
+                    
+                    /* REMOVED: TEXT CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes */
+                    /* REMOVED: HEADING CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes */
+                    /* REMOVED: LINK CONTRAST ENHANCEMENT - User only wants spotlight, not text color changes or underlines */
+                    
+                    /* 5. BUTTON CONTRAST ENHANCEMENT - More visible buttons */
+                    body.adhd-friendly button,
+                    body.adhd-friendly input[type="button"],
+                    body.adhd-friendly input[type="submit"],
+                    body.adhd-friendly input[type="reset"],
+                    body.adhd-friendly .btn {
+                        background-color: #0066cc !important;
+                        color: #ffffff !important;
+                        border: 2px solid #004499 !important;
+                        font-weight: 600;
+                        text-shadow: none !important;
+                        transition: all 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly button:hover,
+                    body.adhd-friendly input[type="button"]:hover,
+                    body.adhd-friendly input[type="submit"]:hover,
+                    body.adhd-friendly input[type="reset"]:hover,
+                    body.adhd-friendly .btn:hover {
+                        background-color: #004499 !important;
+                        border-color: #003366 !important;
+                    }
+                    
+                    /* 6. FORM ELEMENT CONTRAST ENHANCEMENT - Better form visibility */
+                    body.adhd-friendly input,
+                    body.adhd-friendly textarea,
+                    body.adhd-friendly select {
+                        border: 2px solid #666666 !important;
+                        background-color: #ffffff !important;
+                        color: #1a1a1a !important;
+                        font-weight: 500;
+                        transition: all 0.3s ease-in-out !important;
+                    }
+                    
+                    body.adhd-friendly input:focus,
+                    body.adhd-friendly textarea:focus,
+                    body.adhd-friendly select:focus {
+                        border-color: #0066cc !important;
+                        box-shadow: 0 0 5px rgba(0, 102, 204, 0.3) !important;
+                    }
+                    
+                    /* 7. FOCUS INDICATORS - Enhanced focus visibility */
+                    body.adhd-friendly *:focus {
+                        outline: 3px solid #0066cc !important;
+                        outline-offset: 2px !important;
+                        transition: outline 0.2s ease-in-out !important;
+                    }
+                    
+                    /* 8. IMAGE CONTRAST ENHANCEMENT - Slightly enhance images */
+                    body.adhd-friendly img {
+                        filter: contrast(1.1) brightness(1.05) !important;
+                        transition: filter 0.3s ease-in-out !important;
+                    }
+                    
+                    /* REMOVED: NAVIGATION CONTRAST ENHANCEMENT - User only wants spotlight, not nav text color changes or underlines */
+                `;
                 
                 document.head.appendChild(style);
           
@@ -25271,7 +35351,34 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const style = document.createElement('style');
             style.id = 'cognitive-css';
-            style.textContent = `.cognitive-disability{box-sizing:border-box !important;}.cognitive-disability *{box-sizing:border-box !important;}.cognitive-disability body{overflow-x:auto !important;overflow-y:auto !important;}.cognitive-disability html{height:auto !important;}.cognitive-disability body{height:auto !important;margin:0 !important;padding:0 !important;}`;
+            style.textContent = `
+                /* Cognitive Disability: Minimize layout impact */
+                .cognitive-disability {
+                    /* Prevent layout breaking from cognitive boxes */
+                    box-sizing: border-box !important;
+                }
+                
+                .cognitive-disability * {
+                    box-sizing: border-box !important;
+                }
+                
+                /* Ensure cognitive boxes don't cause overflow */
+                .cognitive-disability body {
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                }
+                
+                /* Prevent extra whitespace */
+                .cognitive-disability html {
+                    height: auto !important;
+                }
+                
+                .cognitive-disability body {
+                    height: auto !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+            `;
             document.head.appendChild(style);
         }
     
@@ -27496,7 +37603,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 // Create style element for shadow DOM
                 const style = document.createElement('style');
                 style.id = 'toggle-text-translation';
-                style.textContent = `.slider::after{content:"${content.toggleOff}" !important;}`;
+                style.textContent = `
+                    .slider::after {
+                        content: "${content.toggleOff}" !important;
+                    }
+                    /* Keep vertical line when on; do not override with toggleOn text */
+                `;
                 
              
                 // Remove existing toggle text style if it exists from shadow DOM
@@ -27751,7 +37863,44 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             // Add mobile-specific CSS for all control buttons
             const mobileControlStyle = document.createElement('style');
-            mobileControlStyle.textContent = `@media (max-width:768px){.scaling-btn,button[class*="increase"],button[class*="decrease"],.arrow-btn,.control-btn{height:20px !important;min-height:20px !important;padding:1px 6px !important;font-size:9px;border-radius:4px !important;width:auto !important;min-width:32px !important;display:flex !important;align-items:center !important;justify-content:center !important;gap:4px !important;}.scaling-btn i.fas,button[class*="increase"] i.fas,button[class*="decrease"] i.fas{display:flex !important;align-items:center !important;justify-content:center !important;line-height:1;}.scaling-btn span,button[class*="increase"] span,button[class*="decrease"] span{display:flex !important;align-items:center !important;line-height:1;margin:0 !important;padding:0 !important;}}`;
+            mobileControlStyle.textContent = `
+                @media (max-width: 768px) {
+                    .scaling-btn, button[class*="increase"], button[class*="decrease"], .arrow-btn, .control-btn {
+                        height: 20px !important;
+                        min-height: 20px !important;
+                        padding: 1px 6px !important;
+                        font-size: 9px;
+                        border-radius: 4px !important;
+                        /* Don't set line-height when using flexbox - it interferes with centering */
+                        width: auto !important;
+                        min-width: 32px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 4px !important;
+                    }
+                    
+                    /* Ensure icons inside buttons align properly */
+                    .scaling-btn i.fas,
+                    button[class*="increase"] i.fas,
+                    button[class*="decrease"] i.fas {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        line-height: 1;
+                    }
+                    
+                    .scaling-btn span,
+                    button[class*="increase"] span,
+                    button[class*="decrease"] span {
+                        display: flex !important;
+                        align-items: center !important;
+                        line-height: 1;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                }
+            `;
             this.shadowRoot?.appendChild(mobileControlStyle);
         
             
@@ -27794,7 +37943,33 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             // Add mobile-specific CSS for Useful Links dropdown
             const mobileUsefulLinksStyle = document.createElement('style');
-            mobileUsefulLinksStyle.textContent = `@media (max-width:768px){.useful-links-dropdown{font-size:10px;padding:4px 6px !important;min-height:28px !important;margin:6px 0 !important;border-radius:6px !important;}.useful-links-content{padding:6px !important;}.useful-links-content select{font-size:10px;padding:4px 6px !important;min-height:24px !important;height:24px !important;line-height:1.1;border-radius:4px !important;}.useful-links-content select option{font-size:10px;padding:4px 6px !important;line-height:1.1;}}`;
+            mobileUsefulLinksStyle.textContent = `
+                @media (max-width: 768px) {
+                    .useful-links-dropdown {
+                        font-size: 10px;
+                        padding: 4px 6px !important;
+                        min-height: 28px !important;
+                        margin: 6px 0 !important;
+                        border-radius: 6px !important;
+                    }
+                    .useful-links-content {
+                        padding: 6px !important;
+                    }
+                    .useful-links-content select {
+                        font-size: 10px;
+                        padding: 4px 6px !important;
+                        min-height: 24px !important;
+                        height: 24px !important;
+                        line-height: 1.1;
+                        border-radius: 4px !important;
+                    }
+                    .useful-links-content select option {
+                        font-size: 10px;
+                        padding: 4px 6px !important;
+                        line-height: 1.1;
+                    }
+                }
+            `;
             this.shadowRoot?.appendChild(mobileUsefulLinksStyle);
           
             // Prevent Useful Links title from shifting when toggle is ON (mobile)
@@ -27820,7 +37995,71 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             // Increase toggle width when ON to fit text properly and fix text sliding
             const style = document.createElement('style');
-            style.textContent = `@media (max-width:768px){.toggle-switch>input:checked+.slider{width:100% !important;}}.profile-item .profile-info{min-width:0 !important;word-wrap:break-word !important;word-break:break-word !important;overflow-wrap:break-word !important;}.profile-item .profile-info h4,.profile-item .profile-info p{white-space:normal !important;overflow:visible !important;text-overflow:unset !important;max-width:100% !important;word-wrap:break-word !important;word-break:break-word !important;overflow-wrap:break-word !important;hyphens:auto !important;}#useful-links:checked+.slider:before{transform:translateX(26px) !important;}@media (max-width:1279px){.toggle-switch>input:not(:checked)+.slider::after{content:"" !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;right:16px !important;top:50% !important;transform:translateY(-50%) rotate(0deg) !important;width:12px !important;height:12px !important;border-width:2px !important;border:2px solid #FFFFFF !important;border-radius:50% !important;background:transparent !important;pointer-events:none !important;transition:none !important;}.toggle-switch>input:checked+.slider::after{content:"" !important;display:block !important;visibility:visible !important;opacity:1 !important;position:absolute !important;left:22px !important;right:auto !important;top:50% !important;transform:translateY(-50%) !important;width:2px !important;height:12px !important;background:white !important;border:none !important;border-radius:0 !important;pointer-events:none !important;transition:none !important;}}`;
+            style.textContent = `
+                @media (max-width: 768px) {
+                    .toggle-switch > input:checked + .slider { width: 100% !important; }
+                }
+                .profile-item .profile-info { 
+                    min-width: 0 !important; 
+                    word-wrap: break-word !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                .profile-item .profile-info h4, .profile-item .profile-info p { 
+                    white-space: normal !important; 
+                    overflow: visible !important; 
+                    text-overflow: unset !important; 
+                    max-width: 100% !important; 
+                    word-wrap: break-word !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                    hyphens: auto !important;
+                }
+                /* Ensure useful links toggle works correctly */
+                #useful-links:checked + .slider:before {
+                    transform: translateX(26px) !important;
+                }
+                
+                /* When off: show white circle on toggle; when on: show bar; no transition on ::after to avoid flash */
+                @media (max-width: 1279px) {
+                    .toggle-switch > input:not(:checked) + .slider::after {
+                        content: "" !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        right: 16px !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) rotate(0deg) !important;
+                        width: 12px !important;
+                        height: 12px !important;
+                        border-width: 2px !important;
+                        border: 2px solid #FFFFFF !important;
+                        border-radius: 50% !important;
+                        background: transparent !important;
+                        pointer-events: none !important;
+                        transition: none !important;
+                    }
+                    .toggle-switch > input:checked + .slider::after {
+                        content: "" !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: absolute !important;
+                        left: 22px !important;
+                        right: auto !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                        width: 2px !important;
+                        height: 12px !important;
+                        background: white !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        pointer-events: none !important;
+                        transition: none !important;
+                    }
+                }
+            `;
             this.shadowRoot?.appendChild(style);
            
         }
@@ -28195,7 +38434,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         if (finalFinalComputed !== borderRadius) {
                             
                             const style = document.createElement('style');
-                            style.textContent = `.accessbit-widget-icon[data-shape="rounded"]{border-radius:${borderRadius}!important;-webkit-border-radius:${borderRadius}!important;-moz-border-radius:${borderRadius}!important;}.accessbit-widget-icon.rounded{border-radius:${borderRadius}!important;-webkit-border-radius:${borderRadius}!important;-moz-border-radius:${borderRadius}!important;}`;
+                            style.textContent = `
+                                .accessbit-widget-icon[data-shape="rounded"] {
+                                    border-radius: ${borderRadius} !important;
+                                    -webkit-border-radius: ${borderRadius} !important;
+                                    -moz-border-radius: ${borderRadius} !important;
+                                }
+                                .accessbit-widget-icon.rounded {
+                                    border-radius: ${borderRadius} !important;
+                                    -webkit-border-radius: ${borderRadius} !important;
+                                    -moz-border-radius: ${borderRadius} !important;
+                                }
+                            `;
                             document.head.appendChild(style);
                            
                         }
@@ -28788,7 +39038,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                             // Last resort: Create a new style element with maximum specificity
                             const shapeLower = shape.toLowerCase();
                             const style = document.createElement('style');
-                            style.textContent = `.accessbit-widget-icon[data-shape="${shapeLower}"]{border-radius:${borderRadius}!important;-webkit-border-radius:${borderRadius}!important;-moz-border-radius:${borderRadius}!important;}.accessbit-widget-icon.${shapeLower}{border-radius:${borderRadius}!important;-webkit-border-radius:${borderRadius}!important;-moz-border-radius:${borderRadius}!important;}`;
+                            style.textContent = `
+                                .accessbit-widget-icon[data-shape="${shapeLower}"] {
+                                    border-radius: ${borderRadius} !important;
+                                    -webkit-border-radius: ${borderRadius} !important;
+                                    -moz-border-radius: ${borderRadius} !important;
+                                }
+                                .accessbit-widget-icon.${shapeLower} {
+                                    border-radius: ${borderRadius} !important;
+                                    -webkit-border-radius: ${borderRadius} !important;
+                                    -moz-border-radius: ${borderRadius} !important;
+                                }
+                            `;
                             document.head.appendChild(style);
                             
                         }
