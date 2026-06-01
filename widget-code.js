@@ -1,3 +1,6 @@
+// Capture currentScript synchronously — it becomes null once execution goes async
+var _accessbitScriptEl = document.currentScript;
+
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
@@ -36908,11 +36911,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             try {
                 // 2. Try currentScript first, then fallback to the verified search term
-                const scriptEl = document.currentScript ||
-                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js') || s.src.includes('widget-code.js'))) ||
+                // _accessbitScriptEl is captured synchronously at file load (top of file)
+                // because document.currentScript is null by the time this async method runs
+                const scriptEl = _accessbitScriptEl ||
+                                 document.currentScript ||
+                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('widget-code.js') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
                                  document.querySelector('script[src*="widget-code.js"]') ||
-                                 document.querySelector('script[src*="new.js"]') ||
                                  document.querySelector('script[src*="widget.js"]') ||
+                                 document.querySelector('script[src*="new.js"]') ||
                                  document.querySelector('script[src*="script.js"]') ||
                                  document.querySelector('script[src*="test.js"]') ||
                                  document.querySelector('script[src*="dashboard.js"]');
