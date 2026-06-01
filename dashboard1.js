@@ -1,3 +1,6 @@
+// Capture currentScript synchronously at parse time — it becomes null in any async/callback context
+var _abWidgetScript = document.currentScript;
+
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
@@ -1618,7 +1621,10 @@ class AccessibilityWidget {
                 // Only matches script tags with our widget filenames, not user elements
                 let siteTokenParam = null;
                 try {
-                    const scriptEl = document.currentScript || 
+                    const scriptEl = _abWidgetScript ||
+                                   document.currentScript ||
+                                   document.querySelector('script[src*="dashboard1.js"]') ||
+                                   document.querySelector('script[src*="dashboard.js"]') ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
@@ -36829,12 +36835,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             try {
                 // 2. Try currentScript first, then fallback to the verified search term
-                const scriptEl = document.currentScript ||
-                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
+                const scriptEl = _abWidgetScript ||
+                                 document.currentScript ||
+                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard1.js') || s.src.includes('dashboard.js'))) ||
                                  document.querySelector('script[src*="new.js"]') ||
                                  document.querySelector('script[src*="widget.js"]') ||
                                  document.querySelector('script[src*="script.js"]') ||
                                  document.querySelector('script[src*="test.js"]') ||
+                                 document.querySelector('script[src*="dashboard1.js"]') ||
                                  document.querySelector('script[src*="dashboard.js"]');
 
                 if (scriptEl && scriptEl.src) {
@@ -39380,7 +39388,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
                     // Try to find the script tag - check for widget-specific filenames only
-                    const scriptEl = document.currentScript || 
+                    const scriptEl = _abWidgetScript ||
+                                   document.currentScript ||
+                                   document.querySelector('script[src*="dashboard1.js"]') ||
+                                   document.querySelector('script[src*="dashboard.js"]') ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
@@ -39499,4 +39510,3 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
  //latest code in live after dashboard made live (may 7)// 
 
            
-              
