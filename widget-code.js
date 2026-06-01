@@ -1,4 +1,18 @@
-var _accessbitSiteId = (function(){ try { var s = document.currentScript; return s ? new URL(s.src).searchParams.get('siteId') : null; } catch(e){ return null; } })();
+var _accessbitSiteId = (function(){
+    try {
+        // 1. Standard currentScript (works for non-dynamic scripts)
+        var s = document.currentScript;
+        if (s && s.src) { var u = new URL(s.src); var id = u.searchParams.get('siteId'); if (id) return id; }
+        // 2. DOM search (works if script element is still in DOM)
+        var all = document.getElementsByTagName('script');
+        for (var i = 0; i < all.length; i++) { if (all[i].src && all[i].src.indexOf('siteId=') > -1) { var u2 = new URL(all[i].src); var id2 = u2.searchParams.get('siteId'); if (id2) return id2; } }
+        // 3. Error stack trace (works for Webflow dynamic injection where script element is not in DOM)
+        var stack = (new Error()).stack || '';
+        var m = stack.match(/https?:\/\/[^\s\)]+\?[^\s\)]+/);
+        if (m) { var u3 = new URL(m[0].split(':')[0] + ':' + m[0].split(':')[1] + (m[0].split(':')[2]||'')); var id3 = u3.searchParams.get('siteId'); if (id3) return id3; }
+    } catch(e) {}
+    return null;
+})();
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
