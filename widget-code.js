@@ -1,3 +1,4 @@
+var _accessbitSiteId = (function(){ try { var s = document.currentScript; return s ? new URL(s.src).searchParams.get('siteId') : null; } catch(e){ return null; } })();
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
@@ -36898,6 +36899,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // 1. Return cached siteId if available
             if (this.siteId) {
                 return this.siteId;
+            }
+
+            // 2. Use siteId captured synchronously at file load (currentScript is null by the time this runs async)
+            if (_accessbitSiteId) {
+                this.siteId = _accessbitSiteId;
+                return _accessbitSiteId;
             }
 
             try {
