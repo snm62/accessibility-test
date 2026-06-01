@@ -890,7 +890,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://app.accessbit.io';
+            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev/';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -1501,7 +1501,7 @@ class AccessibilityWidget {
                     return true;
                 }
                 // OPTIMIZED: Minimal headers, efficient fetch with isolation
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                     method: 'GET',
                     headers: {
@@ -1515,7 +1515,7 @@ class AccessibilityWidget {
                     
                     await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
                     
-                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
                     const retryResponse = await this.isolatedFetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                         method: 'GET',
                         headers: {
@@ -1635,7 +1635,7 @@ class AccessibilityWidget {
                 }
                 
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base3}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -4276,7 +4276,7 @@ font-family: Archivo;
     
     
     
-            // Screen-reader live-region (must exist from the moment the widget loads)
+            // Screen-reader live-region (needed immediately)
             const srAnnouncements = document.createElement('div');
             srAnnouncements.id  = 'sr-announcements';
             srAnnouncements.className = 'sr-only';
@@ -4290,17 +4290,15 @@ font-family: Archivo;
                 applyVisionImpaired(viEnabled);
             } catch (_) {}
 
-            // Panel DOM is built lazily on first open — keeps initial JS execution off the critical path
+            // Panel DOM built lazily on first open
             this._panelReady = false;
 
         }
 
-        // Lazily builds the panel the first time the user opens it.
         _initPanel() {
             if (this._panelReady) return;
 
             const shadowRoot = this.shadowRoot;
-
     
             const panelOuter = document.createElement('div');
     
@@ -4521,7 +4519,6 @@ font-family: Archivo;
             } catch (_) {}
     
 
-            // Bind panel-specific event listeners now that all panel elements exist
             this.bindEvents();
 
             this._panelReady = true;
@@ -36536,10 +36533,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
         togglePanel() {
            
-            // Build panel on first open (lazy init — keeps initial load off the critical path)
-            if (!this._panelReady) {
-                this._initPanel();
-            }
+            if (!this._panelReady) { this._initPanel(); }
 
             // PERFORMANCE OPTIMIZATION: Use cached elements, but force refresh to ensure we have current elements
             const elements = this.getCachedElements(true); // Force refresh to get current elements
@@ -36776,7 +36770,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     
                     // OPTIMIZATION: Remove cache buster to allow browser caching
                     // The worker already sets Cache-Control headers for 5 minutes
-                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
                     const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
                 
               
@@ -36909,8 +36903,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             try {
                 // 2. Try currentScript first, then fallback to the verified search term
                 const scriptEl = document.currentScript ||
-                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('widget-code.js') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
-                                 document.querySelector('script[src*="widget-code.js"]') ||
+                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
                                  document.querySelector('script[src*="new.js"]') ||
                                  document.querySelector('script[src*="widget.js"]') ||
                                  document.querySelector('script[src*="script.js"]') ||
@@ -39480,7 +39473,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
                 let resp = await this.isolatedFetch(`${base}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
