@@ -39395,8 +39395,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
               
                 
                 // Check if this is a staging domain (always allow without payment)
-                const isStagingDomain = currentDomain.includes('.webflow.io') || 
-                                       currentDomain.includes('.webflow.com') || 
+                const isStagingDomain = currentDomain.includes('.webflow.io') ||
+                                       currentDomain.includes('.webflow.com') ||
+                                       currentDomain.endsWith('.framer.app') ||
                                        currentDomain.includes('localhost') ||
                                        currentDomain.includes('127.0.0.1') ||
                                        currentDomain.includes('staging');
