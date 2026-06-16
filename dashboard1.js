@@ -1620,9 +1620,9 @@ class AccessibilityWidget {
                     const scriptEl = document.currentScript ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
-                                   document.querySelector('script[src*="accessbit"]') ||
+                                   document.querySelector('script[src*="accessbit.js"]') ||
                                    document.querySelector('script[src*="widget.js"]') ||
-                                   document.querySelector('script[src*="dashboard1"]');
+                                   document.querySelector('script[src*="dashboard1.js"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteTokenParam = u.searchParams.get('siteToken');
@@ -36884,7 +36884,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                                  document.querySelector('script[src*="script.js"]') ||
                                  document.querySelector('script[src*="test.js"]') ||
                                  document.querySelector('script[src*="dashboard.js"]') ||
-                                 document.querySelector('script[src*="dashboard1"]');
+                                 document.querySelector('script[src*="dashboard1.js"]');
 
                 if (scriptEl && scriptEl.src) {
                     // Use the URL constructor to handle parsing &amp; and other encoding issues
@@ -39433,9 +39433,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     const scriptEl = document.currentScript ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
-                                   document.querySelector('script[src*="accessbit"]') ||
+                                   document.querySelector('script[src*="accessbit.js"]') ||
                                    document.querySelector('script[src*="widget.js"]') ||
-                                   document.querySelector('script[src*="dashboard1"]');
+                                   document.querySelector('script[src*="dashboard1.js"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteIdParam = u.searchParams.get('siteId');
