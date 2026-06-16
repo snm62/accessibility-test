@@ -1506,7 +1506,8 @@ class AccessibilityWidget {
                     let _fSiteId = null, _fSiteToken = null;
                     const _fScript = document.currentScript ||
                                      document.querySelector('script[src*="accessbit"]') ||
-                                     document.querySelector('script[src*="widget.js"]');
+                                     document.querySelector('script[src*="widget.js"]') ||
+                                     document.querySelector('script[src*="dashboard1"]');
                     if (_fScript && _fScript.src) {
                         const _fU = new URL(_fScript.src);
                         _fSiteId = _fU.searchParams.get('siteId');
@@ -1641,11 +1642,12 @@ class AccessibilityWidget {
                 // Only matches script tags with our widget filenames, not user elements
                 let siteTokenParam = null;
                 try {
-                    const scriptEl = document.currentScript || 
+                    const scriptEl = document.currentScript ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
-                                   document.querySelector('script[src*="widget.js"]');
+                                   document.querySelector('script[src*="widget.js"]') ||
+                                   document.querySelector('script[src*="dashboard1"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteTokenParam = u.searchParams.get('siteToken');
@@ -36918,7 +36920,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                                  document.querySelector('script[src*="widget.js"]') ||
                                  document.querySelector('script[src*="script.js"]') ||
                                  document.querySelector('script[src*="test.js"]') ||
-                                 document.querySelector('script[src*="dashboard.js"]');
+                                 document.querySelector('script[src*="dashboard.js"]') ||
+                                 document.querySelector('script[src*="dashboard1"]');
 
                 if (scriptEl && scriptEl.src) {
                     // Use the URL constructor to handle parsing &amp; and other encoding issues
@@ -39463,11 +39466,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
                     // Try to find the script tag - check for widget-specific filenames only
-                    const scriptEl = document.currentScript || 
+                    const scriptEl = document.currentScript ||
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
-                                   document.querySelector('script[src*="widget.js"]');
+                                   document.querySelector('script[src*="widget.js"]') ||
+                                   document.querySelector('script[src*="dashboard1"]');
                     if (scriptEl && scriptEl.src) {
                         const u = new URL(scriptEl.src);
                         siteIdParam = u.searchParams.get('siteId');
