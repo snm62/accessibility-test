@@ -1,6 +1,3 @@
-// Capture currentScript synchronously at parse time — it becomes null in any async/callback context
-var _abWidgetScript = document.currentScript;
-
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
@@ -522,12 +519,8 @@ function applyVisionImpaired(on) {
         } else {
             bindReduceMotionToggle();
         }
-        // Poll until element is found, then stop to avoid recurring main-thread task
-        var _abRmIv = setInterval(function() {
-            bindReduceMotionToggle();
-            var _i = document.getElementById('reduce-motion');
-            if (_i && _i.__reduceMotionBound) clearInterval(_abRmIv);
-        }, 1000);
+        // Also check periodically in case widget loads later
+        setInterval(bindReduceMotionToggle, 1000);
     } catch (e) {
        
     }
@@ -897,7 +890,7 @@ class AccessibilityWidget {
             this.isOpeningDropdown = false; // Flag to prevent immediate close
     
             // Set the KV API URL for your worker
-            this.kvApiUrl = 'https://accessbit-test-worker.web-8fb.workers.dev/';
+            this.kvApiUrl = 'https://app.accessbit.io';
             
 
             // CRITICAL: Check for seizure-safe mode immediately and apply it before any animations start
@@ -1499,16 +1492,42 @@ class AccessibilityWidget {
             try {
                 // Staging sites are free - check for all staging patterns
                 const host = window.location.hostname || '';
-                const isStagingDomain = host.endsWith('.webflow.io') || 
-                                       host.endsWith('.webflow.com') || 
+                const isStagingDomain = host.endsWith('.webflow.io') ||
+                                       host.endsWith('.webflow.com') ||
+                                       host.endsWith('.framer.app') ||
                                        host.includes('localhost') ||
                                        host.includes('127.0.0.1') ||
                                        host.includes('staging');
                 if (isStagingDomain) {
                     return true;
                 }
+                // Check Framer KV first if this widget was loaded with siteId+siteToken
+                try {
+                    let _fSiteId = null, _fSiteToken = null;
+                    const _fScript = document.currentScript ||
+                                     document.querySelector('script[src*="accessbit"]') ||
+                                     document.querySelector('script[src*="widget.js"]');
+                    if (_fScript && _fScript.src) {
+                        const _fU = new URL(_fScript.src);
+                        _fSiteId = _fU.searchParams.get('siteId');
+                        _fSiteToken = _fU.searchParams.get('siteToken');
+                        if (_fSiteToken && (!/^[a-zA-Z0-9._-]+$/.test(_fSiteToken) || _fSiteToken.length > 500)) _fSiteToken = null;
+                        if (_fSiteId && (typeof _fSiteId !== 'string' || _fSiteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(_fSiteId))) _fSiteId = null;
+                    }
+                    if (_fSiteId && _fSiteToken) {
+                        const _fRes = await this.isolatedFetch(
+                            `https://accessbit-framer.web-8fb.workers.dev/api/widget/validate?siteId=${encodeURIComponent(_fSiteId)}&siteToken=${encodeURIComponent(_fSiteToken)}`,
+                            { method: 'GET', headers: { 'Accept': 'application/json' } },
+                            8000, 1
+                        );
+                        if (_fRes && _fRes.ok) {
+                            const _fData = await _fRes.json();
+                            if (_fData.valid && _fData.paid) return true;
+                        }
+                    }
+                } catch {}
                 // OPTIMIZED: Minimal headers, efficient fetch with isolation
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
+                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                     method: 'GET',
                     headers: {
@@ -1522,7 +1541,7 @@ class AccessibilityWidget {
                     
                     await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
                     
-                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
+                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                     const retryResponse = await this.isolatedFetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
                         method: 'GET',
                         headers: {
@@ -1597,8 +1616,9 @@ class AccessibilityWidget {
                 
                 // Check if this is a staging domain (always allow)
                 const isStagingDomain = domain && (
-                    domain.endsWith('.webflow.io') || 
-                    domain.endsWith('.webflow.com') || 
+                    domain.endsWith('.webflow.io') ||
+                    domain.endsWith('.webflow.com') ||
+                    domain.endsWith('.framer.app') ||
                     domain.includes('localhost') ||
                     domain.includes('127.0.0.1') ||
                     domain.includes('staging')
@@ -1621,10 +1641,7 @@ class AccessibilityWidget {
                 // Only matches script tags with our widget filenames, not user elements
                 let siteTokenParam = null;
                 try {
-                    const scriptEl = _abWidgetScript ||
-                                   document.currentScript ||
-                                   document.querySelector('script[src*="dashboard1.js"]') ||
-                                   document.querySelector('script[src*="dashboard.js"]') ||
+                    const scriptEl = document.currentScript || 
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
@@ -1643,9 +1660,24 @@ class AccessibilityWidget {
                 if (siteId && (typeof siteId !== 'string' || siteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(siteId))) {
                     return false;
                 }
-                
+
+                // Check Framer KV first if siteId+siteToken are both present
+                if (siteId && siteTokenParam) {
+                    try {
+                        const _fvRes = await this.isolatedFetch(
+                            `https://accessbit-framer.web-8fb.workers.dev/api/widget/validate?siteId=${encodeURIComponent(siteId)}&siteToken=${encodeURIComponent(siteTokenParam)}`,
+                            { method: 'GET', headers: { 'Accept': 'application/json' } },
+                            8000, 1
+                        );
+                        if (_fvRes && _fvRes.ok) {
+                            const _fvData = await _fvRes.json();
+                            if (_fvData.valid) return true;
+                        }
+                    } catch {}
+                }
+
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
+                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                 const response = await this.isolatedFetch(`${base3}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3317,9 +3349,9 @@ class AccessibilityWidget {
                 z-index: 2147483645;
     
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-
-                transition: box-shadow 0.3s ease;
-
+    
+                transition: all 0.3s ease;
+    
             `;
     
             
@@ -3869,6 +3901,39 @@ font-family: Archivo;
     
     /* Removed conflicting shape styles */
     
+    /* DEBUG: Add visual indicators for shape testing */
+    .accessbit-widget-icon[data-shape="circle"]::after {
+        content: "CIRCLE" !important;
+        position: absolute !important;
+        top: -20px !important;
+        left: 0 !important;
+        /* Font size controlled by JavaScript */
+        color: red !important;
+        background: yellow !important;
+        z-index: 9999 !important;
+    }
+    
+    .accessbit-widget-icon[data-shape="rounded"]::after {
+        content: "ROUNDED" !important;
+        position: absolute !important;
+        top: -20px !important;
+        left: 0 !important;
+        /* Font size controlled by JavaScript */
+        color: red !important;
+        background: yellow !important;
+        z-index: 9999 !important;
+    }
+    
+    .accessbit-widget-icon[data-shape="square"]::after {
+        content: "SQUARE" !important;
+        position: absolute !important;
+        top: -20px !important;
+        left: 0 !important;
+        /* Font size controlled by JavaScript */
+        color: red !important;
+        background: yellow !important;
+        z-index: 9999 !important;
+    }
     
     /* Removed conflicting media query rules */
     
@@ -4578,7 +4643,6 @@ font-family: Archivo;
                 max-height: calc(100dvh - (var(--widget-spacing) * 2)) !important;
                 border-radius: 20px !important;
                 background-clip: padding-box !important;
-                will-change: transform, opacity;
             }
             @supports (height: 100dvh) {
                 .accessbit-widget-panel {
@@ -4695,9 +4759,8 @@ font-family: Archivo;
                        fall back to default there when app doesn't send a color */
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+                    transition: all 0.3s ease;
                     pointer-events: auto;
-                    will-change: transform;
                 }
                 .accessbit-widget-icon .sr-only {
                     position: absolute !important;
@@ -4761,7 +4824,7 @@ font-family: Archivo;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
                     border-radius: 4px !important;
-                    transition: box-shadow 0.2s ease !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
                 }
                 
                 /* Additional focus styles for accessibility icon when keyboard navigation is active */
@@ -4770,7 +4833,7 @@ font-family: Archivo;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
                     border-radius: 4px !important;
-                    transition: box-shadow 0.2s ease !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
                     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
                 }
     
@@ -5011,7 +5074,7 @@ font-family: Archivo;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
                     border-radius: 4px !important;
-                    transition: box-shadow 0.2s ease !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
                     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
                 }
     
@@ -5092,7 +5155,7 @@ font-family: Archivo;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
                     border-radius: 4px !important;
-                    transition: box-shadow 0.2s ease !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
                 }
     
                 /* Ensure focus styles work inside Shadow DOM when body has highlight-focus */
@@ -5105,7 +5168,7 @@ font-family: Archivo;
                     outline-offset: 2px !important;
                     background: rgba(99, 102, 241, 0.1) !important;
                     border-radius: 4px !important;
-                    transition: box-shadow 0.2s ease !important;
+                    transition: outline 0.2s ease, background 0.2s ease !important;
                 }
     
                 /* Inside the widget: only show custom focus when Highlight Focus is ON */
@@ -7140,7 +7203,7 @@ font-family: Archivo;
                     border-radius: 60px;
                     cursor: pointer;
                     font-weight: 600;
-                    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+                    transition: all 0.3s ease;
                     white-space: nowrap;
                     font-size: 12px;
                     justify-content: center;
@@ -7435,7 +7498,7 @@ font-family: Archivo;
                     align-items: center;
                     gap: 15px; /* 15px gap between icon block and text block */
                     border: 2px solid transparent;
-                    transition: border-color 0.2s ease, background-color 0.2s ease;
+                    transition: all 0.2s ease;
                     box-sizing: border-box;
                 }
                 .content-adjustments-card.profile-item { margin-bottom: 0; max-width: none; }
@@ -7817,7 +7880,7 @@ font-family: Archivo;
 
                     margin-right: auto;
 
-                    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+                    transition: all 0.3s ease;
 
                     border: 2px solid transparent;
 
@@ -9773,9 +9836,9 @@ input:checked + .slider::after {
                     cursor: pointer;
     
                     border: 2px solid transparent;
-
-                    transition: transform 0.2s ease, border-color 0.2s ease;
-
+    
+                    transition: all 0.2s ease;
+    
                     position: relative;
     
                     flex-shrink: 0;
@@ -10193,7 +10256,7 @@ input:checked + .slider::after {
 
                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 
-                    transition: box-shadow 0.3s ease;
+                    transition: all 0.3s ease;
 
                 }
     
@@ -10236,9 +10299,9 @@ input:checked + .slider::after {
                     font-family: Archivo;
 
                     cursor: pointer;
-
-                    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-
+    
+                    transition: all 0.3s ease;
+    
                     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     
                     appearance: none;
@@ -10478,7 +10541,7 @@ input:checked + .slider::after {
                     font-size: 14px;
                     font-weight: 500;
                     cursor: pointer;
-                    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+                    transition: all 0.2s ease;
                     font-family: Archivo, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
                 }
     
@@ -16361,9 +16424,9 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 z-index: 2147483645;
     
                 box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-
-                transition: box-shadow 0.3s ease;
-
+    
+                transition: all 0.3s ease;
+    
             `;
     
             
@@ -17340,25 +17403,39 @@ keyboardNav: "Keyboard Navigation (Motor)",
                 skipLink.textContent = 'Skip to main content';
     
                 skipLink.style.cssText = `
+    
                     position: absolute;
-                    top: 6px;
+    
+                    top: -40px;
+    
                     left: 6px;
+    
                     background: var(--primary-color);
+    
                     color: white;
+    
                     padding: 8px;
+    
                     text-decoration: none;
+    
                     border-radius: 4px;
+    
                     z-index: 2147483645;
-                    transform: translateY(-200%);
-                    transition: transform 0.3s;
+    
+                    transition: top 0.3s;
+    
                 `;
-
+    
                 skipLink.addEventListener('focus', () => {
-                    skipLink.style.transform = 'translateY(0)';
+    
+                    skipLink.style.top = '6px';
+    
                 });
-
+    
                 skipLink.addEventListener('blur', () => {
-                    skipLink.style.transform = 'translateY(-200%)';
+    
+                    skipLink.style.top = '-40px';
+    
                 });
     
                 document.body.insertBefore(skipLink, document.body.firstChild);
@@ -22236,7 +22313,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 width: 100%;
                 height: 50%;
                 background: rgba(0, 0, 0, 0.5);
-                transition: height 0.1s ease;
+                transition: all 0.1s ease;
             `;
     
             // Create bottom overlay
@@ -22249,7 +22326,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 width: 100%;
                 height: 50%;
                 background: rgba(0, 0, 0, 0.5);
-                transition: height 0.1s ease;
+                transition: all 0.1s ease;
             `;
     
             spotlight.appendChild(topOverlay);
@@ -22563,7 +22640,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         outline-offset: 2px !important;
                         background: rgba(99, 102, 241, 0.1) !important;
                         border-radius: 4px !important;
-                        transition: box-shadow 0.2s ease !important;
+                        transition: outline 0.2s ease, background 0.2s ease !important;
                     }
                     
                     body.highlight-focus a:focus,
@@ -22589,7 +22666,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         background: rgba(99, 102, 241, 0.1) !important;
                         border-radius: 4px !important;
                         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
-                        transition: box-shadow 0.2s ease !important;
+                        transition: outline 0.2s ease, background 0.2s ease, box-shadow 0.2s ease !important;
                     }
                     
                     /* Exclude accessibility widget from highlight focus */
@@ -28453,9 +28530,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     pointer-events: none;
     
                     z-index: 100000;
-
-                    transition: top 0.1s ease, left 0.1s ease;
-
+    
+                    transition: all 0.1s ease;
+    
                     box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
     
                 }
@@ -35082,8 +35159,8 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
     
                 /* Create spotlight hole using large box-shadow */
                 box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-
-                transition: top 0.1s ease, left 0.1s ease, width 0.1s ease, height 0.1s ease;
+    
+                transition: all 0.1s ease;
     
             `;
     
@@ -35213,9 +35290,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         border: 2px solid #004499 !important;
                         font-weight: 600;
                         text-shadow: none !important;
-                        transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out !important;
+                        transition: all 0.3s ease-in-out !important;
                     }
-
+                    
                     body.adhd-friendly button:hover,
                     body.adhd-friendly input[type="button"]:hover,
                     body.adhd-friendly input[type="submit"]:hover,
@@ -35233,9 +35310,9 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         background-color: #ffffff !important;
                         color: #1a1a1a !important;
                         font-weight: 500;
-                        transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out !important;
+                        transition: all 0.3s ease-in-out !important;
                     }
-
+                    
                     body.adhd-friendly input:focus,
                     body.adhd-friendly textarea:focus,
                     body.adhd-friendly select:focus {
@@ -35247,7 +35324,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     body.adhd-friendly *:focus {
                         outline: 3px solid #0066cc !important;
                         outline-offset: 2px !important;
-                        transition: box-shadow 0.2s ease-in-out !important;
+                        transition: outline 0.2s ease-in-out !important;
                     }
                     
                     /* 8. IMAGE CONTRAST ENHANCEMENT - Slightly enhance images */
@@ -36703,7 +36780,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     
                     // OPTIMIZATION: Remove cache buster to allow browser caching
                     // The worker already sets Cache-Control headers for 5 minutes
-                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
+                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                     const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
                 
               
@@ -36835,14 +36912,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             try {
                 // 2. Try currentScript first, then fallback to the verified search term
-                const scriptEl = _abWidgetScript ||
-                                 document.currentScript ||
-                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard1.js') || s.src.includes('dashboard.js'))) ||
+                const scriptEl = document.currentScript ||
+                                 Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
                                  document.querySelector('script[src*="new.js"]') ||
                                  document.querySelector('script[src*="widget.js"]') ||
                                  document.querySelector('script[src*="script.js"]') ||
                                  document.querySelector('script[src*="test.js"]') ||
-                                 document.querySelector('script[src*="dashboard1.js"]') ||
                                  document.querySelector('script[src*="dashboard.js"]');
 
                 if (scriptEl && scriptEl.src) {
@@ -39388,10 +39463,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 let siteIdParam = null; let siteTokenParam = null;
                 try {
                     // Try to find the script tag - check for widget-specific filenames only
-                    const scriptEl = _abWidgetScript ||
-                                   document.currentScript ||
-                                   document.querySelector('script[src*="dashboard1.js"]') ||
-                                   document.querySelector('script[src*="dashboard.js"]') ||
+                    const scriptEl = document.currentScript || 
                                    document.querySelector('script[src*="test.js"]') ||
                                    document.querySelector('script[src*="new.js"]') ||
                                    document.querySelector('script[src*="accessbit"]') ||
@@ -39411,7 +39483,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     }
                 } catch {}
                 const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://accessbit-test-worker.web-8fb.workers.dev/').replace(/\/+$/,'');
+                const base = ((this && this.kvApiUrl) ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                 let resp = await this.isolatedFetch(`${base}/api/accessibility/validate-domain`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -39507,6 +39579,4 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
         
     })();
     
- //latest code in live after dashboard made live (may 7)// 
-
-           
+ //latest code in live after dashboard made live (may 7)
