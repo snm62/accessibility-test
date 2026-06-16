@@ -1528,7 +1528,7 @@ class AccessibilityWidget {
                         );
                         if (!res || !res.ok) return null;
                         const d = await res.json();
-                        return (d.valid && d.paid) ? true : null;
+                        return d.valid ? true : null;
                     })(),
                     // Webflow Stripe check
                     (async () => {
