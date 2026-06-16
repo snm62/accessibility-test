@@ -36759,39 +36759,48 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         return null;
                     }
                     
-                    // OPTIMIZATION: Remove cache buster to allow browser caching
-                    // The worker already sets Cache-Control headers for 5 minutes
-                    const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
-                    const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
+                    // Detect platform: siteToken in script URL = Framer, otherwise = Webflow
+                    let _cfgSiteToken = null;
+                    try {
+                        const _cfgScript = document.currentScript ||
+                                           document.querySelector('script[src*="accessbit"]') ||
+                                           document.querySelector('script[src*="widget.js"]') ||
+                                           document.querySelector('script[src*="dashboard1"]');
+                        if (_cfgScript && _cfgScript.src) {
+                            const _cfgU = new URL(_cfgScript.src);
+                            _cfgSiteToken = _cfgU.searchParams.get('siteToken');
+                            if (_cfgSiteToken && (!/^[a-zA-Z0-9._-]+$/.test(_cfgSiteToken) || _cfgSiteToken.length > 500)) _cfgSiteToken = null;
+                        }
+                    } catch {}
 
-                    // Check both KVs in parallel — Framer KV and Webflow KV are equally important
-                    const [_framerCfgResult, _webflowCfgResult] = await Promise.allSettled([
-                        // Framer KV check
-                        (async () => {
-                            const res = await this.isolatedFetch(
-                                `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}`,
-                                { method: 'GET', headers: { 'Accept': 'application/json' } },
-                                8000, 1
-                            );
-                            if (!res || !res.ok) return null;
+                    const isFramerSite = !!_cfgSiteToken;
+
+                    let cfgData = null;
+                    if (isFramerSite) {
+                        // Framer site — check Framer KV
+                        const res = await this.isolatedFetch(
+                            `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}`,
+                            { method: 'GET', headers: { 'Accept': 'application/json' } },
+                            8000, 1
+                        );
+                        if (res && res.ok) {
                             const d = await res.json();
-                            if (!d || (!d.customization && !d.accessibilityProfiles)) return null;
-                            return { ...d, publishedAt: d.updatedAt || null };
-                        })(),
-                        // Webflow KV check
-                        (async () => {
-                            const res = await this.isolatedFetch(apiUrl, {
-                                method: 'GET', headers: { 'Accept': 'application/json' }, keepalive: false
-                            }, 10000, 3);
-                            if (!res || !res.ok) return null;
-                            return await res.json();
-                        })()
-                    ]);
+                            if (d && (d.customization || d.accessibilityProfiles)) {
+                                cfgData = { ...d, publishedAt: d.updatedAt || null };
+                            }
+                        }
+                    } else {
+                        // Webflow site — check Webflow KV
+                        const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                        const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
+                        const res = await this.isolatedFetch(apiUrl, {
+                            method: 'GET', headers: { 'Accept': 'application/json' }, keepalive: false
+                        }, 10000, 3);
+                        if (res && res.ok) {
+                            cfgData = await res.json();
+                        }
+                    }
 
-                    const framerCfg = _framerCfgResult.status === 'fulfilled' ? _framerCfgResult.value : null;
-                    const webflowCfg = _webflowCfgResult.status === 'fulfilled' ? _webflowCfgResult.value : null;
-                    // Use whichever KV returned data; prefer Framer if both have it (siteToken present = Framer site)
-                    const cfgData = framerCfg || webflowCfg;
                     if (cfgData && siteId) {
                         try {
                             sessionStorage.setItem(`customization_cache_${siteId}`, JSON.stringify({
