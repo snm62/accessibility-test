@@ -1501,88 +1501,63 @@ class AccessibilityWidget {
                 if (isStagingDomain) {
                     return true;
                 }
-                // Check Framer KV first if this widget was loaded with siteId+siteToken
+                // Check both KVs in parallel — Framer KV and Webflow KV are equally important
+                let _pSiteId = null, _pSiteToken = null;
                 try {
-                    let _fSiteId = null, _fSiteToken = null;
-                    const _fScript = document.currentScript ||
+                    const _pScript = document.currentScript ||
                                      document.querySelector('script[src*="accessbit"]') ||
                                      document.querySelector('script[src*="widget.js"]') ||
                                      document.querySelector('script[src*="dashboard1"]');
-                    if (_fScript && _fScript.src) {
-                        const _fU = new URL(_fScript.src);
-                        _fSiteId = _fU.searchParams.get('siteId');
-                        _fSiteToken = _fU.searchParams.get('siteToken');
-                        if (_fSiteToken && (!/^[a-zA-Z0-9._-]+$/.test(_fSiteToken) || _fSiteToken.length > 500)) _fSiteToken = null;
-                        if (_fSiteId && (typeof _fSiteId !== 'string' || _fSiteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(_fSiteId))) _fSiteId = null;
+                    if (_pScript && _pScript.src) {
+                        const _pU = new URL(_pScript.src);
+                        _pSiteId = _pU.searchParams.get('siteId');
+                        _pSiteToken = _pU.searchParams.get('siteToken');
+                        if (_pSiteToken && (!/^[a-zA-Z0-9._-]+$/.test(_pSiteToken) || _pSiteToken.length > 500)) _pSiteToken = null;
+                        if (_pSiteId && (typeof _pSiteId !== 'string' || _pSiteId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(_pSiteId))) _pSiteId = null;
                     }
-                    if (_fSiteId && _fSiteToken) {
-                        const _fRes = await this.isolatedFetch(
-                            `https://accessbit-framer.web-8fb.workers.dev/api/widget/validate?siteId=${encodeURIComponent(_fSiteId)}&siteToken=${encodeURIComponent(_fSiteToken)}`,
+                } catch {}
+
+                const [_framerPayResult, _webflowPayResult] = await Promise.allSettled([
+                    // Framer KV check
+                    (async () => {
+                        if (!_pSiteId || !_pSiteToken) return null;
+                        const res = await this.isolatedFetch(
+                            `https://accessbit-framer.web-8fb.workers.dev/api/widget/validate?siteId=${encodeURIComponent(_pSiteId)}&siteToken=${encodeURIComponent(_pSiteToken)}`,
                             { method: 'GET', headers: { 'Accept': 'application/json' } },
                             8000, 1
                         );
-                        if (_fRes && _fRes.ok) {
-                            const _fData = await _fRes.json();
-                            if (_fData.valid && _fData.paid) return true;
+                        if (!res || !res.ok) return null;
+                        const d = await res.json();
+                        return (d.valid && d.paid) ? true : null;
+                    })(),
+                    // Webflow Stripe check
+                    (async () => {
+                        const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                        let res = await this.isolatedFetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                            method: 'GET', headers: { 'Accept': 'application/json' }, keepalive: false
+                        }, 10000, 2);
+                        if (res && res.status === 429) {
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                            const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                            res = await this.isolatedFetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
+                                method: 'GET', headers: { 'Accept': 'application/json' }, keepalive: false
+                            });
                         }
-                    }
-                } catch {}
-                // OPTIMIZED: Minimal headers, efficient fetch with isolation
-                const base1 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
-                const response = await this.isolatedFetch(`${base1}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    keepalive: false
-                }, 10000, 2); // 10s timeout, 2 retries (isolatedFetch handles 429 automatically)
-                
-                // Handle rate limit errors with retry (fallback if isolatedFetch didn't handle it)
-                if (response && response.status === 429) {
-                    
-                    await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced retry delay
-                    
-                    const base2 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
-                    const retryResponse = await this.isolatedFetch(`${base2}/api/stripe/customer-data-by-domain?domain=${encodeURIComponent(host)}&_t=${Date.now()}`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        keepalive: false
-                    });
-                    if (!retryResponse.ok) {
-                        // API error - return null to indicate check failed (not payment invalid)
-                        return null;
-                    }
-                    
-                    const paymentData = await retryResponse.json();
-                    return this.processPaymentResponse(paymentData);
-                }
-                
-                if (!response.ok) {
-                    // API error - return null to indicate check failed (not payment invalid)
-                    // Don't hide widget on temporary API errors
-                    return null;
-                }
-                
-                const paymentData = await response.json();
+                        if (!res || !res.ok) return null;
+                        const paymentData = await res.json();
+                        if (paymentData && paymentData.customDomain) {
+                            const recordDomain = paymentData.customDomain.replace(/^https?:\/\//, '').replace(/\/$/, '').replace(/^www\./, '').toLowerCase();
+                            const currentHost = host.replace(/^www\./, '').toLowerCase();
+                            if (recordDomain && recordDomain !== currentHost) return false;
+                        }
+                        return this.processPaymentResponse(paymentData);
+                    })()
+                ]);
 
-                // After a domain transfer, customDomain in the customer record points to
-                // the NEW domain. If it doesn't match the current hostname the widget must
-                // hide on the old domain — without deleting anything from KV.
-                if (paymentData && paymentData.customDomain) {
-                    const recordDomain = paymentData.customDomain
-                        .replace(/^https?:\/\//, '')
-                        .replace(/\/$/, '')
-                        .replace(/^www\./, '')
-                        .toLowerCase();
-                    const currentHost = host.replace(/^www\./, '').toLowerCase();
-                    if (recordDomain && recordDomain !== currentHost) {
-                        return false; // This domain's license was transferred away
-                    }
-                }
-
-                return this.processPaymentResponse(paymentData);
+                const framerPaid = _framerPayResult.status === 'fulfilled' && _framerPayResult.value === true;
+                if (framerPaid) return true;
+                // Return Webflow result (true/false/null) — null means check failed, don't hide widget
+                return _webflowPayResult.status === 'fulfilled' ? _webflowPayResult.value : null;
                 
             } catch (error) {
                 // Network/parsing error - return null to indicate check failed (not payment invalid)
@@ -1663,33 +1638,37 @@ class AccessibilityWidget {
                     return false;
                 }
 
-                // Check Framer KV first if siteId+siteToken are both present
-                if (siteId && siteTokenParam) {
-                    try {
-                        const _fvRes = await this.isolatedFetch(
+                // Check both KVs in parallel — Framer KV and Webflow KV are equally important
+                const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+                const [_framerValidResult, _webflowValidResult] = await Promise.allSettled([
+                    // Framer KV check
+                    (async () => {
+                        if (!siteId || !siteTokenParam) return false;
+                        const res = await this.isolatedFetch(
                             `https://accessbit-framer.web-8fb.workers.dev/api/widget/validate?siteId=${encodeURIComponent(siteId)}&siteToken=${encodeURIComponent(siteTokenParam)}`,
                             { method: 'GET', headers: { 'Accept': 'application/json' } },
                             8000, 1
                         );
-                        if (_fvRes && _fvRes.ok) {
-                            const _fvData = await _fvRes.json();
-                            if (_fvData.valid) return true;
-                        }
-                    } catch {}
-                }
-
-                const visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-                const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
-                const response = await this.isolatedFetch(`${base3}/api/accessibility/validate-domain`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId })
-                });
-                
-                if (!response || !response.ok) return false;
-                
-                const { isValid } = await response.json();
-                return isValid;
+                        if (!res || !res.ok) return false;
+                        const d = await res.json();
+                        return d.valid === true;
+                    })(),
+                    // Webflow KV check
+                    (async () => {
+                        const base3 = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
+                        const res = await this.isolatedFetch(`${base3}/api/accessibility/validate-domain`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ domain, siteId, siteToken: siteTokenParam, visitorId })
+                        });
+                        if (!res || !res.ok) return false;
+                        const { isValid } = await res.json();
+                        return isValid;
+                    })()
+                ]);
+                const framerValid = _framerValidResult.status === 'fulfilled' && _framerValidResult.value === true;
+                const webflowValid = _webflowValidResult.status === 'fulfilled' && _webflowValidResult.value === true;
+                return framerValid || webflowValid;
             } catch (error) {
                 
                 return false;
@@ -36784,70 +36763,45 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     // The worker already sets Cache-Control headers for 5 minutes
                     const baseCfg = (this && this.kvApiUrl ? this.kvApiUrl : 'https://app.accessbit.io').replace(/\/+$/,'');
                     const apiUrl = `${baseCfg}/api/accessibility/config?siteId=${siteId}`;
-                
-              
-                
-                // Use isolatedFetch for API isolation (handles retries, timeouts, rate limiting automatically)
-                const response = await this.isolatedFetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    keepalive: false
-                }, 10000, 3); // 10s timeout, 3 retries
-                
-                if (response && response.ok) {
-                   
-                    
-                    // Parse response data
-                    let data = null;
-                    try {
-                        data = await response.json();
-                    } catch (parseError) {
-                        console.error('[CUSTOMIZATION FETCH] Failed to parse JSON response:', parseError);
-                        return null;
-                    }
-                    
-                    // Cache the successful response
-                    // Check if publishedAt changed - if so, use new data (new customization published)
-                    if (data && siteId) {
-                        try {
-                            const newPublishedAt = data.publishedAt;
-                            
-                            // If publishedAt changed, this means new customization was published
-                            // Always use the new data and update cache
-                            if (cachedPublishedAt && newPublishedAt && cachedPublishedAt !== newPublishedAt) {
-                                
-                            } else if (cachedPublishedAt === newPublishedAt) {
-                               
-                            }
-                            
-                            // Always update cache with latest data
-                            sessionStorage.setItem(`customization_cache_${siteId}`, JSON.stringify({
-                                data: data,
-                                timestamp: Date.now(),
-                                publishedAt: data.publishedAt
-                            }));
-             
-                        } catch (e) {
-                            // Ignore storage errors (quota exceeded, etc.)
-                        }
-                    }
 
-                    return data;
-                } else {
-                    // Response was null or not ok - isolatedFetch already handled retries
-                    if (response) {
-                        const errorText = await response.text().catch(() => 'Unable to read error response');
-                        console.error('[CUSTOMIZATION FETCH] API error:', {
-                            status: response.status,
-                            statusText: response.statusText,
-                            url: apiUrl,
-                            errorBody: errorText
-                        });
+                    // Check both KVs in parallel — Framer KV and Webflow KV are equally important
+                    const [_framerCfgResult, _webflowCfgResult] = await Promise.allSettled([
+                        // Framer KV check
+                        (async () => {
+                            const res = await this.isolatedFetch(
+                                `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}`,
+                                { method: 'GET', headers: { 'Accept': 'application/json' } },
+                                8000, 1
+                            );
+                            if (!res || !res.ok) return null;
+                            const d = await res.json();
+                            if (!d || (!d.customization && !d.accessibilityProfiles)) return null;
+                            return { ...d, publishedAt: d.updatedAt || null };
+                        })(),
+                        // Webflow KV check
+                        (async () => {
+                            const res = await this.isolatedFetch(apiUrl, {
+                                method: 'GET', headers: { 'Accept': 'application/json' }, keepalive: false
+                            }, 10000, 3);
+                            if (!res || !res.ok) return null;
+                            return await res.json();
+                        })()
+                    ]);
+
+                    const framerCfg = _framerCfgResult.status === 'fulfilled' ? _framerCfgResult.value : null;
+                    const webflowCfg = _webflowCfgResult.status === 'fulfilled' ? _webflowCfgResult.value : null;
+                    // Use whichever KV returned data; prefer Framer if both have it (siteToken present = Framer site)
+                    const cfgData = framerCfg || webflowCfg;
+                    if (cfgData && siteId) {
+                        try {
+                            sessionStorage.setItem(`customization_cache_${siteId}`, JSON.stringify({
+                                data: cfgData, timestamp: Date.now(), publishedAt: cfgData.publishedAt
+                            }));
+                        } catch {}
+                        return cfgData;
                     }
                     return null;
-                }
+
             } catch (error) {
                    
                     return null;
