@@ -1,3 +1,19 @@
+// Capture siteId + siteToken at script load time (document.currentScript is only available synchronously)
+(function() {
+    try {
+        var _s = document.currentScript;
+        if (_s && _s.src) {
+            var _u = new URL(_s.src);
+            var _sid = _u.searchParams.get('siteId');
+            var _stok = _u.searchParams.get('siteToken');
+            var _plat = _u.searchParams.get('platform');
+            if (_sid) window.__accessbit_siteId = _sid;
+            if (_stok) window.__accessbit_siteToken = _stok;
+            if (_plat) window.__accessbit_platform = _plat;
+        }
+    } catch(e) {}
+})();
+
 // Early run: apply reduce-motion and seizure-safe from localStorage before any animations
 (function() {
     function isDesignerModeStandalone() {
@@ -36759,21 +36775,21 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         return null;
                     }
                     
-                    // Detect platform: siteToken in script URL = Framer, otherwise = Webflow
-                    let _cfgSiteToken = null;
-                    try {
-                        const _cfgScript = document.currentScript ||
-                                           document.querySelector('script[src*="accessbit"]') ||
-                                           document.querySelector('script[src*="widget.js"]') ||
-                                           document.querySelector('script[src*="dashboard1"]');
-                        if (_cfgScript && _cfgScript.src) {
-                            const _cfgU = new URL(_cfgScript.src);
-                            _cfgSiteToken = _cfgU.searchParams.get('siteToken');
-                            if (_cfgSiteToken && (!/^[a-zA-Z0-9._-]+$/.test(_cfgSiteToken) || _cfgSiteToken.length > 500)) _cfgSiteToken = null;
-                        }
-                    } catch {}
+                    // Detect platform by explicit param: platform=framer added by Framer plugin, never by Webflow
+                    let _cfgPlatform = window.__accessbit_platform || null;
+                    if (!_cfgPlatform) {
+                        try {
+                            const _cfgScript = document.currentScript ||
+                                               document.querySelector('script[src*="accessbit"]') ||
+                                               document.querySelector('script[src*="widget.js"]') ||
+                                               document.querySelector('script[src*="dashboard1"]');
+                            if (_cfgScript && _cfgScript.src) {
+                                _cfgPlatform = new URL(_cfgScript.src).searchParams.get('platform');
+                            }
+                        } catch {}
+                    }
 
-                    const isFramerSite = !!_cfgSiteToken;
+                    const isFramerSite = _cfgPlatform === 'framer';
 
                     let cfgData = null;
                     if (isFramerSite) {
@@ -36875,8 +36891,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 return this.siteId;
             }
 
+            // 2. Use early-captured global (set synchronously at script load time)
+            if (window.__accessbit_siteId) {
+                this.siteId = window.__accessbit_siteId;
+                return this.siteId;
+            }
+
             try {
-                // 2. Try currentScript first, then fallback to the verified search term
+                // 3. Try currentScript first, then fallback to the verified search term
                 const scriptEl = document.currentScript ||
                                  Array.from(document.getElementsByTagName('script')).find(s => s.src && (s.src.includes('AccessBit') || s.src.includes('script.js') || s.src.includes('test.js') || s.src.includes('dashboard.js'))) ||
                                  document.querySelector('script[src*="new.js"]') ||
