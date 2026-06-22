@@ -897,7 +897,7 @@ class AccessibilityWidget {
             this._mutationTimer = null;
             this._rafPending = false;
             // Single source of truth for breakpoint – JS and CSS flip together
-            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 1279px)') : null;
+            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 767px)') : null;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1966,7 +1966,7 @@ class AccessibilityWidget {
                 const iconEl = this.shadowRoot?.getElementById('accessbit-widget-icon');
                 if (iconEl && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     const shouldShow = !isMobile ? !hideTrigger : (mobileVisibility !== 'Hide');
                     if (shouldShow) {
@@ -2142,7 +2142,7 @@ class AccessibilityWidget {
                 }
                 
                 // Apply mobile responsive styles on load if mobile
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767))) {
                     this.applyMobileResponsiveStyles();
                 }
 
@@ -37052,7 +37052,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767))) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -37106,7 +37106,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -37156,7 +37156,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
             
             // Check device type
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -37223,7 +37223,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
 
             // Keep trigger positioning responsive while dragging breakpoints.
             // We explicitly set the CSS vars each time so stale transforms/anchors can't accumulate.
@@ -37267,6 +37267,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 } else {
                     if (data.triggerHorizontalOffset !== undefined) this.updateTriggerOffset('horizontal', data.triggerHorizontalOffset);
                     if (data.triggerVerticalOffset !== undefined) this.updateTriggerOffset('vertical', data.triggerVerticalOffset);
+                }
+                // Re-apply correct shape for the current breakpoint
+                if (isMobile) {
+                    if (data.mobileTriggerShape) this.updateMobileTriggerShape(data.mobileTriggerShape);
+                } else {
+                    if (data.triggerButtonShape) this.updateTriggerButtonShape(data.triggerButtonShape);
                 }
             } catch (e) {}
 
@@ -38372,7 +38378,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -38676,56 +38682,29 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
 
                 
                 // Only apply desktop offsets on desktop/tablet
                 if (!isMobile) {
-                    
-                    const cs = window.getComputedStyle(icon);
-                    const currentLeftRaw = icon.style.left || cs.left;
-                    const currentRightRaw = icon.style.right || cs.right;
-                    const currentTopRaw = icon.style.top || cs.top;
-                    const currentBottomRaw = icon.style.bottom || cs.bottom;
-                    const currentTransformRaw = icon.style.transform || cs.transform || '';
-    
-
-    
                     const normalizedOffset = (typeof offset === 'number' || /^-?\d+$/.test(String(offset))) ? `${offset}px` : String(offset);
-                    
-                if (direction === 'horizontal') {
-                        if (currentLeftRaw && currentLeftRaw !== 'auto' && currentLeftRaw !== '0px' && currentLeftRaw !== '0') {
-                            const currentLeft = currentLeftRaw;
-                            const newLeft = currentLeft.includes('calc') ? currentLeft.replace(')', ` + ${normalizedOffset})`) : `calc(${currentLeft} + ${normalizedOffset})`;
-                            this.setIconPositionVars({ left: newLeft, right: 'auto' });
-                        } else if (currentRightRaw && currentRightRaw !== 'auto' && currentRightRaw !== '0px' && currentRightRaw !== '0') {
-                            const currentRight = currentRightRaw;
-                            const newRight = currentRight.includes('calc') ? currentRight.replace(')', ` + ${normalizedOffset})`) : `calc(${currentRight} + ${normalizedOffset})`;
-                            this.setIconPositionVars({ right: newRight, left: 'auto' });
-                        } else {
+                    const hPos = (this.customizationData?.triggerHorizontalPosition || 'Right').toLowerCase();
+                    const vPos = (this.customizationData?.triggerVerticalPosition || 'Bottom').toLowerCase();
+                    if (direction === 'horizontal') {
+                        if (hPos === 'left') {
                             this.setIconPositionVars({ left: `calc(20px + ${normalizedOffset})`, right: 'auto' });
-                        }
-                } else if (direction === 'vertical') {
-                        if (currentTopRaw && currentTopRaw !== 'auto' && currentTopRaw !== '0px' && currentTopRaw !== '0') {
-                            const currentTop = currentTopRaw;
-                            if (currentTop === '50%') {
-                                const currentTransform = currentTransformRaw || 'translateY(-50%)';
-                                const newTransform = currentTransform.includes('calc') ? currentTransform.replace(')', ` + ${normalizedOffset})`) : `translateY(calc(-50% + ${normalizedOffset}))`;
-                                this.setIconPositionVars({ transform: newTransform });
-                            } else {
-                                const newTop = currentTop.includes('calc') ? currentTop.replace(')', ` + ${normalizedOffset})`) : `calc(${currentTop} + ${normalizedOffset})`;
-                                this.setIconPositionVars({ top: newTop, bottom: 'auto' });
-                            }
-                        } else if (currentBottomRaw && currentBottomRaw !== 'auto' && currentBottomRaw !== '0px' && currentBottomRaw !== '0') {
-                            const currentBottom = currentBottomRaw;
-                            const newBottom = currentBottom.includes('calc') ? currentBottom.replace(')', ` + ${normalizedOffset})`) : `calc(${currentBottom} + ${normalizedOffset})`;
-                            this.setIconPositionVars({ bottom: newBottom, top: 'auto' });
                         } else {
+                            this.setIconPositionVars({ right: `calc(20px + ${normalizedOffset})`, left: 'auto' });
+                        }
+                    } else if (direction === 'vertical') {
+                        if (vPos === 'top') {
                             this.setIconPositionVars({ top: `calc(20px + ${normalizedOffset})`, bottom: 'auto' });
+                        } else if (vPos === 'middle' || vPos === 'center') {
+                            this.setIconPositionVars({ transform: `translateY(calc(-50% + ${normalizedOffset}))` });
+                        } else {
+                            this.setIconPositionVars({ bottom: `calc(20px + ${normalizedOffset})`, top: 'auto' });
                         }
                     }
-                    
-                   
                 } else {
                     // Store the offset values for when desktop positioning is applied
                     this.desktopHorizontalOffset = direction === 'horizontal' ? offset : (this.desktopHorizontalOffset || 0);
@@ -38968,7 +38947,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -38992,7 +38971,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
                 if (isMobile) {
                   
                     
@@ -39109,7 +39088,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1279);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
 
                 
                 if (isMobile) {
