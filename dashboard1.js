@@ -38802,7 +38802,11 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             panel.style.removeProperty('transform');
 
             const margin = 20;
-            const hPos = (this.customizationData?.triggerHorizontalPosition || 'right').toString().toLowerCase();
+            const isMobilePanel = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+            const hPos = (isMobilePanel
+                ? (this.customizationData?.mobileTriggerHorizontalPosition || this.customizationData?.triggerHorizontalPosition || 'right')
+                : (this.customizationData?.triggerHorizontalPosition || 'right')
+            ).toString().toLowerCase();
             const isRight = hPos.includes('right');
             if (isRight) {
                 host.style.setProperty('--panel-right', margin + 'px');
