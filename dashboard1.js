@@ -7363,7 +7363,7 @@ font-family: Archivo;
                 }
                 .content-adjustments-title,
                 .placeholder-title { opacity: 1 !important; min-height: 27px !important; white-space: nowrap !important; overflow: visible !important; }
-                .color-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .color-adjustments-section { margin-top: 16px; margin-bottom: 8px; max-width: min(528px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .color-adjustments-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .color-adjustments-toggles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
                 .color-adjustments-card { background: #FFFFFF; border-radius: 7px; padding: 15px 22px; min-height: 84px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; box-sizing: border-box; }
@@ -7458,7 +7458,7 @@ font-family: Archivo;
                 #accessbit-widget-panel[data-lang="ru"] .contrast-style-card .card-top { min-height: 40px; }
                 #accessbit-widget-panel[data-lang="ru"] .contrast-style-card h4 { margin-top: 6px; }
                 .cursor-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; margin-bottom: 16px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
-                .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(440px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .interface-controls-section { margin-top: 16px; margin-bottom: 8px; max-width: min(528px, 100%); margin-left: auto; margin-right: auto; width: 100%; overflow: visible !important; overflow-x: hidden !important; overflow-y: visible !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
                 .interface-controls-section::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
                 .interface-controls-title { font-family: Archivo; font-weight: 600; font-style: normal; font-size: 26px; line-height: 27px; letter-spacing: -1px; color: #524072 !important; margin: 36px 0 18px 0 !important; text-align: left !important; display: block !important; min-height: 27px !important; contain: layout !important; }
                 @media (max-width: 768px) {
