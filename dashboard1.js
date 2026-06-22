@@ -7394,6 +7394,7 @@ font-family: Archivo;
                 .color-adjustments-card .content-card-icon.monochrome-icon svg { width: 43px; height: 43px; }
                 .high-contrast-card h4, .high-saturation-card h4, .low-saturation-card h4, .monochrome-card h4 { margin: 0; margin-top: 8px; font-family: Archivo; font-weight: 500; font-size: 21px; line-height: 27px; letter-spacing: -0.44px; color: #1E2939; }
                 .contrast-style-card { display: flex; flex-direction: column; align-items: stretch; width: 257px; min-height: 84px; border-radius: 7px; opacity: 1; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1); overflow: hidden; background: #FFFFFF; padding: 8px 22px; }
+                .accessbit-widget-panel .contrast-style-card { padding: 8px 22px !important; }
                 .contrast-style-card .card-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible !important; min-height: 44px; }
                 .contrast-style-card .card-top .toggle-switch { margin-left: auto; flex-shrink: 0; }
                 /* Ring is drawn inside SVG — wrapper background would double the #ECEDED disk (extra ash halo) */
