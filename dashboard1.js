@@ -36794,7 +36794,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     let cfgData = null;
                     if (isFramerSite) {
                         // Framer site — check Framer KV (siteToken proves this is a legitimate widget)
-                        const _cfgSiteToken = window.__accessbit_siteToken || '';
+                        let _cfgSiteToken = window.__accessbit_siteToken || '';
+                        if (!_cfgSiteToken) {
+                            try {
+                                const _tokScript = document.currentScript ||
+                                                   document.querySelector('script[src*="accessbit"]') ||
+                                                   document.querySelector('script[src*="widget.js"]') ||
+                                                   document.querySelector('script[src*="dashboard1"]');
+                                if (_tokScript && _tokScript.src) {
+                                    _cfgSiteToken = new URL(_tokScript.src).searchParams.get('siteToken') || '';
+                                }
+                            } catch {}
+                        }
                         const res = await this.isolatedFetch(
                             `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}&siteToken=${encodeURIComponent(_cfgSiteToken)}`,
                             { method: 'GET', headers: { 'Accept': 'application/json' } },
