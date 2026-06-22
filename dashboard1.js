@@ -28696,15 +28696,13 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         text-decoration: none !important;
                     }
 
-                    /* Exclude Framer's "Made in Framer" badge from font-size scaling and animation pausing */
-                    html.older-adults .__framer-badge,
-                    html.older-adults .__framer-badge *,
-                    body.older-adults .__framer-badge,
-                    body.older-adults .__framer-badge * {
-                        font-size: revert !important;
-                        animation: revert !important;
-                        transition: revert !important;
-                        animation-play-state: revert !important;
+                    /* Exclude Framer's "Made in Framer" badge from animation/transition pausing.
+                       Use body in selector to get specificity [0,2,2] which beats [0,2,1]
+                       from the [style*="animation"]/[style*="transition"] attribute selectors above. */
+                    html.older-adults body .__framer-badge,
+                    html.older-adults body .__framer-badge * {
+                        transition: all 0.25s ease !important;
+                        animation-play-state: running !important;
                     }
                 `;
                 document.head.appendChild(style);
