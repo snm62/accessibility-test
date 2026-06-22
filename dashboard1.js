@@ -28695,6 +28695,17 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         animation-play-state: running !important;
                         text-decoration: none !important;
                     }
+
+                    /* Exclude Framer's "Made in Framer" badge from font-size scaling and animation pausing */
+                    html.older-adults .__framer-badge,
+                    html.older-adults .__framer-badge *,
+                    body.older-adults .__framer-badge,
+                    body.older-adults .__framer-badge * {
+                        font-size: revert !important;
+                        animation: revert !important;
+                        transition: revert !important;
+                        animation-play-state: revert !important;
+                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -28706,6 +28717,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 const candidates = document.querySelectorAll('[data-w-id], [style*="opacity"], main, section, article, [role="main"]');
                 candidates.forEach((el) => {
                     try {
+                        if (el.closest && el.closest('.__framer-badge')) return;
                         const cs = window.getComputedStyle(el);
                         const hiddenByLayout = cs.display === 'none' || cs.visibility === 'hidden';
                         const opacity = parseFloat(cs.opacity || '1');
