@@ -7485,6 +7485,8 @@ font-family: Archivo;
                 .color-adjustments-picker-card .picker-clear-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; margin: 0; border: none; background: transparent; cursor: pointer; flex-shrink: 0; align-self: center; display: flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 0; vertical-align: middle; }
                 .color-adjustments-picker-card .picker-clear-btn:hover { background: rgba(0,0,0,0.06); }
                 .color-adjustments-picker-card .picker-clear-btn svg { width: 34px; height: 34px; display: block; vertical-align: middle; }
+                .accessbit-widget-panel .color-adjustments-picker-card { width: 100% !important; max-width: min(528px, 100%) !important; padding: 10px 22px !important; }
+                .accessbit-widget-panel .profile-item.useful-links-card { width: 100% !important; max-width: min(528px, 100%) !important; }
                 .content-adjustments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
                 .content-adjustments-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px; }
                 .content-adjustments-card {
