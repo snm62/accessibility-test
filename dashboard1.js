@@ -36793,9 +36793,10 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                     let cfgData = null;
                     if (isFramerSite) {
-                        // Framer site — check Framer KV
+                        // Framer site — check Framer KV (siteToken proves this is a legitimate widget)
+                        const _cfgSiteToken = window.__accessbit_siteToken || '';
                         const res = await this.isolatedFetch(
-                            `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}`,
+                            `https://accessbit-framer.web-8fb.workers.dev/api/settings?siteId=${encodeURIComponent(siteId)}&siteToken=${encodeURIComponent(_cfgSiteToken)}`,
                             { method: 'GET', headers: { 'Accept': 'application/json' } },
                             8000, 1
                         );
