@@ -28708,6 +28708,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 document.head.appendChild(style);
             }
 
+            // Protect Framer badge via JS inline styles (beats all author CSS regardless of specificity)
+            // Runs after style injection so the badge is protected on the same frame
+            try {
+                requestAnimationFrame(() => {
+                    try {
+                        document.querySelectorAll('.__framer-badge, .__framer-badge *').forEach(function(el) {
+                            el.style.setProperty('transition', 'all 0.3s ease', 'important');
+                            el.style.setProperty('animation-play-state', 'running', 'important');
+                        });
+                    } catch(_) {}
+                });
+            } catch(_) {}
+
             // Some Webflow/GSAP pages keep main wrappers at opacity:0 until an intro animation runs.
             // Older Adults intentionally disables animations, so we selectively reveal only those
             // elements that are hidden by opacity but not intentionally hidden by display/visibility.
@@ -28919,6 +28932,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     } catch (_) {}
                 });
             } catch (_) {}
+
+            // Remove inline style overrides we set on the Framer badge during enable
+            try {
+                document.querySelectorAll('.__framer-badge, .__framer-badge *').forEach(function(el) {
+                    el.style.removeProperty('transition');
+                    el.style.removeProperty('animation-play-state');
+                });
+            } catch(_) {}
         }
 
         ensureOpenDyslexicFontImported() {
@@ -28983,6 +29004,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         letter-spacing: normal !important;
                         word-spacing: normal !important;
                         max-width: none !important;
+                    }
+
+                    /* Target elements directly so Framer's per-element class font-family is overridden.
+                       body inheritance alone is not enough in Framer — each element has its own font-family
+                       set via class-based CSS with !important. */
+                    html.ab-dyslexia h1, html.ab-dyslexia h2, html.ab-dyslexia h3,
+                    html.ab-dyslexia h4, html.ab-dyslexia h5, html.ab-dyslexia h6,
+                    html.ab-dyslexia p, html.ab-dyslexia li, html.ab-dyslexia a,
+                    html.ab-dyslexia span:not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]),
+                    html.ab-dyslexia div:not(#accessbit-widget-container):not(#accessbit-widget-container *):not([class*="icon"]):not([class*="symbol"]):not([class*="arrow"]):not([class*="slider"]):not([class*="carousel"]):not([class*="swiper"]),
+                    html.ab-dyslexia td, html.ab-dyslexia th, html.ab-dyslexia label,
+                    html.ab-dyslexia blockquote, html.ab-dyslexia figcaption {
+                        font-family: 'OpenDyslexic', Arial, sans-serif !important;
                     }
                 `;
                 document.head.appendChild(style);
