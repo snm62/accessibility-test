@@ -28703,20 +28703,17 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         animation-play-state: running !important;
                     }
 
-                    /* The badge contains a <p style="position:absolute"> with SEO/promo text.
-                       html font-size change causes Framer's layout system to re-trigger entrance
-                       animations which set opacity:1 on all badge children including this p,
-                       making it overlay the badge visually. Force it hidden. */
+                    /* The badge contains <p style="position:absolute;transform:scale(0.001)">
+                       with SEO promo text. Framer hides it by scaling to 0.001 via JS inline style.
+                       When html font-size changes, Framer's appear animation re-fires and resets
+                       the p transform back toward scale(1) mid-animation, making it visible.
+                       Framer's JS sets this as a non-!important inline style, so our CSS
+                       !important wins and locks the p invisible regardless of animation state. */
                     html.older-adults body .__framer-badge p,
                     body.older-adults .__framer-badge p {
+                        transform: scale(0.001) !important;
                         opacity: 0 !important;
                         pointer-events: none !important;
-                        position: absolute !important;
-                        width: 1px !important;
-                        height: 1px !important;
-                        overflow: hidden !important;
-                        clip: rect(0,0,0,0) !important;
-                        white-space: nowrap !important;
                     }
                 `;
                 document.head.appendChild(style);
