@@ -28696,29 +28696,56 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         text-decoration: none !important;
                     }
 
-                    /* Exclude Framer's "Made in Framer" badge from animation/transition pausing.
-                       Use body in selector to get specificity [0,2,2] which beats [0,2,1]
-                       from the [style*="animation"]/[style*="transition"] attribute selectors above. */
+                    /* Exclude Framer's "Made in Framer" badge from animation/transition pausing. */
                     html.older-adults body .__framer-badge,
                     html.older-adults body .__framer-badge * {
                         transition: all 0.25s ease !important;
                         animation-play-state: running !important;
                     }
+
+                    /* The badge contains a <p style="position:absolute"> with SEO/promo text.
+                       html font-size change causes Framer's layout system to re-trigger entrance
+                       animations which set opacity:1 on all badge children including this p,
+                       making it overlay the badge visually. Force it hidden. */
+                    html.older-adults body .__framer-badge p,
+                    body.older-adults .__framer-badge p {
+                        opacity: 0 !important;
+                        pointer-events: none !important;
+                        position: absolute !important;
+                        width: 1px !important;
+                        height: 1px !important;
+                        overflow: hidden !important;
+                        clip: rect(0,0,0,0) !important;
+                        white-space: nowrap !important;
+                    }
                 `;
                 document.head.appendChild(style);
             }
 
-            // Protect Framer badge via JS inline styles (beats all author CSS regardless of specificity)
-            // Runs after style injection so the badge is protected on the same frame
+            // Synchronously capture badge animation state BEFORE our CSS runs, then
+            // restore via inline !important so Framer's hiding animations are not lost
             try {
-                requestAnimationFrame(() => {
+                const _badgeAnimSnap = [];
+                document.querySelectorAll('.__framer-badge *').forEach(function(el) {
                     try {
-                        document.querySelectorAll('.__framer-badge, .__framer-badge *').forEach(function(el) {
-                            el.style.setProperty('transition', 'all 0.3s ease', 'important');
-                            el.style.setProperty('animation-play-state', 'running', 'important');
-                        });
+                        const _cs = window.getComputedStyle(el);
+                        const _anim = _cs.animation || _cs.webkitAnimation || '';
+                        const _opac = _cs.opacity;
+                        if (_anim && _anim !== 'none 0s ease 0s 1 normal none running' && _anim.trim() !== '') {
+                            _badgeAnimSnap.push({ el: el, anim: _anim, opacity: _opac });
+                        }
                     } catch(_) {}
                 });
+                if (_badgeAnimSnap.length) {
+                    requestAnimationFrame(function() {
+                        try {
+                            _badgeAnimSnap.forEach(function(item) {
+                                item.el.style.setProperty('animation', item.anim, 'important');
+                                item.el.style.setProperty('animation-play-state', 'running', 'important');
+                            });
+                        } catch(_) {}
+                    });
+                }
             } catch(_) {}
 
             // Some Webflow/GSAP pages keep main wrappers at opacity:0 until an intro animation runs.
@@ -28938,6 +28965,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 document.querySelectorAll('.__framer-badge, .__framer-badge *').forEach(function(el) {
                     el.style.removeProperty('transition');
                     el.style.removeProperty('animation-play-state');
+                    el.style.removeProperty('animation');
                 });
             } catch(_) {}
         }
