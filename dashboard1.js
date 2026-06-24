@@ -28650,6 +28650,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
             document.body.classList.add('older-adults');
             document.documentElement.classList.add('older-adults');
+            // Framer's appear-animation system uses a MutationObserver on <html> for class
+            // changes — adding .older-adults re-fires the badge appear animation (expand then
+            // collapse), and our animation-stop CSS then freezes it in the expanded start state.
+            // Remove the class from html immediately; all functional CSS uses body.older-adults
+            // selectors (which still apply because document.body keeps the class).
+            try { document.documentElement.classList.remove('older-adults'); } catch(_) {}
 
             // CAUSE 2 FIX: Remove data-framer-appear-id from badge before any CSS injection.
             // Framer tracks which elements have played their entrance animation via this attribute.
@@ -28818,6 +28824,31 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         font-size: 1.125em !important;
                     }
 
+                    /* body.older-adults text scaling — mirrors the html.older-adults rules above.
+                       html.older-adults is intentionally removed immediately after being set
+                       (to avoid triggering Framer's html-level MutationObserver), so these
+                       body.older-adults equivalents are the ACTIVE text-scaling rules. */
+                    body.older-adults p:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h1:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h2:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h3:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h4:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h5:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults h6:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults li:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults td:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults th:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults label:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults blockquote:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults figcaption:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults dt:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults dd:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults a:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults span:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    body.older-adults button:not(.__framer-badge *):not(#accessbit-widget-container *) {
+                        font-size: 1.125em !important;
+                    }
+
                     /* ── BADGE HARD EXCLUSION ──────────────────────────────────────────────────
                        All prior badge rules (transition:all, max-height, overflow, transform on p,
                        opacity on p) changed badge layout/paint → Framer ResizeObserver fires →
@@ -28868,6 +28899,25 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                                         if (_mel.style.getPropertyPriority('pointer-events') !== 'important') {
                                             _mel.style.setProperty('pointer-events', 'none', 'important');
                                         }
+                                    }
+                                    // For ALL badge elements: if Framer's appear animation sets an
+                                    // inline 'animation' property, our CSS stop rule [style*="animation"]
+                                    // would match it and freeze the badge in the animation's start
+                                    // (expanded) state. Remove the inline animation immediately so
+                                    // the stop rule never matches the badge.
+                                    if (_mel.style && (_mel.style.animation || _mel.style.animationName)) {
+                                        _mel.style.removeProperty('animation');
+                                        _mel.style.removeProperty('animation-name');
+                                        _mel.style.removeProperty('animation-duration');
+                                        _mel.style.removeProperty('animation-timing-function');
+                                        _mel.style.removeProperty('animation-delay');
+                                        _mel.style.removeProperty('animation-fill-mode');
+                                        _mel.style.removeProperty('animation-play-state');
+                                    }
+                                    // If appear animation set opacity:0 as its initial state, clear it
+                                    // so the badge stays visible
+                                    if (_mel.style && _mel.style.opacity === '0') {
+                                        _mel.style.removeProperty('opacity');
                                     }
                                 } catch(_) {}
                             }
@@ -29139,6 +29189,12 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             } catch(_) {}
 
             // CAUSE 2 RESTORE: Put back data-framer-appear-id attributes removed during enable
+            // OVERRIDE: Clear list before the restore loop — restoring data-framer-appear-id
+            // triggers Framer's document MutationObserver which creates NEW IntersectionObservers
+            // on the badge element. Those observers fire immediately (badge is in viewport) and
+            // re-trigger the appear animation on disable, breaking the badge again.
+            // The badge's appear animation already played at page load; it never needs to replay.
+            try { this._framerBadgeAppearIds = []; } catch(_) {}
             try {
                 if (this._framerBadgeAppearIds && this._framerBadgeAppearIds.length) {
                     this._framerBadgeAppearIds.forEach(function(item) {
@@ -29161,6 +29217,18 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 if (_bp) {
                     _bp.style.removeProperty('visibility');
                     _bp.style.removeProperty('pointer-events');
+                }
+            } catch(_) {}
+            // After removing our inline overrides, Framer's own JS normally keeps the SEO <p>
+            // at transform:scale(0.001). But if Framer's appear animation re-fired during the
+            // mode session it may have left <p> at scale(1) (visible/expanded).
+            // Re-apply Framer's default hidden state as non-!important inline style so the
+            // badge <p> is hidden without fighting Framer's own JS which will override if needed.
+            try {
+                var _bpGuard = document.querySelector('.__framer-badge p');
+                if (_bpGuard) {
+                    _bpGuard.style.visibility = 'hidden';
+                    _bpGuard.style.transform = 'scale(0.001)';
                 }
             } catch(_) {}
         }
