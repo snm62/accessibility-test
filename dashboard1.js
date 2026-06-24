@@ -28752,6 +28752,26 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         opacity: 0 !important;
                         pointer-events: none !important;
                     }
+
+                    /* ROOT FIX: Cancel the rem change above — same specificity + !important, later wins.
+                       Changing html font-size alters rem units globally, which triggers Framer's
+                       ResizeObserver → React re-render → appear animation re-fires on the badge,
+                       expanding it and revealing the SEO <p>. By keeping html font-size at 100%
+                       rem stays at 16px and Framer's layout system never detects a size change. */
+                    html.older-adults { font-size: 100% !important; }
+
+                    /* Scale page content via body zoom instead. zoom: 1.125 visually enlarges all
+                       content by 12.5% without affecting rem units — identical visual result for
+                       the user, zero impact on Framer's measurement system. */
+                    body.older-adults { zoom: 1.125; }
+
+                    /* Counteract body zoom on elements that must not scale: the badge and our widget.
+                       1 / 1.125 = 0.8889. Compound zoom: 1.125 * 0.889 ≈ 1.0 — back to original size. */
+                    body.older-adults .__framer-badge,
+                    body.older-adults #accessbit-widget-container,
+                    body.older-adults #accessbit-widget-container * {
+                        zoom: 0.889;
+                    }
                 `;
                 document.head.appendChild(style);
             }
