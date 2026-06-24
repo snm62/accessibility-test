@@ -28651,6 +28651,36 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.body.classList.add('older-adults');
             document.documentElement.classList.add('older-adults');
 
+            // Freeze Framer badge BEFORE CSS injection so html font-size:112.5% can't
+            // trigger Framer's appear-animation or ResizeObserver to corrupt the badge.
+            // getComputedStyle runs here (pre-injection) so values reflect original state.
+            // Inline !important beats Framer's non-important JS inline style assignments.
+            this._framerBadgeFreezeList = [];
+            try {
+                const _badge = document.querySelector('.__framer-badge');
+                if (_badge) {
+                    // Lock root badge width + height to prevent expansion
+                    const _bcs = window.getComputedStyle(_badge);
+                    ['width', 'height'].forEach(function(p) {
+                        const v = _bcs[p];
+                        if (v && v !== 'auto' && v !== '0px') {
+                            _badge.style.setProperty(p, v, 'important');
+                            this._framerBadgeFreezeList.push({ el: _badge, prop: p });
+                        }
+                    }.bind(this));
+                    // Lock transforms on all badge children (keeps p at scale(0.001))
+                    _badge.querySelectorAll('*').forEach(function(el) {
+                        try {
+                            const _t = window.getComputedStyle(el).transform;
+                            if (_t && _t !== 'none') {
+                                el.style.setProperty('transform', _t, 'important');
+                                this._framerBadgeFreezeList.push({ el: el, prop: 'transform' });
+                            }
+                        } catch(_) {}
+                    }.bind(this));
+                }
+            } catch(_) {}
+
             // 1) Enlarge text + improve contrast (exclude widget UI)
             if (!document.getElementById('older-adults-mode-css')) {
                 const style = document.createElement('style');
@@ -28703,12 +28733,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         animation-play-state: running !important;
                     }
 
-                    /* The badge contains <p style="position:absolute;transform:scale(0.001)">
-                       with SEO promo text. Framer hides it by scaling to 0.001 via JS inline style.
-                       When html font-size changes, Framer's appear animation re-fires and resets
-                       the p transform back toward scale(1) mid-animation, making it visible.
-                       Framer's JS sets this as a non-!important inline style, so our CSS
-                       !important wins and locks the p invisible regardless of animation state. */
+                    /* Lock badge to compact size. html font-size:112.5% triggers Framer's appear
+                       animation to re-fire, expanding the badge. max-height + overflow:hidden
+                       clips it to compact dimensions regardless of internal state. */
+                    html.older-adults body .__framer-badge,
+                    body.older-adults .__framer-badge {
+                        max-width: 220px !important;
+                        max-height: 56px !important;
+                        overflow: hidden !important;
+                    }
+
+                    /* Hide the SEO <p> inside badge — Framer normally hides it via
+                       transform:scale(0.001) JS inline style (non-!important), so our
+                       CSS !important locks it invisible even when appear animation resets it. */
                     html.older-adults body .__framer-badge p,
                     body.older-adults .__framer-badge p {
                         transform: scale(0.001) !important;
@@ -28964,6 +29001,16 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     el.style.removeProperty('animation-play-state');
                     el.style.removeProperty('animation');
                 });
+            } catch(_) {}
+
+            // Unfreeze Framer badge (remove the width/height/transform locks set during enable)
+            try {
+                if (this._framerBadgeFreezeList && this._framerBadgeFreezeList.length) {
+                    this._framerBadgeFreezeList.forEach(function(item) {
+                        try { item.el.style.removeProperty(item.prop); } catch(_) {}
+                    });
+                }
+                this._framerBadgeFreezeList = [];
             } catch(_) {}
         }
 
