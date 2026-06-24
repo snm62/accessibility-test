@@ -28651,6 +28651,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             document.body.classList.add('older-adults');
             document.documentElement.classList.add('older-adults');
 
+            // CAUSE 2 FIX: Remove data-framer-appear-id from badge before any CSS injection.
+            // Framer tracks which elements have played their entrance animation via this attribute.
+            // By removing it before our CSS fires, Framer cannot re-identify or re-fire the badge appear.
+            this._framerBadgeAppearIds = [];
+            try {
+                var _appearQuery = '.__framer-badge[data-framer-appear-id], .__framer-badge [data-framer-appear-id]';
+                document.querySelectorAll(_appearQuery).forEach(function(el) {
+                    var _aid = el.getAttribute('data-framer-appear-id');
+                    this._framerBadgeAppearIds.push({ el: el, id: _aid });
+                    el.removeAttribute('data-framer-appear-id');
+                }.bind(this));
+            } catch(_) {}
+
             // Freeze Framer badge BEFORE CSS injection so html font-size:112.5% can't
             // trigger Framer's appear-animation or ResizeObserver to corrupt the badge.
             // getComputedStyle runs here (pre-injection) so values reflect original state.
@@ -28772,8 +28785,72 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     body.older-adults #accessbit-widget-container * {
                         zoom: 0.889;
                     }
+
+                    /* CAUSE 1 FINAL FIX: Cancel body zoom — body zoom ALSO changes layout metrics
+                       that Framer observes (ResizeObserver/IntersectionObserver), triggering the
+                       same appear-animation re-fire as html font-size changes did. */
+                    body.older-adults { zoom: 1 !important; }
+
+                    /* CAUSE 1 TEXT SCALING: Scale leaf text elements directly (1.125em = 12.5% larger).
+                       Using element-level selectors instead of html/body font-size or zoom means
+                       the badge and widget containers are never touched, so Framer sees zero change
+                       in the badge's observed dimensions.
+                       :not(.__framer-badge *) = exclude any descendant of the badge.
+                       :not(#accessbit-widget-container *) = exclude widget. */
+                    html.older-adults p:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h1:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h2:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h3:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h4:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h5:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults h6:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults li:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults td:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults th:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults label:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults blockquote:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults figcaption:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults dt:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults dd:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults a:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults span:not(.__framer-badge *):not(#accessbit-widget-container *),
+                    html.older-adults button:not(.__framer-badge *):not(#accessbit-widget-container *) {
+                        font-size: 1.125em !important;
+                    }
                 `;
                 document.head.appendChild(style);
+            }
+
+            // CAUSE 3 FIX: MutationObserver on badge subtree — instantly reverts any non-!important
+            // transform/opacity change Framer's JS makes on the <p> (the SEO hidden text element).
+            // This runs in the same microtask batch as the mutation, before the browser paints,
+            // so the user never sees the p at scale(1) even for a single frame.
+            if (!this._framerBadgeMO) {
+                try {
+                    var _badgeMORoot = document.querySelector('.__framer-badge');
+                    if (_badgeMORoot) {
+                        this._framerBadgeMO = new MutationObserver(function(mutations) {
+                            for (var _mi = 0; _mi < mutations.length; _mi++) {
+                                try {
+                                    var _mel = mutations[_mi].target;
+                                    if (mutations[_mi].attributeName === 'style' && _mel.tagName === 'P') {
+                                        if (_mel.style.getPropertyPriority('transform') !== 'important') {
+                                            _mel.style.setProperty('transform', 'scale(0.001)', 'important');
+                                        }
+                                        if (_mel.style.getPropertyPriority('opacity') !== 'important') {
+                                            _mel.style.setProperty('opacity', '0', 'important');
+                                        }
+                                    }
+                                } catch(_) {}
+                            }
+                        });
+                        this._framerBadgeMO.observe(_badgeMORoot, {
+                            attributes: true,
+                            attributeFilter: ['style'],
+                            subtree: true
+                        });
+                    }
+                } catch(_) {}
             }
 
             // Synchronously capture badge animation state BEFORE our CSS runs, then
@@ -29031,6 +29108,24 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                 }
                 this._framerBadgeFreezeList = [];
+            } catch(_) {}
+
+            // CAUSE 2 RESTORE: Put back data-framer-appear-id attributes removed during enable
+            try {
+                if (this._framerBadgeAppearIds && this._framerBadgeAppearIds.length) {
+                    this._framerBadgeAppearIds.forEach(function(item) {
+                        try { item.el.setAttribute('data-framer-appear-id', item.id); } catch(_) {}
+                    });
+                    this._framerBadgeAppearIds = [];
+                }
+            } catch(_) {}
+
+            // CAUSE 3 CLEANUP: Disconnect badge MutationObserver
+            try {
+                if (this._framerBadgeMO) {
+                    this._framerBadgeMO.disconnect();
+                    this._framerBadgeMO = null;
+                }
             } catch(_) {}
         }
 
