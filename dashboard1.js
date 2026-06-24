@@ -28817,6 +28817,32 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     html.older-adults button:not(.__framer-badge *):not(#accessbit-widget-container *) {
                         font-size: 1.125em !important;
                     }
+
+                    /* ── BADGE HARD EXCLUSION ──────────────────────────────────────────────────
+                       All prior badge rules (transition:all, max-height, overflow, transform on p,
+                       opacity on p) changed badge layout/paint → Framer ResizeObserver fires →
+                       appear animation re-triggers → badge breaks.
+                       These rules come LAST in the same <style> block, so same-specificity
+                       !important rules above are overridden by these.
+                       The ONLY thing we set on the badge is visibility:hidden on the <p> — Framer
+                       never sets visibility via inline style, so this is safe and permanent. */
+                    html.older-adults body .__framer-badge,
+                    body.older-adults .__framer-badge,
+                    html.older-adults body .__framer-badge *,
+                    body.older-adults .__framer-badge * {
+                        transition: initial !important;
+                        animation-play-state: initial !important;
+                        max-width: initial !important;
+                        max-height: initial !important;
+                        overflow: initial !important;
+                    }
+                    html.older-adults body .__framer-badge p,
+                    body.older-adults .__framer-badge p {
+                        transform: initial !important;
+                        opacity: initial !important;
+                        visibility: hidden !important;
+                        pointer-events: none !important;
+                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -28833,12 +28859,14 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                             for (var _mi = 0; _mi < mutations.length; _mi++) {
                                 try {
                                     var _mel = mutations[_mi].target;
-                                    if (mutations[_mi].attributeName === 'style' && _mel.tagName === 'P') {
-                                        if (_mel.style.getPropertyPriority('transform') !== 'important') {
-                                            _mel.style.setProperty('transform', 'scale(0.001)', 'important');
+                                    // Guard the <p> via visibility — Framer never sets visibility
+                                    // inline, so our inline !important cannot be overridden by Framer.
+                                    if (_mel.tagName === 'P') {
+                                        if (_mel.style.getPropertyPriority('visibility') !== 'important') {
+                                            _mel.style.setProperty('visibility', 'hidden', 'important');
                                         }
-                                        if (_mel.style.getPropertyPriority('opacity') !== 'important') {
-                                            _mel.style.setProperty('opacity', '0', 'important');
+                                        if (_mel.style.getPropertyPriority('pointer-events') !== 'important') {
+                                            _mel.style.setProperty('pointer-events', 'none', 'important');
                                         }
                                     }
                                 } catch(_) {}
@@ -29120,11 +29148,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch(_) {}
 
-            // CAUSE 3 CLEANUP: Disconnect badge MutationObserver
+            // CAUSE 3 CLEANUP: Disconnect badge MutationObserver and remove
+            // inline visibility/pointer-events the MO set on the badge <p>
             try {
                 if (this._framerBadgeMO) {
                     this._framerBadgeMO.disconnect();
                     this._framerBadgeMO = null;
+                }
+            } catch(_) {}
+            try {
+                var _bp = document.querySelector('.__framer-badge p');
+                if (_bp) {
+                    _bp.style.removeProperty('visibility');
+                    _bp.style.removeProperty('pointer-events');
                 }
             } catch(_) {}
         }
