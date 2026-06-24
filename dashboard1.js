@@ -28900,25 +28900,6 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                                             _mel.style.setProperty('pointer-events', 'none', 'important');
                                         }
                                     }
-                                    // For ALL badge elements: if Framer's appear animation sets an
-                                    // inline 'animation' property, our CSS stop rule [style*="animation"]
-                                    // would match it and freeze the badge in the animation's start
-                                    // (expanded) state. Remove the inline animation immediately so
-                                    // the stop rule never matches the badge.
-                                    if (_mel.style && (_mel.style.animation || _mel.style.animationName)) {
-                                        _mel.style.removeProperty('animation');
-                                        _mel.style.removeProperty('animation-name');
-                                        _mel.style.removeProperty('animation-duration');
-                                        _mel.style.removeProperty('animation-timing-function');
-                                        _mel.style.removeProperty('animation-delay');
-                                        _mel.style.removeProperty('animation-fill-mode');
-                                        _mel.style.removeProperty('animation-play-state');
-                                    }
-                                    // If appear animation set opacity:0 as its initial state, clear it
-                                    // so the badge stays visible
-                                    if (_mel.style && _mel.style.opacity === '0') {
-                                        _mel.style.removeProperty('opacity');
-                                    }
                                 } catch(_) {}
                             }
                         });
