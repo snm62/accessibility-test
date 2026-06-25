@@ -28716,6 +28716,21 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch(_) {}
 
+            // Also save styles indexed by position only (no el reference) for the async
+            // position-based restore on disable. These survive badge remounts because
+            // restore re-queries fresh elements and matches by index instead of by reference.
+            this._framerBadgeOriginalStylesAsync = null;
+            try {
+                var _bgSaveRootA = document.querySelector('.__framer-badge');
+                if (_bgSaveRootA) {
+                    this._framerBadgeOriginalStylesAsync = [];
+                    var _bgAllA = [_bgSaveRootA].concat(Array.prototype.slice.call(_bgSaveRootA.querySelectorAll('*')));
+                    for (var _bgSaveIdx = 0; _bgSaveIdx < _bgAllA.length; _bgSaveIdx++) {
+                        this._framerBadgeOriginalStylesAsync.push({ style: _bgAllA[_bgSaveIdx].getAttribute('style') || '' });
+                    }
+                }
+            } catch(_) {}
+
             // Reset Framer badge hover state before CSS injection.
             // The badge is a React component with onMouseEnter/onMouseLeave handlers
             // that expand it into the promo card view. If the badge is hovered (or
@@ -29314,6 +29329,49 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     });
                 }
                 this._framerBadgeOriginalStyles = null;
+            } catch(_) {}
+
+            // Async position-based restore: runs AFTER React processes the mouseleave re-render.
+            // The sync restore above may be overwritten by React's re-render (triggered by the
+            // mouseleave dispatch). Also handles the case where Framer remounted the badge
+            // (new DOM nodes), making the saved el references stale. Here we re-query fresh
+            // elements by position-index (same DOM order = same index) and restore saved styles.
+            // _bgAsyncStyles was captured as a local variable before _framerBadgeOriginalStyles
+            // was nulled out by the sync restore, so it remains available in these closures.
+            try {
+                var _bgAsyncStyles = null;
+                try {
+                    if (this._framerBadgeOriginalStylesAsync && this._framerBadgeOriginalStylesAsync.length) {
+                        _bgAsyncStyles = this._framerBadgeOriginalStylesAsync;
+                        this._framerBadgeOriginalStylesAsync = null;
+                    }
+                } catch(_) {}
+                if (_bgAsyncStyles && _bgAsyncStyles.length) {
+                    var _bgDoRestore = function(_styles) {
+                        try {
+                            var _bgFrRoot = document.querySelector('.__framer-badge');
+                            if (_bgFrRoot) {
+                                var _bgFrAll = [_bgFrRoot].concat(Array.prototype.slice.call(_bgFrRoot.querySelectorAll('*')));
+                                for (var _bgFrIdx = 0; _bgFrIdx < _styles.length; _bgFrIdx++) {
+                                    var _bgFrEl = _bgFrAll[_bgFrIdx];
+                                    var _bgFrSaved = _styles[_bgFrIdx];
+                                    if (_bgFrEl && _bgFrSaved) {
+                                        try {
+                                            if (_bgFrSaved.style === '') {
+                                                _bgFrEl.removeAttribute('style');
+                                            } else {
+                                                _bgFrEl.setAttribute('style', _bgFrSaved.style);
+                                            }
+                                        } catch(_) {}
+                                    }
+                                }
+                            }
+                        } catch(_) {}
+                    };
+                    var _bgAsyncCapture = _bgAsyncStyles;
+                    setTimeout(function() { _bgDoRestore(_bgAsyncCapture); }, 100);
+                    setTimeout(function() { _bgDoRestore(_bgAsyncCapture); }, 350);
+                }
             } catch(_) {}
         }
 
