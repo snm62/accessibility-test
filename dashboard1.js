@@ -897,7 +897,7 @@ class AccessibilityWidget {
             this._mutationTimer = null;
             this._rafPending = false;
             // Single source of truth for breakpoint – JS and CSS flip together
-            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 767px)') : null;
+            this._mobileMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 1024px)') : null;
     
             this.currentLanguage = this.getCurrentLanguage(); // Initialize current language
     
@@ -1966,7 +1966,7 @@ class AccessibilityWidget {
                 const iconEl = this.shadowRoot?.getElementById('accessbit-widget-icon');
                 if (iconEl && customizationData && customizationData.customization) {
                     const hideTrigger = customizationData.customization.hideTriggerButton === 'Yes';
-                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                    const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
                     const mobileVisibility = customizationData.customization.showOnMobile;
                     const shouldShow = !isMobile ? !hideTrigger : (mobileVisibility !== 'Hide');
                     if (shouldShow) {
@@ -2142,7 +2142,7 @@ class AccessibilityWidget {
                 }
                 
                 // Apply mobile responsive styles on load if mobile
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024))) {
                     this.applyMobileResponsiveStyles();
                 }
 
@@ -37605,7 +37605,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 this.updateMobileTriggerShape(customizationData.mobileTriggerShape);
                 
                 // Final verification for mobile shape
-                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767))) {
+                if ((this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024))) {
                     setTimeout(() => {
                         const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
                         if (icon) {
@@ -37659,7 +37659,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             // after it was correctly shown with the right visibility logic
             if (this._iconExplicitlyShown) {
                 // Only update visibility if settings actually changed (e.g., window resize changed mobile state)
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
                 const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
                 const mobileVisibility = this.customizationData?.showOnMobile;
                 
@@ -37709,7 +37709,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             }
             
             // Check device type
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
             const hideTrigger = this.customizationData?.hideTriggerButton === 'Yes';
             const mobileVisibility = this.customizationData?.showOnMobile; // 'Show' | 'Hide' | undefined
     
@@ -37739,6 +37739,19 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 icon.style.visibility = 'visible';
                 icon.style.opacity = '1';
                 icon.style.transition = 'opacity 0.3s ease';
+                // Re-apply mobile trigger settings so repeated showIcon() calls don't revert to desktop values
+                if (this.customizationData?.mobileTriggerHorizontalPosition && this.customizationData?.mobileTriggerVerticalPosition) {
+                    this.updateMobileTriggerCombinedPosition(
+                        this.customizationData.mobileTriggerHorizontalPosition,
+                        this.customizationData.mobileTriggerVerticalPosition
+                    );
+                }
+                if (this.customizationData?.mobileTriggerShape) {
+                    this.updateMobileTriggerShape(this.customizationData.mobileTriggerShape);
+                }
+                if (this.customizationData?.mobileTriggerSize) {
+                    this.updateMobileTriggerSize(this.customizationData.mobileTriggerSize);
+                }
                 return;
             }
     
@@ -37776,7 +37789,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 return; // Don't call showIcon() if customization data isn't loaded yet
             }
-            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+            const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
 
             // Keep trigger positioning responsive while dragging breakpoints.
             // We explicitly set the CSS vars each time so stale transforms/anchors can't accumulate.
@@ -38931,7 +38944,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
 
                 
                 // Check if we're on mobile and have mobile shape configuration
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
                 const hasMobileShape = this.customizationData?.mobileTriggerShape;
                 
                 if (isMobile && hasMobileShape) {
@@ -39235,7 +39248,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
 
                 
                 // Only apply desktop offsets on desktop/tablet
@@ -39354,7 +39367,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             panel.style.removeProperty('transform');
 
             const margin = 20;
-            const isMobilePanel = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+            const isMobilePanel = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
             const hPos = (isMobilePanel
                 ? (this.customizationData?.mobileTriggerHorizontalPosition || this.customizationData?.triggerHorizontalPosition || 'right')
                 : (this.customizationData?.triggerHorizontalPosition || 'right')
@@ -39504,7 +39517,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
          
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
                 if (isMobile) {
                     if (size === 'Small') {
                         icon.style.setProperty('width', '35px', 'important');
@@ -39528,7 +39541,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
                 if (isMobile) {
                   
                     
@@ -39645,7 +39658,7 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
             
             const icon = this.shadowRoot?.getElementById('accessbit-widget-icon');
             if (icon) {
-                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 767);
+                const isMobile = this._mobileMql ? this._mobileMql.matches : (window.innerWidth <= 1024);
 
                 
                 if (isMobile) {
