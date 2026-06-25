@@ -28700,6 +28700,22 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch(_) {}
 
+            // Save ALL badge inline styles before any changes so we can do a full restore
+            // on disable — this is the only reliable way to get the badge back to exactly
+            // the same state it was in before we touched it, regardless of what Framer's
+            // appear animation or our CSS did to opacity/background/transform during the session.
+            this._framerBadgeOriginalStyles = null;
+            try {
+                var _bgSaveRoot = document.querySelector('.__framer-badge');
+                if (_bgSaveRoot) {
+                    this._framerBadgeOriginalStyles = [];
+                    var _bgAll = [_bgSaveRoot].concat(Array.prototype.slice.call(_bgSaveRoot.querySelectorAll('*')));
+                    _bgAll.forEach(function(el) {
+                        this._framerBadgeOriginalStyles.push({ el: el, style: el.getAttribute('style') || '' });
+                    }.bind(this));
+                }
+            } catch(_) {}
+
             // Reset Framer badge hover state before CSS injection.
             // The badge is a React component with onMouseEnter/onMouseLeave handlers
             // that expand it into the promo card view. If the badge is hovered (or
@@ -28897,9 +28913,28 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     body.older-adults .__framer-badge {
                         pointer-events: none !important;
                     }
+
+                    /* Cancel zoom:0.889 that was a counter-zoom for body zoom:1.125.
+                       Body zoom was also cancelled (zoom:1 !important above), so the
+                       badge counter-zoom now makes it 11% smaller than normal.
+                       Reset to zoom:1 to restore original badge size. */
+                    body.older-adults .__framer-badge {
+                        zoom: 1 !important;
+                    }
                 `;
                 document.head.appendChild(style);
             }
+
+            // Cancel font-size:1.125em that our text scaling rule applies to the badge root <a>.
+            // The :not(.__framer-badge *) exclusion only covers badge descendants, not the root
+            // element itself (the <a> IS .__framer-badge but is not its own descendant).
+            // Inline !important beats author-stylesheet !important regardless of specificity.
+            try {
+                var _badgeFontFix = document.querySelector('.__framer-badge');
+                if (_badgeFontFix) {
+                    _badgeFontFix.style.setProperty('font-size', 'initial', 'important');
+                }
+            } catch(_) {}
 
             // CAUSE 3 FIX: MutationObserver on badge subtree — instantly reverts any non-!important
             // transform/opacity change Framer's JS makes on the <p> (the SEO hidden text element).
@@ -29257,6 +29292,28 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         }
                     } catch(_) {}
                 }, 50);
+            } catch(_) {}
+
+            // Full inline-style restore: put every badge element's style attribute back to
+            // exactly what it was before enableOlderAdultsMode ran. This is the definitive
+            // fix for the white background disappearing — Framer's appear animation re-fire
+            // may have set opacity:0 or cleared background on badge children during the session.
+            // CSS !important and JS overrides can't reliably override WAAPI animations, so
+            // restoring the original inline style after everything else is cleaned up is the
+            // only way to guarantee the badge looks exactly as it did before the mode was on.
+            try {
+                if (this._framerBadgeOriginalStyles && this._framerBadgeOriginalStyles.length) {
+                    this._framerBadgeOriginalStyles.forEach(function(item) {
+                        try {
+                            if (item.style === '') {
+                                item.el.removeAttribute('style');
+                            } else {
+                                item.el.setAttribute('style', item.style);
+                            }
+                        } catch(_) {}
+                    });
+                }
+                this._framerBadgeOriginalStyles = null;
             } catch(_) {}
         }
 
