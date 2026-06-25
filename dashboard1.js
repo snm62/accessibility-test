@@ -28700,6 +28700,20 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }
             } catch(_) {}
 
+            // Reset Framer badge hover state before CSS injection.
+            // The badge is a React component with onMouseEnter/onMouseLeave handlers
+            // that expand it into the promo card view. If the badge is hovered (or
+            // if our DOM class changes trigger React to fire synthetic hover events),
+            // it will be stuck in expanded state throughout Older Adults mode.
+            // Dispatching mouseleave first collapses it BEFORE we lock anything.
+            try {
+                var _badgePreEl = document.querySelector('.__framer-badge');
+                if (_badgePreEl) {
+                    _badgePreEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true, cancelable: true }));
+                    _badgePreEl.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, cancelable: true }));
+                }
+            } catch(_) {}
+
             // 1) Enlarge text + improve contrast (exclude widget UI)
             if (!document.getElementById('older-adults-mode-css')) {
                 const style = document.createElement('style');
@@ -28872,6 +28886,15 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                         transform: initial !important;
                         opacity: initial !important;
                         visibility: hidden !important;
+                        pointer-events: none !important;
+                    }
+
+                    /* Block hover events on badge during Older Adults mode.
+                       The badge expands via Framer's React onMouseEnter handler.
+                       pointer-events:none on the root <a> prevents mouse events
+                       from reaching React, so the hover-expand state can never trigger.
+                       This comes after all other badge rules so specificity order wins. */
+                    body.older-adults .__framer-badge {
                         pointer-events: none !important;
                     }
                 `;
@@ -29211,6 +29234,29 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     _bpGuard.style.visibility = 'hidden';
                     _bpGuard.style.transform = 'scale(0.001)';
                 }
+            } catch(_) {}
+
+            // Dispatch mouseleave on badge after all cleanup — the CSS that blocked hover events
+            // (pointer-events:none) is now gone, and Framer's React component may still think
+            // it's in hover-expanded state from before the mode was enabled.
+            // Firing mouseleave tells React to collapse the badge back to compact state.
+            try {
+                var _badgePostEl = document.querySelector('.__framer-badge');
+                if (_badgePostEl) {
+                    _badgePostEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true, cancelable: true }));
+                    _badgePostEl.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, cancelable: true }));
+                }
+            } catch(_) {}
+            // Second dispatch after a tick in case React needs a re-render cycle
+            try {
+                setTimeout(function() {
+                    try {
+                        var _badgePostEl2 = document.querySelector('.__framer-badge');
+                        if (_badgePostEl2) {
+                            _badgePostEl2.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true, cancelable: true }));
+                        }
+                    } catch(_) {}
+                }, 50);
             } catch(_) {}
         }
 
