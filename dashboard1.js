@@ -28670,6 +28670,23 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                 }.bind(this));
             } catch(_) {}
 
+            // TRUE PRE-FREEZE SAVE: capture badge inline styles BEFORE the freeze code
+            // below modifies them. The freeze adds !important width/height/transform that
+            // must NOT appear in the restore state. The later _framerBadgeOriginalStyles
+            // save runs AFTER freeze and captures a post-freeze state (wrong for restore).
+            // _framerBadgeTrueStyles is the only accurate pre-enable snapshot.
+            this._framerBadgeTrueStyles = null;
+            try {
+                var _bgTrueRoot = document.querySelector('.__framer-badge');
+                if (_bgTrueRoot) {
+                    this._framerBadgeTrueStyles = [];
+                    var _bgTrueAll = [_bgTrueRoot].concat(Array.prototype.slice.call(_bgTrueRoot.querySelectorAll('*')));
+                    for (var _bgTrueIdx = 0; _bgTrueIdx < _bgTrueAll.length; _bgTrueIdx++) {
+                        this._framerBadgeTrueStyles.push({ style: _bgTrueAll[_bgTrueIdx].getAttribute('style') || '' });
+                    }
+                }
+            } catch(_) {}
+
             // Freeze Framer badge BEFORE CSS injection so html font-size:112.5% can't
             // trigger Framer's appear-animation or ResizeObserver to corrupt the badge.
             // getComputedStyle runs here (pre-injection) so values reflect original state.
@@ -29371,6 +29388,50 @@ const controls = this.shadowRoot.getElementById('letter-spacing-controls');
                     var _bgAsyncCapture = _bgAsyncStyles;
                     setTimeout(function() { _bgDoRestore(_bgAsyncCapture); }, 100);
                     setTimeout(function() { _bgDoRestore(_bgAsyncCapture); }, 350);
+                }
+            } catch(_) {}
+
+            // TRUE STYLES RESTORE: uses _framerBadgeTrueStyles (saved BEFORE freeze in enable),
+            // so the restored state has no !important width/height/transform artifacts from freeze.
+            // Also cancels any running WAAPI animations (which override inline style during playback)
+            // so our setAttribute calls are not immediately overridden by an active animation.
+            // Runs at 500ms and 1000ms to cover animations longer than 350ms.
+            try {
+                var _bgTrueCapture = this._framerBadgeTrueStyles;
+                this._framerBadgeTrueStyles = null;
+                if (_bgTrueCapture && _bgTrueCapture.length) {
+                    var _bgDoTrueRestore = function(_ts) {
+                        try {
+                            var _bgTR = document.querySelector('.__framer-badge');
+                            if (!_bgTR) return;
+                            var _bgTA = [_bgTR].concat(Array.prototype.slice.call(_bgTR.querySelectorAll('*')));
+                            // Cancel all running WAAPI animations so they can't override inline style
+                            _bgTA.forEach(function(el) {
+                                try {
+                                    if (el.getAnimations) {
+                                        el.getAnimations().forEach(function(anim) {
+                                            try { anim.cancel(); } catch(_) {}
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                            // Restore true pre-freeze inline styles by position index
+                            for (var _ti = 0; _ti < _ts.length; _ti++) {
+                                var _tel = _bgTA[_ti], _tst = _ts[_ti];
+                                if (_tel && _tst) {
+                                    try {
+                                        if (_tst.style === '') {
+                                            _tel.removeAttribute('style');
+                                        } else {
+                                            _tel.setAttribute('style', _tst.style);
+                                        }
+                                    } catch(_) {}
+                                }
+                            }
+                        } catch(_) {}
+                    };
+                    setTimeout(function() { _bgDoTrueRestore(_bgTrueCapture); }, 500);
+                    setTimeout(function() { _bgDoTrueRestore(_bgTrueCapture); }, 1000);
                 }
             } catch(_) {}
         }
